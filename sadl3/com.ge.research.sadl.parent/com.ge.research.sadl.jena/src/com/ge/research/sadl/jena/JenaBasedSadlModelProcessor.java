@@ -1730,7 +1730,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			e.printStackTrace();
 		} catch (DontTypeCheckException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+//			e.printStackTrace();
 		} catch (CircularDefinitionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -3096,7 +3096,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				e.printStackTrace();
 			} catch (DontTypeCheckException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+//				e.printStackTrace();
 			} catch (CircularDefinitionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -4333,7 +4333,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (((VariableNode) obj).isList()) {
 						isList = true;
 					}
-					checkTripleRange(subjeo, predeo, null, expr, subjNode, predNode, pred, pnodetype, vartype, isList);
+//					if (EcoreUtil2.getContainerOfType(objeo, RuleStatement.class) == null && EcoreUtil2.getContainerOfType(objeo, QueryStatement.class) == null) {
+					if (vartype != null) {
+						checkTripleRange(subjeo, predeo, null, expr, subjNode, predNode, pred, pnodetype, vartype, isList);
+					}
+//					}
 				} else {
 					throw new TranslationException("Unexpected error, disagreement between objtype and actual obj");
 				}
@@ -4432,6 +4436,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else {
 				throw new TranslationException("Unexpected error: the object of the triple is a ProxyNode but the proxyFor type isn't handled (" + pf.getClass().getCanonicalName() + ")");
 			}
+		} else if (obj == null) {
+			throw new TranslationException("Unexpected error: the object of the triple is not identifiable");
 		} else {
 			throw new TranslationException("Unexpected error: the object of the triple is not a node of known type ('" + obj.getClass().getCanonicalName() + ")");
 		}
@@ -5387,7 +5393,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				try {
 					TypeCheckInfo lTci = getModelValidator().getType(expr);
 					addLocalizedTypeToNode(predNode,lTci);
-				} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
+				} catch (DontTypeCheckException e) {
+					// do nothing
+				} catch (URISyntaxException | IOException | ConfigurationException
 						| CircularDefinitionException | CircularDependencyException | PropertyWithoutRangeException e) {
 					e.printStackTrace();
 				}
@@ -7697,8 +7705,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if (avfstmt != null) {
 							RDFNode type = avfstmt.getObject();
 							if (type.isURIResource()) {
+								OntConceptType tctypetype = OntConceptType.CLASS_LIST;
+								if (type.asResource().getNameSpace().equals(XSD.getURI())) {
+									tctypetype = OntConceptType.DATATYPE_LIST;
+								}
+								else {
+									StmtIterator eqitr = type.asResource().listProperties(OWL.equivalentClass);
+									if (eqitr.hasNext()) {
+										RDFNode eqCls = eqitr.nextStatement().getObject();
+										if (eqCls.equals(RDFS.Datatype)) {
+											tctypetype = OntConceptType.DATATYPE_LIST;
+										}
+									}
+								}
 								NamedNode tctype = validateNamedNode(new NamedNode(type.asResource().getURI(),
-										ontConceptTypeToNodeType(OntConceptType.CLASS_LIST)));
+										ontConceptTypeToNodeType(tctypetype)));
 								sitr.close();
 								return tctype;
 							}
