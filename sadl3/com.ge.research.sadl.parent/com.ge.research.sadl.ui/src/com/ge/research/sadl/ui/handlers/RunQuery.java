@@ -24,15 +24,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.xtext.xbase.lib.Extension;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.model.gp.Query;
-import com.ge.research.sadl.model.gp.SadlCommand;
-import com.ge.research.sadl.processing.OntModelProvider;
-import com.ge.research.sadl.query.SadlQueryHelper;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
@@ -44,11 +40,8 @@ import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlCommandResult;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.sADL.QueryStatement;
 import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.utils.ResourceManager;
-import com.google.inject.Inject;
-import com.hp.hpl.jena.vocabulary.RDFS;
 
 public class RunQuery extends SadlActionHandler {
 
@@ -242,6 +235,7 @@ public class RunQuery extends SadlActionHandler {
 								if (!success) {
 									ResultSet rs = reasoner.ask(currentQuery);
 									if (rs != null) {
+										
 										if (currentQuery.toLowerCase().startsWith("construct")) {
 											String desc = "Adhoc query Graph";
 		        							String baseFileName = trgtFile.getProjectRelativePath().lastSegment() + System.currentTimeMillis(); 							
