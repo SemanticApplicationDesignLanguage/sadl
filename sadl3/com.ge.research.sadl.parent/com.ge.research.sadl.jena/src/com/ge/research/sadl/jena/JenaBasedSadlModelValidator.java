@@ -1424,7 +1424,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			// we are comparing or assigning this to something else so we want the type of the root (if there is a chain) property
 			if (expression.getProp() instanceof SadlResource) {
 				SadlResource prop = expression.getProp();
-				return getType(prop);
+				TypeCheckInfo propTci = getType(prop);
+				if (propTci.getTypeCheckType() == null && isInQuery(expression) && 
+						propTci.getExpressionType() instanceof ConceptName && ((ConceptName)propTci.getExpressionType()).getType().equals(ConceptType.VARIABLE)) {
+					throw new DontTypeCheckException();	// OK to not get a type for a property which is a variable in a query
+				}
+				return propTci;
 			}
 			else {
 				issueAcceptor.addError("This subject-has-property construct isn't properly validated, please report.", expression);
@@ -2955,7 +2960,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if(conceptType.equals(OntConceptType.VARIABLE)){
 			String nm = declarationExtensions.getConcreteName(sr);
 			String uri = declarationExtensions.getConceptUri(sr);
-			if (uri == null) {
+			if (nm == null || uri == null) {
 				getModelProcessor().addIssueToAcceptor("Unable to resolve name",reference);
 				return null;
 			}
@@ -3476,7 +3481,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (((SubjHasProp)defContainer).getLeft().equals(name)) {
 					return getPropertyDomainType(propsr, reference);
 				}
-				else if (((SubjHasProp)defContainer).getRight().equals(name)) {
+				else if (((SubjHasProp)defContainer).getRight() != null && ((SubjHasProp)defContainer).getRight().equals(name)) {
 					return getPropertyRangeType(propsr, reference);
 				}
 			}
@@ -4220,6 +4225,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 
 			}
+			if (leftCName.getNamespace().equals(XSD.getURI())) {
+				if (((ConceptName)rightConceptIdentifier).getNamespace().equals(XSD.getURI())) {
+					if (xsdTypeToXtextType(leftCName).equals(xsdTypeToXtextType((ConceptName)rightConceptIdentifier))) {
+						return true;
+					}
+				}
+			}
 		}
 				
 		List<ConceptIdentifier> leftCIs = null;
@@ -4408,6 +4420,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 	
+	private String xsdTypeToXtextType(ConceptName cname) throws InvalidNameException {
+		if (cname.getUri().equals(XSD.anyURI.getURI())) {
+			return XSD.xstring.getURI();
+		}
+		return cname.getUri();
+	}
+
 	private boolean isCompatibleListTypes(List<String> operations, TypeCheckInfo leftTypeCheckInfo,
 			TypeCheckInfo rightTypeCheckInfo) {
 		// TODO Auto-generated method stub
@@ -4716,7 +4735,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	public void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression target, boolean propOfSubjectCheck, String varName) throws InvalidTypeException {
-		if(prop == null || prop.canAs(AnnotationProperty.class)){
+		if(subj == null || prop == null || prop.canAs(AnnotationProperty.class)){
 			return;
 		}
 		StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
@@ -5127,7 +5146,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 				}
 			}
-			else if (obj.canAs(OntClass.class) && rng.isResource() && rng.asResource().canAs(OntClass.class)) {
+			else if (obj != null && obj.canAs(OntClass.class) && rng.isResource() && rng.asResource().canAs(OntClass.class)) {
 				if (SadlUtils.classIsSubclassOf(obj.as(OntClass.class), rng.asResource().as(OntClass.class), true, null)) {
 					rngitr.close();
 					return true;
