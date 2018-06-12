@@ -4713,7 +4713,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	private GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj)
+	protected GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (name.equals(JunctionType.AND_ALPHA) || name.equals(JunctionType.AND_SYMBOL)
 				|| name.equals(JunctionType.OR_ALPHA) || name.equals(JunctionType.OR_SYMBOL)) {
