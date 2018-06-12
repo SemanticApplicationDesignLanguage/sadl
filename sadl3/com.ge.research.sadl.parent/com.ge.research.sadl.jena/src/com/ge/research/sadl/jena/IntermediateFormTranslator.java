@@ -2648,85 +2648,100 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @return
 	 * @throws TranslationException 
 	 */
-	public static List<GraphPatternElement> junctionToList(Junction gpe) throws TranslationException {
-		if (gpe.getJunctionType().equals(JunctionType.Disj)) {
-			return disjunctionToList(gpe);
-		}
-		boolean lhsGpe = true;
-		boolean rhsGpe = true;
-		List<GraphPatternElement> results = null;
-		Object lhs = gpe.getLhs();
-		if (lhs instanceof ProxyNode) lhs = ((ProxyNode)lhs).getProxyFor();
-		if (lhs instanceof Junction && ((Junction)lhs).getJunctionType().equals(JunctionType.Conj)) {
-			results = junctionToList((Junction)lhs);
-		}
-		else if (lhs instanceof GraphPatternElement) {
-			results = new ArrayList<GraphPatternElement>();
-			results.add((GraphPatternElement) lhs);
-		}
-		else {
-			lhsGpe = false;
-		}
-		Object rhs = gpe.getRhs();
-		if (rhs instanceof ProxyNode) rhs = ((ProxyNode)rhs).getProxyFor();
-		if (rhs instanceof Junction && ((Junction)rhs).getJunctionType().equals(JunctionType.Conj)) {
-			if (results != null) {
-				results.addAll(junctionToList((Junction)rhs));
-			}
-			else {
-				results = junctionToList((Junction)rhs);
+	public static List<GraphPatternElement> junctionToList(Junction gpe)
+	throws TranslationException {
+		List<GraphPatternElement> lResult = new ArrayList<>();
+		List<Node> lProxies = junctionToNodeList(gpe);
+		for( Node lProxy : lProxies ) {
+			if( lProxy instanceof ProxyNode ) {
+				lResult.add(((ProxyNode)lProxy).getProxyFor());
+			} else {
+				throw new TranslationException("junctionToGraphPatternList called on junction which includes a non-GraphPatternElement; this is not supported.");
 			}
 		}
-		else if (rhs instanceof GraphPatternElement){
-			results.add((GraphPatternElement) rhs);
-		}
-		else {
-			rhsGpe = false;
-		}
-		if (!lhsGpe && !rhsGpe) {
-			results = new ArrayList<GraphPatternElement>();
-			results.add(gpe);	// give it back unchanged
-		}
-		else if ((lhsGpe && !rhsGpe) || (!lhsGpe && rhsGpe)) {
-			throw new TranslationException("junctionToList called on junction with a fix of a GrpahPatternElement and a non-GraphPatternElement; this is not handled.");
-		}
-		return results;
+		return lResult;
 	}
 	
+	/**
+	 * Method to convert a Junction to a List<Node>. Note that this method will either handle
+	 * conjunction or disjunction at the top level but once the type is set the other type will not be converted
+	 * to a list as if both were converted the results would be non-functional.
+	 * @param gpe
+	 * @return
+	 */
+	public static List<Node> junctionToNodeList(Junction gpe) {
+		List<Node> lResult = new ArrayList<>(1);
+		if ( JunctionType.Conj.equals(gpe.getJunctionType()) ) {
+			lResult = conjunctionToList(gpe);
+		} else if ( JunctionType.Disj.equals(gpe.getJunctionType()) ) {
+			lResult = disjunctionToList(gpe);
+		} else {
+			try {
+				lResult.add(new ProxyNode(gpe));
+			} catch ( InvalidTypeException e ) {}
+		}
+		return lResult;
+	}
+	
+	public static List<Node> conjunctionToList(Junction gpe) {
+		List<Node> lResult = new ArrayList<>();
 
-	public static List<GraphPatternElement> disjunctionToList(Junction gpe) throws TranslationException {
-		if (!gpe.getJunctionType().equals(JunctionType.Disj)) {
-			throw new TranslationException("disjunctionToList called for Junction which is not disjunction");
-		}
-		List<GraphPatternElement> results = new ArrayList<GraphPatternElement>(1);
-		Object lhs = gpe.getLhs();
+		Node lhs = (Node)gpe.getLhs();
 		if (lhs instanceof ProxyNode) {
-			if (((ProxyNode)lhs).getProxyFor() instanceof Junction) {
-				List<GraphPatternElement> lgpe = junctionToList((Junction) ((ProxyNode)lhs).getProxyFor());
-				if (lgpe.size() == 1) {
-					((ProxyNode)lhs).setProxyFor(lgpe.get(0));
-					results.add(gpe);
-				}
-				else {
-					results.addAll(lgpe);
-				}
+			GraphPatternElement lhsProxy = ((ProxyNode)lhs).getProxyFor();
+			if (lhsProxy instanceof Junction && JunctionType.Conj.equals(((Junction)lhsProxy).getJunctionType())) {
+				lResult.addAll( conjunctionToList((Junction)lhsProxy) );
+			} else {
+				lResult.add(lhs);
 			}
+		} else {
+			lResult.add(lhs);
 		}
-		Object rhs = gpe.getRhs();
+
+		Node rhs = (Node)gpe.getRhs();
 		if (rhs instanceof ProxyNode) {
-			if (((ProxyNode)rhs).getProxyFor() instanceof Junction) {
-				List<GraphPatternElement> rgpe = junctionToList((Junction) ((ProxyNode)rhs).getProxyFor());
-				if (rgpe.size() == 1) {
-					((ProxyNode)rhs).setProxyFor(rgpe.get(0));
-					results.add(gpe);
-				}
-				else {
-					results.addAll(rgpe);
-				}
+			GraphPatternElement rhsProxy = ((ProxyNode)rhs).getProxyFor();
+			if (rhsProxy instanceof Junction && JunctionType.Conj.equals(((Junction)rhsProxy).getJunctionType())) {
+				lResult.addAll( conjunctionToList((Junction)rhsProxy) );
+			} else {
+				lResult.add(rhs);
 			}
+		} else {
+			lResult.add(rhs);
 		}
-		
-		return results;
+
+		return lResult;
+	}
+	
+	
+	public static List<Node> disjunctionToList(Junction gpe) {
+		List<Node> lResult = new ArrayList<>();
+
+		Node lhs = (Node)gpe.getLhs();
+		if (lhs instanceof ProxyNode) {
+			GraphPatternElement lhsProxy = ((ProxyNode)lhs).getProxyFor();
+			if (lhsProxy instanceof Junction && JunctionType.Disj.equals(((Junction)lhsProxy).getJunctionType())) {
+				lResult.addAll( disjunctionToList((Junction)lhsProxy) );
+			} else {
+				lResult.add(lhs);
+			}
+		} else {
+			lResult.add(lhs);
+		}
+
+		Node rhs = (Node)gpe.getRhs();
+		if (rhs instanceof ProxyNode) {
+			GraphPatternElement rhsProxy = ((ProxyNode)rhs).getProxyFor();
+			if (rhsProxy instanceof Junction && JunctionType.Disj.equals(((Junction)rhsProxy).getJunctionType())) {
+				lResult.addAll( disjunctionToList((Junction)rhsProxy) );
+			} else {
+				lResult.add(rhs);
+			}
+		} else {
+			lResult.add(rhs);
+		}
+
+		return lResult;
 	}
 
 	/**
