@@ -119,7 +119,7 @@ public class VariableNode extends NamedNode {
 	 * @throws TranslationException
 	 */
 	public void setType(Node type) throws TranslationException {
-		if (this.type != null && 
+		if (type != null && this.type != null && 
 				!this.type.equals(type)) {
 			throw new TranslationException("Cannot change the type of a variable. (Attempted change from '" + 
 				this.type.toFullyQualifiedString() + "' to '" + type.toFullyQualifiedString() + "'");

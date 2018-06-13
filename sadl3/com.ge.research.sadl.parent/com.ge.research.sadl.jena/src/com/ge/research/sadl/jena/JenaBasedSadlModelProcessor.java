@@ -3567,6 +3567,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (lobj instanceof VariableNode && robj instanceof NamedNode && ((NamedNode)robj).getNodeType().equals(NodeType.ClassNode)) {
 						// this is a restriction on the variable type
 						((VariableNode)lobj).addDefinition(nodeCheck(trel));
+						try {
+							applyRestrictionToVariableType((VariableNode)lobj, (NamedNode) robj, rexpr);
+						} catch (CircularDependencyException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
 				} else {
@@ -3819,6 +3825,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				bi = (GraphPatternElement) createUnaryBuiltin(container, "not", bi);
 			}
 			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi), rest);
+		}
+	}
+
+	private void applyRestrictionToVariableType(VariableNode vobj, NamedNode restrictionType, EObject expr) throws CircularDependencyException, TranslationException {
+		if (((VariableNode)vobj).getType() != null) {
+			// this variable already has a type so the restriction should be a narrowing of type to be valid
+			Node oldType = ((VariableNode)vobj).getType();
+			if (oldType instanceof NamedNode) {
+				if (!oldType.equals(restrictionType)) {
+					OntResource oldRsrc = getTheJenaModel().getOntResource(((NamedNode)oldType).getURI());
+					OntClass newRsrc = getTheJenaModel().getOntClass(restrictionType.getURI());
+					if (oldRsrc != null && newRsrc != null && !SadlUtils.classIsSubclassOf(newRsrc, oldRsrc, true, null)) {
+						// this is not consistent
+						addError("Restriction on variable type must be a subclass of type from definition.", expr);
+					}
+					else {
+						((VariableNode)vobj).setType(null); // this clears without an exception
+						((VariableNode)vobj).setType(restrictionType);	// this sets to new value
+					}
+				}
+			}
 		}
 	}
 
