@@ -2720,6 +2720,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String ruleName = getDeclarationExtensions().getConcreteName(element.getName());
 		Rule rule = new Rule(ruleName);
 		setTarget(rule);
+		int stage = element.getStage();
+		if (stage > 1) {
+			rule.setStage(stage);
+		}
 		EList<Expression> ifs = element.getIfs();
 		EList<Expression> thens = element.getThens();
 		setRulePart(RulePart.PREMISE);
@@ -3014,7 +3018,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// could be dropped entirely
 					// but for now returning this extra type although for a list range will be
 					// incorrect? awc 12/6/2017
-					TripleElement trel = new TripleElement(leftVar, new RDFTypeNode(), leftDefnType);
+					TripleElement trel;
+					if (leftVariableDefn instanceof Declaration) {
+//						NamedNode rdfssubclass = new NamedNode(RDFS.subClassOf.getURI());
+//						rdfssubclass.setNodeType(NodeType.ObjectProperty);
+						trel = new TripleElement(leftVar, new RDFTypeNode(), (Node) leftTranslatedDefn);
+					}
+					else {
+						trel = new TripleElement(leftVar, new RDFTypeNode(), leftDefnType);
+					}
 					trel.setSourceType(TripleSourceType.SPV);
 					return combineRest(trel, rest);
 //				} else if (leftVariableDefnTripleMissingObject) {
@@ -3081,6 +3093,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					} else {
 						Node defn = nodeCheck(leftTranslatedDefn);
 						GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, defn);
+						if (bi instanceof BuiltinElement && (defn instanceof com.ge.research.sadl.model.gp.Literal || defn instanceof ConstantNode || 
+								(defn instanceof NamedNode && ((NamedNode)defn).getNodeType().equals(NodeType.InstanceNode)))) {
+							((BuiltinElement)bi).setFuncName("assign");
+						}
 						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
 						return bi;
 					}
@@ -3567,6 +3583,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (lobj instanceof VariableNode && robj instanceof NamedNode && ((NamedNode)robj).getNodeType().equals(NodeType.ClassNode)) {
 						// this is a restriction on the variable type
 						((VariableNode)lobj).addDefinition(nodeCheck(trel));
+						try {
+							applyRestrictionToVariableType((VariableNode)lobj, (NamedNode) robj, rexpr);
+						} catch (CircularDependencyException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
 				} else {
@@ -3746,12 +3768,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if( lobj instanceof TripleElement && robj instanceof BuiltinElement) {
 				BuiltinElement right = (BuiltinElement) robj;
 				if(right.getFuncName() == "not") {
-					Node arg = right.getArguments().get(0);
-					//Pull up the not to the outside operator with the "is" operator nested     			
 					TripleElement left = (TripleElement) lobj;
-					GraphPatternElement bi = createBinaryBuiltin(op, left, arg);     			
-					Object ubi = createUnaryBuiltin(container, "not", bi);
-					return combineRest(ubi, rest);
+					Node arg = right.getArguments().get(0);
+					//Pull up the not to the outside operator with the "is" operator nested   
+					if (arg instanceof ConstantNode && ((ConstantNode)arg).getName().equals(SadlConstants.CONSTANT_KNOWN)) {
+						left.setObject(arg);
+						left.setType(TripleModifierType.Not);
+						return left;
+					}
+					else {
+						GraphPatternElement bi = createBinaryBuiltin(op, left, arg);     			
+						Object ubi = createUnaryBuiltin(container, "not", bi);
+						return combineRest(ubi, rest);
+					}
 				}
 			}
 
@@ -3819,6 +3848,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				bi = (GraphPatternElement) createUnaryBuiltin(container, "not", bi);
 			}
 			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi), rest);
+		}
+	}
+
+	private void applyRestrictionToVariableType(VariableNode vobj, NamedNode restrictionType, EObject expr) throws CircularDependencyException, TranslationException {
+		if (((VariableNode)vobj).getType() != null) {
+			// this variable already has a type so the restriction should be a narrowing of type to be valid
+			Node oldType = ((VariableNode)vobj).getType();
+			if (oldType instanceof NamedNode) {
+				if (!oldType.equals(restrictionType)) {
+					OntResource oldRsrc = getTheJenaModel().getOntResource(((NamedNode)oldType).getURI());
+					OntClass newRsrc = getTheJenaModel().getOntClass(restrictionType.getURI());
+					if (oldRsrc != null && newRsrc != null && !SadlUtils.classIsSubclassOf(newRsrc, oldRsrc, true, null)) {
+						// this is not consistent
+						addError("Restriction on variable type must be a subclass of type from definition.", expr);
+					}
+					else {
+						((VariableNode)vobj).setType(null); // this clears without an exception
+						((VariableNode)vobj).setType(restrictionType);	// this sets to new value
+					}
+				}
+			}
 		}
 	}
 
@@ -4742,7 +4792,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	private GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj)
+	protected GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (name.equals(JunctionType.AND_ALPHA) || name.equals(JunctionType.AND_SYMBOL)
 				|| name.equals(JunctionType.OR_ALPHA) || name.equals(JunctionType.OR_SYMBOL)) {
@@ -4791,8 +4841,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public Node processExpression(Constant expr) throws InvalidNameException {
 		// System.out.println("processing " + expr.getClass().getCanonicalName() + ": "
 		// + expr.getConstant());
-		if (expr.getConstant().equals("known")) {
-			return new ConstantNode("known");
+		if (expr.getConstant().equals(SadlConstants.CONSTANT_KNOWN)) {
+			return new ConstantNode(SadlConstants.CONSTANT_KNOWN);
 		}
 		if (expr.getConstant().equals(SadlConstants.CONSTANT_NONE)) {
 			return new ConstantNode(SadlConstants.CONSTANT_NONE);
@@ -5260,9 +5310,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		int numBuiltinArgs = 0;
 		
         boolean specialCntIdxProcessing = false;
-
+        boolean lIsConstantExpression = false;
+        
 		if (predicate instanceof Constant) {
 			// this is a pseudo PropOfSubject; the predicate is a constant
+			lIsConstantExpression = true;
 			String cnstval = ((Constant) predicate).getConstant();
 			predicate = null;
 			if (cnstval.equals("length") || cnstval.equals("the length")) {
@@ -5321,7 +5373,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			} else if (cnstval.equals("a type")) {
 				trSubj = processExpression(subject);
-				trPred = new RDFTypeNode();
+				trPred = new NamedNode(RDFS.subClassOf.getURI());  // new RDFTypeNode();
+				((NamedNode)trPred).setNodeType(NodeType.ObjectProperty);
 				return new TripleElement((Node)null, (Node)trPred, (Node)trSubj);
 			} else {
 				System.err.println("Unhandled constant property in translate PropOfSubj: " + cnstval);
@@ -5390,8 +5443,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				throw new TranslationException("Subject is neither Node nor GraphPatternElement: " + subjNode.getClass().getCanonicalName());
 			}
 			if (predNode != null && predNode instanceof Node) {
+				//Add range information to predNode based on domain restriction
 				try {
-					TypeCheckInfo lTci = getModelValidator().getType(expr);
+					EObject lTciExpression = expr;
+					if(lIsConstantExpression) {
+						lTciExpression = expr.getRight();
+					}
+					TypeCheckInfo lTci = getModelValidator().getType(lTciExpression);
 					addLocalizedTypeToNode(predNode,lTci);
 				} catch (DontTypeCheckException e) {
 					// do nothing
