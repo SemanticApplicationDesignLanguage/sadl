@@ -253,7 +253,7 @@ NamedStructureAnnotation :
 
 RuleStatement returns ExpressionScope :
 	{RuleStatement}
-	'Rule' name=SadlResource (annotations+=NamedStructureAnnotation)* ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
+	('Stage' stage=NUMBER)? 'Rule' name=SadlResource (annotations+=NamedStructureAnnotation)* ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
 						   'then' thens +=Expression // (','? thens+=Expression)*
 ;
 

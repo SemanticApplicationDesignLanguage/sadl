@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import javax.naming.directory.ModificationItem;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -796,17 +798,17 @@ public class JenaTranslatorPlugin implements ITranslator {
 	private String graphPatternElementToJenaRuleString(GraphPatternElement gpe, RulePart rulePart) throws TranslationException {
 		StringBuilder sb = null;
 		if (gpe instanceof TripleElement) {
-			if (!((TripleElement)gpe).getModifierType().equals(TripleModifierType.None)) {
+			if (!((TripleElement)gpe).getModifierType().equals(TripleModifierType.None) && !((TripleElement)gpe).getModifierType().equals(TripleModifierType.Assignment)) {
 				sb = new StringBuilder();
 				TripleModifierType type = ((TripleElement)gpe).getModifierType();
 				if (type.equals(TripleModifierType.Not)) {
 					sb.append("noValue(");
 				}
 				else if (type.equals(TripleModifierType.Only)) {
-					sb.append("notOnlyValue(");
-				}
-				else {
 					sb.append("noValueOtherThan(");
+				}
+				else if (type.equals(TripleModifierType.NotOnly)) {
+					sb.append("notOnlyValue(");
 				}
 				sb.append(nodeToString(((TripleElement)gpe).getSubject(),TranslationTarget.RULE_BUILTIN));
 				sb.append(", ");
@@ -826,22 +828,31 @@ public class JenaTranslatorPlugin implements ITranslator {
 		else if (gpe instanceof BuiltinElement) {
 			sb = new StringBuilder();
 			List<Node> args = ((BuiltinElement)gpe).getArguments();
-			sb.append(builtinTypeToString((BuiltinElement)gpe));
-			sb.append("(");
-			for (int i = 0; args != null && i < args.size(); i++) {
-				Node arg = args.get(i);
-				if (i > 0) sb.append(", ");
-				if (arg instanceof ProxyNode) {
-					Object pfor = ((ProxyNode)arg).getProxyFor();
-					if (pfor instanceof GraphPatternElement) {
-						sb.append(graphPatternElementToJenaRuleString((GraphPatternElement) pfor, rulePart));
+			if ((((BuiltinElement)gpe).getFuncName().equals("is") || ((BuiltinElement)gpe).getFuncName().equals("assign"))
+					&& ((BuiltinElement)gpe).getFuncType().equals(BuiltinType.Assign)) {
+				sb.append("assign(");
+				sb.append(nodeToString(args.get(1), TranslationTarget.RULE_BUILTIN));
+				sb.append(",");
+				sb.append(nodeToString(args.get(0), TranslationTarget.RULE_BUILTIN));
+			}
+			else {
+				sb.append(builtinTypeToString((BuiltinElement)gpe));
+				sb.append("(");
+				for (int i = 0; args != null && i < args.size(); i++) {
+					Node arg = args.get(i);
+					if (i > 0) sb.append(", ");
+					if (arg instanceof ProxyNode) {
+						Object pfor = ((ProxyNode)arg).getProxyFor();
+						if (pfor instanceof GraphPatternElement) {
+							sb.append(graphPatternElementToJenaRuleString((GraphPatternElement) pfor, rulePart));
+						}
+						else {
+							throw new TranslationException("Non-graph element proxy-for in ProxyNode '" + arg.toFullyQualifiedString() + "'");
+						}
 					}
 					else {
-						throw new TranslationException("Non-graph element proxy-for in ProxyNode '" + arg.toFullyQualifiedString() + "'");
+						sb.append(nodeToString(arg, TranslationTarget.RULE_BUILTIN));
 					}
-				}
-				else {
-					sb.append(nodeToString(arg, TranslationTarget.RULE_BUILTIN));
 				}
 			}
 			sb.append(")");

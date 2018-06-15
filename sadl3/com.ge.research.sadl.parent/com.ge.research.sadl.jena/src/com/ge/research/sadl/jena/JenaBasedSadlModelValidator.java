@@ -1425,7 +1425,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (expression.getProp() instanceof SadlResource) {
 				SadlResource prop = expression.getProp();
 				TypeCheckInfo propTci = getType(prop);
-				if (propTci.getTypeCheckType() == null && isInQuery(expression) && 
+				if (propTci != null && propTci.getTypeCheckType() == null && isInQuery(expression) && 
 						propTci.getExpressionType() instanceof ConceptName && ((ConceptName)propTci.getExpressionType()).getType().equals(ConceptType.VARIABLE)) {
 					throw new DontTypeCheckException();	// OK to not get a type for a property which is a variable in a query
 				}
