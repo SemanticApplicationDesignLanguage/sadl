@@ -3863,10 +3863,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						// this is not consistent
 						addError("Restriction on variable type must be a subclass of type from definition.", expr);
 					}
-					else {
-						((VariableNode)vobj).setType(null); // this clears without an exception
-						((VariableNode)vobj).setType(restrictionType);	// this sets to new value
-					}
+//					else {
+//						((VariableNode)vobj).setType(null); // this clears without an exception
+//						((VariableNode)vobj).setType(restrictionType);	// this sets to new value
+//					}
 				}
 			}
 		}
