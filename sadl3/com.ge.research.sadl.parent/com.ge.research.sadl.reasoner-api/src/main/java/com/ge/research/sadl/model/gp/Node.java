@@ -18,9 +18,6 @@
 
 package com.ge.research.sadl.model.gp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Class to represent a Node in a graph model.
  * @author 200005201
@@ -31,51 +28,9 @@ public abstract class Node implements Cloneable{
 	//	of a predicate in RDF triples and come from the domain or range. As such, the value
 	//	types could be a union of classes (for an ObjectProperty)--hence the list.
 	// For a NamedNode, the value type is the class to which the node belongs if an instance.
-	private List<Node> nodeValueTypes;
 	protected String name = null;
 	protected String prefix = null;
 	protected String namespace = null;
-	
-	/**
-	 * Get the list of Nodes that represent the possible types of this Node
-	 * @return
-	 */
-	public List<Node> getNodeValueTypes() {
-		return nodeValueTypes;
-	}
-	
-	/**
-	 * Set the list of Nodes that represent the possible types of this Node
-	 * @param nodeValueTypes
-	 */
-	public void setNodeValueTypes(List<Node> nodeValueTypes) {
-		this.nodeValueTypes = nodeValueTypes;
-	}
-	
-	/**
-	 * Add a Node to the list of Nodes that represent the possible types of this Node
-	 * @param nodeValueType
-	 */
-	public void addNodeValueType(Node nodeValueType) {
-		if (nodeValueTypes == null) {
-			nodeValueTypes = new ArrayList<Node>();
-		}
-		if (!nodeValueTypes.contains(nodeValueType)) {
-			nodeValueTypes.add(nodeValueType);
-		}
-	}
-	
-	/**
-	 * Does this Node have a type matching the specified type?
-	 * @param type
-	 * @return
-	 */
-	public boolean hasCompatibleValueType(Node type) {
-		if (nodeValueTypes != null && nodeValueTypes.contains(type)) {
-			return true;
-		}
-		return false;
-	}
 
 	/**
 	 * Default method to convert the GraphPatternElement to a string
