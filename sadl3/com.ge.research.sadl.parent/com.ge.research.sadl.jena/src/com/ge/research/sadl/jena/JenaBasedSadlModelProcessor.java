@@ -4057,13 +4057,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (isDeclaration(((BinaryOperation) expr).getRight())) {
 				return true;
 			}
-		} else if (expr instanceof BinaryOperation) {
-			if (isDeclaration(((BinaryOperation) expr).getLeft())) {
-				return true;
-			}
-			if (isDeclaration(((BinaryOperation) expr).getRight())) {
-				return true;
-			}
 		} else if (expr instanceof UnaryExpression && ((UnaryExpression) expr).getExpr() instanceof Declaration) {
 			return true;
 		} else if (expr instanceof Declaration) {
