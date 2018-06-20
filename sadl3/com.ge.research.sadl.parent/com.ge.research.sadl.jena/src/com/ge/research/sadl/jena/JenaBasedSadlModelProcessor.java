@@ -4378,7 +4378,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				instanceInObjectTypePropertyRange(pred, obj, isList, expr);
 			} else if (objtype.equals(NodeType.VariableNode)) {
 				if (obj instanceof VariableNode) {
-					Node vartype = ((VariableNode) obj).getType();
+					Node vartype = null;
+					if (getTarget() != null) {
+						if (getTarget() instanceof Rule) {
+							vartype = getLocalRestrictionOnVariableTypeFromRule((Rule) getTarget(), subjNode, predNode, (VariableNode)obj);
+						}
+					}
+					if (vartype == null) {
+						vartype = ((VariableNode) obj).getType();
+					}
 					if (((VariableNode) obj).isList()) {
 						isList = true;
 					}
@@ -4490,6 +4498,46 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else {
 			throw new TranslationException("Unexpected error: the object of the triple is not a node of known type ('" + obj.getClass().getCanonicalName() + ")");
 		}
+	}
+
+	private Node getLocalRestrictionOnVariableTypeFromRule(Rule rule, Node subjNode, Node predNode, VariableNode obj) {
+		Node result = null;
+		if (rule.getGivens() != null) {
+			for (GraphPatternElement gpe : rule.getGivens()) {
+				result = getLocalRestrictionOnVariableTypeFromGpe(gpe, subjNode, predNode, obj);
+				if (result != null) {
+					break;
+				}
+			}
+		}
+		if (result == null && rule.getIfs() != null) {
+			for (GraphPatternElement gpe : rule.getIfs()) {
+				result = getLocalRestrictionOnVariableTypeFromGpe(gpe, subjNode, predNode, obj);
+				if (result != null) {
+					break;
+				}
+			}
+		}
+		return result;
+	}
+
+	private Node getLocalRestrictionOnVariableTypeFromGpe(GraphPatternElement gpe, Node subjNode, Node predNode,
+			VariableNode obj) {
+		Node result = null;
+		if (gpe instanceof TripleElement) {
+			if (((TripleElement)gpe).getSubject().equals(obj) && ((TripleElement)gpe).getPredicate() instanceof RDFTypeNode) {
+				result = ((TripleElement)gpe).getObject();
+			}
+		}
+		else if (gpe instanceof Junction) {
+			if (((Junction)gpe).getLhs() instanceof ProxyNode) {
+				result = getLocalRestrictionOnVariableTypeFromGpe(((ProxyNode) ((Junction)gpe).getLhs()).getProxyFor(), subjNode, predNode, obj);
+			}
+			if (result == null && ((Junction)gpe).getRhs() instanceof ProxyNode) {
+				result = getLocalRestrictionOnVariableTypeFromGpe(((ProxyNode) ((Junction)gpe).getRhs()).getProxyFor(), subjNode, predNode, obj);
+			}
+		}
+		return result;
 	}
 
 	public void handleLocalRestriction(EObject expr, TripleElement tr) {
