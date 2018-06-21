@@ -2754,6 +2754,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		getIfTranslator().setTarget(rule);
+		getIfTranslator().setStartingVariableNumber(getVariableNumber());
 		rule = getIfTranslator().postProcessRule(rule, element);
 		if (rules == null) {
 			rules = new ArrayList<Rule>();
