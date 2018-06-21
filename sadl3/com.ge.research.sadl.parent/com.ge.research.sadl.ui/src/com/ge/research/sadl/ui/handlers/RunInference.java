@@ -32,6 +32,7 @@ import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.model.gp.TestResult;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
@@ -103,6 +104,8 @@ public class RunInference extends SadlActionHandler {
 	        						else {
 //		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
 		    							String msg = "Query: " + query.toString() + "\n";
+		    							String nsiqr = prefMap.get(SadlPreferences.NAMESPACE_IN_QUERY_RESULTS.getId());
+		    							rs.setShowNamespaces(Boolean.parseBoolean(nsiqr));
 		    							msg += rs.toStringWithIndent(5);
 		        						SadlConsole.writeToConsole(MessageType.INFO, msg);
 	        						}

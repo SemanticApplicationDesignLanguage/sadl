@@ -369,7 +369,21 @@ public class NamedNode extends Node {
 			missingPatterns = new ArrayList<TripleElement>();
 		}
 		if (!missingPatterns.contains(missingPattern)) {
-			missingPatterns.add(missingPattern);
+			boolean added = false;
+			if (missingPatterns.size() > 0) {
+				int idx = 0;
+				for (TripleElement tr : missingPatterns) {
+					if (tr.getSubject().equals(missingPattern.getObject())) {
+						missingPatterns.add(idx, missingPattern);
+						added = true;
+						break;
+					}
+					idx++;
+				}
+			}
+			if (!added) {
+				missingPatterns.add(missingPattern);
+			}
 			return true;
 		}
 		return false;
