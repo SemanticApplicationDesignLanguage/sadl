@@ -34,6 +34,7 @@ public class Rule {
 	private List<GraphPatternElement> ifs = null;
 	private List<GraphPatternElement> thens = null;
 	private List<VariableNode> ruleVariables = null;
+	private int stage = 1;	// default
 	
 	public Rule(String name) {
 		setRuleName(name);
@@ -242,6 +243,14 @@ public class Rule {
 			}
 		}
 		return null;
+	}
+
+	public int getStage() {
+		return stage;
+	}
+
+	public void setStage(int stage) {
+		this.stage = stage;
 	}
 	
 }
