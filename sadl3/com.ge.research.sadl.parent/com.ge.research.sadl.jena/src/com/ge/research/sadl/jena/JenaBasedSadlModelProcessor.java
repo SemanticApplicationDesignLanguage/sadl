@@ -2755,7 +2755,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		getIfTranslator().setTarget(rule);
 		getIfTranslator().setStartingVariableNumber(getVariableNumber());
-		rule = getIfTranslator().postProcessRule(rule, element);
+		try {
+			rule = getIfTranslator().postProcessRule(rule, element);
+		}
+		catch (Exception e) {
+			addError("Fatal error post-processing rule. " + e.getMessage(), element);
+		}
 		if (rules == null) {
 			rules = new ArrayList<Rule>();
 		}
@@ -5834,7 +5839,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		com.ge.research.sadl.model.gp.Literal unitLiteral = new com.ge.research.sadl.model.gp.Literal();
 		unitLiteral.setValue(unit);
-		return createBinaryBuiltin("unittedQuantity", valarg, unitLiteral);
+		if (!(valarg instanceof Node || valarg instanceof GraphPatternElement)) {
+			// this is the kind of error that happens with invalid syntax that makes a construct that appears like a unitted quantity
+			addError("Invalid syntax", expr);
+			return valarg;
+		}
+		else {
+			return createBinaryBuiltin("unittedQuantity", valarg, unitLiteral);
+		}
 	}
 
 	public Object processExpression(SubjHasProp expr)
