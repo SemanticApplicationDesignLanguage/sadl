@@ -235,7 +235,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage IMPORTED_RANGE_CHANGE = new SadlErrorMessage("imported_range_change");
 /**
-* translate(Name) called with a SadlResource which resolved to null; this needs to be caught in validation
+* This can be caused by invalid syntax and by reference to QNames that do not exist in any import
 **/
     public static final SadlErrorMessage TRANSLATE_NAME_SADLRESOURCE = new SadlErrorMessage("translate_name_sadlresource");
 /**

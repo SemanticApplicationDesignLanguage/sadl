@@ -290,8 +290,11 @@ public class JenaTranslatorPlugin implements ITranslator {
 						while (restIdx < elements.size()) {
 							// these should all be TripleElement graph patterns 
 							GraphPatternElement gpe = elements.get(restIdx);
-							if (!(gpe instanceof TripleElement)) {
-								logger.error("All rule then elements after a 'thereExists' should be triple patterns");
+							if (!(gpe instanceof TripleElement) || !((TripleElement)gpe).getSubject().equals(thereExistsVar)) {
+								logger.error("Found end of 'thereExists' with something after");
+								sb.append(graphPatternElementToJenaRuleString(elements.get(idx), rulePart));
+								idx++;
+								break;
 							}
 							TripleElement tgpe = (TripleElement) gpe;
 							if (tgpe.getSubject().equals(thereExistsVar) && tgpe.getPredicate().equals(new RDFTypeNode()) && tgpe.getObject().equals(thereExistsVar.getType())) {
@@ -314,6 +317,18 @@ public class JenaTranslatorPlugin implements ITranslator {
 							}
 						}
 						// we now want to process this as if it were this in the first place
+						// (except remove extra comma)
+						if (sb.length() > 0) {
+							int lastComma = sb.lastIndexOf(",");
+							if (lastComma > 0) {
+								int diff = sb.length() - lastComma;
+								if (diff > 0 &&diff <= 2) {
+									for (int i = 0; i < diff; i++) {
+										sb.deleteCharAt(lastComma);
+									}
+								}
+							}
+						}
 						continue;
 					}
 					else {
