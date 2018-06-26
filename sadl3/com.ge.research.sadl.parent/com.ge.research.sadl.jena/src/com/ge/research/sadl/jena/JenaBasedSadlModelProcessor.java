@@ -3530,6 +3530,31 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 
 		if(lobj != null && robj !=null ) {
+			//Check to apply implied property to built
+			if(robj instanceof BuiltinElement) {
+				//check for implied properties
+				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+				if(ip != null) {
+					Iterator<EObject> ipitr = ip.keySet().iterator();
+					while (ipitr.hasNext()) {
+						EObject eobj = ipitr.next();
+						Property implProp = ip.get(eobj);
+						try {
+							TypeCheckInfo lPropTci = getModelValidator().getType((EObject)eobj);
+                        
+							if (eobj.equals(rexpr)) {
+								((BuiltinElement) robj).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));								
+	        					//addLocalizedTypeToNode(((NamedNode) lobj), lPropTci);
+	                        }
+						} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
+								| CircularDefinitionException | CircularDependencyException
+								| PropertyWithoutRangeException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+			
 			if(lobj instanceof TripleElement && robj instanceof TripleElement) {
 				boolean flag = false;
 				TripleElement tr = (TripleElement)lobj;
@@ -3818,11 +3843,85 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return applyImpliedAndExpandedProperties(container, lexpr, rexpr,
 					createBinaryBuiltin("assign", robj, lobj));
 		}
+
+		//check for implied properties on junctions with top level named nodes
 		if (op.equals("and") || op.equals("or")) {
 			Junction jct = new Junction();
 			jct.setJunctionName(op);
+			
+			if(robj instanceof NamedNode) {
+				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+				if(ip != null) {
+					Iterator<EObject> ipitr = ip.keySet().iterator();
+					while (ipitr.hasNext()) {
+						EObject eobj = ipitr.next();
+						Property implProp = ip.get(eobj);
+						try {
+							TypeCheckInfo lPropTci = getModelValidator().getType((EObject)eobj);
+							
+							if (eobj.equals(rexpr)) {
+								((NamedNode) robj).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));
+	        					addLocalizedTypeToNode(((NamedNode) robj), lPropTci);
+							}
+						} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
+								| CircularDefinitionException | CircularDependencyException
+								| PropertyWithoutRangeException e) {
+							e.printStackTrace();
+						}
+					}	
+				}
+			}else if(robj instanceof BuiltinElement) {
+				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+				if(ip != null) {
+					Iterator<EObject> ipitr = ip.keySet().iterator();
+					while (ipitr.hasNext()) {
+						EObject eobj = ipitr.next();
+						Property implProp = ip.get(eobj);
+						try {
+							TypeCheckInfo lPropTci = getModelValidator().getType((EObject)eobj);
+							
+							if (eobj.equals(rexpr)) {
+								((BuiltinElement) robj).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));
+	        					addLocalizedTypeToNode(((NamedNode) robj), lPropTci);
+							}
+						} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
+								| CircularDefinitionException | CircularDependencyException
+								| PropertyWithoutRangeException e) {
+							e.printStackTrace();
+						}
+					}	
+				}
+			}
+			if(lobj instanceof NamedNode || lobj instanceof BuiltinElement) {
+				//check for implied properties
+				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+				if(ip != null) {
+					Iterator<EObject> ipitr = ip.keySet().iterator();
+					while (ipitr.hasNext()) {
+						EObject eobj = ipitr.next();
+						Property implProp = ip.get(eobj);
+						try {
+							TypeCheckInfo lPropTci = getModelValidator().getType((EObject)eobj);
+                        
+							if (eobj.equals(lexpr)) {
+								if(lobj instanceof NamedNode) {
+									((NamedNode) lobj).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));								
+		        					addLocalizedTypeToNode(((NamedNode) lobj), lPropTci);
+								}
+	                        }
+						} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
+								| CircularDefinitionException | CircularDependencyException
+								| PropertyWithoutRangeException e) {
+							e.printStackTrace();
+						}
+						
+	
+					}
+				}
+			}
 			jct.setLhs(nodeCheck(postProcessTranslationResult(lobj)));
 			jct.setRhs(nodeCheck(robj instanceof NamedNode && rest != null ? rest : robj));
+			
 			return jct;
 		} else {
 			boolean isNegated = false;
@@ -3883,43 +3982,76 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					while (ipitr.hasNext()) {
 						EObject eobj = ipitr.next();
 						Property implProp = ip.get(eobj);
-						if (eobj.equals(lobj)) {
-							//((GraphPatternElement) maybeGpe).setLeftImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
-							//set the implied property node for the underlying named node
-							if(maybeGpe instanceof TripleElement) {
-								NamedNode predicate = (NamedNode) ((TripleElement) maybeGpe).getPredicate();
-								predicate.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
-							}else {
-								//left is the first argument of a BuildinElement
-								List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
-								((NamedNode) args.get(0)).setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
-							}
+						
+						try {
+							TypeCheckInfo lPropTci = getModelValidator().getType((EObject)eobj);
 							
-							matched = true;
-							if (toBeRemoved == null) {
-								toBeRemoved = new ArrayList<EObject>();
-							}
-							toBeRemoved.add(lobj);
-						}
-						else if (eobj.equals(robj)) {
-							//((GraphPatternElement)maybeGpe).setRightImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
-							//set the implied property node for the underlying named node
+							if (eobj.equals(lobj)) {
+								//((GraphPatternElement) maybeGpe).setLeftImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+								//set the implied property node for the underlying named node
+								if(maybeGpe instanceof TripleElement) {
+									NamedNode predicate = (NamedNode) ((TripleElement) maybeGpe).getPredicate();
+									predicate.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
+		        					addLocalizedTypeToNode(((NamedNode) predicate), lPropTci);
 
-							if(maybeGpe instanceof TripleElement) {
-								NamedNode object = (NamedNode) ((TripleElement) maybeGpe).getObject();
-								object.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));						
-							}else {
-								//right is the second argument of a BuildinElement
-								List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
-								((NamedNode) args.get(1)).setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));					
+								}else {
+									//right is the second argument of a BuildinElement
+									List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
+									if(args.get(0) instanceof NamedNode ) {
+										((NamedNode) args.get(0)).setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
+			        					addLocalizedTypeToNode(((NamedNode) args.get(0)), lPropTci);
+
+									}else if (args.get(0) instanceof ProxyNode && args.get(1) instanceof ProxyNode) {
+										BuiltinElement bie = (BuiltinElement) ((ProxyNode)args.get(1)).getProxyFor();
+										bie.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
+			        					//Might need a localized type on BuiltinElement
+										//addLocalizedTypeToNode(((NamedNode) predicate), lPropTci);
+										//((NamedNode)bie.getArguments().get(0)).setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
+									}
+								}
+								
+								matched = true;
+								if (toBeRemoved == null) {
+									toBeRemoved = new ArrayList<EObject>();
+								}
+								toBeRemoved.add(lobj);
 							}
-							
-							
-							matched = true;
-							if (toBeRemoved == null) {
-								toBeRemoved = new ArrayList<EObject>();
+							else if (eobj.equals(robj)) {
+								//((GraphPatternElement)maybeGpe).setRightImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+								//set the implied property node for the underlying named node
+	
+								if(maybeGpe instanceof TripleElement) {
+									NamedNode object = (NamedNode) ((TripleElement) maybeGpe).getObject();
+									object.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));						
+									addLocalizedTypeToNode(object, lPropTci);
+
+								}else {
+									//right is the second argument of a BuildinElement
+									List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
+									if(args.get(1) instanceof NamedNode) {
+									((NamedNode) args.get(1)).setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));					
+									addLocalizedTypeToNode(((NamedNode) args.get(1)), lPropTci);
+
+									}else if (args.get(1) instanceof ProxyNode && ((ProxyNode)args.get(1)).getProxyFor() instanceof BuiltinElement ) {
+										BuiltinElement bie = (BuiltinElement) ((ProxyNode)args.get(1)).getProxyFor();
+										bie.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
+			        					//Might need a localized type on BuiltinElement
+										//addLocalizedTypeToNode(((NamedNode) predicate), lPropTci);
+										//((NamedNode)bie.getArguments().get(0)).setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
+									}
+								}
+								
+								
+								matched = true;
+								if (toBeRemoved == null) {
+									toBeRemoved = new ArrayList<EObject>();
+								}
+								toBeRemoved.add(robj);
 							}
-							toBeRemoved.add(robj);
+						} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
+								| CircularDefinitionException | CircularDependencyException
+								| PropertyWithoutRangeException | InvalidNameException | InvalidTypeException e) {
+							e.printStackTrace();
 						}
 					}
 					if (!matched) {
@@ -4806,7 +4938,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	protected GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj)
+	public GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (name.equals(JunctionType.AND_ALPHA) || name.equals(JunctionType.AND_SYMBOL)
 				|| name.equals(JunctionType.OR_ALPHA) || name.equals(JunctionType.OR_SYMBOL)) {
@@ -5266,35 +5398,45 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 	
 
-	public Object processExpression(Name expr) throws TranslationException, InvalidNameException, InvalidTypeException {
-		if (expr.isFunction()) {
-			return processFunction(expr);
+	public Object processExpression(Name aExpr) throws TranslationException, InvalidNameException, InvalidTypeException {
+		
+		// check if the expression is a function
+		if (aExpr.isFunction()) {
+			return processFunction(aExpr);
 		}
-		SadlResource qnm = expr.getName();
-		String nm = getDeclarationExtensions().getConcreteName(qnm);
-		if (nm == null) {
-			SadlResource srnm = qnm.getName();
+		
+		SadlResource lQName = aExpr.getName();
+		String lName = getDeclarationExtensions().getConcreteName(lQName);
+		
+		// make sure we have a name
+		if (lName == null) {
+			
+			SadlResource srnm = lQName.getName();
 			if (srnm != null) {
 				return processExpression(srnm);
 			}
-			addError(SadlErrorMessages.TRANSLATE_NAME_SADLRESOURCE.toString(), expr);
-			// throw new InvalidNameException("Unable to resolve SadlResource to a name");
-		} else if (qnm.equals(expr) && expr.eContainer() instanceof BinaryOperation
-				&& ((BinaryOperation) expr.eContainer()).getRight() != null
-				&& ((BinaryOperation) expr.eContainer()).getRight().equals(qnm)) {
-			addError("It appears that '" + nm + "' is not defined.", expr);
+			addError(SadlErrorMessages.TRANSLATE_NAME_SADLRESOURCE.toString(), aExpr);
+			
+		// make sure the right side is defined for binary operation
+		} else if (lQName.equals(aExpr) && aExpr.eContainer() instanceof BinaryOperation
+			&& ((BinaryOperation) aExpr.eContainer()).getRight() != null
+			&& ((BinaryOperation) aExpr.eContainer()).getRight().equals(lQName)) {
+			
+			addError("It appears that '" + lName + "' is not defined.", aExpr);
+			
+		// make sure the left side is defined for binary operation
+		} else if (lQName.equals(aExpr) && aExpr.eContainer() instanceof BinaryOperation
+			&& ((BinaryOperation) aExpr.eContainer()).getLeft() != null
+			&& ((BinaryOperation) aExpr.eContainer()).getLeft().equals(lQName)) {
+			
+			addError("It appears that '" + lName + "' is not defined.", aExpr);
+			
+		} else {
+			
+			return processExpression(lQName);
 		}
-			
-		  else if (qnm.equals(expr) && expr.eContainer() instanceof BinaryOperation
-				      && ((BinaryOperation) expr.eContainer()).getLeft() != null
-				    && ((BinaryOperation) expr.eContainer()).getLeft().equals(qnm)) {
-				    addError("It appears that '" + nm + "' is not defined.", expr);
-				  }
-			
-			
-		 else {
-			return processExpression(qnm);
-		}
+		
+		// fall out to null
 		return null;
 	}
 
@@ -5398,6 +5540,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //			trPred = processExpression(predicate);
 			Expression element = ((ElementInList)predicate).getElement();
 			Object elObj = processExpression(element);
+            
+            if(elObj instanceof NamedNode) {
+                //check for implied properties
+                Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+                if(ip != null) {
+                    Iterator<EObject> ipitr = ip.keySet().iterator();
+                    while (ipitr.hasNext()) {
+                        EObject eobj = ipitr.next();
+                        Property implProp = ip.get(eobj);
+                        TypeCheckInfo lPropTci;
+						try {
+							lPropTci = getModelValidator().getType((EObject)eobj);
+                        
+	                        if (eobj.equals(predicate)) {
+	                            ((NamedNode) elObj).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));
+	        					addLocalizedTypeToNode(((NamedNode) elObj), lPropTci);
+	                        }
+						} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
+								| CircularDefinitionException | CircularDependencyException
+								| PropertyWithoutRangeException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+                    }	
+                }
+            }
+
+
+			
 			BuiltinElement bi = new BuiltinElement();
 			if (((ElementInList) predicate).isBefore()) {
 				bi.setFuncName("elementBefore");
@@ -5551,7 +5723,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	private void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
+	protected void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
 		if(predNode instanceof NamedNode) {
 			((NamedNode) predNode).setLocalizedType(lTci.getTypeCheckType());
 		}

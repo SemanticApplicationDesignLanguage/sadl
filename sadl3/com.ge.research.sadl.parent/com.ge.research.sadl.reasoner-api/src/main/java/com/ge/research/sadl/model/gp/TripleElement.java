@@ -187,8 +187,15 @@ public class TripleElement extends GraphPatternElement {
 	@Override
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder("rdf(");
-		NamedNode leftImpliedPropertyUsed = ((NamedNode) getPredicate()).getImpliedPropertyNode();
-		NamedNode rightImpliedPropertyUsed = ((NamedNode) getObject()).getImpliedPropertyNode();
+		
+		NamedNode leftImpliedPropertyUsed = null;
+		NamedNode rightImpliedPropertyUsed = null;
+		if(getPredicate() != null && getPredicate() instanceof NamedNode) {
+			leftImpliedPropertyUsed = ((NamedNode) getPredicate()).getImpliedPropertyNode();			
+		}
+		if(getObject() != null && getObject() instanceof NamedNode ) {
+			rightImpliedPropertyUsed = ((NamedNode) getObject()).getImpliedPropertyNode();			
+		}
 
 		if (leftImpliedPropertyUsed != null || rightImpliedPropertyUsed != null || getExpandedPropertiesToBeUsed() != null) {
 			sb.append("(");

@@ -332,8 +332,25 @@ public class BuiltinElement extends GraphPatternElement {
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getFuncName());
-		NamedNode leftImpliedPropertyUsed = ((NamedNode) getArguments().get(0)).getImpliedPropertyNode();
-		NamedNode rightImpliedPropertyUsed = ((NamedNode) getArguments().get(1)).getImpliedPropertyNode();
+
+		NamedNode leftImpliedPropertyUsed = null;
+		NamedNode rightImpliedPropertyUsed = null;
+		
+		if(getFuncName() == "shallSet" && 
+		   getArguments().get(0) instanceof NamedNode && 
+		   getArguments().get(1) instanceof ProxyNode) {
+		
+			// get the real builtinElement
+			 GraphPatternElement proxyFor = ((ProxyNode) getArguments().get(1)).getProxyFor();
+			 if(proxyFor instanceof BuiltinElement) {
+				 if((((BuiltinElement) proxyFor).getArguments().get(0)) instanceof NamedNode) {
+					 leftImpliedPropertyUsed = ((NamedNode)((BuiltinElement) proxyFor).getArguments().get(0)).getImpliedPropertyNode();
+				 }
+				 if((((BuiltinElement) proxyFor).getArguments().get(1)) instanceof NamedNode) {
+					 rightImpliedPropertyUsed = ((NamedNode)((BuiltinElement) proxyFor).getArguments().get(1)).getImpliedPropertyNode();
+				 }
+			 }
+		}
 		
 		if (leftImpliedPropertyUsed != null || rightImpliedPropertyUsed != null || getExpandedPropertiesToBeUsed() != null) {
 			sb.append("(");

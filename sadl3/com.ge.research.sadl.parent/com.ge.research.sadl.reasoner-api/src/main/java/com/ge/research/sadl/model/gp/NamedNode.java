@@ -203,6 +203,19 @@ public class NamedNode extends Node {
 		if (getMissingPatterns() != null) {
 			sb.append(missingPatternsToDescriptiveString());
 		}
+		if(getImpliedPropertyNode() != null) {
+			sb.append(impliedPropertyToDescriptiveString());
+		}
+		return sb.toString();
+	}
+
+	private String impliedPropertyToDescriptiveString() {
+		StringBuilder sb = new StringBuilder(" (has implied property '");
+		Object ip = getImpliedPropertyNode();
+		if (ip instanceof NamedNode) {
+			sb.append(((NamedNode)ip).toDescriptiveString());
+			sb.append("')");
+		}
 		return sb.toString();
 	}
 
