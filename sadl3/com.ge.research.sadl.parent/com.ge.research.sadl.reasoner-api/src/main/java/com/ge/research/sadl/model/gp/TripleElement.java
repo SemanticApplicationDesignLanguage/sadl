@@ -155,7 +155,11 @@ public class TripleElement extends GraphPatternElement {
 		}
 		if (!getModifierType().equals(TripleModifierType.None) && !getModifierType().equals(TripleModifierType.Assignment)) {
 			sb.insert(0, "(");
-			sb.insert(0, getModifierType().toString());
+			if(getModifierType().equals(TripleModifierType.Not)) {
+				sb.insert(0, getModifierType().toString().toLowerCase());
+			}else {
+				sb.insert(0, getModifierType().toString());
+			}
 			sb.append(")");
 		}
 		sb.append(")");
@@ -176,7 +180,11 @@ public class TripleElement extends GraphPatternElement {
 		}
 		if (!getModifierType().equals(TripleModifierType.None) && !getModifierType().equals(TripleModifierType.Assignment)) {
 			sb.insert(0, "(");
-			sb.insert(0, getModifierType().toString());
+			if(getModifierType().equals(TripleModifierType.Not)) {
+				sb.insert(0, getModifierType().toString().toLowerCase());
+			}else {
+				sb.insert(0, getModifierType().toString());
+			}
 			sb.append(")");
 		}
 		sb.append(")");
@@ -239,7 +247,11 @@ public class TripleElement extends GraphPatternElement {
 		}
 		if (!getModifierType().equals(TripleModifierType.None)) {
 			sb.insert(0, "(");
-			sb.insert(0, getModifierType().toString());
+			if(getModifierType().equals(TripleModifierType.Not)) {
+				sb.insert(0, getModifierType().toString().toLowerCase());
+			}else {
+				sb.insert(0, getModifierType().toString());
+			}
 			sb.append(")");
 		}
 		sb.append(")");
