@@ -845,7 +845,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return false;
 	}
 
-	public Rule postProcessRule(Rule rule, EObject object) {
+	public Rule postProcessRule(Rule rule, EObject object) throws TranslationException {
 		clearCruleVariableTypedOutput();
 		try {
 			// do this first so that the arguments don't change before these are applied
@@ -939,8 +939,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (TranslationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw e;
 			} 		
 		}
 		try {
@@ -2322,7 +2321,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				patterns.add(be);
 			}
 			else {
-				patterns.add(patterns.size() - 1, be);
+//				patterns.add(patterns.size() - 1, be);
+				patterns.add(be);
 			}
 			returnNode = be.getArguments() != null ? be.getArguments().get(0) : null;	// this can occur during editing
 		}
