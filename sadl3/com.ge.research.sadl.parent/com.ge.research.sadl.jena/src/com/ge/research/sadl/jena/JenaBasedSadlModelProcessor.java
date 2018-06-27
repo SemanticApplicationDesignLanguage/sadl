@@ -5592,7 +5592,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
 		if(predNode instanceof NamedNode) {
-			((NamedNode) predNode).setLocalizedType(lTci.getTypeCheckType());
+			if(ignoreUnittedQuantities && lTci.getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+				((NamedNode) predNode).setLocalizedType(validateNamedNode(new NamedNode(XSD.decimal.getURI(),NodeType.DataTypeNode)));
+			} else {
+				((NamedNode) predNode).setLocalizedType(lTci.getTypeCheckType());
+			}
 		}
 	}
 
