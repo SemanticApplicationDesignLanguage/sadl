@@ -450,8 +450,8 @@ public class NamedNode extends Node {
 	}
 	
 	/**
-	 * get the node's implied property
-	 * @return mImpliedPropertyNode
+	 * Get the node's implied property
+	 * @return NamedNode mImpliedPropertyNode
 	 */
 	public NamedNode getImpliedPropertyNode() {
 		return mImpliedPropertyNode;
@@ -459,10 +459,12 @@ public class NamedNode extends Node {
 	
 	/**
 	 * set the node's implied property
-	 * @return mImpliedPropertyNode
+	 * @param NamedNode mImpliedPropertyNode
 	 */
-	public void setImpliedPropertyNode(NamedNode mImpliedPropertyNode) {
-		this.mImpliedPropertyNode = mImpliedPropertyNode;
+	public void setImpliedPropertyNode(NamedNode aImpliedPropertyNode) {
+		this.mImpliedPropertyNode = aImpliedPropertyNode;
 	}
+	
+	
 
 }

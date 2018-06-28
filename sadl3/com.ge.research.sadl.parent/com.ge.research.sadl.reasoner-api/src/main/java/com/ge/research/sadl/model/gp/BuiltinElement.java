@@ -531,9 +531,9 @@ public class BuiltinElement extends GraphPatternElement {
 	
 	/**
 	 * set the node's implied property
-	 * @return mImpliedPropertyNode
+	 * @param aImpliedPropertyNode
 	 */
-	public void setImpliedPropertyNode(NamedNode mImpliedPropertyNode) {
-		this.mImpliedPropertyNode = mImpliedPropertyNode;
+	public void setImpliedPropertyNode(NamedNode aImpliedPropertyNode) {
+		this.mImpliedPropertyNode = aImpliedPropertyNode;
 	}
 }

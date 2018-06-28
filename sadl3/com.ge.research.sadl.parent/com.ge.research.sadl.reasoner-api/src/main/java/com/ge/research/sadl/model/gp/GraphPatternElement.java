@@ -212,14 +212,15 @@ public abstract class GraphPatternElement {
 		return false;
 	}
 	
-	public NamedNode getRightImpliedPropertyUsed() {
-		return null;
-	}
-	public NamedNode getLeftImpliedPropertyUsed() {
-		return null;
-	}
-	public void setRightImpliedPropertyUsed(NamedNode node) {
-	}
-	public void setLeftImpliedPropertyUsed(NamedNode node) {
-	}
+	//TODO Remove these functions
+	//public NamedNode getRightImpliedPropertyUsed() {
+	//	return null;
+	//}
+	//public NamedNode getLeftImpliedPropertyUsed() {
+	//	return null;
+	//}
+	//public void setRightImpliedPropertyUsed(NamedNode node) {
+	//}
+	//public void setLeftImpliedPropertyUsed(NamedNode node) {
+	//}
 }

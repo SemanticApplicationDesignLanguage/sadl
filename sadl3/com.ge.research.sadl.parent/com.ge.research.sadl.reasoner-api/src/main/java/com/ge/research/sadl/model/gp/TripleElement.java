@@ -195,27 +195,28 @@ public class TripleElement extends GraphPatternElement {
 	@Override
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder("rdf(");
-		
-		NamedNode leftImpliedPropertyUsed = null;
-		NamedNode rightImpliedPropertyUsed = null;
+
+		//Implied properties moved off of graph pattern elements are now on NamedNodes
+		NamedNode lPredicateImpliedProperty = null;
+		NamedNode lObjectImpliedProperty = null;
 		if(getPredicate() != null && getPredicate() instanceof NamedNode) {
-			leftImpliedPropertyUsed = ((NamedNode) getPredicate()).getImpliedPropertyNode();			
+			lPredicateImpliedProperty = ((NamedNode) getPredicate()).getImpliedPropertyNode();			
 		}
 		if(getObject() != null && getObject() instanceof NamedNode ) {
-			rightImpliedPropertyUsed = ((NamedNode) getObject()).getImpliedPropertyNode();			
+			lObjectImpliedProperty = ((NamedNode) getObject()).getImpliedPropertyNode();			
 		}
 
-		if (leftImpliedPropertyUsed != null || rightImpliedPropertyUsed != null || getExpandedPropertiesToBeUsed() != null) {
+		if (lPredicateImpliedProperty != null || lObjectImpliedProperty != null || getExpandedPropertiesToBeUsed() != null) {
 			sb.append("(");
 			boolean needComma = false;
-			if (leftImpliedPropertyUsed != null) {
-				sb.append("leftImpliedProperty ");
-				sb.append(leftImpliedPropertyUsed.toDescriptiveString());
+			if (lPredicateImpliedProperty != null) {
+				sb.append("predicateImpliedProperty ");
+				sb.append(lPredicateImpliedProperty.toDescriptiveString());
 				needComma = true;
 			}
-			else if (rightImpliedPropertyUsed != null) { // only left or right should exist (at most)
-				sb.append("rightImpliedProperty ");
-				sb.append(rightImpliedPropertyUsed.toDescriptiveString());
+			else if (lObjectImpliedProperty != null) { // only left or right should exist (at most)
+				sb.append("objectImpliedProperty ");
+				sb.append(lObjectImpliedProperty.toDescriptiveString());
 				needComma = true;
 			}
 			if (getExpandedPropertiesToBeUsed() != null) {
@@ -299,5 +300,4 @@ public class TripleElement extends GraphPatternElement {
 	public TripleSourceType getSourceType() {
 		return sourceType;
 	}
-	
 }
