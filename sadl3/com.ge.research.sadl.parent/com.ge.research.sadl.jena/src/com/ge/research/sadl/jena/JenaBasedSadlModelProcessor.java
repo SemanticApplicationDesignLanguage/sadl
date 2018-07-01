@@ -3556,11 +3556,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						Property implProp = ip.get(eobj);
 						try {
 							TypeCheckInfo lPropTci = getModelValidator().getType((EObject)eobj);
+							
+							TypeCheckInfo ipNN = getMatchingImpliedPropertyBaseTci(lPropTci, implProp, eobj);
+							NamedNode impliedPropertyNode = (validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+        					addLocalizedTypeToNode(impliedPropertyNode, ipNN);		
                         
 							if (eobj.equals(rexpr)) {
-								((BuiltinElement) robj).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));								
-	        					//TODO: Might need to add localized type to builtinElement?
-
+								((BuiltinElement) robj).setImpliedPropertyNode(impliedPropertyNode);								
+								
 								//Handle a prop of subject statement with "constant" OP "PropOfSubject"
 								//ex. data1 to index of data2 in intList
 								//data2 here need to be integer type
@@ -3569,7 +3572,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									((PropOfSubject) rexpr).getLeft() instanceof Constant) {
 								PropOfSubject propOfSubj = (PropOfSubject) ((PropOfSubject) rexpr).getRight();
 								if(eobj.equals(propOfSubj.getLeft())) {
-									((NamedNode) ((BuiltinElement) robj).getArguments().get(1)).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));								
+									((NamedNode) ((BuiltinElement) robj).getArguments().get(1)).setImpliedPropertyNode(impliedPropertyNode);								
 									((NamedNode) ((BuiltinElement) robj).getArguments().get(1)).setLocalizedType(lPropTci.getTypeCheckType());								
 								}
 							}
@@ -3883,16 +3886,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					while (ipitr.hasNext()) {
 						EObject eobj = ipitr.next();
 						Property implProp = ip.get(eobj);
+					
 						try {
 							TypeCheckInfo lPropTci = getModelValidator().getType((EObject)eobj);
+							TypeCheckInfo ipNN = getMatchingImpliedPropertyBaseTci(lPropTci, implProp, eobj);
+							NamedNode impliedPropertyNode = (validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+        					addLocalizedTypeToNode(impliedPropertyNode, ipNN);									
 							
 							if (eobj.equals(rexpr)) {
 								if(robj instanceof NamedNode) {
-									((NamedNode) robj).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));
 		        					addLocalizedTypeToNode(((NamedNode) robj), lPropTci);	
+									((NamedNode) robj).setImpliedPropertyNode(impliedPropertyNode);
 								}else {
-									((BuiltinElement) robj).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));
 		        					addLocalizedTypeToNode(((NamedNode) robj), lPropTci);
+									((BuiltinElement) robj).setImpliedPropertyNode(impliedPropertyNode);
 								}
 							}
 						} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
@@ -3914,11 +3921,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						Property implProp = ip.get(eobj);
 						try {
 							TypeCheckInfo lPropTci = getModelValidator().getType((EObject)eobj);
+							
+							TypeCheckInfo ipNN = getMatchingImpliedPropertyBaseTci(lPropTci, implProp, eobj);
+							NamedNode impliedPropertyNode = (validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+        					addLocalizedTypeToNode(impliedPropertyNode, ipNN);	
                         
 							if (eobj.equals(lexpr)) {
 								if(lobj instanceof NamedNode) {
-									((NamedNode) lobj).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));								
 		        					addLocalizedTypeToNode(((NamedNode) lobj), lPropTci);
+									((NamedNode) lobj).setImpliedPropertyNode(impliedPropertyNode);								
 								}
 	                        }
 						} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
@@ -3982,6 +3993,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 	}
+	
+	public TypeCheckInfo getMatchingImpliedPropertyBaseTci(TypeCheckInfo aImpliedBaseTci, Property aPropertyToMatch, EObject aEObj) throws DontTypeCheckException, InvalidTypeException, TranslationException, InvalidNameException{
+		Iterator<ConceptName> litr = aImpliedBaseTci.getImplicitProperties().iterator();
+		TypeCheckInfo baseImpliedPropertyTci = null;
+		while (litr.hasNext()) {
+			ConceptName cn = litr.next();
+			Property prop = theJenaModel.getProperty(cn.getUri());
+			if(aPropertyToMatch.equals(prop)){
+				baseImpliedPropertyTci = getModelValidator().getTypeInfoFromRange(cn, prop, aEObj);
+			}
+		}
+		
+		return baseImpliedPropertyTci;
+	}
 
 	/**
 	 * Check and add implied and expanded properties on a GraphPatternElement at
@@ -4007,26 +4032,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						
 						try {
 							TypeCheckInfo lPropTci = getModelValidator().getType((EObject)eobj);
+							TypeCheckInfo ipNN = getMatchingImpliedPropertyBaseTci(lPropTci, implProp, eobj);
+							NamedNode impliedPropertyNode = (validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+        					addLocalizedTypeToNode(impliedPropertyNode, ipNN);
 							
 							if (eobj.equals(lobj)) {
 								//((GraphPatternElement) maybeGpe).setLeftImpliedPropertyUsed(validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
 								//set the implied property node for the underlying named node instead of GPE
 								if(maybeGpe instanceof TripleElement) {
 									NamedNode predicate = (NamedNode) ((TripleElement) maybeGpe).getPredicate();
-									predicate.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
 		        					addLocalizedTypeToNode(((NamedNode) predicate), lPropTci);
+									predicate.setImpliedPropertyNode(impliedPropertyNode);
 
 								}else {
 									//right is the second argument of a BuildinElement
 									List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
 									if(args.get(0) instanceof NamedNode ) {
-										((NamedNode) args.get(0)).setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
 			        					addLocalizedTypeToNode(((NamedNode) args.get(0)), lPropTci);
+										((NamedNode) args.get(0)).setImpliedPropertyNode(impliedPropertyNode);
 
 									}else if (args.get(0) instanceof ProxyNode && args.get(1) instanceof ProxyNode) {
 										BuiltinElement bie = (BuiltinElement) ((ProxyNode)args.get(1)).getProxyFor();
-										bie.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
-			        					//TODO: Might need a localized type on BuiltinElement?
+										bie.setImpliedPropertyNode(impliedPropertyNode);
 									}
 								}
 								
@@ -4042,20 +4069,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	
 								if(maybeGpe instanceof TripleElement) {
 									NamedNode object = (NamedNode) ((TripleElement) maybeGpe).getObject();
-									object.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));						
 									addLocalizedTypeToNode(object, lPropTci);
+									object.setImpliedPropertyNode(impliedPropertyNode);						
 
 								}else {
 									//right is the second argument of a BuildinElement
 									List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
 									if(args.get(1) instanceof NamedNode) {
-									((NamedNode) args.get(1)).setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));					
 									addLocalizedTypeToNode(((NamedNode) args.get(1)), lPropTci);
+									((NamedNode) args.get(1)).setImpliedPropertyNode(impliedPropertyNode);					
 
 									}else if (args.get(1) instanceof ProxyNode && ((ProxyNode)args.get(1)).getProxyFor() instanceof BuiltinElement ) {
 										BuiltinElement bie = (BuiltinElement) ((ProxyNode)args.get(1)).getProxyFor();
-										bie.setImpliedPropertyNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode));
-			        					//TODO: Might need a localized type on BuiltinElement?
+										bie.setImpliedPropertyNode(impliedPropertyNode);
 									}
 								}
 								
@@ -5617,10 +5643,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
                         TypeCheckInfo lPropTci;
 						try {
 							lPropTci = getModelValidator().getType((EObject)eobj);
-                        
+							TypeCheckInfo ipNN = getMatchingImpliedPropertyBaseTci(lPropTci, implProp, eobj);
+							NamedNode impliedPropertyNode = (validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode)));
+        					addLocalizedTypeToNode(impliedPropertyNode, ipNN);
+        					
 	                        if (eobj.equals(predicate)) {
-	                            ((NamedNode) elObj).setImpliedPropertyNode((validateNamedNode(new NamedNode(implProp.getURI(), NodeType.PropertyNode))));
 	        					addLocalizedTypeToNode(((NamedNode) elObj), lPropTci);
+	                            ((NamedNode) elObj).setImpliedPropertyNode(impliedPropertyNode);
 	                        }
 						} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
 								| CircularDefinitionException | CircularDependencyException

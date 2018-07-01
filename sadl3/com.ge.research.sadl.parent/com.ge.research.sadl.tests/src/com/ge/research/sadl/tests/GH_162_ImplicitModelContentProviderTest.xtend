@@ -26,7 +26,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.unifyEOL
-import org.hamcrest.CoreMatchers
 
 /**
  * Test for checking the content of the SADL implicit model in the headless case.
@@ -42,8 +41,7 @@ class GH_162_ImplicitModelContentProviderTest extends Assert {
 	
 	@Test
 	def void checkContent() {
-		//assertEquals(ISadlImplicitModelContentProvider.Default.DEFAULT_CONTENT.unifyEOL, content.unifyEOL);
-		assertThat( content.unifyEOL, CoreMatchers.containsString(ISadlImplicitModelContentProvider.Default.DEFAULT_CONTENT.unifyEOL));
+		assertEquals(ISadlImplicitModelContentProvider.Default.DEFAULT_CONTENT.unifyEOL, content.unifyEOL);
 	}
 	
 
