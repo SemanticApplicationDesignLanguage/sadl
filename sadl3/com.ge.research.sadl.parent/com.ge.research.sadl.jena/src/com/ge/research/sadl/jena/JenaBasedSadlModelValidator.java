@@ -92,7 +92,9 @@ import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.UnitExpression;
 import com.ge.research.sadl.sADL.ValueTable;
+import com.ge.research.sadl.sADL.impl.ElementInListImpl;
 import com.ge.research.sadl.sADL.impl.ExternalEquationStatementImpl;
+import com.ge.research.sadl.sADL.impl.PropOfSubjectImpl;
 import com.ge.research.sadl.sADL.impl.TestStatementImpl;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.hp.hpl.jena.datatypes.DatatypeFormatException;
@@ -235,14 +237,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (o instanceof TypeCheckInfo) {
 				TypeCheckInfo other = (TypeCheckInfo) o;
 				try {
-					return context == other.context // Identity check should be fine for EObjects
-						&& Objects.equals(getExpressionType(), other.getExpressionType())
-						&& Objects.equals(getRangeValueType(), other.getRangeValueType())
-						&& Objects.equals(getTypeCheckType(), other.getTypeCheckType());
+				return context == other.context // Identity check should be fine for EObjects
+					&& Objects.equals(getExpressionType(), other.getExpressionType())
+					&& Objects.equals(getRangeValueType(), other.getRangeValueType())
+					&& Objects.equals(getTypeCheckType(), other.getTypeCheckType());
 				} catch (InvalidTypeException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}	
+			}
 			}
     		return false;
     	}
@@ -250,11 +252,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		@Override
 		public int hashCode() {
 			try {
-				return Objects.hash(context, getExpressionType(), getRangeValueType(), getTypeCheckType());
+			return Objects.hash(context, getExpressionType(), getRangeValueType(), getTypeCheckType());
 			} catch (InvalidTypeException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+		}
 			return 0;
 		}
 
@@ -525,14 +527,79 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				leftTypeCheckInfo = getType(leftExpression);
 				if (getModelProcessor().isConjunction(op) || getModelProcessor().isDisjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
-					leftTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);						
-				}
-				else if (getModelProcessor().elementIdentificationOperation(op)) {
+					// check for implied properties on boolean "and" or "statements"
+					if(leftTypeCheckInfo.getImplicitProperties() != null) {
+						//property is implied
+						Iterator<ConceptName> ipitr = leftTypeCheckInfo.getImplicitProperties().iterator();
+						while (ipitr.hasNext()) {
+							ConceptName cn = ipitr.next();
+							Property prop = theJenaModel.getProperty(cn.getUri());
+							if (prop.canAs(ObjectProperty.class)) {
+								cn.setType(ConceptType.OBJECTPROPERTY);
+							}
+							else if (prop.canAs(DatatypeProperty.class)) {
+								cn.setType(ConceptType.DATATYPEPROPERTY);
+							}
+							else {
+								cn.setType(ConceptType.RDFPROPERTY);
+							}
+							TypeCheckInfo newltci = getTypeInfoFromRange(cn, prop, leftExpression);
+							if (newltci.getTypeCheckType().getName().equals("boolean")) {
+								getModelProcessor().addIssueToAcceptor("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (left side of '" + op + "') to pass type check", Severity.INFO, leftExpression);
+								addImpliedPropertiesUsed(leftExpression, prop);
+								break;
+							}
+						}
+					}
+					leftTypeCheckInfo = createBooleanTypeCheckInfo(leftExpression);						 
+				} else if (getModelProcessor().elementIdentificationOperation(op)) {
 					if(leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST)) {
 						lIsLeftListType = true;
 					}
 					leftTypeCheckInfo = convertListTypeToElementOfListType(leftTypeCheckInfo);
 				}
+				
+				if(leftExpression instanceof PropOfSubjectImpl &&
+						// This odd clause is here as to pass special case in AATIM_2780Test.xtend
+						!((((PropOfSubjectImpl) leftExpression).getLeft() instanceof Constant) &&
+						((PropOfSubjectImpl) leftExpression).getRight() instanceof PropOfSubject)) {
+					Expression pred = ((PropOfSubjectImpl) leftExpression).getLeft();
+					Expression subj = ((PropOfSubjectImpl) leftExpression).getRight();
+					TypeCheckInfo predTci = getType(pred);
+					TypeCheckInfo subjTci = getType(subj);
+					if(predTci != null && 
+							subjTci != null &&
+							subjTci.getRangeValueType().equals(RangeValueType.LIST) &&
+							pred instanceof ElementInListImpl) {
+		                    
+						if(predTci.getImplicitProperties() != null) {
+		                        //property is implied
+		                        Iterator<ConceptName> ipitr = predTci.getImplicitProperties().iterator();
+		                        while (ipitr.hasNext()) {
+		                            ConceptName cn = ipitr.next();
+		                            Property prop = theJenaModel.getProperty(cn.getUri());
+		                            if (prop.canAs(ObjectProperty.class)) {
+		                                cn.setType(ConceptType.OBJECTPROPERTY);
+		                            }
+		                            else if (prop.canAs(DatatypeProperty.class)) {
+		                                cn.setType(ConceptType.DATATYPEPROPERTY);
+		                            }
+		                            else {
+		                                cn.setType(ConceptType.RDFPROPERTY);
+		                            }
+		                            TypeCheckInfo newltci = getTypeInfoFromRange(cn, prop, pred);
+		                            if (newltci.getTypeCheckType().getName().equals(subjTci.getTypeCheckType().getName())) {
+										getModelProcessor().addIssueToAcceptor("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (left side of 'of') to pass type check", Severity.INFO, pred);
+		                                addImpliedPropertiesUsed((ElementInListImpl)pred, prop);
+		                                break;
+		                            }
+		                        }
+			                }
+			            }
+				}
+					
+				
+				
 			} catch (DontTypeCheckException e) {
 				dontTypeCheck = true;
 			}
@@ -545,6 +612,29 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				rightTypeCheckInfo = getType(rightExpression);
 				if (getModelProcessor().isConjunction(op) || getModelProcessor().isDisjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
+					if(rightTypeCheckInfo.getImplicitProperties() != null) {
+						// check for implied properties on boolean "and" or "statements"
+						Iterator<ConceptName> ipitr = rightTypeCheckInfo.getImplicitProperties().iterator();
+						while (ipitr.hasNext()) {
+							ConceptName cn = ipitr.next();
+							Property prop = theJenaModel.getProperty(cn.getUri());
+							if (prop.canAs(ObjectProperty.class)) {
+								cn.setType(ConceptType.OBJECTPROPERTY);
+							}
+							else if (prop.canAs(DatatypeProperty.class)) {
+								cn.setType(ConceptType.DATATYPEPROPERTY);
+							}
+							else {
+								cn.setType(ConceptType.RDFPROPERTY);
+							}
+							TypeCheckInfo newltci = getTypeInfoFromRange(cn, prop, rightExpression);
+							if (newltci.getTypeCheckType().getName().equals("boolean")) {
+								getModelProcessor().addIssueToAcceptor("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (right side of '" + op + "') to pass type check", Severity.INFO, rightExpression);
+								addImpliedPropertiesUsed(rightExpression, prop);
+								break;
+							}
+						}
+					}
 					rightTypeCheckInfo = createBooleanTypeCheckInfo(rightExpression);
 				}
 				else if (getModelProcessor().elementIdentificationOperation(op)) {
@@ -552,6 +642,39 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						lIsRightListType = true;
 					}
 					rightTypeCheckInfo = convertListTypeToElementOfListType(rightTypeCheckInfo);
+					
+					
+					TypeCheckInfo predTci = getType(leftExpression);
+					TypeCheckInfo subjTci = getType(rightExpression);
+					if(!predTci.getTypeCheckType().getName().equals(subjTci.getTypeCheckType().getName()) &&
+							predTci.getRangeValueType().equals(RangeValueType.LIST) &&  
+							subjTci.getImplicitProperties() != null) {
+		                   
+	                        //property is implied
+	                        Iterator<ConceptName> ipitr = subjTci.getImplicitProperties().iterator();
+	                        while (ipitr.hasNext()) {
+	                            ConceptName cn = ipitr.next();
+	                            Property prop = theJenaModel.getProperty(cn.getUri());
+	                            if (prop.canAs(ObjectProperty.class)) {
+	                                cn.setType(ConceptType.OBJECTPROPERTY);
+	                            }
+	                            else if (prop.canAs(DatatypeProperty.class)) {
+	                                cn.setType(ConceptType.DATATYPEPROPERTY);
+	                            }
+	                            else {
+	                                cn.setType(ConceptType.RDFPROPERTY);
+	                            }
+	                            TypeCheckInfo newltci = getTypeInfoFromRange(cn, prop, leftExpression);
+	                            if (newltci.getTypeCheckType().getName().equals(predTci.getTypeCheckType().getName())) {
+									getModelProcessor().addIssueToAcceptor("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (right side of '" + op + "')to pass type check", Severity.INFO, rightExpression);
+	                            	//issueAcceptor.addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (right side of '" + op + "')to pass type check", rightExpression);
+	                                addImpliedPropertiesUsed(leftExpression, prop);
+	                                return true;
+	                            }
+	                        }
+			                
+			            }
+					
 				}
 			} catch (DontTypeCheckException e) {
 				dontTypeCheck = true;
@@ -904,11 +1027,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		catch (Throwable t2) {
 			try {
 				getModelProcessor().addTypeCheckingError("Unexpected exception (" + t.getClass().getCanonicalName() + ": " + 
-						t2.getMessage() + ") displaying validation error : " + t.getMessage(), expr);
+					t2.getMessage() + ") displaying validation error : " + t.getMessage(), expr);
 			} catch (InvalidTypeException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+		}
 		}
 		return false;
 	}
@@ -1994,6 +2117,47 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (cnstval.endsWith("length") || cnstval.equals("count") || cnstval.endsWith("index")) {
 				NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.xint.getURI(), NodeType.DataTypeNode));
 				ConceptName nlcn = getModelProcessor().namedNodeToConceptName(tctype);
+				
+				TypeCheckInfo subjType = null;
+				if(subject instanceof PropOfSubject && ((PropOfSubject) subject).getLeft() instanceof PropOfSubject) {
+					subjType = getType(((PropOfSubject) subject).getLeft());
+				}else {
+					subjType = getType(subject);
+				}
+				
+				//check for implied property when left side is using explicitly called out implied property
+				if(subject instanceof PropOfSubject && predicate instanceof PropOfSubject) {
+					if (useImpliedPropertyToMatchNumericOperator(subject, subjType, "right side of '" + ofOp + "'")) {
+						//should we be matching a NumbericOperator here? Need at least integer for "index"
+					}
+				}else if(subject instanceof PropOfSubject && predicate instanceof Constant) {
+					// could replace with useImpliedPropertyToMatchNumericOperator if numeric works to use
+					Expression left = ((PropOfSubject)subject).getLeft();
+					String op  = ((PropOfSubject)subject).getOf();
+					TypeCheckInfo leftTci = getType(left);
+
+					if (leftTci != null && leftTci.getImplicitProperties() != null) {
+						Iterator<ConceptName> ipitr = leftTci.getImplicitProperties().iterator();
+						while (ipitr.hasNext()) {
+							ConceptName cn = ipitr.next();
+							Property prop = theJenaModel.getProperty(cn.getUri());
+							if (prop.canAs(ObjectProperty.class)) {
+								cn.setType(ConceptType.OBJECTPROPERTY);
+							}
+							else if (prop.canAs(DatatypeProperty.class)) {
+								cn.setType(ConceptType.DATATYPEPROPERTY);
+							}
+							else {
+								cn.setType(ConceptType.RDFPROPERTY);
+							}
+							TypeCheckInfo newltci = getTypeInfoFromRange(cn, prop, left);
+							if (isNumeric(newltci)) {
+								getModelProcessor().addInfo("Implied property '" + getModelProcessor().conceptIdentifierToString(cn) + "' used (" + op + ") to pass type check", left);
+								addImpliedPropertiesUsed(left, prop);
+							}
+						}
+					}		
+				}
 				return new TypeCheckInfo(nlcn, tctype, this, expression);
 			}
 			else if (subjtype != null && (cnstval.endsWith(" element"))) {
@@ -2003,6 +2167,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							NamedNode lTcType = getModelProcessor().validateNamedNode(new NamedNode(((NamedNode)subjtype.getTypeCheckType()).toFullyQualifiedString(), NodeType.ClassNode));
 							ConceptName lCN = getModelProcessor().namedNodeToConceptName(lTcType);
 							TypeCheckInfo lTCI = new TypeCheckInfo(lCN, lTcType, this, expression);
+							if(subjtype.getImplicitProperties() != null) {
+								lTCI.addImplicitProperties(subjtype.getImplicitProperties());
+							}
 							lTCI.setRangeValueType(RangeValueType.CLASS_OR_DT);
 							return lTCI;
 						}
@@ -2056,8 +2223,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (predicate instanceof ElementInList) {
 			// this is like the constant "element"
 			TypeCheckInfo subjtype = getType(subject);
+			TypeCheckInfo predtype = null;
+			if(((ElementInList) predicate).getElement() instanceof PropOfSubject) {
+				predtype = getType(((ElementInList) predicate).getElement());
+			}else {
+				predtype = getType(predicate);
+			}
+			
+			//check for implied property 
+			if (useImpliedPropertyToMatchNumericOperator(predicate, predtype, "left side of '" + ofOp + "'")) {
+				//should we be matching a NumbericOperator here?
+			}
+			
 			TypeCheckInfo lElementType = convertListTypeToElementOfListType(subjtype);
 			lElementType.setAdditionalInformation("element of");
+			if(subjtype.getImplicitProperties() != null && subjtype.getImplicitProperties().size() != 0){
+				lElementType.addImplicitProperties(subjtype.getImplicitProperties());
+			}
 			return lElementType;
 		}
 		boolean isElementInListConstruct = false;
@@ -3267,8 +3449,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo getSadlTypedListTypeCheckInfo(OntClass lst, ConceptName propConceptName, EObject expression, ConceptType propertyType) throws InvalidTypeException, TranslationException, InvalidNameException {
 		Resource avf = getSadlTypedListType(lst);
 		if (avf != null && avf.isURIResource()) {
-//							List<ConceptName> impliedProperties = getImpliedProperties(avf.asResource());
-			List<ConceptName> impliedProperties = null;		// don't impute implied properties when the range is a List
+			List<ConceptName> impliedProperties = null;
+			if(avf.asResource().canAs(OntClass.class)) {
+				impliedProperties = getImpliedProperties(avf.asResource());				
+			}
 			NamedNode tctype = new NamedNode(avf.getURI());
 			tctype.setListLength(getSadlTypedListLengthRestriction(lst));
 			tctype.setMaxListLength(getSadlTypedListMaxLengthRestriction(lst));
@@ -4183,21 +4367,26 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private boolean compatibleTypes(List<String> operations, EObject leftExpression, EObject rightExpression,
 									TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidNameException, InvalidTypeException, DontTypeCheckException, TranslationException{
-				if ((leftTypeCheckInfo.getRangeValueType() == null && rightTypeCheckInfo.getRangeValueType() != null && !rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT)) || 
-			(leftTypeCheckInfo.getRangeValueType() != null && !leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT) && rightTypeCheckInfo.getRangeValueType() == null) ||
-			(leftTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType() != null && !(leftTypeCheckInfo.getRangeValueType().equals(rightTypeCheckInfo.getRangeValueType())))) {
+		boolean lCond1 = leftTypeCheckInfo.getRangeValueType() == null && rightTypeCheckInfo.getRangeValueType() != null && !rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT);		
+		boolean lCond2 = leftTypeCheckInfo.getRangeValueType() != null && !leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT) && rightTypeCheckInfo.getRangeValueType() == null; 
+		boolean lCond3 = leftTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType() != null && !(leftTypeCheckInfo.getRangeValueType().equals(rightTypeCheckInfo.getRangeValueType()));
+		if ( lCond1 || lCond2 || lCond3) {
 			if (!isQualifyingListOperation(operations, leftTypeCheckInfo, rightTypeCheckInfo)) {
-				if (isCompatibleListTypes(operations, leftTypeCheckInfo, rightTypeCheckInfo)) {
+				if (isCompatibleListTypes(leftTypeCheckInfo, rightTypeCheckInfo)) {
 					return true;
 				}
 				return false;
 			}
 		}
 		
-		if(leftTypeCheckInfo.getRangeValueType() != null && leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) &&
-		   rightTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST)) {
-			if(leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null &&
-			   leftTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(rightTypeCheckInfo.getTypeCheckType().toFullyQualifiedString())){
+		boolean lCond4 = leftTypeCheckInfo.getRangeValueType() != null && leftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST);
+		boolean lCond5 = rightTypeCheckInfo.getRangeValueType() != null && rightTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST);
+		
+		if( lCond4 && lCond5) {
+			
+			boolean lCond6 = leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo.getTypeCheckType() != null;
+			boolean lCond7 =  leftTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(rightTypeCheckInfo.getTypeCheckType().toFullyQualifiedString());
+			if( lCond6 && lCond7){
 				ConceptName leftConceptName = (ConceptName)getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
 				ConceptName rightConceptName = (ConceptName)getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo);
 				if(leftConceptName.getType().equals(rightConceptName.getType())){
@@ -4432,6 +4621,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		return false;
 	}
+
 	
 	private String xsdTypeToXtextType(ConceptName cname) throws InvalidNameException {
 		if (cname.getUri().equals(XSD.anyURI.getURI())) {
@@ -4440,10 +4630,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return cname.getUri();
 	}
 
-	private boolean isCompatibleListTypes(List<String> operations, TypeCheckInfo leftTypeCheckInfo,
-			TypeCheckInfo rightTypeCheckInfo) {
-		// TODO Auto-generated method stub
-		return false;
+	/**
+	 * @param aLeftTypeCheckInfo
+	 * @param lRightTypeCheckInfo
+	 * @return true if list and class_or_dt have compatible types, false otherwise
+	 */
+	private boolean isCompatibleListTypes(TypeCheckInfo aLeftTypeCheckInfo,TypeCheckInfo lRightTypeCheckInfo)
+			throws TranslationException, InvalidNameException, InvalidTypeException {
+		
+		if(aLeftTypeCheckInfo.getRangeValueType() != null &&
+				lRightTypeCheckInfo.getRangeValueType() != null &&
+				aLeftTypeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) &&
+				lRightTypeCheckInfo.getRangeValueType().equals(RangeValueType.CLASS_OR_DT)){
+			
+			return getConceptIdentifierFromTypeCheckInfo(lRightTypeCheckInfo).equals(getConceptIdentifierFromTypeCheckInfo(aLeftTypeCheckInfo));
+		} else {
+			return false;
+		}
 	}
 
 	private ConceptName getListType(TypeCheckInfo tci) throws TranslationException, InvalidTypeException {
@@ -5176,4 +5379,4 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-}
+			}
