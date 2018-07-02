@@ -35,8 +35,6 @@ public abstract class GraphPatternElement {
 	private int offset;
 	
 	// These only apply to BuiltinElement and TripleElement
-	private NamedNode leftImpliedPropertyUsed = null;		// an impliedProperty to be used on the left side of a binary operation
-	private NamedNode rightImpliedPropertyUsed = null;		// am impliedProperty to be used on the right side of a binary operation
 	private List<NamedNode> expandedPropertiesToBeUsed = null;	// a list of expandedProperties to be used on both sides of a binary operation
 
 	private GraphPatternElement next = null;
@@ -213,37 +211,16 @@ public abstract class GraphPatternElement {
 		}
 		return false;
 	}
-
-	/**
-	 * Get the implied property (if any) to be used on the right of this GraphPatternElement
-	 * @return
-	 */
-	public NamedNode getRightImpliedPropertyUsed() {
-		return rightImpliedPropertyUsed;
-	}
-
-	/**
-	 * Set the implied property (if any) to be used on the right of this GraphPatternElement
-	 * @return
-	 */
-	public void setRightImpliedPropertyUsed(NamedNode rightImpliedPropertyUsed) {
-		this.rightImpliedPropertyUsed = rightImpliedPropertyUsed;
-	}
-
-	/**
-	 * Get the implied property (if any) to be used on the left of this GraphPatternElement
-	 * @return
-	 */
-	public NamedNode getLeftImpliedPropertyUsed() {
-		return leftImpliedPropertyUsed;
-	}
-
-	/**
-	 * Set the implied property (if any) to be used on the left of this GraphPatternElement
-	 * @return
-	 */
-	public void setLeftImpliedPropertyUsed(NamedNode leftImpliedPropertyUsed) {
-		this.leftImpliedPropertyUsed = leftImpliedPropertyUsed;
-	}
-
+	
+	//TODO Remove these functions
+	//public NamedNode getRightImpliedPropertyUsed() {
+	//	return null;
+	//}
+	//public NamedNode getLeftImpliedPropertyUsed() {
+	//	return null;
+	//}
+	//public void setRightImpliedPropertyUsed(NamedNode node) {
+	//}
+	//public void setLeftImpliedPropertyUsed(NamedNode node) {
+	//}
 }

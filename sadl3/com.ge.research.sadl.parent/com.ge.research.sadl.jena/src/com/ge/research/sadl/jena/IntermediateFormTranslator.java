@@ -1116,14 +1116,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 
 	private GraphPatternElement addImpliedAndExpandedProperties(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
 		boolean processed = false;
-		if (gpe.getLeftImpliedPropertyUsed() != null) {
-			applyLeftImpliedProperty(gpe);
-			processed = true;
-		}
-		else if (gpe.getRightImpliedPropertyUsed() != null) {
-			applyRightImpliedProperty(gpe);
-			processed = true;
-		}
+//		if (gpe.getLeftImpliedPropertyUsed() != null) {
+//			applyLeftImpliedProperty(gpe);
+//			processed = true;
+//		}
+//		else if (gpe.getRightImpliedPropertyUsed() != null) {
+//			applyRightImpliedProperty(gpe);
+//			processed = true;
+//		}
 		if (gpe.getExpandedPropertiesToBeUsed() != null) {
 			gpe = applyExpandedProperties(gpe);
 			processed = true;
@@ -1143,8 +1143,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return gpe;
 	}
 
+	//Need to update for implied properties being moved off graph pattern elements?
 	private void applyLeftImpliedProperty(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
-		NamedNode lip = gpe.getLeftImpliedPropertyUsed();
+		NamedNode lip = null; //gpe.getLeftImpliedPropertyUsed();
 		if (gpe instanceof BuiltinElement) {
 			if (((BuiltinElement)gpe).getArguments() == null || ((BuiltinElement)gpe).getArguments().size() != 2) {
 				throw new TranslationException("Implied properties can't be applied to a BuiltinElement with other than 2 arguments");
@@ -1163,21 +1164,22 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					addImpliedAndExpandedProperties((BuiltinElement)((ProxyNode)agi).getProxyFor());
 				}
 			}
-			((BuiltinElement)gpe).setLeftImpliedPropertyUsed(null);
+			//((BuiltinElement)gpe).setLeftImpliedPropertyUsed(null);
 		}
 		else if (gpe instanceof TripleElement) {
 			TripleElement newTriple = new TripleElement(((TripleElement)gpe).getSubject(), ((TripleElement)gpe).getPredicate(), null);
 			((TripleElement)gpe).setSubject(SadlModelProcessor.nodeCheck(newTriple));
 			((TripleElement)gpe).setPredicate(lip);
-			gpe.setRightImpliedPropertyUsed(null);
+			//gpe.setRightImpliedPropertyUsed(null);
 		}
 		else {
 			throw new TranslationException("Unexpected GraphPatternElement (" + gpe.getClass().getCanonicalName() + ") encountered applying implied property");
 		}
 	}
 
+	//Need to update for implied properties being moved off graph pattern elements?
 	private void applyRightImpliedProperty(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
-		NamedNode rip = gpe.getRightImpliedPropertyUsed();
+		NamedNode rip = null; //gpe.getRightImpliedPropertyUsed();
 		if (gpe instanceof BuiltinElement) {
 			if (((BuiltinElement)gpe).getArguments() == null || ((BuiltinElement)gpe).getArguments().size() != 2) {
 				throw new TranslationException("Implied properties can't be applied to a BuiltinElement with other than 2 arguments");
@@ -1196,13 +1198,13 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					addImpliedAndExpandedProperties((BuiltinElement)((ProxyNode)agi).getProxyFor());
 				}
 			}
-			gpe.setRightImpliedPropertyUsed(null);
+			//gpe.setRightImpliedPropertyUsed(null);
 		}
 		else if (gpe instanceof TripleElement) {
 			Node objNode = ((TripleElement)gpe).getObject();
 			TripleElement newTriple = new TripleElement(objNode, rip, null);
 			((TripleElement)gpe).setObject(SadlModelProcessor.nodeCheck(newTriple));
-			gpe.setRightImpliedPropertyUsed(null);
+			//gpe.setRightImpliedPropertyUsed(null);
 		}
 		else {
 			throw new TranslationException("Unexpected GraphPatternElement (" + gpe.getClass().getCanonicalName() + ") encountered applying implied property");
@@ -2333,7 +2335,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return returnNode;
 	}
 
-	private Object applyExpandedAndImpliedProperties(List<GraphPatternElement> patterns, BuiltinElement be,
+	//Removed implied properties from graph pattern element
+	/*private Object applyExpandedAndImpliedProperties(List<GraphPatternElement> patterns, BuiltinElement be,
 			Object realArgForThen, List<GraphPatternElement> moveToIfts, Object finalIfsVar)
 			throws TranslationException, InvalidNameException, InvalidTypeException {
 		if (be.getExpandedPropertiesToBeUsed() != null) {
@@ -2397,6 +2400,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		return null;
 	}
+	*/
 	
 	private void removeArgsFromPatterns(List<GraphPatternElement> patterns, BuiltinElement be) {
 		if (patterns != null && patterns.size() > 0) {

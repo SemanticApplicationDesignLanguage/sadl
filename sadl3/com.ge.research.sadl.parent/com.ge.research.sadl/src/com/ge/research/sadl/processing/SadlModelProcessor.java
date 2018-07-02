@@ -466,7 +466,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		throw new TranslationException("nodeCheck called with non-Node, non-GraphPatternElement argument: " + nodeObj.getClass().getCanonicalName());
 	}
 
-	protected GraphPatternElement createBinaryBuiltin(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
 		BuiltinElement builtin = new BuiltinElement();
 		builtin.setFuncName(name);
 		if (lobj != null) {

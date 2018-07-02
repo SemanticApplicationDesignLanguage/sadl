@@ -38,6 +38,7 @@ public class TripleElement extends GraphPatternElement {
 	public enum TripleSourceType {SPV, PSnewV, PSV, VPS, ITC, SCofC}	// type of source
 	private TripleSourceType sourceType;	// what was the source of this TripleElement?
 	
+	
 	/**
 	 * Null argument constructor
 	 */
@@ -194,17 +195,28 @@ public class TripleElement extends GraphPatternElement {
 	@Override
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder("rdf(");
-		if (getLeftImpliedPropertyUsed() != null || getRightImpliedPropertyUsed() != null || getExpandedPropertiesToBeUsed() != null) {
+
+		//Implied properties moved off of graph pattern elements are now on NamedNodes
+		NamedNode lPredicateImpliedProperty = null;
+		NamedNode lObjectImpliedProperty = null;
+		if(getPredicate() != null && getPredicate() instanceof NamedNode) {
+			lPredicateImpliedProperty = ((NamedNode) getPredicate()).getImpliedPropertyNode();			
+		}
+		if(getObject() != null && getObject() instanceof NamedNode ) {
+			lObjectImpliedProperty = ((NamedNode) getObject()).getImpliedPropertyNode();			
+		}
+
+		if (lPredicateImpliedProperty != null || lObjectImpliedProperty != null || getExpandedPropertiesToBeUsed() != null) {
 			sb.append("(");
 			boolean needComma = false;
-			if (getLeftImpliedPropertyUsed() != null) {
-				sb.append("leftImpliedProperty ");
-				sb.append(getLeftImpliedPropertyUsed().toDescriptiveString());
+			if (lPredicateImpliedProperty != null) {
+				sb.append("predicateImpliedProperty ");
+				sb.append(lPredicateImpliedProperty.toDescriptiveString());
 				needComma = true;
 			}
-			else if (getRightImpliedPropertyUsed() != null) { // only left or right should exist (at most)
-				sb.append("rightImpliedProperty ");
-				sb.append(getRightImpliedPropertyUsed().toDescriptiveString());
+			else if (lObjectImpliedProperty != null) { // only left or right should exist (at most)
+				sb.append("objectImpliedProperty ");
+				sb.append(lObjectImpliedProperty.toDescriptiveString());
 				needComma = true;
 			}
 			if (getExpandedPropertiesToBeUsed() != null) {
