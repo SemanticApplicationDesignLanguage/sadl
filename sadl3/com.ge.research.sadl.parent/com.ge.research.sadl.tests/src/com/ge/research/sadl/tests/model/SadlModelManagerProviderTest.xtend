@@ -144,6 +144,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			assertTrue(issues.size == 0)
 			var itr = jenaModel.listClasses().toIterable().iterator
 			var found = false
+			// some weird garbage values at the end of itr causing null pointer
 			while (itr.hasNext()) {
 				val nxt = itr.next;
 				if (nxt.localName.equals("Foo")) {
@@ -189,6 +190,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			assertTrue(issues.join(',')[message], issues.size == 0)
 			var itr = jenaModel.listClasses().toIterable().iterator
 			var found = false
+			// some weird garbage values at the end of itr causing null pointer
 			while (itr.hasNext()) {
 				val nxt = itr.next;
 				if (nxt.localName.equals("Shape")) {

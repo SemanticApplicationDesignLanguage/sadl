@@ -48,6 +48,9 @@ public class NamedNode extends Node {
 	private List<TripleElement> missingPatterns = null;  // a list of patterns found to be missing from the higher-level structure
 														 // e.g, Rule, and which should be added before the GraphPatternElement
 														 // containing this Node
+	
+	private NamedNode mImpliedPropertyNode = null;		// contains the implied property information of the named node
+	
 
 	/**
 	 * Null argument constructor
@@ -199,6 +202,19 @@ public class NamedNode extends Node {
 		}
 		if (getMissingPatterns() != null) {
 			sb.append(missingPatternsToDescriptiveString());
+		}
+		if(getImpliedPropertyNode() != null) {
+			sb.append(impliedPropertyToDescriptiveString());
+		}
+		return sb.toString();
+	}
+
+	private String impliedPropertyToDescriptiveString() {
+		StringBuilder sb = new StringBuilder(" (has implied property '");
+		Object ip = getImpliedPropertyNode();
+		if (ip instanceof NamedNode) {
+			sb.append(((NamedNode)ip).toDescriptiveString());
+			sb.append("')");
 		}
 		return sb.toString();
 	}
@@ -432,5 +448,23 @@ public class NamedNode extends Node {
 		sb.append("])");
 		return sb.toString();
 	}
+	
+	/**
+	 * Get the node's implied property
+	 * @return NamedNode mImpliedPropertyNode
+	 */
+	public NamedNode getImpliedPropertyNode() {
+		return mImpliedPropertyNode;
+	}
+	
+	/**
+	 * set the node's implied property
+	 * @param NamedNode mImpliedPropertyNode
+	 */
+	public void setImpliedPropertyNode(NamedNode aImpliedPropertyNode) {
+		this.mImpliedPropertyNode = aImpliedPropertyNode;
+	}
+	
+	
 
 }

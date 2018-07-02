@@ -39,6 +39,8 @@ public class BuiltinElement extends GraphPatternElement {
 	private List<Node> arguments = null;
 	private int expectedArgCount = 0;
 	private boolean createdFromInterval = false;
+	private NamedNode mImpliedPropertyNode = null;		// contains the implied property information of the named node
+
 	
 	public static enum BuiltinType {
 		Equal, NotEqual, Only, NotOnly, LT,	 				// these are boolean built-ins requiring two input arguments to be bound
@@ -330,18 +332,38 @@ public class BuiltinElement extends GraphPatternElement {
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getFuncName());
-		if (getLeftImpliedPropertyUsed() != null || getRightImpliedPropertyUsed() != null || getExpandedPropertiesToBeUsed() != null) {
+
+		NamedNode leftImpliedPropertyUsed = null;
+		NamedNode rightImpliedPropertyUsed = null;
+		
+		if(getFuncName() == "shallSet" && 
+		   getArguments().get(0) instanceof NamedNode && 
+		   getArguments().get(1) instanceof ProxyNode) {
+		
+			// get the real builtinElement
+			 GraphPatternElement proxyFor = ((ProxyNode) getArguments().get(1)).getProxyFor();
+			 if(proxyFor instanceof BuiltinElement) {
+				 if((((BuiltinElement) proxyFor).getArguments().get(0)) instanceof NamedNode) {
+					 leftImpliedPropertyUsed = ((NamedNode)((BuiltinElement) proxyFor).getArguments().get(0)).getImpliedPropertyNode();
+				 }
+				 if((((BuiltinElement) proxyFor).getArguments().get(1)) instanceof NamedNode) {
+					 rightImpliedPropertyUsed = ((NamedNode)((BuiltinElement) proxyFor).getArguments().get(1)).getImpliedPropertyNode();
+				 }
+			 }
+		}
+		
+		if (leftImpliedPropertyUsed != null || rightImpliedPropertyUsed != null || getExpandedPropertiesToBeUsed() != null) {
 			sb.append("(");
 			boolean needComma = false;
-			if (getLeftImpliedPropertyUsed() != null) {
+			if (leftImpliedPropertyUsed != null) {
 				sb.append("leftImpliedProperty ");
-				sb.append(getLeftImpliedPropertyUsed().toDescriptiveString());
+				sb.append(leftImpliedPropertyUsed.toDescriptiveString());
 				needComma = true;
 			}
-			if (getRightImpliedPropertyUsed() != null) {
+			if (rightImpliedPropertyUsed != null) {
 				if (needComma) sb.append(",");
 				sb.append("rightImpliedProperty ");
-				sb.append(getRightImpliedPropertyUsed().toDescriptiveString());
+				sb.append(rightImpliedPropertyUsed.toDescriptiveString());
 				needComma = true;
 			}
 			if (getExpandedPropertiesToBeUsed() != null) {
@@ -497,5 +519,21 @@ public class BuiltinElement extends GraphPatternElement {
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * get the node's implied property
+	 * @return mImpliedPropertyNode
+	 */
+	public NamedNode getImpliedPropertyNode() {
+		return mImpliedPropertyNode;
+	}
+	
+	/**
+	 * set the node's implied property
+	 * @param aImpliedPropertyNode
+	 */
+	public void setImpliedPropertyNode(NamedNode aImpliedPropertyNode) {
+		this.mImpliedPropertyNode = aImpliedPropertyNode;
 	}
 }
