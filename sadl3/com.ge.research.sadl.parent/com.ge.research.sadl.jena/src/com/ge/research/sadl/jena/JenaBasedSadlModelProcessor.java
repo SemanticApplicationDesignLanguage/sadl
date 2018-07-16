@@ -7531,9 +7531,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (rngNode instanceof OntClass) {
 			rngResource = rngNode.as(OntClass.class);
 			if (prop.isDatatypeProperty()) {
-				// this happens when the range is a union of Lists of primitive types
-				getTheJenaModel().remove(prop, RDF.type, OWL.DatatypeProperty);
-				getTheJenaModel().add(prop, RDF.type, OWL.ObjectProperty);
+				boolean changePropType = true;
+				if (context instanceof SadlTypeReference) {
+					ConceptName cn = sadlSimpleTypeReferenceToConceptName((SadlTypeReference)context);
+					if (cn != null && cn.getType().equals(ConceptType.RDFDATATYPE)) {
+						// if the range is a user-defined datatype, do not change to an ObjectProperty
+						changePropType = false;
+					}
+				}
+				if (changePropType) {
+					// this happens when the range is a union of Lists of primitive types
+					getTheJenaModel().remove(prop, RDF.type, OWL.DatatypeProperty);
+					getTheJenaModel().add(prop, RDF.type, OWL.ObjectProperty);
+				}
 			}
 		}
 		// If ignoring UnittedQuantity, change any UnittedQuantity range to the range of
@@ -8337,7 +8347,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else if (type.equals(OntConceptType.DATATYPE_PROPERTY)) {
 			DatatypeProperty dprop = getTheJenaModel().getDatatypeProperty(propuri);
 			if (dprop == null) {
-				// dumpModel(getTheJenaModel());
+//				dumpModel(getTheJenaModel());
 				addError(SadlErrorMessages.PROPERTY_NOT_EXIST.get(propuri), prop);
 			} else {
 				if (val instanceof SadlValueList) {
