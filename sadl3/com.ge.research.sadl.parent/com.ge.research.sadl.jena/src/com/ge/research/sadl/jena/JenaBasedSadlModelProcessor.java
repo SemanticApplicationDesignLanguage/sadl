@@ -3138,76 +3138,81 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				e.printStackTrace();
 			}
 		} else if (isRightVariableDefinition) { // only, left is not variable definition
-			Object rightTranslatedDefn = processExpression(rightVariableDefn);
-			NamedNode rightDefnType = null;
-			VariableNode rightVar;
-			try {
-				rightVar = createVariable(getDeclarationExtensions().getConceptUri(rightVariableName.getName()), expr);
-				if (rightVar == null) {
-					return null;
-				}
-				addVariableNamingEObject(rightVar, rightVariableName.getName());
-				if (rightTranslatedDefn instanceof NamedNode) {
-					rightDefnType = (NamedNode) rightTranslatedDefn;
-					setVarType(rightVar, rightDefnType, (Boolean) null, rightVariableDefn);
-				} else {
-					TypeCheckInfo varType = getModelValidator().getType(rightVariableDefn);
-					if (varType != null) {
-						if (rightVar.getType() == null) {
-							if (varType.getCompoundTypes() != null) {
-								Object jct = compoundTypeCheckTypeToNode(varType, rightVariableDefn);
-								if (jct != null && jct instanceof Junction) {
-									setVarType(rightVar, nodeCheck(jct), (Boolean) null, rightVariableDefn);
-								} else {
-									addTypeCheckingError(
-											"Compound type check did not process into expected result for variable type",
-											leftVariableDefn);
-								}
-							} else if (varType.getTypeCheckType() != null
-									&& varType.getTypeCheckType() instanceof NamedNode) {
-								rightDefnType = (NamedNode) varType.getTypeCheckType();
-								setVarType(rightVar, rightDefnType, (Boolean) null, rightVariableDefn);
-							}
-						}
-					} else if (rightTranslatedDefn instanceof GraphPatternElement) {
-						rightVar.addDefinition(nodeCheck((GraphPatternElement) rightTranslatedDefn));
-					} else if (rightTranslatedDefn instanceof List<?>) {
-//						rightVar.setDefinition((List<GraphPatternElement>) rightTranslatedDefn);
-						throw new TranslationException("This shouldn't happen!");
-					}
-				}
-				Object lobj = processExpression(expr.getLeft());
-				if (lobj instanceof TripleElement && ((TripleElement) lobj).getObject() == null) {
-					((TripleElement) lobj).setObject(rightVar);
-					return lobj;
-				} else {
-					return createBinaryBuiltin(expr.getOp(), rightVar, lobj);
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (PrefixNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (DontTypeCheckException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CircularDefinitionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CircularDependencyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (PropertyWithoutRangeException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			return null;
+			/*
+			 * Currently "Variable definition on right is not supported at this time"
+			 */
+			
+//			Object rightTranslatedDefn = processExpression(rightVariableDefn);
+//			NamedNode rightDefnType = null;
+//			VariableNode rightVar;
+//			try {
+//				rightVar = createVariable(getDeclarationExtensions().getConceptUri(rightVariableName.getName()), expr);
+//				if (rightVar == null) {
+//					return null;
+//				}
+//				addVariableNamingEObject(rightVar, rightVariableName.getName());
+//				if (rightTranslatedDefn instanceof NamedNode) {
+//					rightDefnType = (NamedNode) rightTranslatedDefn;
+//					setVarType(rightVar, rightDefnType, (Boolean) null, rightVariableDefn);
+//				} else {
+//					TypeCheckInfo varType = getModelValidator().getType(rightVariableDefn);
+//					if (varType != null) {
+//						if (rightVar.getType() == null) {
+//							if (varType.getCompoundTypes() != null) {
+//								Object jct = compoundTypeCheckTypeToNode(varType, rightVariableDefn);
+//								if (jct != null && jct instanceof Junction) {
+//									setVarType(rightVar, nodeCheck(jct), (Boolean) null, rightVariableDefn);
+//								} else {
+//									addTypeCheckingError(
+//											"Compound type check did not process into expected result for variable type",
+//											leftVariableDefn);
+//								}
+//							} else if (varType.getTypeCheckType() != null
+//									&& varType.getTypeCheckType() instanceof NamedNode) {
+//								rightDefnType = (NamedNode) varType.getTypeCheckType();
+//								setVarType(rightVar, rightDefnType, (Boolean) null, rightVariableDefn);
+//							}
+//						}
+//					} else if (rightTranslatedDefn instanceof GraphPatternElement) {
+//						rightVar.addDefinition(nodeCheck((GraphPatternElement) rightTranslatedDefn));
+//					} else if (rightTranslatedDefn instanceof List<?>) {
+////						rightVar.setDefinition((List<GraphPatternElement>) rightTranslatedDefn);
+//						throw new TranslationException("This shouldn't happen!");
+//					}
+//				}
+//				Object lobj = processExpression(expr.getLeft());
+//				if (lobj instanceof TripleElement && ((TripleElement) lobj).getObject() == null) {
+//					((TripleElement) lobj).setObject(rightVar);
+//					return lobj;
+//				} else {
+//					return createBinaryBuiltin(expr.getOp(), rightVar, lobj);
+//				}
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (PrefixNotFoundException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (ConfigurationException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (URISyntaxException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (DontTypeCheckException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (CircularDefinitionException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (CircularDependencyException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (PropertyWithoutRangeException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		}
 
 		String op = expr.getOp();
