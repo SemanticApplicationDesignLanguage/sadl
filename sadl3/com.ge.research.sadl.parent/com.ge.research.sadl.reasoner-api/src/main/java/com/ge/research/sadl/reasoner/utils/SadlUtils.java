@@ -773,6 +773,21 @@ public class SadlUtils {
 		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range boolean";
 		            }
 		        }
+		        else if (rnguri.endsWith("anyURI")) {
+		        	if (v instanceof String) {
+		                v = stripQuotes((String)v);
+		                try {
+		                	URI.create((String) v);
+		                	val = m.createTypedLiteral(v, rnguri);
+		                }
+		                catch (Exception e) {
+		                	errMsg = "Error converting '" + v.toString() + "' to URI: " + e.getMessage();
+		                }
+		        	}
+		        	else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range anyURI";
+		        	}
+		        }
 		        else {
 		            errMsg = "Unhandled range " + rnguri;
 		        }
