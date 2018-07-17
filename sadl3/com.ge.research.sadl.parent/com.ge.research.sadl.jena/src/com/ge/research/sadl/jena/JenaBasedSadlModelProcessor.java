@@ -215,6 +215,7 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.google.common.base.Preconditions;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -5739,8 +5740,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					
 				} catch (DontTypeCheckException e) {
 					// do nothing
+				} catch (PropertyWithoutRangeException e) {
+					getModelValidator().handleValidationException(predicate, e);
 				} catch (URISyntaxException | IOException | ConfigurationException
-						| CircularDefinitionException | CircularDependencyException | PropertyWithoutRangeException e) {
+						| CircularDefinitionException | CircularDependencyException e) {
 					e.printStackTrace();
 				}
 				returnTriple = new TripleElement(subjNode, predNode, null);

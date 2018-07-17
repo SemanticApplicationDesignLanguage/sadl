@@ -3446,6 +3446,44 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return tci;
 	}
 
+	private TypeCheckInfo createTypeCheckInfoForUnion(ConceptName propConceptName, List<RDFNode> operands, boolean isDomain,
+			EObject expression) throws InvalidTypeException {
+		TypeCheckInfo tci = null;
+		try {
+			Iterator<RDFNode> eitr = operands.iterator();
+			if (eitr.hasNext()) {
+				tci = new TypeCheckInfo(propConceptName, this, expression);
+				while (eitr.hasNext()) {
+					RDFNode uclsmember = eitr.next();
+					if (uclsmember.isURIResource()) {
+						if (isDomain) {
+							TypeCheckInfo utci = createTypeCheckInfoForPropertyDomain(uclsmember.asResource(), propConceptName, expression);
+							tci.addCompoundType(utci);
+						}
+						else {
+							TypeCheckInfo utci = createTypeCheckInfoForPropertyRange(uclsmember, propConceptName, expression, propConceptName.getType());
+							tci.addCompoundType(utci);
+						}
+					}
+					else {
+						if (isDomain) {
+							TypeCheckInfo utci = createTypeCheckInfoForNonUriPropertyDomain(uclsmember.asResource(), propConceptName, expression);
+							tci.addCompoundType(utci);
+						}
+						else {
+							TypeCheckInfo utci = createTypeCheckInfoForNonUriPropertyRange(uclsmember, propConceptName, expression, propConceptName.getType());
+							tci.addCompoundType(utci);
+						}
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			getModelProcessor().addTypeCheckingError(SadlErrorMessages.UNEXPECTED_TYPE_CHECK_ERROR.get("union range", e.getMessage() ), getDefaultContext());
+		}
+		return tci;
+	}
+
 	private TypeCheckInfo getSadlTypedListTypeCheckInfo(OntClass lst, ConceptName propConceptName, EObject expression, ConceptType propertyType) throws InvalidTypeException, TranslationException, InvalidNameException {
 		Resource avf = getSadlTypedListType(lst);
 		if (avf != null && avf.isURIResource()) {
@@ -3591,12 +3629,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 					catch (Exception e) {
 						// didn't have a OWL2.onDataType property
-						OntResource rngOC = rngEC.as(OntResource.class);
-						if (rngOC.canAs(OntClass.class)) {
-							OntClass rmgOntC = rngOC.as(OntClass.class);
-							if (rmgOntC.isUnionClass()) {
-								tci = createTypeCheckInfoForUnion(propConceptName, rmgOntC.asUnionClass(), false, expression);
-							}
+						RDFNode baseType = rngEC.as(OntResource.class).listPropertyValues(OWL2.unionOf).next();
+						if (baseType.isResource()) {
+							List<RDFNode> l = SadlUtils.convertList(baseType, theJenaModel);
+							tci = createTypeCheckInfoForUnion(propConceptName, l, false, expression);		
 						}
 					}
 				}
@@ -3611,7 +3647,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else {
 			rangeNamedNode.setNodeType(NodeType.ClassNode);
 		}
-		List<ConceptName> impliedProperties = getImpliedProperties(first.asResource());
+		List<ConceptName> impliedProperties = null;
+		if (!propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
+			impliedProperties = getImpliedProperties(first.asResource());
+		}
 		if (tci == null) {
 			tci = new TypeCheckInfo(propConceptName, rangeNamedNode, impliedProperties, this, expression);
 		}
@@ -5162,7 +5201,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		TypeCheckInfo valType = getType(val);
 		List<String> operations = Arrays.asList("is");
 		if (declarationExtensions.getOntConceptType(pred).equals(OntConceptType.DATATYPE_PROPERTY)) {
-			if (!checkNumericRangeLimits("=", predType, valType)) {
+			if (predType.getCompoundTypes() != null) {
+				boolean allFalse = true;
+				for (TypeCheckInfo ctci : predType.getCompoundTypes()) {
+					boolean bcheck = checkNumericRangeLimits("=", ctci, valType);
+					if (bcheck) {
+						allFalse = false;
+						if (compareTypes(operations , pred, val, ctci, valType, ImplicitPropertySide.NONE)) {
+							return true;
+						}
+						break;	// only need one true
+					}
+				}
+				if (allFalse) {
+					return true;
+				}
+			}
+			else if (!checkNumericRangeLimits("=", predType, valType)) {
 				return true;  // return true so as to not generate error at higher level; failure has already created marker
 			}
 		}
@@ -5220,6 +5275,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 
+	/**
+	 * Method to check to make sure a value is within any range limits
+	 * @param op
+	 * @param predType
+	 * @param valType
+	 * @return -- true if check passes else false
+	 * @throws TranslationException
+	 */
 	private boolean checkNumericRangeLimits(String op, TypeCheckInfo predType, TypeCheckInfo valType) throws TranslationException {
 		if (valType == null || predType == null) {
 			return false;	// return as error
