@@ -678,7 +678,10 @@ public class SadlUtils {
 			            }
 			        }
 			        else if (rnguri.contains("decimal")) {
-			            if (v instanceof Double) {
+			            if (v instanceof BigDecimal) {
+			            	// nothing required
+			            }
+			            else if (v instanceof Double) {
 			                v= new BigDecimal(((Double)v).doubleValue());
 			            }
 			            else if (v instanceof Float){
