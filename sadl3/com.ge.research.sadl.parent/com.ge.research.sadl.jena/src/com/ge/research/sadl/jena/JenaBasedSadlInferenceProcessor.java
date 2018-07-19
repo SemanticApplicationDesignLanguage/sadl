@@ -160,19 +160,52 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			SadlCommand cmd =cmds.get(cmdIndex);
 			try {
 				if (cmd instanceof Explain) {
-					results.add(processExplain((Explain) cmd));
+					SadlCommandResult scr = processExplain((Explain) cmd);
+					if (writeInEffect != null && !writeInEffect.isDataOnly()) {
+						writeAccumulator.append(scr.getResults().toString());
+						writeAccumulator.append("\n");
+					}
+					results.add(scr);
 				}
 				else if (cmd instanceof Print) {
-					results.add(processPrint((Print) cmd));
+					SadlCommandResult scr = processPrint((Print) cmd);
+					if (writeInEffect != null && !writeInEffect.isDataOnly()) {
+						writeAccumulator.append(scr.getResults().toString());
+						writeAccumulator.append("\n");
+					}
+					results.add(scr);
 				}
 				else if (cmd instanceof Query) {
-					results.add(processAdhocQuery((Query) cmd));
+					SadlCommandResult scr = processAdhocQuery((Query) cmd);
+					if (writeInEffect != null) {
+						if (writeInEffect.isDataOnly()) {
+							if (scr.getResults() instanceof ResultSet) {
+								writeAccumulator.append(((ResultSet)scr.getResults()).toStringWithIndent(2));
+								writeAccumulator.append("\n");
+							}
+							else {
+								writeAccumulator.append(scr.getResults().toString());
+								writeAccumulator.append("\n");
+							}
+						}
+						else {
+							writeAccumulator.append(scr.getCmd().toString());
+							writeAccumulator.append("\n");
+							writeAccumulator.append(scr.getResults().toString());
+							writeAccumulator.append("\n");
+						}
+					}
+					results.add(scr);
 				}
 				else if (cmd instanceof Read) {
 					results.add(processRead((Read)cmd));
 				}
 				else if (cmd instanceof Test) {
-					results.add(processTest((Test)cmd));
+					SadlCommandResult scr = processTest((Test)cmd);
+					if (writeInEffect != null && !writeInEffect.isDataOnly()) {
+						writeAccumulator.append(scr.getResults().toString());
+					}
+					results.add(scr);
 				}
 				else if (cmd instanceof StartWrite) {
 					writeInEffect = (StartWrite) cmd;
