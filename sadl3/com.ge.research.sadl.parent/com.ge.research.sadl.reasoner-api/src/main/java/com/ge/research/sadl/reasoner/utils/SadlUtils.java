@@ -18,6 +18,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -45,12 +47,16 @@ import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
-import com.hp.hpl.jena.vocabulary.XSD;
 
 public class SadlUtils {
 	private static final Logger logger = LoggerFactory.getLogger(SadlUtils.class);
@@ -564,24 +570,54 @@ public class SadlUtils {
         boolean rdfTypeValid = false;
         boolean isNumeric = isNumericRange(rnguri);
         RDFDatatype rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
-        if (rdftype != null && !rdftype.getURI().equals(XSD.xboolean.getURI()) && 
-        		!rdftype.getURI().equals(XSD.date.getURI()) && 
-        		!rdftype.getURI().equals(XSD.dateTime.getURI())) {
-        	rdfTypeValid = rdftype.isValidValue(v);
-        	if (rdfTypeValid) {
-        		try {
-        			if (v instanceof String && isNumeric) {
-        				v = stringToNumber(v, rnguri);
-        			}
-        			val = m.createTypedLiteral(v, rdftype);
-        		}
-        		catch(Throwable e) {
-        			e.printStackTrace();
-        		}
-        	}
-        	if (val != null) {
-        		return val;
-        	}
+        if (rdftype != null) {
+        	Resource rng = m.getResource(rnguri);
+			OntClass eqcls = null;
+			if (rng.canAs(OntClass.class)) {
+				eqcls = rng.as(OntClass.class).getEquivalentClass();
+			}
+			if (eqcls != null) {
+				Statement pv = eqcls.getProperty(OWL2.onDatatype);
+				if (pv != null) {
+					RDFNode pvobj = pv.getObject();
+					if (pvobj.isURIResource()) {
+						rnguri = pvobj.asResource().getURI();
+						rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
+						isNumeric = isNumericRange(rnguri);
+					}
+				}
+				else {
+					Statement uof = eqcls.getProperty(OWL2.unionOf);
+					if (uof != null) {
+						RDFNode uofnode = uof.getObject();
+						if (uofnode.isResource()) {
+							java.util.List<RDFNode> l = convertList(uofnode, m);
+							if (l != null) {
+								Iterator<RDFNode> opsitr = l.iterator();
+								while (opsitr.hasNext()) {
+									RDFNode op = opsitr.next();
+									if (op.isURIResource()) {
+										try {
+											Literal oplit = getLiteralMatchingDataPropertyRange(m, op.asResource().getURI(), v);
+											if (oplit != null) {
+												return oplit;
+											}
+										}
+										catch (Throwable t) {
+											
+										}
+									}
+								}
+							}
+						}
+					}
+					StmtIterator pvitr = eqcls.listProperties();
+					while (pvitr.hasNext()) {
+						System.out.println(pvitr.nextStatement().toString());
+					}
+				}
+			}
+
         }
     	if (rnguri != null) {
     		Object vorig = v;
@@ -642,7 +678,10 @@ public class SadlUtils {
 			            }
 			        }
 			        else if (rnguri.contains("decimal")) {
-			            if (v instanceof Double) {
+			            if (v instanceof BigDecimal) {
+			            	// nothing required
+			            }
+			            else if (v instanceof Double) {
 			                v= new BigDecimal(((Double)v).doubleValue());
 			            }
 			            else if (v instanceof Float){
@@ -668,6 +707,9 @@ public class SadlUtils {
 			        			v = Integer.parseInt(stripQuotes((String)vorig));
 			        		}
 			         	}
+			        	if (v instanceof BigDecimal) {
+			        		v = new Long(((BigDecimal)v).longValue());
+			        	}
 			        	if (v instanceof Long) {
 			            	v = new Integer(((Long)v).intValue());
 			        	}
@@ -733,6 +775,21 @@ public class SadlUtils {
 		            else {
 		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range boolean";
 		            }
+		        }
+		        else if (rnguri.endsWith("anyURI")) {
+		        	if (v instanceof String) {
+		                v = stripQuotes((String)v);
+		                try {
+		                	URI.create((String) v);
+		                	val = m.createTypedLiteral(v, rnguri);
+		                }
+		                catch (Exception e) {
+		                	errMsg = "Error converting '" + v.toString() + "' to URI: " + e.getMessage();
+		                }
+		        	}
+		        	else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range anyURI";
+		        	}
 		        }
 		        else {
 		            errMsg = "Unhandled range " + rnguri;
@@ -1070,5 +1127,48 @@ public class SadlUtils {
 		}
 		return false;
 	}
+
+    /**
+     * Helper - returns the (singleton) value for the given property on the given
+     * root node in the data graph.
+     */
+    public static RDFNode getPropValue(RDFNode rdfNode, Property prop, OntModel m) {
+        return doGetPropValue(m.listStatements(rdfNode.asResource(), prop, (RDFNode)null));
+    }
+
+    /**
+     * Internal implementation of all the getPropValue variants.
+     */
+    private static RDFNode doGetPropValue(StmtIterator stmtIterator) {
+        RDFNode result = null;
+        if (stmtIterator.hasNext()) {
+            result = stmtIterator.next().getObject();
+        }
+        stmtIterator.close();
+        return result;
+    }
+
+    /**
+     * Convert an (assumed well formed) RDF list to a java list of RDFNodes
+     * @param root -- the root node of the list
+     * @param context the graph containing the list assertions
+     */
+    public static List<RDFNode> convertList(RDFNode root, OntModel m) {
+        return convertList(root, m, new LinkedList<RDFNode>());
+    }
+
+    /**
+     * Convert an (assumed well formed) RDF list to a java list of RDFNodes
+     */
+    private static List<RDFNode> convertList( RDFNode rdfNode, OntModel m, List<RDFNode> sofar ) {
+        if (rdfNode == null || rdfNode.equals(RDF.nil)) return sofar;
+        RDFNode next = getPropValue(rdfNode, RDF.first, m);
+        if (next != null) {
+            sofar.add(next);
+            return convertList(getPropValue(rdfNode, RDF.rest, m), m, sofar);
+        } else {
+            return sofar;
+        }
+    }
 
 }
