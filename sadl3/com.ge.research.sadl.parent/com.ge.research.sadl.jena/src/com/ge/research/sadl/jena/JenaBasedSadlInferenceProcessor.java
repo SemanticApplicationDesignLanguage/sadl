@@ -178,22 +178,20 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				else if (cmd instanceof Query) {
 					SadlCommandResult scr = processAdhocQuery((Query) cmd);
 					if (writeInEffect != null) {
-						if (writeInEffect.isDataOnly()) {
-							if (scr.getResults() instanceof ResultSet) {
-								writeAccumulator.append(((ResultSet)scr.getResults()).toStringWithIndent(2));
-								writeAccumulator.append("\n");
-							}
-							else {
-								writeAccumulator.append(scr.getResults().toString());
-								writeAccumulator.append("\n");
-							}
-						}
-						else {
+						int indent = 0;
+						if (!writeInEffect.isDataOnly()) {
 							writeAccumulator.append(scr.getCmd().toString());
 							writeAccumulator.append("\n");
-							writeAccumulator.append(scr.getResults().toString());
+							indent = 2;
+						}
+						if (scr.getResults() instanceof ResultSet) {
+							writeAccumulator.append(((ResultSet)scr.getResults()).toStringWithIndent(indent));
 							writeAccumulator.append("\n");
 						}
+						else {
+							writeAccumulator.append(scr.getResults().toString());
+							writeAccumulator.append("\n");
+						}						
 					}
 					results.add(scr);
 				}
