@@ -185,6 +185,10 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 							indent = 2;
 						}
 						if (scr.getResults() instanceof ResultSet) {
+							String nsiqr = preferenceMap.get(SadlPreferences.NAMESPACE_IN_QUERY_RESULTS.getId());
+							if (nsiqr != null) {
+								((ResultSet)scr.getResults()).setShowNamespaces(Boolean.parseBoolean(nsiqr));
+							}
 							writeAccumulator.append(((ResultSet)scr.getResults()).toStringWithIndent(indent));
 							writeAccumulator.append("\n");
 						}
