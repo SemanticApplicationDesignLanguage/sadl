@@ -331,6 +331,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private Equation currentEquation = null;
 	private List<SadlCommand> sadlCommands = null;
 	private SadlCommand targetCommand = null;
+	public List<TripleElement> eventConj = new ArrayList<TripleElement>();
 
 	private List<EObject> operationsPullingUp = null;
 
@@ -3591,7 +3592,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			
 			if(lobj instanceof TripleElement && robj instanceof TripleElement) {
-				boolean flag = false;
+			
+				eventConj.clear();
 				TripleElement tr = (TripleElement)lobj;
 				TripleElement tl = (TripleElement)robj;
 				Node trnode = tr.getObject();
@@ -3606,7 +3608,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 								try {
 									if (SadlUtils.classIsSubclassOf(subclassr,suprclass,true,null)){
-										flag = true;
+										if(isConjunction(op)){
+											
+											eventConj.add(tr);
+											eventConj.add(tl);
+											  	
+										}
+										
 									}
 								} catch (CircularDependencyException e) {
 									// TODO Auto-generated catch block
@@ -3617,13 +3625,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						if(flag == true && isConjunction(op)){
-							addError(SadlErrorMessages.INVALID_CONJUNCTION.toString(), container);    	
-						}
+					
 					}
 				}	
 			}
-		}
+	}
 
 		if (optype == BuiltinType.Equal || optype == BuiltinType.NotEqual) {
 			// If we're doing an assignment, we can simplify the pattern.
