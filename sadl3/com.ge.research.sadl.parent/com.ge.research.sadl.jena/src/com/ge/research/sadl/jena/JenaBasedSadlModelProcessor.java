@@ -2347,8 +2347,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (PropertyWithoutRangeException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				addTypeCheckingError(e.getMessage(), whexpr);
 			} catch (InvalidNameException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -9605,13 +9604,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							SadlErrorMessages.NOT_IN_RANGE.get(valInst.getURI(), prop.getURI()));
 				}
 			} else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
-				if (prop.canAs(OntProperty.class) && val.isLiteral()
+				if (prop != null && val != null && prop.canAs(OntProperty.class) && val.isLiteral()
 						&& valueInDatatypePropertyRange(prop.as(OntProperty.class), val.asLiteral(), cond)) {
 					HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null, prop, val);
 					logger.debug(
 							"New has value restriction on '" + prop.getURI() + "' to value '" + val.toString() + "'");
 					retval = hvr;
-				} else {
+				} else if (val != null) {
 					throw new JenaProcessorException(SadlErrorMessages.NOT_IN_RANGE.get(val.toString(), prop.getURI()));
 				}
 			} else if (propType.equals(OntConceptType.RDF_PROPERTY)) {
@@ -10746,6 +10745,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	protected String rdfNodeToString(RDFNode node) {
+		if (node == null) return "null";
 		if (node.isLiteral()) {
 			return node.asLiteral().getValue().toString();
 		} else if (node.isURIResource() && getConfigMgr() != null) {

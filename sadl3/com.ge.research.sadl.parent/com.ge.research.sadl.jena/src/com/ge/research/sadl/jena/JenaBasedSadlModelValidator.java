@@ -2428,7 +2428,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				String className = ((NamedNode) ci).toFullyQualifiedString();
 				addEffectiveRangeUnit(className, predicateType);
 			}
-			else {
+			else if (ci != null) {
 				throw new InvalidNameException("addEffectiveRangeByTypeCheckInfo called with TypeCheckInfo '" + subjTCI.toString() + ", which isn't handled.");
 			}
 		}
