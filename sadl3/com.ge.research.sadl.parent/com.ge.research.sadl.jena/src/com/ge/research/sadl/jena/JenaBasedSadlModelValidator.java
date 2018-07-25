@@ -5360,6 +5360,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (ptype.equals(XSD.integer.getURI())) return true;
 			if (ptype.equals(XSD.xlong.getURI())) return true;
 		}
+		try {
+			if (SadlUtils.getLiteralMatchingDataPropertyRange(theJenaModel, ptype, val.getValue()) != null) {
+				return true;
+			}
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return false;
 	}
 
