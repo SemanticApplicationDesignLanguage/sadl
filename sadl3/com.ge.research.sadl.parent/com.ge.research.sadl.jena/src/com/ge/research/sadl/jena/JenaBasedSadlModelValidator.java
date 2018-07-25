@@ -3645,7 +3645,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		else {
-			rangeNamedNode.setNodeType(NodeType.ClassNode);
+			if(!rangeNamedNode.getNamespace().equals(XSD.getURI())) {
+				rangeNamedNode.setNodeType(NodeType.ClassNode);
+			}
 		}
 		List<ConceptName> impliedProperties = null;
 		if (!propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
