@@ -3843,7 +3843,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						return left;
 					}
 					else {
-						GraphPatternElement bi = createBinaryBuiltin(op, left, arg);     			
+						applyImpliedAndExpandedProperties(container, lexpr, rexpr, left);
+						GraphPatternElement bi = createBinaryBuiltin(op, left, arg); 
 						Object ubi = createUnaryBuiltin(container, "not", bi);
 						return combineRest(ubi, rest);
 					}
