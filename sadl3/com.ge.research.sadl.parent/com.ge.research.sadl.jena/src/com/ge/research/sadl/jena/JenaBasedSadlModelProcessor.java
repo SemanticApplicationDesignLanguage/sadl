@@ -4098,7 +4098,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									addLocalizedTypeToNode(((NamedNode) args.get(1)), lPropTci);
 									((NamedNode) args.get(1)).setImpliedPropertyNode(impliedPropertyNode);					
 
-									}else if (args.get(1) instanceof ProxyNode && ((ProxyNode)args.get(1)).getProxyFor() instanceof BuiltinElement ) {
+									}else if (args.get(1) instanceof ProxyNode) {
 										GraphPatternElement lGPE = ((ProxyNode)args.get(1)).getProxyFor();
 										if(lGPE instanceof BuiltinElement) {
 											BuiltinElement bie = (BuiltinElement) lGPE;
