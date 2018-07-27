@@ -150,23 +150,23 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 		val grd1 = newArrayList(
 "SADL Command Result:
   select ?v0 ?v1 where {?v0 <http://sadl.org/Shapes.sadl#area> ?v1}
-  v0, v1
-  http://sadl.org/Shapes.sadl#MyCircle, 28.27433466911316
-  http://sadl.org/Test.sadl#MyRect, 8.0
+  \"v0\",\"v1\"
+  \"http://sadl.org/Shapes.sadl#MyCircle\",28.27433466911316
+  \"http://sadl.org/Test.sadl#MyRect\",8.0
 ",
 "SADL Command Result:
   select ?v2 ?v3 where {?v2 <http://sadl.org/Shapes.sadl#area> ?v3}
-  v2, v3
-  http://sadl.org/Shapes.sadl#MyCircle, 28.27433466911316
-  http://sadl.org/Test.sadl#MyRect, 8.0
+  \"v2\",\"v3\"
+  \"http://sadl.org/Shapes.sadl#MyCircle\",28.27433466911316
+  \"http://sadl.org/Test.sadl#MyRect\",8.0
 "			
 		)
 		val grd2 = newArrayList(
 "SADL Command Result:
   select ?v0 ?v1 where {?v0 <http://sadl.org/Shapes.sadl#area> ?v1}
-  v0, v1
-  http://sadl.org/Shapes.sadl#MyCircle, 28.27433466911316
-  http://sadl.org/Test.sadl#MyRect, 8.0
+  \"v0\",\"v1\"
+  \"http://sadl.org/Shapes.sadl#MyCircle\",28.27433466911316
+  \"http://sadl.org/Test.sadl#MyRect\",8.0
 "	
 		)
 		createFile('Shapes.sadl', SHAPES);
@@ -204,13 +204,13 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 		val grd1 = newArrayList(
 "SADL Command Result:
   select ?x ?y where {?x <http://sadl.org/TransitiveProperty.sadl#locatedIn> ?y} order by ?x ?y
-  x, y
-  http://sadl.org/TransitiveProperty.sadl#BalstonSpa, http://sadl.org/TransitiveProperty.sadl#NewYork
-  http://sadl.org/TransitiveProperty.sadl#BalstonSpa, http://sadl.org/TransitiveProperty.sadl#Saratoga
-  http://sadl.org/TransitiveProperty.sadl#BalstonSpa, http://sadl.org/TransitiveProperty.sadl#USA
-  http://sadl.org/TransitiveProperty.sadl#NewYork, http://sadl.org/TransitiveProperty.sadl#USA
-  http://sadl.org/TransitiveProperty.sadl#Saratoga, http://sadl.org/TransitiveProperty.sadl#NewYork
-  http://sadl.org/TransitiveProperty.sadl#Saratoga, http://sadl.org/TransitiveProperty.sadl#USA
+  \"x\",\"y\"
+  \"http://sadl.org/TransitiveProperty.sadl#BalstonSpa\",\"http://sadl.org/TransitiveProperty.sadl#NewYork\"
+  \"http://sadl.org/TransitiveProperty.sadl#BalstonSpa\",\"http://sadl.org/TransitiveProperty.sadl#Saratoga\"
+  \"http://sadl.org/TransitiveProperty.sadl#BalstonSpa\",\"http://sadl.org/TransitiveProperty.sadl#USA\"
+  \"http://sadl.org/TransitiveProperty.sadl#NewYork\",\"http://sadl.org/TransitiveProperty.sadl#USA\"
+  \"http://sadl.org/TransitiveProperty.sadl#Saratoga\",\"http://sadl.org/TransitiveProperty.sadl#NewYork\"
+  \"http://sadl.org/TransitiveProperty.sadl#Saratoga\",\"http://sadl.org/TransitiveProperty.sadl#USA\"
 ",
 "SADL Command Result:
   rdf(TransitiveProperty:BalstonSpa, TransitiveProperty:locatedIn, TransitiveProperty:USA)

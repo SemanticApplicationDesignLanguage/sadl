@@ -331,6 +331,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private Equation currentEquation = null;
 	private List<SadlCommand> sadlCommands = null;
 	private SadlCommand targetCommand = null;
+	public List<TripleElement> eventConj = new ArrayList<TripleElement>();
 
 	private List<EObject> operationsPullingUp = null;
 
@@ -2347,8 +2348,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (PropertyWithoutRangeException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				addTypeCheckingError(e.getMessage(), whexpr);
 			} catch (InvalidNameException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -3592,7 +3592,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			
 			if(lobj instanceof TripleElement && robj instanceof TripleElement) {
-				boolean flag = false;
+			
+				eventConj.clear();
 				TripleElement tr = (TripleElement)lobj;
 				TripleElement tl = (TripleElement)robj;
 				Node trnode = tr.getObject();
@@ -3607,7 +3608,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 								try {
 									if (SadlUtils.classIsSubclassOf(subclassr,suprclass,true,null)){
-										flag = true;
+										if(isConjunction(op)){
+											
+											eventConj.add(tr);
+											eventConj.add(tl);
+											  	
+										}
+										
 									}
 								} catch (CircularDependencyException e) {
 									// TODO Auto-generated catch block
@@ -3618,13 +3625,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						if(flag == true && isConjunction(op)){
-							addError(SadlErrorMessages.INVALID_CONJUNCTION.toString(), container);    	
-						}
+					
 					}
 				}	
 			}
-		}
+	}
 
 		if (optype == BuiltinType.Equal || optype == BuiltinType.NotEqual) {
 			// If we're doing an assignment, we can simplify the pattern.
@@ -3838,7 +3843,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						return left;
 					}
 					else {
-						GraphPatternElement bi = createBinaryBuiltin(op, left, arg);     			
+						applyImpliedAndExpandedProperties(container, lexpr, rexpr, left);
+						GraphPatternElement bi = createBinaryBuiltin(op, left, arg); 
 						Object ubi = createUnaryBuiltin(container, "not", bi);
 						return combineRest(ubi, rest);
 					}
@@ -4051,15 +4057,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									predicate.setImpliedPropertyNode(impliedPropertyNode);
 
 								}else {
-									//right is the second argument of a BuildinElement
+									//left is the first argument of a BuiltinElement
 									List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
 									if(args.get(0) instanceof NamedNode ) {
 			        					addLocalizedTypeToNode(((NamedNode) args.get(0)), lPropTci);
 										((NamedNode) args.get(0)).setImpliedPropertyNode(impliedPropertyNode);
 
 									}else if (args.get(0) instanceof ProxyNode && args.get(1) instanceof ProxyNode) {
-										BuiltinElement bie = (BuiltinElement) ((ProxyNode)args.get(1)).getProxyFor();
-										bie.setImpliedPropertyNode(impliedPropertyNode);
+										GraphPatternElement lGPE = ((ProxyNode)args.get(0)).getProxyFor();
+										if(lGPE instanceof BuiltinElement) {
+											BuiltinElement bie = (BuiltinElement) lGPE;
+											bie.setImpliedPropertyNode(impliedPropertyNode);
+										}else if(lGPE instanceof TripleElement){
+											NamedNode predicate = (NamedNode) ((TripleElement) lGPE).getPredicate();
+				        					addLocalizedTypeToNode(((NamedNode) predicate), lPropTci);
+											predicate.setImpliedPropertyNode(impliedPropertyNode);
+										}
 									}
 								}
 								
@@ -4085,9 +4098,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									addLocalizedTypeToNode(((NamedNode) args.get(1)), lPropTci);
 									((NamedNode) args.get(1)).setImpliedPropertyNode(impliedPropertyNode);					
 
-									}else if (args.get(1) instanceof ProxyNode && ((ProxyNode)args.get(1)).getProxyFor() instanceof BuiltinElement ) {
-										BuiltinElement bie = (BuiltinElement) ((ProxyNode)args.get(1)).getProxyFor();
-										bie.setImpliedPropertyNode(impliedPropertyNode);
+									}else if (args.get(1) instanceof ProxyNode) {
+										GraphPatternElement lGPE = ((ProxyNode)args.get(1)).getProxyFor();
+										if(lGPE instanceof BuiltinElement) {
+											BuiltinElement bie = (BuiltinElement) lGPE;
+											bie.setImpliedPropertyNode(impliedPropertyNode);
+										}else if(lGPE instanceof TripleElement){
+											NamedNode predicate = (NamedNode) ((TripleElement) lGPE).getPredicate();
+				        					addLocalizedTypeToNode(((NamedNode) predicate), lPropTci);
+											predicate.setImpliedPropertyNode(impliedPropertyNode);
+										}
 									}
 								}
 								
@@ -9605,13 +9625,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							SadlErrorMessages.NOT_IN_RANGE.get(valInst.getURI(), prop.getURI()));
 				}
 			} else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
-				if (prop.canAs(OntProperty.class) && val.isLiteral()
+				if (prop != null && val != null && prop.canAs(OntProperty.class) && val.isLiteral()
 						&& valueInDatatypePropertyRange(prop.as(OntProperty.class), val.asLiteral(), cond)) {
 					HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null, prop, val);
 					logger.debug(
 							"New has value restriction on '" + prop.getURI() + "' to value '" + val.toString() + "'");
 					retval = hvr;
-				} else {
+				} else if (val != null) {
 					throw new JenaProcessorException(SadlErrorMessages.NOT_IN_RANGE.get(val.toString(), prop.getURI()));
 				}
 			} else if (propType.equals(OntConceptType.RDF_PROPERTY)) {
@@ -10746,6 +10766,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	protected String rdfNodeToString(RDFNode node) {
+		if (node == null) return "null";
 		if (node.isLiteral()) {
 			return node.asLiteral().getValue().toString();
 		} else if (node.isURIResource() && getConfigMgr() != null) {
