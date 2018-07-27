@@ -2428,7 +2428,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				String className = ((NamedNode) ci).toFullyQualifiedString();
 				addEffectiveRangeUnit(className, predicateType);
 			}
-			else {
+			else if (ci != null) {
 				throw new InvalidNameException("addEffectiveRangeByTypeCheckInfo called with TypeCheckInfo '" + subjTCI.toString() + ", which isn't handled.");
 			}
 		}
@@ -3645,7 +3645,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		else {
-			rangeNamedNode.setNodeType(NodeType.ClassNode);
+			if(!rangeNamedNode.getNamespace().equals(XSD.getURI())) {
+				rangeNamedNode.setNodeType(NodeType.ClassNode);
+			}
 		}
 		List<ConceptName> impliedProperties = null;
 		if (!propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
@@ -5359,6 +5361,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (dtype.equals(XSD.xint.getURI())) {	// the literal is an integer
 			if (ptype.equals(XSD.integer.getURI())) return true;
 			if (ptype.equals(XSD.xlong.getURI())) return true;
+		}
+		try {
+			if (SadlUtils.getLiteralMatchingDataPropertyRange(theJenaModel, ptype, val.getValue()) != null) {
+				return true;
+			}
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return false;
 	}

@@ -376,35 +376,14 @@ public class ResultSet {
 	 * Simple output of headers followed by row(s) of data, all comma-separated.
 	 */
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		if (header != null && header.length > 0) {
-			for (int i = 0; i < header.length; i++) {
-				if (i > 0) sb.append(",");
-				sb.append("\"");
-				sb.append(header[i]);
-				sb.append("\"");
-			}
-			sb.append(System.getProperty("line.separator"));
-		}
-		if (table != null && table[0] != null) {
-			for (int i = 0; i < table.length; i++) {
-				for (int j = 0; j < table[i].length; j++) {
-					if (j > 0) sb.append(",");
-					Object val = getResultAt(i,j);
-					if (val instanceof String) {
-						sb.append("\"");
-					}
-					sb.append(val != null ? val.toString() : val);
-					if (val instanceof String) {
-						sb.append("\"");
-					}
-				}
-				sb.append(System.getProperty("line.separator"));
-			}
-		}	
-		return sb.toString();
+		return toStringWithIndent(0);
 	}
 	
+	/**
+	 * Method to output headers followed by row(s) of data, all comma-separated, but with each line indented the indicated number of spaces
+	 * @param indent
+	 * @return
+	 */
 	public String toStringWithIndent(int indent) {
 		StringBuilder sb = new StringBuilder();
 		if (table != null && table[0] != null) {
@@ -415,20 +394,26 @@ public class ResultSet {
 						sb.append(" ");
 					}
 					for (int i = 0; i < header.length; i++) {
-						if (i > 0) sb.append(", ");
-						sb.append(header[i]);
+						if (i > 0) sb.append(",");
+						sb.append(quoteAsNeeded(header[i]));
 					}
-					sb.append("\n");
+					sb.append(System.getProperty("line.separator"));
 				}
 				for (int i = 0; i < table.length; i++) {
 					for (int j = 0; j < indent; j++) {
 						sb.append(" ");
 					}
 					for (int j = 0; j < table[i].length; j++) {
-						if (j > 0) sb.append(", ");
-						sb.append(getResultAt(i, j));
+						if (j > 0) sb.append(",");
+						Object val = getResultAt(i,j);
+						if (val instanceof String) {
+							sb.append(val != null ? quoteAsNeeded(val) : val);
+						}
+						else {
+							sb.append(val != null ? val.toString() : val);
+						}
 					}
-					sb.append("\n");
+					sb.append(System.getProperty("line.separator"));
 				}
 			}
 			else {
@@ -441,18 +426,66 @@ public class ResultSet {
 						sb.append(", ");
 					}
 					if (header != null && i < header.length) {
-						sb.append(header[i]);
+						sb.append(quoteAsNeeded(header[i]));
 						sb.append(" = ");
 					}
-					sb.append(getResultAt(0, i));
+					Object val = getResultAt(0,i);
+					if (val instanceof String) {
+						sb.append(val != null ? quoteAsNeeded(val) : val);
+					}
+					else {
+						sb.append(val != null ? val.toString() : val);
+					}
 				}
-				sb.append("\n");
+				sb.append(System.getProperty("line.separator"));
 			}
-		}
-		
+		}	
 		return sb.toString();
 	}
 	
+	/**
+	 * Method to place strings in double quotes and to replace any object's toString containing whitespace or a double quote(s) with a quoted string
+	 * @param val
+	 * @return
+	 */
+	private Object quoteAsNeeded(Object val) {
+		if (val instanceof String) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("\"");
+			sb.append(((String)val).replaceAll("\"", "\"\""));
+			sb.append("\"");
+			return sb.toString();
+		}
+		else if (val != null &&  containsWhitespaceOrQuote(val.toString())) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("\"");
+			sb.append(val.toString().replaceAll("\"", "\"\""));
+			sb.append("\"");
+			return sb.toString();
+		}
+		else {
+			return val;
+		}
+	}
+	
+	/**
+	 * Method to determine if a string contains whitespace of double quotes
+	 * @param str
+	 * @return
+	 */
+	public static boolean containsWhitespaceOrQuote(String str) {
+		int strLen = str.length();
+		for (int i = 0; i < strLen; i++) {
+			if (Character.isWhitespace(str.charAt(i))) {
+				return true;
+			}
+			else if (str.charAt(i) == '"') {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public ValueTableNode toValueTableNode() {
 		ValueTableNode vtn = new ValueTableNode();
 		int cols = getColumnCount();

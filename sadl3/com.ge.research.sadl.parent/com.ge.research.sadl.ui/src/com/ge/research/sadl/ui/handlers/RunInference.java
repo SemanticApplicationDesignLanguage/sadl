@@ -131,7 +131,12 @@ public class RunInference extends SadlActionHandler {
         					else if (infresults instanceof String) {
         						if (cmd instanceof Print || cmd instanceof EndWrite) {
         							if (((String)infresults).startsWith("file:/")) {
-        								SadlConsole.writeToConsole(MessageType.INFO, ((Print)cmd).getModel() + " written to '" + ((String)infresults).substring(6) + "\n");
+        								if (cmd instanceof Print) {
+        									SadlConsole.writeToConsole(MessageType.INFO, ((Print)cmd).getModel() + " written to '" + ((String)infresults).substring(6) + "'\n");
+        								}
+        								else {
+        									SadlConsole.writeToConsole(MessageType.INFO, "Write statement output written to '" + ((EndWrite)cmd).getOutputFilename() + "'\n");
+        								}
         							}
         							else {
         								SadlConsole.writeToConsole(MessageType.INFO, (String)infresults + "\n");

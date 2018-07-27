@@ -1583,7 +1583,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 		String lname = name.substring(name.indexOf(':') + 1);
 		String ns = model.getNsPrefixURI(prefix);
 		if (ns != null) {
-			name = ns + lname;
+			if (ns.endsWith("#")) {
+				name = ns + lname;
+			}
+			else {
+				name = ns + "#" + lname;
+			}
 		}
 		return name;
 	}
