@@ -281,13 +281,19 @@ public class JenaTranslatorPlugin implements ITranslator {
 					else if (elements.get(idx) instanceof BuiltinElement && ((BuiltinElement)elements.get(idx)).getFuncName().equals(THERE_EXISTS)) {
 						if (((BuiltinElement)elements.get(idx)).getArguments() == null || ((BuiltinElement)elements.get(idx)).getArguments().size() != 1) {
 							logger.error("Function 'thereExists' should have one and only one argument");
+							addError("Function 'thereExists' should have one and only one argument.");						
+							return sb.toString();
 						}
 						if (!(((BuiltinElement)elements.get(idx)).getArguments().get(0) instanceof VariableNode)) {
-							logger.error("Function 'thereExists' should have a variable as argument");
+							logger.error("Function 'thereExists' should have a variable as argument.");
+							addError("Function 'thereExists' should have a variable as argument.");	
+							return sb.toString();
 						}
 						VariableNode thereExistsVar = (VariableNode) ((BuiltinElement)elements.get(idx)).getArguments().get(0);
 						if (thereExistsVar.getType() == null) {
 							logger.error("Function 'thereExists' variable must have a type");
+							addError("Function 'thereExists' variable must have a type.");			
+							return sb.toString();
 						}
 						BuiltinElement bi = new BuiltinElement();
 						bi.setFuncName("getInstance");

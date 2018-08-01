@@ -133,6 +133,7 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.AskExpression;
 import com.ge.research.sadl.sADL.BinaryOperation;
@@ -680,9 +681,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private void modelErrorsToOutput(Resource resource, List<ModelError> errors) {
+//		EObject sm = resource.getContents().get(0);
+//		if (sm instanceof SadlModel) {
+//			sm = ((SadlModel)sm).getElements().get(0);
+//		}
 		for (int i = 0; errors != null && i < errors.size(); i++) {
 			ModelError err = errors.get(i);
-			addError(err.getErrorMsg(), resource.getContents().get(0));
+//			if (sm != null) {
+//				addError(err.getErrorMsg(), sm);
+//			}
+//			else {
+				if (err.getErrorType().equals(ErrorType.ERROR)) {
+					System.err.println(err.getErrorMsg());
+				}
+				else {
+					System.out.println(err.getErrorMsg());
+				}
+//			}
 		}
 	}
 
@@ -3222,8 +3237,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 		Object result = processBinaryExpressionByParts(expr, op, lexpr, rexpr);
 		if(result instanceof TripleElement) {
-			checkForArticleForNameInTriple(lexpr, result);
-			checkForArticleForNameInTriple(rexpr, result);
+			checkForArticleForNameInTriple(lexpr, result, SIDE.LEFT);
+			checkForArticleForNameInTriple(rexpr, result, SIDE.RIGHT);
 		}else if(result instanceof BuiltinElement) {
 			checkForArticleForNameInBuiltinElement(lexpr, result);
 			checkForArticleForNameInBuiltinElement(rexpr, result);
@@ -3494,13 +3509,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private boolean isDeclInThereExists(Declaration decl) {
-		if (decl.eContainer() != null && decl.eContainer() instanceof UnaryExpression
-				&& ((UnaryExpression) decl.eContainer()).getOp().equals("there exists")) {
-			return true;
-		} else if (decl.eContainer() != null && decl.eContainer() instanceof SubjHasProp
-				&& decl.eContainer().eContainer() != null && decl.eContainer().eContainer() instanceof UnaryExpression
-				&& ((UnaryExpression) decl.eContainer().eContainer()).getOp().equals("there exists")) {
-			return true;
+		EObject eobj = decl.eContainer();
+		while (eobj != null) {
+			if (eobj instanceof UnaryExpression && ((UnaryExpression)eobj).getOp().equals("there exists")) {
+				return true;
+			}
+			else if (eobj instanceof SubjHasProp) {
+				eobj = eobj.eContainer();
+			}
 		}
 		return false;
 	}
@@ -11331,15 +11347,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return useArticlesInValidation;
 	}
 
-	protected void checkForArticleForNameInTriple(Expression value, Object triple) throws InvalidNameException {
+	enum SIDE {LEFT, RIGHT};
+	
+	protected void checkForArticleForNameInTriple(Expression value, Object triple, SIDE side) throws InvalidNameException {
 		if(triple instanceof TripleElement) {
-			Node tripleObject = ((TripleElement)triple).getObject();
-			if (tripleObject == null && ((TripleElement)triple).getModifierType().equals(TripleModifierType.None)) {
-				tripleObject = new ConstantNode(SadlConstants.CONSTANT_NONE);
-				((TripleElement)triple).setObject(tripleObject);
+			Node tripleNode = side.equals(SIDE.LEFT) ? ((TripleElement)triple).getSubject() : ((TripleElement)triple).getObject();
+			if (side.equals(SIDE.RIGHT) && tripleNode == null && ((TripleElement)triple).getModifierType().equals(TripleModifierType.None)) {
+				tripleNode = new ConstantNode(SadlConstants.CONSTANT_NONE);
+				((TripleElement)triple).setObject(tripleNode);
 			}
-			if (isUseArticlesInValidation() && value instanceof Name && tripleObject instanceof NamedNode
-					&& ((NamedNode) tripleObject).getNodeType().equals(NodeType.ClassNode)) {
+			if (isUseArticlesInValidation() && value instanceof Name && tripleNode instanceof NamedNode
+					&& ((NamedNode) tripleNode).getNodeType().equals(NodeType.ClassNode)) {
 				addError(SadlErrorMessages.NEEDS_ARTICLE.get(), value);
 			}
 		}
