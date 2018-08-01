@@ -6421,7 +6421,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			bi.addArgument((Node) eobj);
 		} else if (eobj instanceof GraphPatternElement) {
 			bi.addArgument(new ProxyNode((GraphPatternElement) eobj));
-		} else if (eobj instanceof Object[] && ((Object[])eobj).length == 2 && ((Object[])eobj)[0] instanceof VariableNode) {
+		} else if (eobj instanceof Object[] && ((Object[])eobj).length == 2 && ((Object[])eobj)[0] instanceof NamedNode) {
 			bi.addArgument((Node) ((Object[])eobj)[0]);
 			Junction jct = new Junction();
 			jct.setJunctionName("and");
