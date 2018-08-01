@@ -34,12 +34,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataSource;
-import junit.framework.TestCase;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -53,6 +53,8 @@ import com.ge.research.sadl.server.ISadlServer;
 import com.ge.research.sadl.server.ISadlServerPE;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
+
+import junit.framework.TestCase;
 
 public class TestSadlServerDemo extends TestCase {
 
@@ -114,24 +116,25 @@ public class TestSadlServerDemo extends TestCase {
 		assertNotNull(sv);
 		System.out.println("Server version: " + sv);
 		
-//		// select a service model--this is necessary to enable creation of a reasoner--and then get the reasoner version
+		// select a service model--this is necessary to enable creation of a reasoner--and then get the reasoner version
 //		assertNotNull(srvr.selectServiceModel(serverSideScenario));
-//		String rv = srvr.getReasonerVersion();
-//		assertNotNull(rv);
-//		System.out.println("Reasoner version: " + rv);
-//		
-//		// get the version of the ontology (model) specified in the named service
-//		String modelName = srvr.getModelName();
-//		String vqry = srvr.prepareQuery("select ?ver where {<" + modelName + "> <owl:versionInfo> + ?ver}");
-//		ResultSet rs = srvr.query(vqry);
-//		assertNotNull(rs);
-//		System.out.println("Server-side scenario ontology (" + modelName + ") version: " + rs.getResultAt(0, 0));
-//		
-//		// get the names of all imported models and their versions
-//		String ivqry = srvr.prepareQuery("select ?impont ?impver where {<" + modelName + "> <owl:imports>+ ?impont . ?impont <owl:versionInfo> ?impver}");
-//		rs = srvr.query(ivqry);
-//		assertNotNull(rs);
-//		System.out.println("Imported ontologies and versions: " + rs.toStringWithIndent(5));
+		assertNotNull(srvr.selectServiceModel(initialNamedService));
+		String rv = srvr.getReasonerVersion();
+		assertNotNull(rv);
+		System.out.println("Reasoner version: " + rv);
+		
+		// get the version of the ontology (model) specified in the named service
+		String modelName = srvr.getModelName();
+		String vqry = srvr.prepareQuery("select ?ver where {<" + modelName + "> <owl:versionInfo> + ?ver}");
+		ResultSet rs = srvr.query(vqry);
+		assertNotNull(rs);
+		System.out.println("Server-side scenario ontology (" + modelName + ") version: " + rs.getResultAt(0, 0));
+		
+		// get the names of all imported models and their versions
+		String ivqry = srvr.prepareQuery("select ?impont ?impver where {<" + modelName + "> <owl:imports>+ ?impont . ?impont <owl:versionInfo> ?impver}");
+		rs = srvr.query(ivqry);
+		assertNotNull(rs);
+		System.out.println("Imported ontologies and versions: " + rs.toStringWithIndent(5));
 	}
 
 	@Test
@@ -153,21 +156,22 @@ public class TestSadlServerDemo extends TestCase {
 //		assertTrue(rs.getResultAt(0, 1).equals(13.75));
 	}
 
+	@Ignore
 	@Test
 	public void testSadlServerClienSideScenario() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException {
-//		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
-//		assertNotNull(srvr);
-//		Map<String, String[]> map = srvr.getServiceNameMap();
-//		int x = map.size();
-//		assertNotNull(srvr.selectServiceModel(initialNamedService));
-//		String newRectUri = clientScenarioNS + "Rect" + System.currentTimeMillis();
-//		String instUri = srvr.createInstance(newRectUri, rectangleNS + "Rectangle");
-//		assertTrue(instUri.equals(newRectUri));
-//		assertTrue(srvr.addTriple(instUri, rectangleNS + "height", 10));
-//		assertTrue(srvr.addTriple(instUri, rectangleNS + "width", 12));
-//		ResultSet rs = srvr.ask(instUri, shapesNS + "area", null);
-//		assertNotNull(rs);
-//		assertEquals(rs.getResultAt(0, 0),120.0);
+		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
+		assertNotNull(srvr);
+		Map<String, String[]> map = srvr.getServiceNameMap();
+		int x = map.size();
+		assertNotNull(srvr.selectServiceModel(initialNamedService));
+		String newRectUri = clientScenarioNS + "Rect" + System.currentTimeMillis();
+		String instUri = srvr.createInstance(newRectUri, rectangleNS + "Rectangle");
+		assertTrue(instUri.equals(newRectUri));
+		assertTrue(srvr.addTriple(instUri, rectangleNS + "height", 10));
+		assertTrue(srvr.addTriple(instUri, rectangleNS + "width", 12));
+		ResultSet rs = srvr.ask(instUri, shapesNS + "area", null);
+		assertNotNull(rs);
+		assertEquals(rs.getResultAt(0, 0),120.0);
 	}
 
 	@Test

@@ -215,7 +215,6 @@ import com.ge.research.sadl.utils.PathToFileUriConverter;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.google.common.base.Preconditions;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -1159,7 +1158,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throws ConfigurationException, IOException, URISyntaxException, JenaProcessorException {
 		if (isSyntheticUri(null, resource)) {
 			// test case: get SadlImplicitModel OWL model from the OntModelProvider
-			URI simTestUri = URI.createURI(SadlConstants.SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI);
+			URI simTestUri = URI.createURI(IReasoner.SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI);
 			try {
 				sadlBuiltinFunctionModel = OntModelProvider
 						.find(resource.getResourceSet().getResource(simTestUri, true));
@@ -1185,14 +1184,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									.validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
 							sadlBuiltinFunctionModel = OntModelProvider.find(imrsrc);
 							OntModelProvider.attach(imrsrc, sadlBuiltinFunctionModel,
-									SadlConstants.SADL_BUILTIN_FUNCTIONS_URI,
-									SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
+									IReasoner.SADL_BUILTIN_FUNCTIONS_URI,
+									IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS);
 						} else {
 							IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
 							if (cm.getModelGetter() == null) {
 								cm.setModelGetter(new SadlJenaModelGetter(cm, null));
 							}
-							cm.getModelGetter().getOntModel(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI,
+							cm.getModelGetter().getOntModel(IReasoner.SADL_BUILTIN_FUNCTIONS_URI,
 									ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
 											.appendFragment(SadlConstants.OWL_BUILTIN_FUNCTIONS_FILENAME)
 											.toFileString(),
@@ -1203,8 +1202,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		if (sadlBuiltinFunctionModel != null) {
-			addImportToJenaModel(getModelName(), SadlConstants.SADL_BUILTIN_FUNCTIONS_URI,
-					SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS, sadlBuiltinFunctionModel);
+			addImportToJenaModel(getModelName(), IReasoner.SADL_BUILTIN_FUNCTIONS_URI,
+					IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS, sadlBuiltinFunctionModel);
 		}
 	}
 
@@ -2687,7 +2686,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private boolean namespaceIsImported(String namespace, Resource resource) {
 		String currentNamespace = namespace.replace("#", "");
-		if (currentNamespace.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)
+		if (currentNamespace.equals(IReasoner.SADL_BUILTIN_FUNCTIONS_URI)
 				|| currentNamespace.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
 			return true;
 		}

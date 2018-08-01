@@ -27,7 +27,6 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.xtext.preferences.IPreferenceValues;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
@@ -36,11 +35,10 @@ import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
-import com.ge.research.sadl.ui.preferences.SadlPreferencesProvider;
-import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.EnumeratedClass;
@@ -198,7 +196,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 						if(instanceObj.isURIResource()) {
 							Resource instanceClass = instanceObj.as(Resource.class);
 							if(instanceClass.getNameSpace().equals(SadlConstants.SADL_BASE_MODEL_URI + "#") || 
-							   instanceClass.getNameSpace().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#") || 
+							   instanceClass.getNameSpace().equals(IReasoner.SADL_BUILTIN_FUNCTIONS_URI + "#") || 
 							   instanceClass.getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#")) {
 								//This subj Resource is an instance of a class defined in an implicit resource
 								//All graphing for this Resource should be skipped at this point
@@ -226,11 +224,11 @@ public class OntologyGraphGenerator extends GraphGenerator {
 			}
 			else if (subj.isURIResource() && 
 					(subj.getNameSpace().equals(SadlConstants.SADL_BASE_MODEL_URI + "#") || 
-					 subj.getNameSpace().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#") || 
+					 subj.getNameSpace().equals(IReasoner.SADL_BUILTIN_FUNCTIONS_URI + "#") || 
 					 subj.getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#")) &&
 					 (!graphImplicitElements &&
 					  (!publicUri.equals(SadlConstants.SADL_BASE_MODEL_URI) && 
-				       !publicUri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI) && 
+				       !publicUri.equals(IReasoner.SADL_BUILTIN_FUNCTIONS_URI) && 
 				       !publicUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)))) {
 				// only show implicit model concepts when graphing the implicit model
 				// or when the option to graph implicit elements has been enabled
@@ -650,7 +648,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	private boolean isUbiquitousImport(String key) {
 		if (key != null) {
 			if (key.equals(SadlConstants.SADL_BASE_MODEL_URI) ||
-					key.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI) ||
+					key.equals(IReasoner.SADL_BUILTIN_FUNCTIONS_URI) ||
 					key.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI) ||
 					key.equals(SadlConstants.SADL_LIST_MODEL_URI)) {
 				return true;

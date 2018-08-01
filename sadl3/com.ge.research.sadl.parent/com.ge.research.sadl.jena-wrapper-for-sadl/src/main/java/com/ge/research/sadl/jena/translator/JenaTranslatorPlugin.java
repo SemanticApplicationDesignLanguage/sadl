@@ -117,6 +117,13 @@ public class JenaTranslatorPlugin implements ITranslator {
 														// imported models and if there are any create a rule file
 														// for this model so that the imported rule files will be loaded
 	
+	/**
+	 * The null argument constructor
+	 */
+	public JenaTranslatorPlugin() {
+		
+	}
+	
 
 	public List<ModelError> translateAndSaveModel(OntModel model, String translationFolder,
 			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException {
@@ -1928,9 +1935,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 	public String getBuiltinFunctionModel(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("uri \"");
-		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI);
+		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_URI);
 		sb.append("\" alias ");
-		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
+		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS);
 		sb.append(".\n\n");
 		
 		try {
@@ -2073,7 +2080,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	
 	@Override
 	public Enum isBuiltinFunctionTypeCheckingAvailable(){
-		return SadlConstants.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
+		return IReasoner.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
 	}
 
 

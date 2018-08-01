@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ge.research.sadl</groupId>
   <artifactId>server</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>SADL Knowledge Services</name>
   <description>Supporting software for knowledge capture and delivery</description>
@@ -14,18 +14,18 @@
   	<module>
   		com.ge.research.sadl.server.server-impl
   	</module>
-  	<module>
-  		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.jena-wrapper-for-sadl
-  	</module>
-  	<module>
-  		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-api
-  	</module>
-  	<module>
-  		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-impl
-  	</module>
-  	<module>
-  		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin
-  	</module>
+<!--   	<module> -->
+<!--   		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.jena-wrapper-for-sadl -->
+<!--   	</module> -->
+<!--   	<module> -->
+<!--   		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-api -->
+<!--   	</module> -->
+<!--   	<module> -->
+<!--   		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-impl -->
+<!--   	</module> -->
+<!--   	<module> -->
+<!--   		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin -->
+<!--   	</module> -->
   </modules>
   <dependencyManagement>
   	<dependencies>
@@ -59,7 +59,7 @@
   			<artifactId>
   				com.ge.research.sadl.swi-prolog-plugin
   			</artifactId>
-  			<version>3.0.0-SNAPSHOT</version>
+  			<version>3.2.0-SNAPSHOT</version>
   			<type>eclipse-plugin</type>
   		</dependency>
   	</dependencies>
