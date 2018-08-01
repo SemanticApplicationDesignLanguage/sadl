@@ -18,10 +18,14 @@
 
 package com.ge.research.sadl.reasoner;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.rdf.model.Literal;
 
 /**
  * This class implements utility methods believed to of general use to
@@ -36,41 +40,49 @@ import java.util.List;
  */
 public abstract class Reasoner implements IReasoner {
 
-//	private static final String XSD_TYPE_ID_DELIMITED = "<" + XSDDatatype.XSD + ">";
+	private static final String XSD_TYPE_ID_DELIMITED = "<" + XSDDatatype.XSD + ">";
 	protected HashMap<String, Object> configuration;
 
 	public static synchronized Object xsdStringToObject(String objValue) {
-//		if ((objValue.indexOf(XSDDatatype.XSD)) > 0) {
-//			String[] valueAndType = xsdStringToTypeAndValue(objValue);
-//			if (valueAndType != null) {
-//				XSDDatatype dt = new XSDDatatype(valueAndType[0]);
-//				String value = stripDoubleQuotes(valueAndType[1]);
-//				if (dt.getURI().equals((XSDDatatype.XSDint.getURI()))) {
-//					return Integer.parseInt(value);
-//				}
-//				else if (dt.getURI().equals(XSDDatatype.XSDinteger.getURI())) {
-//					return Integer.parseInt(value);
-//				}
-//				else if (dt.getURI().equals(XSDDatatype.XSDfloat.getURI())) {
-//					return Float.parseFloat(value);
-//				}
-//				else if (dt.getURI().equals(XSDDatatype.XSDdate.getURI())) {
-//					return value;//.toString();
-//				}
-//				else if (dt.getURI().equals(XSDDatatype.XSDdateTime.getURI())) {
-//					return value;//.toString();
-//				}
-//				else if (dt.getURI().equals(XSDDatatype.XSDdouble.getURI())) {
-//					return Double.parseDouble(value);
-//				}
-//				else if (dt.getURI().equals(XSDDatatype.XSDstring.getURI())) {
-//					return value;
-//				}
-//				else if (dt.getURI().equals(XSDDatatype.XSDboolean.getURI())) {
-//					return Boolean.parseBoolean(value);
-//				}
-//			}
-//		}
+		if ((objValue.indexOf(XSDDatatype.XSD)) > 0) {
+			String[] valueAndType = xsdStringToTypeAndValue(objValue);
+			if (valueAndType != null) {
+				XSDDatatype dt = new XSDDatatype(valueAndType[0]);
+				String value = stripDoubleQuotes(valueAndType[1]);
+				if (dt.getURI().equals((XSDDatatype.XSDint.getURI()))) {
+					return Integer.parseInt(value);
+				}
+				else if (dt.getURI().equals(XSDDatatype.XSDinteger.getURI())) {
+					return Integer.parseInt(value);
+				}
+				else if (dt.getURI().equals(XSDDatatype.XSDfloat.getURI())) {
+					return Float.parseFloat(value);
+				}
+				else if (dt.getURI().equals(XSDDatatype.XSDdate.getURI())) {
+					return value;//.toString();
+				}
+				else if (dt.getURI().equals(XSDDatatype.XSDdateTime.getURI())) {
+					return value;//.toString();
+				}
+				else if (dt.getURI().equals(XSDDatatype.XSDdouble.getURI())) {
+					return Double.parseDouble(value);
+				}
+				else if (dt.getURI().equals(XSDDatatype.XSDstring.getURI())) {
+					return value;
+				}
+				else if (dt.getURI().equals(XSDDatatype.XSDdecimal.getURI())) {
+					if (value.indexOf('.') >= 0) {
+						return BigDecimal.valueOf(Double.parseDouble(value));
+					}
+					else {
+						return BigDecimal.valueOf(Long.parseLong(value));
+					}
+				}
+				else if (dt.getURI().equals(XSDDatatype.XSDboolean.getURI())) {
+					return Boolean.parseBoolean(value);
+				}
+			}
+		}
 		
 		return objValue;
 	}
@@ -79,63 +91,63 @@ public abstract class Reasoner implements IReasoner {
 		if (objValue == null) {
 			return null;
 		}
-//		if (objValue instanceof Literal) {
-//			return ((Literal)objValue).toString(); // getLexicalForm();
-//		}
-//		if (!(objValue instanceof String)) {
-//			XSDDatatype dtype = null;
-//			if (objValue instanceof Double) {
-//				dtype = new XSDDatatype("double");
-//			}
-//			else if (objValue instanceof Float) {
-//				dtype = new XSDDatatype("float");
-//			}
-//			else {
-//				return null;
-//			}
-//			return objValue.toString() + "^^" + dtype.getURI();
-//		}
-//		else {
+		if (objValue instanceof Literal) {
+			return ((Literal)objValue).toString(); // getLexicalForm();
+		}
+		if (!(objValue instanceof String)) {
+			XSDDatatype dtype = null;
+			if (objValue instanceof Double) {
+				dtype = new XSDDatatype("double");
+			}
+			else if (objValue instanceof Float) {
+				dtype = new XSDDatatype("float");
+			}
+			else {
+				return null;
+			}
+			return objValue.toString() + "^^" + dtype.getURI();
+		}
+		else {
 			return (String)objValue;
-//		}
+		}
 	}
 
-//	protected static String[] xsdStringToTypeAndValue(String xsdString) {
-//		String value = null;
-//		String type = null;
-//		int startTypeID = xsdString.indexOf(XSDDatatype.XSD);
-//		if (startTypeID >= 0) {
-//			int endVal = xsdString.indexOf("^^", startTypeID - 3);
-//			if (endVal > 0) {
-//				value = xsdString.substring(0, endVal);
-//			}
-//			else {
-//				value = xsdString.substring(0, startTypeID);
-//			}
-//			type = xsdString.substring(startTypeID + XSDDatatype.XSD.length());
-//	
-//		}
-//		else {
-//			startTypeID = xsdString.indexOf(XSD_TYPE_ID_DELIMITED);
-//			if (startTypeID > 0) {
-//				value = xsdString.substring(0, startTypeID);
-//				type = xsdString.substring(startTypeID + XSD_TYPE_ID_DELIMITED.length());
-//			}
-//		}
-//		if (type != null) {
-//			if (type.startsWith("#")) {
-//				type = type.substring(1);
-//			}
-//			if (type.endsWith(">")) {
-//				type = type.substring(0, type.length() - 1);
-//			}
-//			String[] retVal = new String[2];
-//			retVal[0] = type;
-//			retVal[1] = value;
-//			return retVal;
-//		}
-//		return null;
-//	}
+	protected static String[] xsdStringToTypeAndValue(String xsdString) {
+		String value = null;
+		String type = null;
+		int startTypeID = xsdString.indexOf(XSDDatatype.XSD);
+		if (startTypeID >= 0) {
+			int endVal = xsdString.indexOf("^^", startTypeID - 3);
+			if (endVal > 0) {
+				value = xsdString.substring(0, endVal);
+			}
+			else {
+				value = xsdString.substring(0, startTypeID);
+			}
+			type = xsdString.substring(startTypeID + XSDDatatype.XSD.length());
+	
+		}
+		else {
+			startTypeID = xsdString.indexOf(XSD_TYPE_ID_DELIMITED);
+			if (startTypeID > 0) {
+				value = xsdString.substring(0, startTypeID);
+				type = xsdString.substring(startTypeID + XSD_TYPE_ID_DELIMITED.length());
+			}
+		}
+		if (type != null) {
+			if (type.startsWith("#")) {
+				type = type.substring(1);
+			}
+			if (type.endsWith(">")) {
+				type = type.substring(0, type.length() - 1);
+			}
+			String[] retVal = new String[2];
+			retVal[0] = type;
+			retVal[1] = value;
+			return retVal;
+		}
+		return null;
+	}
 
 	protected static String stripDoubleQuotes(String val) {
 		return removeDelimiters(val, "\"", "\"");
