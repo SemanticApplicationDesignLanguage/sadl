@@ -3842,7 +3842,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						return left;
 					}
 					else {
-						GraphPatternElement bi = createBinaryBuiltin(op, left, arg);     			
+						applyImpliedAndExpandedProperties(container, lexpr, rexpr, left);
+						GraphPatternElement bi = createBinaryBuiltin(op, left, arg); 
 						Object ubi = createUnaryBuiltin(container, "not", bi);
 						return combineRest(ubi, rest);
 					}
@@ -4055,15 +4056,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									predicate.setImpliedPropertyNode(impliedPropertyNode);
 
 								}else {
-									//right is the second argument of a BuildinElement
+									//left is the first argument of a BuiltinElement
 									List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
 									if(args.get(0) instanceof NamedNode ) {
 			        					addLocalizedTypeToNode(((NamedNode) args.get(0)), lPropTci);
 										((NamedNode) args.get(0)).setImpliedPropertyNode(impliedPropertyNode);
 
 									}else if (args.get(0) instanceof ProxyNode && args.get(1) instanceof ProxyNode) {
-										BuiltinElement bie = (BuiltinElement) ((ProxyNode)args.get(1)).getProxyFor();
-										bie.setImpliedPropertyNode(impliedPropertyNode);
+										GraphPatternElement lGPE = ((ProxyNode)args.get(0)).getProxyFor();
+										if(lGPE instanceof BuiltinElement) {
+											BuiltinElement bie = (BuiltinElement) lGPE;
+											bie.setImpliedPropertyNode(impliedPropertyNode);
+										}else if(lGPE instanceof TripleElement){
+											NamedNode predicate = (NamedNode) ((TripleElement) lGPE).getPredicate();
+				        					addLocalizedTypeToNode(((NamedNode) predicate), lPropTci);
+											predicate.setImpliedPropertyNode(impliedPropertyNode);
+										}
 									}
 								}
 								
@@ -4089,9 +4097,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									addLocalizedTypeToNode(((NamedNode) args.get(1)), lPropTci);
 									((NamedNode) args.get(1)).setImpliedPropertyNode(impliedPropertyNode);					
 
-									}else if (args.get(1) instanceof ProxyNode && ((ProxyNode)args.get(1)).getProxyFor() instanceof BuiltinElement ) {
-										BuiltinElement bie = (BuiltinElement) ((ProxyNode)args.get(1)).getProxyFor();
-										bie.setImpliedPropertyNode(impliedPropertyNode);
+									}else if (args.get(1) instanceof ProxyNode) {
+										GraphPatternElement lGPE = ((ProxyNode)args.get(1)).getProxyFor();
+										if(lGPE instanceof BuiltinElement) {
+											BuiltinElement bie = (BuiltinElement) lGPE;
+											bie.setImpliedPropertyNode(impliedPropertyNode);
+										}else if(lGPE instanceof TripleElement){
+											NamedNode predicate = (NamedNode) ((TripleElement) lGPE).getPredicate();
+				        					addLocalizedTypeToNode(((NamedNode) predicate), lPropTci);
+											predicate.setImpliedPropertyNode(impliedPropertyNode);
+										}
 									}
 								}
 								
