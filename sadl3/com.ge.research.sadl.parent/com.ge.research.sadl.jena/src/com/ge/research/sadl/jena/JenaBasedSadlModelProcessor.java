@@ -3517,6 +3517,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else if (eobj instanceof SubjHasProp) {
 				eobj = eobj.eContainer();
 			}
+			else {
+				break;
+			}
 		}
 		return false;
 	}
