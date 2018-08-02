@@ -4012,8 +4012,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					OntResource oldRsrc = getTheJenaModel().getOntResource(((NamedNode)oldType).getURI());
 					OntClass newRsrc = getTheJenaModel().getOntClass(restrictionType.getURI());
 					if (oldRsrc != null && newRsrc != null && !SadlUtils.classIsSubclassOf(newRsrc, oldRsrc, true, null)) {
-						// this is not consistent
-						addTypeCheckingError("Restriction on variable type must be a subclass of type from definition.", expr);
+						if (!(getTarget() instanceof Rule) || !getRulePart().equals(RulePart.CONCLUSION)) {
+							// this is not consistent	this is OK to have in a rule conclusion--it is concluding, not conditioning
+							addTypeCheckingError("Restriction on variable type must be a subclass of type from definition.", expr);
+						}
 					}
 //					else {
 //						((VariableNode)vobj).setType(null); // this clears without an exception
