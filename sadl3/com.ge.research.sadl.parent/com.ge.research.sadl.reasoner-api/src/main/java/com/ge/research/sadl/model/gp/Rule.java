@@ -252,5 +252,66 @@ public class Rule {
 	public void setStage(int stage) {
 		this.stage = stage;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
+		result = prime * result + ((givens == null) ? 0 : givens.hashCode());
+		result = prime * result + ((ifs == null) ? 0 : ifs.hashCode());
+		result = prime * result + ((ruleName == null) ? 0 : ruleName.hashCode());
+		result = prime * result + ((ruleNamespace == null) ? 0 : ruleNamespace.hashCode());
+		result = prime * result + ((ruleVariables == null) ? 0 : ruleVariables.hashCode());
+		result = prime * result + ((thens == null) ? 0 : thens.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Rule other = (Rule) obj;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
+			return false;
+		if (givens == null) {
+			if (other.givens != null)
+				return false;
+		} else if (!givens.equals(other.givens))
+			return false;
+		if (ifs == null) {
+			if (other.ifs != null)
+				return false;
+		} else if (!ifs.equals(other.ifs))
+			return false;
+		if (ruleName == null) {
+			if (other.ruleName != null)
+				return false;
+		} else if (!ruleName.equals(other.ruleName))
+			return false;
+		if (ruleNamespace == null) {
+			if (other.ruleNamespace != null)
+				return false;
+		} else if (!ruleNamespace.equals(other.ruleNamespace))
+			return false;
+		if (ruleVariables == null) {
+			if (other.ruleVariables != null)
+				return false;
+		} else if (!ruleVariables.equals(other.ruleVariables))
+			return false;
+		if (thens == null) {
+			if (other.thens != null)
+				return false;
+		} else if (!thens.equals(other.thens))
+			return false;
+		return true;
+	}
 	
 }

@@ -491,33 +491,40 @@ public class BuiltinElement extends GraphPatternElement {
 		this.funcPrefix = funcPrefix;
 	}
 
-	/**
-	 * Method to compare BuiltinElement with another Object 
-	 * @return -- true if obj is a BuiltinElement and they have the same name, URI, and arguments else false
-	 */
-	@Override 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((arguments == null) ? 0 : arguments.hashCode());
+		result = prime * result + ((funcName == null) ? 0 : funcName.hashCode());
+		result = prime * result + ((funcUri == null) ? 0 : funcUri.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		
-		BuiltinElement be = (BuiltinElement) obj;
-		if(funcName != be.getFuncName()) {
+		BuiltinElement other = (BuiltinElement) obj;
+		if (arguments == null) {
+			if (other.arguments != null)
+				return false;
+		} else if (!arguments.equals(other.arguments))
 			return false;
-		}
-		if(funcUri != be.getFuncUri()) {
+		if (funcName == null) {
+			if (other.funcName != null)
+				return false;
+		} else if (!funcName.equals(other.funcName))
 			return false;
-		}
-		if(!funcType.equals(be.getFuncType())) {
+		if (funcUri == null) {
+			if (other.funcUri != null)
+				return false;
+		} else if (!funcUri.equals(other.funcUri))
 			return false;
-		}
-		if(!arguments.containsAll(be.getArguments())) {
-			return false;
-		}
-		
 		return true;
 	}
 	
