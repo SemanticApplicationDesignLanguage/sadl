@@ -31,7 +31,6 @@ import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.VariableNode;
-import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
@@ -1726,9 +1725,9 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	public String getBuiltinFunctionModel(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("uri \"");
-		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI);
+		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_URI);
 		sb.append("\" alias ");
-		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
+		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS);
 		sb.append(".\n\n");
 		
 		return sb.toString();
@@ -1748,7 +1747,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	
 	@Override
 	public Enum isBuiltinFunctionTypeCheckingAvailable(){
-		return SadlConstants.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
+		return IReasoner.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
 	}
 
 	@Override

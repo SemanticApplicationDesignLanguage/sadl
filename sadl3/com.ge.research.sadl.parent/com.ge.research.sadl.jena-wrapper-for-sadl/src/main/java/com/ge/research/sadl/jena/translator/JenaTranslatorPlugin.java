@@ -117,6 +117,13 @@ public class JenaTranslatorPlugin implements ITranslator {
 														// imported models and if there are any create a rule file
 														// for this model so that the imported rule files will be loaded
 	
+	/**
+	 * The null argument constructor
+	 */
+	public JenaTranslatorPlugin() {
+		
+	}
+	
 
 	public List<ModelError> translateAndSaveModel(OntModel model, String translationFolder,
 			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException, IOException, URISyntaxException {
@@ -274,13 +281,19 @@ public class JenaTranslatorPlugin implements ITranslator {
 					else if (elements.get(idx) instanceof BuiltinElement && ((BuiltinElement)elements.get(idx)).getFuncName().equals(THERE_EXISTS)) {
 						if (((BuiltinElement)elements.get(idx)).getArguments() == null || ((BuiltinElement)elements.get(idx)).getArguments().size() != 1) {
 							logger.error("Function 'thereExists' should have one and only one argument");
+							addError("Function 'thereExists' should have one and only one argument.");						
+							return sb.toString();
 						}
 						if (!(((BuiltinElement)elements.get(idx)).getArguments().get(0) instanceof VariableNode)) {
-							logger.error("Function 'thereExists' should have a variable as argument");
+							logger.error("Function 'thereExists' should have a variable as argument.");
+							addError("Function 'thereExists' should have a variable as argument.");	
+							return sb.toString();
 						}
 						VariableNode thereExistsVar = (VariableNode) ((BuiltinElement)elements.get(idx)).getArguments().get(0);
 						if (thereExistsVar.getType() == null) {
 							logger.error("Function 'thereExists' variable must have a type");
+							addError("Function 'thereExists' variable must have a type.");			
+							return sb.toString();
 						}
 						BuiltinElement bi = new BuiltinElement();
 						bi.setFuncName("getInstance");
@@ -1701,11 +1714,16 @@ public class JenaTranslatorPlugin implements ITranslator {
 		if (otherStructure instanceof List<?>) {
 			OntModel eqModel = null;	// get model
 			// remove all equations in this namespace
+			boolean equationWarningGiven = false;
 			for (Object os: (List<?>)otherStructure) {
 				if (os instanceof Equation) {
-					addError(new ModelError(this.getClass().getCanonicalName() + " does not currently translate equations", ErrorType.ERROR));
-					// add equations
-//					System.out.println("Jena translator ready to save equation '" + os.toString() + "'");
+					if (((Equation)os).getBody() != null && !equationWarningGiven) {
+						// only warn for equations, not externals
+						addError(new ModelError(this.getClass().getCanonicalName() + " does not currently translate equations", ErrorType.ERROR));
+						// add equations
+//						System.out.println("Jena translator ready to save equation '" + os.toString() + "'");
+						equationWarningGiven = true;
+					}
 				}
 			}
 			// save eqModel
@@ -1928,9 +1946,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 	public String getBuiltinFunctionModel(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("uri \"");
-		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI);
+		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_URI);
 		sb.append("\" alias ");
-		sb.append(SadlConstants.SADL_BUILTIN_FUNCTIONS_ALIAS);
+		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS);
 		sb.append(".\n\n");
 		
 		try {
@@ -2073,7 +2091,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	
 	@Override
 	public Enum isBuiltinFunctionTypeCheckingAvailable(){
-		return SadlConstants.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
+		return IReasoner.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
 	}
 
 

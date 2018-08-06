@@ -33,8 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.activation.DataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,11 +41,9 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
 import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
-import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.utils.ResourceManager;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -889,7 +885,7 @@ public class OwlToSadl {
 		if (impUri.equals(SadlConstants.SADL_BASE_MODEL_URI)) {
 			return true;
 		}
-		else if (impUri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)) {
+		else if (impUri.equals(IReasoner.SADL_BUILTIN_FUNCTIONS_URI)) {
 			return true;
 		}
 		else if (impUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {

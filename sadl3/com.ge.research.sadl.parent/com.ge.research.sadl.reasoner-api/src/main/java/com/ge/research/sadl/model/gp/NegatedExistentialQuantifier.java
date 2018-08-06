@@ -67,4 +67,35 @@ public class NegatedExistentialQuantifier extends GraphPatternElement {
 		this.quantified = quantified;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((quantified == null) ? 0 : quantified.hashCode());
+		result = prime * result + ((variables == null) ? 0 : variables.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		NegatedExistentialQuantifier other = (NegatedExistentialQuantifier) obj;
+		if (quantified == null) {
+			if (other.quantified != null)
+				return false;
+		} else if (!quantified.equals(other.quantified))
+			return false;
+		if (variables == null) {
+			if (other.variables != null)
+				return false;
+		} else if (!variables.equals(other.variables))
+			return false;
+		return true;
+	}
+
 }

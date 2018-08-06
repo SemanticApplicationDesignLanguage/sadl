@@ -94,7 +94,7 @@ public class SadlServerMain {
 	 * Main arguments needed for SadlServer V2; first 2  and 4th are required, rest are optional but an earlier argument 
 	 *   must be present (could be empty) for a later to be included.
 	 * 
-	 * arg0. service class name -- the fully qualified name of the class implementing the service defined in com.ge.research.sadl.sadlserver.server.ISadlServer
+	 * arg0. service class name -- the fully qualified name of the class implementing the service defined in com.ge.research.sadl.server.ISadlServer
 	 * 	e.g, com.ge.research.sadl.sadlserver.SadlServerImpl
 	 * arg1. service identifier -- either 1) kbase root--the path to the directory on the local file system in or under under which model folders and/or service definition files are located
 	 *                                 or 2) the URL of the Web service to invoke

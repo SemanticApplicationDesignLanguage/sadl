@@ -88,6 +88,7 @@ public interface ISadlServer {
 	 * 
 	 * @return -- class name
 	 * @throws SessionNotFoundException 
+	 * @throws com.ge.research.sadl.sadlserver.SessionNotFoundException 
 	 */
 	abstract public String getClassName() throws SessionNotFoundException;
 	

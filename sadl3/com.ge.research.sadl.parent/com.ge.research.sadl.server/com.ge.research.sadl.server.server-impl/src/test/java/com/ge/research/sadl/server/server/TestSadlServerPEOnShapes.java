@@ -1,20 +1,13 @@
 package com.ge.research.sadl.server.server;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -23,10 +16,11 @@ import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.server.ISadlServerMD;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
+
+import junit.framework.TestCase;
 
 /**
  * @author 200005201

@@ -38,7 +38,13 @@ import com.ge.research.sadl.model.gp.GraphPatternElement;
 
 public interface IReasoner {
 	
+	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
+	public static final String SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI = "synthetic://test/SadlBuiltinFunctions.sadl";
+	public static final String SADL_BUILTIN_FUNCTIONS_ALIAS = "builtinfunctions";
+	public static enum SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY{FULL,NAME_ONLY,NONE};
+
 	public final static String TotalReasoningTime = "TotalReasoningTime";
+	
 	/**
 	 * Method to configure the reasoner properties
 	 * @param  preferences
