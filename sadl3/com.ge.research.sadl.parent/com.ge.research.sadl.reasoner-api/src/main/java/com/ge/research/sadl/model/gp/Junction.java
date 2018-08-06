@@ -251,33 +251,43 @@ public class Junction extends GraphPatternElement {
 		return sb.toString();	
 	}
 	
-	/**
-	 * Method to compare Junction with another Object 
-	 * @return -- true if obj is a Junction and they have the same name, same left and right hand sides
-	 */
-	@Override 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((junctionName == null) ? 0 : junctionName.hashCode());
+		result = prime * result + ((junctionType == null) ? 0 : junctionType.hashCode());
+		result = prime * result + ((lhs == null) ? 0 : lhs.hashCode());
+		result = prime * result + ((rhs == null) ? 0 : rhs.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		
-		Junction junction = (Junction)obj;
-		if(junctionName != junction.getJunctionName()) {
+		Junction other = (Junction) obj;
+		if (junctionName == null) {
+			if (other.junctionName != null)
+				return false;
+		} else if (!junctionName.equals(other.junctionName))
 			return false;
-		}
-		if(!junctionType.equals(junction.getJunctionType())) {
+		if (junctionType != other.junctionType)
 			return false;
-		}
-		if(!lhs.equals(junction.getLhs())) {
+		if (lhs == null) {
+			if (other.lhs != null)
+				return false;
+		} else if (!lhs.equals(other.lhs))
 			return false;
-		}
-		if(!rhs.equals(junction.getRhs())) {
+		if (rhs == null) {
+			if (other.rhs != null)
+				return false;
+		} else if (!rhs.equals(other.rhs))
 			return false;
-		}
-		
 		return true;
 	}
 }

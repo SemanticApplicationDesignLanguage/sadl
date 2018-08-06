@@ -63,7 +63,7 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @param owlInstanceFileName File name containing instance in OWL format. For absolute paths use "file:///"
 	 * @param globalPrefix Global prefix (must be unique in the knowledge base)
 	 * @return True if successful else false
-	 * @throws com.ge.research.sadl.sadlserver.server.ConfigurationException
+	 * @throws com.ge.research.sadl.server.ConfigurationException
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
 	 * @throws IOException 
 	 */
@@ -78,7 +78,7 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @param owlInstanceFileName File name containing instance in OWL format
 	 * @param globalPrefix Global prefix
 	 * @return True if successful else false
-	 * @throws com.ge.research.sadl.sadlserver.server.ConfigurationException
+	 * @throws com.ge.research.sadl.server.ConfigurationException
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
 	 * @throws IOException 
 	 */
@@ -110,9 +110,9 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @param predicate Predicate
 	 * @param value Object value
 	 * @return True if operation was successful, false otherwise
-	 * @throws com.ge.research.sadl.sadlserver.server.ConfigurationException
-	 * @throws com.ge.research.sadl.sadlserver.server.ReasonerNotFoundException 
-	 * @throws com.ge.research.sadl.sadlserver.server.TripleNotFoundException 
+	 * @throws com.ge.research.sadl.server.ConfigurationException
+	 * @throws com.ge.research.sadl.server.ReasonerNotFoundException 
+	 * @throws com.ge.research.sadl.server.TripleNotFoundException 
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
 	 */
 	abstract public boolean addTriple(String modelName, String subject, String predicate, Object value) 
@@ -140,9 +140,9 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @param predicate Predicate
 	 * @param value Object value
 	 * @return True if operation was successful, false otherwise
-	 * @throws com.ge.research.sadl.sadlserver.server.ConfigurationException
-	 * @throws com.ge.research.sadl.sadlserver.server.ReasonerNotFoundException 
-	 * @throws com.ge.research.sadl.sadlserver.server.TripleNotFoundException 
+	 * @throws com.ge.research.sadl.server.ConfigurationException
+	 * @throws com.ge.research.sadl.server.ReasonerNotFoundException 
+	 * @throws com.ge.research.sadl.server.TripleNotFoundException 
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
 	 */
 	abstract public boolean deleteTriple(String modelName, String subject, String predicate, Object value)
@@ -170,7 +170,7 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @param baseLocalName -- local fragment base of the URI
 	 * @return -- a unique URI with the namespace and base fragment augmented to make it unique
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
-	 * @throws com.ge.research.sadl.sadlserver.server.InvalidNameException 
+	 * @throws com.ge.research.sadl.server.InvalidNameException 
 	 */
 	String getUniqueInstanceUri(String namespace, String baseLocalName) throws InvalidNameException, SessionNotFoundException;
 
@@ -185,7 +185,7 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @param baseLocalName -- local fragment base of the URI
 	 * @return -- a unique URI with the namespace and base fragment augmented to make it unique
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
-	 * @throws com.ge.research.sadl.sadlserver.server.InvalidNameException 
+	 * @throws com.ge.research.sadl.server.InvalidNameException 
 	 */
 	String getUniqueInstanceUri(String modelName, String namespace, String baseLocalName) throws InvalidNameException, SessionNotFoundException;
 
@@ -198,7 +198,7 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @param baseNamespace -- base namespace of the new URI
 	 * @return -- a unique namespace URI with base namespace augmented to make it unique
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
-	 * @throws com.ge.research.sadl.sadlserver.server.InvalidNameException 
+	 * @throws com.ge.research.sadl.server.InvalidNameException 
 	 * @throws ConfigurationException 
 	 * @throws MalformedURLException 
 	 */
@@ -211,9 +211,9 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @param instName Instance name
 	 * @param className Class name or null if none
 	 * @return True if successful else false
-	 * @throws com.ge.research.sadl.sadlserver.server.ConfigurationException
+	 * @throws com.ge.research.sadl.server.ConfigurationException
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
-	 * @throws com.ge.research.sadl.sadlserver.server.InvalidNameException
+	 * @throws com.ge.research.sadl.server.InvalidNameException
 	 */
 	boolean addInstance(String modelName, String instName, String className)
 			throws ConfigurationException, InvalidNameException, SessionNotFoundException;
@@ -405,7 +405,7 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @param modelName Model name
 	 * @param ruleAsString Rule
 	 * @return True if successful else false
-	 * @throws com.ge.research.sadl.sadlserver.server.ConfigurationException 
+	 * @throws com.ge.research.sadl.server.ConfigurationException 
 	 * @throws IOException 
 	 * @throws com.ge.research.sadl.server.SessionNotFoundException
 	 */

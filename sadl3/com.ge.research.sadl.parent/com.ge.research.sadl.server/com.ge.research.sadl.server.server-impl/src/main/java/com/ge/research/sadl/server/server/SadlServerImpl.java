@@ -471,12 +471,12 @@ public class SadlServerImpl implements ISadlServer {
 			Object objValue) throws ConfigurationException, TripleNotFoundException, ReasonerNotFoundException {
 		if (reasoner != null) {
 			String strval;
-			if (objValue instanceof String) {
-				strval = (String)objValue;
-			}
-			else {
+//			if (objValue instanceof String) {
+//				strval = (String)objValue;
+//			}
+//			else {
 				strval = reasoner.objectValueToStringValue(objValue, predName);
-			}
+//			}
 			return reasoner.addTriple(subjName, predName, strval);
 		}
 		throw new ReasonerNotFoundException("No reasoner found.");

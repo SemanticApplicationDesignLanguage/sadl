@@ -1,14 +1,10 @@
 package com.ge.research.sadl.server.server;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -29,6 +25,8 @@ import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.server.ISadlServerMD;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
+
+import junit.framework.TestCase;
 
 /**
  * @author 200005201
@@ -60,6 +58,7 @@ public class TestSadlServerMD_Mobius extends TestCase {
 		modelName = "http://www.mobius.illinois.edu/advise/ont/core/Queries";
 	}
 
+	@Ignore
 	@Test
 	public void testWithJenaReasoner() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException {
 		// demonstrate ability to access the base named service

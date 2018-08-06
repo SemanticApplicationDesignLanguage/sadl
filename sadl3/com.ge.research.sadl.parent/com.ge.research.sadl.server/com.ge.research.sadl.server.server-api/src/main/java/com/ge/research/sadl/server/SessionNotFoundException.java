@@ -27,8 +27,6 @@
 
 package com.ge.research.sadl.server;
 
-import javax.xml.ws.WebFault;
-
 public class SessionNotFoundException extends Exception {
     
     public SessionNotFoundException() {
