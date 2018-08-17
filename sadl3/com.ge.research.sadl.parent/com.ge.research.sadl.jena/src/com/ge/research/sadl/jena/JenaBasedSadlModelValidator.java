@@ -2253,7 +2253,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return null;
 				}
 				else if (!predtype.equals(OntConceptType.CLASS_PROPERTY) && !predtype.equals(OntConceptType.DATATYPE_PROPERTY) && 
-						!predtype.equals(OntConceptType.RDF_PROPERTY) && !predtype.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+						!predtype.equals(OntConceptType.RDF_PROPERTY) && !predtype.equals(OntConceptType.ANNOTATION_PROPERTY) && !predtype.equals(OntConceptType.CLASS)) {
 //					String preduri = declarationExtensions.getConceptUri(((Name)predicate).getName());
 					getModelProcessor().addTypeCheckingError(SadlErrorMessages.EXPECTED_A.get("property in property chain"), predicate);
 				}
@@ -4996,6 +4996,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if(subj == null || prop == null || prop.canAs(AnnotationProperty.class)){
 			return;
 		}
+		
+
+		
 		StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
 		boolean matchFound = false;
 		while (stmtitr.hasNext()) {
@@ -5026,6 +5029,29 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
+		boolean n = true;
+		
+		if (prop.canAs(OntClass.class)) 
+		{
+			ExtendedIterator<? extends OntResource> spropitr = prop.as(OntClass.class).listInstances();
+			while (spropitr.hasNext()) {
+				OntResource sprop = spropitr.next();
+				stmtitr = ontModel.listStatements(sprop, RDFS.domain, (RDFNode)null);
+				while (stmtitr.hasNext()) {
+					RDFNode obj = stmtitr.nextStatement().getObject();
+					if (obj.isResource()) {
+						matchFound = checkForPropertyDomainMatch(subj, prop, obj.asResource());
+					}
+					if (matchFound) {
+						stmtitr.close();
+						break;
+					}
+				}
+			}
+			
+		}
+		
+		
 		if (subj != null && !matchFound) {
 			if (varName != null) {
 				if(propOfSubjectCheck){
@@ -5049,7 +5075,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
-	}
+		}
+	
 	
 	private boolean checkForPropertyDomainMatch(Resource subj, Property prop, Resource obj) throws InvalidTypeException {
 		if (obj.isResource()) {
