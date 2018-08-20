@@ -266,4 +266,68 @@ public class Equation {
 	public void setLocation(String location) {
 		this.location = location;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((argumentTypes == null) ? 0 : argumentTypes.hashCode());
+		result = prime * result + ((arguments == null) ? 0 : arguments.hashCode());
+		result = prime * result + ((body == null) ? 0 : body.hashCode());
+		result = prime * result + (isExternal ? 1231 : 1237);
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((namespace == null) ? 0 : namespace.hashCode());
+		result = prime * result + ((returnType == null) ? 0 : returnType.hashCode());
+		result = prime * result + ((uri == null) ? 0 : uri.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Equation other = (Equation) obj;
+		if (argumentTypes == null) {
+			if (other.argumentTypes != null)
+				return false;
+		} else if (!argumentTypes.equals(other.argumentTypes))
+			return false;
+		if (arguments == null) {
+			if (other.arguments != null)
+				return false;
+		} else if (!arguments.equals(other.arguments))
+			return false;
+		if (body == null) {
+			if (other.body != null)
+				return false;
+		} else if (!body.equals(other.body))
+			return false;
+		if (isExternal != other.isExternal)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (namespace == null) {
+			if (other.namespace != null)
+				return false;
+		} else if (!namespace.equals(other.namespace))
+			return false;
+		if (returnType == null) {
+			if (other.returnType != null)
+				return false;
+		} else if (!returnType.equals(other.returnType))
+			return false;
+		if (uri == null) {
+			if (other.uri != null)
+				return false;
+		} else if (!uri.equals(other.uri))
+			return false;
+		return true;
+	}
 }
