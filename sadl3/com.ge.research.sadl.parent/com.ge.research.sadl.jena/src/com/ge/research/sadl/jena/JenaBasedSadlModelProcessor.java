@@ -9822,8 +9822,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			} else if (value instanceof SadlResource) {
 				Node nval = processExpression((SadlResource) value);
-				throw new JenaProcessorException(
-						"Unable to convert concept '" + nval.toFullyQualifiedString() + "to a literal");
+				throw new JenaProcessorException(SadlErrorMessages.CONVERSION_TO_LITERAL_ERROR.get(nval.toFullyQualifiedString()));
 			} else {
 				throw new JenaProcessorException(
 						"Unhandled sadl explicit vaue type: " + value.getClass().getCanonicalName());
