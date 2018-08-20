@@ -3617,8 +3617,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				Node trnode = tr.getObject();
 				Node tlnode = tl.getObject();
 				if(trnode!= null && tlnode !=null) {
-					OntClass subclassl = theJenaModel.getOntClass((trnode).toFullyQualifiedString());
-					OntClass subclassr = theJenaModel.getOntClass((tlnode).toFullyQualifiedString());
+					OntResource resourceL = theJenaModel.getOntResource(trnode.toFullyQualifiedString());
+					OntResource resourceR = theJenaModel.getOntResource(tlnode.toFullyQualifiedString());
+					
+					OntClass subclassl = null;
+					if(resourceL != null) {
+						if(resourceL.canAs(OntClass.class)) {
+							subclassl = resourceL.as(OntClass.class);
+							
+						}else if(resourceL.canAs(Individual.class)) {
+							subclassl = resourceL.as(Individual.class).getOntClass();
+						}
+					}
+					
+					OntClass subclassr = null;
+					if(resourceR != null) {
+						if(resourceR.canAs(OntClass.class)) {
+							subclassr = resourceR.as(OntClass.class);
+							
+						}else if(resourceR.canAs(Individual.class)) {
+							subclassr = resourceR.as(Individual.class).getOntClass();
+						}
+					}
+		
 					OntResource suprclass = theJenaModel.getOntResource(SadlConstants.SADL_IMPLICIT_MODEL_EVENT_URI);
 					if(subclassl != null && subclassr != null) {
 						try {
