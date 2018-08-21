@@ -37,6 +37,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -115,6 +116,7 @@ import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
+import com.ge.research.sadl.model.gp.Update;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
@@ -210,6 +212,8 @@ import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.UnitExpression;
+import com.ge.research.sadl.sADL.UpdateExpression;
+import com.ge.research.sadl.sADL.UpdateStatement;
 import com.ge.research.sadl.sADL.ValueRow;
 import com.ge.research.sadl.sADL.ValueTable;
 import com.ge.research.sadl.utils.PathToFileUriConverter;
@@ -440,13 +444,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								try {
 									String translatedQuery = null;
 									try {
-										translatedQuery = translator.translateQuery(getTheJenaModel(), (Query) cmd);
+										translatedQuery = translator.translateQuery(getTheJenaModel(), getModelName(), (Query) cmd);
 									} catch (UnsupportedOperationException e) {
 										IReasoner defaultReasoner = getConfigMgr(resource, format)
 												.getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
 										translator = getConfigMgr(resource, format)
 												.getTranslatorForReasoner(defaultReasoner);
-										translatedQuery = translator.translateQuery(getTheJenaModel(), (Query) cmd);
+										translatedQuery = translator.translateQuery(getTheJenaModel(), getModelName(), (Query) cmd);
 									}
 									Literal queryLit = getTheJenaModel().createTypedLiteral(translatedQuery);
 									queryInst.addProperty(RDFS.isDefinedBy, queryLit);
@@ -1101,6 +1105,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				processStatement((ExplainStatement) element);
 			} else if (element instanceof QueryStatement) {
 				processStatement((QueryStatement) element);
+			} else if (element instanceof UpdateStatement) {
+				processStatement((UpdateStatement) element);
 			} else if (element instanceof SadlResource) {
 				if (!SadlASTUtils.isUnit(element)) {
 					processExpression((SadlResource) element);
@@ -1978,6 +1984,77 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		addSadlCommand(print);
 	}
 
+	private Query processStatement(UpdateStatement element) throws JenaProcessorException, TranslationException, InvalidNameException, InvalidTypeException, CircularDefinitionException {
+		Expression qexpr = element.getExpr();
+		if (qexpr != null) {
+			Update theQuery = new Update();
+			theQuery.setContext(qexpr);
+			theQuery.setUpdate(true);
+			setTarget(theQuery);
+			if (qexpr instanceof Name) {
+				OntConceptType qntype = getDeclarationExtensions().getOntConceptType(((Name) qexpr).getName());
+				if (qntype.equals(OntConceptType.STRUCTURE_NAME)) {
+					// this is just a named query declared elsewhere
+					SadlResource qdecl = getDeclarationExtensions().getDeclaration(((Name) qexpr).getName());
+					EObject qdeclcont = qdecl.eContainer();
+					if (qdeclcont instanceof QueryStatement) {
+						qexpr = ((QueryStatement) qdeclcont).getExpr();
+					} else {
+						addError("Unexpected named structure name whose definition is not a query statement", qexpr);
+						return null;
+					}
+				}
+			}
+			Object qobj = processExpression(qexpr);
+			Query query = null;
+			if (qobj instanceof Update) {
+				query = (Update) qobj;
+			} else if (qobj == null) {
+				// maybe this is a query by name?
+				if (qexpr instanceof Name) {
+					SadlResource qnm = ((Name) qexpr).getName();
+					String qnmuri = getDeclarationExtensions().getConceptUri(qnm);
+					if (qnmuri != null) {
+						Individual qinst = getTheJenaModel().getIndividual(qnmuri);
+						if (qinst != null) {
+							StmtIterator stmtitr = qinst.listProperties();
+							while (stmtitr.hasNext()) {
+								System.out.println(stmtitr.nextStatement().toString());
+							}
+						}
+					}
+				}
+			} else {
+				query = processQuery(postProcessTranslationResult(qobj));
+			}
+			if (query != null) {
+				if (element.getName() != null) {
+					String uri = declarationExtensions.getConceptUri(element.getName());
+					query.setFqName(uri);
+					OntClass nqcls = getTheJenaModel()
+							.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_NAMEDQUERY_CLASS_URI);
+					if (nqcls != null) {
+						Individual nqry = getTheJenaModel().createIndividual(uri, nqcls);
+						// Add annotations, if any
+						EList<NamedStructureAnnotation> annotations = element.getAnnotations();
+						if (annotations != null && annotations.size() > 0) {
+							addNamedStructureAnnotations(nqry, annotations);
+						}
+					}
+				}
+				final ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
+				if (node != null) {
+					query.setOffset(node.getOffset() - 1);
+					query.setLength(node.getLength());
+				}
+				query = addExpandedPropertiesToQuery(query, qexpr);
+				addSadlCommand(query);
+			}
+			return query;
+		}
+		return null;
+	}
+
 	public Query processStatement(QueryStatement element) throws JenaProcessorException, InvalidNameException,
 			InvalidTypeException, TranslationException, CircularDefinitionException {
 		Expression qexpr = element.getExpr();
@@ -2192,6 +2269,80 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public Query processExpression(AskExpression expr)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		return processAsk(expr);
+	}
+	
+	public Update processExpression(UpdateExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		return processUpdate(expr);
+	}
+
+	private Update processUpdate(UpdateExpression expr) throws InvalidNameException, InvalidTypeException, TranslationException {
+		Update query = (Update) getTarget();
+		query.setUpdate(true);
+		boolean ddata = expr.getDData() != null;
+		boolean idata = expr.getIData() != null;
+		Expression dExpr = expr.getDeleteExpression();
+		Expression iExpr = expr.getInsertExpression();
+		Expression wExpr = expr.getWhereExpression();
+		Object dObj = null;
+		Object iObj = null;
+		Object wObj = null;
+		if (dExpr != null) {
+			dObj = processExpression(dExpr);
+			query.setKeyword("delete");
+			if (ddata) {
+				query.setDeleteData(true);
+			}
+			if (dObj instanceof Object[]) {
+				if (((Object[])dObj)[1] instanceof GraphPatternElement) {
+					query.addDeletePattern((GraphPatternElement) ((Object[])dObj)[1]);
+				}
+				else if (((Object[])dObj)[1] instanceof List<?>) {
+					query.getDeletePatterns().addAll((Collection<? extends GraphPatternElement>) ((Object[])dObj)[1]);
+				}
+			}
+			else if (dObj instanceof Junction) {
+				query.addDeletePattern((Junction)dObj);
+			}
+			else if (dObj != null){
+				throw new TranslationException("Unhandled delete expression: " + dObj.getClass().getCanonicalName());
+			}
+		}
+		if (iExpr != null) {
+			iObj = processExpression(iExpr);
+			query.setSecondKeyword("insert");
+			if (idata) {
+				query.setInsertData(true);
+			}
+			if (iObj instanceof Object[]) {
+				if (((Object[])iObj)[1] instanceof GraphPatternElement) {
+					query.addInsertPattern((GraphPatternElement) ((Object[])iObj)[1]);
+				}
+				else if (((Object[])iObj)[1] instanceof List<?>) {
+					query.getInsertPatterns().addAll((Collection<? extends GraphPatternElement>) ((Object[])iObj)[1]);
+				}
+			}
+			else if (iObj instanceof Junction) {
+				query.addInsertPattern((Junction)iObj);
+			}
+			else if (iObj != null) {
+				throw new TranslationException("Unhandled insert expression: " + iObj.getClass().getCanonicalName());
+			}
+		}
+		if (wExpr != null) {
+			wObj = postProcessTranslationResult(processExpression(wExpr));
+			if (wObj instanceof Object[]) {
+				query.addVariable((VariableNode) ((Object[])wObj)[0]);
+				query.addPattern((GraphPatternElement) ((Object[])wObj)[1]);
+			}
+			else if (wObj instanceof Junction) {
+				query.addPattern((Junction)wObj);
+			}
+			else if (wObj != null) {
+				throw new TranslationException("Unhandled where expression: " + wObj.getClass().getCanonicalName());
+			}
+		}
+		
+		return query;
 	}
 
 	private Query processAsk(Expression expr) {
@@ -2902,6 +3053,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return processExpression((UnitExpression) expr);
 		} else if (expr instanceof ElementInList) {
 			return processExpression((ElementInList) expr);
+		} else if (expr instanceof UpdateExpression) {
+			return processExpression((UpdateExpression) expr);
 		} else if (expr != null) {
 			throw new TranslationException("Unhandled rule expression type: " + expr.getClass().getCanonicalName());
 		}

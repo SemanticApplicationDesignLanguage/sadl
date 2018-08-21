@@ -57,6 +57,7 @@ import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
+import com.ge.research.sadl.model.gp.Update;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
@@ -182,7 +183,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 
 
-	public String translateRule(OntModel model, Rule rule)
+	public String translateRule(OntModel model, String modelName, Rule rule)
 			throws TranslationException {
 		setRuleInTranslation(rule);
 		boolean translateToBackwardRule = false;
@@ -495,7 +496,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 
 
-	public String translateQuery(OntModel model, Query query)
+	public String translateQuery(OntModel model, String modelName, Query query)
 			throws TranslationException, InvalidNameException {
 		boolean isEval = false;
 		setTheModel(model);
@@ -523,70 +524,83 @@ public class JenaTranslatorPlugin implements ITranslator {
 			return prepareQuery(model, query.getSparqlQueryString());
 		}
 		if (query.getKeyword() == null) {
-			if (query.getVariables() == null) {
-				query.setKeyword("ask");
-			}
-			else {
-				query.setKeyword("select");
+			if (!(query instanceof Update)) {
+				if (query.getVariables() == null) {
+					query.setKeyword("ask");
+				}
+				else {
+					query.setKeyword("select");
+				}
 			}
 		}
-		if (!query.getKeyword().equals("ask") && query.getVariables() == null) {
+		if (!(query instanceof Update) && !query.getKeyword().equals("ask") && query.getVariables() == null) {
 			throw new TranslationException("Invalid query (" + query.toString() + "): must be a valid structure with specified variable(s).");
 		}
 		setQueryInTranslation(query);
 		StringBuilder sbmain = new StringBuilder();
+		StringBuilder sbSubsidiary = null;
 		StringBuilder sbfilter = new StringBuilder();
-		sbmain.append(query.getKeyword());		
-		sbmain.append(" ");
-		if (query.getKeyword().equalsIgnoreCase("construct")) {
-			sbmain.append("{");
-		}
-		if (query.isDistinct()) {
-			sbmain.append("distinct ");
-		}
-		
 		List<VariableNode> vars = query.getVariables();
-		List<GraphPatternElement> elements = query.getPatterns();
-		if (vars != null && vars.size() > 0) {
-			for (int i = 0; i < vars.size(); i++) {
-				if (i > 0) sbmain.append(" ");
-				sbmain.append("?" + vars.get(i).getName());
+		if (query instanceof Update) {
+			if (((Update)query).getKeyword() != null) {
+				sbmain.append(((Update)query).getKeyword());
+				sbmain.append(" {");
+				List<GraphPatternElement> delements = ((Update)query).getDeletePatterns();
+				if (delements != null) {
+					int tripleCtr = 0;
+					for (GraphPatternElement el : delements) {
+						tripleCtr = processGraphPatternElement(el, sbmain, sbfilter, tripleCtr);
+					}
+				}
+				sbmain.append("} ");
 			}
+			if (((Update)query).getSecondKeyword() != null) {
+				sbSubsidiary = new StringBuilder();
+				sbSubsidiary.append(((Update)query).getSecondKeyword());
+				sbSubsidiary.append(" {");
+				List<GraphPatternElement> ielements = ((Update)query).getInsertPatterns();
+				if (ielements != null) {
+					int tripleCtr = 0;
+					for (GraphPatternElement el : ielements) {
+						tripleCtr = processGraphPatternElement(el, sbSubsidiary, sbfilter, tripleCtr);
+					}
+				}
+				sbSubsidiary.append("} ");
+			}
+			sbmain.append(sbSubsidiary);
 		}
 		else {
-			sbmain.append("*");
+			sbmain.append(query.getKeyword());		
+			sbmain.append(" ");
+			if (query.getKeyword().equalsIgnoreCase("construct")) {
+				sbmain.append("{");
+			}
+			if (query.isDistinct()) {
+				sbmain.append("distinct ");
+			}
+			if (vars != null && vars.size() > 0) {
+				for (int i = 0; i < vars.size(); i++) {
+					if (i > 0) sbmain.append(" ");
+					sbmain.append("?" + vars.get(i).getName());
+				}
+			}
+			else {
+				sbmain.append("*");
+			}
+			if (query.getKeyword().equalsIgnoreCase("construct")) {
+				sbmain.append("} ");
+			}
 		}
-		if (query.getKeyword().equalsIgnoreCase("construct")) {
-			sbmain.append("} ");
-		}
+
+		List<GraphPatternElement> elements = query.getPatterns();
 		sbmain.append(" where {");
-		
+			
 		int tripleCtr = 0; 
-		int builtinCtr = 0;
+//			int builtinCtr = 0;
 		for (int i = 0; elements != null && i < elements.size(); i++) {
 			GraphPatternElement gpe = elements.get(i);
 			// need to handle or, and
-			if (gpe instanceof Junction) {
-				if (tripleCtr++ > 0) sbmain.append(" . ");
-				String junctionStr = junctionToQueryString((Junction)gpe, sbfilter);
-				sbmain.append(junctionStr);
-			}
-			else if (gpe instanceof TripleElement) {
-				if (tripleCtr++ > 0) sbmain.append(" . ");
-				String jenaStr = graphPatternElementToJenaQueryString(gpe, sbfilter, TranslationTarget.QUERY_TRIPLE, RulePart.NOT_A_RULE);
-				sbmain.append(jenaStr);
-			}
-			else if (gpe instanceof BuiltinElement) {
-//				if (builtinCtr++ > 0) {
-//					sbfilter.append(" && ");
-//				}
-//				else {
-//					sbfilter.append("FILTER (");
-//				}
-//				sbfilter.append(graphPatternElementToJenaQueryString(gpe, sbfilter, TranslationTarget.QUERY_FILTER));
-				// the filter string will be added in the method
-				graphPatternElementToJenaQueryString(gpe, sbfilter, TranslationTarget.QUERY_FILTER, RulePart.NOT_A_RULE);
-			}
+			tripleCtr = processGraphPatternElement(gpe, sbmain, sbfilter, tripleCtr);
 		}
 		if (sbfilter.length() > 0) {
 			sbfilter.insert(0, "FILTER ("); sbfilter.append(")");
@@ -618,7 +632,40 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 		return prepareQuery(model, sbmain.toString());
 	}
+
+
+	private int processGraphPatternElement(GraphPatternElement gpe, StringBuilder sbmain, StringBuilder sbfilter,
+			int tripleCtr) throws TranslationException {
+		if (gpe instanceof Junction) {
+			if (tripleCtr++ > 0) sbmain.append(" . ");
+			String junctionStr = junctionToQueryString((Junction)gpe, sbfilter);
+			sbmain.append(junctionStr);
+		}
+		else if (gpe instanceof TripleElement) {
+			if (tripleCtr++ > 0) sbmain.append(" . ");
+			String jenaStr = graphPatternElementToJenaQueryString(gpe, sbfilter, TranslationTarget.QUERY_TRIPLE, RulePart.NOT_A_RULE);
+			sbmain.append(jenaStr);
+		}
+		else if (gpe instanceof BuiltinElement) {
+//					if (builtinCtr++ > 0) {
+//						sbfilter.append(" && ");
+//					}
+//					else {
+//						sbfilter.append("FILTER (");
+//					}
+//					sbfilter.append(graphPatternElementToJenaQueryString(gpe, sbfilter, TranslationTarget.QUERY_FILTER));
+			// the filter string will be added in the method
+			graphPatternElementToJenaQueryString(gpe, sbfilter, TranslationTarget.QUERY_FILTER, RulePart.NOT_A_RULE);
+		}
+		return tripleCtr;
+	}
 	
+	private String translateUpdate(OntModel model, Update query) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 	/**
 	 * Convert a junction to a query string. Filter stuff goes to the sbfilter StringBuilder, triple stuff gets returned.
 	 * 
@@ -786,7 +833,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		StringBuilder ruleContent = new StringBuilder();
 		for (int i = 0; i < ruleList.size(); i++) {
 			Rule rule = ruleList.get(i);
-			ruleContent.append(translateRule(model, rule));
+			ruleContent.append(translateRule(model, modelName, rule));
 			ruleContent.append("\n");
 		}
 		
@@ -1934,7 +1981,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 
 	@Override
-	public String translateEquation(OntModel model, Equation equation) throws TranslationException {
+	public String translateEquation(OntModel model, String modelName, Equation equation) throws TranslationException {
 		throw new TranslationException("Equation translation not yet implemented in " + this.getClass().getCanonicalName());
 	}
 	

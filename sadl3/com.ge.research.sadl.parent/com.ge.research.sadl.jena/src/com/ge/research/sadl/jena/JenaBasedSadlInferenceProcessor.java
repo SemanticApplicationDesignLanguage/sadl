@@ -775,7 +775,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			newQuery.setPatterns((List<GraphPatternElement>) lst);
 			setVariablesFromPatterns(newQuery);
 			String queryStr = getConfigMgr(getOwlFormat()).getTranslator()
-					.translateQuery(getTheJenaModel(), newQuery);
+					.translateQuery(getTheJenaModel(), getModelName(), newQuery);
 			logger.debug("Translated query: " + queryStr);
 			ResultSet lhResultSet = reasoner.ask(queryStr);
 			if (lhResultSet != null) {
@@ -922,7 +922,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					tmpQuery.setSparqlQueryString(litObj.toString());
 					try {
 						String queryStr = getConfigMgr(getOwlFormat()).getTranslator()
-								.translateQuery(getTheJenaModel(), tmpQuery);
+								.translateQuery(getTheJenaModel(), getModelName(), tmpQuery);
 						logger.debug("Found SPARQL query as literal: "
 								+ queryStr);
 						obj = reasoner.ask(queryStr);
@@ -948,7 +948,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				String queryStr = null;
 				try {
 					queryStr = getConfigMgr(getOwlFormat()).getTranslator()
-							.translateQuery(getTheJenaModel(), (Query) obj);
+							.translateQuery(getTheJenaModel(), getModelName(), (Query) obj);
 					logger.debug("Translated query: " + queryStr);
 					ResultSet lhResultSet = reasoner.ask(queryStr);
 					obj = lhResultSet;
@@ -1252,12 +1252,12 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		ITranslator translator = null;
 		if (query == null) {
 			try {
-				query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), cmd);
+				query = getConfigMgr(null).getTranslator().translateQuery(getTheJenaModel(), getModelName(), cmd);
 			}
 			catch (UnsupportedOperationException e) {
 				IReasoner defaultReasoner = getConfigMgr(null).getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
 				translator = getConfigMgr(null).getTranslatorForReasoner(defaultReasoner);
-				query = translator.translateQuery(getTheJenaModel(), cmd);
+				query = translator.translateQuery(getTheJenaModel(), getModelName(), cmd);
 			}
 		}
 		query = SadlUtils.stripQuotes(query);
@@ -1280,6 +1280,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			translator = getConfigMgr(getOwlFormat()).getTranslator();
 		}
 		Query q = processQuery(query);
+		q.setUpdate(cmd.isUpdate());
 		q.setGraph(cmd.isGraph());
 		SadlCommandResult result = new SadlCommandResult(q);
 		result.setResults(processAdhocQuery(translator, q));
@@ -1290,12 +1291,12 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	private ResultSet processAdhocQuery(ITranslator translator, Query q) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		String queryString = null;
 		try {
-			queryString = translator.translateQuery(getTheJenaModel(), q);
+			queryString = translator.translateQuery(getTheJenaModel(), getModelName(), q);
 		}
 		catch (UnsupportedOperationException e) {
 			IReasoner defaultReasoner = getConfigMgr(null).getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
 			ITranslator alttranslator = getConfigMgr(null).getTranslatorForReasoner(defaultReasoner);
-			queryString = alttranslator.translateQuery(getTheJenaModel(), q);
+			queryString = alttranslator.translateQuery(getTheJenaModel(), getModelName(), q);
 		}
 		if (queryString == null && q.getSparqlQueryString() != null) {
 			queryString = q.getSparqlQueryString();

@@ -279,6 +279,11 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//QueryStatement/annotations"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//QueryStatement/expr"/>
     </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//UpdateStatement">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UpdateStatement/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UpdateStatement/annotations"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UpdateStatement/expr"/>
+    </genClasses>
     <genClasses ecoreClass="SADL.ecore#//ConstructExpression">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ConstructExpression/subj"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ConstructExpression/pred"/>
@@ -287,6 +292,13 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//AskExpression">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//AskExpression/whereExpression"/>
+    </genClasses>
+    <genClasses ecoreClass="SADL.ecore#//UpdateExpression">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//UpdateExpression/dData"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UpdateExpression/deleteExpression"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//UpdateExpression/iData"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UpdateExpression/insertExpression"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//UpdateExpression/whereExpression"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//TestStatement">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//TestStatement/tests"/>

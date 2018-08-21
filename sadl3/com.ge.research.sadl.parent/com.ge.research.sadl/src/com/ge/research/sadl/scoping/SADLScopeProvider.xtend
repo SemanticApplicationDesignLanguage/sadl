@@ -70,6 +70,8 @@ import static com.ge.research.sadl.processing.SadlConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension com.ge.research.sadl.utils.SadlASTUtils.*
+import com.ge.research.sadl.sADL.UpdateStatement
+import com.ge.research.sadl.sADL.UpdateExpression
 
 /**
  * This class contains custom scoping description.
@@ -190,6 +192,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		if (test?.tests !== null) {
 			return getLocalVariableScope(test.tests, parent)
 		}
+		val update = EcoreUtil2.getContainerOfType(context, UpdateStatement)
+		if (update?.expr !== null) {
+			val uexpr = update.expr as UpdateExpression
+			return getLocalVariableScope(#[uexpr.deleteExpression] + #[uexpr.insertExpression] + #[uexpr.whereExpression], parent)
+		}
 		return parent
 	}
 	
@@ -214,6 +221,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, RuleStatement) !== null)    // we are in the middle of a rule statement (GH-245).
 				) {
 					return true;
+				}
+			} else if (container instanceof UpdateExpression) {
+				if (container.whereExpression instanceof SubjHasProp) {
+					val subjHasProp = container.whereExpression as SubjHasProp
+					return subjHasProp.left === it || subjHasProp.right === it;
 				}
 			} else if (container instanceof SelectExpression) {
 				if (container.whereExpression instanceof SubjHasProp) {

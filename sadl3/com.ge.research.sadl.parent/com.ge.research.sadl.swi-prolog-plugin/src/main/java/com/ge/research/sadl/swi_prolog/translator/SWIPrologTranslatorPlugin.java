@@ -182,7 +182,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 				for (Rule rule: ruleList){
 					//System.out.println(rule.toString());
 //					String ruleStr = toString(rule.getRuleName(),rule.getIfs(),rule.getThens());
-					String ruleStr = translateRule(model, rule);
+					String ruleStr = translateRule(model, modelName, rule);
 					FileInterface.writeFile(fullyQualifiedRulesFilename, ruleStr.trim() + "\n", true);
 				}
 			}
@@ -225,7 +225,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	}
 
 	@Override
-	public String translateRule(OntModel model, Rule rule)
+	public String translateRule(OntModel model, String modelName, Rule rule)
 			throws TranslationException {
 		setRuleInTranslation(rule);
 
@@ -331,7 +331,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	}
 
 	@Override
-	public String translateQuery(OntModel model, Query query)
+	public String translateQuery(OntModel model, String modelName, Query query)
 			throws TranslationException, InvalidNameException {
 		setTheModel(model);
 		
@@ -1716,7 +1716,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	}
 
 	@Override
-	public String translateEquation(OntModel model, Equation equation) throws TranslationException {
+	public String translateEquation(OntModel model, String modelName, Equation equation) throws TranslationException {
 		// TODO Auto-generated method stub
 		return null;
 	}
