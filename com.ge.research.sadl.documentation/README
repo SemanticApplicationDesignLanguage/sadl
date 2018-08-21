@@ -1,6 +1,5 @@
-This project is the source of SADL 2 documentation. 
-All changes to SADL 2 documentation should be made in this project.
-To update SADL 2 documentation on OpenGE, copy this project content to the OpenGE project com.ge.research.sadl.documentation.
+This project is NOT the source of SADL 2 documentation but only a duplicate for upload to OpenGE. 
+Please make all editing changes to the github project, com.ge.research.sadl.documentation.
 
 Also, note that this is NOT the SADL 3 documentation. SADL 3 documentation is in project
 	sadl3/com.ge.research.sadl.parent/com.ge.research.sad3.documentation.
