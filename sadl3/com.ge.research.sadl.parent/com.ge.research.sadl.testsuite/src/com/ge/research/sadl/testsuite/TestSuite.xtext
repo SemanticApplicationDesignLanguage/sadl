@@ -1,0 +1,37 @@
+grammar com.ge.research.sadl.testsuite.TestSuite with org.eclipse.xtext.common.Terminals
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+import "http://www.ge.com/research/sadl/SADL" as sadl
+
+generate testSuite "http://www.ge.com/research/sadl/testsuite/TestSuite" 
+
+//TestModel returns sadl::SadlModel:
+//	super::SadlModel	
+//;
+//
+//@Override
+//SadlModelElement returns sadl::SadlModelElement :
+////	incremental=IncrementalLoad?
+////	infer=InferStmt?
+////	preProcessing+=BeforeTriple*
+//	TestStatement
+//;
+
+TestModel  :
+	tests += Test*
+;	
+
+//@Override
+//SadlImport :
+////    'Test:' importedResource=[SadlModel|STRING] EOS;
+//	'Test:' testResource=STRING EOS;
+
+//@Override 
+//TestStatement :
+Test :
+	'Test:' testResource=[sadl::SadlModel|STRING] EOS;
+//	'Test:' testResource=STRING EOS;
+	
+EOS:
+	'.';
+	
