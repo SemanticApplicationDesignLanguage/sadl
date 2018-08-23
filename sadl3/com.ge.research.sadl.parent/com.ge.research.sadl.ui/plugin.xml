@@ -488,15 +488,15 @@
 	</extension>
   <extension point="org.eclipse.ui.importWizards"> 
 		<category id="com.ge.research.sadl" name="SADL"/>
-<!--		<wizard 
+		<wizard 
 			id="com.ge.research.sadl.geonly.ImportCSVToSadl" 
 			name="CSV Files" 
-			class="com.ge.research.sadl.geonly.ui.imports.SadlCSVImportWizard"
+			class="com.ge.research.sadl.ui.imports.SadlCSVImportWizard"
 			icon="icons/import_folder.gif" 
 			category="com.ge.research.sadl">
 			<description>Import CSV files to a SADL project</description> 
 			<selection class="org.eclipse.core.resources.IFile" name="*.csv"/> 
-		</wizard> -->
+		</wizard>
 <!--		<wizard 
 			id="com.ge.research.sadl.geonly.ImportXLSToSadl" 
 			name="Excel Files" 
