@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: com.ge.research.sadl.importer.ui
+Bundle-ManifestVersion: 2
+Bundle-Name: com.ge.research.sadl.importer.ui
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: com.ge.research.sadl.importer.ui; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: com.ge.research.sadl.importer,
+ com.ge.research.sadl.importer.ide,
+ org.eclipse.xtext.ui,
+ org.eclipse.xtext.ui.shared,
+ org.eclipse.xtext.ui.codetemplates.ui,
+ org.eclipse.ui.editors;bundle-version="3.5.0",
+ org.eclipse.ui.ide;bundle-version="3.5.0",
+ org.eclipse.ui,
+ org.eclipse.compare,
+ org.eclipse.xtext.builder,
+ org.eclipse.xtend.lib;resolution:=optional,
+ org.eclipse.xtext.xbase.lib,
+ com.ge.research.jena,
+ com.ge.research.sadl.jena-wrapper-for-sadl,
+ com.ge.research.sadl.ui,
+ com.ge.research.sadl.jena
+Import-Package: com.hp.hpl.jena.query,
+ com.hp.hpl.jena.rdf.model,
+ org.apache.log4j
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.ge.research.sadl.importer.ui.quickfix,
+ com.ge.research.sadl.importer.ui.contentassist,
+ com.ge.research.sadl.importer.ui.internal
+Bundle-Activator: com.ge.research.sadl.importer.ui.internal.ImporterActivator
