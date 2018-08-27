@@ -8810,6 +8810,40 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		return false;
 	}
+	
+	private void checkForExistingRangeOnPropertyForCondition(Property aProperty, RDFNode aRangeNode, EObject aCondition) {
+		OntResource rng = null;
+		if (aProperty.canAs(DatatypeProperty.class)) {
+			rng = aProperty.as(DatatypeProperty.class).getRange();
+		}else if(aProperty.canAs(ObjectProperty.class)) {
+			rng = aProperty.as(ObjectProperty.class).getRange();
+		}
+		if (rng != null) {
+			if(rng.equals(aRangeNode)) {
+				return;
+			}else if(rng.canAs(UnionClass.class)) {
+				for(OntClass rngOperand : rng.as(UnionClass.class).listOperands().toList()) {
+					if(rngOperand.equals(aRangeNode)) {
+						return;
+					}
+				}
+			}else {
+				for(Statement stmt : getTheJenaModel().listStatements(null, OWL.onProperty, aProperty).toList()) {
+					com.hp.hpl.jena.rdf.model.Resource subjectResource = stmt.getSubject();
+					if(subjectResource.canAs(AllValuesFromRestriction.class)) {
+						com.hp.hpl.jena.rdf.model.Resource avf = subjectResource.as(AllValuesFromRestriction.class).getAllValuesFrom();
+						if(avf.equals(aRangeNode)) {
+							return;
+						}
+						if(avf.canAs(OntClass.class) && aRangeNode.canAs(OntClass.class) && SadlUtils.classIsSuperClassOf(avf.as(OntClass.class), aRangeNode.as(OntClass.class))) {
+							return;
+						}
+					}
+				}
+			}
+			//addError(SadlErrorMessages.CANNOT_ASSIGN_EXISTING.get("range", nodeToString(aProperty), nodeToString(rng)), aCondition);
+		}
+	}
 
 	private void addPropertyDomain(Property prop, OntResource cls, EObject context) throws JenaProcessorException {
 		boolean addNewDomain = true;
@@ -9707,6 +9741,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addError(SadlErrorMessages.CANNOT_CREATE.get("all values from restriction",
 						"restriction on unresolvable property value restriction"), type);
 			} else {
+				checkForExistingRangeOnPropertyForCondition(prop, typersrc, cond);
 				AllValuesFromRestriction avf = getTheJenaModel().createAllValuesFromRestriction(null, prop, typersrc);
 				logger.debug("New all values from restriction on '" + prop.getURI() + "' to values of type '"
 						+ typersrc.toString() + "'");
