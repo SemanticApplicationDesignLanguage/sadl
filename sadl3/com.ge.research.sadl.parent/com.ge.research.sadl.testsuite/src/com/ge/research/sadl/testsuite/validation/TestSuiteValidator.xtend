@@ -3,11 +3,9 @@
  */
 package com.ge.research.sadl.testsuite.validation
 
-import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.testsuite.testSuite.TestModel
 import com.ge.research.sadl.testsuite.testSuite.TestSuitePackage
 import org.eclipse.xtext.validation.Check
-import com.ge.research.sadl.testsuite.testSuite.Test
-import com.ge.research.sadl.testsuite.testSuite.TestModel
 
 /**
  * This class contains custom validation rules. 
@@ -29,15 +27,16 @@ class TestSuiteValidator extends AbstractTestSuiteValidator {
 
 	@Check
 	def checkSadlModel(TestModel model) {
-		if (model.eContainer instanceof Test) {
-			val tst = model.eContainer as Test
-			val root = tst.eContainer as SadlModel
-			var boolean found = false;
-			for (t : root.elements) {
-				if (t.equals(model)) {
-					if (found) {
-						warning("Duplicate test", model, TestSuitePackage.Literals.TEST__TEST_RESOURCE)
-					}
+		val tsts = model.tests
+		var tstsFound = newArrayList
+		for (tst : tsts) {
+			if (tst.testResource !== null) {
+				val tsturi = tst.testResource.baseUri
+				if (tstsFound.contains(tsturi)) {
+					warning("Duplicate test", tst, TestSuitePackage.Literals.TEST__TEST_RESOURCE)
+				}
+				else {
+					tstsFound.add(tsturi);
 				}
 			}
 		}
