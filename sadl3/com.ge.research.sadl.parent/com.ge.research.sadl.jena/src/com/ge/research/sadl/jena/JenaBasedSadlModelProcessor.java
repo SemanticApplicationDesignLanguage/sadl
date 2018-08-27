@@ -3821,7 +3821,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}	
 			}
-	}
+		}
 
 		if (optype == BuiltinType.Equal || optype == BuiltinType.NotEqual) {
 			// If we're doing an assignment, we can simplify the pattern.
@@ -3978,8 +3978,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if(right.getFuncName() == "not") {
 					//Pull up the not to the outside operator with the "is" operator nested     			
 					Node right_arg = right.getArguments().get(0);
-					GraphPatternElement bi = createBinaryBuiltin(op, lobj, right_arg);     			
-					Object ubi = createUnaryBuiltin(container, "not", bi);
+					GraphPatternElement bi = createBinaryBuiltin(op, lobj, right_arg); 
+					Object biWithImpliedProperties = applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi);
+					Object ubi = createUnaryBuiltin(container, "not", biWithImpliedProperties);
 					return combineRest(ubi, rest);
 				}
 
