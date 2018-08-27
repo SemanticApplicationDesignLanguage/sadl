@@ -1,0 +1,43 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:Measurement="http://sadl.org/Measurement.sadl"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:trbn="http://sadl.org/Turbine.sadl#"
+  xml:base="http://sadl.org/Turbine.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="Measurement.sadl"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Turbine.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Generator"/>
+  <owl:Class rdf:ID="Turbine">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="drives"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="#drives">
+    <rdfs:domain rdf:resource="#Turbine"/>
+    <rdfs:range rdf:resource="#Generator"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="speed">
+    <rdfs:domain rdf:resource="#Turbine"/>
+    <rdfs:range rdf:resource="Measurement.sadl#AngularSpeed"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="power">
+    <rdfs:domain rdf:resource="#Generator"/>
+    <rdfs:range rdf:resource="Measurement.sadl#Power"/>
+  </owl:ObjectProperty>
+</rdf:RDF>
