@@ -8821,23 +8821,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (rng != null) {
 			if(rng.equals(aRangeNode)) {
 				return;
-			}else if(rng.canAs(UnionClass.class)) {
+			}
+			if(rng.canAs(UnionClass.class)) {
 				for(OntClass rngOperand : rng.as(UnionClass.class).listOperands().toList()) {
 					if(rngOperand.equals(aRangeNode)) {
 						return;
 					}
 				}
-			}else {
-				for(Statement stmt : getTheJenaModel().listStatements(null, OWL.onProperty, aProperty).toList()) {
-					com.hp.hpl.jena.rdf.model.Resource subjectResource = stmt.getSubject();
-					if(subjectResource.canAs(AllValuesFromRestriction.class)) {
-						com.hp.hpl.jena.rdf.model.Resource avf = subjectResource.as(AllValuesFromRestriction.class).getAllValuesFrom();
-						if(avf.equals(aRangeNode)) {
-							return;
-						}
-						if(avf.canAs(OntClass.class) && aRangeNode.canAs(OntClass.class) && SadlUtils.classIsSuperClassOf(avf.as(OntClass.class), aRangeNode.as(OntClass.class))) {
-							return;
-						}
+			}
+			for(Statement stmt : getTheJenaModel().listStatements(null, OWL.onProperty, aProperty).toList()) {
+				com.hp.hpl.jena.rdf.model.Resource subjectResource = stmt.getSubject();
+				if(subjectResource.canAs(AllValuesFromRestriction.class)) {
+					com.hp.hpl.jena.rdf.model.Resource avf = subjectResource.as(AllValuesFromRestriction.class).getAllValuesFrom();
+					if(avf.equals(aRangeNode)) {
+						return;
+					}
+					if(avf.canAs(OntClass.class) && aRangeNode.canAs(OntClass.class) && SadlUtils.classIsSuperClassOf(avf.as(OntClass.class), aRangeNode.as(OntClass.class))) {
+						return;
 					}
 				}
 			}
