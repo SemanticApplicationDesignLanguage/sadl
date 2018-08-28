@@ -624,7 +624,7 @@ public class SadlUtils {
     		try {
     			if (isNumeric) {
     				if (v instanceof String) {
-    					v = stringToNumber(v, rnguri);
+    					v = new BigDecimal((String)v);
     		        	rdfTypeValid = rdftype.isValidValue(v);
      					if (rdfTypeValid) {
     						val = m.createTypedLiteral(vorig, rdftype);
@@ -818,15 +818,15 @@ public class SadlUtils {
         return val;
     }
 
-	private static Object stringToNumber(Object v, String rnguri) {
-		if (((String) v).contains(".")) {
-			v = Double.parseDouble(stripQuotes((String)v));
-		}
-		else {
-			v = Long.parseLong(stripQuotes((String)v));
-		}
-		return v;
-	}
+//	private static Object stringToNumber(Object v, String rnguri) {
+//		if (((String) v).contains(".")) {
+//			v = Double.parseDouble(stripQuotes((String)v));
+//		}
+//		else {
+//			v = Long.parseLong(stripQuotes((String)v));
+//		}
+//		return v;
+//	}
 
 	private static boolean isNumericRange(String rnguri) {
         if (rnguri.endsWith("float")) {
