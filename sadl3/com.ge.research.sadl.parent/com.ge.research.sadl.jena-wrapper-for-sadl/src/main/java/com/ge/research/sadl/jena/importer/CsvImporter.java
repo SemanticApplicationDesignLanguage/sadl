@@ -167,6 +167,7 @@ public class CsvImporter implements ITabularDataImporter {
 	private OntModel importModel = null;	// the model of all imports, with import statements removed, for use with import of TDB inferred model
 	private List<String> indirectImportNamespaces = null;	// the namespaces that are not direct imports, needed to resolve unqualified local names
 	private SadlUtils sadlUtils = null;
+	private boolean processed = false;	// has this set of inputs been processed?
 
 	/**
 	 * Inner class to represent an RDF Triple pattern with the objects it contains and
@@ -889,6 +890,7 @@ public class CsvImporter implements ITabularDataImporter {
 		_csvFilename = validateFile(_csvFilename, false);
 		csvInputStream = new FileInputStream(_csvFilename);
 		setIncludesHeader(_includesHeader);
+		processed = false; // set or reset
 	}
 
 	/* (non-Javadoc)
@@ -898,6 +900,7 @@ public class CsvImporter implements ITabularDataImporter {
 	public void setImportDataSource(DataSource csvDs, boolean _includesHeader) throws IOException {
 		csvInputStream = csvDs.getInputStream();
 		setIncludesHeader(_includesHeader);
+		processed = false; // set or reset
 	}
 
 	/* (non-Javadoc)
@@ -907,6 +910,7 @@ public class CsvImporter implements ITabularDataImporter {
 	public void setImportModelNamespace(String ns) throws MalformedURLException {
 		ns = stripNamespaceDelimiter(ns);
 		importModelNS = getSadlUtils().validateHTTP_URI(ns);
+		processed = false; // set or reset
 	}
 
 
@@ -967,6 +971,7 @@ public class CsvImporter implements ITabularDataImporter {
 			sb.append(_imports.get(i));
 		}
 		setImports(sb.toString());
+		processed = false; // set or reset
 	}
 
 	/* (non-Javadoc)
@@ -984,6 +989,7 @@ public class CsvImporter implements ITabularDataImporter {
 				imports[i] = rawImport;
 			}
 		}
+		processed = false; // set or reset
 	}
 
 	private void prepareNewModel(int arraypos) throws ConfigurationException {
@@ -1034,6 +1040,8 @@ public class CsvImporter implements ITabularDataImporter {
 		if (template == null || template.length() <= 0) {
 			throw new ConfigurationException("template is null or empty");
 		}
+		processed = false; // set or reset
+
 		String templateString = null;
 		allocateOntModelsArray(numThreads);		// this initially sets the array size to 1.
 		// it is included in the case that no number was given for the "parallel" tag
@@ -1262,6 +1270,12 @@ public class CsvImporter implements ITabularDataImporter {
 								gtr.setEndingTriple(groupEndLine);
 								groups.put(maxNull, gtr);
 							}
+						}
+						if (importModelNS == null) {
+							if (tripleCount == 1) {
+								throw new ConfigurationException("No import model namespace specified; if input was a file name please prefix with 'file:/'.");
+							}
+							throw new ConfigurationException("No import model namespace specified.");
 						}
 						if (groupingOnly) {
 							tripleCount--;
@@ -2051,6 +2065,9 @@ public class CsvImporter implements ITabularDataImporter {
 
 	private boolean doImport(InputStreamReader isReader) throws ConfigurationException, IOException, InvalidNameException, AbortDataRowException, QueryCancelledException, ReasonerNotFoundException {
 		try {
+			if (processed ) {
+				return true;
+			}
 			if (varMap == null) {
 				throw new ConfigurationException("There are no variables found in the template; can't do import.");
 			}
@@ -2197,6 +2214,7 @@ public class CsvImporter implements ITabularDataImporter {
 		finally {
 			
 		}
+		processed = true;
 		return true;
 	}
 
@@ -3225,6 +3243,7 @@ public class CsvImporter implements ITabularDataImporter {
 					templateLine = templateLine.substring(0,templateLine.length()-1);
 					usesCR = true;
 				}
+				templateLine = dropEOS(templateLine);
 //				if (templateLine.matches("\\s*uri\\s+\\S*\\s*")) {
 				if (templateLine.matches("\\s*uri\\s+\\S*.*")) {
 					String uri = templateLine.replaceFirst("\\s*uri\\s+","").trim();
@@ -3261,6 +3280,19 @@ public class CsvImporter implements ITabularDataImporter {
 		returnObject[1] = templateImports;
 		returnObject[2] = templateSb.toString();;
 		return returnObject;
+	}
+
+	/**
+	 * Method to drop a trailing period, if present, as it is the End of Statement.
+	 * @param templateLine
+	 * @return
+	 */
+	public static String dropEOS(String templateLine) {
+		if (templateLine.trim().endsWith(".")) {
+			int len = templateLine.trim().length();
+			templateLine = templateLine.trim().substring(0, len - 1);
+		}
+		return templateLine;
 	}
 
 	public class WorkerThread implements Runnable {

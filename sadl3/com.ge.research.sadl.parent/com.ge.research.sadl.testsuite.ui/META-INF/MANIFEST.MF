@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: com.ge.research.sadl.testsuite.ui
+Bundle-ManifestVersion: 2
+Bundle-Name: com.ge.research.sadl.testsuite.ui
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: com.ge.research.sadl.testsuite.ui; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: com.ge.research.sadl.testsuite,
+ com.ge.research.sadl.testsuite.ide,
+ org.eclipse.xtext.ui,
+ org.eclipse.xtext.ui.shared,
+ org.eclipse.xtext.ui.codetemplates.ui,
+ org.eclipse.ui.editors;bundle-version="3.5.0",
+ org.eclipse.ui.ide;bundle-version="3.5.0",
+ org.eclipse.ui,
+ org.eclipse.compare,
+ org.eclipse.xtext.builder,
+ org.eclipse.xtend.lib;resolution:=optional,
+ org.eclipse.xtext.xbase.lib,
+ com.ge.research.jena;bundle-version="3.2.0",
+ com.ge.research.sadl;bundle-version="3.2.0",
+ com.ge.research.sadl.ui;bundle-version="3.2.0"
+Import-Package: org.apache.log4j
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.ge.research.sadl.testsuite.ui.internal,
+ com.ge.research.sadl.testsuite.ui.quickfix,
+ com.ge.research.sadl.testsuite.ui.contentassist
+Bundle-Activator: com.ge.research.sadl.testsuite.ui.internal.TestsuiteActivator

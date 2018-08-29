@@ -1,0 +1,56 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:j.0="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#">
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Turbine.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/CsvImporterDocExample/OwlModels/Turbine.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >trbn</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Measurement.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/CsvImporterDocExample/OwlModels/Measurement.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Measurement.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/CsvImporterDocExample/OwlModels/Measurement.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Measurement</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/builtinfunctions"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/CsvImporterDocExample/OwlModels/SadlBuiltinFunctions.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >builtinfunctions</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadlimplicitmodel"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/CsvImporterDocExample/OwlModels/SadlImplicitModel.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >sadlimplicitmodel</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Turbine.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/CsvImporterDocExample/OwlModels/Turbine.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadlbasemodel"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/CvsImporterDocExample/OwlModels/SadlBaseModel.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >sadlbasemodel</j.0:prefix>
+  </j.0:OntologySpec>
+</rdf:RDF>

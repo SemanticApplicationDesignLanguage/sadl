@@ -39,6 +39,7 @@ SadlModelElement :
 	|	ExpressionStatement => EOS
 	|	RuleStatement => EOS
 	|	QueryStatement => EOS
+	|	UpdateStatement => EOS
 	|	TestStatement => EOS
 	| 	PrintStatement => EOS
 	|	ReadStatement => EOS
@@ -264,6 +265,13 @@ QueryStatement returns ExpressionScope :
 	)
 ;
 
+UpdateStatement returns ExpressionScope :
+	{UpdateStatement}
+	'Update' ((name=SadlResource (annotations+=NamedStructureAnnotation)* )? ':' expr=(UpdateExpression | Expression)
+		| name=SadlResource
+	)
+;
+
 ConstructExpression returns Expression :
 	{ConstructExpression}
 	'construct' subj=SadlResource ','? pred=SadlResource ','? obj=SadlResource 'where' whereExpression=Expression
@@ -272,6 +280,13 @@ ConstructExpression returns Expression :
 AskExpression returns Expression :
 	{AskExpression}
 	'ask' 'where' whereExpression=Expression
+;
+
+UpdateExpression returns Expression :
+	{UpdateExpression}
+	('delete' dData='data'? deleteExpression=Expression)?
+	('insert' iData='data'? insertExpression=Expression)?
+	('where' whereExpression=Expression)?
 ;
 
 TestStatement returns ExpressionScope :

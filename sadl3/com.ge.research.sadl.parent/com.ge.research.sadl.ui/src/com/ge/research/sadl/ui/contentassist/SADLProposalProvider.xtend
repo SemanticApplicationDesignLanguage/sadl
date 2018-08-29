@@ -105,7 +105,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			!alreadyImportedFiles.contains(name?.toString);
 	}
 
-	override def void completeSadlImport_ImportedResource(EObject model, Assignment assignment,
+	override void completeSadlImport_ImportedResource(EObject model, Assignment assignment,
 		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 
 		val term = assignment.terminal;

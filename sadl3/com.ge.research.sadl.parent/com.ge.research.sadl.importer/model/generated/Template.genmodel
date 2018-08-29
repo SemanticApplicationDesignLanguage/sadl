@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="***********************************************************************&#xD;&#xA;Copyright 2007-2016- General Electric Company, All Rights Reserved&#xD;&#xA; *&#xD;&#xA;Project: SADL&#xD;&#xA; *&#xD;&#xA;Description: The Semantic Application Design Language (SADL) is a&#xD;&#xA;language for building semantic models and expressing rules that&#xD;&#xA;capture additional domain knowledge. The SADL-IDE (integrated&#xD;&#xA;development environment) is a set of Eclipse plug-ins that&#xD;&#xA;support the editing and testing of semantic models using the&#xD;&#xA;SADL language.&#xD;&#xA; *&#xD;&#xA;This software is distributed &quot;AS-IS&quot; without ANY WARRANTIES&#xD;&#xA;and licensed under the Eclipse Public License - v 1.0&#xD;&#xA;which is available at http://www.eclipse.org/org/documents/epl-v10.php&#xD;&#xA; *&#xD;&#xA; **********************************************************************"
+    modelDirectory="/com.ge.research.sadl.importer/src-gen" modelPluginID="com.ge.research.sadl.importer"
+    forceOverwrite="true" modelName="Template" updateClasspath="false" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    complianceLevel="6.0" copyrightFields="false" runtimeVersion="2.12" usedGenPackages="platform:/resource/com.ge.research.sadl/model/generated/SADL.genmodel#//sADL">
+  <genPackages prefix="Template" basePackage="com.ge.research.sadl.importer" disposableProviderFactory="true"
+      fileExtensions="tmpl" ecorePackage="Template.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="Template.ecore#//SadlDataType">
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/string"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/boolean"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/decimal"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/int"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/long"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/float"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/double"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/duration"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/dateTime"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/time"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/date"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/gYearMonth"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/gYear"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/gMonthDay"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/gDay"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/gMonth"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/hexBinary"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/base64Binary"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/anyURI"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/integer"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/negativeInteger"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/nonNegativeInteger"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/positiveInteger"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/nonPositiveInteger"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/byte"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/unsignedByte"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/unsignedInt"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//SadlDataType/anySimpleType"/>
+    </genEnums>
+    <genClasses ecoreClass="Template.ecore#//TemplateModel">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//TemplateModel/baseUri"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//TemplateModel/alias"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//TemplateModel/version"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TemplateModel/annotations"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TemplateModel/imports"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TemplateModel/elements"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//SadlAnnotation">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SadlAnnotation/type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SadlAnnotation/contents"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//SadlImport">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Template.ecore#//SadlImport/importedResource"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SadlImport/alias"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//TemplateModelElement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//TemplateModelElement/incremental"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TemplateModelElement/infer"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TemplateModelElement/preProcessing"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//InferStmt">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//InferStmt/inf"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//InferStmt/chunksize"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//InferStmt/threads"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//BeforeTriple">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//BeforeTriple/trans"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//BeforeTriple/val"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Validate">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Validate/col"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Validate/vnb"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Validate/ve"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Validate/vdt"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Validate/vrdft"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Validate/vrdfssc"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Rdftype">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Rdftype/rdftype"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//RdfsSubClass">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//RdfsSubClass/rdfssc"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//NotBlank">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//NotBlank/sk"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//NotBlank/ab"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//NotBlank/ge"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Skip">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Skip/sk"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Skip/scope"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Generate">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Generate/baseURI"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//DType">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//DType/dataType"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//TemplateStatement"/>
+    <genClasses ecoreClass="Template.ecore#//Triple">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Triple/subj"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Triple/pred"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Triple/objval"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Triple/dataval"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Transform">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Transform/from"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Transform/tt"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//TransformFrom">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//TransformFrom/firstfrom"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//UserDefinedFunction">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//UserDefinedFunction/to"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//UserDefinedFunction/funcname"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//UserDefinedFunction/firstArg"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//UserDefinedFunction/otherArgsA"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Split">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Split/to"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Split/delimiter"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Encode">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Encode/to"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Encode/mappings"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//EncodeMappings">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//EncodeMappings/mapping"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//EncodeMapping">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//EncodeMapping/before"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//EncodeMapping/after"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Find">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Find/to"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Find/query"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Group">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Group/groupLines"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Ref">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Ref/ref"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Ref/addlcols"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Ref/row"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//PredRef"/>
+    <genClasses ecoreClass="Template.ecore#//SpecialPred">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SpecialPred/kws"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//SadlExplicitValue"/>
+    <genClasses ecoreClass="Template.ecore#//SadlExplicitValueLiteral"/>
+    <genClasses ecoreClass="Template.ecore#//SadlValueList">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//SadlValueList/explicitValues"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//SadlUnaryExpression">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SadlUnaryExpression/operator"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//SadlUnaryExpression/value"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//SadlNumberLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SadlNumberLiteral/literalNumber"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SadlNumberLiteral/unit"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//SadlStringLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SadlStringLiteral/literalString"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//SadlBooleanLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SadlBooleanLiteral/truethy"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//SadlConstantLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SadlConstantLiteral/term"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>
