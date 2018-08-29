@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+   <extension-point id="template_model_processor" name="Template Model Processor" schema="schema/template_model_processor.exsd"/>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package 
+			uri = "http://www.ge.com/research/sadl/importer/Template"
+			class = "com.ge.research.sadl.importer.template.TemplatePackage"
+			genModel = "model/generated/Template.genmodel" />
+	</extension>
+ <extension
+       point="com.ge.research.sadl.sadl_implicit_model_fragment_provider">
+    <provider
+          class="com.ge.research.sadl.requirements.RequirementsImplicitModelFragmentProvider">
+    </provider>
+ </extension>
+</plugin>

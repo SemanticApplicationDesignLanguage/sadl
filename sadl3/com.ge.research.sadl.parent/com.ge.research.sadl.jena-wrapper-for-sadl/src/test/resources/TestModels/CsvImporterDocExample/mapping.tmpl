@@ -1,0 +1,17 @@
+uri "http://sadl.org/TurbineImport" alias trbnimprt.
+
+import "http://sadl.org/Turbine.sadl".
+
+T<TurbineID> rdf:type Turbine.
+T<TurbineID> speed <1>.
+<1> rdf:type Speed.
+<1> value <Speed>.
+<1> unit RPM.
+<1> timestamp <Time>.
+T<TurbineID> drives Gen<TurbineID>.
+Gen<TurbineID> rdf:type Generator.
+Gen<TurbineID> power <2>.
+<2> rdf:type Power.
+<2> value <Power>.
+<2> unit MW.
+<2> timestamp <Time>.

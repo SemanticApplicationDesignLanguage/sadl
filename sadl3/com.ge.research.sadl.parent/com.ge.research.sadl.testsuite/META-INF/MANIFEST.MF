@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: com.ge.research.sadl.testsuite
+Bundle-ManifestVersion: 2
+Bundle-Name: com.ge.research.sadl.testsuite
+Bundle-Vendor: General Electric Company
+Bundle-Version: 3.2.0
+Bundle-SymbolicName: com.ge.research.sadl.testsuite; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common,
+ com.ge.research.jena,
+ com.ge.research.sadl,
+ org.eclipse.xtext.xbase.lib,
+ org.antlr.runtime,
+ org.eclipse.xtext.util,
+ org.eclipse.xtend.lib,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.common,
+ org.apache.commons.logging,
+ org.apache.log4j,
+ com.ge.research.sadl.xtextgenerator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.ge.research.sadl.testsuite.validation,
+ com.ge.research.sadl.testsuite,
+ com.ge.research.sadl.testsuite.scoping,
+ com.ge.research.sadl.testsuite.parser.antlr,
+ com.ge.research.sadl.testsuite.parser.antlr.internal,
+ com.ge.research.sadl.testsuite.generator,
+ com.ge.research.sadl.testsuite.services,
+ com.ge.research.sadl.testsuite.testSuite.util,
+ com.ge.research.sadl.testsuite.testSuite,
+ com.ge.research.sadl.testsuite.testSuite.impl
+Import-Package: org.apache.log4j

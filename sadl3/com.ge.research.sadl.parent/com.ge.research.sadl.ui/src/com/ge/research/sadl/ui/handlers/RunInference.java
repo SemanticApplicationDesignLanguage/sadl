@@ -8,11 +8,13 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import javax.activation.DataSource;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -24,6 +26,7 @@ import org.eclipse.xtext.validation.Issue;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
+import com.ge.research.sadl.jena.importer.CsvImporter;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.gp.EndWrite;
 import com.ge.research.sadl.model.gp.Explain;
@@ -33,8 +36,11 @@ import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.model.gp.TestResult;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlCommandResult;
@@ -150,10 +156,21 @@ public class RunInference extends SadlActionHandler {
 		        			}
 		        		}
     					else {
-    						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + " is empty\n");
     						if (cmd instanceof Query) {
-    							String msg = "Query: " + ((Query)cmd).toString() + "\n";
+    							String msg;
+    							if (((Query)cmd).isUpdate()) {
+    								msg = "Update: " + ((Query)cmd).toString() + "\n";
+    							}
+    							else {
+    								msg = "Query: " + ((Query)cmd).toString() + "\n";
+    							}
     							SadlConsole.writeToConsole(MessageType.INFO, msg);
+    							if (!((Query)cmd).isUpdate()) {
+    	    						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + " is empty\n");
+    							}
+    						}
+    						else {
+        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + " is empty\n");
     						}
     					}
 		        		if (errors != null) {
@@ -179,7 +196,54 @@ public class RunInference extends SadlActionHandler {
 				}
 				else if (trgtFile.getFileExtension().equals("test")) {
 					// run test suite
-					SadlConsole.writeToConsole(MessageType.INFO, "Testing of suite '" +  trgtFile.getFullPath().toPortableString() + "' requested. Not Yet Implemented.\n");
+					SadlConsole.writeToConsole(MessageType.INFO, "Testing of suite '" +  trgtFile.getFullPath().toPortableString() + "' requested.\n");
+			    	File f = new File(trgtFile.getRawLocationURI().getPath());
+			    	List<String> templateImports = new ArrayList<String>();
+					Scanner s = new Scanner(f).useDelimiter("\\n");
+					int totalTestCount = 0;
+					int passedTestCount = 0;
+					while (s.hasNext()) {
+						String templateLine = s.next();
+						templateLine = CsvImporter.dropEOS(templateLine);
+						if (templateLine.trim().startsWith("Test:")) {
+							int testLoc = templateLine.indexOf("Test:");
+							String testfile = templateLine.substring(testLoc + 5).trim();
+							String modelFolderPath = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toOSString());
+							String owlModelPath = modelFolderPath + "/" + trgtFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment();
+							IConfigurationManager configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderPath, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+							String actualUrl = new SadlUtils().fileUrlToFileName(configMgr.getAltUrlFromPublicUri(SadlUtils.stripQuotes(testfile)));
+							File actualFile = new File(actualUrl);
+							String fileName = actualFile.getName();
+							fileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".sadl";
+							IFile file = findFileRecursively(project, fileName);
+							if (file != null) {
+								Resource res = prepareActionHandler(project, file);
+								if (res != null) {
+									Object[] retvals = processor.runInference(res, actualUrl, modelFolderPath, prefMap);
+									for (int i = 0; retvals != null && i < retvals.length; i++) {
+										SadlCommandResult result = (SadlCommandResult) retvals[i];
+						        		SadlCommand cmd = result.getCmd();
+						        		Object infresults = result.getResults();										Object retval = retvals[i];
+										if (infresults instanceof TestResult) {
+			        						TestResult tr = (TestResult)infresults;
+			        						totalTestCount++;
+//			        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
+			        						String msg;
+			        						if (tr.isPassed()) {
+			        							msg = "Test passed: " + cmd.toString() + "\n";
+			        							passedTestCount++;
+			        						}
+			        						else {
+			        							msg = "Test failed: " + cmd.toString() + "(" + tr.toString() + ")\n";
+			        						}
+			        						SadlConsole.writeToConsole(MessageType.INFO, msg);
+										}
+									}
+								}
+							}
+						}
+					}
+					SadlConsole.writeToConsole(MessageType.INFO, "Completed test suite'" +  trgtFile.getFullPath().toPortableString() + "': passed " + passedTestCount + " of " + totalTestCount + " tests.\n");
 				}
 			}
 			else {
@@ -194,6 +258,21 @@ public class RunInference extends SadlActionHandler {
 		}
 
 		return event;
+	}
+	
+	public IFile findFileRecursively(IContainer container, String name) throws CoreException {
+	    for (IResource r : container.members()) {
+	        if (r instanceof IContainer) {
+	            IFile file = findFileRecursively((IContainer) r, name);
+	            if(file != null) {
+	                return file;
+	            }
+	        } else if (r instanceof IFile && r.getName().equals(name)) {
+	            return (IFile) r;
+	        }
+	    }
+
+	    return null;
 	}
 	
 	private String writeDerivationsToFile(IProject project, IFile trgtFile, DataSource ds) throws CoreException, IOException {

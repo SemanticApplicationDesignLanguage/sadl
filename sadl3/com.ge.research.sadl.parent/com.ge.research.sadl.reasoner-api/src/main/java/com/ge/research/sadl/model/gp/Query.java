@@ -41,11 +41,12 @@ public class Query extends SadlCommand {
 	private String keyword = null;
 	private List<VariableNode> variables = null;
 	private List<GraphPatternElement> patterns = null;
-	private String sparqlQueryString = null;
+	protected String sparqlQueryString = null;
 	private List<OrderingPair> orderBy = null;
 	private boolean distinct = false;
 	private boolean toBeEvaluated = false;
 	private boolean isGraph = false;
+	private boolean isUpdate = false;
 
 	public enum Order {ASC, DESC}
 	
@@ -317,5 +318,13 @@ public class Query extends SadlCommand {
 
 	public void setGraph(boolean isGraph) {
 		this.isGraph = isGraph;
+	}
+
+	public boolean isUpdate() {
+		return isUpdate;
+	}
+
+	public void setUpdate(boolean isUpdate) {
+		this.isUpdate = isUpdate;
 	}
 }

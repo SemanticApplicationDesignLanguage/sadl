@@ -37,7 +37,7 @@ public class TestTranslator {
 		om.read(altUrl, format);
 		Rule rule = new Rule("TestRule");
 		
-		String stat = trans.translateRule(om, rule);
+		String stat = trans.translateRule(om, "http://sadl.org/Shapes.owl", rule);
 	}
 
 	@Ignore

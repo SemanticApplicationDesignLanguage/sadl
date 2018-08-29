@@ -103,7 +103,7 @@ public interface ITranslator {
 	 * @throws TranslationException
 	 */
 	
-	public String translateRule(OntModel model, Rule rule) throws TranslationException;	
+	public String translateRule(OntModel model, String modelName, Rule rule) throws TranslationException;	
 	
 	/**
 	 * Method to translate an Equation (internal or external) to a String.
@@ -112,7 +112,7 @@ public interface ITranslator {
 	 * @return
 	 * @throws TranslationException
 	 */
-	public String translateEquation(OntModel model, Equation equation) throws TranslationException;
+	public String translateEquation(OntModel model, String modelName, Equation equation) throws TranslationException;
 	
 	/**
 	 * Method to translate a query in intermediate form to the target representation
@@ -123,7 +123,7 @@ public interface ITranslator {
 	 * @throws TranslationException
 	 * @throws InvalidNameException 
 	 */
-	public String translateQuery(OntModel model, Query query) throws TranslationException, InvalidNameException;	
+	public String translateQuery(OntModel model, String modelName, Query query) throws TranslationException, InvalidNameException;	
 	
 	/**
 	 * Method to identify the family of reasoners to which this translator can be applied, e.g., "Jena-Based".

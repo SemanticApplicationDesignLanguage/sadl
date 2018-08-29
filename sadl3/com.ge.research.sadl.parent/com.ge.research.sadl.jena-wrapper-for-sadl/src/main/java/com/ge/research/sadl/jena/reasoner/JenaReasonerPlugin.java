@@ -147,6 +147,9 @@ import com.hp.hpl.jena.reasoner.rulesys.RuleDerivation;
 import com.hp.hpl.jena.reasoner.rulesys.builtins.Product;
 import com.hp.hpl.jena.shared.RulesetNotFoundException;
 import com.hp.hpl.jena.sparql.syntax.Template;
+import com.hp.hpl.jena.update.UpdateAction;
+import com.hp.hpl.jena.update.UpdateFactory;
+import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.util.PrintUtil;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
@@ -1056,78 +1059,89 @@ public class JenaReasonerPlugin extends Reasoner{
 	//					index = larqBuilder.getIndex();
 	//				}
 	//			}
-				if (infDataset != null) {
-					qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ),infDataset);
-				}
-				else {
-					qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ), this.infModel);
-				}
-	//			if (index != null) {
-	//				LARQ.setDefaultIndex(qexec.getContext(), index);
-	//			}
-				qexec.setTimeout(queryTimeout);
-				if (askQuery.trim().substring(0, 3).equals("ask")) {	
-					boolean askResult = qexec.execAsk();
-					String[] columnName = new String[1];
-					columnName[0] = "ask";
-					Object array[][] = new Object[1][1];
-					array[0][0] = askResult;
-					rs = new ResultSet(columnName, array);
-				}
-				else if (askQuery.trim().substring(0, 9).equals("construct")) {
-					Model constructModel = qexec.execConstruct();
-					if (constructModel != null) {
-						StmtIterator sitr = constructModel.listStatements();
-						if (sitr.hasNext()) {
-							String[] columnName = new String[3];
-							Query q = qexec.getQuery();
-							Template template = q.getConstructTemplate();
-							Triple triple0 = template.getBGP().get(0);
-//							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
-//							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
-//							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
-							com.hp.hpl.jena.graph.Node subj = triple0.getSubject();
-							com.hp.hpl.jena.graph.Node pred = triple0.getPredicate();
-							com.hp.hpl.jena.graph.Node obj = triple0.getObject();
-							
-							columnName[0] = subj.isVariable() ? subj.getName() : subj.getLocalName();
-							columnName[1] = pred.isVariable() ? pred.getName() : pred.getLocalName();
-							columnName[2] = obj.isVariable() ? obj.getName() : obj.getLocalName();
-							List<Object[]> dataList = new ArrayList<Object[]>();
-							while (sitr.hasNext()) {
-								Statement stmt = sitr.nextStatement();
-								Object[] row = new Object[3];
-								row[0] = stmt.getSubject().toString();
-								row[1] = stmt.getPredicate().toString();
-								RDFNode val = stmt.getObject();
-								if (val instanceof Resource) {
-									row[2] = ((Resource)val).toString();
-								}
-								else if (val instanceof Literal) {
-									row[2] = ((Literal)val).getValue();
-								}
-								else {
-									row[2] = val.toString();
-								}
-								dataList.add(row);
-							}
-							Object[][] data = new Object[dataList.size()][3];
-							for (int r = 0; r < dataList.size(); r++) {
-								for (int c = 0; c < 3; c++) {
-									data[r][c] = ((Object[]) dataList.get(r))[c];
-								}
-							}
-							rs = new ResultSet(columnName, data);
-						}
+				if (askQuery.startsWith("delete") || askQuery.startsWith("insert")) {
+					UpdateRequest urequest = UpdateFactory.create(askQuery);
+					if (infDataset != null) {
+						UpdateAction.execute(urequest, infDataset);
+					}
+					else {
+						UpdateAction.execute(urequest, this.infModel);
 					}
 				}
 				else {
-					results = qexec.execSelect();
-					rs = convertFromJenaResultSetToReasonerResultSet(results);
-				}
-				if (collectTimingInfo) {
-					long t2 = System.currentTimeMillis();
-					timingInfo.add(new ReasonerTiming(TIMING_EXECUTE_QUERY, "execute query (" + askQuery + ")", t2 - t1));
+					if (infDataset != null) {
+						qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ),infDataset);
+					}
+					else {
+						qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ), this.infModel);
+					}
+		//			if (index != null) {
+		//				LARQ.setDefaultIndex(qexec.getContext(), index);
+		//			}
+					qexec.setTimeout(queryTimeout);
+					if (askQuery.trim().substring(0, 3).equals("ask")) {	
+						boolean askResult = qexec.execAsk();
+						String[] columnName = new String[1];
+						columnName[0] = "ask";
+						Object array[][] = new Object[1][1];
+						array[0][0] = askResult;
+						rs = new ResultSet(columnName, array);
+					}
+					else if (askQuery.trim().substring(0, 9).equals("construct")) {
+						Model constructModel = qexec.execConstruct();
+						if (constructModel != null) {
+							StmtIterator sitr = constructModel.listStatements();
+							if (sitr.hasNext()) {
+								String[] columnName = new String[3];
+								Query q = qexec.getQuery();
+								Template template = q.getConstructTemplate();
+								Triple triple0 = template.getBGP().get(0);
+	//							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
+	//							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
+	//							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
+								com.hp.hpl.jena.graph.Node subj = triple0.getSubject();
+								com.hp.hpl.jena.graph.Node pred = triple0.getPredicate();
+								com.hp.hpl.jena.graph.Node obj = triple0.getObject();
+								
+								columnName[0] = subj.isVariable() ? subj.getName() : subj.getLocalName();
+								columnName[1] = pred.isVariable() ? pred.getName() : pred.getLocalName();
+								columnName[2] = obj.isVariable() ? obj.getName() : obj.getLocalName();
+								List<Object[]> dataList = new ArrayList<Object[]>();
+								while (sitr.hasNext()) {
+									Statement stmt = sitr.nextStatement();
+									Object[] row = new Object[3];
+									row[0] = stmt.getSubject().toString();
+									row[1] = stmt.getPredicate().toString();
+									RDFNode val = stmt.getObject();
+									if (val instanceof Resource) {
+										row[2] = ((Resource)val).toString();
+									}
+									else if (val instanceof Literal) {
+										row[2] = ((Literal)val).getValue();
+									}
+									else {
+										row[2] = val.toString();
+									}
+									dataList.add(row);
+								}
+								Object[][] data = new Object[dataList.size()][3];
+								for (int r = 0; r < dataList.size(); r++) {
+									for (int c = 0; c < 3; c++) {
+										data[r][c] = ((Object[]) dataList.get(r))[c];
+									}
+								}
+								rs = new ResultSet(columnName, data);
+							}
+						}
+					}
+					else {
+						results = qexec.execSelect();
+						rs = convertFromJenaResultSetToReasonerResultSet(results);
+					}
+					if (collectTimingInfo) {
+						long t2 = System.currentTimeMillis();
+						timingInfo.add(new ReasonerTiming(TIMING_EXECUTE_QUERY, "execute query (" + askQuery + ")", t2 - t1));
+					}
 				}
 			}
 			catch (com.hp.hpl.jena.query.QueryCancelledException e) {

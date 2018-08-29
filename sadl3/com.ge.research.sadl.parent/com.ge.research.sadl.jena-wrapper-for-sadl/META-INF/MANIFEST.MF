@@ -17,6 +17,7 @@ Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.ge.research.sadl.jena,
+ com.ge.research.sadl.jena.importer,
  com.ge.research.sadl.jena.multithreaded,
  com.ge.research.sadl.jena.reasoner;
   uses:="com.hp.hpl.jena.reasoner,
