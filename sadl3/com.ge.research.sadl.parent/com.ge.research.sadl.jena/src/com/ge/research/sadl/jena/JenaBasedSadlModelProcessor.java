@@ -243,6 +243,7 @@ import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.SomeValuesFromRestriction;
 import com.hp.hpl.jena.ontology.UnionClass;
+import com.hp.hpl.jena.rdf.model.HasNoModelException;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -8810,6 +8811,102 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		return false;
 	}
+	
+	private void checkForExistingRangeOnPropertyForCondition(Property aProperty, RDFNode aRangeNode, EObject aCondition) {
+		OntResource lRange = null;
+		if (aProperty.canAs(DatatypeProperty.class)) {
+			lRange = aProperty.as(DatatypeProperty.class).getRange();
+		}else if(aProperty.canAs(ObjectProperty.class)) {
+			lRange = aProperty.as(ObjectProperty.class).getRange();
+		}
+		if (lRange != null) {
+			//Are ranges directly equivalent?
+			if(lRange.equals(aRangeNode)) {
+				return;
+			}
+			//If not list types, is new restriction a sub-type of original restriction?
+			try {
+				if(!isTypedListSubclass(lRange) && !isTypedListSubclass(aRangeNode)) {
+					if(lRange.canAs(OntClass.class) && aRangeNode.canAs(OntClass.class) && SadlUtils.classIsSuperClassOf(lRange.as(OntClass.class), aRangeNode.as(OntClass.class))) {
+						return;
+					}
+				}
+			}catch(HasNoModelException e) {
+				//Continue from here
+			}
+			//Union class comparisons
+			if(lRange.canAs(UnionClass.class)) {
+				for(OntClass lRangeOperand : lRange.as(UnionClass.class).listOperands().toList()) {
+					if(lRangeOperand.equals(aRangeNode)) {
+						return;
+					}
+					if(lRangeOperand.canAs(OntClass.class) && aRangeNode.canAs(OntClass.class) && SadlUtils.classIsSuperClassOf(lRangeOperand.as(OntClass.class), aRangeNode.as(OntClass.class))) {
+						return;
+					}
+				}
+			}
+			if(aRangeNode.canAs(UnionClass.class)) {
+				for(OntClass lRangeNodeOperand : aRangeNode.as(UnionClass.class).listOperands().toList()) {
+					if(lRange.equals(lRangeNodeOperand)) {
+						return;
+					}
+					if(lRange.canAs(OntClass.class) && lRangeNodeOperand.canAs(OntClass.class) && SadlUtils.classIsSuperClassOf(lRange.as(OntClass.class), lRangeNodeOperand.as(OntClass.class))) {
+						return;
+					}
+				}
+			}
+			//Intersection class comparisons
+			if(lRange.canAs(IntersectionClass.class)) {
+				for(OntClass lRangeOperand : lRange.as(IntersectionClass.class).listOperands().toList()) {
+					if(lRangeOperand.equals(aRangeNode)) {
+						return;
+					}
+					if(lRangeOperand.canAs(OntClass.class) && aRangeNode.canAs(OntClass.class) && SadlUtils.classIsSuperClassOf(lRangeOperand.as(OntClass.class), aRangeNode.as(OntClass.class))) {
+						return;
+					}
+				}
+			}
+			if(aRangeNode.canAs(IntersectionClass.class)) {
+				for(OntClass lRangeNodeOperand : aRangeNode.as(IntersectionClass.class).listOperands().toList()) {
+					if(lRange.equals(lRangeNodeOperand)) {
+						return;
+					}
+					if(lRange.canAs(OntClass.class) && lRangeNodeOperand.canAs(OntClass.class) && SadlUtils.classIsSuperClassOf(lRange.as(OntClass.class), lRangeNodeOperand.as(OntClass.class))) {
+						return;
+					}
+				}
+			}
+			//List types comparison
+			if(isTypedListSubclass(lRange) && isTypedListSubclass(aRangeNode)) {
+				try {
+					NamedNode lPropertyRangeNN = getTypedListType(lRange);
+					NamedNode lInputRangeNN = getTypedListType(aRangeNode);
+					if(lPropertyRangeNN != null && lInputRangeNN != null) {
+						if(lPropertyRangeNN.equals(lInputRangeNN)) {
+							return;
+						}
+					}
+				} catch (TranslationException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			for(Statement stmt : getTheJenaModel().listStatements(null, OWL.onProperty, aProperty).toList()) {
+				com.hp.hpl.jena.rdf.model.Resource subjectResource = stmt.getSubject();
+				if(subjectResource.canAs(AllValuesFromRestriction.class)) {
+					com.hp.hpl.jena.rdf.model.Resource avf = subjectResource.as(AllValuesFromRestriction.class).getAllValuesFrom();
+					if(avf.equals(aRangeNode)) {
+						return;
+					}
+					if(avf.canAs(OntClass.class) && aRangeNode.canAs(OntClass.class) && SadlUtils.classIsSuperClassOf(avf.as(OntClass.class), aRangeNode.as(OntClass.class))) {
+						return;
+					}
+				}
+			}
+			
+			//addError(SadlErrorMessages.CANNOT_ASSIGN_EXISTING.get("range", nodeToString(aProperty), nodeToString(lRange)), aCondition);
+		}
+	}
 
 	private void addPropertyDomain(Property prop, OntResource cls, EObject context) throws JenaProcessorException {
 		boolean addNewDomain = true;
@@ -9707,6 +9804,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addError(SadlErrorMessages.CANNOT_CREATE.get("all values from restriction",
 						"restriction on unresolvable property value restriction"), type);
 			} else {
+				checkForExistingRangeOnPropertyForCondition(prop, typersrc, cond);
 				AllValuesFromRestriction avf = getTheJenaModel().createAllValuesFromRestriction(null, prop, typersrc);
 				logger.debug("New all values from restriction on '" + prop.getURI() + "' to values of type '"
 						+ typersrc.toString() + "'");

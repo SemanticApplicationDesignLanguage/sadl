@@ -624,7 +624,7 @@ public class SadlUtils {
     		try {
     			if (isNumeric) {
     				if (v instanceof String) {
-    					v = stringToNumber((String) v);
+    					v = new BigDecimal((String)v);
     		        	rdfTypeValid = rdftype.isValidValue(v);
      					if (rdfTypeValid) {
     						val = m.createTypedLiteral(vorig, rdftype);

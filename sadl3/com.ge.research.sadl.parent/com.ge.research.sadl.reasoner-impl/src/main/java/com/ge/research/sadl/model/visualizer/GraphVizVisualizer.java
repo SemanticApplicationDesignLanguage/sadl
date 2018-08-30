@@ -105,7 +105,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			}
 			int cntr = 0;
 			File fto = new File(graphFileToOpen);
-			while (cntr++ < 10 && !fto.exists()) {
+			while (cntr++ < 50 && !fto.exists()) {
 				try {
 					Thread.sleep(200);
 				} catch (InterruptedException e) {
