@@ -3,7 +3,6 @@
  */
 package com.ge.research.sadl.testsuite.ui.contentassist
 
-import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.testsuite.testSuite.TestModel
 import java.util.Collection
 import org.eclipse.emf.ecore.EObject
