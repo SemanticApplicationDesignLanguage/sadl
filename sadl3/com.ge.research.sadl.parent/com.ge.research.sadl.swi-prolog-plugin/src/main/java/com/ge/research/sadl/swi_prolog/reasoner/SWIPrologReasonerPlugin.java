@@ -879,4 +879,10 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		throw new ConfigurationException("Method not supported in this reasoner.");
 	}
 
+	@Override
+	public String parameterizeQuery(String query, List<Object> values) throws InvalidNameException, ConfigurationException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

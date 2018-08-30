@@ -29,6 +29,7 @@ package com.ge.research.sadl.server.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,12 +62,30 @@ public class TestSadlServerDemo extends TestCase {
 	private String kbaseRoot;
 	private String modelFolder;
 	
+	/* The ShapesDemo kbase has two different shape models
+	 * 1) shapes.owl and shapes.rules contain complete ontology and rule specifications, made from a single shapes.sadl file.
+	 * 2) shapes-test.owl (http://sadl.imp/shapes_test) imports
+	 * 		shapes-rules.owl (http://sadl.imp/shape_rules) imports (and associated shapes-rules.rules)
+	 * 			shapes-specific.owl (http://sadl.imp/shapes_specific) imports
+	 * 				shapes-top.owl (http://sadl.imp/shapes_top)
+	
+	*/
 	private String shapesMN;
+	private String shapesNS;
+
+	private String shapes_testMN;
+	private String shapes_testNS;
+	private String shapes_rulesMN;
+	private String shapes_rulesNS;
+	private String shapes_specificMN;
+	private String shapes_specificNS;
+	private String shapesTopMN;
+	private String shapesTopNS;
+	
 	private String ruleMN;
 	private String test1MN;
 	private String extendedMN;
 	private String clientScenarioMN = "http://sadl.org/Shapes/clientdata";
-	private String shapesNS;
 	private String rectangleNS;
 	private String ruleNS;
 	private String test1NS;
@@ -94,14 +113,21 @@ public class TestSadlServerDemo extends TestCase {
 		for ( Logger logger : loggers ) {
 		    logger.setLevel(Level.OFF);
 		}
-		shapesMN = "http://sadl.org/Shapes/Shapes";
-		ruleMN = "http://sadl.org/Shapes/Rule";
-		test1MN = "http://sadl.org/Shapes/Test1";
-		extendedMN = "http://sadl.org/Shapes/MoreShapes";
+		shapesMN = "http://sadl.imp/shapes";
 		shapesNS = shapesMN + "#";
-		rectangleNS = "http://sadl.org/Shapes/Rectangle#";
-		ruleNS = ruleMN + "#";
+		
+		shapes_testMN = "http://sadl.imp/shapes_test";
+		shapes_testNS = shapes_testMN + "#";
+		shapes_rulesMN = "http://sadl.imp/shape_rules";
+		shapes_rulesNS = shapes_rulesMN + "#";
+		shapes_specificMN = "http://sadl.imp/shapes_specific";
+		shapes_specificNS = shapes_specificMN + "#";
+		shapesTopMN = "http://sadl.imp/shapes_top";
+		shapesTopNS = shapesTopMN + "#";
+
+		test1MN = "http://sadl.org/Shapes/Test1";
 		test1NS = test1MN + "#";	
+		extendedMN = "http://sadl.org/Shapes/MoreShapes";
 		extendedNS = extendedMN + "#";
 		clientScenarioNS = clientScenarioMN + "#";
 	}
@@ -158,7 +184,7 @@ public class TestSadlServerDemo extends TestCase {
 
 	@Ignore
 	@Test
-	public void testSadlServerClienSideScenario() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException {
+	public void testSadlServerClientSideScenario() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException {
 		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
 		assertNotNull(srvr);
 		Map<String, String[]> map = srvr.getServiceNameMap();
@@ -169,31 +195,40 @@ public class TestSadlServerDemo extends TestCase {
 		assertTrue(instUri.equals(newRectUri));
 		assertTrue(srvr.addTriple(instUri, rectangleNS + "height", 10));
 		assertTrue(srvr.addTriple(instUri, rectangleNS + "width", 12));
-		ResultSet rs = srvr.ask(instUri, shapesNS + "area", null);
+		ResultSet rs = srvr.ask(instUri, shapesTopNS + "area", null);
 		assertNotNull(rs);
 		assertEquals(rs.getResultAt(0, 0),120.0);
 	}
 
 	@Test
-	public void testSadlServerClienSideScenarioWithPersistence() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException {
+	public void testSadlServerClientSideScenarioWithPersistence() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException {
 		ISadlServerPE srvr = new SadlServerPEImpl(kbaseRoot);
 		assertNotNull(srvr);
 		assertNotNull(srvr.selectServiceModel(initialNamedService));
-//		String newRectUri = clientScenarioNS + "Rect" + System.currentTimeMillis();
-//		String instUri = srvr.createInstance(newRectUri, rectangleNS + "Rectangle");
-//		assertTrue(instUri.equals(newRectUri));
-//		assertTrue(srvr.addTriple(instUri, rectangleNS + "height", 10));
-//		assertTrue(srvr.addTriple(instUri, rectangleNS + "width", 12));
-//		ResultSet rs = srvr.ask(instUri, shapesNS + "area", null);
-//		assertNotNull(rs);
-//		assertEquals(rs.getResultAt(0, 0),120.0);
-//		assertTrue(srvr.persistInstanceModel(clientScenearioFileName, clientScenarioGlobalPrefix));
-//		
-//		ISadlServer srvr2 = new SadlServerImpl(kbaseRoot);
-//		assertNotNull(srvr2.selectServiceModel(modelFolder, clientScenarioMN));
-//		ResultSet rs2 = srvr.ask(instUri, shapesNS + "area", null);
-//		assertNotNull(rs2);
-//		assertEquals(rs2.getResultAt(0, 0),120.0);
+		String newRectUri = clientScenarioNS + "Rect" + System.currentTimeMillis();
+		String instUri = srvr.createInstance(newRectUri, rectangleNS + "Rectangle");
+		assertTrue(instUri.equals(newRectUri));
+		assertTrue(srvr.addTriple(instUri, rectangleNS + "height", 10));
+		assertTrue(srvr.addTriple(instUri, rectangleNS + "width", 12));
+		ResultSet rs = srvr.ask(instUri, shapesTopNS + "area", null);
+		if (rs == null) {
+			try {
+				ResultSet rs2 = srvr.query("select ?s ?p ?v where { ?s ?p ?v}");
+				System.out.println(rs2.toStringWithIndent(5));
+			} catch (QueryParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		assertNotNull(rs);
+		assertEquals(rs.getResultAt(0, 0),120.0);
+		assertTrue(srvr.persistInstanceModel(clientScenearioFileName, clientScenarioGlobalPrefix));
+		
+		ISadlServer srvr2 = new SadlServerImpl(kbaseRoot);
+		assertNotNull(srvr2.selectServiceModel(modelFolder, clientScenarioMN));
+		ResultSet rs2 = srvr.ask(instUri, shapesTopNS + "area", null);
+		assertNotNull(rs2);
+		assertEquals(rs2.getResultAt(0, 0),120.0);
 	}
 
 //	@Test
@@ -225,6 +260,59 @@ public class TestSadlServerDemo extends TestCase {
 //		assertNotNull(srvr.selectServiceModel(initialNamedService));
 //		srvr.createServiceModel(kbid, serviceName, modelName, owlFileName)
 //	}
+	/**
+	 * This method uses the hierarchical models
+	 * @throws ConfigurationException
+	 * @throws ReasonerNotFoundException
+	 * @throws SessionNotFoundException
+	 * @throws NamedServiceNotFoundException
+	 * @throws InvalidNameException
+	 * @throws IOException
+	 * @throws TripleNotFoundException
+	 * @throws QueryCancelledException
+	 * @throws QueryParseException
+	 */
+	@Test
+	public void testSadlServerParameterizedQuery() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, QueryParseException {
+		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
+		assertNotNull(srvr);
+		Map<String, String[]> map = srvr.getServiceNameMap();
+		int x = map.size();
+		assertNotNull(srvr.selectServiceModel(initialNamedService));
+		String newCircleUri = clientScenarioNS + "Circle" + System.currentTimeMillis();
+		String circleUri = shapes_specificNS + "Circle";
+		String radiusUri = shapes_specificNS + "radius";
+		String areaUri = shapesTopNS + "area";
+		String update = "insert data {<" + newCircleUri + "> <rdf:type> <" + circleUri + 
+				"> . <" + newCircleUri + "> <" + radiusUri + "> 3.0}";
+		update = srvr.prepareQuery(update);
+		System.out.println("Query: " + update);
+		ResultSet rs = srvr.query(update);
+		assertNull(rs);
+		String pq = "select ?s ?a where {?s <rdf:type> ? . ?s <area> ?a} order by desc(?a)";
+		List<Object> values = new ArrayList<Object>();
+//		values.add("<Circle>");  // this doesn't work for unknown reasons awc 8/29/2018
+		values.add("<" + circleUri + ">");
+		pq = srvr.parameterizeQuery(pq, values);
+		pq = srvr.prepareQuery(pq);
+		System.out.println("Query: " + pq);
+		rs = srvr.query(pq);
+		if (rs == null) {
+			try {
+				ResultSet rs2 = srvr.query("select ?s ?p ?v where { ?s ?p ?v}");
+				System.out.println(rs2.toStringWithIndent(5));
+			} catch (QueryParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		assertNotNull(rs);
+		System.out.println(rs.toStringWithIndent(5));
+		float val = Float.parseFloat(rs.getResultAt(0, 1).toString());
+		assertTrue(28.27 < val);
+		assertTrue(28.28 > val);
+	}
+	
 
 	private static String writeDataSourceToString(DataSource out) {
 		InputStream is = null;

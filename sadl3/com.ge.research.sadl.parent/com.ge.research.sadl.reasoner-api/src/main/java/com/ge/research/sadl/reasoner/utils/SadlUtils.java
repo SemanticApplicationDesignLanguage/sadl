@@ -624,7 +624,7 @@ public class SadlUtils {
     		try {
     			if (isNumeric) {
     				if (v instanceof String) {
-    					v = stringToNumber(v, rnguri);
+    					v = stringToNumber((String) v);
     		        	rdfTypeValid = rdftype.isValidValue(v);
      					if (rdfTypeValid) {
     						val = m.createTypedLiteral(vorig, rdftype);
@@ -818,14 +818,20 @@ public class SadlUtils {
         return val;
     }
 
-	private static Object stringToNumber(Object v, String rnguri) {
+    /**
+     * Method to try to convert 
+     * @param v -- the string to be converted, potentially, to a number
+     * @return -- the number from conversion
+     */
+	public static Object stringToNumber(String v) {
+		Object vRet = v;
 		if (((String) v).contains(".")) {
-			v = Double.parseDouble(stripQuotes((String)v));
+			vRet = Double.parseDouble(stripQuotes(v));
 		}
 		else {
-			v = Long.parseLong(stripQuotes((String)v));
+			vRet = Long.parseLong(stripQuotes(v));
 		}
-		return v;
+		return vRet;
 	}
 
 	private static boolean isNumericRange(String rnguri) {

@@ -71,6 +71,7 @@ import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
@@ -78,6 +79,7 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Ontology;
+import com.hp.hpl.jena.query.ParameterizedSparqlString;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.reasoner.rulesys.Builtin;
 import com.hp.hpl.jena.reasoner.rulesys.BuiltinRegistry;
@@ -1503,7 +1505,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	 */
 	public String prepareQuery(OntModel model, String q) throws InvalidNameException {
 		int openBracket = q.indexOf('<');
-		if (openBracket > 0) {
+		if (openBracket >= 0) {
 			int closeBracket = q.indexOf('>', openBracket);
 			if (closeBracket <= openBracket) {
 				// this could be a comparison in a FILTER...
@@ -1527,6 +1529,44 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return q;
 	}
 
+	public String parameterizeQuery(OntModel model, String q, List<Object> values) throws InvalidNameException {
+		int idx = q.indexOf("?}");
+		int lastIdx = 0;
+		if (idx > 0) {
+			StringBuilder sb = new StringBuilder();
+			while (idx > 0) {
+				String before = q.substring(lastIdx, idx + 1);
+				sb.append(before);
+				sb.append(" ");
+				lastIdx = idx + 1;
+				idx = q.indexOf("?}", lastIdx);
+			}
+			sb.append(q.substring(lastIdx));
+			q = sb.toString();
+		}
+		ParameterizedSparqlString pss = new ParameterizedSparqlString(q) ;
+        idx = 0;
+		for (Object val : values) {
+			if (val instanceof String) {
+				if (val.toString().startsWith( "<") && val.toString().endsWith(">")) {
+					val = prepareQuery(model, val.toString());
+					pss.setIri(idx++, val.toString().substring(1,val.toString().length() - 1));
+				}
+				else if ((val.toString().startsWith("\"") || val.toString().startsWith("'")) &&
+						val.toString().endsWith(val.toString().substring(0,1))) {
+					pss.setLiteral(idx++, val.toString().substring(1,val.toString().length() - 1));
+				}
+				else {
+					pss.setLiteral(idx++, model.createTypedLiteral(val.toString()));
+				}
+			}
+			else {
+				pss.setLiteral(idx++, model.createTypedLiteral(val));
+			}
+		}
+		return pss.toString();
+	}
+	
 	protected boolean isValidLocalName(String name) {
 		if (name == null || name.indexOf(" ") >= 0 || name.indexOf("?") >= 0) {
 			return false;
@@ -1552,10 +1592,16 @@ public class JenaTranslatorPlugin implements ITranslator {
 		Iterator<String> impitr = model.listImportedOntologyURIs(true).iterator();
 		while (impitr.hasNext()) {
 			String impuri = impitr.next();
+			OntModel submodel = model.getImportedModel(impuri);
 			if (!impuri.endsWith("#")) {
 				impuri += "#";
 			}
-			impuri = getUriInModel(model, impuri, name);
+			if (submodel != null) {
+				impuri = getUriInModel(submodel, impuri, name);
+			}
+			else {
+				impuri = getUriInModel(model, impuri, name);
+			}
 			if (impuri != null) {
 				logger.debug("found concept with URI '" + impuri + "'");
 				return impuri;

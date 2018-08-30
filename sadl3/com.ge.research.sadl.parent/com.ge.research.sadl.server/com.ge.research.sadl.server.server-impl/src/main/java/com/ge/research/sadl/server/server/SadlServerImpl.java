@@ -513,6 +513,13 @@ public class SadlServerImpl implements ISadlServer {
 		throw new ReasonerNotFoundException("No reasoner found.");
 	}
 
+	public String parameterizeQuery(String query, List<Object> values) throws InvalidNameException, ConfigurationException, ReasonerNotFoundException {
+		if (reasoner != null) {
+			return reasoner.parameterizeQuery(query, values);
+		}
+		throw new ReasonerNotFoundException("No reasoner found.");
+	}
+	
     private String getModelNameByServiceName(String serviceName) {
 		if (this.serviceNameMap != null && this.serviceNameMap.containsKey(serviceName)) {
 			return this.serviceNameMap.get(serviceName)[1];

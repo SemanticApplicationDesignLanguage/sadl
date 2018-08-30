@@ -180,6 +180,17 @@ public interface ITranslator {
 	public String prepareQuery(OntModel model, String queryStr) throws InvalidNameException;
 	
 	/**
+	 * Method to substitute parameter values for "?" terms in a query string.
+	 * 
+	 * @param model
+	 * @param queryStr
+	 * @param values
+	 * @return parameterized query
+	 * @throws InvalidNameException
+	 */
+	public String parameterizeQuery(OntModel model, String queryStr, List<Object> values) throws InvalidNameException;
+	
+	/**
 	 * Method to explore translator configuration options to discover those
 	 * that provide optimal performance for the entire project or for a subset
 	 * of the project.

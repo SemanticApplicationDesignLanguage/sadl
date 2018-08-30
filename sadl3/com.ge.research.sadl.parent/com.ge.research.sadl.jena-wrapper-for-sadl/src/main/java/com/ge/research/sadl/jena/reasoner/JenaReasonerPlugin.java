@@ -2731,6 +2731,48 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 
+	public String parameterizeQuery(String query, List<Object> values) throws InvalidNameException, ConfigurationException {
+		getReasonerOnlyWhenNeeded();
+		OntModel model = null;
+		if (dataModel != null) {
+			model = dataModel;
+		}
+		else if (schemaModel != null) {
+			model = schemaModel;
+		}
+		if (model != null) {
+			ReasonerTiming rt = null;
+			long t1 = 0L;
+			if (collectTimingInfo) {
+				rt = new ReasonerTiming(TIMING_PREPARE_QUERY, "prepare query (" + query + ")", 0);		// do this now to pick up query text before preparation
+				t1 = System.currentTimeMillis();
+			}
+			if (configurationMgr != null) {
+//				ITranslator translator = configurationMgr.getTranslatorForReasoner(ReasonerCategory);
+//				if (translator == null) {
+//					translator = configurationMgr.getTranslatorForReasoner(this);
+//				}
+				ITranslator translator = configurationMgr.getTranslatorForReasoner(this);
+				if (translator != null) {
+					translator.setConfigurationManager(configurationMgr);
+					query = translator.parameterizeQuery(model, query, values);
+					if (collectTimingInfo) {
+						long t2 = System.currentTimeMillis();
+						rt.setMilliseconds(t2 - t1);
+						timingInfo.add(rt);
+					}
+				}
+				else {
+					throw new ConfigurationException("Unable to obtain a translator.");
+				}
+			}
+			else {
+				throw new ConfigurationException("No ConfigurationManager availalble.");
+			}
+		}
+		return query;
+	}
+	
 	public String getReasonerFamily() {
 		return ReasonerFamily;
 	}
