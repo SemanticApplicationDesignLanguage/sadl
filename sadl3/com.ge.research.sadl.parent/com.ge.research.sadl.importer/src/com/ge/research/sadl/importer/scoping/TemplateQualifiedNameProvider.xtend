@@ -27,8 +27,8 @@ class TemplateQualifiedNameProvider extends SadlQualifiedNameProvider {
 
 	override apply(EObject input) {
 		if (input instanceof TemplateModel) {
-			Preconditions.checkNotNull(input.baseUri, '''Base URI was null for SADL model in resource: «input.eResource.URI».''');
-			return QualifiedName.create(input.baseUri)
+			Preconditions.checkNotNull(input.uri.baseUri, '''Base URI was null for SADL model in resource: «input.eResource.URI».''');
+			return QualifiedName.create(input.uri.baseUri)
 		}
 		else {	
 			return getFullyQualifiedName(input)			

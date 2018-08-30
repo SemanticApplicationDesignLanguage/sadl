@@ -1,15 +1,33 @@
-module com.ge.research.sadl.importer.GenerateTemplate
+/************************************************************************
+ * Copyright � 2007-2018 - General Electric Company, All Rights Reserved
+ *
+ * Project: SADL
+ *
+ * Description: The Semantic Application Design Language (SADL) is a
+ * language for building semantic models and expressing rules that
+ * capture additional domain knowledge. The SADL-IDE (integrated
+ * development environment) is a set of Eclipse plug-ins that
+ * support the editing and testing of semantic models using the
+ * SADL language.
+ *
+ * This software is distributed "AS-IS" without ANY WARRANTIES
+ * and licensed under the Eclipse Public License - v 1.0
+ * which is available at http://www.eclipse.org/org/documents/epl-v10.php
+ *
+ ***********************************************************************/
+ module com.ge.research.sadl.importer.GenerateTemplate
 
 import org.eclipse.xtext.xtext.generator.*
 import org.eclipse.xtext.xtext.generator.model.project.*
 
-var rootPath = ".."
-var toBeScanned1 = '..'
+var projectPath = "./"
+var rootPath = "${projectPath}/.."
+//var toBeScanned1 = '..'
 
 Workflow {
-	bean = org.eclipse.emf.mwe.utils.StandaloneSetup {
-		platformUri = toBeScanned1
-	}	
+//	bean = org.eclipse.emf.mwe.utils.StandaloneSetup {
+//		platformUri = toBeScanned1
+//	}	
 	component = XtextGenerator {
 		configuration = {
 			project = StandardProjectConfig {
@@ -61,10 +79,10 @@ Workflow {
 			validator = {
 				// composedCheck = "org.eclipse.xtext.validation.NamesAreUniqueValidator"
 			}
-			parserGenerator = {
-				debugGrammar = true
-				combinedGrammar = false
-			}
+//			parserGenerator = {
+//				debugGrammar = true
+//				combinedGrammar = false
+//			}
 //			fragment = com.ge.research.sadl.xtextgenerator.JFlexFragment {}
 		}
 	}
