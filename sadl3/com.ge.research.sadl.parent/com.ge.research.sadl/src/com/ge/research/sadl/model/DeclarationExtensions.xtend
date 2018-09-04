@@ -54,6 +54,7 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import com.ge.research.sadl.scoping.SadlQualifiedNameConverter
 import org.eclipse.emf.ecore.resource.Resource
+import com.ge.research.sadl.sADL.UpdateStatement
 
 class DeclarationExtensions {
 	
@@ -311,6 +312,7 @@ class DeclarationExtensions {
 					OntConceptType.INSTANCE
 					
 				QueryStatement,
+				UpdateStatement,
 				RuleStatement:
 					OntConceptType.STRUCTURE_NAME					
 					

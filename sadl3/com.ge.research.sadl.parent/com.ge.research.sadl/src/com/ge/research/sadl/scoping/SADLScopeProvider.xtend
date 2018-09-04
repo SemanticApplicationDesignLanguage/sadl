@@ -193,7 +193,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return getLocalVariableScope(test.tests, parent)
 		}
 		val update = EcoreUtil2.getContainerOfType(context, UpdateStatement)
-		if (update?.expr !== null) {
+		if (update?.expr !== null && update?.expr instanceof UpdateExpression) {
 			val uexpr = update.expr as UpdateExpression
 			return getLocalVariableScope(#[uexpr.deleteExpression] + #[uexpr.insertExpression] + #[uexpr.whereExpression], parent)
 		}
