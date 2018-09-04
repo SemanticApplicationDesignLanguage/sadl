@@ -20,8 +20,6 @@
 <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->08/27/2018<!--webbot bot="Timestamp" endspan i-checksum="12637" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 
-<h4>Table of Contents</h4>
-
 <h2>Introduction</h2>
 
 <p>Web SADL is a set of services that allow a SADL IDE to be instantiated in a 
@@ -135,6 +133,15 @@ depending up the type of input window.</p>
 <p>This would mean that the service is running on host port 3000, container port 
 3000, host location <i>current directory </i>(directory in which Docker was 
 run), container location &quot;/home/project&quot;.</p>
+
+<p>In a Linux environment, the command would be:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-family: Courier New">docker 
+run -it -p 3000:3000 -v &quot;$(pwd):/home/project&quot;&nbsp;theiaide/sadl</span></p>
+
+<h2>Configuring with Git</h2>
+
+<p>The Web SADL server environment can be configured so that Git integration is 
+available in the browser. </p>
 
 <p>&nbsp;</p>
 

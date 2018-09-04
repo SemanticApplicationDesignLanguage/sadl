@@ -81,6 +81,101 @@ statements.</p>
 information about setting up the Web SADL backend services, please see
 <a href="WebSadlBackend.html">Web SADL Backend</a>.</p>
 
+<h2>Connecting to the Web SADL Backend</h2>
+
+<p>The Web SADL client will run in a Web browser. Chrome is recommended and it 
+the browser that has been used in testing.</p>
+
+<p>Connect to the Web SADL backed by entering the service URL of the form 
+&quot;http://&lt;host&gt;:&lt;port&gt;, e.g.,</p>
+
+<p>&nbsp;&nbsp;&nbsp; <a href="http://nsk1twin01:3000">http://nsk1twin01:3000</a></p>
+
+<p>The result should be a browser tab with menu items across the top and down 
+the left and right sides as shown below.</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/WebSAD2.jpg" width="487" height="239"></p>
+
+<h2>Using Web SADL</h2>
+
+<h3>Creating a SADL Project</h3>
+
+<p>To create a new SADL project, click on &quot;Files&quot; on the left-side menu to show 
+the file system. Select a folder, e.g., &quot;project&quot;, and right-click to obtain a 
+popup menu. Note that the Files view can be made invisible by clicking on 
+&quot;Files&quot; again.</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/WebSAD7.gif" width="414" height="406"></p>
+
+<p>Click on &quot;New SADL Project&quot; to create a SADL project. Name your project as 
+requested. For purposes of this tutorial, you might want to name it &quot;Shapes&quot;.</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/WebSAD8.gif" width="371" height="136"></p>
+
+<p>Note that the &quot;settings.json&quot; file contains the project settings and can be 
+opened in an editor by double-clicking on the name or by right-clicking for a 
+popup menu.</p>
+
+<h3>Creating SADL Model Files</h3>
+
+<p>Now that we have a SADL project, we can begin to create SADL model files. 
+Right-click on the project name (e.g., &quot;Shapes&quot;) and select &quot;New File&quot;. In the 
+naming dialog give the file a name ending in &quot;.sadl&quot;, e.g., &quot;ShapesTop.sadl&quot;. 
+The result will be a new SADL model file opened in a SADL editor window. This 
+editor window will have content assist, error and warning markers, hyperlinking, 
+etc., just like the Eclipse-based SADL IDE. Holding down the Control key and 
+pressing the space bar activates content assistance. </p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/WebSAD9.jpg" width="533" height="117"></p>
+
+<p>Pressing the Enter key will insert the selected suggestion into the model 
+file.</p>
+
+<p>Defining a class &quot;Shape&quot; which is in the domain of property &quot;area&quot; with range 
+&quot;float&quot; results in the following state of the project.</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/WebSAD10.jpg" width="797" height="329"></p>
+
+<p>Note that an &quot;OwlModels&quot; folder has been created containing the translated 
+model for our newly created model as well as several other files. The &quot;ImplicitModel&quot; 
+folder contains the definition of the built-in functions supported by the 
+selected reasoner. It also contains the SadlImplicitModel. These two editable 
+files, along with SadlBaseModel.owl in the OwlModels folder, are implicitly 
+imported by every SADL model. </p>
+
+<p>To complete our simple demo project, we create a second SADL model file which 
+imports the first and defines Circle and Rectangle as subclasses of Shape with 
+defining properties. Finally we add a couple of rules to compute the area of 
+these types of Shape.</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/WebSAD11.jpg" width="759" height="225"></p>
+
+<h3>Testing a Model</h3>
+
+<p>We can test our model by creating a SADL file which contains some instances 
+of Shape and some tests to verify that the rules compute correct areas.</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/WebSAD12.jpg" width="536" height="187"></p>
+
+<p>By clicking on the &quot;SADL&quot; top menu item and selecting &quot;Test Model&quot;, with the 
+editor focus on TestShapes.sadl, we can run inference. The results are displayed 
+in the Output window and include the test results.</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/WebSAD13.gif" width="490" height="48"></p>
+
+<p>&nbsp;</p>
+<hr>
+
+<h2>From Original Documentation from Akos</h2>
+
 <h2>Notes</h2>
 <p class="MsoNormal">Web SADL has been exercised on both OS X and Windows 10 (VMWare).</p>
 <p class="MsoNormal">&nbsp;</p>
