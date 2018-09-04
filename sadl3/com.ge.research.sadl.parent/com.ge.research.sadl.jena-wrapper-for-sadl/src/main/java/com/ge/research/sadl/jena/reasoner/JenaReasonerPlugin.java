@@ -2805,11 +2805,12 @@ public class JenaReasonerPlugin extends Reasoner{
 						RDFNode idb = inst.getPropertyValue(RDFS.isDefinedBy);
 						if (idb instanceof Literal) {
 							String qstr = ((Literal)idb).getValue().toString();
-							if (qstr.contains("insert") || qstr.contains("delete")) {
+							if (qstr.contains("ask") || qstr.contains("select") || qstr.contains("construct") ||
+									qstr.contains("insert") || qstr.contains("delete")) {
 								query = qstr;
 							}
 							else {
-								throw new InvalidNameException("'" + inst.getURI() + "' appears to be a named update but update string not found.");
+								throw new InvalidNameException("'" + inst.getURI() + "' appears to be a named query or update but SPARQL string not found.");
 							}
 						}
 					}
