@@ -103,6 +103,7 @@ import com.hp.hpl.jena.graph.Node_Literal;
 import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.graph.Node_Variable;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntDocumentManager.ReadFailureHandler;
@@ -1037,6 +1038,14 @@ public class JenaReasonerPlugin extends Reasoner{
 			QueryExecution qexec = null;		
 			com.hp.hpl.jena.query.ResultSet results = null;		
 			prepareInfModel();
+			try {
+				String qstr = handleNamedQueryByName(askQuery);
+				if (qstr != null) {
+					askQuery = qstr;
+				}
+			} catch (InvalidNameException e1) {
+				throw new QueryParseException(e1.getMessage());
+			}
 			try {
 				long t1 = System.currentTimeMillis();
 	//			IndexLARQ index = null;
@@ -2073,9 +2082,9 @@ public class JenaReasonerPlugin extends Reasoner{
 			logger.debug("In prepareInfModel, reusing infModel with newInputFlag is true");
 			if (infModel instanceof InfModel) {
 				synchronized(ReasonerFamily) {
-				logger.debug("In prepareInfModel, reusing infModel, rebinding existing infModel");
-				((InfModel) infModel).rebind();
-				infModel.size();	// force re-instantiation?
+					logger.debug("In prepareInfModel, reusing infModel, rebinding existing infModel");
+					((InfModel) infModel).rebind();
+					infModel.size();	// force re-instantiation?
 				}
 			}
 		} else {
@@ -2741,6 +2750,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			model = schemaModel;
 		}
 		if (model != null) {
+			query = handleNamedQueryByName(query);
 			ReasonerTiming rt = null;
 			long t1 = 0L;
 			if (collectTimingInfo) {
@@ -2768,6 +2778,45 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 			else {
 				throw new ConfigurationException("No ConfigurationManager availalble.");
+			}
+		}
+		return query;
+	}
+
+	/**
+	 * Method to talk a query which is the URI of a named query and return the query string.
+	 * @param query
+	 * @return
+	 * @throws InvalidNameException
+	 */
+	private String handleNamedQueryByName(String query) throws InvalidNameException {
+		OntModel model = null;
+		if (dataModel != null) {
+			model = dataModel;
+		}
+		else if (schemaModel != null) {
+			model = schemaModel;
+		}
+		if (model != null) {
+			try {
+				if (SadlUtils.validateUri(query) == null) {
+					Individual inst = model.getIndividual(query);
+					if (inst != null) {
+						RDFNode idb = inst.getPropertyValue(RDFS.isDefinedBy);
+						if (idb instanceof Literal) {
+							String qstr = ((Literal)idb).getValue().toString();
+							if (qstr.contains("insert") || qstr.contains("delete")) {
+								query = qstr;
+							}
+							else {
+								throw new InvalidNameException("'" + inst.getURI() + "' appears to be a named update but update string not found.");
+							}
+						}
+					}
+				}
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		return query;
