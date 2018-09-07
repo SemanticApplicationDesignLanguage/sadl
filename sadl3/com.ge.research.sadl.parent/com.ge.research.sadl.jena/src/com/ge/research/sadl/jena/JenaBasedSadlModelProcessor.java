@@ -6276,6 +6276,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			NamedNode n = new NamedNode(nm, ontConceptTypeToNodeType(type));
 			n.setNamespace(ns);
 			n.setPrefix(prfx);
+			try {
+				addLocalizedTypeToNode(n,getModelValidator().getType(expr));
+			} catch (DontTypeCheckException | CircularDefinitionException | InvalidNameException | URISyntaxException
+					| IOException | ConfigurationException | InvalidTypeException | CircularDependencyException
+					| PropertyWithoutRangeException e) {
+				e.printStackTrace();
+			}
 			return n;
 		}
 		return null;
