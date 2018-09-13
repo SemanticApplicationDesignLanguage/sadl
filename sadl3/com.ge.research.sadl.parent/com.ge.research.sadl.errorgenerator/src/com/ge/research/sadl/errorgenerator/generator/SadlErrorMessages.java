@@ -183,6 +183,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage DOMAIN_MATCHING = new SadlErrorMessage("domain_matching");
 /**
+* This range restriction may be inapplicable. Property {0} currently has range {1}
+**/
+    public static final SadlErrorMessage RANGE_MAY_BE_INAPPLICABLE = new SadlErrorMessage("range_may_be_inapplicable");
+/**
 * Using a datatype as a domain--probably not what was intended?
 **/
     public static final SadlErrorMessage DATATYPE_AS_DOMAIN = new SadlErrorMessage("datatype_as_domain");

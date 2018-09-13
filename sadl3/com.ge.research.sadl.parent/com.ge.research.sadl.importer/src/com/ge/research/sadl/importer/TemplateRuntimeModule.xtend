@@ -17,50 +17,64 @@
  ***********************************************************************/
 package com.ge.research.sadl.importer
 
-import com.ge.research.sadl.importer.scoping.TemplateQualifiedNameProvider
+import com.ge.research.sadl.ValueConverterService
+import com.ge.research.sadl.generator.SADLOutputConfigurationProvider
+import com.ge.research.sadl.resource.SadlResourceDescriptionStrategy
 import com.ge.research.sadl.scoping.ErrorAddingLinkingService
+import com.ge.research.sadl.scoping.SadlQualifiedNameConverter
+import com.ge.research.sadl.scoping.SadlQualifiedNameProvider
+import com.ge.research.sadl.scoping.SilencedImportedNamesAdapter
+import com.ge.research.sadl.validation.ResourceValidator
+import com.ge.research.sadl.validation.SoftLinkingMessageProvider
 import java.io.IOException
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.xtext.generator.IContextualOutputConfigurationProvider
+import org.eclipse.xtext.generator.IOutputConfigurationProvider
 import org.eclipse.xtext.linking.impl.DefaultLinkingService
+import org.eclipse.xtext.linking.impl.ImportedNamesAdapter
+import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
+import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.parsetree.reconstr.IParseTreeConstructor
 import org.eclipse.xtext.parsetree.reconstr.ITokenStream
+import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy
+import org.eclipse.xtext.validation.ResourceValidatorImpl
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class TemplateRuntimeModule extends AbstractTemplateRuntimeModule {
 	
-//	override bindIValueConverterService() {
-//		return ValueConverterService;
-//	}
-	
-	override bindIQualifiedNameProvider() {
-		return TemplateQualifiedNameProvider;
+	override bindIValueConverterService() {
+		return ValueConverterService;
 	}
 	
-//	def Class<? extends IOutputConfigurationProvider> bindIOutputConfigurationProvider() {
-//		return SADLOutputConfigurationProvider;	
-//	}
-//	
-//	def Class<? extends IContextualOutputConfigurationProvider> bindIContextualOutputConfigurationProvider() {
-//		return SADLOutputConfigurationProvider;
-//	}
-//	
-//	def Class<? extends IQualifiedNameConverter> bindIQualifiedNameCoverter() {
-//		return SadlQualifiedNameConverter;
-//	}
-//	
-//	def Class<? extends LinkingDiagnosticMessageProvider> bindILinkingDiagnosticMessageProvider() {
-//		return SoftLinkingMessageProvider;
-//	}
+	override bindIQualifiedNameProvider() {
+		return SadlQualifiedNameProvider;
+	}
 	
-//	def Class<? extends ResourceValidatorImpl> bindResourceValidatorImpl() {
-//		return ResourceValidator;
-//	}
-//	
-//	def Class<? extends DefaultResourceDescriptionStrategy> bindResourceDescritpionStrategy() {
-//		return SadlResourceDescriptionStrategy;
-//	}
+	def Class<? extends IOutputConfigurationProvider> bindIOutputConfigurationProvider() {
+		return SADLOutputConfigurationProvider;	
+	}
+	
+	def Class<? extends IContextualOutputConfigurationProvider> bindIContextualOutputConfigurationProvider() {
+		return SADLOutputConfigurationProvider;
+	}
+	
+	def Class<? extends IQualifiedNameConverter> bindIQualifiedNameCoverter() {
+		return SadlQualifiedNameConverter;
+	}
+	
+	def Class<? extends LinkingDiagnosticMessageProvider> bindILinkingDiagnosticMessageProvider() {
+		return SoftLinkingMessageProvider;
+	}
+	
+	def Class<? extends ResourceValidatorImpl> bindResourceValidatorImpl() {
+		return ResourceValidator;
+	}
+	
+	def Class<? extends DefaultResourceDescriptionStrategy> bindResourceDescritpionStrategy() {
+		return SadlResourceDescriptionStrategy;
+	}
 	
 	def Class<? extends DefaultLinkingService> bindDefaultLinkingService() {
 		return ErrorAddingLinkingService;
@@ -70,9 +84,9 @@ class TemplateRuntimeModule extends AbstractTemplateRuntimeModule {
 		NoImplParseTreeConstructor
 	}
 	
-//	def Class<? extends ImportedNamesAdapter> bindImportedNamesAdapter() {
-//		return SilencedImportedNamesAdapter; 
-//	}
+	def Class<? extends ImportedNamesAdapter> bindImportedNamesAdapter() {
+		return SilencedImportedNamesAdapter; 
+	}
 	
 	static class NoImplParseTreeConstructor implements IParseTreeConstructor {
 		

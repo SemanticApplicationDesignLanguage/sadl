@@ -188,6 +188,16 @@ public interface IReasoner {
 	public String prepareQuery(String query) throws InvalidNameException, ConfigurationException;
 	
 	/**
+	 * Method to substitute parameter values for "?" terms in a query string.
+	 * 
+	 * @param query
+	 * @param values
+	 * @return parameterized query
+	 * @throws InvalidNameException
+	 */
+	public String parameterizeQuery(String query, List<Object> values) throws InvalidNameException, ConfigurationException;
+	
+	/**
 	 * Method to return a subject and/or object and/or predicate of a triple. This method takes an incomplete triple and 
 	 * returns a complete triple. The result set will have as many columns as there are null arguments: if subject is null
 	 * there will be a subject column, if predicate is null there will be a predicate column, if object is null there will
