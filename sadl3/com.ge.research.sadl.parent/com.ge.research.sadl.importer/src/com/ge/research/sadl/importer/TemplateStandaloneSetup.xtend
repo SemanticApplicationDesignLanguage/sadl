@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.importer
 
+import com.ge.research.sadl.SADLStandaloneSetup
 
 /**
  * Initialization support for running Xtext languages without Equinox extension registry.
@@ -26,4 +27,10 @@ class TemplateStandaloneSetup extends TemplateStandaloneSetupGenerated {
 	def static void doSetup() {
 		new TemplateStandaloneSetup().createInjectorAndDoEMFRegistration()
 	}
+
+	override createInjectorAndDoEMFRegistration() {
+		new SADLStandaloneSetup().createInjectorAndDoEMFRegistration()
+		super.createInjectorAndDoEMFRegistration()
+	}
+	
 }

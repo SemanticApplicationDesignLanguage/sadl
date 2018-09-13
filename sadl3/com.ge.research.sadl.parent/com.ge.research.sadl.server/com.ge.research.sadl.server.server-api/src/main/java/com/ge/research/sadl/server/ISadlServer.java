@@ -189,6 +189,19 @@ public interface ISadlServer {
 	public String prepareQuery(String query) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, InvalidNameException, SessionNotFoundException;
 
 	/**
+	 * Method to substitute parameter values for "?" terms in a query string.
+	 * 
+	 * @param queryStr -- SPARQL query or update string
+	 * @param values -- parameter values to be substituted
+	 * @return parameterized query
+	 * @throws ConfigurationException 
+	 * @throws InvalidNameException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws SessionNotFoundException 
+	 */
+	public String parameterizeQuery(String queryStr, List<Object> values) throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException;
+
+	/**
      * This method is called to cause abox data to be loaded from the server environment.
      *
      * @param serverDataLocator -- the location of the data to be loaded in the server environment. This will be reasoner-specifc. For some reasoners it may be a relative file path.

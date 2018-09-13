@@ -818,15 +818,21 @@ public class SadlUtils {
         return val;
     }
 
-//	private static Object stringToNumber(Object v, String rnguri) {
-//		if (((String) v).contains(".")) {
-//			v = Double.parseDouble(stripQuotes((String)v));
-//		}
-//		else {
-//			v = Long.parseLong(stripQuotes((String)v));
-//		}
-//		return v;
-//	}
+    /**
+     * Method to try to convert 
+     * @param v -- the string to be converted, potentially, to a number
+     * @return -- the number from conversion
+     */
+	public static Object stringToNumber(String v) {
+		Object vRet = v;
+		if (((String) v).contains(".")) {
+			vRet = Double.parseDouble(stripQuotes(v));
+		}
+		else {
+			vRet = Long.parseLong(stripQuotes(v));
+		}
+		return vRet;
+	}
 
 	private static boolean isNumericRange(String rnguri) {
         if (rnguri.endsWith("float")) {

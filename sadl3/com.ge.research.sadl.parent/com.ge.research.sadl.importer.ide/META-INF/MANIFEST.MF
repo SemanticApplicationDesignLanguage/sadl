@@ -12,5 +12,5 @@ Require-Bundle: com.ge.research.sadl.importer,
  org.antlr.runtime
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.importer.ide.contentassist.antlr.internal,
- com.ge.research.sadl.importer.ide.contentassist.antlr,
- com.ge.research.sadl.importer.ide.contentassist.antlr.lexer
+ com.ge.research.sadl.importer.ide.contentassist.antlr
+

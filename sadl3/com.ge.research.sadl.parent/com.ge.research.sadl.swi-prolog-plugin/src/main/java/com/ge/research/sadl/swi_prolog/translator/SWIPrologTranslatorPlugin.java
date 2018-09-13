@@ -1772,4 +1772,10 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		return supportedDataTypes;
 	}
 
+	@Override
+	public String parameterizeQuery(OntModel model, String queryStr, List<Object> values) throws InvalidNameException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
