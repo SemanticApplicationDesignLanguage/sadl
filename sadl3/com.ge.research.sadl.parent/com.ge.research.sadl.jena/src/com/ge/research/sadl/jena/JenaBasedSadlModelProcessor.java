@@ -8908,7 +8908,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			
-			//addError(SadlErrorMessages.CANNOT_ASSIGN_EXISTING.get("range", nodeToString(aProperty), nodeToString(lRange)), aCondition);
+			addWarning(SadlErrorMessages.RANGE_MAY_BE_INAPPLICABLE.get(nodeToString(aProperty), nodeToString(lRange)), aCondition);
 		}
 	}
 
