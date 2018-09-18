@@ -55,6 +55,19 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract boolean isConfigurationStale();
 
 	/**
+	 * Method to get an instance of a class by reflection
+	 * @param name
+	 * @param clazz
+	 * @return
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws ClassNotFoundException
+	 */
+	public <T> T getClassInstance(String name, Class<? extends T> clazz)
+			throws InstantiationException, IllegalAccessException,
+			ClassNotFoundException;
+			
+	/**
 	 * Method to clear an old version of a model from cache when a new version of the model is saved
 	 * 
 	 * @param newOntModel

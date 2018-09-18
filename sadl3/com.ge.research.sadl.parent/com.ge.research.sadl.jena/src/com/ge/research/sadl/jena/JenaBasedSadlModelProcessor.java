@@ -1950,6 +1950,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (result instanceof GraphPatternElement) {
 				Explain cmd = new Explain((GraphPatternElement) result);
 				addSadlCommand(cmd);
+			} else if (result instanceof Object[] && ((Object[])result).length > 1 &&
+					((Object[])result)[1] instanceof GraphPatternElement) {
+				Explain cmd = new Explain((GraphPatternElement) ((Object[])result)[1]);
+				addSadlCommand(cmd);
 			} else if (result != null) {
 				throw new TranslationException("Unhandled ExplainStatement: " + result.toString());
 			}
@@ -2035,7 +2039,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					OntClass nqcls = getTheJenaModel()
 							.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_NAMEDQUERY_CLASS_URI);
 					if (nqcls != null) {
-						Individual nqry = getTheJenaModel().createIndividual(uri, nqcls);
+						Individual nqry = createIndividual(element.getName(), nqcls);
 						// Add annotations, if any
 						EList<NamedStructureAnnotation> annotations = element.getAnnotations();
 						if (annotations != null && annotations.size() > 0) {
@@ -2106,8 +2110,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					OntClass nqcls = getTheJenaModel()
 							.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_NAMEDQUERY_CLASS_URI);
 					if (nqcls != null) {
-						Individual nqry = getTheJenaModel().createIndividual(uri, nqcls);
-						// Add annotations, if any
+						Individual nqry = createIndividual(element.getName(), nqcls);
+						// Add NamedStructureAnnotations, if any
 						EList<NamedStructureAnnotation> annotations = element.getAnnotations();
 						if (annotations != null && annotations.size() > 0) {
 							addNamedStructureAnnotations(nqry, annotations);
@@ -2888,7 +2892,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private void processStatement(RuleStatement element)
-			throws InvalidNameException, InvalidTypeException, TranslationException {
+			throws InvalidNameException, InvalidTypeException, TranslationException, JenaProcessorException {
 		clearCruleVariables();
 		String ruleName = getDeclarationExtensions().getConcreteName(element.getName());
 		Rule rule = new Rule(ruleName);
@@ -2935,7 +2939,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String uri = declarationExtensions.getConceptUri(element.getName());
 		OntClass rcls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_RULE_CLASS_URI);
 		if (rcls != null) {
-			Individual rl = getTheJenaModel().createIndividual(uri, rcls);
+			Individual rl = createIndividual(element.getName(), rcls);
 			// Add annotations, if any
 			EList<NamedStructureAnnotation> annotations = element.getAnnotations();
 			if (annotations != null && annotations.size() > 0) {

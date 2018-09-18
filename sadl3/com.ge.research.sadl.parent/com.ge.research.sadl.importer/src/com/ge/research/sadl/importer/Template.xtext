@@ -29,9 +29,11 @@ TemplateModel:
 	(Comment* EOL)*
 	imports+=Import* 
 	(Comment* EOL)*
-	incremental=IncrementalLoad?
+	(incremental=IncrementalLoad)?
 	(Comment* EOL)*
-	infer=InferStmt?
+	(infer=InferStmt)?
+	(Comment* EOL)*
+	(infer=LogStmt)?
 	(Comment* EOL)*
 	preProcessing+=BeforeTriple*
 	(Comment* EOL)*
@@ -49,6 +51,10 @@ Import :
 IncrementalLoad : 'incremental' (WS? Comment)? WS? EOL;    
 
 InferStmt : inf='infer' WS ('chunk' WS chunksize=DIGITS)? WS? ('parallel' WS threads=DIGITS)? (WS? Comment)? WS? EOL;
+
+LogStmt :
+	'log' WS logfilename = STRING WS? EOL
+;
 
 BeforeTriple:
 	(trans=Transform | val=Validate) (WS? Comment)? WS? EOL
@@ -153,7 +159,8 @@ SpecialPred:
 	(kws='is' WS 'a' WS 'type' WS 'of') |
 	(kws='is' WS 'a') |
 	kws='rdf:type' |
-	kws='rdfs:subClassOf'
+	kws='rdfs:subClassOf' |
+	sr=[sadl::SadlResource|IDEXT]
 ;
 
 Has:
