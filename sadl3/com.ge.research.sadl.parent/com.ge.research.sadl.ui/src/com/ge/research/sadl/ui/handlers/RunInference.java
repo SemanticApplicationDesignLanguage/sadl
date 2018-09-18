@@ -38,6 +38,7 @@ import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.gp.Read;
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.model.gp.TestResult;
 import com.ge.research.sadl.preferences.SadlPreferences;
@@ -298,7 +299,7 @@ public class RunInference extends SadlActionHandler {
 						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + " is empty\n");
 					}
 				}
-				else {
+				else if (!(cmd instanceof Read)) {
 					SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + " is empty\n");
 				}
 			}

@@ -381,9 +381,11 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 
 	private void addErrorToSadlCommand(SadlCommandResult scr, String msg, ErrorType errorType) {
 		ModelError me = new ModelError(msg, errorType);
-		List<ModelError> errors = new ArrayList<ModelError>();
-		errors.add(me);
-		scr.setErrors(errors);
+		if (scr.getErrors() == null) {
+			List<ModelError> errors = new ArrayList<ModelError>();
+			scr.setErrors(errors);
+		}
+		scr.getErrors().add(me);
 	}
 
 	private SadlCommandResult convertCmdExceptionToSadlCommandError(SadlCommand cmd, Throwable t) {
