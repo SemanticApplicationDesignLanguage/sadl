@@ -343,6 +343,8 @@ public class RunInference extends SadlActionHandler {
 	
 	private String writeDerivationsToFile(IProject project, IFile trgtFile, DataSource ds) throws CoreException, IOException {
 		String tempFolderPath = convertProjectRelativePathToAbsolutePath(project.getFullPath().append("Temp").toOSString());
+		File tfFile = new File(tempFolderPath);
+		tfFile.mkdirs();
 		String baseName = trgtFile.getName();
 		if (baseName.endsWith(ResourceManager.SADLEXT)) {
 			baseName = baseName.substring(0,
