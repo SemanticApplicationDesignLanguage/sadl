@@ -30,6 +30,7 @@
 						<param>com.ge.research.sadl.reasoner.IReasoner</param>
 						<param>com.ge.research.sadl.reasoner.ITranslator</param>
 						<param>com.hp.hpl.jena.reasoner.rulesys.Builtin</param>
+						<param>com.ge.research.sadl.importer.ITabularDataImporter</param>
 					</services>
 				</configuration>
 				<executions>
@@ -80,6 +81,7 @@
                                        <mainClass>com.ge.research.sadl.reasoner.IReasoner</mainClass>
                                        <mainClass>com.ge.research.sadl.reasoner.ITranslator</mainClass>
                                        <mainClass>com.hp.hpl.jena.reasoner.rulesys.Builtin</mainClass>
+                                       <mainClass>com.ge.research.sadl.importer.ITabularDataImporter</mainClass>
                                  </manifest>
                            </archive>
                       </configuration>

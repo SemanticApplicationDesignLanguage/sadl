@@ -317,9 +317,22 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			else {
 				ITabularDataImporter importer = getTabularDataImporter(getConfigMgr(getOwlFormat()));
 				if (importer == null) {
-					String msg = "Failed to find an importer implementing ITabularDataImporter.\n";
-					addErrorToSadlCommand(result, msg, ErrorType.ERROR);
-					return result;
+					Class<?> clz;
+					try {
+						importer = getConfigMgr(getOwlFormat()).getClassInstance("com.ge.research.sadl.jena.importer.CsvImporter", ITabularDataImporter.class);
+						if (importer == null) {
+							String msg = "Failed to find an importer implementing ITabularDataImporter.\n";
+							addErrorToSadlCommand(result, msg, ErrorType.ERROR);
+							return result;
+						}
+						else {
+							String msg = "Using default importer " + importer.getClass().getCanonicalName() + ".\n";
+							addErrorToSadlCommand(result, msg, ErrorType.WARNING);
+						}
+					} catch (Exception e) {
+						String msg = "Error trying to find an importer implementing ITabularDataImporter: " + e.getMessage() + "\n";
+						addErrorToSadlCommand(result, msg, ErrorType.ERROR);
+					}
 				}
 				importer.setImportFilename(inFile.getAbsolutePath(), true);
 				importer.setModelFolder(getConfigMgr(getOwlFormat()).getModelFolder());
@@ -363,14 +376,16 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		else {	// this is a straight read of an input file
 			getInitializedReasoner().loadInstanceData(inFile.getAbsolutePath());						
 		}
-		return null;
+		return result;
 	}
 
 	private void addErrorToSadlCommand(SadlCommandResult scr, String msg, ErrorType errorType) {
 		ModelError me = new ModelError(msg, errorType);
-		List<ModelError> errors = new ArrayList<ModelError>();
-		errors.add(me);
-		scr.setErrors(errors);
+		if (scr.getErrors() == null) {
+			List<ModelError> errors = new ArrayList<ModelError>();
+			scr.setErrors(errors);
+		}
+		scr.getErrors().add(me);
 	}
 
 	private SadlCommandResult convertCmdExceptionToSadlCommandError(SadlCommand cmd, Throwable t) {

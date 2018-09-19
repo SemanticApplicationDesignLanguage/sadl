@@ -54,24 +54,18 @@ class TemplateProposalProvider extends AbstractTemplateProposalProvider {
 			!alreadyImportedFiles.contains(name?.toString);
 	}
 
-//	override void completeImport_ImportResource(EObject model, Assignment assignment,
-//		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-//
-//		val term = assignment.terminal;
-//		val templateModel = EcoreUtil2.getContainerOfType(model, TemplateModel);
-//		if (templateModel !== null) {
-//			val imps = templateModel.imports
-//			for (imp : imps) {
-//				if (imp instanceof Import) {
-//					val alias = (imp as Import).mportResource
-//				}
-//			}
-//			val imports = templateModel.imports.map[importResource].filterNull.map[baseUri].filterNull.toSet;
-//			lookupCrossReference(term as CrossReference, context, acceptor) [
-//				return canBeImported(it, imports);
-//			];
-//		}
-//	}
+	override void completeImport_ImportResource(EObject model, Assignment assignment,
+		ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+
+		val term = assignment.terminal;
+		val templateModel = EcoreUtil2.getContainerOfType(model, TemplateModel);
+		if (templateModel !== null) {
+			val imports = templateModel.imports.map[importResource].filterNull.map[baseUri].filterNull.toSet;
+			lookupCrossReference(term as CrossReference, context, acceptor) [
+				return canBeImported(it, imports);
+			];
+		}
+	}
 
 	// Creates a proposal for an EOS terminal.  Xtext can't guess (at
     // the moment) what the valid values for a terminal rule are, so
