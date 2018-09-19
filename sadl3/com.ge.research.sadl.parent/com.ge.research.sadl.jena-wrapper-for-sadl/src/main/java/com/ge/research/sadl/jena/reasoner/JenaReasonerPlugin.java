@@ -3313,7 +3313,23 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	@Override
 	public boolean loadInstanceData(Object model) throws ConfigurationException {
-		// TODO Auto-generated method stub
+		if (model instanceof OntModel) {
+			return loadInstanceData((OntModel)model);
+		}
+		else if (model instanceof URI) {
+			try {
+				return loadInstanceData((URI)model);
+			} catch (IOException e) {
+				throw new ConfigurationException(e.getMessage(), e);
+			}
+		}
+		else if (model instanceof String) {
+			try {
+				return loadInstanceData((String)model);
+			} catch (IOException e) {
+				throw new ConfigurationException(e.getMessage(), e);
+			}
+		}
 		return false;
 	}
 

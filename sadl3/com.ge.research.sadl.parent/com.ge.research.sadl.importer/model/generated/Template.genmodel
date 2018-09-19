@@ -6,9 +6,34 @@
     complianceLevel="6.0" copyrightFields="false" runtimeVersion="2.12" usedGenPackages="platform:/resource/com.ge.research.sadl/model/generated/SADL.genmodel#//sADL">
   <genPackages prefix="Template" basePackage="com.ge.research.sadl.importer" disposableProviderFactory="true"
       fileExtensions="tmpl" ecorePackage="Template.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="Template.ecore#//DataType">
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/string"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/boolean"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/decimal"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/int"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/long"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/float"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/double"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/duration"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/dateTime"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/time"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/date"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/gYearMonth"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/gYear"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/gMonthDay"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/gDay"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/gMonth"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/hexBinary"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/base64Binary"/>
+      <genEnumLiterals ecoreEnumLiteral="Template.ecore#//DataType/anyURI"/>
+    </genEnums>
     <genClasses ecoreClass="Template.ecore#//TemplateModel">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TemplateModel/uri"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TemplateModel/imports"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//TemplateModel/incremental"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TemplateModel/infer"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TemplateModel/preProcessing"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TemplateModel/triples"/>
     </genClasses>
     <genClasses ecoreClass="Template.ecore#//NewModelNS">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//NewModelNS/baseUri"/>
@@ -17,6 +42,117 @@
     <genClasses ecoreClass="Template.ecore#//Import">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Template.ecore#//Import/importResource"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Import/alias"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//InferStmt">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//InferStmt/inf"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//InferStmt/chunksize"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//InferStmt/threads"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//LogStmt">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//LogStmt/logfilename"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//BeforeTriple">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//BeforeTriple/trans"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//BeforeTriple/val"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Validate">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Validate/col"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Validate/vnb"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Validate/ve"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Validate/vdt"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Validate/vrdft"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Validate/vrdfssc"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//NonIndexedColRef">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//NonIndexedColRef/ref"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//IndexedColRef">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//IndexedColRef/ref"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//IndexedColRef/idx"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//NotBlank">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//NotBlank/sk"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//NotBlank/ab"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//NotBlank/ge"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Skip">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Skip/sk"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Skip/scope"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Generate">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Generate/baseURI"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//DType">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//DType/dataType"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Rdftype">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Rdftype/rdftype"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//RdfsSubClass">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//RdfsSubClass/rdfssc"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Transform">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Transform/from"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Transform/tt"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//TransformFrom">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TransformFrom/firstfrom"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TransformFrom/restfrom"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//UserDefinedFunction">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//UserDefinedFunction/to"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//UserDefinedFunction/funcname"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//UserDefinedFunction/firstArg"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//UserDefinedFunction/otherArgsA"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Split">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Split/to"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Split/delimiter"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Encode">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Encode/to"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Encode/mappings"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//EncodeMappings">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//EncodeMappings/mapping"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//EncodeMapping">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//EncodeMapping/before"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//EncodeMapping/after"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Find">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Find/to"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Find/query"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Group">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Group/groupLines"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Line">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Line/line"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Line/ignore"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Line/slc"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Line/mlc"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Triple">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Triple/subj"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Triple/pred"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Triple/objval"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Triple/dataval"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//PredRef"/>
+    <genClasses ecoreClass="Template.ecore#//SpecialPred">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//SpecialPred/kws"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Template.ecore#//SpecialPred/sr"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//LiteralValue">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//LiteralValue/literalNumber"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//LiteralValue/literalString"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//LiteralValue/literalBoolean"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Ref">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Ref/ref"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Ref/addlcols"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Ref/row"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

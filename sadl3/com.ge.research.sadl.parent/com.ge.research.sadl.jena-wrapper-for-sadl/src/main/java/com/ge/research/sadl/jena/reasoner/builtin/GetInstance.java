@@ -361,7 +361,7 @@ public class GetInstance extends CancellableBuiltin {
     	while (citr.hasNext()) {
     		Triple t = citr.next();
     		Node scls = t.getObject();
-    		if (scls.isURI()) {
+    		if (scls.isURI()  && !scls.equals(cls)) {
     			// only give types that are named? (this would fail for unnamed unions, intersections, etc.
     			Triple tct = new Triple(inst, RDF.type.asNode(), scls);
     			Utils.doAddTriple(tct, context, true);

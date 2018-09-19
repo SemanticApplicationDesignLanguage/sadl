@@ -3169,6 +3169,9 @@ public class CsvImporter implements ITabularDataImporter {
 	public boolean enableTriplesAddedInOrderLogging(String filename) throws IOException {
 		boolean status = false;
 		if (allowTripleProcessingLog ) {
+			if (filename.startsWith("\"")) {
+				filename = SadlUtils.stripQuotes(filename);
+			}
 			triplesAddedInOrder = new File(filename);
 			if (!triplesAddedInOrder.exists()) {
 				try {

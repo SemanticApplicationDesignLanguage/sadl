@@ -1,0 +1,144 @@
+<title>Knowledge Server</title>
+<style>
+<!--
+a:link	     { color: #0066cc; }a:link.header    { text-decoration: none; color: #000000 }
+-->
+</style>
+<h1>Knowledge Server</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/04/2018<!--webbot bot="Timestamp" endspan i-checksum="12575" -->. 
+Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
+<h2>Introduction</h2>
+<p>Traditionally knowledge has been captured in some kind of knowledge 
+development interface which is akin to an integrated development environment 
+(IDE) for software development. For example, the SADL IDE is a knowledge capture 
+or knowledge development interface. Usually such an interface is not well-suited 
+to fielding the knowledge base in the environment in which it is useful either 
+as part of a software solution or as a decision support tool to people working 
+to solve problems. For delivery, the knowledge base is often more usefully 
+exposed through some kind of programmatic interface in which specific scenario 
+data is passed to a knowledge service, inference is perhaps performed, and 
+questions are asked to expose both the knowledge, the scenario data, and the 
+inferences drawn for this particular scenario. </p>
+<p>The knowledge services described herein are divided into three levels of 
+service: 
+1) basic scenario data push, query pull, 2) basic plus the ability to make 
+modifications to the knowledge base and persist both knowledge base changes and 
+data pushed (persist and edit, PE), and 3) basic plus PE plus a number of 
+convenience methods that facilitate model-driven (MD) applications. </p>
+<p>The names of the knowledge server Java Interface classes for each level of 
+service is shown in the table below.</p>
+<blockquote>
+  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="33%">
+    <tr>
+      <td width="22%">&nbsp;</td>
+      <td width="18%" align="center"><b>Java API</b></td>
+    </tr>
+    <tr>
+      <td width="22%"><b>Basic push, query</b></td>
+      <td width="18%" align="center"><i>
+      <a href="JavaDoc/JavaAPI/com/ge/research/sadl/server/ISadlServer.html">ISadlServer</a></i></td>
+    </tr>
+    <tr>
+      <td width="22%"><b>Persiste and Edit</b></td>
+      <td width="18%" align="center"><i>
+      <a href="JavaDoc/JavaAPI/com/ge/research/sadl/server/ISadlServerPE.html">ISadlServerPE</a></i></td>
+    </tr>
+    <tr>
+      <td width="22%"><b>Model-Driven</b></td>
+      <td width="18%" align="center"><i>
+      <a href="JavaDoc/JavaAPI/com/ge/research/sadl/server/ISadlServerMD.html">ISadlServerMD</a></i></td>
+    </tr>
+  </table>
+</blockquote>
+<p>This document will provide information and links to more detailed information 
+for the services provided by each of these three classes. Each class in the 
+table is linked to the JavaDoc documentation for that class. Complete JavaDoc 
+for the knowledge server Java API is available at <a href="JavaDoc/JavaAPI/index.html">
+Java API classes</a>.</p>
+<h2><i>ISadlServer</i>: Basic Services via a Java API</h2>
+<h3>Outline of Usage: Initial Steps</h3>
+<h4>Creation</h4>
+<p>The first step is to create an instance of a class implementing <i>
+ISadlServer</i>, e.g., <i>SadlServerImpl</i>. This is done with a Java statement 
+of the form:</p>
+<p>&nbsp;<i>&nbsp;&nbsp; ISadlServer srvr = new SadlServerImpl( );</i></p>
+<h4>Initialization</h4>
+<p>Next the server must be initialized by setting the folder on the file system 
+that is the kbase root folder, meaning all kbases are located under this folder. 
+This can be done by calling <i>setKbaseRoot</i>:</p>
+<p>&nbsp;&nbsp;&nbsp; <i>srvr.setKbaseRoot(&quot;c:/someuser/kbaseroot&quot;);</i></p>
+<p>Note that this could have been done in a single call by passing the kbase 
+root to the constructor:</p>
+<p>&nbsp;&nbsp;&nbsp; <i>&nbsp; ISadlServer srvr = new SadlServerImpl( &quot;c:/someuser/kbaseroot&quot;);</i></p>
+<h3>Outline of Usage: Next Steps</h3>
+<p>Once an instance of a class implementing <i>ISadlServer</i> has been created 
+an initialized, subsequent method calls can occur in any order. Functionalities 
+of potential interest are described in this section.</p>
+<h4>Pushing Scenario Data from Client to Server</h4>
+<h2>Sending Data to the Service</h2>
+<p>A Knowledge Server knowledge base consists of a set of
+<a href="https://www.w3.org/OWL/">OWL</a> models. An OWL model consists of a set 
+of RDF triples. Scenario-specific information can be added to a knowledge base 
+by adding RDF triples to the knowledge base. There are multiple ways that data 
+can be added to the server's knowledge base. Note that the services defined by
+<i>ISadlserver</i> only allow adding data for the current server session; the 
+data is not persisted on the server.</p>
+<h3>Creating a New Instance of a KBase Class</h3>
+<p>&nbsp;&nbsp;&nbsp; <i>String newInstanceURI = srvr.createInstance(&quot;http://some/scenario/namespace/uri#newInstanceName&quot;, 
+&quot;http://some/kbase/namespace/uri#ExistingClassName&quot;);</i></p>
+<h3>Adding a Triple to the KBase</h3>
+<p>An RDF triple consists of a subject, a property (or predicate), and a value. 
+The value can be a literal if the property is an <i>owl:DatatypeProperty</i>, or 
+it can be a URI if the property is an <i>owl:ObjectProperty</i> (see
+<a href="https://www.w3.org/TR/2004/REC-owl-guide-20040210/#SimpleProperties">
+https://www.w3.org/TR/2004/REC-owl-guide-20040210/#SimpleProperties</a>). Thus 
+for an owl:DatatypePropety one might have this call:</p>
+<p>&nbsp;&nbsp;&nbsp; <i>boolean status = srvr.addTriple(&quot;http://some/uri#subjectInstanceName&quot;, 
+&quot;http://some/kbase/uri#someDatatypePropertyName&quot;, 23.56);</i></p>
+<p>For an owl:ObjectProperty, one would make this call:</p>
+<p>&nbsp;&nbsp;&nbsp; <i>boolean status = srvr.addTriple(&quot;http://some/uri#subjectInstanceName&quot;, 
+&quot;http://some/kbase/uri#someObjectPropertyName&quot;, &quot;<a href="http://some/uri#objectInstanceName">http://some/uri#objectInstanceName</a>&quot;);</i></p>
+<h3>Using SPARQL Update</h3>
+<p><a href="https://www.w3.org/TR/sparql11-overview/">SPARQL</a> is a W3C graph 
+query language. SPARQL 1.1 includes
+<a href="https://www.w3.org/TR/2013/REC-sparql11-update-20130321/">update 
+capability</a>. The ISadlServer interface includes a method to insert triples 
+into and/or delete triples from the server session's knowledge base using an 
+update statement. </p>
+<p>&nbsp;&nbsp;&nbsp; <i>srvr.query(&quot;delete {?person &lt;foaf:givenName&gt; 'Bill'} 
+insert {?person &lt;foaf:givenName&gt; 'William'} where {?person &lt;foaf:givenName&gt; 
+'Bill'}&quot;);</i></p>
+<h3>Loading a File Containing RDF Triples</h3>
+<p>Data can be loaded into the knowledge base from a file containing RDF triples 
+in several standard formats, e.g., XML, Notation3 (N3), N-Triples (see
+<a href="https://en.wikipedia.org/wiki/Resource_Description_Framework#Serialization_formats">
+https://en.wikipedia.org/wiki/Resource_Description_Framework#Serialization_formats</a>). 
+The caveat is that the file designation is on the server's file system and must 
+be known by the client.</p>
+<p>&nbsp;&nbsp;&nbsp; <i>boolean status = srvr.loadData(&quot;file:///c:/tmp/instdata1.owl&quot;);</i></p>
+<h3>Loading a File containing Comma Separated Values (CSV)</h3>
+<p>With the additional information provided by a template file, RDF triples can 
+also be added to the session kbase from a CSV file. Once again, file paths are 
+on the server file system and must be known to the client.</p>
+<p>&nbsp;&nbsp;&nbsp; <i>boolean status = srvr.loadCsvData(file:///c:/tmp/instdata1.csv&quot;, 
+true, &quot;<a href="file:///c:/kbases/mykbase/mytemplate.tmpl">file:///c:/kbases/mykbase/mytemplate.tmpl</a>&quot;);</i></p>
+<p>The 3rd argument could be a URL or it could be an actual template as a 
+String.</p>
+<h3>Sending Data from a Client File Containing RDF Triples</h3>
+<p>If a file on the client file system contains RDF triples, the data can be 
+sent to the server using the class <i>
+<a class="header" href="eclipse-javadoc:â??=com.ge.research.sadl.sadlserver-impl/C:\/Program%20Files\/Java\/jdk1.8.0_77\/jre\/lib\/rt.jar%3Cjavax">
+javax</a>.<a class="header" href="eclipse-javadoc:â??=com.ge.research.sadl.sadlserver-impl/C:\/Program%20Files\/Java\/jdk1.8.0_77\/jre\/lib\/rt.jar%3Cjavax.activation">activation</a>.DataSource</i> 
+or one of its subclasses.</p>
+<p>&nbsp;&nbsp;&nbsp; <i>DataSource fdsrc = new FileDataSource(file:///c:/tmp/instdata1.owl);<br>
+&nbsp;&nbsp;&nbsp; boolean status = srvr.sendData(fdsrc);</i></p>
+<h3>Sending Data from a Client CSV File</h3>
+<p>A client-side CSV file can also be sent, along with a template, to add 
+triples to a session's knowledge base.</p>
+<p>&nbsp;&nbsp;&nbsp; <i>DataSource fdsrc = new FileDataSource(file:///c:/tmp/instdata1.csv);<br>
+&nbsp;&nbsp;&nbsp; boolean status = srvr.sendCsvData(fdsrc, true, &quot;<a href="file:///c:/kbases/mykbase/mytemplate.tmpl">file:///c:/kbases/mykbase/mytemplate.tmpl</a>&quot;);</i></p>
+<p>In this case the 3rd argument could be an URL or it could be the actual 
+template as a String.</p>
+<h2>ISadlServerPE: Modifying and Saving Models to the Knowledge Base</h2>
+<h2>ISadlServerMD: Supporting Model-Driven Development</h2>
