@@ -1364,8 +1364,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			String anntype = ann.getType();
 			EList<String> annContents = ann.getContents();
 			Iterator<String> anniter = annContents.iterator();
-			while (anniter.hasNext()) {
+			while (anniter.hasNext()) {  
 				String annContent = anniter.next();
+				annContent = cleanTextForUTF8(annContent);	
 				if (anntype.equalsIgnoreCase(AnnType.ALIAS.toString())) {
 					modelOntology.addLabel(annContent, "en");
 				} else if (anntype.equalsIgnoreCase(AnnType.NOTE.toString())) {
@@ -1373,6 +1374,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
+	}
+
+	private String cleanTextForUTF8(String aContent) {
+		aContent = aContent.replaceAll("[^\\x00-\\x7F]", "");
+		aContent = aContent.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
+		return aContent;
 	}
 
 	public OntModel prepareEmptyOntModel(Resource resource) throws ConfigurationException {
