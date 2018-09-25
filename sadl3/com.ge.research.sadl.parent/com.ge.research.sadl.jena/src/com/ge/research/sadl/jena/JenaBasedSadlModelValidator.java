@@ -85,6 +85,7 @@ import com.ge.research.sadl.sADL.SadlStringLiteral;
 import com.ge.research.sadl.sADL.SadlTypeReference;
 import com.ge.research.sadl.sADL.SadlUnaryExpression;
 import com.ge.research.sadl.sADL.SadlUnionType;
+import com.ge.research.sadl.sADL.SadlValueList;
 import com.ge.research.sadl.sADL.SelectExpression;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
@@ -2032,6 +2033,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo getType(SadlPrimitiveDataType expression) throws TranslationException, InvalidNameException, InvalidTypeException {
 		TypeCheckInfo tci = getType(expression.getPrimitiveType());
 		tci.setContext(this, expression);
+		if (expression.isList()) {
+			tci.setRangeValueType(RangeValueType.LIST);
+			int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
+			Node tctype = tci.getTypeCheckType();
+			if(tctype instanceof NamedNode) {
+				if (lenRest != null) {
+					if (lenRest.length == 1) {
+						((NamedNode)tctype).setListLength(lenRest[0]);
+					}
+					else if (lenRest.length == 2) {
+						((NamedNode)tctype).setMinListLength(lenRest[0]);
+						((NamedNode)tctype).setMaxListLength(lenRest[1]);
+					}
+				}
+				((NamedNode)tctype).setNodeType(NodeType.DataTypeListNode);
+			}
+		}
 		return tci;
 	}
 
@@ -3103,6 +3121,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (qnmDecl.eContainer().eContainer() instanceof SadlClassOrPropertyDeclaration) {
 							return getType(((SadlClassOrPropertyDeclaration)qnmDecl.eContainer().eContainer()).getClassOrProperty().get(0));
 						}
+					}else if (qnmDecl.eContainer() instanceof SadlValueList) {
+						return getType(((SadlValueList)qnmDecl.eContainer()).eContainer());
 					}
 				}
 				getModelProcessor().addTypeCheckingError(SadlErrorMessages.UNIDENTIFIED.toString(), reference);

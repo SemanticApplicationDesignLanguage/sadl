@@ -695,7 +695,10 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
         	}
         	csvImporter = new CsvImporter(cmgr);
         	if (debugOutput) {
-        		String tripleFile = projectUri.toString() + File.separator + "Temp" + File.separator + targetResource.getName() + ".tripleCreationLog";
+        		String tempFolder = projectUri.toString() + File.separator + "Temp";
+        		File tfFile = new File(tempFolder);
+        		tfFile.mkdirs();
+        		String tripleFile = tempFolder + File.separator + targetResource.getName() + ".tripleCreationLog";
         		csvImporter.enableTriplesAddedInOrderLogging(su.fileUrlToFileName(tripleFile));
         	}
         	csvImporter.setModelFolder(modelFolder);
