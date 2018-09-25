@@ -7605,6 +7605,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 	}
+	
+	private void addLengthRestrictionsToListLiteral(OntClass aClass, SadlValueList aListLiteral) {
+		int lLength = aListLiteral.getExplicitValues().size();
+		HasValueRestriction lHVR = getTheJenaModel().createHasValueRestriction(null,
+				getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI),
+				getTheJenaModel().createTypedLiteral(lLength));
+		aClass.addSuperClass(lHVR);
+	}
+
 
 	private void addCardinalityRestriction(OntResource cls, Property retProp, int cardinality) {
 		if (cls != null && cls.canAs(OntClass.class) && retProp != null) {
@@ -8281,6 +8290,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 				if (cls != null) {
+					addLengthRestrictionsToListLiteral(cls, listInitializer);
 					addListValues(inst, cls, listInitializer);
 				} else {
 					throw new JenaProcessorException("Unable to find type of list '" + inst.toString() + "'");
@@ -9199,9 +9209,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				if (restrictionTypeUri.equals(typeUri)) {
 					if(facet == null) {
-						spcitr.close();
-						lscitr.close();
-						return scls;
+						if(typeUri.contains(XSD.getURI())) {
+							if(lengthRestriction == -1 &&
+							   lengthMaxRestriction == -1 &&
+							   lengthMinRestriction == -1) {
+								spcitr.close();
+								lscitr.close();
+								return scls;
+							}	
+						}else {
+							spcitr.close();
+							lscitr.close();
+							return scls;
+						}
 					}else {
 						int length = facet.getLen() != null ? Integer.parseInt(facet.getLen()) : -1;
 						int lengthMax = facet.getMaxlen() != null ? Integer.parseInt(facet.getMaxlen()) : -1;
