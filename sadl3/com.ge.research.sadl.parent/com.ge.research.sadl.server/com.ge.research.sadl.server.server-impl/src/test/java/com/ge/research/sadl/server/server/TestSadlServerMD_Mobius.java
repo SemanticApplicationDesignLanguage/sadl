@@ -60,7 +60,7 @@ public class TestSadlServerMD_Mobius extends TestCase {
 
 	@Ignore
 	@Test
-	public void testWithJenaReasoner() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException {
+	public void testWithJenaReasoner() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException, IOException, URISyntaxException {
 		// demonstrate ability to access the base named service
 		modelFolder = "D:/sadl/workspace-sadl/Mobius2.new/OwlModels";
 		ISadlServerMD srvr = new SadlServerMDImpl();

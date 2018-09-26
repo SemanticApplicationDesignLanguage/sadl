@@ -90,6 +90,9 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.reasoner.rulesys.Rule;
+import com.hp.hpl.jena.update.UpdateAction;
+import com.hp.hpl.jena.update.UpdateFactory;
+import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.XSD;
 
@@ -131,8 +134,21 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			Iterator<String> modelNamesIter = instanceDataModels.keySet().iterator();
 			while (modelNamesIter.hasNext()) {
 				String modelName = modelNamesIter.next();
-				OntModel model = instanceDataModels.get(modelName);
-				model.removeAll();
+				try {
+					OntModel model = instanceDataModels.get(modelName);
+					if (getServiceModelName() != null && getServiceModelName().equals(modelName)) {
+						// reload the model
+						if (reasoner != null) {
+							reasoner.reset();		// this isn't right awc 9/25/18
+						}
+					}
+					else {
+						model.removeAll();
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			instanceDataModels.clear();
 		}
@@ -166,11 +182,86 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	@Override
 	public boolean persistInstanceModel(String modelName, String owlFileName, String globalPrefix) throws ConfigurationException, IOException {
 		String fullyQualifiedOwlFilename = null;
+		boolean updateMapping = true;
+		if (modelName == null) {
+			if (owlFileName == null) {
+				throw new IOException("Both model name and model file name cannot be null.");
+			}
+			try {
+				modelName = getConfigurationMgr().getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(owlFileName));
+				updateMapping = false;	// this is not a change in mapping
+			} catch (URISyntaxException e) {
+				throw new IOException(e.getMessage());
+			}
+		}
+		else {
+			// modelName is given
+			if (owlFileName != null) {
+				// OWL file name id given
+				// If either is in the policy mapping then the other must match what is in the policy mapping
+				// convert, if necessary, to a full-path URL
+				if (!owlFileName.contains("\\") && !owlFileName.contains("/")) {
+					String fp = getConfigurationMgr().getModelFolder() + "/" + owlFileName;
+					try {
+						fp = new SadlUtils().fileNameToFileUrl(fp);
+					} catch (URISyntaxException e) {
+						throw new IOException(e.getMessage());
+					}
+					owlFileName = fp;
+				}
+				String mappingFN = getConfigurationMgr().getAltUrlFromPublicUri(modelName);
+				if (mappingFN != null && !mappingFN.equals(modelName)) {	// if no mapping is found mappingFN will = modelName
+					if (!mappingFN.equals(owlFileName)) {
+						throw new IOException("A model with name '" + modelName + " already exists but is persisted in a different model file ("
+								+ mappingFN + "). It is not allowed to have the same model namespace in multiple model files.");
+					}
+				}
+				else {
+					// try the other way
+					try {
+						String mappingMN = getConfigurationMgr().getPublicUriFromActualUrl(owlFileName);
+						if (mappingMN != null) {
+							if (!mappingMN.equals(modelName)) {
+								throw new IOException("A model with file name '" + owlFileName + " already exists but has a different model namespace ("
+									+ mappingMN + "). It is not allowed to have safe models with different namespaces to the same file.");
+							}
+							else {
+								updateMapping = false;	// everything matches (so far)
+							}
+						}
+					} catch (ConfigurationException e) {
+						// this is OK
+					}
+				}
+			}
+			else {
+				updateMapping = false;	// this is not a change in mapping
+			}
+		}
+		if (globalPrefix != null) {
+			String mappingPrefix = getConfigurationMgr().getGlobalPrefix(modelName);
+			if (mappingPrefix != null) {
+				if (!mappingPrefix.equals(globalPrefix)) {
+					throw new IOException("A model with name '" + modelName + " already exists but has a different prefix ("
+							+ mappingPrefix + "). It is not allowed to have different global prefixes for the same model namespace.");
+				}
+				else {
+					updateMapping = false;	// everything matches
+				}
+			}
+			else {
+				updateMapping = true;	// no global prefix in mapping but one is given
+			}
+		}
+
+		if (owlFileName == null) {
+			owlFileName = getConfigurationMgr().getAltUrlFromPublicUri(modelName);
+		}
 		if (owlFileName == null) {
 			throw new IOException("File name for persistence must not be null.");
 		}
 		try {		
-			if (owlFileName.startsWith("file://")) {
+			if (owlFileName.startsWith("file:/")) {
         		SadlUtils su = new SadlUtils();
 				fullyQualifiedOwlFilename = su.fileUrlToFileName(owlFileName);
 			}
@@ -184,15 +275,22 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		}
 		String format = "RDF/XML-ABBREV";
 		try {
-			if (writeOntModel(getOntModelForEditing(modelName), modelName, fullyQualifiedOwlFilename, format)) {
-			    try {
-	        		SadlUtils su = new SadlUtils();
-			    	getConfigurationMgr().addMapping(su.fileNameToFileUrl(fullyQualifiedOwlFilename), modelName, globalPrefix, true, null);
-			    	getConfigurationMgr().saveOntPolicyFile();
-			    }
-			    catch (Exception e) {
-			    	return addError(new ModelError("Failed to save mapping for model file '" + fullyQualifiedOwlFilename + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
-			    }
+			OntModel theOntModel = getInstanceData(); // getOntModelForEditing(modelName);
+			if (theOntModel == null) {
+				// we don't have a model for editing so we're going to save the instance data model
+				theOntModel = getOntModelForEditing(getInstanceModelName());
+			}
+			if (writeOntModel(theOntModel, modelName, fullyQualifiedOwlFilename, format)) {
+				if (updateMapping) {
+				    try {
+		        		SadlUtils su = new SadlUtils();
+				    	getConfigurationMgr().addMapping(su.fileNameToFileUrl(fullyQualifiedOwlFilename), modelName, globalPrefix, true, "SadlServerPE");
+				    	getConfigurationMgr().saveOntPolicyFile();
+				    }
+				    catch (Exception e) {
+				    	return addError(new ModelError("Failed to save mapping for model file '" + fullyQualifiedOwlFilename + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
+				    }
+				}
 			}
 		} catch (IOException e) {
 	    	return addError(new ModelError("Failed to save mapping for model file '" + fullyQualifiedOwlFilename + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
@@ -455,7 +553,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			return editedTboxModels.get(thisModelName);
 		}
 		try {
-			if (modelName != null && !modelName.equals(thisModelName)) {
+			if (serviceModelName != null && !serviceModelName.equals(thisModelName)) {
 				if (instanceDataModels != null && instanceDataModels.containsKey(thisModelName)) {
 					return instanceDataModels.get(thisModelName);
 				}
@@ -498,7 +596,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		}
 		OntModel model = ModelFactory.createOntologyModel(getConfigurationMgr().getOntModelSpec(null));
 		model.getDocumentManager().setFileManager(getConfigurationMgr().getJenaDocumentMgr().getFileManager());
-		Resource importOnt = model.getResource(getModelName());
+		Resource importOnt = model.getResource(getServiceModelName());
 		Ontology ont = model.createOntology(thisModelName);
 		ont.addImport(importOnt);
 		ont.addComment("This ontology model was created by SadlServerPE.", "en");
@@ -1632,7 +1730,11 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return defaultInstanceDataNS.substring(0, defaultInstanceDataNS.length() - 1);
 			}
 		}
-		return null;
+		try {
+			return getServiceModelName();
+		} catch (IOException e) {
+			throw new ConfigurationException(e.getMessage());
+		}
 	}
 
 	@Override
@@ -1891,6 +1993,16 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	}
 
 	@Override
+	public ResultSet query(String query) throws QueryParseException, ReasonerNotFoundException, QueryCancelledException, IOException, ConfigurationException, InvalidNameException, URISyntaxException {
+		if (query.startsWith("delete") || query.startsWith("insert")) {
+			UpdateRequest urequest = UpdateFactory.create(query);
+			OntModel ontModel = getOntModelForEditing(serviceModelName);
+			UpdateAction.execute(urequest, ontModel);
+		}
+		return super.query(query);
+	}
+	
+	@Override
 	public ResultSet query(String modelName, String query)
 			throws QueryCancelledException, QueryParseException,
 			ReasonerNotFoundException, SessionNotFoundException, IOException, ConfigurationException, InvalidNameException, URISyntaxException {
@@ -1901,6 +2013,18 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		OntModel ontModel = getOntModelForEditing(modelName);
 		reasoner.loadInstanceData(ontModel);
 		return reasoner.ask(query);
+	}
+
+	@Override
+	public String prepareQuery(String modelName, String query) throws InvalidNameException, ReasonerNotFoundException,
+			ConfigurationException, InvalidNameException, SessionNotFoundException {
+		return super.prepareQuery(query);
+	}
+
+	@Override
+	public String parameterizeQuery(String modelName, String query, List<Object> values)
+			throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException {
+		return super.parameterizeQuery(query, values);
 	}
 
 }

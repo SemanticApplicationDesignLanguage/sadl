@@ -93,7 +93,7 @@ public class RunInference extends SadlActionHandler {
 						if (monitor.isCanceled()) {
 							while (inferenceThread.isAlive()) {
 								inferenceThread.stop();
-								inferenceThread.join();
+//								inferenceThread.join();
 							}
 							SadlConsole.writeToConsole(MessageType.INFO, "Inference canceled.");
 							return Status.CANCEL_STATUS;

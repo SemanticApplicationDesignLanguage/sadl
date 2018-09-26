@@ -28,6 +28,7 @@
 package com.ge.research.sadl.server;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import javax.naming.NameNotFoundException;
 
@@ -75,8 +76,10 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws SessionNotFoundException 
 	 * @throws QueryParseException 
 	 * @throws NameNotFoundException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public abstract String[] getAllSubclassesOfTaxonomy(String root) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+	public abstract String[] getAllSubclassesOfTaxonomy(String root) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns all of the direct subclasses (one level down) of root in a class hierarchy.
@@ -90,8 +93,10 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws SessionNotFoundException 
 	 * @throws QueryParseException 
 	 * @throws NameNotFoundException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public abstract String[] getDirectSubclassesOfTaxonomy(String root) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+	public abstract String[] getDirectSubclassesOfTaxonomy(String root) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns all of the ancestor classes given a starting class,
@@ -106,8 +111,10 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws SessionNotFoundException 
 	 * @throws QueryParseException 
 	 * @throws NameNotFoundException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public abstract String[] getAncestorClassesOfTaxonomy(String className) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+	public abstract String[] getAncestorClassesOfTaxonomy(String className) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns all of the direct super classes (one level up) given
@@ -122,8 +129,10 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws SessionNotFoundException 
 	 * @throws QueryParseException 
 	 * @throws NameNotFoundException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public abstract String[] getDirectSuperclassesOfTaxonomy(String className) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+	public abstract String[] getDirectSuperclassesOfTaxonomy(String className) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns all the leaf classes of the classification hierarchy starting at root
@@ -137,12 +146,13 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
 	 */
 	public abstract String[] getLeafClassesOfTaxonomy(String root)
 			throws IOException, NameNotFoundException, QueryParseException,
 			ReasonerNotFoundException, InvalidNameException,
 			ConfigurationException, SessionNotFoundException,
-			QueryCancelledException;
+			QueryCancelledException, URISyntaxException;
 
 	/**
 	 * This method returns all the instances of the given class
@@ -156,12 +166,13 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
 	 */
 	public abstract String[] getInstancesOfClass(String cls)
 			throws IOException, NameNotFoundException, QueryParseException,
 			ReasonerNotFoundException, InvalidNameException,
 			ConfigurationException, SessionNotFoundException,
-			QueryCancelledException;
+			QueryCancelledException, URISyntaxException;
 
 	/**
 	 * This method returns true if and only if the property is an ObjectProperty
@@ -174,12 +185,14 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
 	public abstract boolean isObjectProperty(String property)
 			throws NameNotFoundException, QueryParseException,
 			ReasonerNotFoundException, InvalidNameException,
 			ConfigurationException, SessionNotFoundException,
-			QueryCancelledException;
+			QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns true if and only if the property is an DatatypeProperty
@@ -192,12 +205,14 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
 	public abstract boolean isDatatypeProperty(String property)
 			throws NameNotFoundException, QueryParseException,
 			ReasonerNotFoundException, InvalidNameException,
 			ConfigurationException, SessionNotFoundException,
-			QueryCancelledException;
+			QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns the class(es) which are the domain of the property, if any.
@@ -210,12 +225,14 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
 	public abstract String[] getPropertyDomain(String property)
 			throws NameNotFoundException, QueryParseException,
 			ReasonerNotFoundException, InvalidNameException,
 			ConfigurationException, SessionNotFoundException,
-			QueryCancelledException;
+			QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns the class(es) or XSD types which are the range of the property, if any.
@@ -228,12 +245,14 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
 	public abstract String[] getPropertyRange(String property)
 			throws NameNotFoundException, QueryParseException,
 			ReasonerNotFoundException, InvalidNameException,
 			ConfigurationException, SessionNotFoundException,
-			QueryCancelledException;
+			QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns all the classes that must be represented in the range of the given property on the given class
@@ -248,13 +267,14 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
 	 */
 	public abstract String[] getRequiredRangeClassesOfPropertyOfClass(
 			String cls, String property) throws IOException,
 			NameNotFoundException, QueryParseException,
 			ReasonerNotFoundException, InvalidNameException,
 			ConfigurationException, SessionNotFoundException,
-			QueryCancelledException;
+			QueryCancelledException, URISyntaxException;
 
 	/**
 	 * This method returns all the names of classes that are allowed in the range of the given property on the given class
@@ -268,12 +288,14 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws QueryParseException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
 	public abstract String[] getAllowedRangeClassesOfPropertyOfClass(
 			String cls, String property) throws NameNotFoundException,
 			InvalidNameException, ReasonerNotFoundException,
 			ConfigurationException, QueryParseException,
-			SessionNotFoundException, QueryCancelledException;
+			SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns all the names of instances that are allowed values of the given property on the given class
@@ -288,13 +310,14 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
 	 */
 	public abstract String[] getAllowedValuesOfObjectPropertyOfClass(
 			String cls, String property) throws IOException,
 			NameNotFoundException, QueryParseException,
 			ReasonerNotFoundException, InvalidNameException,
 			ConfigurationException, SessionNotFoundException,
-			QueryCancelledException;
+			QueryCancelledException, URISyntaxException;
 
 	/**
 	 * This method returns all the allowed values of the given property on the given class. Note that in the case of xsd:string values,
@@ -310,12 +333,13 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
 	 */
 	public abstract Object[] getAllowedValuesOfDataPropertyOfClass(String cls,
 			String property) throws QueryParseException,
 			ReasonerNotFoundException, InvalidNameException,
 			ConfigurationException, SessionNotFoundException,
-			QueryCancelledException;
+			QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns all of the properties that have the given class in the property domain.
@@ -326,8 +350,10 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws QueryCancelledException 
 	 * @throws QueryParseException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public abstract String[] getPropertiesWithGivenClassInDomain(String cls) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException;
+	public abstract String[] getPropertiesWithGivenClassInDomain(String cls) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException, IOException, URISyntaxException;
 	
 	/**
 	 * This method returns the default value of the given property on the given class
@@ -341,9 +367,11 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws SessionNotFoundException 
 	 * @throws QueryParseException 
 	 * @throws NameNotFoundException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
 	public abstract Object getDefaultValueOfPropertyOnClass(String cls, String prop) throws InvalidNameException, ReasonerNotFoundException, 
-		ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException;
+		ConfigurationException, NameNotFoundException, QueryParseException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException;
 	
 	/**
 	 * This method returns the rdfs:label values (aka aliases, aka longnames) for a given concept identified by URI
@@ -354,8 +382,10 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws QueryCancelledException 
 	 * @throws QueryParseException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public abstract String[] getConceptRdfsLabels(String conceptUri) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException;
+	public abstract String[] getConceptRdfsLabels(String conceptUri) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException, IOException, URISyntaxException;
 	
 	/**
 	 * This method returns the rdfs:comment values (aka notes, aka descriptions) for a given concept identified by URI
@@ -366,8 +396,10 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws QueryCancelledException 
 	 * @throws QueryParseException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public abstract String[] getConceptRdfsComments(String conceptUri) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException;
+	public abstract String[] getConceptRdfsComments(String conceptUri) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException, IOException, URISyntaxException;
 
 	/**
 	 * This method returns the annotation on the given class
@@ -379,7 +411,9 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 	 * @throws InvalidNameException 
 	 * @throws QueryCancelledException 
 	 * @throws QueryParseException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public abstract String getAnnotation(String className, String annotationName) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException ;
+	public abstract String getAnnotation(String className, String annotationName) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, QueryCancelledException, IOException, URISyntaxException ;
 
 }

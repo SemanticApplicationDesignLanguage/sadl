@@ -108,7 +108,7 @@ public class SadlServerImpl implements ISadlServer {
     protected IConfigurationManager configurationMgr = null;
     protected IReasoner reasoner = null;
     private boolean collectTimingInformation = false;
-    protected String modelName = null;
+    protected String serviceModelName = null;		// the model identified as the starting model in selectServiceModel
 	private String serviceVersion = "$Revision: 1.16 $";
 	protected String kbaseRoot = null;
 	protected String defaultInstanceDataNS = null;
@@ -131,7 +131,7 @@ public class SadlServerImpl implements ISadlServer {
 	}
 
     public ResultSet query(String sparql)
-            throws QueryParseException, ReasonerNotFoundException, QueryCancelledException {
+            throws QueryParseException, ReasonerNotFoundException, QueryCancelledException, IOException, ConfigurationException, InvalidNameException, URISyntaxException {
         logger.info("Calling query(\"{}\")", sparql);
         if (reasoner != null) {
  			ResultSet rs = reasoner.ask(sparql);
@@ -210,7 +210,7 @@ public class SadlServerImpl implements ISadlServer {
 		importer.setImportFilename(serverCsvDataLocator, includesHeader);
 		importer.setModelFolder(getKBaseIdentifier());
 		importer.setImportModelNamespace(defaultInstanceDataNS);
-		importer.setImports(getModelName());
+		importer.setImports(getServiceModelName());
 		importer.setTemplates(csvTemplate);
 		Object om;
 		try {
@@ -310,7 +310,7 @@ public class SadlServerImpl implements ISadlServer {
     		}
 		}
         int iStatus = reasoner.initializeReasoner(getModelFolder(), modelName, transPrefs, repoType);
-        this.modelName = modelName;
+        this.serviceModelName = modelName;
         if (this.reasoner == null) {
         	logger.info("Failed to get reasoner");
         } else if (iStatus == 0){
@@ -443,7 +443,7 @@ public class SadlServerImpl implements ISadlServer {
 				numImports = templateImports.size();
 			}
 			else {
-				importer.setImports(getModelName());
+				importer.setImports(getServiceModelName());
 				numImports = 1;
 			}
 			String processedTemplate = (String) o[0];
@@ -564,8 +564,8 @@ public class SadlServerImpl implements ISadlServer {
 		return null;
 	}
 
-	public String getModelName() throws IOException {
-		return modelName;
+	public String getServiceModelName() throws IOException {
+		return serviceModelName;
 	}
 
 	public String getReasonerVersion() throws ConfigurationException {
@@ -627,6 +627,7 @@ public class SadlServerImpl implements ISadlServer {
     			kbrootpath = _kbaseRoot.substring(5);
     		}
     		this.kbaseRoot = _kbaseRoot;
+			logger.info("kbaseRoot set to '" + this.kbaseRoot + "'");
     		java.io.File kbrootFile = new java.io.File(kbrootpath);
     		if (kbrootFile.exists() && kbrootFile.isDirectory()) {
     			Map[] results = scanFolderForServices(kbrootFile, null, null);
@@ -635,6 +636,22 @@ public class SadlServerImpl implements ISadlServer {
     					Map<String, String[]> serviceMap = (Map<String, String[]>) results[0];
 		    			if (serviceMap != null) {
 		    				setServiceNameMap(serviceMap);
+		    				if (logger.isDebugEnabled()) {
+		    					Iterator<String> smitr = serviceMap.keySet().iterator();
+		    					while (smitr.hasNext()) {
+		    						String key = smitr.next();
+		    						String[] values = serviceMap.get(key);
+		    						StringBuilder sb = new StringBuilder("Service: ");
+		    						sb.append(key);
+		    						sb.append("\n");
+		    						for (int i = 0; values != null && i < values.length; i++) {
+		    							sb.append("  ");
+		    							sb.append(values[i]);
+		    							sb.append("\n");
+		    						}
+		    						logger.info(sb.toString());
+		    					}
+		    				}
 		    			}
     				}
     			}
@@ -802,7 +819,7 @@ public class SadlServerImpl implements ISadlServer {
 	public ResultSet[] atomicQuery(String serviceName, DataSource dataSrc, String inputFormat,
 			String[] sparql) throws IOException, ConfigurationException,
 			NamedServiceNotFoundException, QueryParseException,
-			ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException {
+			ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException, URISyntaxException {
 		ResultSet[] results = null;
 		if (serviceName == null || serviceName.length() == 0) {
 			throw new NamedServiceNotFoundException("Service name is null");
@@ -836,7 +853,7 @@ public class SadlServerImpl implements ISadlServer {
 			String[] sparql) throws IOException, ConfigurationException,
 			NamedServiceNotFoundException, QueryParseException,
 			ReasonerNotFoundException, SessionNotFoundException,
-			InvalidNameException, TemplateException, QueryCancelledException {
+			InvalidNameException, TemplateException, QueryCancelledException, URISyntaxException {
 		ResultSet[] results = null;
 		if (serviceName == null || serviceName.length() == 0) {
 			throw new NamedServiceNotFoundException("Service name is null");
@@ -869,7 +886,7 @@ public class SadlServerImpl implements ISadlServer {
 			reasoner.setInstanceDataNamespace(namespace);
 		}
 		if (defaultInstanceDataNS.endsWith("#")) {
-			modelName = defaultInstanceDataNS.substring(0, defaultInstanceDataNS.length() - 1);
+			serviceModelName = defaultInstanceDataNS.substring(0, defaultInstanceDataNS.length() - 1);
 		}
 		return oldNS;
 	}
@@ -883,7 +900,7 @@ public class SadlServerImpl implements ISadlServer {
 	
 	@Override
 	public String getInstanceModelName() {
-		return modelName;
+		return serviceModelName;
 	}
 	
 	public String createInstance(String name, String className) throws ConfigurationException, InvalidNameException, IOException {
