@@ -41,7 +41,7 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.ui.SadlConsole;
+import com.ge.research.sadl.ui.SadlEclipseConsole;
 import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.ui.visualize.GraphGenerator;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;

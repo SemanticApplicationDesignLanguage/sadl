@@ -40,7 +40,7 @@ class SADLStandaloneSetup extends SADLStandaloneSetupGenerated {
 		injector.createExternalResourceHelper.registerExternalEmfResourceSupport;
 	}
 	
-	public override createInjectorAndDoEMFRegistration() {
+	override createInjectorAndDoEMFRegistration() {
 		return super.createInjectorAndDoEMFRegistration()
 	}
 

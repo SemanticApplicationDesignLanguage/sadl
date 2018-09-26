@@ -57,8 +57,8 @@ public enum OutputStreamStrategy {
 	 */
 	SADL {
 
-		private PrintStream OUT = new PrintStream(SadlConsole.getOutputStream(MessageType.INFO));
-		private PrintStream ERR = new PrintStream(SadlConsole.getOutputStream(MessageType.ERROR));
+		private PrintStream OUT = new PrintStream(SadlEclipseConsole.getOutputStream(MessageType.INFO));
+		private PrintStream ERR = new PrintStream(SadlEclipseConsole.getOutputStream(MessageType.ERROR));
 
 		@Override
 		protected PrintStream getOut() {

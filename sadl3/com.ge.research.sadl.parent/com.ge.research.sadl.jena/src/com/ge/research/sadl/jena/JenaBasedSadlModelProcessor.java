@@ -219,6 +219,7 @@ import com.ge.research.sadl.sADL.ValueTable;
 import com.ge.research.sadl.utils.PathToFileUriConverter;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlASTUtils;
+import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -630,20 +631,26 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private String getModelFolderPath(Resource resource) {
-		final URI resourceUri = resource.getURI();
-		final URI modelFolderUri = resourceUri.trimSegments(resourceUri.isFile() ? 1 : resourceUri.segmentCount() - 2)
-				.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
-
-		if (resourceUri.isPlatformResource()) {
-			final IFile file = ResourcesPlugin.getWorkspace().getRoot()
-					.getFile(new Path(modelFolderUri.toPlatformString(true)));
-			return file.getRawLocation().toPortableString();
-		} else {
-			final String modelFolderPathname = findModelFolderPath(resource.getURI());
-			return modelFolderPathname == null ? modelFolderUri.toFileString() : modelFolderPathname;
+		try {
+			if (isSyntheticUri(resource)) {
+				return null;
+			}
+			final URI resourceUri = resource.getURI();
+			java.net.URI root = this.projectHelper.getRoot(new java.net.URI(resourceUri.toString()));
+			// This is for the headless tool-chain.
+			if (root == null && resourceUri.isFile()) {
+				root = new java.net.URI(resourceUri.trimSegments(1).toString());
+			}
+			return Paths.get(root).resolve(UtilsForJena.OWL_MODELS_FOLDER_NAME).toString();
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
+	/**
+	 * @deprecated use {@link SadlProjectHelper#getRoot(java.net.URI)} instead.
+	 */
+	@Deprecated
 	static String findProjectPath(URI uri) {
 		String modelFolder = findModelFolderPath(uri);
 		if (modelFolder != null) {
@@ -652,6 +659,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
+	/**
+	 * @deprecated use {@link SadlProjectHelper#getRoot(java.net.URI)} instead.
+	 */
+	@Deprecated
 	public static String findModelFolderPath(URI uri) {
 		File file = new File(uri.path());
 		if (file != null) {
@@ -10777,12 +10788,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return configMgr;
 	}
 
+	protected boolean isSyntheticUri(Resource resource) {
+		return resource.getURI().toString().startsWith("synthetic")
+			|| resource.getURI().toString().startsWith(SYNTHETIC_FROM_TEST);
+	}
+	
 	protected boolean isSyntheticUri(String modelFolderPathname, Resource resource) {
-		if ((modelFolderPathname == null && resource.getURI().toString().startsWith("synthetic"))
-				|| resource.getURI().toString().startsWith(SYNTHETIC_FROM_TEST)) {
-			return true;
-		}
-		return false;
+		return modelFolderPathname == null && isSyntheticUri(resource);
 	}
 
 	protected IConfigurationManagerForIDE getConfigMgr() {
