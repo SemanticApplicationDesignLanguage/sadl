@@ -61,7 +61,6 @@ import com.ge.research.sadl.reasoner.TripleNotFoundException;
  * @author 200005201
  *
  */
-@SuppressWarnings("restriction")
 public interface ISadlServer {
 	
 	/**
@@ -347,7 +346,7 @@ public interface ISadlServer {
      * (The model namespace is the model name with a "#" added at the end.)
      * @return
      */
-    abstract public String getInstanceModelName();
+    abstract public String getDefaultModelName();
     
     /**
      * This method is called to add a triple to the instance data. The object value will be interpreted based on type of the Object
@@ -428,9 +427,8 @@ public interface ISadlServer {
      * Gets the model name for the current session.
      * 
      * @return model name
-     * @throws IOException 
      */
-	public abstract String getServiceModelName() throws IOException;
+	public abstract String getServiceModelName();
 
     /**
      * Gets the version of the reasoner.

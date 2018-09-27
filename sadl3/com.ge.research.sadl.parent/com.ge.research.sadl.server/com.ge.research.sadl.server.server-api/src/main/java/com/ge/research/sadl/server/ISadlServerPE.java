@@ -164,6 +164,17 @@ public interface ISadlServerPE extends ISadlServer {
 			throws ConfigurationException, TripleNotFoundException, ReasonerNotFoundException, SessionNotFoundException;
 
 	/**
+	 * Call this method to create a new class in the default model
+	 * 
+	 * @param className Class name or null if none
+	 * @param superClassName Super class name or null if none
+	 * @return True if successful else false
+	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws InvalidNameException 
+	 */
+	boolean addClass(String className, String superClassName) throws SessionNotFoundException, InvalidNameException;
+	
+	/**
 	 * Call this method to create a new class in the specified named model
 	 * 
 	 * @param modelName Model name
@@ -220,20 +231,6 @@ public interface ISadlServerPE extends ISadlServer {
 	String getUniqueNamespaceUri(String baseNamespace) throws InvalidNameException, SessionNotFoundException, MalformedURLException, ConfigurationException;
 
 	/**
-	 * Call this method to create a new instance of the specified class in the named model.
-	 * 
-	 * @param modelName Model name
-	 * @param instName Instance name
-	 * @param className Class name or null if none
-	 * @return True if successful else false
-	 * @throws com.ge.research.sadl.server.ConfigurationException
-	 * @throws com.ge.research.sadl.server.SessionNotFoundException
-	 * @throws com.ge.research.sadl.server.InvalidNameException
-	 */
-	boolean addInstance(String modelName, String instName, String className)
-			throws ConfigurationException, InvalidNameException, SessionNotFoundException;
-
-	/**
 	 * Call this method to create a new ontology property, either ObjectProperty or DatatypeProperty,  in the named model.
 	 * 
 	 * @param modelName Model name
@@ -287,6 +284,51 @@ public interface ISadlServerPE extends ISadlServer {
 	 */
 	boolean addCardinalityRestriction(String modelName, String className,
 			String propertyName, int cardValue) throws SessionNotFoundException, InvalidNameException;
+
+	/**
+	 * Call this method to add a max cardinality restriction to a property on a class in the named model.
+	 * 
+	 * @param modelName Model name
+	 * @param className Class name
+	 * @param propertyName Property name
+	 * @param cardValue Cardinality value
+	 * @param restrictedToType class values are restricted to
+	 * @return True if successful else false
+	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws InvalidNameException 
+	 */
+	boolean addMaxQualifiedCardinalityRestriction(String modelName, String className,
+			String propertyName, int cardValue, String restrictedToType) throws SessionNotFoundException, InvalidNameException;
+
+	/**
+	 * Call this method to add a min cardinality restriction to a property on a class in the named model.
+	 * 
+	 * @param modelName Model name
+	 * @param className Class name
+	 * @param propertyName Property name
+	 * @param cardValue Cardinality value
+	 * @param restrictedToType class values are restricted to
+	 * @return True if successful else false
+	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws InvalidNameException 
+	 */
+	boolean addMinQualifiedCardinalityRestriction(String modelName, String className,
+			String propertyName, int cardValue, String restrictedToType) throws SessionNotFoundException, InvalidNameException;
+
+	/**
+	 * Call this method to add a cardinality restriction to a property on a class in the named model.
+	 * 
+	 * @param modelName Model name
+	 * @param className Class name
+	 * @param propertyName Property name
+	 * @param cardValue Cardinality value
+	 * @param restrictedToType class values are restricted to
+	 * @return True if successful else false
+	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws InvalidNameException 
+	 */
+	boolean addQualifiedCardinalityRestriction(String modelName, String className,
+			String propertyName, int cardValue, String restrictedToType) throws SessionNotFoundException, InvalidNameException;
 
 	/**
 	 * Call this method to add to restrict an object property on a class to a particular value in the named model.
@@ -536,6 +578,5 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @throws SessionNotFoundException 
 	 */
 	public String parameterizeQuery(String modelName, String queryStr, List<Object> values) throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException;
-
 
 }
