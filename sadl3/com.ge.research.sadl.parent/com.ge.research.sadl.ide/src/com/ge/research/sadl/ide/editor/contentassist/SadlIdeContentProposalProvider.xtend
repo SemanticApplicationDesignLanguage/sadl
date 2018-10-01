@@ -165,7 +165,7 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 	protected static val BUILTIN_FILES = #{'SadlImplicitModel.sadl', 'SadlBuiltinFunctions.sadl'};
 
 	@Inject protected DeclarationExtensions declarationExtensions;
-	@Inject extension ProposalProviderFilterProvider;
+	@Inject protected extension ProposalProviderFilterProvider;
 
 	val PropertyRangeKeywords = newArrayList('string', 'boolean', 'decimal', 'int', 'long', 'float', 'double',
 		'duration', 'dateTime', 'time', 'date', 'gYearMonth', 'gYear', 'gMonthDay', 'gDay', 'gMonth', 'hexBinary',
