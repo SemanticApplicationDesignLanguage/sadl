@@ -9828,6 +9828,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				String typeStr = pt.getLiteral();
 				typeStr = XSD.getURI() + typeStr;
 			}
+			if(type instanceof SadlSimpleTypeReference) {
+				SadlResource sr = ((SadlSimpleTypeReference)type).getType();
+				if(sr.eContainer() instanceof SadlClassOrPropertyDeclaration) {
+					try {
+						processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration)sr.eContainer());
+						eobjectPreprocessed((SadlClassOrPropertyDeclaration)sr.eContainer());
+					} catch (TranslationException e) {
+						e.printStackTrace();
+					}
+				}
+			}
 			com.hp.hpl.jena.rdf.model.Resource typersrc = sadlTypeReferenceToResource(type);
 			if (typersrc == null) {
 				addError(SadlErrorMessages.CANNOT_CREATE.get("all values from restriction",
