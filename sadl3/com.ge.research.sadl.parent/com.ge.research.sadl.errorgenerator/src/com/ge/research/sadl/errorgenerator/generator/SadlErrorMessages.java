@@ -135,6 +135,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNKNOWN_VALUE = new SadlErrorMessage("unknown_value");
 /**
+* Invalid arguments for "{0}" operator.
+**/
+    public static final SadlErrorMessage INVALID_ARGUMENT_FOR_OPERATOR = new SadlErrorMessage("invalid_argument_for_operator");
+/**
 * ERROR-ATPT: No {0} selected.
 **/
     public static final SadlErrorMessage ATPT_NO_SELECTION = new SadlErrorMessage("atpt_no_selection");
@@ -155,7 +159,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage TRANSLATION_ERROR = new SadlErrorMessage("translation_error");
 /**
-* This expression ({0}) cannot be decomposed into a known type"
+* This expression ({0}) cannot be decomposed into a known type
 **/
     public static final SadlErrorMessage DECOMPOSITION_ERROR = new SadlErrorMessage("decomposition_error");
 /**

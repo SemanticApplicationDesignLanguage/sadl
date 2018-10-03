@@ -5836,6 +5836,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					subject = ((PropOfSubject) subject).getRight();
 				}
 				
+				//Can't contain further constants
+				if(predicate instanceof Constant || subject instanceof Constant) {
+					addError(SadlErrorMessages.INVALID_ARGUMENT_FOR_OPERATOR.get(cnstval), expr);
+				}
+				
                 //Check if we need to do special processing
                 if (expr instanceof PropOfSubject && ((PropOfSubject) expr).getOf() != "in") {
                     specialCntIdxProcessing = true;
