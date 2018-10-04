@@ -11,4 +11,4 @@ build_script:
   - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean verify
 
 cache:
- #- C:\Users\appveyor\.m2
+ - C:\Users\appveyor\.m2
