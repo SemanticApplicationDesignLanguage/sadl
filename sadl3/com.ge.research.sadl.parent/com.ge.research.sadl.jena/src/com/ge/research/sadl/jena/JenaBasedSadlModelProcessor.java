@@ -52,6 +52,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -638,8 +639,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			final URI resourceUri = resource.getURI();
 			java.net.URI root = this.projectHelper.getRoot(new java.net.URI(resourceUri.toString()));
 			// This is for the headless tool-chain.
-			if (root == null && resourceUri.isFile()) {
-				root = new java.net.URI(resourceUri.trimSegments(1).toString());
+			if (root == null) {
+				IPath lWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation();
+				IPath lResourcePath = new Path(resourceUri.toString());
+				if(resourceUri.isFile()) {		
+					root = new java.net.URI(lResourcePath.removeLastSegments(lResourcePath.segmentCount() - lWorkspaceRoot.segmentCount() - 2).toString());
+				}
+				if(resourceUri.isPlatformResource()) {
+					root = new java.net.URI("file:/" + lWorkspaceRoot.append(lResourcePath.segment(1)).toString());
+				}
 			}
 			return Paths.get(root).resolve(UtilsForJena.OWL_MODELS_FOLDER_NAME).toString();
 		} catch (URISyntaxException e) {
@@ -6071,7 +6079,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
 		if(predNode instanceof NamedNode && lTci != null) {
-			if(ignoreUnittedQuantities && lTci.getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+			if(ignoreUnittedQuantities && lTci.getTypeCheckType() != null && lTci.getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 				((NamedNode) predNode).setLocalizedType(validateNamedNode(new NamedNode(XSD.decimal.getURI(),NodeType.DataTypeNode)));
 			}else {
 				((NamedNode) predNode).setLocalizedType(lTci.getTypeCheckType());
@@ -9837,8 +9845,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				SadlResource sr = ((SadlSimpleTypeReference)type).getType();
 				if(sr.eContainer() instanceof SadlClassOrPropertyDeclaration) {
 					try {
-						processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration)sr.eContainer());
-						eobjectPreprocessed((SadlClassOrPropertyDeclaration)sr.eContainer());
+						if(!isEObjectPreprocessed((SadlClassOrPropertyDeclaration)sr.eContainer())) {
+							processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration)sr.eContainer());
+							eobjectPreprocessed((SadlClassOrPropertyDeclaration)sr.eContainer());
+						}
 					} catch (TranslationException e) {
 						e.printStackTrace();
 					}
