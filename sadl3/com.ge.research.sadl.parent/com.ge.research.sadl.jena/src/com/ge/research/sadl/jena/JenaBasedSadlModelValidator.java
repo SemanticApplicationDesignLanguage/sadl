@@ -1515,7 +1515,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException,
 			PropertyWithoutRangeException {
 		Expression el = expression.getElement();
-		if (el instanceof PropOfSubject) {
+		if (el instanceof PropOfSubject && !(expression.eContainer() instanceof PropOfSubject)) {
 			TypeCheckInfo listtype = getType(((PropOfSubject)el).getRight());
 			if (listtype == null) {
 				getModelProcessor().addTypeCheckingError("Unable to get the List type", el);
