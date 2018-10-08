@@ -34,6 +34,7 @@ import javax.naming.directory.ModificationItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ctc.wstx.util.ArgUtil;
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
@@ -1236,6 +1237,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 
 		String builtinName = bin.getFuncName();
+		if (builtinName.equals("length") && bin.getArguments() != null && bin.getArguments().size() == 2) {
+			Node arg0 = bin.getArguments().get(0);
+			if (arg0 instanceof NamedNode && ((NamedNode)arg0).isList()) {
+				builtinName = "listLength";		
+			}
+		}
 
 		// Note: the order here allows any built-in which overrides the ones in Jena to be picked up preferentially
 		//	see if it is known to the ConfigurationManager or if we can find it in the services registry
