@@ -1,7 +1,7 @@
 package com.ge.research.sadl.ui.handlers;
 
-import java.io.File;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +10,6 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -24,27 +23,30 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.xtext.resource.XtextResource;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.builder.MessageManager.MessageType;
-import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.ide.handlers.SadlRunQueryHandler;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
-import com.ge.research.sadl.reasoner.IReasoner;
-import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.SadlCommandResult;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.google.common.base.Supplier;
+import com.google.common.base.Throwables;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class RunQuery extends SadlActionHandler {
 
+	@Inject
+	private Provider<SadlRunQueryHandler> handlerProvider;
+	
 	private static final String pSHOWNAMESPACES = "pShowNamespaces";
 	private static final String[] CONSOLE = {"Console"};
 	public String projectLocation;
@@ -114,161 +116,29 @@ public class RunQuery extends SadlActionHandler {
 			String owlFileName = null;
 
 			if (trgtFile != null) {
-				Map<String,String> prefMap = getPreferences(trgtFile);
-				if (trgtFile.getFileExtension().equals("sadl")) {
-					// run query on this model
-	//				Resource res = prepareActionHandler(target[2]);
-					SadlConsole.writeToConsole(MessageType.INFO, "Adhoc Query of '" + trgtFile.getFullPath().toPortableString() + "' requested.\n");
-					
-	//				final List<Issue> issues = new ArrayList<Issue>();
-	//				processor.processAdhocQuery(res, new ValidationAcceptor(new IAcceptor<Issue>(){
-	
-	//					@Override
-	//					public void accept(Issue t) {
-	//						issues.add(t);
-	//					}
-						
-	//				}),  new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(res)), query);
-	//				if (issues.size() > 0) {
-	//					for (Issue issue: issues) {
-	//						output.writeToConsole(MessageType.ERROR, issue.getMessage() + "\n");
-	//					}
-	//				}
-					owlFileName = trgtFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment();
-				}
-				else if (trgtFile.getFileExtension().equals("owl")) {
-					// run query on this model
-	//				Resource res = prepareActionHandler(trgtFile);
-					SadlConsole.writeToConsole(MessageType.INFO, "Adhoc Query of '" + trgtFile.getFullPath().toPortableString() + "' requested.\n");
-					owlFileName = trgtFile.getFullPath().lastSegment();
-				}
-				else if (tryAddingOwlExtension) {
-					owlFileName = trgtFile.getFullPath().lastSegment().concat(".owl");
-				}
-				String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
+				String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString());
 				final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
 				IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
-				String query = getQuery(configMgr);
-				new SadlUtils();
-				query = SadlUtils.stripQuotes(query);
-				File qf = new File(query);
-				List<String> qlist = null;
-				if (qf.exists()) {
-					List<String[]> queries = new SadlUtils().parseQueries(qf);
-					if (queries != null && queries.size() > 0) {
-						qlist = new ArrayList<String>();
-						for (int i = 0; i < queries.size(); i++) {
-							qlist.add(queries.get(i)[1]);
+				final XtextResource resource = getXtextResource(project, trgtFile);
+				Supplier<XtextResource> resourceSupplier = () -> resource;
+				final IProject currentProject = project;
+				final IFile targetFile = trgtFile;
+				new DelegatingQueryHandler(handlerProvider.get()) {
+					protected void resultSetToGraph(Path path, ResultSet resultSet, String description, String baseFileName, Orientation orientation, java.util.Map<String,String> properties) {
+						try {
+							RunQuery.this.resultSetToGraph(currentProject, targetFile, resultSet, description, baseFileName, orientation, properties);
+						} catch (ConfigurationException | IOException e) {
+							console.error(Throwables.getStackTraceAsString(e));
 						}
-					}
-				}
-				else {
-					qlist = new ArrayList<String>();
-					qlist.add(query);
-				}
-				{
-					IReasoner reasoner = configMgr.getReasoner();
-					if (!reasoner.isInitialized()) {
-						reasoner.setConfigurationManager(configMgr);
-						String modelName = configMgr.getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName));
-						reasoner.initializeReasoner(modelFolderUri, modelName, format);
-					}
-					if (reasoner != null) {	
-						int qidx = 0;
-						while (query != null) {
-							if (qlist != null) {
-								if (qidx < qlist.size()) {
-									query = qlist.get(qidx++);
-								}
-								else {
-									break;
-								}
-							}
-							try {
-								boolean success = false;
-								String currentQuery = reasoner.prepareQuery(query);
-								if (!currentQuery.contains(" ") && !currentQuery.contains("?")) {
-									// this might be a named query
-									Resource res = prepareActionHandler(project, trgtFile);
-									Object[] results = processor.runNamedQuery(res, currentQuery);
-									if (results != null && results.length > 0 && results[0] != null) {
-										SadlCommandResult result = (SadlCommandResult) results[0];
-										String qdisplay = currentQuery;
-										if (result.getClass() != null && result.getCmd() instanceof Query && ((Query)result.getCmd()).getSparqlQueryString() != null) {
-											qdisplay += " (" + ((Query)result.getCmd()).getSparqlQueryString() + ")";
-										}
-										if (result.getResults() != null) {
-											if (result.getResults() instanceof ResultSet) {
-												SadlConsole.getInstance().writeToConsole(MessageType.INFO, "Query '" + qdisplay + "' returned:\n");
-												SadlConsole.getInstance().writeToConsole(MessageType.INFO, ((ResultSet)result.getResults()).toStringWithIndent(5));
-												success = true;
-											}
-											else {
-												SadlConsole.getInstance().writeToConsole(MessageType.WARN, "Query '" + qdisplay + "' returned no results\n");
-											}
-										}
-										else {
-											SadlConsole.getInstance().writeToConsole(MessageType.WARN, "Query '" + qdisplay + "' returned no results\n");
-										}
-										if (result.getErrors() != null) {
-											List<ModelError> errors = result.getErrors();
-											if (errors.size() > 0) {
-												SadlConsole.getInstance().writeToConsole(MessageType.ERROR, "Query '" + qdisplay + "' errors:\n");
-											}
-											for (int i = 0; i < errors.size(); i++) {
-												SadlConsole.getInstance().writeToConsole(MessageType.ERROR, errors.get(i).toString() + "\n");
-											}
-										}
-									}
-
-//									String queryquery = null;
-//									queryquery = "select ?nq ?qnq where {?nq <rdf:type> <NamedQuery> . ?nq <http://www.w3.org/2000/01/rdf-schema#isDefinedBy> ?qnq}";
-//									queryquery = reasoner.prepareQuery(queryquery);
-//									ResultSet qrs = reasoner.ask(queryquery);
-//									if (qrs != null && qrs.getRowCount() > 0) {
-//										if (qrs.getResultAt(0, 0).toString().endsWith(currentQuery)) {
-//											currentQuery = qrs.getResultAt(0, 1).toString();
-//										}
-//									}
-									
-								}
-								if (!success) {
-									ResultSet rs = reasoner.ask(currentQuery);
-									if (rs != null) {
-										
-										if (currentQuery.toLowerCase().startsWith("construct")) {
-											String desc = "Adhoc query Graph";
-		        							String baseFileName = trgtFile.getProjectRelativePath().lastSegment() + System.currentTimeMillis(); 							
-			        						resultSetToGraph(project, trgtFile, rs, desc, baseFileName, null, prefMap);
-										}
-										else {
-											SadlConsole.getInstance().writeToConsole(MessageType.INFO, rs.toStringWithIndent(5));
-										}
-									}
-									else {
-										SadlConsole.getInstance().writeToConsole(MessageType.WARN, "Query '" + currentQuery + "' returned no results\n");
-									}
-								}
-							}
-							catch (Throwable t) {
-								System.err.println("Error processing query '" + query + "'");
-								System.err.println("   " + t.getMessage());
-							}
-						}
-						configMgr.clearReasoner();
-					}
-				}
-//				else if (trgtFile.getName().endsWith("test")) {
-//					// run test suite
-//					output.writeToConsole(MessageType.INFO, "Testing of suite '" +  trgtFile.getName() + "' requested.\n");
-//				}
+					};
+				}.run(trgtFile.getLocation().toFile().toPath(), resourceSupplier, getQuery(configMgr));
 			}
 			else {
 				throw new TranslationException("Please select a target for querying");
 			}
 		}
 		catch (Exception e) {
-			SadlConsole.writeToConsole(MessageType.ERROR, e.getMessage() + "\n");
+			console.error(e.getMessage() + "\n");
 		}
 		finally {
 
@@ -451,7 +321,7 @@ public class RunQuery extends SadlActionHandler {
 				
 				final String finalQuery = query;
 				final List<Object> finalPreviousQueries = previousQueries;
-				SadlConsole.writeToConsole(MessageType.INFO, "Query is: " + query + "\n");
+				console.info("Query is: " + query + "\n");
 			}
 		}
 		if (query != null) {
@@ -468,6 +338,26 @@ public class RunQuery extends SadlActionHandler {
 	protected String[] getValidTargetFileTypes() {
 		String[] types = {"sadl","owl"};
 		return types;
+	}
+	
+	private class DelegatingQueryHandler extends SadlRunQueryHandler {
+		
+		final SadlRunQueryHandler delegate;		
+
+		public void run(Path path, Supplier<XtextResource> resourceSupplier, String query) {
+			delegate.run(path, resourceSupplier, query);
+		}
+
+		public void run(Path path, Supplier<XtextResource> resourceSupplier, String query,
+				Map<String, String> properties) {
+			delegate.run(path, resourceSupplier, query, properties);
+		}
+
+		private DelegatingQueryHandler(SadlRunQueryHandler delegate) {
+			this.delegate = delegate;
+		}
+
+		
 	}
 
 }

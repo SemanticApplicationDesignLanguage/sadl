@@ -1,0 +1,26 @@
+uri "http://sadl.org/Shapes.sadl" alias Shapes.
+
+Shape is a class described by area with values of type float.
+
+comment is a type of annotation.
+
+Circle is a type of Shape, described by radius with values of type float.
+
+MyCircle is a Circle with radius 3.
+
+Rule AreaOfCircle:
+	if c is a Circle
+then area of c is radius of c ^ 2 * PI.
+
+AreaOfCircle has comment "ho".
+
+Ask Q1: area of MyCircle.
+
+Ask Q1.
+
+Ask: x is a ^Rule.
+
+//Ask: select s,p,v where s has p v.
+//Ask: select s,p,v where s has p v.
+
+//Ask: select s p v where s has p v.

@@ -62,7 +62,6 @@ import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
-import com.ge.research.sadl.ui.SadlConsole;
 import com.ge.research.sadl.ui.visualize.GraphGenerator;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.ge.research.sadl.ui.visualize.GraphSegment;
@@ -92,7 +91,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			}
 			String owlFileName = null;
 			if (project == null || trgtFile == null) {
-				SadlConsole.writeToConsole(MessageType.ERROR, "Nothing is selected for graphing. Please select at least a project or click in open editor to select file or concept.\n");
+				console.error("Nothing is selected for graphing. Please select at least a project or click in open editor to select file or concept.\n");
 				return event;
 			}
 
@@ -108,7 +107,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				if (!(new File(owlFileName).exists())) {
 					String owlFileName2 = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().addFileExtension("owl").lastSegment()).toPortableString());
 					if (!(new File(owlFileName2).exists())) {
-						SadlConsole.writeToConsole(MessageType.ERROR, "Selected file is '" + trgtFile.getName() + "' but corresponding OWL file (" + owlFileName + ") not found.\n");
+						console.error("Selected file is '" + trgtFile.getName() + "' but corresponding OWL file (" + owlFileName + ") not found.\n");
 						return event;
 					}
 					else {
@@ -146,7 +145,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 						//graphSadlResource(configMgr, visualizer, sr, project, trgtFile, owlFileName, publicUri, graphRadius);
 					}
 					else {
-						SadlConsole.writeToConsole(MessageType.INFO, "Selected concept for graphing ('" + target[3].toString() + "') is not a SadlResource as expected.\n");
+						console.info("Selected concept for graphing ('" + target[3].toString() + "') is not a SadlResource as expected.\n");
 					}
 				}
 				else {
@@ -156,11 +155,11 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 				}
 			}
 			else {
-				SadlConsole.writeToConsole(MessageType.ERROR, "Unable to find an instance of IGraphVisualizer to render graph.\n");
+				console.error("Unable to find an instance of IGraphVisualizer to render graph.\n");
 			}
 		}
 		catch (Exception e) {
-			SadlConsole.writeToConsole(MessageType.ERROR, e.getMessage() + "\n");
+			console.error(e.getMessage() + "\n");
 		}
 		finally {
 			
@@ -218,7 +217,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		Display.getDefault().asyncExec(new Runnable(){
 			@Override
 			public void run() {
-				SadlConsole.writeToConsole(mType, message);
+				console.print(mType, message);
 			}
 		});
 	}

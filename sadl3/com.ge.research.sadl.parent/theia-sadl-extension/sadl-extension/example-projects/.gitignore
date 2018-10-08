@@ -1,0 +1,6 @@
+# The implicit models.
+ImplicitModel
+# The gen folder.
+OwlModels
+# Downloaded externals.
+externals/externals/*/*owl

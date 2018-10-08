@@ -31,6 +31,10 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.IEObjectDescription
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import com.google.inject.Inject
+import com.ge.research.sadl.utils.SadlProjectHelper
+import java.net.URI
+import org.eclipse.xtext.resource.IResourceDescription
 
 /**
  * Helper for creating and accessing user data on the EObject descriptions.
@@ -42,16 +46,25 @@ class UserDataHelper {
 
 	public static val USER_DATA_ALIAS = 'alias';
 	public static val USER_DATE_PROPERTY_RESTRICTION = 'property_restriction';
+	public static val USER_DATA_CONTAINER_PROJECT_URI = 'container_project_uri';
+	
+	@Inject
+	SadlProjectHelper projectHelper;
 
 	def dispatch Map<String, String> createUserData(EObject it) {
 		return Collections.emptyMap;
 	}
 
 	def dispatch Map<String, String> createUserData(SadlResource it) {
+		val builder = ImmutableMap.builder;
 		if (eContainer instanceof SadlProperty) {
-			return (eContainer as SadlProperty).createUserData;
+			builder.putAll((eContainer as SadlProperty).createUserData);
 		}
-		return Collections.emptyMap;
+		val projectUri = projectHelper.getRoot(new URI(eResource.URI.toString));
+		if (projectUri !== null) {
+			builder.put(USER_DATA_CONTAINER_PROJECT_URI, projectUri.toString);
+		}
+		return builder.build;
 	}
 
 	def dispatch Map<String, String> createUserData(SadlProperty it) {
@@ -71,6 +84,10 @@ class UserDataHelper {
 		if (!alias.nullOrEmpty) {
 			builder.put(USER_DATA_ALIAS, alias);
 		}
+		val projectUri = projectHelper.getRoot(new URI(eResource.URI.toString));
+		if (projectUri !== null) {
+			builder.put(USER_DATA_CONTAINER_PROJECT_URI, projectUri.toString);
+		}
 		return builder.build;
 	}
 
@@ -80,6 +97,22 @@ class UserDataHelper {
 
 	def Optional<String> getPropertyRestriction(IEObjectDescription it) {
 		return getUserData(USER_DATE_PROPERTY_RESTRICTION, null);
+	}
+	
+	def Optional<String> getContainerProjectUri(IEObjectDescription it) {
+		return getUserData(USER_DATA_CONTAINER_PROJECT_URI, SADL_MODEL);
+	}
+	
+	/**
+	 * Null-safe sugar for figuring out the container project URI. This information is attached to the SADL model object description
+	 * and to any SADL resource too. This method gets the first EObject description with this user data.
+	 */
+	def Optional<String> getContainerProjectUri(IResourceDescription it) {
+		if (it === null) {
+			return Optional.absent;
+		}
+		val candidate = getExportedObjects.map[containerProjectUri].findFirst[present];
+		return if (candidate !== null) candidate else Optional.absent;
 	}
 
 	/**

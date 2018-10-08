@@ -18,7 +18,9 @@
 package com.ge.research.sadl.tests.lsp
 
 import org.eclipse.emf.common.EMFPlugin
+import org.eclipse.xtext.resource.IResourceServiceProvider
 import org.eclipse.xtext.testing.AbstractLanguageServerTest
+import org.eclipse.xtext.util.Modules2
 import org.junit.Assume
 
 /**
@@ -43,6 +45,12 @@ class AbstractSadlLanguageServerTest extends AbstractLanguageServerTest {
 	 */
 	new() {
 		super(FILE_EXTENSION)
+	}
+	
+	override protected getServerModule() {
+		return Modules2.mixin(super.serverModule, [
+			bind(IResourceServiceProvider.Registry).toProvider(SadlIdeTestIResourceServiceProviderRegistry)
+		]);
 	}
 	
 }

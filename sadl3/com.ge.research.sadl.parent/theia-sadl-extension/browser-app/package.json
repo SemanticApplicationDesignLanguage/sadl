@@ -1,0 +1,41 @@
+{
+  "private": true,
+  "name": "browser-app",
+  "version": "0.1.9",
+  "dependencies": {
+    "@theia/core": "next",
+    "@theia/editor": "next",
+    "@theia/file-search": "next",
+    "@theia/filesystem": "next",
+    "@theia/git": "next",
+    "@theia/languages": "next",
+    "@theia/markers": "next",
+    "@theia/merge-conflicts": "next",
+    "@theia/messages": "next",
+    "@theia/monaco": "next",
+    "@theia/navigator": "next",
+    "@theia/outline-view": "next",
+    "@theia/output": "next",
+    "@theia/preferences": "next",
+    "@theia/preferences-api": "next",
+    "@theia/preview": "next",
+    "@theia/process": "next",
+    "@theia/search-in-workspace": "next",
+    "@theia/terminal": "next",
+    "@theia/userstorage": "next",
+    "@theia/workspace": "next",
+    "sadl-extension": "^0.1.9"
+  },
+  "devDependencies": {
+    "@theia/cli": "next"
+  },
+  "scripts": {
+    "prepare": "theia build --mode development",    
+    "start": "theia start",
+    "start:socket": "node ./src-gen/backend/main.js --SADL_LSP=5007 --port=3000 --log-level=debug",
+    "watch": "theia build --watch --mode development"
+  },
+  "theia": {
+    "target": "browser"
+  }
+}

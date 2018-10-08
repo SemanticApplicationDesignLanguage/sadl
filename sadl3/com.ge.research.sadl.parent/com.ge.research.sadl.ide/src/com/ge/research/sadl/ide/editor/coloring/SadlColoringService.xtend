@@ -27,11 +27,13 @@ import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlPropertyInitializer
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
+import com.ge.research.sadl.utils.SadlASTUtils
 import com.google.common.collect.ImmutableList
 import com.google.inject.Inject
 import java.util.Collections
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EStructuralFeature
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.lsp4j.ColoringInformation
 import org.eclipse.lsp4j.Range
 import org.eclipse.xtext.ide.server.Document
@@ -41,7 +43,6 @@ import org.eclipse.xtext.resource.XtextResource
 
 import static com.ge.research.sadl.ide.editor.coloring.SadlColoringStyle.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
-import org.eclipse.emf.ecore.util.EcoreUtil
 
 /**
  * Generic highlighting and coloring service for the {@code SADL} language.
@@ -55,12 +56,15 @@ class SadlColoringService implements IColoringService {
 	@Inject
 	extension DeclarationExtensions;
 
-	@Override
 	override getColoring(XtextResource resource, Document doc) {
 
 		if (resource === null) {
 			return emptyList;
 		}
+		
+		if (!resource.URI.file) {
+			return emptyList;
+		}			
 
 		val SadlModel model = resource.contents.head as SadlModel;
 		if (model === null) {
@@ -81,7 +85,7 @@ class SadlColoringService implements IColoringService {
 			builder.add(doc.createInfos(model, SADL_MODEL__BASE_URI, URI_ID));
 		}
 
-		model.eAllContents.forEach [
+		model.eAllContents.toList.filter[!SadlASTUtils.isUnit(it)].forEach [
 			val namedElement = if(it instanceof Name) name else it;
 			switch (namedElement) {
 				Name: {
@@ -171,6 +175,9 @@ class SadlColoringService implements IColoringService {
 				return RDF_PROPERTY_ID;
 			}
 			case INSTANCE: {
+				return INSTANCE_ID;
+			}
+			case STRUCTURE_NAME: {
 				return INSTANCE_ID;
 			}
 			case CLASS: {

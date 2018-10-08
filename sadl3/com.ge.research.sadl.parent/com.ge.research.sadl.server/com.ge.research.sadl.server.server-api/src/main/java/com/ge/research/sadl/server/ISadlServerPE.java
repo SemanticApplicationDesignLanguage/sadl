@@ -45,8 +45,23 @@ import com.ge.research.sadl.server.SessionNotFoundException;
 
 /**
  * This Interface class defines additional methods beyond those in 
- * the superclass SadlServer. These methods support editing of models
+ * the superclass ISadlServer. These methods support editing of models
  * and the persistence of changes/additions to models.
+ * In particular, any method that can add triples to the knowledge base,
+ * or which can query for information, will have a new companion method
+ * that allows the specification of which model to use as the added first
+ * argument. When super class method is called (no model specified), the
+ * default model is used. 
+ * The default model is the starting model identified in the call to 
+ * selectServiceModel, or set by the kbase configuration for a named service.
+ * However, if a call is made to setInstanceDataNamespace with a namespace
+ * different from the default model, then the model with this namespace
+ * becomes the default model. 
+ * 
+ * The companion methods of this interface which take a model name as first
+ * parameter are a way to override the default model, whatever it is, and
+ * do operations on any specified model identifiable in the kbase.
+ * 
  * P--persistence
  * E--editing
  * => SadlServerPE
@@ -149,6 +164,17 @@ public interface ISadlServerPE extends ISadlServer {
 			throws ConfigurationException, TripleNotFoundException, ReasonerNotFoundException, SessionNotFoundException;
 
 	/**
+	 * Call this method to create a new class in the default model
+	 * 
+	 * @param className Class name or null if none
+	 * @param superClassName Super class name or null if none
+	 * @return True if successful else false
+	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws InvalidNameException 
+	 */
+	boolean addClass(String className, String superClassName) throws SessionNotFoundException, InvalidNameException;
+	
+	/**
 	 * Call this method to create a new class in the specified named model
 	 * 
 	 * @param modelName Model name
@@ -205,20 +231,6 @@ public interface ISadlServerPE extends ISadlServer {
 	String getUniqueNamespaceUri(String baseNamespace) throws InvalidNameException, SessionNotFoundException, MalformedURLException, ConfigurationException;
 
 	/**
-	 * Call this method to create a new instance of the specified class in the named model.
-	 * 
-	 * @param modelName Model name
-	 * @param instName Instance name
-	 * @param className Class name or null if none
-	 * @return True if successful else false
-	 * @throws com.ge.research.sadl.server.ConfigurationException
-	 * @throws com.ge.research.sadl.server.SessionNotFoundException
-	 * @throws com.ge.research.sadl.server.InvalidNameException
-	 */
-	boolean addInstance(String modelName, String instName, String className)
-			throws ConfigurationException, InvalidNameException, SessionNotFoundException;
-
-	/**
 	 * Call this method to create a new ontology property, either ObjectProperty or DatatypeProperty,  in the named model.
 	 * 
 	 * @param modelName Model name
@@ -272,6 +284,51 @@ public interface ISadlServerPE extends ISadlServer {
 	 */
 	boolean addCardinalityRestriction(String modelName, String className,
 			String propertyName, int cardValue) throws SessionNotFoundException, InvalidNameException;
+
+	/**
+	 * Call this method to add a max cardinality restriction to a property on a class in the named model.
+	 * 
+	 * @param modelName Model name
+	 * @param className Class name
+	 * @param propertyName Property name
+	 * @param cardValue Cardinality value
+	 * @param restrictedToType class values are restricted to
+	 * @return True if successful else false
+	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws InvalidNameException 
+	 */
+	boolean addMaxQualifiedCardinalityRestriction(String modelName, String className,
+			String propertyName, int cardValue, String restrictedToType) throws SessionNotFoundException, InvalidNameException;
+
+	/**
+	 * Call this method to add a min cardinality restriction to a property on a class in the named model.
+	 * 
+	 * @param modelName Model name
+	 * @param className Class name
+	 * @param propertyName Property name
+	 * @param cardValue Cardinality value
+	 * @param restrictedToType class values are restricted to
+	 * @return True if successful else false
+	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws InvalidNameException 
+	 */
+	boolean addMinQualifiedCardinalityRestriction(String modelName, String className,
+			String propertyName, int cardValue, String restrictedToType) throws SessionNotFoundException, InvalidNameException;
+
+	/**
+	 * Call this method to add a cardinality restriction to a property on a class in the named model.
+	 * 
+	 * @param modelName Model name
+	 * @param className Class name
+	 * @param propertyName Property name
+	 * @param cardValue Cardinality value
+	 * @param restrictedToType class values are restricted to
+	 * @return True if successful else false
+	 * @throws com.ge.research.sadl.server.SessionNotFoundException
+	 * @throws InvalidNameException 
+	 */
+	boolean addQualifiedCardinalityRestriction(String modelName, String className,
+			String propertyName, int cardValue, String restrictedToType) throws SessionNotFoundException, InvalidNameException;
 
 	/**
 	 * Call this method to add to restrict an object property on a class to a particular value in the named model.
@@ -490,5 +547,36 @@ public interface ISadlServerPE extends ISadlServer {
      */
     abstract public ResultSet query(String modelName, String query) throws QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, IOException, ConfigurationException, InvalidNameException, URISyntaxException;
 
+	/**
+	 * Method to expand prefixes, find namespaces, and do whatever
+	 * other processing may be necessary to prepare a query string
+	 * for execution by the target query engine.
+	 * Note: this is provided as a callable functionality so that queries which are known to be completely expanded
+	 * need not have the overhead of checking.
+	 * 
+	 * @param modelName
+	 * @param query
+	 * @return the expanded query prepared for execution
+	 * @throws InvalidNameException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws ConfigurationException 
+	 * @throws InvalidNameException 
+	 * @throws SessionNotFoundException 
+	 */
+	public String prepareQuery(String modelName, String query) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, InvalidNameException, SessionNotFoundException;
+
+	/**
+	 * Method to substitute parameter values for "?" terms in a query string.
+	 * 
+	 * @param modelName
+	 * @param queryStr -- SPARQL query or update string
+	 * @param values -- parameter values to be substituted
+	 * @return parameterized query
+	 * @throws ConfigurationException 
+	 * @throws InvalidNameException 
+	 * @throws ReasonerNotFoundException 
+	 * @throws SessionNotFoundException 
+	 */
+	public String parameterizeQuery(String modelName, String queryStr, List<Object> values) throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException;
 
 }

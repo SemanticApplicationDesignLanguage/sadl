@@ -6,7 +6,7 @@ a:link	     { color: #0066cc; }a:link.header    { text-decoration: none; color: 
 </style>
 <h1>Knowledge Server</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/04/2018<!--webbot bot="Timestamp" endspan i-checksum="12575" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/04/2018<!--webbot bot="Timestamp" endspan i-checksum="12558" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 <h2>Introduction</h2>
 <p>Traditionally knowledge has been captured in some kind of knowledge 
@@ -20,7 +20,7 @@ exposed through some kind of programmatic interface in which specific scenario
 data is passed to a knowledge service, inference is perhaps performed, and 
 questions are asked to expose both the knowledge, the scenario data, and the 
 inferences drawn for this particular scenario. </p>
-<p>The knowledge services described herein are divided into three levels of 
+<p>The knowledge services provided by the Knowledge Server are divided into three levels of 
 service: 
 1) basic scenario data push, query pull, 2) basic plus the ability to make 
 modifications to the knowledge base and persist both knowledge base changes and 
@@ -51,7 +51,7 @@ service is shown in the table below.</p>
     </tr>
   </table>
 </blockquote>
-<p>This document will provide information and links to more detailed information 
+<p>This document  provides information and links to more detailed information 
 for the services provided by each of these three classes. Each class in the 
 table is linked to the JavaDoc documentation for that class. Complete JavaDoc 
 for the knowledge server Java API is available at <a href="JavaDoc/JavaAPI/index.html">
@@ -141,4 +141,217 @@ triples to a session's knowledge base.</p>
 <p>In this case the 3rd argument could be an URL or it could be the actual 
 template as a String.</p>
 <h2>ISadlServerPE: Modifying and Saving Models to the Knowledge Base</h2>
+<p>The extended services of ISadlServerPE allow both changes to existing model 
+files in the knowledge base and the addition of new model files. Consider the 
+knowledge base depicted in the figure below.</p>
+<p>&nbsp;&nbsp;&nbsp;
+<img border="0" src="images/ISadlServerPE1.JPG" width="545" height="400"></p>
+<p>The models M1 through M7 are existing models within the knowledge base 
+represented by the green rectangle. When the service is invoked, either directly 
+or through a named service, a knowledge base and a model in the knowledge base 
+are specified. This &quot;starting&quot; model is indicated in the figure. The methods of ISadlServerPE allow modification of any of the existing models. 
+They also allows 
+the creation of one or more additional models such as N1 in the figure. 
+Furthermore, any changed, both to existing and to new models may be persisted. 
+Note that new models such as N1 are assumed to import the starting model, tying 
+them into the existing knowledge base. Other imports can be added explicitly if 
+needed.</p>
+<h3>Extended Services Applied to Specific Models</h3>
+<p>There are a number of methods in ISadlServerPE that are similar to methods in 
+ISadlServer except that an additional first argument is added to indicate to 
+which model the operation is to be applied. For example, in ISadlServer we find 
+the method</p>
+<p>&nbsp;&nbsp;&nbsp; <i>addTriple(subjectUri, predicateUri, value)&nbsp;&nbsp;&nbsp; 
+// add this triple to the default model</i></p>
+<p>but in ISadlServerPE we find the method</p>
+<p>&nbsp;&nbsp;&nbsp; <i>addTriple(modelName, subjectUri, predicateUri, value)&nbsp;&nbsp;&nbsp; 
+// add this triple to the specified model</i></p>
+<p>Of course if the default model is the same as that identified by &quot;modelName&quot;, 
+the operations will be identical.</p>
+<p>Methods with counterparts in ISadlServer include the following. See
+<a href="JavaDoc/JavaAPI/index.html">JavaDocs</a> for details.</p>
+<ol>
+  <li>addTriple</li>
+  <li>ask</li>
+  <li>createInstance</li>
+  <li>deleteTriple</li>
+  <li>loadCsvData</li>
+  <li>loadData</li>
+  <li>parameterizeQuery</li>
+  <li>prepareQuery</li>
+  <li>query</li>
+  <li>sendCsvData</li>
+  <li>sendData</li>
+</ol>
+<h3>Extended Services to Edit and Persist Changes</h3>
+<p>ISadlServerPE provides the following methods to edit and persist changes. See
+<a href="JavaDoc/JavaAPI/index.html">JavaDocs</a> for details.</p>
+<h4>Create Classes and Properties</h4>
+<ul>
+  <li><font SIZE="2" COLOR="#7f0055"><b>boolean</b></font><font SIZE="2"> 
+  addClass(String </font><font SIZE="2" COLOR="#6a3e3e">className</font><font SIZE="2">, 
+  String </font><font SIZE="2" COLOR="#6a3e3e">superClassName</font><font SIZE="2">)</font><font SIZE="2" COLOR="#7f0055"><b></li>
+  <li>boolean</b></font><font SIZE="2"> addClass(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">className</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">superClassName</font><font SIZE="2">)</font><font SIZE="2" COLOR="#7f0055"><b></li>
+  <li>boolean</b></font><font SIZE="2"> addExistingModel(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelPublicUri</font><font SIZE="2">, String
+  </font><font SIZE="2" COLOR="#6a3e3e">modelAltUrl</font><font SIZE="2">, 
+  String </font><font SIZE="2" COLOR="#6a3e3e">modelPrefix</font><font SIZE="2">)</font><font SIZE="2" COLOR="#7f0055"><b></li>
+  <li>boolean</b></font><font SIZE="2"> addImport(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">importedModelUri</font><font SIZE="2">)</li>
+  </font><font SIZE="2" COLOR="#7f0055"><b>
+  <li>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addObjectPropertyRangeClass(String </font><font SIZE="2" COLOR="#6a3e3e">
+  modelName</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  propertyName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">rangeClassName</font><font SIZE="2">)</li>
+  </font><font SIZE="2" COLOR="#7f0055"><b>
+  <li>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> addOntProperty(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">propertyName</font><font SIZE="2">, String
+  </font><font SIZE="2" COLOR="#6a3e3e">superPropertyName</font><font SIZE="2">)</li>
+  </font><font SIZE="2" COLOR="#7f0055"><b>
+  <li>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addOntPropertyDomainClass(String </font><font SIZE="2" COLOR="#6a3e3e">
+  modelName</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  propertyName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">domainClassName</font><font SIZE="2">)</li>
+  </font><font SIZE="2" COLOR="#7f0055"><b>
+  <li>boolean</b></font><font SIZE="2"> addRule(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">ruleAsString</font><font SIZE="2">)</li>
+  <font SIZE="2" COLOR="#7f0055"><b>
+  <li>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> createServiceModel(String
+  </font><font SIZE="2" COLOR="#6a3e3e">kbid</font><font SIZE="2">, String
+  </font><font SIZE="2" COLOR="#6a3e3e">serviceName</font><font SIZE="2">, 
+  String </font><font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, 
+  String </font><font SIZE="2" COLOR="#6a3e3e">owlFileName</font><font SIZE="2">, 
+  String </font><font SIZE="2" COLOR="#6a3e3e">prefix</font><font SIZE="2">)</li>
+  </font></font><font SIZE="2" COLOR="#7f0055"><b>
+  <li>boolean</b></font><font SIZE="2"> deleteModel(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">)</li>
+  <li>String getUniqueInstanceUri(String </font><font SIZE="2" COLOR="#6a3e3e">
+  namespace</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  baseLocalName</font><font SIZE="2">)</li>
+  <li>String getUniqueInstanceUri(String </font><font SIZE="2" COLOR="#6a3e3e">
+  modelName</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  namespace</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  baseLocalName</font><font SIZE="2">)</font></li>
+  <font SIZE="2" COLOR="#7f0055"><b>
+  <li>public</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#7f0055"><b>
+  boolean</b></font><font SIZE="2"> persistChangesToServiceModels()</font></li>
+  <font SIZE="2" COLOR="#7f0055"><b>
+  <li>public</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#7f0055"><b>
+  boolean</b></font><font SIZE="2"> persistInstanceModel(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">owlInstanceFileName</font><font SIZE="2">, 
+  String </font><font SIZE="2" COLOR="#6a3e3e">globalPrefix</font><font SIZE="2">)
+  </font></li>
+  <font SIZE="2" COLOR="#7f0055"><b>
+  <li>public</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#7f0055"><b>
+  boolean</b></font><font SIZE="2"> persistInstanceModel(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">owlInstanceFileName</font><font SIZE="2">, 
+  String </font><font SIZE="2" COLOR="#6a3e3e">globalPrefix</font><font SIZE="2">)
+  </font></li>
+  <font SIZE="2" COLOR="#7f0055"><b>
+  <li>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  setDatatypePropertyRange(String </font><font SIZE="2" COLOR="#6a3e3e">
+  modelName</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  propertyName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">xsdRange</font><font SIZE="2">)</li>
+  </font><font SIZE="2" COLOR="#7f0055"><b>
+  <li>boolean</b></font><font SIZE="2"> updateRdfsLabel(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">uri</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">label</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">language</font><font SIZE="2">)</font></li>
+  <font SIZE="2" COLOR="#7f0055"><b>
+  <li>boolean</b></font><font SIZE="2"> updateRdfsLabel(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">uri</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">label</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">language</font><font SIZE="2">) </font></li>
+</ul>
+<h4>Adding Property Restrictions</h4>
+<p>Methods support adding all-values-from, some-values-from, has-value, and 
+cardinality restrictions. These methods are the following. See JavaDocs for 
+details.</p>
+<ul>
+  <li><font SIZE="2" COLOR="#7f0055"><b>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addAllValuesFromRestriction(String </font><font SIZE="2" COLOR="#6a3e3e">
+  modelName</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  className</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  propertyName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">restrictionName</font><font SIZE="2">)</font></li>
+  <li><font SIZE="2" COLOR="#7f0055"><b>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addCardinalityRestriction(String </font><font SIZE="2" COLOR="#6a3e3e">
+  modelName</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  className</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  propertyName</font><font SIZE="2">, </font><font SIZE="2" COLOR="#7f0055"><b>
+  int</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#6a3e3e">cardValue</font><font SIZE="2">)</font></li>
+  <li><font SIZE="2" COLOR="#7f0055"><b>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addQualifiedCardinalityRestriction(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">className</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">propertyName</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#7f0055"><b>int</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#6a3e3e">cardValue</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">restrictedToType</font><font SIZE="2">)</font></li>
+  <li><font SIZE="2" COLOR="#7f0055"><b>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addHasValueRestriction(String </font><font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, 
+  String </font><font SIZE="2" COLOR="#6a3e3e">className</font><font SIZE="2">, 
+  String </font><font SIZE="2" COLOR="#6a3e3e">propertyName</font><font SIZE="2">, 
+  String </font><font SIZE="2" COLOR="#6a3e3e">valueInstanceName</font><font SIZE="2">)</font></li>
+  <li><font SIZE="2" COLOR="#7f0055"><b>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addMaxCardinalityRestriction(String </font><font SIZE="2" COLOR="#6a3e3e">
+  modelName</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  className</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  propertyName</font><font SIZE="2">, </font><font SIZE="2" COLOR="#7f0055"><b>
+  int</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#6a3e3e">cardValue</font><font SIZE="2">)</font></li>
+  <li><font SIZE="2" COLOR="#7f0055"><b>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addMaxQualifiedCardinalityRestriction(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">className</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">propertyName</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#7f0055"><b>int</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#6a3e3e">cardValue</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">restrictedToType</font><font SIZE="2">)</font></li>
+  <li><font SIZE="2" COLOR="#7f0055"><b>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addMinCardinalityRestriction(String </font><font SIZE="2" COLOR="#6a3e3e">
+  modelName</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  className</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  propertyName</font><font SIZE="2">, </font><font SIZE="2" COLOR="#7f0055"><b>
+  int</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#6a3e3e">cardValue</font><font SIZE="2">)</font></li>
+  <li><font SIZE="2" COLOR="#7f0055"><b>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addMinQualifiedCardinalityRestriction(String </font>
+  <font SIZE="2" COLOR="#6a3e3e">modelName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">className</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">propertyName</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#7f0055"><b>int</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#6a3e3e">cardValue</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">restrictedToType</font><font SIZE="2">)</font></li>
+  <li><font SIZE="2" COLOR="#7f0055"><b>
+  <p ALIGN="LEFT">boolean</b></font><font SIZE="2"> 
+  addSomeValuesFromRestriction(String </font><font SIZE="2" COLOR="#6a3e3e">
+  modelName</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  className</font><font SIZE="2">, String </font><font SIZE="2" COLOR="#6a3e3e">
+  propertyName</font><font SIZE="2">, String </font>
+  <font SIZE="2" COLOR="#6a3e3e">restrictionName</font><font SIZE="2">)</font></li>
+</ul>
 <h2>ISadlServerMD: Supporting Model-Driven Development</h2>
+<p>Not yet documented here.</p>

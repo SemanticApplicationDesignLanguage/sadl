@@ -1257,7 +1257,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		URI mfp = URI.createURI(modelFolderPath);
 		mfp = mfp.trimSegments(1);
 		mfp = mfp.appendSegment("Temp");
-		File mfpfile = new File(mfp.toFileString());
+		File mfpfile = new File(mfp.toString());
 		mfpfile.mkdirs();
 		mfp = mfp.appendSegment(getCurrentResource().getURI().lastSegment()+ "." + model + ".owl.txt");
 		return mfp.toString();

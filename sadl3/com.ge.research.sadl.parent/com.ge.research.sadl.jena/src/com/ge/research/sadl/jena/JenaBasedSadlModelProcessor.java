@@ -52,6 +52,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -219,6 +220,7 @@ import com.ge.research.sadl.sADL.ValueTable;
 import com.ge.research.sadl.utils.PathToFileUriConverter;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlASTUtils;
+import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -630,20 +632,33 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private String getModelFolderPath(Resource resource) {
-		final URI resourceUri = resource.getURI();
-		final URI modelFolderUri = resourceUri.trimSegments(resourceUri.isFile() ? 1 : resourceUri.segmentCount() - 2)
-				.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
-
-		if (resourceUri.isPlatformResource()) {
-			final IFile file = ResourcesPlugin.getWorkspace().getRoot()
-					.getFile(new Path(modelFolderUri.toPlatformString(true)));
-			return file.getRawLocation().toPortableString();
-		} else {
-			final String modelFolderPathname = findModelFolderPath(resource.getURI());
-			return modelFolderPathname == null ? modelFolderUri.toFileString() : modelFolderPathname;
+		try {
+			if (isSyntheticUri(resource)) {
+				return null;
+			}
+			final URI resourceUri = resource.getURI();
+			java.net.URI root = this.projectHelper.getRoot(new java.net.URI(resourceUri.toString()));
+			// This is for the headless tool-chain.
+			if (root == null) {
+				IPath lWorkspaceRoot = ResourcesPlugin.getWorkspace().getRoot().getLocation();
+				IPath lResourcePath = new Path(resourceUri.toString());
+				if(resourceUri.isFile()) {		
+					root = new java.net.URI(lResourcePath.removeLastSegments(lResourcePath.segmentCount() - lWorkspaceRoot.segmentCount() - 2).toString());
+				}
+				if(resourceUri.isPlatformResource()) {
+					root = new java.net.URI("file:/" + lWorkspaceRoot.append(lResourcePath.segment(1)).toString());
+				}
+			}
+			return Paths.get(root).resolve(UtilsForJena.OWL_MODELS_FOLDER_NAME).toString();
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
+	/**
+	 * @deprecated use {@link SadlProjectHelper#getRoot(java.net.URI)} instead.
+	 */
+	@Deprecated
 	static String findProjectPath(URI uri) {
 		String modelFolder = findModelFolderPath(uri);
 		if (modelFolder != null) {
@@ -652,6 +667,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
+	/**
+	 * @deprecated use {@link SadlProjectHelper#getRoot(java.net.URI)} instead.
+	 */
+	@Deprecated
 	public static String findModelFolderPath(URI uri) {
 		File file = new File(uri.path());
 		if (file != null) {
@@ -5825,6 +5844,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					subject = ((PropOfSubject) subject).getRight();
 				}
 				
+				//Can't contain further constants
+				if(predicate instanceof Constant || subject instanceof Constant) {
+					addError(SadlErrorMessages.INVALID_ARGUMENT_FOR_OPERATOR.get(cnstval), expr);
+				}
+				
                 //Check if we need to do special processing
                 if (expr instanceof PropOfSubject && ((PropOfSubject) expr).getOf() != "in") {
                     specialCntIdxProcessing = true;
@@ -6055,7 +6079,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
 		if(predNode instanceof NamedNode && lTci != null) {
-			if(ignoreUnittedQuantities && lTci.getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+			if(ignoreUnittedQuantities && lTci.getTypeCheckType() != null && lTci.getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 				((NamedNode) predNode).setLocalizedType(validateNamedNode(new NamedNode(XSD.decimal.getURI(),NodeType.DataTypeNode)));
 			}else {
 				((NamedNode) predNode).setLocalizedType(lTci.getTypeCheckType());
@@ -9837,6 +9861,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				String typeStr = pt.getLiteral();
 				typeStr = XSD.getURI() + typeStr;
 			}
+			if(type instanceof SadlSimpleTypeReference) {
+				SadlResource sr = ((SadlSimpleTypeReference)type).getType();
+				if(sr.eContainer() instanceof SadlClassOrPropertyDeclaration) {
+					try {
+						if(!isEObjectPreprocessed((SadlClassOrPropertyDeclaration)sr.eContainer())) {
+							processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration)sr.eContainer());
+							eobjectPreprocessed((SadlClassOrPropertyDeclaration)sr.eContainer());
+						}
+					} catch (TranslationException e) {
+						e.printStackTrace();
+					}
+				}
+			}
 			com.hp.hpl.jena.rdf.model.Resource typersrc = sadlTypeReferenceToResource(type);
 			if (typersrc == null) {
 				addError(SadlErrorMessages.CANNOT_CREATE.get("all values from restriction",
@@ -10797,12 +10834,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return configMgr;
 	}
 
+	protected boolean isSyntheticUri(Resource resource) {
+		return resource.getURI().toString().startsWith("synthetic")
+			|| resource.getURI().toString().startsWith(SYNTHETIC_FROM_TEST);
+	}
+	
 	protected boolean isSyntheticUri(String modelFolderPathname, Resource resource) {
-		if ((modelFolderPathname == null && resource.getURI().toString().startsWith("synthetic"))
-				|| resource.getURI().toString().startsWith(SYNTHETIC_FROM_TEST)) {
-			return true;
-		}
-		return false;
+		return modelFolderPathname == null && isSyntheticUri(resource);
 	}
 
 	protected IConfigurationManagerForIDE getConfigMgr() {

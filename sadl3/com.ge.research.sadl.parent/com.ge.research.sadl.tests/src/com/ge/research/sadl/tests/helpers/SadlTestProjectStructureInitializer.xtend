@@ -16,7 +16,6 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.helpers
 
-import com.ge.research.sadl.ide.DotProjectContentProvider
 import com.ge.research.sadl.processing.ISadlImplicitModelContentProvider
 import com.google.inject.Inject
 import com.google.inject.Singleton
@@ -28,6 +27,7 @@ import static com.ge.research.sadl.jena.UtilsForJena.*
 import static com.ge.research.sadl.processing.SadlConstants.*
 
 import static extension com.google.common.base.Preconditions.*
+import com.google.common.collect.ImmutableMap
 
 /**
  * Singleton class for initializing the SADL project structure.
@@ -86,6 +86,12 @@ class SadlTestProjectStructureInitializer {
 	Test: area of MyCircle is 63.61.
 	
 	Test: area of MyCircle is 53.51.''';
+	
+	public static val FILES_IN_SCOPE = ImmutableMap.<String, CharSequence>builder
+		.put(SHAPES_FILENAME, SHAPES_FILE_CONTENT)
+		.put(CIRCLE_FILENAME, CIRCLE_FILE_CONTENT)
+		.put(RECTANGLE_FILENAME, RECTANGLE_FILE_CONTENT)
+		.put(TEST_FILENAME, TEST_FILE_CONTENT);
 
 	@Inject
 	DotProjectContentProvider dotProjectContentProvider;

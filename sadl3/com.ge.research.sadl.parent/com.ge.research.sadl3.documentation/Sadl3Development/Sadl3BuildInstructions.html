@@ -161,11 +161,28 @@ process described above.</p>
   Build Path -&gt; Libraries). If the JRE System Library isn't the correct one, 
   remove it, then Add Library -&gt; JRE System Library.</li>
   <li>If Maven builds fail, try running Maven from a command line with switches 
-  to turn on additional logging/debug output.<p>&nbsp;</p>
-  <p class="MsoNormal">&nbsp;</p>
-<p>&nbsp;</li>
+  to turn on additional logging/debug output.</li>
 </ol>
-<p>SADL Version 3 currently is built in and for Eclipse Kepler.</p>
+<p>&nbsp;</p>
+  <h2>Continuous Integration</h2>
+  <p>Continuous integration testing for SADL is set up to run automatically on
+  <a href="http://travis-ci.org">http://travis-ci.org</a> and on
+  <a href="http://ci.appveyor.com">http://ci.appveyor.com</a>. These are 
+  integrated with the source code in the sadlos2 repository on
+  <a href="http://github.com">http://github.com</a>, development branch, so that 
+  any commit pushed to the repo will cause a build and test to run automatically 
+  and the results be reported.</p>
+  <h3>Travis CI</h3>
+  <h3>Appveyor</h3>
+  <h4>Tips</h4>
+  <ol>
+    <li>When cache gets corrupted, causing builds to fail although they pass in 
+    the IDE, clean the cache by editing appveyor.yml on github.com, commenting 
+    out the line under &quot;cache&quot;. After a successful build on appveyor.com, 
+    uncomment the line to restore caching.</li>
+</ol>
+  <p class="MsoNormal">&nbsp;</p>
+<p>&nbsp;<p>SADL Version 3 currently is built in and for Eclipse Kepler.</p>
 <ol>
   <li>If not already installed, install Java 1.7 JDK from
   <a href="http://www.java.com">http://www.java.com</a>&nbsp; (Java 1.7 required!). 

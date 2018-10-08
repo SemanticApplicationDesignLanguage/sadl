@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright 2007-2016- General Electric Company, All Rights Reserved
+ * Copyright 2007-2018 - General Electric Company, All Rights Reserved
  * 
  * Project: SADL
  * 
@@ -17,27 +17,43 @@
  ***********************************************************************/
 package com.ge.research.sadl.ide
 
+import com.ge.research.sadl.external.ExternalEmfResourcePredicate
 import com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex.JFlexBasedInternalSADLLexer
 import com.ge.research.sadl.ide.editor.coloring.SadlColoringService
+import com.ge.research.sadl.ide.editor.contentassist.IOntologyContextProvider
+import com.ge.research.sadl.ide.editor.contentassist.SadlContentAssistContextFactory
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeCrossrefProposalProvider
+import com.ge.research.sadl.ide.editor.contentassist.SadlOntologyContextProvider
+import com.ge.research.sadl.ide.external.SadlIdeExternalEmfResourcePredicate
 import com.ge.research.sadl.ide.lsp.^extension.ISadlLanguageServerExtension
+import com.ge.research.sadl.ide.lsp.^extension.SadlLanguageServerExtension
+import com.ge.research.sadl.ide.preferences.SadlIdePreferenceValuesProvider
+import com.ge.research.sadl.ide.utils.SadlIdeProjectHelper
+import com.ge.research.sadl.ide.validator.SadlIdeResourceValidator
+import com.ge.research.sadl.model.SadlEObjectDocumentationProvider.DocumentationUtils
+import com.ge.research.sadl.model.SadlEObjectDocumentationProvider.Markdown
+import com.ge.research.sadl.utils.SadlConsole
+import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.inject.Binder
 import com.google.inject.name.Names
 import org.eclipse.xtext.ide.LexerIdeBindings
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.IdeCrossrefProposalProvider
+import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
 import org.eclipse.xtext.ide.editor.contentassist.antlr.internal.Lexer
 import org.eclipse.xtext.ide.server.ILanguageServerExtension
 import org.eclipse.xtext.ide.server.coloring.IColoringService
-import org.eclipse.xtext.resource.impl.DefaultResourceServiceProvider
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
+import org.eclipse.xtext.validation.ResourceValidatorImpl
+import com.ge.research.sadl.scoping.GlobalScopeProviderFilterProvider
+import com.ge.research.sadl.ide.scoping.SadlIdeGlobalScopeProviderFilterProvider
 
 /**
  * Use this class to register generic IDE components.
  */
 class SADLIdeModule extends AbstractSADLIdeModule {
 
-	@Override
 	override configureContentAssistLexer(Binder binder) {
 		binder.bind(Lexer).annotatedWith(Names.named(LexerIdeBindings.CONTENT_ASSIST)).to(JFlexBasedInternalSADLLexer)
 	}
@@ -45,12 +61,12 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 	def Class<? extends IdeContentProposalProvider> bindIdeContentProposalProvider() {
 		return SadlIdeContentProposalProvider;
 	}
-	
+
 	def Class<? extends IdeCrossrefProposalProvider> bindIdeCrossrefProposalProvider() {
 		return SadlIdeCrossrefProposalProvider;
 	}
 
-	def Class<? extends IColoringService> bindISemanticHighlightService() {
+	def Class<? extends IColoringService> bindIColoringService() {
 		return SadlColoringService;
 	}
 
@@ -58,7 +74,40 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 		return ISadlLanguageServerExtension
 	}
 
-	def Class<? extends DefaultResourceServiceProvider> bindResourceServiceProvider() {
-		return SadlResourceServiceProvider
+	def Class<? extends SadlConsole> bindSadlConsole() {
+		return SadlLanguageServerExtension;
 	}
+
+	def Class<? extends IPreferenceValuesProvider> bindIPreferenceValuesProvider() {
+		return SadlIdePreferenceValuesProvider;
+	}
+
+	def Class<? extends ResourceValidatorImpl> bindResourceValidatorImpl() {
+		return SadlIdeResourceValidator;
+	}
+
+	def Class<? extends ExternalEmfResourcePredicate> bindExternalEmfResourcePredicate() {
+		return SadlIdeExternalEmfResourcePredicate;
+	}
+
+	def Class<? extends SadlProjectHelper> bindSadlProjectHelper() {
+		return SadlIdeProjectHelper;
+	}
+
+	def Class<? extends IOntologyContextProvider> bindIOntologyContextProvider() {
+		return SadlOntologyContextProvider;
+	}
+
+	def Class<? extends ContentAssistContextFactory> bindContentAssistContextFactory() {
+		return SadlContentAssistContextFactory;
+	}
+	
+	def Class<? extends DocumentationUtils> bindDocumentationUtils() {
+		return Markdown;
+	}
+	
+	def Class<? extends GlobalScopeProviderFilterProvider> bindGlobalScopeProviderFilterProvider() {
+		return SadlIdeGlobalScopeProviderFilterProvider;
+	}
+
 }

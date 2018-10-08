@@ -2638,12 +2638,29 @@ public class CsvImporter implements ITabularDataImporter {
 			return getModel(modelArrayPosition).createTypedLiteral(token);
 		}
 		else if (object instanceof String) {
-			String uri = getModelNamespace() + (String)object;
-			Resource obj = getModel(modelArrayPosition).getIndividual(uri);
-			if (obj == null) {
-				obj = getModel(modelArrayPosition).createResource(uri);
+			if (predicate.canAs(OntProperty.class) && predicate.as(OntProperty.class).isDatatypeProperty()) {
+				try {
+					return SadlUtils.getLiteralMatchingDataPropertyRange(getModel(modelArrayPosition), predicate.as(OntProperty.class), object);
+				} catch (TranslationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
-			return obj;
+			else {
+				Object objcn = tokenToConceptName((String) object, modelArrayPosition);
+				String uri;
+				if (objcn instanceof ConceptName) {
+					uri = ((ConceptName)objcn).getUri();
+				}
+				else {
+					uri = getModelNamespace() + (String)object;
+				}
+				Resource obj = getModel(modelArrayPosition).getIndividual(uri);
+				if (obj == null) {
+					obj = getModel(modelArrayPosition).createResource(uri);
+				}
+				return obj;
+			}
 		}
 		else if (object instanceof Resource) {
 			return (Resource)object;

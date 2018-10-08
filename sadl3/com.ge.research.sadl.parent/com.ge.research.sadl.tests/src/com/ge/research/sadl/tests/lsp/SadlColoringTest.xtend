@@ -17,9 +17,6 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.lsp
 
-import com.ge.research.sadl.tests.helpers.SadlTestProjectStructureInitializer
-import com.ge.research.sadl.utils.PathToFileUriConverter
-import com.google.inject.Inject
 import org.junit.Test
 
 import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.unifyEOL
@@ -32,12 +29,6 @@ import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.u
  */
 class SadlColoringTest extends AbstractSadlLanguageServerTest {
 
-	@Inject
-	SadlTestProjectStructureInitializer projectStructureInitializer;
-
-	@Inject
-	PathToFileUriConverter uriConverter;
-
 	override setup() {
 		super.setup();
 		initialize();
@@ -49,24 +40,21 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 
 	@Test
 	def void checkColoring_01() {
-		val file = root.toPath.resolve('''MyModel.«fileExtension»''').toFile;
-		val uri = file.toURI.toString;
-
-		uri.open('''
+        val uri = '''file:///MyModel.«fileExtension»''';
+        open(uri, '''
 		uri "http://sadl.imp/shapes_top".
 
-		Shape is a top-level class.''');
-		
+		Shape is a top-level class.'
+        ''');
 		assertEquals('''
-		«uriConverter.createFileUri(file)» ->
+		«uri» ->
 		 * [[0, 4] .. [0, 32]] -> [21]
 		 * [[2, 0] .. [2, 5]] -> [9]''', coloringParams.toExpectation);
 	}
 
 	@Test
 	def void checkColoring_02() {
-		val file = root.toPath.resolve('''MyModel.«fileExtension»''').toFile;
-		val uri = file.toURI.toString;
+		val uri = '''file:///MyModel.«fileExtension»'''
 		
 		uri.open('''
 		uri "http://sadl.imp/shapes_specific".
@@ -80,7 +68,7 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 		        described by width with values of type float.''');
 		
 		assertEquals('''
-		«uriConverter.createFileUri(file)» ->
+		«uri» ->
 		 * [[1, 7] .. [1, 31]] -> [21]
 		 * [[0, 4] .. [0, 37]] -> [21]
 		 * [[3, 0] .. [3, 6]] -> [9]
@@ -94,8 +82,7 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 
 	@Test
 	def void checkColoring_03() {
-		val file = root.toPath.resolve('''MyModel.«fileExtension»''').toFile;
-		val uri = file.toURI.toString;
+		val uri = '''file:///MyModel.«fileExtension»'''
 		
 		uri.open('''
 		uri "http://sadl.imp/shapes_test" .
@@ -108,7 +95,7 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 		Test: MyCircle has area 38.48 .''');
 		
 		assertEquals('''
-		«uriConverter.createFileUri(file)» ->
+		«uri» ->
 		 * [[1, 7] .. [1, 32]] -> [21]
 		 * [[0, 4] .. [0, 33]] -> [21]
 		 * [[3, 0] .. [3, 8]] -> [5]
@@ -120,12 +107,6 @@ class SadlColoringTest extends AbstractSadlLanguageServerTest {
 		 * [[5, 43] .. [5, 48]] -> [20]
 		 * [[7, 6] .. [7, 14]] -> [5]
 		 * [[7, 19] .. [7, 23]] -> [20]''', coloringParams.toExpectation);
-	}
-
-	override protected initialize() {
-		val rootPath = root.absoluteFile.toPath;
-		projectStructureInitializer.initialize(rootPath);
-		super.initialize();
 	}
 
 }
