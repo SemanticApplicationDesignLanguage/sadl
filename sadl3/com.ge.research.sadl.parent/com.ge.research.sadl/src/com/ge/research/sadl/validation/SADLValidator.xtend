@@ -50,6 +50,8 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement
+import com.ge.research.sadl.utils.SadlProjectHelper
+import java.net.URI
 
 /**
  * This class contains custom validation rules. 
@@ -73,6 +75,7 @@ class SADLValidator extends AbstractSADLValidator {
 	@Inject IResourceDescriptionsProvider resourceDescriptionsProvider
 	@Inject IResourceDescription.Manager resourceDescriptionManager
 	@Inject UserDataHelper userDataHelper
+	@Inject SadlProjectHelper projectHelper;
 
 		
 	protected var List<String> otherNames = new ArrayList
@@ -93,23 +96,38 @@ class SADLValidator extends AbstractSADLValidator {
 		if (errMsg !== null) {
 			error(errMsg, SADL_MODEL__BASE_URI, INVALID_MODEL_URI);
 		}
-		val thisRsrc = model.eResource
-		val emfURI = thisRsrc.URI;
-		val simpleFileName = emfURI.lastSegment
+		val resourceUri = model.eResource.URI
+		val simpleFileName = resourceUri.lastSegment
 		val thisResourceDescription = resourceDescriptionManager.getResourceDescription(model.eResource)
 		val allModels = resourceDescriptionsProvider.getResourceDescriptions(model.eResource.resourceSet).getExportedObjectsByType(SADLPackage.Literals.SADL_MODEL)
-		for (modelDescription : allModels.filter[EObjectURI.trimFragment != thisResourceDescription.URI
+		val projectRoot = try { projectHelper.getRoot(new URI(resourceUri.toString)); } catch (Exception e) { null };
+		val allModelsPerProject = allModels.filter[
+			// Nothing to filter if we cannot locate the SADL project root for the current resource.
+			// Assuming a the headless tool-chain where all files are simply located in a folder on the FS.
+			if (projectRoot === null) {
+				return true;
+			}
+			val otherProjectRoot = projectHelper.getRoot(new URI(EObjectURI.trimFragment.toString));
+			if (otherProjectRoot === null) {
+				return false
+			}
+			return otherProjectRoot.toString == projectRoot.toString;
+		];
+		for (modelDescription : allModelsPerProject.filter[EObjectURI.trimFragment != thisResourceDescription.URI
 			    && (!EObjectURI.isPlatformResource &&  !thisResourceDescription.URI.isPlatformResource 
 			    || EObjectURI.segmentCount > 1 && thisResourceDescription.URI.segmentCount > 1
 				&& EObjectURI.segment(1) == thisResourceDescription.URI.segment(1))]) {
 			if (modelDescription.name.toString == thisUri) {
-				error("This URI is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
+				val message = "This URI is already used in '" + modelDescription.EObjectURI.trimFragment + "'";
+				error(message, SADL_MODEL__BASE_URI, INVALID_MODEL_URI)
 			}
 			if (model.alias !== null && userDataHelper.getAlias(modelDescription).orNull == model.alias) {
-				error("The alias '"+model.alias+"' is already used in '" + modelDescription.EObjectURI.trimFragment + "'", SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
+				val message = "The alias '"+model.alias+"' is already used in '" + modelDescription.EObjectURI.trimFragment + "'"
+				error(message, SADL_MODEL__ALIAS, INVALID_MODEL_ALIAS)
 			}
 			if (modelDescription.EObjectURI.trimFragment.lastSegment == simpleFileName) {
-				error("The simple filename (" + simpleFileName + ") is already used by model '" + modelDescription.EObjectURI.trimFragment + "'; filenames must be unique within a project.", SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
+				val message = "The simple filename (" + simpleFileName + ") is already used by model '" + modelDescription.EObjectURI.trimFragment + "'; filenames must be unique within a project."
+				error(message, SADL_MODEL__BASE_URI, INVALID_MODEL_FILENAME)
 			}
 		}
 		

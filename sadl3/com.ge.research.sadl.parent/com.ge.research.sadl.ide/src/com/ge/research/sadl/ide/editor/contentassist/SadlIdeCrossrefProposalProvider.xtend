@@ -30,7 +30,6 @@ import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
  */
 class SadlIdeCrossrefProposalProvider extends IdeCrossrefProposalProvider {
 
-	@Override
 	override protected createProposal(IEObjectDescription candidate, CrossReference crossRef,
 		ContentAssistContext context) {
 

@@ -29,6 +29,7 @@ package com.ge.research.sadl.server.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -130,10 +131,11 @@ public class TestSadlServerDemo extends TestCase {
 		extendedMN = "http://sadl.org/Shapes/MoreShapes";
 		extendedNS = extendedMN + "#";
 		clientScenarioNS = clientScenarioMN + "#";
+		rectangleNS = shapes_specificNS;
 	}
 	
 	@Test
-	public void testServerVersionInfo() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException, QueryParseException, IOException {
+	public void testServerVersionInfo() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException, QueryParseException, IOException, URISyntaxException {
 		// get an instance of the server
 		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
 		assertNotNull(srvr);
@@ -150,7 +152,7 @@ public class TestSadlServerDemo extends TestCase {
 		System.out.println("Reasoner version: " + rv);
 		
 		// get the version of the ontology (model) specified in the named service
-		String modelName = srvr.getModelName();
+		String modelName = srvr.getServiceModelName();
 		String vqry = srvr.prepareQuery("select ?ver where {<" + modelName + "> <owl:versionInfo> + ?ver}");
 		ResultSet rs = srvr.query(vqry);
 		assertNotNull(rs);
@@ -182,7 +184,7 @@ public class TestSadlServerDemo extends TestCase {
 //		assertTrue(rs.getResultAt(0, 1).equals(13.75));
 	}
 
-	@Ignore
+//	@Ignore
 	@Test
 	public void testSadlServerClientSideScenario() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException {
 		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
@@ -201,7 +203,7 @@ public class TestSadlServerDemo extends TestCase {
 	}
 
 	@Test
-	public void testSadlServerClientSideScenarioWithPersistence() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException {
+	public void testSadlServerClientSideScenarioWithPersistence() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, URISyntaxException {
 		ISadlServerPE srvr = new SadlServerPEImpl(kbaseRoot);
 		assertNotNull(srvr);
 		assertNotNull(srvr.selectServiceModel(initialNamedService));
@@ -271,9 +273,10 @@ public class TestSadlServerDemo extends TestCase {
 	 * @throws TripleNotFoundException
 	 * @throws QueryCancelledException
 	 * @throws QueryParseException
+	 * @throws URISyntaxException 
 	 */
 	@Test
-	public void testSadlServerParameterizedQuery() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, QueryParseException {
+	public void testSadlServerParameterizedQuery() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, QueryParseException, URISyntaxException {
 		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
 		assertNotNull(srvr);
 		Map<String, String[]> map = srvr.getServiceNameMap();

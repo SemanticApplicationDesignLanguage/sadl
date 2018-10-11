@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -387,7 +388,7 @@ public class SadlServerMain {
 				verboseFlag.compareToIgnoreCase("DEBUG") == 0) {
 			if (logger.isDebugEnabled()) logger.debug("Service: " + sadlSvc.getServiceVersion());
 			if (logger.isDebugEnabled()) logger.debug("Model Folder (KBase Identifier): " + sadlSvc.getKBaseIdentifier());
-			if (logger.isDebugEnabled()) logger.debug("Model Name: " + sadlSvc.getModelName());
+			if (logger.isDebugEnabled()) logger.debug("Model Name: " + sadlSvc.getServiceModelName());
 			if (logger.isDebugEnabled())
 				try {
 					logger.debug("Reasoner Version: " + sadlSvc.getReasonerVersion());
@@ -592,7 +593,7 @@ public class SadlServerMain {
 	    is.close();
 	}
 	
-	public String[][] getDataAsStringArray(String query) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, QueryCancelledException {
+	public String[][] getDataAsStringArray(String query) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, QueryCancelledException, IOException, ConfigurationException, InvalidNameException, URISyntaxException {
 		ResultSet results = sadlSvc.query(query);
 		if (results != null) {
 			int colCnt = results.getColumnCount();
@@ -691,8 +692,9 @@ public class SadlServerMain {
 		 * @throws InvalidNameException 
 		 * @throws SessionNotFoundException 
 		 * @throws QueryCancelledException 
+		 * @throws URISyntaxException 
 	 */
-	public String[] getLeafClassesOfTaxonomy(String root) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
+	public String[] getLeafClassesOfTaxonomy(String root) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException {
 		String query = "select ?et where {?et <rdfs:subClassOf> <" + root + "> . OPTIONAL {?et2 <rdfs:subClassOf> ?et . FILTER ((?et2 != <owl:Nothing> && ?et2 != ?et)) } FILTER (!bound(?et2)) }";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -726,8 +728,9 @@ public class SadlServerMain {
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
 	 */
-	public String[] getInstancesOfClass(String cls) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
+	public String[] getInstancesOfClass(String cls) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException {
 		String query = "select ?i where { ?i <rdf:type> <" + cls + "> }";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -760,8 +763,10 @@ public class SadlServerMain {
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public boolean isObjectProperty(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
+	public boolean isObjectProperty(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
 		String query = "select ?t where {<" + property + "> <rdf:type> ?t . FILTER(?t = <http://www.w3.org/2002/07/owl#ObjectProperty>)}";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -783,8 +788,10 @@ public class SadlServerMain {
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public boolean isDatatypeProperty(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
+	public boolean isDatatypeProperty(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
 		String query = "select ?t where {<" + property + "> <rdf:type> ?t . FILTER(?t = <http://www.w3.org/2002/07/owl#DatatypeProperty>)}";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -806,8 +813,10 @@ public class SadlServerMain {
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public String[] getPropertyDomain(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
+	public String[] getPropertyDomain(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
 		String query = "select ?d where { <" + property + "> <rdfs:domain> ?d }";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -841,8 +850,10 @@ public class SadlServerMain {
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public String[] getPropertyRange(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
+	public String[] getPropertyRange(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
 		String query = "select ?r where { <" + property + "> <rdfs:range> ?r }";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -878,8 +889,9 @@ public class SadlServerMain {
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
 	 */
-	public String[] getRequiredRangeClassesOfPropertyOfClass(String cls, String property) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
+	public String[] getRequiredRangeClassesOfPropertyOfClass(String cls, String property) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException {
 		String query = "select ?v where { <" + cls + "> <rdfs:subClassOf> ?r . ?r <rdf:type> <owl:Restriction> . ?r <owl:someValuesFrom> ?v . ?r <owl:onProperty> <" + property + ">}";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -914,8 +926,10 @@ public class SadlServerMain {
 	 * @throws QueryParseException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
 	 */
-	public String[] getAllowedRangeClassesOfPropertyOfClass(String cls, String property) throws NameNotFoundException, InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, SessionNotFoundException, QueryCancelledException {
+	public String[] getAllowedRangeClassesOfPropertyOfClass(String cls, String property) throws NameNotFoundException, InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
 		String query = "select ?v where { <" + cls + "> <rdfs:subClassOf> ?r . ?r <rdf:type> <owl:Restriction> . ?r <owl:allValuesFrom> ?v . ?r <owl:onProperty> <" + property + ">}";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -951,8 +965,9 @@ public class SadlServerMain {
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
 	 */
-	public String[] getAllowedValuesOfObjectPropertyOfClass(String cls, String property) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
+	public String[] getAllowedValuesOfObjectPropertyOfClass(String cls, String property) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException {
 		String query = "select ?v where { <" + cls + "> <rdfs:subClassOf> ?r . ?r <rdf:type> <owl:Restriction> . ?r <owl:onProperty> <" + property + "> . ?r <owl:allValuesFrom> ?o . ?o <owl:oneOf> ?l . ?l <http://jena.hpl.hp.com/ARQ/list#member> ?v}";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -988,8 +1003,9 @@ public class SadlServerMain {
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
+	 * @throws URISyntaxException 
 	 */
-	public Object[] getAllowedValuesOfDataPropertyOfClass(String cls, String property) throws QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException {
+	public Object[] getAllowedValuesOfDataPropertyOfClass(String cls, String property) throws QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
 		String query = "select distinct ?v where { <" + cls + "> <rdfs:subClassOf> ?r . ?r <rdf:type> <owl:Restriction> . ?r <owl:onProperty> <" + property + "> . ?r <owl:hasValue> ?v}";
 		query = sadlSvc.prepareQuery(query);
 		ResultSet results = sadlSvc.query(query);

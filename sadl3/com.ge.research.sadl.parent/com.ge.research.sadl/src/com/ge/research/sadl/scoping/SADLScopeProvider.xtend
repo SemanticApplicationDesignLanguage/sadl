@@ -63,6 +63,7 @@ import org.eclipse.xtext.resource.EObjectDescription
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.AbstractGlobalScopeDelegatingScopeProvider
+import org.eclipse.xtext.scoping.impl.FilteringScope
 import org.eclipse.xtext.scoping.impl.MapBasedScope
 import org.eclipse.xtext.util.OnChangeEvictingCache
 
@@ -72,6 +73,7 @@ import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 import static extension com.ge.research.sadl.utils.SadlASTUtils.*
 import com.ge.research.sadl.sADL.UpdateStatement
 import com.ge.research.sadl.sADL.UpdateExpression
+import com.google.inject.Provider
 
 /**
  * This class contains custom scoping description.
@@ -95,6 +97,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	@Inject protected extension DeclarationExtensions
 	@Inject protected IQualifiedNameConverter converter
 	@Inject protected AmbiguousNameHelper ambiguousNameHelper;
+	@Inject protected GlobalScopeProviderFilterProvider globalScopeProviderFilterProvider;
 	
 	@Inject OnChangeEvictingCache cache
 	
@@ -162,7 +165,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	override getScope(EObject context, EReference reference) {
 		// resolving imports against external models goes directly to the global scope
 		if (reference.EReferenceType === SADL_MODEL) {
-			return super.getGlobalScope(context.eResource, reference)
+			// Here we need to filter out all the items that do not belong to the same SADL project.
+			// It has no effect for the headless tool-chain and the Eclipse IDE case.
+			val predicate = globalScopeProviderFilterProvider.getPredicate(context.eResource);
+			val globalScope = super.getGlobalScope(context.eResource, reference)
+			return new FilteringScope(globalScope, predicate);
 		}
 		if (SADL_RESOURCE.isSuperTypeOf(reference.EReferenceType)) {
 			val result = getSadlResourceScope(context, reference)
@@ -264,7 +271,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources, Predicate<EObject> isIncluded) {
-		return cache.get('resource_scope' -> alias, resource) [
+		val provider = [
 			val shouldWrap = importedResources.empty
 			if (!importedResources.add(resource)) {
 				return IScope.NULLSCOPE
@@ -291,7 +298,9 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			// finally all the rest
 			newParent = internalGetLocalResourceScope(resource, namespace, newParent, importScope, isIncluded)
 			return newParent
-		]
+		] as Provider<IScope>;
+		val key = 'resource_scope' -> alias;
+		return cache.get(key, resource, provider);
 	}
 	
 	protected def List<LocalScopeProvider> getLocalScopeProviders() {
@@ -351,6 +360,17 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 							} else if (namespace !== null) {
 								map.addElement(namespace.append(name), it.name)
 							}
+							iter.prune
+						}
+						ExternalEquationStatement: {
+							val name = converter.toQualifiedName(it.name.concreteName)
+							map.addElement(name, it.name)
+							if (name.segmentCount > 1) {
+								map.addElement(name.skipFirst(1), it.name)
+							} else if (namespace !== null) {
+								map.addElement(namespace.append(name), it.name)
+							}
+							iter.prune
 						}
 						QueryStatement: {
 							// Ignore `anonymous` query statements. Nothing to put into the scope.
@@ -455,7 +475,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	}
 	
 	protected def pruneScope(EObject object) {
-		return object instanceof RuleStatement || object instanceof EquationStatement || object instanceof QueryStatement || object instanceof TestStatement
+		return object instanceof RuleStatement || object instanceof EquationStatement || object instanceof QueryStatement || object instanceof TestStatement || object instanceof ExternalEquationStatement
 	}
 	
 	protected def String getAlias(Resource resource) {
@@ -482,7 +502,9 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			IMPLICIT_MODELS.forEach [ fileName, desiredUri |
 				if (!resource.URI.toString.endsWith(fileName)) {
 					val qName = QualifiedName.create(desiredUri);
-					val element = getGlobalScope(resource, SADL_IMPORT__IMPORTED_RESOURCE).getSingleElement(qName)
+					val predicate = globalScopeProviderFilterProvider.getPredicate(resource);
+					val filteredGlobalScope = new FilteringScope(getGlobalScope(resource, SADL_IMPORT__IMPORTED_RESOURCE), predicate);
+					val element = filteredGlobalScope.getSingleElement(qName)
 					if (element !== null) {
 						val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
 						if (eobject !== null) {

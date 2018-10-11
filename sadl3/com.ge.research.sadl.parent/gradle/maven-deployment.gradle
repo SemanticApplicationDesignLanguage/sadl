@@ -1,11 +1,50 @@
-//see https://docs.gradle.org/current/userguide/maven_plugin.html
-apply plugin: "maven"
-
-uploadArchives {
-	repositories {
-		mavenDeployer {
-			repository(url: "file://${buildDir}/localRepo")
-			snapshotRepository(url: "file://${buildDir}/localRepo")
+// Configuration function for generated POMs
+def configurePom = { pom ->
+	pom.project {
+		if (project.hasProperty('title')) {
+			name = project.title
+			description = project.description
+		}
+		packaging 'jar'
+		url 'https://github.com/crapo/sadlos2'
+		licenses {
+			license {
+				name 'Eclipse Public License - v 1.0'
+				url 'https://www.eclipse.org/legal/epl-v10.html'
+			}
+		}
+		developers {
+			developer {
+				name 'Sven Efftinge'
+				email 'sven.efftinge@typefox.io'
+				organizationUrl 'http://typefox.io'
+			}
+			developer {
+				name 'Akos Kitta'
+				email 'kittaakos@typefox.io'
+				organizationUrl 'http://typefox.io'
+			}
+		}
+		scm {
+			connection 'scm:git:git@github.com:crapo/sadlos2.git'
+			developerConnection 'scm:git:git@github.com:crapo/sadlos2.git'
+			url 'git@github.com:crapo/sadlos2.git'
 		}
 	}
+}
+
+// We need to wait until the project's own build file has been executed
+// so we can use the title and description settings for setting up Maven publishing.
+afterEvaluate {
+	
+	task createLocalMavenRepo(type: Upload) {
+		group = 'Upload'
+		description = 'Create or update the local Maven repository'
+		configuration = configurations.archives
+		repositories.mavenDeployer {
+			repository(url: "file:" + file("${rootDir}/build/maven-repository"))
+			configurePom(pom)
+		}
+	}
+
 }

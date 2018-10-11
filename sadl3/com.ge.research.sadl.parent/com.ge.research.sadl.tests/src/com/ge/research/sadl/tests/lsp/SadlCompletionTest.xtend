@@ -32,8 +32,7 @@ class SadlCompletionTest extends AbstractSadlLanguageServerTest {
 	def void emptyResource() {
 		testCompletion[
 			model = '';
-			expectedCompletionItems = '''
-				uri -> uri [[0, 0] .. [0, 0]]
+			expectedCompletionItems = ''' uri  ->  uri  [[0, 0] .. [0, 0]]
 			''';
 		];
 	}
@@ -58,10 +57,10 @@ class SadlCompletionTest extends AbstractSadlLanguageServerTest {
 				.
 				 (. - End of Sentence) -> .
 				 [[0, 35] .. [0, 35]]
-				alias -> alias [[0, 35] .. [0, 35]]
-				version -> version [[0, 35] .. [0, 35]]
-				( -> ( [[0, 35] .. [0, 35]]
-				, -> , [[0, 35] .. [0, 35]]
+				alias  -> alias  [[0, 35] .. [0, 35]]
+				version  -> version  [[0, 35] .. [0, 35]]
+				(  -> (  [[0, 35] .. [0, 35]]
+				,  -> ,  [[0, 35] .. [0, 35]]
 			''';
 		];
 	}

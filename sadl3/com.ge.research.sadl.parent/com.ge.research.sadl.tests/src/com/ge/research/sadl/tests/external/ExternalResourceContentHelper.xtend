@@ -1,6 +1,7 @@
 package com.ge.research.sadl.tests.external
 
 import org.eclipse.xtext.util.Files
+import java.net.URL
 
 /**
  * Helper class that reads the content of an external resource into a string.
@@ -24,6 +25,10 @@ final class ExternalResourceContentHelper {
 	 */
 	static def String getContent(String fileName) {
 		return Files.readStreamIntoString(ExternalResourceContentHelper.getResourceAsStream('''/«RESOURCES_FOLDER»/«fileName»'''));
+	}
+	
+	static def URL getURL(String fileName) {
+		return ExternalResourceContentHelper.getResource('''/«RESOURCES_FOLDER»/«fileName»''')
 	}
 
 }

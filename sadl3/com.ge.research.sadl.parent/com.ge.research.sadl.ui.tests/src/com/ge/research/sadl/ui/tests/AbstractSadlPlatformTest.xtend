@@ -16,15 +16,22 @@
  */
 package com.ge.research.sadl.ui.tests
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE
 import com.ge.research.sadl.jena.IJenaBasedModelProcessor
 import com.ge.research.sadl.model.gp.SadlCommand
 import com.ge.research.sadl.processing.SadlInferenceProcessorProvider
+import com.ge.research.sadl.reasoner.ConfigurationItem
+import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.tests.SadlTestAssertions
 import com.ge.research.sadl.ui.OutputStreamStrategy
 import com.google.common.collect.ImmutableMap
+import com.google.common.collect.Iterables
 import com.google.common.collect.Lists
+import com.google.common.io.Files
 import com.google.inject.Inject
 import com.hp.hpl.jena.ontology.OntModel
+import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Arrays
 import java.util.List
@@ -39,7 +46,7 @@ import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.ui.actions.WorkspaceModifyOperation
 import org.eclipse.xtend.lib.annotations.Accessors
-import org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil
+import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.preferences.PreferenceKey
 import org.eclipse.xtext.resource.XtextResource
@@ -48,8 +55,8 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.XtextProjectHelper
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
+import org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil
 import org.eclipse.xtext.util.CancelIndicator
-import org.eclipse.xtext.util.Files
 import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
@@ -66,15 +73,9 @@ import static com.ge.research.sadl.jena.UtilsForJena.*
 import static org.eclipse.core.resources.IMarker.*
 import static org.eclipse.core.resources.IResource.DEPTH_INFINITE
 import static org.eclipse.core.runtime.IPath.SEPARATOR
-import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
+import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
 
 import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.*
-import com.google.common.collect.Iterables
-import org.eclipse.xtext.diagnostics.Severity
-import com.ge.research.sadl.reasoner.ConfigurationItem
-import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory
-import com.ge.research.sadl.builder.IConfigurationManagerForIDE
-import com.ge.research.sadl.reasoner.utils.SadlUtils
 
 /**
  * Base test class with a running Eclipse platform, with a workspace and a convenient way
@@ -172,7 +173,14 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	 * Deletes all workspace projects.
 	 */
 	protected def void deleteProjects() {
-		projects.forEach[delete(true, monitor)];
+		projects.forEach[
+			try {
+				delete(true, monitor);				
+			} catch (Exception e) {
+				println('''Error while trying to delete test project: «it».''');
+				e.printStackTrace;
+			}
+		];
 		waitForBuild();
 		assertTrue('''Expected empty workspace. Workspace content was: «Arrays.toString(projects)».''', projects.empty);
 	}
@@ -350,7 +358,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 		(String)=>void assert) {
 
 		val file = locationProvider.get(inputFilePath).file;
-		val content = Files.readFileIntoString(Paths.get(file.locationURI).toFile.absolutePath);
+		val content = Files.toString(Paths.get(file.locationURI).toFile, StandardCharsets.UTF_8);
 		assert.apply(content);
 	}
 
@@ -443,7 +451,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	/**
 	 * Generated output location provider.
 	 */
-	public static interface GeneratedOutputLocationProvider {
+	static interface GeneratedOutputLocationProvider {
 
 		/**
 		 * Returns with the project relative location of the generated output for the given input file path.

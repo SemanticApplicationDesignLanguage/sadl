@@ -30,6 +30,8 @@ import static java.lang.System.lineSeparator
 
 import static extension com.google.common.base.Strings.repeat
 import static extension org.eclipse.xtext.util.Files.writeStringIntoFile
+import org.eclipse.emf.common.EMFPlugin
+import org.eclipse.core.runtime.CoreException
 
 /**
  * Representation of an implicit model content provider for the {@code SADL} language.
@@ -115,10 +117,15 @@ interface ISadlImplicitModelContentProvider {
 		}
 
 		private def Iterable<ISadlImplicitModelFragmentProvider> getFragmentProviders() {
-			return if (Platform.running) {
+			return if (EMFPlugin.IS_ECLIPSE_RUNNING) {
 				Platform.extensionRegistry.getConfigurationElementsFor(EXTENSION_POINT_ID).map [
-					createExecutableExtension(EXECUTABLE_ATTRIBUTE_ID) as ISadlImplicitModelFragmentProvider
-				];
+					try {
+						return createExecutableExtension(EXECUTABLE_ATTRIBUTE_ID) as ISadlImplicitModelFragmentProvider
+					} catch (CoreException e) {
+						// https://github.com/crapo/sadlos2/commit/58c597e79283c86569d37399e277a3d063ea2423#r30636182
+						return null;
+					}
+				].filterNull;
 			} else
 				{
 					ServiceLoader.load(ISadlImplicitModelFragmentProvider).iterator.toIterable;

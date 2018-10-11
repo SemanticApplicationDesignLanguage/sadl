@@ -1,6 +1,8 @@
 package com.ge.research.sadl.server.server;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
@@ -60,7 +62,7 @@ public class TestSadlServerPEOnShapes extends TestCase {
 
 
 	@Test
-	public void test0() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException {
+	public void test0() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException, IOException, URISyntaxException {
 		// demonstrate ability to access the base named service
 		ISadlServerMD srvr = new SadlServerMDImpl();
 		srvr.setKbaseRoot(modelFolder);

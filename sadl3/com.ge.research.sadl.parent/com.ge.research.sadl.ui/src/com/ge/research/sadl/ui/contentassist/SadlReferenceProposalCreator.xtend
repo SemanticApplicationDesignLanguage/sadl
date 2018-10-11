@@ -38,7 +38,6 @@ import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal
 @Singleton
 class SadlReferenceProposalCreator extends ReferenceProposalCreator {
 
-	@Override
 	override protected getWrappedFactory(EObject model, EReference reference,
 		Function<IEObjectDescription, ICompletionProposal> proposalFactory) {
 

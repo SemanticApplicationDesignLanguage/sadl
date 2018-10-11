@@ -1,0 +1,16 @@
+uri "http://sadl.org/Test.sadl" alias Test.
+
+import "http://sadl.org/Polygons.sadl".
+
+MyRect is a Rectangle with height 2, with width 4.
+
+Ask Q1: area.
+
+Ask Q1.
+
+Ask: Shapes:Q1.
+
+Ask: x is a ^Rule.
+
+Ask: "select ?s where {?s <rdf:type> <Shape>}".
+Ask: "select ?s ?a where {?s <area> ?a}".

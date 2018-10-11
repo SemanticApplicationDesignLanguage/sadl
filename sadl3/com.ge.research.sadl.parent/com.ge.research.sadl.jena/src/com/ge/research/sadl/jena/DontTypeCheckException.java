@@ -25,4 +25,8 @@ public class DontTypeCheckException extends Exception {
 		super();
 	}
 
+	public DontTypeCheckException(String msg) {
+		super(msg);
+	}
+
 }

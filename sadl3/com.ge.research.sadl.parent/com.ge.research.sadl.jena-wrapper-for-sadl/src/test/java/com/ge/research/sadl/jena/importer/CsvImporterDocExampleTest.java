@@ -16,6 +16,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.importer.AbortDataRowException;
@@ -50,6 +51,7 @@ public class CsvImporterDocExampleTest {
 	}
 
 
+	@Ignore("https://github.com/crapo/sadlos2/issues/332")
 	@Test
 	public void testTemplateBasedImport_01() throws URISyntaxException, IOException, ConfigurationException, TemplateException, InvalidNameException, AbortDataRowException, QueryCancelledException, ReasonerNotFoundException {
 		String kbasePath = kbroot + File.separator + "CsvImporterDocExample";

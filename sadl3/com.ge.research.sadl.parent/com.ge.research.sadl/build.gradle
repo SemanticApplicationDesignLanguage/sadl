@@ -1,11 +1,5 @@
-dependencies {
-	compile project(":com.ge.research.jena")
-	compile project(":com.ge.research.sadl.xtextgenerator")
-	compile "org.eclipse.xtext:org.eclipse.xtext:$versions.xtext"
-	compile "org.eclipse.xtext:org.eclipse.xtext.xbase:$versions.xtext"
-	compile "org.eclipse.core:org.eclipse.core.runtime:$versions.eclipseCoreRuntime"
-	compile "org.slf4j:slf4j-api:$versions.slf4j"
-}
+ext.title = 'SADL Language'
+description = 'Language infrastructure for SADL based on Xtext'
 
 configurations {
 	mwe2 {
@@ -13,42 +7,39 @@ configurations {
 	}
 }
 
-[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 dependencies {
-	mwe2 "de.jflex:jflex:$versions.jflex"
-	mwe2 "org.eclipse.emf:org.eclipse.emf.mwe2.launch:$versions.mwe2"
-	mwe2 "org.eclipse.xtext:org.eclipse.xtext:$versions.xtext"
-	mwe2 "org.eclipse.xtext:org.eclipse.xtext.generator:$versions.xtext"
-	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:$versions.xtext"
+	compile project(':com.ge.research.jena')
+	compile project(':com.ge.research.sadl.xtextgenerator')
+	compile project(':com.ge.research.sadl.errorgenerator')
+
+	compile "org.jsoup:jsoup:${versions.jsoup}"
+	compile "org.slf4j:slf4j-api:${versions.slf4j}"
+	compile "org.eclipse.core:org.eclipse.core.net:${versions.eclipseCoreNet}"
+	compile "org.eclipse.core:org.eclipse.core.runtime:${versions.eclipseCoreRuntime}"
+	compile "org.eclipse.core:org.eclipse.core.resources:${versions.eclipseCoreResources}"
+	compile "org.eclipse.xtext:org.eclipse.xtext:${versions.xtext}"
+	compile "org.eclipse.xtext:org.eclipse.xtext.xbase:${versions.xtext}"
+
+	mwe2 "io.typefox.xtext:jflex-fragment:${versions.jflexgen}"
+	mwe2 "org.eclipse.emf:org.eclipse.emf.mwe2.launch:${versions.mwe2}"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext:${versions.xtext}"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.generator:${versions.xtext}"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:${versions.xtext}"
 }
 
 task generateXtextLanguage(type: JavaExec) {
-	main = "org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher"
+	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
 	classpath = configurations.mwe2
-	inputs.file "src/com/ge/research/sadl/GenerateSADL.mwe2"
-	inputs.file "src/com/ge/research/sadl/SADL.xtext"
-	outputs.dir "src-gen"
-	args += "src/com/ge/research/sadl/GenerateSADL.mwe2"
-	args += "-p"
+	inputs.file 'src/com/ge/research/sadl/GenerateSADL.mwe2'
+	inputs.file 'src/com/ge/research/sadl/SADL.xtext'
+	outputs.dir 'src-gen'
+	args += 'src/com/ge/research/sadl/GenerateSADL.mwe2'
+	args += '-p'
 	args += "rootPath=/${projectDir}/.."
 }
 
-task generateJFlexLexer(type: JavaExec) {
-    main = "JFlex.Main"
-    classpath = configurations.mwe2
-    inputs.file "src-gen/com/ge/research/sadl/parser/antlr/lexer/jflex/SADLFlexer.flex"
-    inputs.file "src/com/ge/research/sadl/SADL.xtext"
-    outputs.dir "src-gen"
-    args += "-d" 
-    args += "src-gen/com/ge/research/sadl/parser/antlr/lexer/jflex"
-    args += "src-gen/com/ge/research/sadl/parser/antlr/lexer/jflex/SADLFlexer.flex"
-}
-
-generateXtext.dependsOn(generateJFlexLexer)
 generateXtext.dependsOn(generateXtextLanguage)
-generateJFlexLexer.dependsOn(generateXtextLanguage)
 clean.dependsOn(cleanGenerateXtextLanguage)
 eclipse.classpath.plusConfigurations += [configurations.mwe2]
-eclipseClasspath.enabled=false
-cleanEclipseClasspath.enabled=false
