@@ -2972,7 +2972,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					return getType(ees.getReturnType());
 				}
 				else {
-					throw new DontTypeCheckException();
+					throw new DontTypeCheckException("External Equation '" + declarationExtensions.getConceptUri(fsr) + "' does not specify a return type.");
 				}
 			}
 		}

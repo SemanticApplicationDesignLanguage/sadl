@@ -62,12 +62,12 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 	@Override
 	public Object[] onImport(Resource resource, String projectPath) {
 		try {
-			String policyFileName = UtilsForJena.getPolicyFilePathForProject(projectPath);
+//			String policyFileName = UtilsForJena.getPolicyFilePathForProject(projectPath);
 			String owlFilePath = resource.getURI().toFileString();
 	    	File ffop = new File(owlFilePath);
-	    	String sfop = ffop.toURI().toString();
+//	    	String sfop = ffop.toURI().toString();
 	        setResultingDataSource(null);
-			OwlToSadl owlToSadl = new OwlToSadl(sfop,policyFileName);
+			OwlToSadl owlToSadl = new OwlToSadl(ffop); //sfop,policyFileName);
 			setResultingDataSource(owlToSadl.getSadlModel());
 		} catch (Exception e1) {
 	        if (getResultingDataSource() == null) {
