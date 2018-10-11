@@ -1,0 +1,41 @@
+{
+  "name": "sadl-extension",
+  "version": "0.1.9",
+  "description": "An extension for Theia connection language support for the SADL DSL",
+  "license": "EPL-1.0",
+  "keywords": [
+    "theia-extension"
+  ],
+  "files": [
+    "bin",
+    "lib",
+    "src",
+    "example-projects"
+  ],
+  "dependencies": {
+    "@theia/core": "next",
+    "@theia/editor": "next",
+    "@theia/filesystem": "next",
+    "@theia/languages": "next",
+    "@theia/navigator": "next",
+    "@theia/monaco": "next",
+    "@theia/output": "next",
+    "valid-filename": "latest"
+  },
+  "devDependencies": {
+    "rimraf": "latest",
+    "typescript": "latest"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/sadl-frontend-module",
+      "backend": "lib/node/sadl-backend-module"
+    }
+  ]
+}

@@ -1,10 +1,10 @@
-include "com.ge.research.jena"
-include "com.ge.research.sadl.xtextgenerator"
-include "com.ge.research.sadl.errorgenerator"
-include "com.ge.research.sadl"
-include "com.ge.research.sadl.ide"
-include "com.ge.research.sadl.jena"
-include "com.ge.research.sadl.jena-wrapper-for-sadl"
-include "com.ge.research.sadl.tests"
-include "io.typefox.lsp.endpoint"
-include "io.typefox.lsp.monaco"
+rootProject.name = 'com.ge.research.sadl'
+
+include 'com.ge.research.jena'
+include 'com.ge.research.sadl.xtextgenerator'
+include 'com.ge.research.sadl.errorgenerator'
+include 'com.ge.research.sadl'
+include 'com.ge.research.sadl.ide'
+include 'com.ge.research.sadl.jena'
+include 'com.ge.research.sadl.jena-wrapper-for-sadl'
+include 'com.ge.research.sadl.tests'

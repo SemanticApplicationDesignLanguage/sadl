@@ -1,0 +1,8 @@
+uri "http://sadl.org/extension.sadl" alias extension.
+
+import "http://research.ge.com/Acuity/apvf.owl".
+import "http://sadl.org/base.sadl".
+			
+Circle is a Shape. 
+FooBar is a type of AcuityController.
+MyHero is an ArtificialAgent.

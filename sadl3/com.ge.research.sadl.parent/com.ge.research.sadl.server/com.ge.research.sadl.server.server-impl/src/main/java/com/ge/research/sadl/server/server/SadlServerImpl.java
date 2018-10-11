@@ -50,10 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import com.ge.research.sadl.server.ISadlServer;
-import com.ge.research.sadl.server.NamedServiceNotFoundException;
-import com.ge.research.sadl.server.SessionNotFoundException;
-
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.activation.URLDataSource;
@@ -80,6 +76,9 @@ import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
+import com.ge.research.sadl.server.ISadlServer;
+import com.ge.research.sadl.server.NamedServiceNotFoundException;
+import com.ge.research.sadl.server.SessionNotFoundException;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -108,10 +107,15 @@ public class SadlServerImpl implements ISadlServer {
     protected IConfigurationManager configurationMgr = null;
     protected IReasoner reasoner = null;
     private boolean collectTimingInformation = false;
-    protected String modelName = null;
+    
+    private String serviceModelName = null;		// the model identified as the starting model in selectServiceModel
+    												//	(if no instanceDataNamespace has been specified this is the default model)
+    private String instanceDataNamespace = null;	// the [last] namespace specified for a new model 
+    												//	(once specified this becomes default model)
+    private String instanceDataModelName = null;	// the model name of the instanceDataNamespace
+    
 	private String serviceVersion = "$Revision: 1.16 $";
 	protected String kbaseRoot = null;
-	protected String defaultInstanceDataNS = null;
 	protected Map<String, String[]> serviceNameMap = null;
 	private String modelFolder = null;
 
@@ -131,7 +135,7 @@ public class SadlServerImpl implements ISadlServer {
 	}
 
     public ResultSet query(String sparql)
-            throws QueryParseException, ReasonerNotFoundException, QueryCancelledException {
+            throws QueryParseException, ReasonerNotFoundException, QueryCancelledException, IOException, ConfigurationException, InvalidNameException, URISyntaxException, SessionNotFoundException {
         logger.info("Calling query(\"{}\")", sparql);
         if (reasoner != null) {
  			ResultSet rs = reasoner.ask(sparql);
@@ -198,7 +202,7 @@ public class SadlServerImpl implements ISadlServer {
 
 	public boolean loadCsvData(String serverCsvDataLocator, boolean includesHeader, String csvTemplate) throws ConfigurationException, IOException, InvalidNameException, TemplateException {
 		String uri = scanTemplateForUri(csvTemplate);
-		if (defaultInstanceDataNS == null) {
+		if (instanceDataNamespace == null) {
 			if (uri != null) {
 				setInstanceDataNamespace(uri);
 			}
@@ -209,8 +213,8 @@ public class SadlServerImpl implements ISadlServer {
 		ITabularDataImporter importer = new CsvImporter(getConfigurationMgr());
 		importer.setImportFilename(serverCsvDataLocator, includesHeader);
 		importer.setModelFolder(getKBaseIdentifier());
-		importer.setImportModelNamespace(defaultInstanceDataNS);
-		importer.setImports(getModelName());
+		importer.setImportModelNamespace(instanceDataNamespace);
+		importer.setImports(getServiceModelName());
 		importer.setTemplates(csvTemplate);
 		Object om;
 		try {
@@ -310,7 +314,7 @@ public class SadlServerImpl implements ISadlServer {
     		}
 		}
         int iStatus = reasoner.initializeReasoner(getModelFolder(), modelName, transPrefs, repoType);
-        this.modelName = modelName;
+        this.setServiceModelName(modelName);
         if (this.reasoner == null) {
         	logger.info("Failed to get reasoner");
         } else if (iStatus == 0){
@@ -421,7 +425,7 @@ public class SadlServerImpl implements ISadlServer {
 			csvTemplateString = csvTemplate;
 		}
 		String uri = scanTemplateForUri(csvTemplateString);
-		if (defaultInstanceDataNS == null) {
+		if (instanceDataNamespace == null) {
 			if (uri != null) {
 				setInstanceDataNamespace(uri);
 			}
@@ -432,7 +436,7 @@ public class SadlServerImpl implements ISadlServer {
 		CsvImporter importer = new CsvImporter(getConfigurationMgr());
 		importer.setImportDataSource(csvDataSrc, includesHeader);
 		importer.setModelFolder(getKBaseIdentifier());
-		importer.setImportModelNamespace(defaultInstanceDataNS);
+		importer.setImportModelNamespace(instanceDataNamespace);
 		
 		Object[] o = scanTemplateForImports(csvTemplateString);
 		int numImports = 0;
@@ -443,7 +447,7 @@ public class SadlServerImpl implements ISadlServer {
 				numImports = templateImports.size();
 			}
 			else {
-				importer.setImports(getModelName());
+				importer.setImports(getServiceModelName());
 				numImports = 1;
 			}
 			String processedTemplate = (String) o[0];
@@ -564,10 +568,24 @@ public class SadlServerImpl implements ISadlServer {
 		return null;
 	}
 
-	public String getModelName() throws IOException {
-		return modelName;
+	public String getServiceModelName() {
+		return serviceModelName;
 	}
 
+	public String getInstanceDataNamespace() {
+		if (reasoner != null) {
+			return reasoner.getInstanceDataNamespace();
+		}
+		return instanceDataNamespace;
+	}
+	
+	public String getDefaultModelName() {
+		if (getInstanceDataModelName() == null) {
+			return getServiceModelName();
+		}
+		return getInstanceDataModelName();
+	}
+	
 	public String getReasonerVersion() throws ConfigurationException {
 		IReasoner irsnr;
 		try {
@@ -627,6 +645,7 @@ public class SadlServerImpl implements ISadlServer {
     			kbrootpath = _kbaseRoot.substring(5);
     		}
     		this.kbaseRoot = _kbaseRoot;
+			logger.info("kbaseRoot set to '" + this.kbaseRoot + "'");
     		java.io.File kbrootFile = new java.io.File(kbrootpath);
     		if (kbrootFile.exists() && kbrootFile.isDirectory()) {
     			Map[] results = scanFolderForServices(kbrootFile, null, null);
@@ -635,6 +654,22 @@ public class SadlServerImpl implements ISadlServer {
     					Map<String, String[]> serviceMap = (Map<String, String[]>) results[0];
 		    			if (serviceMap != null) {
 		    				setServiceNameMap(serviceMap);
+		    				if (logger.isDebugEnabled()) {
+		    					Iterator<String> smitr = serviceMap.keySet().iterator();
+		    					while (smitr.hasNext()) {
+		    						String key = smitr.next();
+		    						String[] values = serviceMap.get(key);
+		    						StringBuilder sb = new StringBuilder("Service: ");
+		    						sb.append(key);
+		    						sb.append("\n");
+		    						for (int i = 0; values != null && i < values.length; i++) {
+		    							sb.append("  ");
+		    							sb.append(values[i]);
+		    							sb.append("\n");
+		    						}
+		    						logger.info(sb.toString());
+		    					}
+		    				}
 		    			}
     				}
     			}
@@ -802,7 +837,7 @@ public class SadlServerImpl implements ISadlServer {
 	public ResultSet[] atomicQuery(String serviceName, DataSource dataSrc, String inputFormat,
 			String[] sparql) throws IOException, ConfigurationException,
 			NamedServiceNotFoundException, QueryParseException,
-			ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException {
+			ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException, URISyntaxException {
 		ResultSet[] results = null;
 		if (serviceName == null || serviceName.length() == 0) {
 			throw new NamedServiceNotFoundException("Service name is null");
@@ -836,7 +871,7 @@ public class SadlServerImpl implements ISadlServer {
 			String[] sparql) throws IOException, ConfigurationException,
 			NamedServiceNotFoundException, QueryParseException,
 			ReasonerNotFoundException, SessionNotFoundException,
-			InvalidNameException, TemplateException, QueryCancelledException {
+			InvalidNameException, TemplateException, QueryCancelledException, URISyntaxException {
 		ResultSet[] results = null;
 		if (serviceName == null || serviceName.length() == 0) {
 			throw new NamedServiceNotFoundException("Service name is null");
@@ -863,30 +898,16 @@ public class SadlServerImpl implements ISadlServer {
 		if (!namespace.endsWith("#")) {
 			throw new InvalidNameException("A namespace should end with '#' ('" + namespace + "' does not)");
 		}
-		String oldNS = defaultInstanceDataNS;
-		defaultInstanceDataNS = namespace;
+		String oldNS = instanceDataNamespace;
+		instanceDataNamespace = namespace;
 		if (reasoner != null) {
 			reasoner.setInstanceDataNamespace(namespace);
 		}
-		if (defaultInstanceDataNS.endsWith("#")) {
-			modelName = defaultInstanceDataNS.substring(0, defaultInstanceDataNS.length() - 1);
-		}
+		setInstanceDataModelName(instanceDataNamespace.substring(0, instanceDataNamespace.length() - 1));
 		return oldNS;
 	}
 	
-	public String getInstanceDataNamespace() {
-		if (reasoner != null) {
-			return reasoner.getInstanceDataNamespace();
-		}
-		return defaultInstanceDataNS;
-	}
-	
-	@Override
-	public String getInstanceModelName() {
-		return modelName;
-	}
-	
-	public String createInstance(String name, String className) throws ConfigurationException, InvalidNameException, IOException {
+	public String createInstance(String name, String className) throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException {
 		String error = SadlUtils.validateRdfUri(name);
 		if (error != null) {
 			throw new InvalidNameException("Invalid instance name (" + name + "): " + error);
@@ -896,7 +917,7 @@ public class SadlServerImpl implements ISadlServer {
 		}
 		if (name.indexOf(':') < 0 && name.indexOf('#') < 0) {
 			// this name is a fragment; assume it is in the default namespace
-			name = defaultInstanceDataNS + name;
+			name = instanceDataNamespace + name;
 		}
 		try {
 			reasoner.addTriple(name, RDF.type.getURI(), className);
@@ -1062,6 +1083,18 @@ public class SadlServerImpl implements ISadlServer {
 			throw new TemplateException(e.getMessage());
 		}
 		return null;
+	}
+
+	protected String getInstanceDataModelName() {
+		return instanceDataModelName;
+	}
+
+	protected void setInstanceDataModelName(String instanceDataModelName) {
+		this.instanceDataModelName = instanceDataModelName;
+	}
+
+	protected void setServiceModelName(String serviceModelName) {
+		this.serviceModelName = serviceModelName;
 	}
 
 }

@@ -1,0 +1,12 @@
+uri "http://sadl.org/Polygons.sadl" alias Polygons.
+
+import "http://sadl.org/Shapes.sadl".
+
+Rectangle is a type of Shape, described by height with values of type float,
+	described by width with values of type float.
+
+Polygons:area (note "URI is 'http://sadl.org/Polygons.sadl#area'") is a type of Shapes:area.
+
+Rule AreaOfRectangle
+	given x is any Rectangle
+	then area of x = height of x * width of x.

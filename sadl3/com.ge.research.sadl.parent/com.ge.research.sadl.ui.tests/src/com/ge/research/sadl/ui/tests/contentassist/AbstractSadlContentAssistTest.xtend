@@ -17,22 +17,23 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.tests.contentassist
 
+import com.ge.research.sadl.ide.editor.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.processing.IModelProcessorProvider
 import com.ge.research.sadl.tests.AbstractLinkingTest
 import com.ge.research.sadl.ui.OutputStreamStrategy
-import com.ge.research.sadl.ui.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.ui.tests.SADLUiInjectorProvider
 import com.google.common.collect.ImmutableMap
 import com.google.inject.Inject
 import com.google.inject.Injector
+import com.google.inject.Provider
 import java.io.InputStream
 import java.util.Arrays
 import org.eclipse.core.runtime.Platform
 import org.eclipse.emf.common.util.URI
 import org.eclipse.jface.text.contentassist.ICompletionProposal
 import org.eclipse.swt.widgets.Shell
-import org.eclipse.xtext.junit4.ui.ContentAssistProcessorTestBuilder
-import org.eclipse.xtext.junit4.util.ResourceLoadHelper
+import org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext
+import org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext.Builder
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
@@ -40,7 +41,10 @@ import org.eclipse.xtext.ui.XtextProjectHelper
 import org.eclipse.xtext.ui.editor.XtextSourceViewerConfiguration
 import org.eclipse.xtext.ui.editor.contentassist.XtextContentAssistProcessor
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
+import org.eclipse.xtext.ui.testing.ContentAssistProcessorTestBuilder
+import org.eclipse.xtext.ui.testing.util.ResourceLoadHelper
 import org.eclipse.xtext.util.CancelIndicator
+import org.eclipse.xtext.util.TextRegion
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
 import org.junit.AfterClass
@@ -52,7 +56,7 @@ import org.junit.rules.TestName
 import org.junit.runner.RunWith
 
 import static org.eclipse.core.runtime.IPath.SEPARATOR
-import static org.eclipse.xtext.junit4.ui.util.IResourcesSetupUtil.*
+import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
 import static org.junit.Assert.*
 
 /**
@@ -75,6 +79,9 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 
 	@Rule
 	public val name = new TestName();
+	
+	@Inject
+	Provider<Builder> builderProvider;
 
 	@Inject
 	Injector injector;
@@ -148,7 +155,7 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 	}
 
 	protected def newBuilder(String content) {
-		val builder = new SadlContentAssistProcessorTestBuilder(injector, this) {
+		val builder = new SadlContentAssistProcessorTestBuilder(injector, this, builderProvider) {
 
 			override protected toString(ICompletionProposal proposal) {
 				return super.toString(proposal).trim;
@@ -175,8 +182,11 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 
 	protected static class SadlContentAssistProcessorTestBuilder extends ContentAssistProcessorTestBuilder {
 
-		new(Injector injector, ResourceLoadHelper helper) throws Exception {
+		protected val Provider<Builder> builderProvider;
+
+		new(Injector injector, ResourceLoadHelper helper, Provider<Builder> builderProvider) throws Exception {
 			super(injector, helper)
+			this.builderProvider = builderProvider;
 		}
 
 		def getOntologyContext() {
@@ -197,7 +207,7 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 						return provider.getProcessor(it);
 					]);
 					for (context : contexts) {
-						val ontologyContext = get(IOntologyContextProvider).getOntologyContext(context, modelProcessor);
+						val ontologyContext = get(IOntologyContextProvider).getOntologyContext(context.toIdeContext, modelProcessor);
 						if (ontologyContext.present) {
 							return ontologyContext.get;
 						}
@@ -209,6 +219,28 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 			}
 		}
 
+		protected def ContentAssistContext toIdeContext(org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext c) {
+			val builder = builderProvider.get()
+			val replaceRegion = c.replaceRegion
+			builder
+				.setPrefix(c.prefix)
+				.setSelectedText(c.selectedText)
+				.setRootModel(c.rootModel)
+				.setRootNode(c.rootNode)
+				.setCurrentModel(c.currentModel)
+				.setPreviousModel(c.previousModel)
+				.setCurrentNode(c.currentNode)
+				.setLastCompleteNode(c.lastCompleteNode)
+				.setOffset(c.offset)
+				.setReplaceRegion(new TextRegion(replaceRegion.offset, replaceRegion.length))
+				.setResource(c.resource)
+			for (grammarElement : c.firstSetGrammarElements) {
+				builder.accept(grammarElement)
+			}
+			return builder.toContext()
+		}
+
 	}
+	
 
 }

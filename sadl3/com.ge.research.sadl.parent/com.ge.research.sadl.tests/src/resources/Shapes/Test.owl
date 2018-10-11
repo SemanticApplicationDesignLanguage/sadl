@@ -1,0 +1,30 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:j.0="http://sadl.org/specificshapes.sadl#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:Test="http://sadl.org/Test.sadl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:specificshapes="http://sadl.org/specificshapes.sadl"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/Test.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="specificshapes.sadl"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Test.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <j.0:Rectangle rdf:ID="MyNapkin">
+    <j.0:width rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >4.0</j.0:width>
+    <j.0:height rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >8.0</j.0:height>
+  </j.0:Rectangle>
+  <j.0:Circle rdf:ID="MyPlate">
+    <j.0:radius rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >10.0</j.0:radius>
+  </j.0:Circle>
+</rdf:RDF>

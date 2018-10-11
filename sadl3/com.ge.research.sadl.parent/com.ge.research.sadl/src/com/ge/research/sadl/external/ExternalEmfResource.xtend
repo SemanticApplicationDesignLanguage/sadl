@@ -67,14 +67,14 @@ import static org.eclipse.emf.common.util.URI.createURI
 class ExternalEmfResource extends ResourceImpl {
 
 	val Map<String, SadlModel> modelMapping = newHashMap();
-	
+
 	@Accessors(PACKAGE_SETTER)
 	var Injector injector;
 
 	@Accessors(PUBLIC_GETTER)
 	OntModel ontModel;
 
-	override public void load(Map<?, ?> options) throws IOException {
+	override void load(Map<?, ?> options) throws IOException {
 		try {
 			super.load(options);
 		} catch (Exception e) {
@@ -112,7 +112,7 @@ class ExternalEmfResource extends ResourceImpl {
 	 */
 	protected def getConfigurationManager(Map<?, ?> options) {
 		if (ResourceManager.isSyntheticUri(null, URI)) {
-			return getConfigurationManagerForIDE(null, ConfigurationManager.RDF_XML_ABBREV_FORMAT, true);			 
+			return getConfigurationManagerForIDE(null, ConfigurationManager.RDF_XML_ABBREV_FORMAT, true);
 		}
 		val modelFolderUri = getModelFolderUri(URI, options);
 		val modelFolderPath = ResourceManager.toAbsoluteFilePath(modelFolderUri);
@@ -162,7 +162,7 @@ class ExternalEmfResource extends ResourceImpl {
 		}
 		return if(baseUri.endsWith('#')) baseUri.substring(0, baseUri.length - 1) else baseUri;
 	}
-	
+
 	/**
 	 * The file extension of the current resource without the leading dot.
 	 * For instance, {@code owl}, {@code n3} but not {@code .nt}.
@@ -210,7 +210,7 @@ class ExternalEmfResource extends ResourceImpl {
 		val ontResourceUri = ontResource.URI;
 		return new LazyResolvedSadlImport(scopeProvider, ontResourceUri.alias, ontResourceUri);
 	}
-	
+
 	private def getScopeProvider() {
 		return injector.getInstance(IScopeProvider);
 	}
@@ -295,7 +295,7 @@ class ExternalEmfResourceFactory extends ResourceFactoryImpl {
 
 	override createResource(URI uri) {
 		return new ExternalEmfResource() => [
-			it.URI = uri; 
+			it.URI = uri;
 			it.injector = injector;
 		];
 	}
@@ -316,21 +316,16 @@ class ExternalEmfResourceServiceProvider implements IResourceServiceProvider {
 
 	@Delegate
 	@Inject
-	IResourceServiceProvider delegate
+	IResourceServiceProvider delegate;
 
 	@Inject
 	Injector injector;
 
+	@Inject
+	ExternalEmfResourcePredicate resourcePredicate;
+
 	override canHandle(URI uri) {
-		val name = uri.lastSegment;
-		// exclude all generated OWL resources that has the corresponding SADL origin.
-		// TODO add filter (GH-201). Metrics file should remain as is.
-		if (name.endsWith("SadlBaseModel.owl") || name.endsWith("SadlListModel.owl") ||
-			name.endsWith("SadlImplicitModel.owl") || name.endsWith("SadlBuiltinFunctions.owl")
-			|| name.endsWith("metrics.owl")) {
-			return false;
-		}
-		return ExternalEmfResourceFactory.EXTERNAL_EXTENSIONS.contains(uri.fileExtension);
+		return this.resourcePredicate.apply(uri);
 	}
 
 	override getResourceValidator() {

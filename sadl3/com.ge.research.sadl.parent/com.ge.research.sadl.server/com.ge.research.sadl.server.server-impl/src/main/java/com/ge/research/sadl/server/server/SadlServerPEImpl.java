@@ -46,23 +46,19 @@ import javax.activation.DataSource;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
-import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
-import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
+import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.server.ISadlServerPE;
 import com.ge.research.sadl.server.SessionNotFoundException;
-import com.ge.research.sadl.server.server.SadlServerImpl;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
 import com.hp.hpl.jena.ontology.HasValueRestriction;
@@ -70,9 +66,7 @@ import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.MaxCardinalityRestriction;
 import com.hp.hpl.jena.ontology.MinCardinalityRestriction;
 import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Ontology;
@@ -90,6 +84,9 @@ import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.reasoner.rulesys.Rule;
+import com.hp.hpl.jena.update.UpdateAction;
+import com.hp.hpl.jena.update.UpdateFactory;
+import com.hp.hpl.jena.update.UpdateRequest;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.XSD;
 
@@ -103,8 +100,8 @@ import com.hp.hpl.jena.vocabulary.XSD;
 public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	public static final String SADLSERVER_PE_SOURCE = "SadlServerPE";
 	private ConfigurationManagerForEditing configurationMgr = null;
-	private Map<String, OntModel> instanceDataModels = null;
-	private Map<String, OntModel> editedTboxModels = null;
+	private Map<String, OntModel> instanceDataModels = null;		// new models not previously existing
+	private Map<String, OntModel> editedServiceModels = null;			// models already existing in kbase
 	private Map<String, List<Rule>> editedRules = null;
 	private List<ModelError> errors = null;
 	private List<String> newUnsavedNamespaces = null;
@@ -120,6 +117,11 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	}
 
 	@Override
+	public String getServiceVersion() throws SessionNotFoundException {
+		return this.getClass().getCanonicalName() + " version " + serviceVersion;
+	}
+
+	@Override
 	public boolean createServiceModel(String kbid, String serviceName, String modelName, String prefix, String owlFileName) {
 		
 		return noErrors();
@@ -132,7 +134,15 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			while (modelNamesIter.hasNext()) {
 				String modelName = modelNamesIter.next();
 				OntModel model = instanceDataModels.get(modelName);
-				model.removeAll();
+				if (getServiceModelName() != null && getServiceModelName().equals(modelName)) {
+					// reload the model
+					if (reasoner != null) {
+						reasoner.reset();		// this isn't right awc 9/25/18
+					}
+				}
+				else {
+					model.removeAll();
+				}
 			}
 			instanceDataModels.clear();
 		}
@@ -156,21 +166,94 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
         }
 	}
 	
-	@Override
 	public boolean persistInstanceModel(String owlInstanceFileName, String globalPrefix) 
 				throws ConfigurationException, SessionNotFoundException, IOException {
-		return persistInstanceModel(getInstanceDataName(), owlInstanceFileName, globalPrefix);
+		return persistInstanceModel(getDefaultModelName(), owlInstanceFileName, globalPrefix);
 	}
 
 
-	@Override
 	public boolean persistInstanceModel(String modelName, String owlFileName, String globalPrefix) throws ConfigurationException, IOException {
 		String fullyQualifiedOwlFilename = null;
+		boolean updateMapping = true;
+		if (modelName == null) {
+			if (owlFileName == null) {
+				throw new IOException("Both model name and model file name cannot be null.");
+			}
+			try {
+				modelName = getConfigurationMgr().getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(owlFileName));
+				updateMapping = false;	// this is not a change in mapping
+			} catch (URISyntaxException e) {
+				throw new IOException(e.getMessage());
+			}
+		}
+		else {
+			// modelName is given
+			if (owlFileName != null) {
+				// OWL file name id given
+				// If either is in the policy mapping then the other must match what is in the policy mapping
+				// convert, if necessary, to a full-path URL
+				if (!owlFileName.contains("\\") && !owlFileName.contains("/")) {
+					String fp = getConfigurationMgr().getModelFolder() + "/" + owlFileName;
+					try {
+						fp = new SadlUtils().fileNameToFileUrl(fp);
+					} catch (URISyntaxException e) {
+						throw new IOException(e.getMessage());
+					}
+					owlFileName = fp;
+				}
+				String mappingFN = getConfigurationMgr().getAltUrlFromPublicUri(modelName);
+				if (mappingFN != null && !mappingFN.equals(modelName)) {	// if no mapping is found mappingFN will = modelName
+					if (!mappingFN.equals(owlFileName)) {
+						throw new IOException("A model with name '" + modelName + " already exists but is persisted in a different model file ("
+								+ mappingFN + "). It is not allowed to have the same model namespace in multiple model files.");
+					}
+				}
+				else {
+					// try the other way
+					try {
+						String mappingMN = getConfigurationMgr().getPublicUriFromActualUrl(owlFileName);
+						if (mappingMN != null) {
+							if (!mappingMN.equals(modelName)) {
+								throw new IOException("A model with file name '" + owlFileName + " already exists but has a different model namespace ("
+									+ mappingMN + "). It is not allowed to have safe models with different namespaces to the same file.");
+							}
+							else {
+								updateMapping = false;	// everything matches (so far)
+							}
+						}
+					} catch (ConfigurationException e) {
+						// this is OK
+					}
+				}
+			}
+			else {
+				updateMapping = false;	// this is not a change in mapping
+			}
+		}
+		if (globalPrefix != null) {
+			String mappingPrefix = getConfigurationMgr().getGlobalPrefix(modelName);
+			if (mappingPrefix != null) {
+				if (!mappingPrefix.equals(globalPrefix)) {
+					throw new IOException("A model with name '" + modelName + " already exists but has a different prefix ("
+							+ mappingPrefix + "). It is not allowed to have different global prefixes for the same model namespace.");
+				}
+				else {
+					updateMapping = false;	// everything matches
+				}
+			}
+			else {
+				updateMapping = true;	// no global prefix in mapping but one is given
+			}
+		}
+
+		if (owlFileName == null) {
+			owlFileName = getConfigurationMgr().getAltUrlFromPublicUri(modelName);
+		}
 		if (owlFileName == null) {
 			throw new IOException("File name for persistence must not be null.");
 		}
 		try {		
-			if (owlFileName.startsWith("file://")) {
+			if (owlFileName.startsWith("file:/")) {
         		SadlUtils su = new SadlUtils();
 				fullyQualifiedOwlFilename = su.fileUrlToFileName(owlFileName);
 			}
@@ -184,15 +267,22 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		}
 		String format = "RDF/XML-ABBREV";
 		try {
-			if (writeOntModel(getOntModelForEditing(modelName), modelName, fullyQualifiedOwlFilename, format)) {
-			    try {
-	        		SadlUtils su = new SadlUtils();
-			    	getConfigurationMgr().addMapping(su.fileNameToFileUrl(fullyQualifiedOwlFilename), modelName, globalPrefix, true, null);
-			    	getConfigurationMgr().saveOntPolicyFile();
-			    }
-			    catch (Exception e) {
-			    	return addError(new ModelError("Failed to save mapping for model file '" + fullyQualifiedOwlFilename + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
-			    }
+			OntModel theOntModel = getInstanceData(); // getOntModelForEditing(modelName);
+			if (theOntModel == null) {
+				// we don't have a model for editing so we're going to save the instance data model
+				theOntModel = getOntModelForEditing(getDefaultModelName());
+			}
+			if (writeOntModel(theOntModel, modelName, fullyQualifiedOwlFilename, format)) {
+				if (updateMapping) {
+				    try {
+		        		SadlUtils su = new SadlUtils();
+				    	getConfigurationMgr().addMapping(su.fileNameToFileUrl(fullyQualifiedOwlFilename), modelName, globalPrefix, true, "SadlServerPE");
+				    	getConfigurationMgr().saveOntPolicyFile();
+				    }
+				    catch (Exception e) {
+				    	return addError(new ModelError("Failed to save mapping for model file '" + fullyQualifiedOwlFilename + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
+				    }
+				}
 			}
 		} catch (IOException e) {
 	    	return addError(new ModelError("Failed to save mapping for model file '" + fullyQualifiedOwlFilename + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
@@ -209,12 +299,12 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 
 	@Override
 	public boolean persistChangesToServiceModels() {
-		if (editedTboxModels != null && editedTboxModels.size() > 0) {
+		if (editedServiceModels != null && editedServiceModels.size() > 0) {
 			List<String> savedModels = new ArrayList<String>();
-			Iterator<String> moditr = editedTboxModels.keySet().iterator();
+			Iterator<String> moditr = editedServiceModels.keySet().iterator();
 			while (moditr.hasNext()) {
 				String modelName = moditr.next();
-				OntModel ontModel = editedTboxModels.get(modelName);
+				OntModel ontModel = editedServiceModels.get(modelName);
 				String format = "RDF/XML-ABBREV";	
 				String fullyQualifiedOwlFilename = null;
 				try {
@@ -252,7 +342,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			    savedModels.add(modelName);
 			}
 			for (int i = 0; i < savedModels.size(); i++) {
-				editedTboxModels.remove(savedModels.get(i));
+				editedServiceModels.remove(savedModels.get(i));
 			}
 		}
 		return noErrors();
@@ -451,16 +541,16 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	}
 
 	private OntModel getOntModelForEditing(String thisModelName) throws IOException, ConfigurationException, InvalidNameException, URISyntaxException {
-		if (editedTboxModels != null && editedTboxModels.containsKey(thisModelName)) {
-			return editedTboxModels.get(thisModelName);
+		if (editedServiceModels != null && editedServiceModels.containsKey(thisModelName)) {
+			return editedServiceModels.get(thisModelName);
 		}
 		try {
-			if (modelName != null && !modelName.equals(thisModelName)) {
+			if (getServiceModelName() != null && !getServiceModelName().equals(thisModelName)) {
 				if (instanceDataModels != null && instanceDataModels.containsKey(thisModelName)) {
 					return instanceDataModels.get(thisModelName);
 				}
-				else if (getInstanceDataName() == null || thisModelName.equals(getInstanceDataName())) {
-					if (getInstanceDataName() == null) {
+				else if (getDefaultModelName() == null || thisModelName.equals(getDefaultModelName())) {
+					if (getDefaultModelName() == null) {
 						setInstanceDataNamespace(thisModelName + "#");
 					}
 					return createInstanceModel(thisModelName);
@@ -469,7 +559,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		} catch (ConfigurationException e) {
 			// it's ok for instance names space to fail
 		}
-		String altUrl = canModifyModel(thisModelName);
+		String altUrl = getModifiableModelAltUrl(thisModelName);
 		if (altUrl != null) {
 			OntModel ontModel = ModelFactory.createOntologyModel(getConfigurationMgr().getOntModelSpec(null));
 			altUrl = getConfigurationMgr().fileNameToFileUrl(altUrl);
@@ -478,10 +568,10 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			ontModel.getDocumentManager().setProcessImports(true);
 			ontModel.loadImports();
 			ontModel.getDocumentManager().setProcessImports(false);
-			if (editedTboxModels == null) {
-				editedTboxModels = new HashMap<String, OntModel>();
+			if (editedServiceModels == null) {
+				editedServiceModels = new HashMap<String, OntModel>();
 			}
-			editedTboxModels.put(thisModelName, ontModel);
+			editedServiceModels.put(thisModelName, ontModel);
 			return ontModel;
 		}
 		return null;
@@ -493,24 +583,23 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		if (instanceDataModels != null && instanceDataModels.containsKey(thisModelName)) {
 			return instanceDataModels.get(thisModelName);
 		}
-		if (editedTboxModels != null && editedTboxModels.containsKey(thisModelName)) {
-			return editedTboxModels.get(thisModelName);
+		if (editedServiceModels != null && editedServiceModels.containsKey(thisModelName)) {
+			return editedServiceModels.get(thisModelName);
 		}
 		OntModel model = ModelFactory.createOntologyModel(getConfigurationMgr().getOntModelSpec(null));
 		model.getDocumentManager().setFileManager(getConfigurationMgr().getJenaDocumentMgr().getFileManager());
-		Resource importOnt = model.getResource(getModelName());
+		Resource importOnt = model.getResource(getServiceModelName());
 		Ontology ont = model.createOntology(thisModelName);
 		ont.addImport(importOnt);
 		ont.addComment("This ontology model was created by SadlServerPE.", "en");
 		model.getDocumentManager().setProcessImports(true);
 		model.loadImports();
-//		if (logger.isDebugEnabled()) {
+		if (logger.isDebugEnabled()) {
 			Iterator<String> importItr = model.listImportedOntologyURIs().iterator();
 			while (importItr.hasNext()) {
-//				logger.debug("Model '" + thisModelName + "' imports '" + importItr.next() + "'");
-				System.out.println("Model '" + thisModelName + "' imports '" + importItr.next() + "'");
+				logger.debug("Model '" + thisModelName + "' imports '" + importItr.next() + "'");
+			}
 		}
-//		}
 		model.getDocumentManager().setProcessImports(false);
 		if (instanceDataModels == null) {
 			instanceDataModels = new HashMap<String, OntModel>(); 
@@ -519,7 +608,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		return model;
 	}
 
-	private String canModifyModel(String modelName) throws ConfigurationException, IOException, URISyntaxException {
+	private String getModifiableModelAltUrl(String modelName) throws ConfigurationException, IOException, URISyntaxException {
 		SadlUtils su = new SadlUtils();
 		String altUrl = getConfigurationMgr().getAltUrlFromPublicUri(su.fileNameToFileUrl(modelName));
 		if (altUrl.startsWith("http:/")) {
@@ -528,7 +617,6 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		return altUrl;
 	}
 
-	@Override
 	public boolean deleteTriple(String modelName, String subject,
 			String predicate, Object value) throws TripleNotFoundException, ReasonerNotFoundException, ConfigurationException {
 		boolean tripleDeleted = false;
@@ -609,20 +697,10 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		return (super.deleteTriple(subject, predicate, value) || tripleDeleted);
 	}
 	
-	@Override
 	public String getUniqueInstanceUri(String namespace, String baseLocalName) throws InvalidNameException, SessionNotFoundException {
-		String modelName;
-		if (namespace.endsWith("#")) {
-			modelName = namespace.substring(0, namespace.length() - 1);
-		}
-		else {
-			modelName = namespace;
-			namespace += "#";
-		}
-		return getUniqueInstanceUri(modelName, namespace, baseLocalName);
+		return getUniqueInstanceUri(getDefaultModelName(), namespace, baseLocalName);
 	}
 	
-	@Override
 	public String getUniqueInstanceUri(String modelName, String namespace,
 			String baseLocalName) throws InvalidNameException,
 			SessionNotFoundException {
@@ -682,63 +760,10 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		return newNSUri;
 	}
 
-	@Override
-	public boolean addInstance(String modelName, String instName, String className) throws ConfigurationException, InvalidNameException {
-		OntModel ontModel = null;
-		try {
-			if (instName.indexOf('#') < 0) {
-				instName = getUri(modelName, instName);
-			}
-			String error = SadlUtils.validateRdfUri(instName);
-			if (error != null) {
-				throw new InvalidNameException("Invalid URI (" + instName + ") for new instance: " + error + ".");
-			}
-			ontModel = getOntModelForEditing(modelName);
-		} catch (ConfigurationException e) {
-	    	return addError(new ModelError("Failed to find model '" + modelName + "' for editing: " + e.getLocalizedMessage(), ErrorType.ERROR));
-		} catch (IOException e) {
-	    	return addError(new ModelError("Failed to find model '" + modelName + "' for editing: " + e.getLocalizedMessage(), ErrorType.ERROR));
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PrefixNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		if (ontModel != null) {
-			OntClass cls = null;
-			try {
-				cls = ontModel.getOntClass(getUri(modelName, className));
-			} catch (PrefixNotFoundException e) {
-		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
-			} catch (ConfigurationException e) {
-		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
-			} catch (IOException e) {
-		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
-			} catch (InvalidNameException e) {
-		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
-			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if (cls == null) {
-		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
-			}
-			try {
-				ontModel.createIndividual(instName, cls);
-				super.createInstance(instName, className);
-			} catch (ConfigurationException e) {
-		    	return addError(new ModelError("Failed to find create instance '" + instName + "' in model '" + modelName + "'", ErrorType.ERROR));
-			} catch (IOException e) {
-		    	return addError(new ModelError("Failed to find create instance '" + instName + "' in model '" + modelName + "'", ErrorType.ERROR));
-			} catch (InvalidNameException e) {
-		    	return addError(new ModelError("Failed to find create instance '" + instName + "' in model '" + modelName + "'", ErrorType.ERROR));
-			}
-		}
-		return noErrors();
+	public boolean addClass(String className, String superClassName) throws InvalidNameException {
+		return addClass(getDefaultModelName(), className, superClassName);
 	}
-
-	@Override
+	
 	public boolean addClass(String modelName, String className, String superClassName) throws InvalidNameException {
 		OntModel ontModel = null;
 		try {
@@ -1067,7 +1092,11 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			return cls;
 		}
 	}
-	@Override
+
+	public boolean addAllValuesFromRestriction(String className, String propertyName, String restrictionName) throws InvalidNameException {
+		return addAllValuesFromRestriction(getDefaultModelName(), className, propertyName, restrictionName);
+	}
+	
 	public boolean addAllValuesFromRestriction(String modelName, String className, String propertyName, String restrictionName) throws InvalidNameException {
 		OntModel ontModel = null;
 		try {
@@ -1224,8 +1253,11 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		}
 		return noErrors();
 	}
+
+	public boolean addHasValueRestriction(String className, String propertyName, String valueInstanceName) throws InvalidNameException {
+		return addHasValueRestriction(getDefaultModelName(), className, propertyName, valueInstanceName);
+	}
 	
-	@Override
 	public boolean addHasValueRestriction(String modelName, String className, String propertyName, String valueInstanceName) throws InvalidNameException {
 		OntModel ontModel = null;
 		try {
@@ -1304,7 +1336,10 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		return noErrors();
 	}
 	
-	@Override
+	public boolean addCardinalityRestriction(String className, String propertyName, int cardValue) throws InvalidNameException {
+		return addCardinalityRestriction(getDefaultModelName(), className, propertyName, cardValue);
+	}
+
 	public boolean addCardinalityRestriction(String modelName, String className, String propertyName, int cardValue) throws InvalidNameException {
 		OntModel ontModel = null;
 		try {
@@ -1487,6 +1522,27 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		return noErrors();
 	}
 
+	@Override
+	public boolean addMaxQualifiedCardinalityRestriction(String modelName, String className, String propertyName,
+			int cardValue, String restrictedToType) throws SessionNotFoundException, InvalidNameException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean addMinQualifiedCardinalityRestriction(String modelName, String className, String propertyName,
+			int cardValue, String restrictedToType) throws SessionNotFoundException, InvalidNameException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean addQualifiedCardinalityRestriction(String modelName, String className, String propertyName,
+			int cardValue, String restrictedToType) throws SessionNotFoundException, InvalidNameException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	private boolean noErrors() {
 		if (errors == null || errors.size() < 1) {
 			return true;
@@ -1531,24 +1587,24 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	@Override
 	public boolean addTriple(String subjName, String predName, Object objValue) 
 	    			throws ConfigurationException, TripleNotFoundException, ReasonerNotFoundException  {
-		return addTriple(getInstanceDataName(), subjName, predName, objValue);
+		return addTriple(getDefaultModelName(), subjName, predName, objValue);
 	}
 
 	@Override
 	public boolean deleteTriple(String subjName, String predName, Object objValue) 
     		throws ConfigurationException, TripleNotFoundException, ReasonerNotFoundException {
-		return deleteTriple(getInstanceDataName(), subjName, predName, objValue);
+		return deleteTriple(getDefaultModelName(), subjName, predName, objValue);
 	}
 	
 	private OntModel getInstanceData() 
 				throws IOException, ConfigurationException, InvalidNameException, ConfigurationException, URISyntaxException {
-		return getOntModelForEditing(getInstanceDataName());
+		return getOntModelForEditing(getDefaultModelName());
 	}
 	
 	@Override
 	public String createInstance(String name, String className) 
-				throws ConfigurationException, InvalidNameException, IOException {
-		String instanceModelName = getInstanceDataName();
+				throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException {
+		String instanceModelName = getDefaultModelName();
 		if (instanceModelName == null) {
 			if (name.indexOf("#") > 0) {
 				// we have a namespace explicit in the new instance name
@@ -1560,12 +1616,67 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				throw new ConfigurationException("Instance data namespace must be set before SadlServerPE can support this operation.");
 			}
 		}
-		return createInstance(instanceModelName, name, className);
+		return createInstance(getDefaultModelName(), name, className);
 	}
 	
+//	public S createInstance(String modelName, String instName, String className) throws ConfigurationException, InvalidNameException {
+//		OntModel ontModel = null;
+//		try {
+//			if (instName.indexOf('#') < 0) {
+//				instName = getUri(modelName, instName);
+//			}
+//			String error = SadlUtils.validateRdfUri(instName);
+//			if (error != null) {
+//				throw new InvalidNameException("Invalid URI (" + instName + ") for new instance: " + error + ".");
+//			}
+//			ontModel = getOntModelForEditing(modelName);
+//		} catch (ConfigurationException e) {
+//	    	return addError(new ModelError("Failed to find model '" + modelName + "' for editing: " + e.getLocalizedMessage(), ErrorType.ERROR));
+//		} catch (IOException e) {
+//	    	return addError(new ModelError("Failed to find model '" + modelName + "' for editing: " + e.getLocalizedMessage(), ErrorType.ERROR));
+//		} catch (URISyntaxException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (PrefixNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		if (ontModel != null) {
+//			OntClass cls = null;
+//			try {
+//				cls = ontModel.getOntClass(getUri(modelName, className));
+//			} catch (PrefixNotFoundException e) {
+//		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
+//			} catch (ConfigurationException e) {
+//		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
+//			} catch (IOException e) {
+//		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
+//			} catch (InvalidNameException e) {
+//		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
+//			} catch (URISyntaxException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			if (cls == null) {
+//		    	return addError(new ModelError("Failed to find class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
+//			}
+//			try {
+//				ontModel.createIndividual(instName, cls);
+//				super.createInstance(instName, className);
+//			} catch (ConfigurationException e) {
+//		    	return addError(new ModelError("Failed to find create instance '" + instName + "' in model '" + modelName + "'", ErrorType.ERROR));
+//			} catch (IOException e) {
+//		    	return addError(new ModelError("Failed to find create instance '" + instName + "' in model '" + modelName + "'", ErrorType.ERROR));
+//			} catch (InvalidNameException e) {
+//		    	return addError(new ModelError("Failed to find create instance '" + instName + "' in model '" + modelName + "'", ErrorType.ERROR));
+//			}
+//		}
+//		return noErrors();
+//	}
+
 	@Override
 	public String createInstance(String modelName, String name, String className)
-			throws ConfigurationException, InvalidNameException, IOException {
+			throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException {
 		String instname = null;
 		try {
 			if (!(name.indexOf('#') > 0)) {
@@ -1610,29 +1721,35 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			throw new InvalidNameException("A namespace should end with '#' ('" + namespace + "' does not)");
 		}
 		String modelName = namespace.substring(0, namespace.length() - 1);
+		if (modelName.equals(getInstanceDataModelName())) {
+			// this is a no-op
+			return modelName;
+		}
+		String oldNS = getInstanceDataModelName();
+		if (instanceDataModels != null && instanceDataModels.containsKey(modelName)) {
+			setInstanceDataModelName(modelName);
+			return oldNS;
+		}
+		if (getServiceModelName().equals(modelName)) {
+			setInstanceDataModelName(modelName);
+			return oldNS;
+		}
 		try {
 			createInstanceModel(modelName);
 		} catch (Exception e) {
 			throw new InvalidNameException(e.getMessage());
 		}
-		String oldNS = defaultInstanceDataNS;
-		defaultInstanceDataNS = namespace;
+		setInstanceDataNamespace(namespace);
 		if (reasoner != null) {
 			reasoner.setInstanceDataNamespace(namespace);
 		}
 		return oldNS;
 	}
 	
-	private String getInstanceDataName() throws ConfigurationException {
-		if (defaultInstanceDataNS == null && reasoner != null) {
-			defaultInstanceDataNS = reasoner.getInstanceDataNamespace();
-		}
-		if (defaultInstanceDataNS != null) {
-			if (defaultInstanceDataNS.endsWith("#")) {
-				return defaultInstanceDataNS.substring(0, defaultInstanceDataNS.length() - 1);
-			}
-		}
-		return null;
+	public OntModel getDefaultModel() {
+		OntModel theModel = null;
+		
+		return theModel;
 	}
 
 	@Override
@@ -1760,7 +1877,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 					altUrl = serverDataLocator;
 				} catch (ConfigurationException e1) {
 					// no mapping found, either as public or as actual, so use the default public 
-					pubUri = getInstanceDataName();
+					pubUri = getDefaultModelName();
 				}
 
     		}
@@ -1788,7 +1905,6 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		throw new ReasonerNotFoundException("No reasoner found.");
     }
 
-	@Override
 	public boolean deleteModel(String modelName) throws ConfigurationException, IOException {
 		try {
 			return getConfigurationMgr().deleteModel(modelName);
@@ -1799,7 +1915,6 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		}
 	}
 
-	@Override
 	public boolean addExistingModel(String modelPublicUri, String modelAltUrl,
 			String modelPrefix) throws InvalidNameException, ConfigurationException, IOException, URISyntaxException {
 		try {
@@ -1833,7 +1948,10 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		return true;
 	}
 
-	@Override
+	public boolean addImport( String importedModelUri) throws ConfigurationException, IOException, InvalidNameException, URISyntaxException {
+		return addImport(getDefaultModelName(), importedModelUri);
+	}
+	
 	public boolean addImport(String modelName, String importedModelUri) throws ConfigurationException, IOException, InvalidNameException, URISyntaxException {
 		try {
 			String altImportUrl = getConfigurationMgr().getAltUrlFromPublicUri(importedModelUri);
@@ -1850,12 +1968,10 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		}
 	}
 	
-	@Override
 	public boolean updateRdfsLabel(String uri, String label, String language) throws ConfigurationException, IOException, InvalidNameException, URISyntaxException {
-		return updateRdfsLabel(getInstanceDataName(),  uri, label, language);
+		return updateRdfsLabel(getDefaultModelName(),  uri, label, language);
 	}
 
-	@Override
 	public boolean updateRdfsLabel(String modelName, String uri, String label, String language) throws IOException, ConfigurationException, InvalidNameException, URISyntaxException {
 		OntModel ontModel = getOntModelForEditing(modelName);
 		boolean retval = false;
@@ -1891,6 +2007,19 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	}
 
 	@Override
+	public ResultSet query(String query) throws QueryParseException, ReasonerNotFoundException, QueryCancelledException, IOException, ConfigurationException, InvalidNameException, URISyntaxException {
+		if (query.startsWith("delete") || query.startsWith("insert")) {
+			UpdateRequest urequest = UpdateFactory.create(query);
+			OntModel ontModel = getOntModelForEditing(getDefaultModelName());
+			UpdateAction.execute(urequest, ontModel);
+		}
+		try {
+			return query(getDefaultModelName(), query);
+		} catch (SessionNotFoundException e) {
+			throw new IOException(e);
+		}
+	}
+	
 	public ResultSet query(String modelName, String query)
 			throws QueryCancelledException, QueryParseException,
 			ReasonerNotFoundException, SessionNotFoundException, IOException, ConfigurationException, InvalidNameException, URISyntaxException {
@@ -1900,7 +2029,17 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		reasoner.reset();
 		OntModel ontModel = getOntModelForEditing(modelName);
 		reasoner.loadInstanceData(ontModel);
-		return reasoner.ask(query);
+		return super.query(query);
+	}
+
+	public String prepareQuery(String modelName, String query) throws InvalidNameException, ReasonerNotFoundException,
+			ConfigurationException, InvalidNameException, SessionNotFoundException {
+		return super.prepareQuery(query);
+	}
+
+	public String parameterizeQuery(String modelName, String query, List<Object> values)
+			throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException {
+		return super.parameterizeQuery(query, values);
 	}
 
 }

@@ -1,4 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<Context processTlds="false">
-	<JarScanner scanClassPath="false" scanAllFiles="false" scanAllDirectories="false" scanBootstrapClassPath="false" />
-</Context>

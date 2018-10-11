@@ -46,7 +46,6 @@ class ValidationAcceptorImpl implements ValidationAcceptorExt {
 	val counter = new IssueCounter
 	val converter = new DiagnosticConverterImpl
 
-	@Override
 	override add(String message, EObject context, Severity severity) {
 		add(message, context, severity, null)
 	}
@@ -63,7 +62,6 @@ class ValidationAcceptorImpl implements ValidationAcceptorExt {
 		add(message, context, INFO, feature);
 	}
 
-	@Override
 	override int getErrorCount() {
 		return ERROR.issueCount;
 	}
@@ -72,7 +70,6 @@ class ValidationAcceptorImpl implements ValidationAcceptorExt {
 		ERROR.reset;
 	}
 
-	@Override
 	override int getWarningCount() {
 		return WARNING.issueCount;
 	}
@@ -81,7 +78,6 @@ class ValidationAcceptorImpl implements ValidationAcceptorExt {
 		WARNING.reset;
 	}
 
-	@Override
 	override int getInfoCount() {
 		return INFO.issueCount;
 	}

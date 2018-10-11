@@ -13,11 +13,16 @@ Require-Bundle: org.antlr.runtime,
  org.eclipse.xtext.xbase.ide,
  com.ge.research.sadl,
  com.ge.research.jena,
- com.ge.research.sadl.jena
+ com.ge.research.sadl.jena,
+ com.google.gson,
+ com.ge.research.sadl.jena-wrapper-for-sadl;bundle-version="3.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.ide,
  com.ge.research.sadl.ide.contentassist.antlr,
  com.ge.research.sadl.ide.contentassist.antlr.internal,
  com.ge.research.sadl.ide.contentassist.antlr.lexer,
- com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex
+ com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex,
+ com.ge.research.sadl.ide.editor.contentassist,
+ com.ge.research.sadl.ide.handlers
 Import-Package: org.slf4j
+Automatic-Module-Name: com.ge.research.sadl.ide

@@ -1,0 +1,9 @@
+uri "http://sadl.org/Rectangle.sadl".
+
+import "http://sadl.org/Shapes.sadl".
+
+Rectangle is a type of Shape,
+    described by height with values of type float,
+    described by width with values of type float.
+	
+Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x.

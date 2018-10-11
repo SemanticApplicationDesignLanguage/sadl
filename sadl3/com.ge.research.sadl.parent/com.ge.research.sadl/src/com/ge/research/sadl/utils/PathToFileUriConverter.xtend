@@ -79,7 +79,6 @@ class PathToFileUriConverter {
 			ref = new AtomicReference<URI>;
 		}
 
-		@Override
 		override accept(URI uri) {
 			if (ref.get === null) {
 				ref.set(uri);

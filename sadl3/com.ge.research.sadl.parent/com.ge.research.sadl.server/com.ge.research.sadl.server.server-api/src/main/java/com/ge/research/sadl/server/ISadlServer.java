@@ -28,6 +28,7 @@
 package com.ge.research.sadl.server;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +61,6 @@ import com.ge.research.sadl.reasoner.TripleNotFoundException;
  * @author 200005201
  *
  */
-@SuppressWarnings("restriction")
 public interface ISadlServer {
 	
 	/**
@@ -110,8 +110,12 @@ public interface ISadlServer {
      * @throws QueryParseException 
      * @throws ReasonerNotFoundException 
      * @throws SessionNotFoundException 
+     * @throws URISyntaxException 
+     * @throws InvalidNameException 
+     * @throws ConfigurationException 
+     * @throws IOException 
      */
-    abstract public ResultSet query(String query) throws QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException;
+    abstract public ResultSet query(String query) throws QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, IOException, ConfigurationException, InvalidNameException, URISyntaxException;
 
     /**
      * Method to provide instance data and then execute a set of queries in an atomic (stateless) manner, returning a ResultSet for each query. The query
@@ -130,8 +134,9 @@ public interface ISadlServer {
      * @throws ReasonerNotFoundException
      * @throws SessionNotFoundException
      * @throws InvalidNameException 
+     * @throws URISyntaxException 
      */
-    abstract public ResultSet[] atomicQuery(String serviceName, DataSource dataSrc, String inputFormat, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException;
+    abstract public ResultSet[] atomicQuery(String serviceName, DataSource dataSrc, String inputFormat, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, URISyntaxException;
                               
 
     /**
@@ -153,8 +158,9 @@ public interface ISadlServer {
      * @throws SessionNotFoundException
      * @throws InvalidNameException 
      * @throws TemplateException 
+     * @throws URISyntaxException 
      */
-    abstract public ResultSet[] atomicQueryCsvData(String serviceName, DataSource csvDataSrc, boolean includesHeader, String csvTemplate, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, TemplateException;
+    abstract public ResultSet[] atomicQueryCsvData(String serviceName, DataSource csvDataSrc, boolean includesHeader, String csvTemplate, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, TemplateException, URISyntaxException;
 
     /**
      * This method retrieves the results of an RDF triple matching request as a list of matching statements. Zero or more of the
@@ -259,7 +265,7 @@ public interface ISadlServer {
      * This method is called to identify the knowledgeBaseIdentifier and model (tbox) to use in this knowledge service session.
      *
      * @param knowledgeBaseIdentifier -- the identity of the knowledge base, e.g., the folder containing the OWL/Rule files OR the name of the service of a service that does not have a model name specified, in which case the model name is specified by the next parameter
-     * @param modelName -- the entry point (specific model) within the knowledge base, e.g., the URI corresponding with the base namespace of the OWL model
+     * @param modelName -- the entry point (specific model) within the knowledge base, e.g., the URI corresponding with the base namespace of the OWL model identified as the default model
      *
      * @return -- the unique session key for this knowledge service session
      * @throws ReasonerNotFoundException 
@@ -272,7 +278,7 @@ public interface ISadlServer {
      * This method is called to identify the knowledgeBaseIdentifier and model (tbox) to use in this knowledge service session.
      *
      * @param knowledgeBaseIdentifier -- the identity of the knowledge base, e.g., the folder containing the OWL/Rule files OR the name of the service of a service that does not have a model name specified, in which case the model name is specified by the next parameter
-     * @param modelName -- the entry point (specific model) within the knowledge base, e.g., the URI corresponding with the base namespace of the OWL model
+     * @param modelName -- the entry point (specific model) within the knowledge base, e.g., the URI corresponding with the base namespace of the OWL model identified as the default model
      * @param preferences -- preferences override the configuration from the development environment (configuration.rdf)
      * 
      * @return -- the unique session key for this knowledge service session
@@ -340,7 +346,7 @@ public interface ISadlServer {
      * (The model namespace is the model name with a "#" added at the end.)
      * @return
      */
-    abstract public String getInstanceModelName();
+    abstract public String getDefaultModelName();
     
     /**
      * This method is called to add a triple to the instance data. The object value will be interpreted based on type of the Object
@@ -421,9 +427,8 @@ public interface ISadlServer {
      * Gets the model name for the current session.
      * 
      * @return model name
-     * @throws IOException 
      */
-	public abstract String getModelName() throws IOException;
+	public abstract String getServiceModelName();
 
     /**
      * Gets the version of the reasoner.

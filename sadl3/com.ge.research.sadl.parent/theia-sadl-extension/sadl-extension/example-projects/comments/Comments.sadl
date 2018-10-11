@@ -1,0 +1,17 @@
+uri "http://sadl.org/Comments.sadl".
+
+/** No comments. */
+NoComments is a class.
+
+SingleAlias (alias "single alias") is a class.
+
+MultipleAlias (alias "first alias", "second alias") is a class.
+
+SingleComment (note "single comment") is a class.
+
+MultipleComments (note "first comment", "second comment") is a class.
+
+MultipleCommentsWithLB (note "first
+comment", "second
+
+comment") is a class.

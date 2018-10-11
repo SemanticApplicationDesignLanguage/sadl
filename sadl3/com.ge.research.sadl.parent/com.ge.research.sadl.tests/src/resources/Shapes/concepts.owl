@@ -1,0 +1,84 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:concepts="http://sadl.org/concepts.sadl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/concepts.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'concepts.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <rdfs:Datatype rdf:ID="ColorComponent">
+    <owl:equivalentClass>
+      <rdfs:Datatype>
+        <owl:withRestrictions rdf:parseType="Collection">
+          <rdf:Description>
+            <xsd:maxInclusive>255</xsd:maxInclusive>
+            <xsd:minInclusive>0</xsd:minInclusive>
+          </rdf:Description>
+        </owl:withRestrictions>
+        <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+      </rdfs:Datatype>
+    </owl:equivalentClass>
+  </rdfs:Datatype>
+  <owl:Class rdf:ID="Color"/>
+  <owl:Class rdf:ID="Shape"/>
+  <owl:ObjectProperty rdf:ID="color">
+    <rdfs:domain rdf:resource="#Shape"/>
+    <rdfs:range rdf:resource="#Color"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="blue">
+    <rdfs:range rdf:resource="#ColorComponent"/>
+    <rdfs:domain rdf:resource="#Color"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="red">
+    <rdfs:range rdf:resource="#ColorComponent"/>
+    <rdfs:domain rdf:resource="#Color"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="green">
+    <rdfs:range rdf:resource="#ColorComponent"/>
+    <rdfs:domain rdf:resource="#Color"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="area">
+    <rdfs:domain rdf:resource="#Shape"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <concepts:Color rdf:ID="Green">
+    <concepts:blue rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >0</concepts:blue>
+    <concepts:green rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >255</concepts:green>
+    <concepts:red rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >0</concepts:red>
+  </concepts:Color>
+  <concepts:Color rdf:ID="Yellow">
+    <concepts:blue rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >0</concepts:blue>
+    <concepts:green rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >255</concepts:green>
+    <concepts:red rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >255</concepts:red>
+  </concepts:Color>
+  <concepts:Color rdf:ID="Blue">
+    <concepts:blue rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >255</concepts:blue>
+    <concepts:green rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >0</concepts:green>
+    <concepts:red rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >0</concepts:red>
+  </concepts:Color>
+  <concepts:Color rdf:ID="Red">
+    <concepts:blue rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >0</concepts:blue>
+    <concepts:green rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >0</concepts:green>
+    <concepts:red rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >255</concepts:red>
+  </concepts:Color>
+</rdf:RDF>

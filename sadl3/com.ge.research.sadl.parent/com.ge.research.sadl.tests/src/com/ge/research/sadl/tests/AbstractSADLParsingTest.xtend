@@ -29,6 +29,7 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Assert
 import org.junit.runner.RunWith
 import java.util.Arrays
+import com.google.common.collect.Iterables
 
 @RunWith(XtextRunner)
 @InjectWith(SADLNoopModelProcessorsInjectorProvider)
@@ -50,7 +51,7 @@ abstract class AbstractSADLParsingTest extends AbstractSadlTest {
 		val model = parseHelper.parse(text)
 		val issues = validate(model)
 		Assert.assertFalse(issues.isEmpty)
-		Assert.assertEquals(issues.size, 1)
+		Assert.assertEquals(Iterables.toString(issues), issues.size, 1)
 		for (err : errPartials) {
 			var found = false
 			for (issue : issues) {

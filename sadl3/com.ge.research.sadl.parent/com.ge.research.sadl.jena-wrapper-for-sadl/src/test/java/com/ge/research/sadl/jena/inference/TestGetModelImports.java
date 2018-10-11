@@ -14,6 +14,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.model.SadlUnionClass;
@@ -43,6 +44,7 @@ public class TestGetModelImports {
 		}
 	}
 
+	@Ignore("https://github.com/crapo/sadlos2/issues/332")
 	@Test
 	public void test() throws ConfigurationException, URISyntaxException {
 		String modelFolder = kbroot + "/TestImports/OwlModels";
