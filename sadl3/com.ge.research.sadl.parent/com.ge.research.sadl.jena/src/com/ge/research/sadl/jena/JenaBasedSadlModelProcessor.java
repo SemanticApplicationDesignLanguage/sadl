@@ -6313,10 +6313,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			n.setPrefix(prfx);
 			try {
 				addLocalizedTypeToNode(n,getModelValidator().getType(expr));
-			} catch (DontTypeCheckException | CircularDefinitionException | InvalidNameException | URISyntaxException
+			} catch (CircularDefinitionException | InvalidNameException | URISyntaxException
 					| IOException | ConfigurationException | InvalidTypeException | CircularDependencyException
 					| PropertyWithoutRangeException e) {
 				e.printStackTrace();
+			} catch (DontTypeCheckException e) {
+				//this is acceptable
 			}
 			return n;
 		}
