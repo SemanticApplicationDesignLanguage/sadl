@@ -63,6 +63,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage OBJECT_PROP_SYMMETRY = new SadlErrorMessage("object_prop_symmetry");
 /**
+* {0} is a reserved name for configuring a knowledge service.
+**/
+    public static final SadlErrorMessage RESERVED_NAME_SERVICESCONFIG = new SadlErrorMessage("reserved_name_servicesconfig");
+/**
 * No folder or xml file selected for ATPT
 **/
     public static final SadlErrorMessage ATPT_NO_XML_SELECTED = new SadlErrorMessage("atpt_no_xml_selected");
