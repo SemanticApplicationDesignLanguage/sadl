@@ -1189,7 +1189,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (!isReservedFolder(resource, model)) {
 			if (isReservedName(resource)) {
 				if (!isSyntheticUri(null, resource)) {
-					addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
+					if (modelActualUrl.equals(ResourceManager.ServicesConf_SFN)) {
+						addWarning(SadlErrorMessages.RESERVED_NAME_SERVICESCONFIG.get(modelActualUrl), model);
+					}
+					else {
+						addError(SadlErrorMessages.RESERVED_NAME.get(modelActualUrl), model);
+					}
 				}
 			}
 		}
