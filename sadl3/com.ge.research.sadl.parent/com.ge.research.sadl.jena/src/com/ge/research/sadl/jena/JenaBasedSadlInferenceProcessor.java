@@ -307,6 +307,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			addErrorToSadlCommand(result, msg, ErrorType.ERROR);
 			return result;
 		}
+//		System.out.println("CSV File: " + inFile.getCanonicalPath());
 		if (tfn != null) {		// this is a mapped read with template
 			File tf = getConfigMgr(getOwlFormat()).resolveFilename(tfn);
 			if (tf == null) {
@@ -315,6 +316,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				return result;
 			}
 			else {
+//				System.out.println("Template File: " + tf.getCanonicalPath());
 				ITabularDataImporter importer = getTabularDataImporter(getConfigMgr(getOwlFormat()));
 				if (importer == null) {
 					Class<?> clz;

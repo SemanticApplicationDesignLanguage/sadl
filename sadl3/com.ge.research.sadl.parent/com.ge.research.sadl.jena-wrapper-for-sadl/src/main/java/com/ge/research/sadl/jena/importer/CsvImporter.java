@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
@@ -1040,6 +1041,7 @@ public class CsvImporter implements ITabularDataImporter {
 		if (template == null || template.length() <= 0) {
 			throw new ConfigurationException("template is null or empty");
 		}
+//		System.out.println("setTemplates: " + template);
 		processed = false; // set or reset
 
 		String templateString = null;
@@ -1062,27 +1064,13 @@ public class CsvImporter implements ITabularDataImporter {
 				}
 				templateString = (String) templateParts[2];
 			} else if (template.startsWith("file:/")) {
-				// sometimes the URL will, at least on Windows, be "file:/D:/...." 
-				// however, the relative URL for a template on the server, identified in ServicesConfig.owl, is being passed as "file:///template.tmpl"
-				// the implementation below may be incorrect as it would not allow for absolute paths on Unix servers.
-				String s = template.substring(6);
-				if (s.startsWith("//")) {
-					// this handles "file:///..." which is how relative template files are passed by QueryServer
-					//	and allows for a Unix absolute path to be given as "file:////..." (which probably isn't compliant with standard)
-					s = s.substring(2);
-				}
-				else if (s.startsWith("/")) {
-					// this handles "file://..." as a relative path
-					s = s.substring(1);
-				}
-				if (s.contains("/") || s.contains("\\")) {
-					DataSource dataSrc = new FileDataSource(s);
+				try {
+					File templateFile = new File(new URL(template).toURI());
+//					System.out.println("File from URL: " + templateFile.getCanonicalPath());
+					DataSource dataSrc = new FileDataSource(templateFile);
 					templateString = getSadlUtils().convertDataSourceToString(dataSrc);
-				} else {
-					String path = getConfigMgr().getModelFolderPath().getAbsolutePath() +
-							File.separator + s;
-					DataSource dataSrc = new FileDataSource(path);
-					templateString = getSadlUtils().convertDataSourceToString(dataSrc);
+				} catch (URISyntaxException e) {
+					throw new TemplateException("Failed to convert argument '" + template + "' from URL to an actual file.");
 				}
 				Object[] templateParts = scanTemplateForNameAndImports(templateString);
 				setImportModelNamespace((String) templateParts[0]);

@@ -1,0 +1,266 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:j.0="http://sadl.org/sadlbasemodel#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/builtinfunctions">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'SadlBuiltinFunctions.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <j.0:ExternalEquation rdf:ID="subtractDates">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#subtractDates</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="notBNode">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#notBNode</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="ceiling">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#ceiling</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="mod">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#mod</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="lessThan">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#lessThan</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="isLiteral">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#isLiteral</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="isDType">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#isDType</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="unbound">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#unbound</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="bound">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#bound</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listNotEqual">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#listNotEqual</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="sin">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#sin</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="pow">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#pow</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="countUniqueMatches">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#countUniqueMatches</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="localname">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#localname</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listConcat">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#listConcat</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="cos">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#cos</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="unique">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#unique</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="countLiteralValues">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#countLiteralValues</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="abs">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#abs</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="list">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#list</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="table">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#table</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="notBType">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#notBType</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="oneOf">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#oneOf</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="addOne">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#addOne</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listMapAsObject">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#listMapAsObject</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="getClassFromConstraint">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#getClassFromConstraint</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="regex">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#regex</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="acos">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#acos</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listLength">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#listLength</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="noValuesOtherThan">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#noValuesOtherThan</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="isBNode">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#isBNode</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="notDType">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#notDType</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="noValue">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#noValue</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="asin">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#asin</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listNotContains">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#listNotContains</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="notLiteral">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#notLiteral</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="sum">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#sum</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listMapAsSubject">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#listMapAsSubject</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listEqual">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#listEqual</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="print">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#print</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="tableAll">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#tableAll</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="min">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#min</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="noSubjectsOtherThan">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#noSubjectsOtherThan</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listToString">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#listToString</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="now">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#now</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="noUnknownValues">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#noUnknownValues</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listContains">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#listContains</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="average">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#average</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="atan">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#atan</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="sqrt">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#sqrt</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="assign">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#assign</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="product">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#product</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="max">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#max</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="getInstance">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#getInstance</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="countMatches">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#countMatches</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listEntry">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#listEntry</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="notOnlyValue">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#notOnlyValue</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="uriConcat">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#uriConcat</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="greaterThan">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#greaterThan</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="listSubtract">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#listSubtract</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="strConcat">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.hp.hpl.jena.reasoner.rulesys.builtins#strConcat</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="floor">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#floor</j.0:externalURI>
+  </j.0:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="tan">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >com.ge.research.sadl.jena.reasoner.builtin#tan</j.0:externalURI>
+  </j.0:ExternalEquation>
+</rdf:RDF>

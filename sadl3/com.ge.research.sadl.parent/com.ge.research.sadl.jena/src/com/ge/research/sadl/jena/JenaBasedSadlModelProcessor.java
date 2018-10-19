@@ -334,7 +334,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected List<String> importsInOrderOfAppearance = null; // an ordered set of import URIs, ordered by appearance in
 																// file.
 	private List<Rule> rules = null;
-	private List<Equation> equations = null;
 	private Equation currentEquation = null;
 	private List<SadlCommand> sadlCommands = null;
 	private SadlCommand targetCommand = null;
@@ -415,6 +414,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
 				
 		generationInProgress = true;
+		setCurrentResource(resource);
 		setProcessorContext(context);
 		List<String[]> newMappings = new ArrayList<String[]>();
 		logger.debug("onGenerate called for Resource '" + resource.getURI() + "'");
@@ -567,9 +567,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					for (int i = 0; i < otherContent.size(); i++) {
 						Object oc = otherContent.get(i);
 						if (oc instanceof List<?>) {
-							if (((List<?>) oc).get(0) instanceof Equation) {
-								setEquations((List<Equation>) oc);
-							} else if (((List<?>) oc).get(0) instanceof Rule) {
+							if (((List<?>) oc).get(0) instanceof Rule) {
 								rules = (List<Rule>) oc;
 							}
 						}
@@ -2862,10 +2860,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	protected void addEquation(Resource resource, Equation eq, EObject nm) {
-		if (getEquations() == null) {
-			setEquations(new ArrayList<Equation>());
-			OntModelProvider.addOtherContent(resource, getEquations());
-		}
 		String newEqName = eq.getName();
 		List<Equation> eqlist = getEquations();
 		for (int i = 0; i < eqlist.size(); i++) {
@@ -2878,7 +2872,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
-		getEquations().add(eq);
+		OntModelProvider.addOtherContent(resource, eq);;
 	}
 
 	private boolean namespaceIsImported(String namespace, Resource resource) {
@@ -2913,7 +2907,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	public List<Equation> getEquations(Resource resource) {
+		List<Equation> equations = new ArrayList<Equation>();
 		List<Object> other = OntModelProvider.getOtherContent(resource);
+		if(other != null) {
+			for(Object obj: other) {
+				if(obj instanceof Equation) {
+					equations.add((Equation)obj);
+				}
+			}
+		}
 		return equations;
 	}
 
@@ -6313,10 +6315,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			n.setPrefix(prfx);
 			try {
 				addLocalizedTypeToNode(n,getModelValidator().getType(expr));
-			} catch (DontTypeCheckException | CircularDefinitionException | InvalidNameException | URISyntaxException
+			} catch (CircularDefinitionException | InvalidNameException | URISyntaxException
 					| IOException | ConfigurationException | InvalidTypeException | CircularDependencyException
 					| PropertyWithoutRangeException e) {
 				e.printStackTrace();
+			} catch (DontTypeCheckException e) {
+				//this is acceptable
 			}
 			return n;
 		}
@@ -10883,11 +10887,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	public List<Equation> getEquations() {
-		return equations;
-	}
-
-	public void setEquations(List<Equation> equations) {
-		this.equations = equations;
+		return getEquations(getCurrentResource());
 	}
 
 	protected boolean isClass(OntConceptType oct) {
