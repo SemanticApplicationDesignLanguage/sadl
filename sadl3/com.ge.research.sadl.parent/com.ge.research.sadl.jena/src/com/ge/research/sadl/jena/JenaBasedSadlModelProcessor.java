@@ -7294,10 +7294,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						retProp = prop2;
 					} else if (((SadlRangeRestriction) spr2).getTypeonly() == null) {
 						OntResource rngRsrc = sadlTypeReferenceToOntResource(rng);
-						if ((rng instanceof SadlSimpleTypeReference && ((SadlSimpleTypeReference) rng).isList())
-								|| (rng instanceof SadlPrimitiveDataType && ((SadlPrimitiveDataType) rng).isList())) {
-							addLengthRestrictionsToList(rngRsrc, ((SadlRangeRestriction) spr2).getFacet());
-						}
 						if (rngRsrc == null) {
 							addError(SadlErrorMessages.RANGE_RESOLVE.toString(), rng);
 						} else {
@@ -9486,6 +9482,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// TODO How do we tell if this is a union versus an intersection?
 		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
 			SadlResource strSR = ((SadlSimpleTypeReference) sadlTypeRef).getType();
+			SadlDataTypeFacet lFacet = getSadlDataTypeFacetFromSadlSimpleTypeReference((SadlSimpleTypeReference) sadlTypeRef);
 			// TODO check for proxy, i.e. unresolved references
 			OntConceptType ctype;
 			try {
@@ -9505,7 +9502,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (ctype.equals(OntConceptType.CLASS)) {
 				if (((SadlSimpleTypeReference) sadlTypeRef).isList()) {
-					rsrc = getOrCreateListSubclass(null, strSRUri, sadlTypeRef.eResource(), null);
+					rsrc = getOrCreateListSubclass(null, strSRUri, sadlTypeRef.eResource(), lFacet, null);
 				} else {
 					rsrc = getTheJenaModel().getOntClass(strSRUri);
 					if (rsrc == null) {
@@ -9526,13 +9523,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							e.printStackTrace();
 						}
 					} else {
-						return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource(), null);
+						return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource(), lFacet, null);
 					}
 				}
 			} else if (ctype.equals(OntConceptType.DATATYPE_LIST)) {
 				rsrc = getTheJenaModel().getOntClass(strSRUri);
 				if (rsrc == null) {
-					return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource(), null);
+					return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource(), lFacet, null);
 				}
 			} else if (ctype.equals(OntConceptType.INSTANCE)) {
 				rsrc = getTheJenaModel().getIndividual(strSRUri);
@@ -9677,11 +9674,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return rsrc;
 	}
 
+	private SadlDataTypeFacet getSadlDataTypeFacetFromSadlSimpleTypeReference(SadlSimpleTypeReference aTypeRef) {
+		EObject lContainer = aTypeRef.eContainer();
+		if(lContainer instanceof SadlRangeRestriction) {
+			return ((SadlRangeRestriction)lContainer).getFacet();
+		}else if(lContainer instanceof SadlAllValuesCondition) {
+			return ((SadlAllValuesCondition)lContainer).getFacet();
+		}else if(lContainer instanceof SadlCardinalityCondition) {
+			return ((SadlCardinalityCondition)lContainer).getFacet();
+		}else if(lContainer instanceof SadlClassOrPropertyDeclaration) {
+			return ((SadlClassOrPropertyDeclaration)lContainer).getFacet();
+		}
+		return null;
+	}
+
 	private com.hp.hpl.jena.rdf.model.Resource processSadlPrimitiveDataType(SadlClassOrPropertyDeclaration element,
 			SadlPrimitiveDataType sadlTypeRef, String newDatatypeUri) throws JenaProcessorException {
 		com.hp.hpl.jena.rdf.model.Resource onDatatype = getSadlPrimitiveDataTypeResource(sadlTypeRef);
 		if (sadlTypeRef.isList()) {
-			onDatatype = getOrCreateListSubclass(null, onDatatype.toString(), sadlTypeRef.eResource(), null);
+			onDatatype = getOrCreateListSubclass(null, onDatatype.toString(), sadlTypeRef.eResource(), element.getFacet(), null);
 		}
 		if (newDatatypeUri == null) {
 			return onDatatype;
