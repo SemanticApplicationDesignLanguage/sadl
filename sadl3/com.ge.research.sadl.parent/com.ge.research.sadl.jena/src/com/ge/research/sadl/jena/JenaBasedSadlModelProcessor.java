@@ -6884,7 +6884,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else if (superElementType.equals(OntConceptType.CLASS_LIST)
 					|| superElementType.equals(OntConceptType.DATATYPE_LIST)) {
 				for (int i = 0; i < newNames.size(); i++) {
-					rsrcList.add(getOrCreateListSubclass(newNames.get(i), superSRUri, superSR.eResource(), null));
+					rsrcList.add(getOrCreateListSubclass(newNames.get(i), superSRUri, superSR.eResource(), element.getFacet(), null));
 				}
 			} else if (superElementType.equals(OntConceptType.CLASS_PROPERTY)) {
 				for (int i = 0; i < newNames.size(); i++) {
@@ -6925,7 +6925,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (isList) {
 				com.hp.hpl.jena.rdf.model.Resource spdt = getSadlPrimitiveDataTypeResource(
 						(SadlPrimitiveDataType) superElement);
-				rsrcList.add(getOrCreateListSubclass(newNames.get(0), spdt.getURI(), superElement.eResource(), null));
+				rsrcList.add(getOrCreateListSubclass(newNames.get(0), spdt.getURI(), superElement.eResource(), element.getFacet(), null));
 			} else {
 				com.hp.hpl.jena.rdf.model.Resource spdt = processSadlPrimitiveDataType(element,
 						(SadlPrimitiveDataType) superElement, newNames.get(0));
@@ -7055,10 +7055,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 
 		}
-		if (isList) {
-			addLengthRestrictionsToList(rsrcList.get(0), element.getFacet());
 
-		}
 		return rsrcList;
 	}
 
@@ -7165,8 +7162,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 						OntResource rngRsrc;
 						if (isList) {
-							rngRsrc = getOrCreateListSubclass(null, rngName, element.eResource(), ((SadlRangeRestriction) spr1).getFacet());
-							addLengthRestrictionsToList(rngRsrc, ((SadlRangeRestriction) spr1).getFacet());
+							rngRsrc = getOrCreateListSubclass(null, rngName, element.eResource(), ((SadlRangeRestriction) spr1).getFacet(), null);
 							propType = OntConceptType.CLASS_PROPERTY;
 						} else {
 							rngRsrc = sadlTypeReferenceToOntResource(rng);
@@ -8228,7 +8224,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 						else {
 							try {
-								cls = getOrCreateListSubclass(null, rsrc.getURI(), type.eResource(), null);
+								SadlValueList listInitializer = element.getListInitializer();
+								cls = getOrCreateListSubclass(null, rsrc.getURI(), type.eResource(), null, listInitializer);
 							} catch (JenaProcessorException e) {
 								addError(e.getMessage(), type);
 							}
@@ -8318,7 +8315,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 				if (cls != null) {
-					addLengthRestrictionsToListLiteral(cls, listInitializer);
 					addListValues(inst, cls, listInitializer);
 				} else {
 					throw new JenaProcessorException("Unable to find type of list '" + inst.toString() + "'");
@@ -9184,7 +9180,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return newCls;
 	}
 
-	private OntClass getOrCreateListSubclass(String newName, String typeUri, Resource resource, SadlDataTypeFacet facet)
+	private OntClass getOrCreateListSubclass(String newName, String typeUri, Resource resource, SadlDataTypeFacet facet, SadlValueList listLiteral)
 			throws JenaProcessorException {
 		if (sadlListModel == null) {
 			try {
@@ -9194,6 +9190,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				throw new JenaProcessorException("Failed to load SADL List model", e);
 			}
 		}
+		int length = -1;
+		int lengthMax = -1;
+		int lengthMin = -1;
+		if(listLiteral != null) {
+			length = listLiteral.getExplicitValues().size();
+		}else if(facet != null) {
+			length = facet.getLen() != null ? Integer.parseInt(facet.getLen()) : -1;
+			lengthMax = facet.getMaxlen() != null ? Integer.parseInt(facet.getMaxlen()) : -1;
+			lengthMin = facet.getMinlen() != null ? Integer.parseInt(facet.getMinlen()) : -1;
+		}
+		
 		OntClass lstcls = getTheJenaModel().getOntClass(SadlConstants.SADL_LIST_MODEL_LIST_URI);
 		ExtendedIterator<OntClass> lscitr = lstcls.listSubClasses();
 		while (lscitr.hasNext()) {
@@ -9251,9 +9258,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							return scls;
 						}
 					}else {
-						int length = facet.getLen() != null ? Integer.parseInt(facet.getLen()) : -1;
-						int lengthMax = facet.getMaxlen() != null ? Integer.parseInt(facet.getMaxlen()) : -1;
-						int lengthMin = facet.getMinlen() != null ? Integer.parseInt(facet.getMinlen()) : -1;
 						if(lengthRestriction == length &&
 						   lengthMaxRestriction == lengthMax &&
 						   lengthMinRestriction == lengthMin) {
@@ -9273,6 +9277,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Property prest = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI);
 		AllValuesFromRestriction avf2 = getTheJenaModel().createAllValuesFromRestriction(null, prest, newcls);
 		newcls.addSuperClass(avf2);
+		if(facet != null) {
+			addLengthRestrictionsToList(newcls, facet);
+		}else if(listLiteral != null) {
+			addLengthRestrictionsToListLiteral(newcls, listLiteral);
+		}
+		
 		return newcls;
 	}
 
