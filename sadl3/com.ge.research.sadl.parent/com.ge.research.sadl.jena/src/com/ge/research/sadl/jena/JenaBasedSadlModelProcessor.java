@@ -8445,7 +8445,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else if (type instanceof SadlPrimitiveDataType) {
 			isList = ((SadlPrimitiveDataType) type).isList();
 		}
-		if(type.eContainer() instanceof SadlInstance) {
+		if(type != null && type.eContainer() instanceof SadlInstance && !isList) {
 			isList = ((SadlInstance)type.eContainer()).getListInitializer() != null;
 		}
 		
