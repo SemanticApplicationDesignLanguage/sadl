@@ -8445,6 +8445,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else if (type instanceof SadlPrimitiveDataType) {
 			isList = ((SadlPrimitiveDataType) type).isList();
 		}
+		if(type.eContainer() instanceof SadlInstance) {
+			isList = ((SadlInstance)type.eContainer()).getListInitializer() != null;
+		}
+		
 		if (isList) {
 			try {
 				importSadlListModel(type.eResource());
@@ -9186,15 +9190,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				throw new JenaProcessorException("Failed to load SADL List model", e);
 			}
 		}
-		int length = -1;
-		int lengthMax = -1;
-		int lengthMin = -1;
+		String length = "-1";
+		String lengthMax = "-1";
+		String lengthMin = "-1";
 		if(listLiteral != null) {
-			length = listLiteral.getExplicitValues().size();
+			length = String.valueOf(listLiteral.getExplicitValues().size());
 		}else if(facet != null) {
-			length = facet.getLen() != null ? Integer.parseInt(facet.getLen()) : -1;
-			lengthMax = facet.getMaxlen() != null ? Integer.parseInt(facet.getMaxlen()) : -1;
-			lengthMin = facet.getMinlen() != null ? Integer.parseInt(facet.getMinlen()) : -1;
+			length = facet.getLen() != null ? facet.getLen() : "-1";
+			lengthMax = facet.getMaxlen() != null ? facet.getMaxlen() : "-1";
+			lengthMin = facet.getMinlen() != null ? facet.getMinlen() : "-1";
 		}
 		
 		OntClass lstcls = getTheJenaModel().getOntClass(SadlConstants.SADL_LIST_MODEL_LIST_URI);
@@ -9207,9 +9211,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (newName == null && scls.isAnon()) {
 				String restrictionTypeUri = "";
-				int lengthRestriction = -1;
-				int lengthMaxRestriction = -1;
-				int lengthMinRestriction = -1;
+				String lengthRestriction = "-1";
+				String lengthMaxRestriction = "-1";
+				String lengthMinRestriction = "-1";
 				ExtendedIterator<OntClass> spcitr = scls.listSuperClasses(true);
 				while (spcitr.hasNext()) {
 					OntClass spcls = spcitr.next();
@@ -9227,13 +9231,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if(restriction.isHasValueRestriction()) {
 							RDFNode hasValue = restriction.asHasValueRestriction().getHasValue();
 							if(onprop.isURIResource() && onprop.getURI().equals(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI)) {
-								lengthRestriction = hasValue.asLiteral().getInt();
+								lengthRestriction = String.valueOf(hasValue.asLiteral().getInt());
 							}
 							if(onprop.isURIResource() && onprop.getURI().equals(SadlConstants.SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI)) {
-								lengthMaxRestriction = hasValue.asLiteral().getInt();
+								lengthMaxRestriction = String.valueOf(hasValue.asLiteral().getInt());
 							}
 							if(onprop.isURIResource() && onprop.getURI().equals(SadlConstants.SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI)) {
-								lengthMinRestriction = hasValue.asLiteral().getInt();
+								lengthMinRestriction = String.valueOf(hasValue.asLiteral().getInt());
 							}
 						}
 					}
@@ -9241,9 +9245,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (restrictionTypeUri.equals(typeUri)) {
 					if(facet == null) {
 						if(typeUri.contains(XSD.getURI())) {
-							if(lengthRestriction == -1 &&
-							   lengthMaxRestriction == -1 &&
-							   lengthMinRestriction == -1) {
+							if(lengthRestriction.equals("-1") &&
+							   lengthMaxRestriction.equals("-1") &&
+							   lengthMinRestriction.equals("-1")) {
 								spcitr.close();
 								lscitr.close();
 								return scls;
@@ -9254,9 +9258,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							return scls;
 						}
 					}else {
-						if(lengthRestriction == length &&
-						   lengthMaxRestriction == lengthMax &&
-						   lengthMinRestriction == lengthMin) {
+						if(lengthRestriction.equals(length) &&
+						   lengthMaxRestriction.equals(lengthMax) &&
+						   lengthMinRestriction.equals(lengthMin)) {
 							spcitr.close();
 							lscitr.close();
 							return scls;
@@ -9482,7 +9486,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// TODO How do we tell if this is a union versus an intersection?
 		if (sadlTypeRef instanceof SadlSimpleTypeReference) {
 			SadlResource strSR = ((SadlSimpleTypeReference) sadlTypeRef).getType();
-			SadlDataTypeFacet lFacet = getSadlDataTypeFacetFromSadlSimpleTypeReference((SadlSimpleTypeReference) sadlTypeRef);
+			SadlDataTypeFacet lFacet = getSadlDataTypeFacetFromSadlTypeReference(sadlTypeRef);
 			// TODO check for proxy, i.e. unresolved references
 			OntConceptType ctype;
 			try {
@@ -9674,7 +9678,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return rsrc;
 	}
 
-	private SadlDataTypeFacet getSadlDataTypeFacetFromSadlSimpleTypeReference(SadlSimpleTypeReference aTypeRef) {
+	/**
+	 * Method to get the Facet from a SadlSimpleTypeReference or SadlPrimitiveDataType, both subclasses of SadlTypeReference
+	 * @param SadlTypeReference object
+	 * @return SadlDataTypeFacet object
+	 */
+	private SadlDataTypeFacet getSadlDataTypeFacetFromSadlTypeReference(SadlTypeReference aTypeRef) {
 		EObject lContainer = aTypeRef.eContainer();
 		if(lContainer instanceof SadlRangeRestriction) {
 			return ((SadlRangeRestriction)lContainer).getFacet();
@@ -9692,7 +9701,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			SadlPrimitiveDataType sadlTypeRef, String newDatatypeUri) throws JenaProcessorException {
 		com.hp.hpl.jena.rdf.model.Resource onDatatype = getSadlPrimitiveDataTypeResource(sadlTypeRef);
 		if (sadlTypeRef.isList()) {
-			onDatatype = getOrCreateListSubclass(null, onDatatype.toString(), sadlTypeRef.eResource(), element.getFacet(), null);
+			SadlDataTypeFacet lFacet = null;
+			if(element == null) {
+				lFacet = getSadlDataTypeFacetFromSadlTypeReference(sadlTypeRef);
+			}else {
+				lFacet = element.getFacet();
+			}
+			SadlValueList lListLiteral = null;
+			if(sadlTypeRef.eContainer() instanceof SadlInstance) {
+				lListLiteral = ((SadlInstance)sadlTypeRef.eContainer()).getListInitializer();
+			}
+			
+			onDatatype = getOrCreateListSubclass(null, onDatatype.toString(), sadlTypeRef.eResource(), lFacet, lListLiteral);
 		}
 		if (newDatatypeUri == null) {
 			return onDatatype;
