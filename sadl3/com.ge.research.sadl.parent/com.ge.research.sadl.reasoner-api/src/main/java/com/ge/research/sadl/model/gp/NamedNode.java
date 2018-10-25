@@ -43,6 +43,7 @@ public class NamedNode extends Node {
 	private int listLength = -1;						// the length restriction, if any (-1 => none)
 	private int minListLength = -1;						// the minimum length restriction, if any (-1 => none)
 	private int maxListLength = -1;						// the maximum length restriction, if any (-1 => none)
+	private List<Object> listLiterals = null;			// a collection of literals that are included in this list
 	
 	private ProxyNode missingTripleReplacement = null;
 	private List<TripleElement> missingPatterns = null;  // a list of patterns found to be missing from the higher-level structure
@@ -305,6 +306,34 @@ public class NamedNode extends Node {
 	 */
 	public boolean isList() {
 		return nodeType != null && (nodeType.equals(NodeType.ClassListNode) || nodeType.equals(NodeType.DataTypeListNode));
+	}
+	
+	/**
+	 * Add literal value for list to the collection of List Literals
+	 * @param aObject
+	 */
+	public void addListLiteral(Object aObject) {
+		if(this.listLiterals == null) {
+			this.listLiterals = new ArrayList<Object>();
+		}
+		
+		this.listLiterals.add(aObject);
+	}
+	
+	/**
+	 * Sets the literals collection for NamedNode List
+	 * @param alistLiterals
+	 */
+	public void setListLiterals(List<Object> alistLiterals) {
+		this.listLiterals = alistLiterals;
+	}
+	
+	/**
+	 * Literals in the NamedNode List
+	 * @return a collection of literals in this list
+	 */
+	public List<Object> getListLiterals(){
+		return this.listLiterals;
 	}
 
 	/**

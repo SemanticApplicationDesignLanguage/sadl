@@ -3233,20 +3233,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// incorrect? awc 12/6/2017
 					TripleElement trel;
 					if (leftVariableDefn instanceof Declaration) {
-//						NamedNode rdfssubclass = new NamedNode(RDFS.subClassOf.getURI());
-//						rdfssubclass.setNodeType(NodeType.ObjectProperty);
 						trel = new TripleElement(leftVar, new RDFTypeNode(), (Node) leftTranslatedDefn);
 					}
 					else {
 						trel = new TripleElement(leftVar, new RDFTypeNode(), leftDefnType);
 					}
+					addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
 					trel.setSourceType(TripleSourceType.SPV);
 					return combineRest(trel, rest);
-//				} else if (leftVariableDefnTripleMissingObject) {
-//					// this is just like a SubjHasProp only the order is reversed
-//					((TripleElement) leftTranslatedDefn).setObject(leftVar);
-//					addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
-//					return leftTranslatedDefn;
 				} else {
 					if (leftVariableDefnTci == null) {
 						leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
@@ -4522,6 +4516,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (eObject instanceof Declaration) {
 			String len = ((Declaration) eObject).getLen();
 			String maxLen = ((Declaration) eObject).getMaxlen();
+			
+			if(len == null && maxLen == null && ((Declaration)eObject).getArglist() != null && ((Declaration)eObject).getArglist().size() > 0) {
+				int[] result = new int[1];
+				result[0] = ((Declaration)eObject).getArglist().size();
+				return result;
+			}
+			
 			int lenL = -1;
 			int minL = -1;
 			int maxL = -1;
@@ -5388,17 +5389,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return var;
 			} else if (typenode != null && typenode instanceof NamedNode) {
 				if (isList((NamedNode) typenode, type)) {
-					((NamedNode) typenode).setList(true);
-					if (expr.getLen() != null) {
-						if (expr.getMaxlen() != null) {
-							((NamedNode) typenode).setMinListLength(Integer.parseInt(expr.getLen()));
-							if (!expr.getMaxlen().equals("*")) {
-								((NamedNode) typenode).setMaxListLength(Integer.parseInt(expr.getMaxlen()));
-							}
-						} else {
-							((NamedNode) typenode).setListLength(Integer.parseInt(expr.getLen()));
-						}
-					}
+					processListDeclaration(expr, (NamedNode)typenode);
 				}
 				VariableNode var = null;
 				if (isUseArticlesInValidation()) {
@@ -5448,10 +5439,39 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						"A class name should be preceded by either an indefinite (e.g., 'a' or 'an') or a definite (e.g., 'the') article.",
 						expr);
 			}
+		} else if(isDefinitionOfExplicitVariable(expr) && typenode instanceof NamedNode && isList((NamedNode) typenode, type)) {
+			processListDeclaration(expr, (NamedNode) typenode);
 		}
+		
 		return typenode;
 	}
 
+	protected void processListDeclaration(Declaration aExpression, NamedNode aListNode) throws InvalidNameException, TranslationException {
+		aListNode.setList(true);
+		if(aExpression.getArglist() != null && aExpression.getArglist().size() > 0) {
+			List<Object> lListLiterals = new ArrayList<Object>();
+			for(Expression lArgument : aExpression.getArglist()) {
+				try {
+					lListLiterals.add(processExpression(lArgument));
+				} catch (InvalidTypeException e) {
+					logger.error(e.getMessage());
+				}
+				//TODO add collection of list literals to NamedNode
+			}
+			aListNode.setListLength(aExpression.getArglist().size());
+			
+		} else if (aExpression.getLen() != null) {
+			if (aExpression.getMaxlen() != null) {
+				aListNode.setMinListLength(Integer.parseInt(aExpression.getLen()));
+				if (!aExpression.getMaxlen().equals("*")) {
+					aListNode.setMaxListLength(Integer.parseInt(aExpression.getMaxlen()));
+				}
+			} else {
+				aListNode.setListLength(Integer.parseInt(aExpression.getLen()));
+			}
+		}
+	}
+	
 	protected EObject getHostEObject() {
 		return hostEObject;
 	}
