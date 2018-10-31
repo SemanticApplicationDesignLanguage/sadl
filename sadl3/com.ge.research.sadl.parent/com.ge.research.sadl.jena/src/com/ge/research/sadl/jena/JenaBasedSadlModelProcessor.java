@@ -5449,14 +5449,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected void processListDeclaration(Declaration aExpression, NamedNode aListNode) throws InvalidNameException, TranslationException {
 		aListNode.setList(true);
 		if(aExpression.getArglist() != null && aExpression.getArglist().size() > 0) {
-			List<Object> lListLiterals = new ArrayList<Object>();
 			for(Expression lArgument : aExpression.getArglist()) {
 				try {
-					lListLiterals.add(processExpression(lArgument));
+					aListNode.addListLiteral(processExpression(lArgument));
 				} catch (InvalidTypeException e) {
 					logger.error(e.getMessage());
 				}
-				//TODO add collection of list literals to NamedNode
 			}
 			aListNode.setListLength(aExpression.getArglist().size());
 			
