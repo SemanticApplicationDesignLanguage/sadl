@@ -320,6 +320,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private OntModel sadlListModel = null;
 	private OntModel sadlDefaultsModel = null;
+	private OntModel sadlServicesConfigConceptModel = null;
 
 	private OntModel sadlImplicitModel = null;
 	private OntModel sadlBuiltinFunctionModel = null;
@@ -552,7 +553,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						newMappings.add(mapping);
 					}
 				}
-
+				fn = SadlConstants.SADL_SERVICES_CONFIGURATION_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
+				if (!fileExists(fsa, fn)) {
+					sadlServicesConfigConceptModel = OntModelProvider.getSadlServicesConfigConceptsModel();
+					if (sadlServicesConfigConceptModel != null) {
+						RDFWriter w2 = sadlServicesConfigConceptModel.getWriter(format);
+						w.setProperty("xmlbase", SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI);
+						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+						w2.write(sadlServicesConfigConceptModel.getBaseModel(), out2, SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI);
+						CharSequence seq2 = new String(out2.toByteArray(), charset);
+						fsa.generateFile(fn, seq2);
+						String[] mapping = new String[3];
+						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
+						mapping[1] = SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI;
+						mapping[2] = SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX;
+						newMappings.add(mapping);
+					}
+				}
 				String[] mapping = new String[3];
 				mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + owlFN);
 				mapping[1] = getModelName();
@@ -977,6 +994,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addImplicitSadlModelImportToJenaModel(resource, context);
 				addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
 
+			}
+			if (modelActualUrl.equals(ResourceManager.ServicesConf_SFN)) {
+				try {
+					importSadlServicesConfigConceptsModel(resource);
+				} catch (JenaProcessorException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -10713,6 +10741,97 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return sb.toString();
 	}
 
+	static public String getSadlServicesConfigConceptsModel() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("<rdf:RDF\r\n"); 
+		sb.append("    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n"); 
+		sb.append("    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\r\n"); 
+		sb.append("    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\r\n"); 
+		sb.append("  xml:base=\"http://com.ge.research.sadl/sadlserver/Services\">\r\n"); 
+		sb.append("  <owl:Ontology rdf:about=\"http://com.ge.research.sadl/sadlserver/Services\">\r\n"); 
+		sb.append("    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2012/12/03 19:04:44 $</owl:versionInfo>\r\n"); 
+		sb.append("    <rdfs:comment xml:lang=\"en\">This ontology was created from a SADL file 'Services.sadl' and should not be edited.</rdfs:comment>\r\n"); 
+		sb.append("  </owl:Ontology>\r\n"); 
+		sb.append("  <owl:Class rdf:ID=\"NameValuePairs\">\r\n"); 
+		sb.append("    <rdfs:subClassOf>\r\n"); 
+		sb.append("      <owl:Restriction>\r\n"); 
+		sb.append("        <owl:maxCardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\r\n"); 
+		sb.append("        >1</owl:maxCardinality>\r\n"); 
+		sb.append("        <owl:onProperty>\r\n"); 
+		sb.append("          <owl:DatatypeProperty rdf:ID=\"name\"/>\r\n"); 
+		sb.append("        </owl:onProperty>\r\n"); 
+		sb.append("      </owl:Restriction>\r\n"); 
+		sb.append("    </rdfs:subClassOf>\r\n"); 
+		sb.append("  </owl:Class>\r\n"); 
+		sb.append("  <owl:Class rdf:ID=\"KnowledgeBase\">\r\n"); 
+		sb.append("    <rdfs:subClassOf>\r\n"); 
+		sb.append("      <owl:Restriction>\r\n"); 
+		sb.append("        <owl:maxCardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\r\n"); 
+		sb.append("        >1</owl:maxCardinality>\r\n"); 
+		sb.append("        <owl:onProperty>\r\n"); 
+		sb.append("          <owl:DatatypeProperty rdf:ID=\"url\"/>\r\n"); 
+		sb.append("        </owl:onProperty>\r\n"); 
+		sb.append("      </owl:Restriction>\r\n"); 
+		sb.append("    </rdfs:subClassOf>\r\n"); 
+		sb.append("  </owl:Class>\r\n"); 
+		sb.append("  <owl:Class rdf:ID=\"NamedService\">\r\n"); 
+		sb.append("    <rdfs:subClassOf>\r\n"); 
+		sb.append("      <owl:Restriction>\r\n"); 
+		sb.append("        <owl:maxCardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\r\n"); 
+		sb.append("        >1</owl:maxCardinality>\r\n"); 
+		sb.append("        <owl:onProperty>\r\n"); 
+		sb.append("          <owl:DatatypeProperty rdf:ID=\"modelName\"/>\r\n"); 
+		sb.append("        </owl:onProperty>\r\n"); 
+		sb.append("      </owl:Restriction>\r\n"); 
+		sb.append("    </rdfs:subClassOf>\r\n"); 
+		sb.append("  </owl:Class>\r\n"); 
+		sb.append("  <owl:Class rdf:ID=\"ConfigurationItem\">\r\n"); 
+		sb.append("    <rdfs:subClassOf>\r\n"); 
+		sb.append("      <owl:Restriction>\r\n"); 
+		sb.append("        <owl:maxCardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\r\n"); 
+		sb.append("        >1</owl:maxCardinality>\r\n"); 
+		sb.append("        <owl:onProperty>\r\n"); 
+		sb.append("          <owl:DatatypeProperty rdf:ID=\"category\"/>\r\n"); 
+		sb.append("        </owl:onProperty>\r\n"); 
+		sb.append("      </owl:Restriction>\r\n"); 
+		sb.append("    </rdfs:subClassOf>\r\n"); 
+		sb.append("  </owl:Class>\r\n"); 
+		sb.append("  <owl:ObjectProperty rdf:ID=\"item\">\r\n"); 
+		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#ConfigurationItem\"/>\r\n"); 
+		sb.append("    <rdfs:range rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NameValuePairs\"/>\r\n"); 
+		sb.append("  </owl:ObjectProperty>\r\n"); 
+		sb.append("  <owl:ObjectProperty rdf:ID=\"entryPoint\">\r\n"); 
+		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#KnowledgeBase\"/>\r\n"); 
+		sb.append("    <rdfs:range rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NamedService\"/>\r\n"); 
+		sb.append("  </owl:ObjectProperty>\r\n"); 
+		sb.append("  <owl:ObjectProperty rdf:ID=\"configurationOverride\">\r\n"); 
+		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NamedService\"/>\r\n"); 
+		sb.append("    <rdfs:range rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#ConfigurationItem\"/>\r\n"); 
+		sb.append("  </owl:ObjectProperty>\r\n"); 
+		sb.append("  <owl:DatatypeProperty rdf:about=\"http://com.ge.research.sadl/sadlserver/Services#url\">\r\n"); 
+		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#KnowledgeBase\"/>\r\n"); 
+		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n"); 
+		sb.append("  </owl:DatatypeProperty>\r\n"); 
+		sb.append("  <owl:DatatypeProperty rdf:about=\"http://com.ge.research.sadl/sadlserver/Services#name\">\r\n"); 
+		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NameValuePairs\"/>\r\n"); 
+		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n"); 
+		sb.append("  </owl:DatatypeProperty>\r\n"); 
+		sb.append("  <owl:DatatypeProperty rdf:about=\"http://com.ge.research.sadl/sadlserver/Services#category\">\r\n"); 
+		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#ConfigurationItem\"/>\r\n"); 
+		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n"); 
+		sb.append("  </owl:DatatypeProperty>\r\n"); 
+		sb.append("  <owl:DatatypeProperty rdf:about=\"http://com.ge.research.sadl/sadlserver/Services#modelName\">\r\n"); 
+		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NamedService\"/>\r\n"); 
+		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n"); 
+		sb.append("  </owl:DatatypeProperty>\r\n"); 
+		sb.append("  <owl:DatatypeProperty rdf:ID=\"value\">\r\n"); 
+		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NameValuePairs\"/>\r\n"); 
+		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n"); 
+		sb.append("  </owl:DatatypeProperty>\r\n"); 
+		sb.append("</rdf:RDF>\r\n"); 
+		return sb.toString();
+	}
+
 	static public String getSadlDefaultsModel() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<?xml version=\"1.0\"?>\n");
@@ -10763,6 +10882,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		sb.append("	</owl:ObjectProperty>\n");
 		sb.append("</rdf:RDF>\n");
 		return sb.toString();
+	}
+	
+	private boolean importSadlServicesConfigConceptsModel(Resource resource) throws JenaProcessorException, ConfigurationException {
+		if (sadlServicesConfigConceptModel == null) {
+			try {
+				sadlServicesConfigConceptModel = getOntModelFromString(resource, getSadlServicesConfigConceptsModel());
+				OntModelProvider.setSadlServicesConfigConceptsModel(sadlServicesConfigConceptModel);
+			} catch (Exception e) {
+				throw new JenaProcessorException(e.getMessage(), e);
+			}
+			addImportToJenaModel(getModelName(), SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI,
+					SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX, sadlServicesConfigConceptModel);
+			return true;
+		}
+		return false;
 	}
 
 	private boolean importSadlListModel(Resource resource) throws JenaProcessorException, ConfigurationException {

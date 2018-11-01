@@ -38,13 +38,13 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_RULE_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Rule";
 	
 	public static final String SADL_RULE_PATTERN_URI = "http://sadl.org/rule/patterns";
-	public static final String SADL_RULE_PATTERN_PREFIX = "";
+	public static final String SADL_RULE_PATTERN_PREFIX = "srpp";
 	public static final String SADL_RULE_PATTERN_DATA_URI = "http://sadl.org/rule/patterns/data";
-	public static final String SADL_RULE_PATTERN_DATA_PREFIX = "";
+	public static final String SADL_RULE_PATTERN_DATA_PREFIX = "srpdp";
+	public static final String SADL_SERVICES_CONFIGURATION_FILENAME = "SadlServicesConfigurationConcepts";
 	public static final String SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI = "http://com.ge.research.sadl/sadlserver/Services";
-	public static final String SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX = "";
+	public static final String SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX = "ssccp";
 	public static final String SADL_SERIVCES_CONFIGURATION_URI = "http://com.ge.research.sadl/sadlserver/ServicesConfig";
-	public static final String SADL_SERIVCES_CONFIGURATION_PREFIX = "";
 	
 	public static final String SADL_DEFAULTS_MODEL_FILENAME = "defaults";
 	public static final String SADL_DEFAULTS_MODEL_PREFIX = "defs";

@@ -21,6 +21,7 @@ package com.ge.research.sadl.owl2sadl;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -418,7 +419,8 @@ public class OwlToSadl {
 		setSpec(spec);
 		theModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM); //_RDFS_INF);
 		theModel.getDocumentManager().setProcessImports(false);
-        theModel.read(owlFile.getCanonicalPath());
+		theModel.read(new FileInputStream(owlFile), baseUri);
+//        theModel.read(owlFile.getCanonicalPath());
 	}
 
 	public OwlToSadl(String owlContent) {
@@ -1667,6 +1669,9 @@ public class OwlToSadl {
 	}
 
 	private List<Property> sortResources(List<Property> pList) {
+		if (pList.isEmpty()) {
+			return pList;
+		}
 		List<Property> newList = new ArrayList<Property>();
 		newList.add(pList.get(0));
 		for (int i = 1; i < pList.size(); i++) {
