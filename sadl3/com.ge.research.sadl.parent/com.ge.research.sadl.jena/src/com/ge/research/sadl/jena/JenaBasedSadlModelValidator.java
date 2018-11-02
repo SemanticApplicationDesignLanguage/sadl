@@ -4452,7 +4452,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				ConceptName leftConceptName = (ConceptName)getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo);
 				ConceptName rightConceptName = (ConceptName)getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo);
 				if(leftConceptName.getType().equals(rightConceptName.getType())){
-					return leftTypeCheckInfo.getTypeCheckType().equals(rightTypeCheckInfo.getTypeCheckType());
+					return checkForListOverlap(leftTypeCheckInfo.getTypeCheckType(), rightTypeCheckInfo.getTypeCheckType());
 				}
 			}
 		}
@@ -4685,6 +4685,40 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	
+	private boolean checkForListOverlap(Node aLeftTCT, Node aRightTCT) {
+		if(aLeftTCT instanceof NamedNode && aRightTCT instanceof NamedNode) {
+			NamedNode lNode = (NamedNode)aLeftTCT;
+			NamedNode rNode = (NamedNode)aRightTCT;
+			
+			int lLowerBound; 
+			int lUpperBound;
+			if(lNode.getListLength() != -1) {
+				lLowerBound = lNode.getListLength();
+				lUpperBound = lNode.getListLength();
+			}else {
+				lLowerBound = lNode.getMinListLength() != -1 ? lNode.getMinListLength() : 0;
+				lUpperBound = lNode.getMaxListLength() != -1 ? lNode.getMaxListLength() : Integer.MAX_VALUE;
+			}
+			
+			int rLowerBound; 
+			int rUpperBound;
+			if(rNode.getListLength() != -1) {
+				rLowerBound = rNode.getListLength();
+				rUpperBound = rNode.getListLength();
+			}else {
+				rLowerBound = rNode.getMinListLength() != -1 ? rNode.getMinListLength() : 0;
+				rUpperBound = rNode.getMaxListLength() != -1 ? rNode.getMaxListLength() : Integer.MAX_VALUE;
+			}
+			
+			if(lLowerBound > rUpperBound || lUpperBound < rLowerBound) {
+				return false;
+			}
+			return true;
+		}
+		
+		return false;
+	}
+
 	private String xsdTypeToXtextType(ConceptName cname) throws InvalidNameException {
 		if (cname.getUri().equals(XSD.anyURI.getURI())) {
 			return XSD.xstring.getURI();
