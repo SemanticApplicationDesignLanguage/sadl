@@ -225,6 +225,7 @@ import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -10643,12 +10644,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return builtinFunctionFile;
 	}
 
-	public static List<String> getSadlKeywords() {
-		SADLParser sparser = null;
+	@Inject SADLParser sparser;
+	public List<String> getSadlKeywords() {
+//		SADLParser sparser = null;
 		Set<String> sadlkeywords = null;
 		if (sadlTokens == null) {
-		    Injector injector = new SADLStandaloneSetup().createInjectorAndDoEMFRegistration();
-		    sparser = injector.getInstance(SADLParser.class);
+//		    Injector injector = new SADLStandaloneSetup().createInjectorAndDoEMFRegistration();
+//		    sparser = injector.getInstance(SADLParser.class);
 			if (sparser != null) {
 				sadlkeywords = GrammarUtil.getAllKeywords(sparser.getGrammarAccess().getGrammar());
 				if (sadlkeywords != null) {
