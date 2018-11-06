@@ -2043,7 +2043,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 	
 	@Override
-	public String getBuiltinFunctionModel(){
+	public String getBuiltinFunctionModel(List<String> reservedWords){
 		StringBuilder sb = new StringBuilder();
 		sb.append("uri \"");
 		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_URI);
@@ -2054,7 +2054,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		try {
 			List<FunctionSignature> bfsigs = getBuiltinFunctionSignatures();
 			for(FunctionSignature fs : bfsigs){
-				sb.append(fs.FunctionSignatureToSadlModelFormat());
+				sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
 				sb.append("\n\n");
 			}
 			
@@ -2074,12 +2074,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 								if (trans != null) {
 									if (trans instanceof TypedBaseBuiltin) {
 										FunctionSignature fs = new FunctionSignature(((TypedBaseBuiltin)trans).getFunctionSignatureString(), binfo.getUri());
-										sb.append(fs.FunctionSignatureToSadlModelFormat());
+										sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
 										sb.append("\n\n");
 									} else {
 										String untypedFctSignature = binfo.getName() + "(--)--";
 										FunctionSignature fs = new FunctionSignature(untypedFctSignature, binfo.getUri());
-										sb.append(fs.FunctionSignatureToSadlModelFormat());
+										sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
 										sb.append("\n\n");
 									}
 								}

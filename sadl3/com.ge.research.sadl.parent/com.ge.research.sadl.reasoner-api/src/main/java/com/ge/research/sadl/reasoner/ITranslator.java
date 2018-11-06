@@ -240,9 +240,10 @@ public interface ITranslator {
 	
 	/**
 	 * Method to obtain the implicit model for built-in functions for this reasoner/translator pair
+	 * @param reservedWords -- a list of reserved words in the language that must be escaped with "^" prefix
 	 * @return -- Built-in Function Implicit model as a string
 	 */
-	public String getBuiltinFunctionModel();
+	public String getBuiltinFunctionModel(List<String> reservedWords);
 	
 	/**
 	 * Method to take the name (local fragment) of a concept or construct (e.g., class or rule) and return the

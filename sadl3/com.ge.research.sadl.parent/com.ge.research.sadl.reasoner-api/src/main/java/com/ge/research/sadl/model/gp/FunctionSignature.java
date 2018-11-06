@@ -1,5 +1,7 @@
 package com.ge.research.sadl.model.gp;
 
+import java.util.List;
+
 public class FunctionSignature {
 	
 	private String name;
@@ -9,16 +11,21 @@ public class FunctionSignature {
 	
 	public FunctionSignature(String fullEquationDefinition, String uri){
 		String[] equationSplit = fullEquationDefinition.split("\\(|\\)", -1);
-		this.setName(equationSplit[0]);
+		String nm = equationSplit[0];
+		this.setName(nm);
 		this.setParameterTypes(equationSplit[1].split(",", -1));
 		this.setReturnType(equationSplit[2]);
-		this.setUri(uri);		
+		this.setUri(uri);	
 	}
 	
-	public String FunctionSignatureToSadlModelFormat(){
+	public String FunctionSignatureToSadlModelFormat(List<String> reservedWords){
 		StringBuilder sb = new StringBuilder();
 		sb.append("External ");
-		sb.append(this.getName());
+		String nm = this.getName();
+		if (reservedWords != null && reservedWords.contains(nm)) {
+			sb.append("^");
+		}
+		sb.append(nm);
 		sb.append("(");		
 		for(int i = 0; i < this.getParameterTypes().length; i++){
 			if(!this.getParameterTypes()[i].isEmpty()){

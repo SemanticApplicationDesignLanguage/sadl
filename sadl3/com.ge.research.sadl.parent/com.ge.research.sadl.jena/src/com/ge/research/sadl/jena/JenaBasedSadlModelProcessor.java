@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -52,7 +51,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -60,6 +58,8 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.Grammar;
+import org.eclipse.xtext.GrammarUtil;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
@@ -75,6 +75,7 @@ import org.eclipse.xtext.validation.CheckType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.SADLStandaloneSetup;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
@@ -119,6 +120,7 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.Update;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.parser.antlr.SADLParser;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.processing.OntModelProvider;
@@ -134,9 +136,9 @@ import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.AskExpression;
 import com.ge.research.sadl.sADL.BinaryOperation;
@@ -222,6 +224,8 @@ import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.inject.Injector;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
@@ -285,6 +289,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public enum AnnType {
 		ALIAS, NOTE
 	}
+
+	private static List<String> sadlTokens = null;
 
 	private List<String> comparisonOperators = Arrays.asList(">=", ">", "<=", "<", "==", "!=", "is", "=", "not",
 			"unique", "in", "contains", "does", /* "not", */"contain");
@@ -661,7 +667,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					root = new java.net.URI(lResourcePath.removeLastSegments(lResourcePath.segmentCount() - lWorkspaceRoot.segmentCount() - 2).toString());
 				}
 				if(resourceUri.isPlatformResource()) {
-					root = new java.net.URI("file:/" + lWorkspaceRoot.append(lResourcePath.segment(1)).toString());
+					root = lWorkspaceRoot.append(lResourcePath.segment(1)).toFile().toURI();
 				}
 			}
 			return Paths.get(root).resolve(UtilsForJena.OWL_MODELS_FOLDER_NAME).toString();
@@ -10737,7 +10743,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				.getConfigurationManagerForIDE(fixedModelFolderName, format);
 		ITranslator translator = configMgr.getTranslator();
 		// Second, obtain built-in function implicit model contents
-		String builtinFunctionModel = translator.getBuiltinFunctionModel();
+		String builtinFunctionModel = translator.getBuiltinFunctionModel(getSadlKeywords());
 		// Third, create built-in function implicit model file
 		File builtinFunctionFile = new File(projectRootPath + "/" + SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/"
 				+ SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME);
@@ -10746,6 +10752,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return builtinFunctionFile;
 	}
 
+	public static List<String> getSadlKeywords() {
+		if (sadlTokens == null) {
+			synchronized (JenaBasedSadlModelProcessor.class) {
+				if (sadlTokens == null) {
+					SADLStandaloneSetup setup = new SADLStandaloneSetup();
+					Injector injector = setup.createInjector();
+					SADLParser parser = injector.getInstance(SADLParser.class);
+					Grammar grammar = parser.getGrammarAccess().getGrammar();
+					sadlTokens = ImmutableList.copyOf(GrammarUtil.getAllKeywords(grammar));
+				}
+			}
+		}
+		return sadlTokens;
+	}
+	
 	static public String getSadlBaseModel() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<rdf:RDF\n");
