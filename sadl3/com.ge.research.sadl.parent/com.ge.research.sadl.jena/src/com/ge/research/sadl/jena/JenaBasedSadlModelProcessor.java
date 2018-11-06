@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -52,7 +51,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.URIUtil;
 import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -60,6 +58,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.Grammar;
 import org.eclipse.xtext.GrammarUtil;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
@@ -119,9 +118,9 @@ import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
-import com.ge.research.sadl.parser.antlr.SADLParser;
 import com.ge.research.sadl.model.gp.Update;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.parser.antlr.SADLParser;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.processing.OntModelProvider;
@@ -137,9 +136,9 @@ import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.AskExpression;
 import com.ge.research.sadl.sADL.BinaryOperation;
@@ -225,7 +224,7 @@ import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
-import com.google.inject.Inject;
+import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -653,7 +652,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					root = new java.net.URI(lResourcePath.removeLastSegments(lResourcePath.segmentCount() - lWorkspaceRoot.segmentCount() - 2).toString());
 				}
 				if(resourceUri.isPlatformResource()) {
-					root = new java.net.URI("file:/" + lWorkspaceRoot.append(lResourcePath.segment(1)).toString());
+					root = lWorkspaceRoot.append(lResourcePath.segment(1)).toFile().toURI();
 				}
 			}
 			return Paths.get(root).resolve(UtilsForJena.OWL_MODELS_FOLDER_NAME).toString();
@@ -10644,31 +10643,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return builtinFunctionFile;
 	}
 
-	@Inject SADLParser sparser;
-	public List<String> getSadlKeywords() {
-//		SADLParser sparser = null;
-		Set<String> sadlkeywords = null;
+	public static List<String> getSadlKeywords() {
 		if (sadlTokens == null) {
-//		    Injector injector = new SADLStandaloneSetup().createInjectorAndDoEMFRegistration();
-//		    sparser = injector.getInstance(SADLParser.class);
-			if (sparser != null) {
-				sadlkeywords = GrammarUtil.getAllKeywords(sparser.getGrammarAccess().getGrammar());
-				if (sadlkeywords != null) {
-					sadlTokens = new ArrayList<String>();
-					Iterator<String> itr = sadlkeywords.iterator();
-					int cntr = 0;
-					while (itr.hasNext()) {
-						String token = itr.next();
-						sadlTokens.add(token);
-	//					if (cntr++ > 0) {
-	//						sb.append(",");
-	//					}
-	//					sb.append("\"");
-	//					sb.append(token);
-	//					sb.append("\"");
-					}
-	//				sb.append("};");
-	//				System.out.println(sb.toString());
+			synchronized (JenaBasedSadlModelProcessor.class) {
+				if (sadlTokens == null) {
+					SADLStandaloneSetup setup = new SADLStandaloneSetup();
+					Injector injector = setup.createInjector();
+					SADLParser parser = injector.getInstance(SADLParser.class);
+					Grammar grammar = parser.getGrammarAccess().getGrammar();
+					sadlTokens = ImmutableList.copyOf(GrammarUtil.getAllKeywords(grammar));
 				}
 			}
 		}
