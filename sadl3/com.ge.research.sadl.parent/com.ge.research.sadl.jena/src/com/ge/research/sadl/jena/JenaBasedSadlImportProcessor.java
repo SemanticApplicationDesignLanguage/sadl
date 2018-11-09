@@ -67,7 +67,13 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 	    	File ffop = new File(owlFilePath);
 //	    	String sfop = ffop.toURI().toString();
 	        setResultingDataSource(null);
-			OwlToSadl owlToSadl = new OwlToSadl(ffop); //sfop,policyFileName);
+			OwlToSadl owlToSadl = null;
+			try {
+				owlToSadl = new OwlToSadl(ffop); //sfop,policyFileName);
+			}
+			catch (Exception e) {
+				
+			}
 			setResultingDataSource(owlToSadl.getSadlModel());
 		} catch (Exception e1) {
 	        if (getResultingDataSource() == null) {

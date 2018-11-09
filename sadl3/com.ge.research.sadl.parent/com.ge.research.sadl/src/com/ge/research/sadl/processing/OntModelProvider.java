@@ -30,6 +30,7 @@ public class OntModelProvider {
 	private static OntModel sadlBaseModel;
 	private static OntModel sadlListModel;
 	private static OntModel sadlDefaultsModel;
+	private static OntModel sadlServicesConfigConceptsModel;
 	
 	static class OntModelAdapter extends AdapterImpl  {
 		String modelName;
@@ -228,6 +229,14 @@ public class OntModelProvider {
 	
 	public static void setSadlDefaultsModel(OntModel model) {
 		sadlDefaultsModel = model;
+	}
+
+	public static OntModel getSadlServicesConfigConceptsModel() {
+		return sadlServicesConfigConceptsModel;
+	}
+
+	public static void setSadlServicesConfigConceptsModel(OntModel sadlServicesConfigConceptsModel) {
+		OntModelProvider.sadlServicesConfigConceptsModel = sadlServicesConfigConceptsModel;
 	}
 
 }

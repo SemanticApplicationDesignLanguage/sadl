@@ -1722,7 +1722,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	}
 	
 	@Override
-	public String getBuiltinFunctionModel(){
+	public String getBuiltinFunctionModel(List<String> reservedWords){
 		StringBuilder sb = new StringBuilder();
 		sb.append("uri \"");
 		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_URI);

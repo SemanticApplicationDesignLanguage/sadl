@@ -21,6 +21,7 @@ package com.ge.research.sadl.owl2sadl;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -32,10 +33,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.xtext.GrammarUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.SADLStandaloneSetup;
+import com.ge.research.sadl.parser.antlr.SADLParser;
+import com.google.inject.Injector;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -107,11 +113,12 @@ public class OwlToSadl {
 	
 	private HashMap<String, OntResource> restrictions = null;
 
-	// copied from com.ge.research.sadl.parser.antlr.internal.InternalSadlParser in com.ge.research.sadl project.
-    public static final String[] tokenNames = new String[] {
-        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "RULE_STRING", "RULE_EOS", "RULE_ID", "RULE_UNSIGNED_NUMBER", "RULE_INT", "RULE_ML_COMMENT", "RULE_SL_COMMENT", "RULE_WS", "RULE_ANY_OTHER", "'uri'", "'alias'", "'version'", "'import'", "'as'", "'('", "'note'", "')'", "'{'", "','", "'}'", "'or'", "'and'", "'is'", "'a'", "'top-level'", "'class'", "'are'", "'classes'", "'type'", "'of'", "'types'", "'must'", "'be'", "'one'", "'described'", "'by'", "'has'", "'with'", "'single'", "'value'", "'values'", "'A'", "'An'", "'an'", "'The'", "'the'", "'same'", "'disjoint'", "'not'", "'only'", "'can'", "'level'", "'default'", "'at'", "'least'", "'each'", "'always'", "'most'", "'exactly'", "'if'", "'relationship'", "'to'", "'annotation'", "'describes'", "'subject'", "'symmetrical'", "'transitive'", "'inverse'", "'any'", "'Rule'", "':'", "'given'", "'then'", "'Ask:'", "'Test:'", "'Expr:'", "'Print:'", "'Deductions'", "'Model'", "'Explain:'", "'select'", "'distinct'", "'*'", "'where'", "'order by'", "'asc'", "'desc'", "'||'", "'&&'", "'='", "'=='", "'!='", "'<'", "'<='", "'>'", "'>='", "'+'", "'-'", "'/'", "'^'", "'%'", "'!'", "'PI'", "'known'", "'['", "']'", "'true'", "'false'", "'.'", "'~'", "'string'", "'boolean'", "'decimal'", "'int'", "'long'", "'float'", "'double'", "'duration'", "'dateTime'", "'time'", "'date'", "'gYearMonth'", "'gYear'", "'gMonthDay'", "'gDay'", "'gMonth'", "'hexBinary'", "'base64Binary'", "'anyURI'", "'data'"
-    };
-
+	//	replaced with getSadlKeywords to get straight from grammar
+//	// copied from com.ge.research.sadl.parser.antlr.internal.InternalSadlParser in com.ge.research.sadl project.
+//    public static final String[] tokenNames = new String[] {
+//        "<invalid>", "<EOR>", "<DOWN>", "<UP>", "RULE_STRING", "RULE_EOS", "RULE_ID", "RULE_UNSIGNED_NUMBER", "RULE_INT", "RULE_ML_COMMENT", "RULE_SL_COMMENT", "RULE_WS", "RULE_ANY_OTHER", "'uri'", "'alias'", "'version'", "'import'", "'as'", "'('", "'note'", "')'", "'{'", "','", "'}'", "'or'", "'and'", "'is'", "'a'", "'top-level'", "'class'", "'are'", "'classes'", "'type'", "'of'", "'types'", "'must'", "'be'", "'one'", "'described'", "'by'", "'has'", "'with'", "'single'", "'value'", "'values'", "'A'", "'An'", "'an'", "'The'", "'the'", "'same'", "'disjoint'", "'not'", "'only'", "'can'", "'level'", "'default'", "'at'", "'least'", "'each'", "'always'", "'most'", "'exactly'", "'if'", "'relationship'", "'to'", "'annotation'", "'describes'", "'subject'", "'symmetrical'", "'transitive'", "'inverse'", "'any'", "'Rule'", "':'", "'given'", "'then'", "'Ask:'", "'Test:'", "'Expr:'", "'Print:'", "'Deductions'", "'Model'", "'Explain:'", "'select'", "'distinct'", "'*'", "'where'", "'order by'", "'asc'", "'desc'", "'||'", "'&&'", "'='", "'=='", "'!='", "'<'", "'<='", "'>'", "'>='", "'+'", "'-'", "'/'", "'^'", "'%'", "'!'", "'PI'", "'known'", "'['", "']'", "'true'", "'false'", "'.'", "'~'", "'string'", "'boolean'", "'decimal'", "'int'", "'long'", "'float'", "'double'", "'duration'", "'dateTime'", "'time'", "'date'", "'gYearMonth'", "'gYear'", "'gMonthDay'", "'gDay'", "'gMonth'", "'hexBinary'", "'base64Binary'", "'anyURI'", "'data'"
+//    };
+    		
 	private String baseUri;
 
 	private String sourceFile = null;
@@ -418,7 +425,8 @@ public class OwlToSadl {
 		setSpec(spec);
 		theModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM); //_RDFS_INF);
 		theModel.getDocumentManager().setProcessImports(false);
-        theModel.read(owlFile.getCanonicalPath());
+		theModel.read(new FileInputStream(owlFile), baseUri);
+//        theModel.read(owlFile.getCanonicalPath());
 	}
 
 	public OwlToSadl(String owlContent) {
@@ -427,6 +435,37 @@ public class OwlToSadl {
 		theModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM); //_RDFS_INF);
 		theModel.getDocumentManager().setProcessImports(false);
         theModel.read(new ByteArrayInputStream(owlContent.getBytes()), null);
+	}
+	
+	private List<String> getSadlKeywords() {
+		SADLParser sparser = null;
+		Set<String> sadlkeywords = null;
+		
+	    Injector injector = new SADLStandaloneSetup().createInjectorAndDoEMFRegistration();
+	    sparser = injector.getInstance(SADLParser.class);
+		if (sparser != null) {
+			sadlkeywords = GrammarUtil.getAllKeywords(sparser.getGrammarAccess().getGrammar());
+			if (sadlkeywords != null) {
+				StringBuilder sb = new StringBuilder("public static final String[] tokenNames = new String[] {");
+				List<String> tokens = new ArrayList<String>();
+				Iterator<String> itr = sadlkeywords.iterator();
+				int cntr = 0;
+				while (itr.hasNext()) {
+					String token = itr.next();
+					tokens.add(token);
+					if (cntr++ > 0) {
+						sb.append(",");
+					}
+					sb.append("\"");
+					sb.append(token);
+					sb.append("\"");
+				}
+				sb.append("};");
+				System.out.println(sb.toString());
+				return tokens;
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -521,17 +560,18 @@ public class OwlToSadl {
 		theBaseModel = ModelFactory.createOntologyModel(getSpec(), theModel);
 		
 		if (allTokens == null) {
-			allTokens = new ArrayList<String>();
-			String[] tokens = tokenNames;
-			for (int i = 0; i < tokens.length; i++) {
-				String strippedToken = stripQuotes(tokens[i]);
-				String[] words = strippedToken.trim().split(" ");
-				if (words != null) {
-					for (int j = 0; j < words.length; j++) {
-						allTokens.add(words[j]);
-					}
-				}
-			}
+//			allTokens = new ArrayList<String>();
+//			String[] tokens = tokenNames;
+//			for (int i = 0; i < tokens.length; i++) {
+//				String strippedToken = stripQuotes(tokens[i]);
+//				String[] words = strippedToken.trim().split(" ");
+//				if (words != null) {
+//					for (int j = 0; j < words.length; j++) {
+//						allTokens.add(words[j]);
+//					}
+//				}
+//			}
+			allTokens = getSadlKeywords();
 		}
 		if (sadlModel == null) {
 			sadlModel = new StringBuilder();
@@ -985,7 +1025,6 @@ public class OwlToSadl {
 	public static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
 	public static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
 	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
-
 
 	private boolean isImplicitUri(String impUri) {
 		if (impUri.equals(SADL_BASE_MODEL_URI)) {
@@ -1667,6 +1706,9 @@ public class OwlToSadl {
 	}
 
 	private List<Property> sortResources(List<Property> pList) {
+		if (pList.isEmpty()) {
+			return pList;
+		}
 		List<Property> newList = new ArrayList<Property>();
 		newList.add(pList.get(0));
 		for (int i = 1; i < pList.size(); i++) {
