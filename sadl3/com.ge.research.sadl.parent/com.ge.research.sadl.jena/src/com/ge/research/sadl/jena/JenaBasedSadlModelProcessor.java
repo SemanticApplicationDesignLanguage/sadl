@@ -199,6 +199,7 @@ import com.ge.research.sadl.sADL.SadlPropertyInitializer;
 import com.ge.research.sadl.sADL.SadlPropertyRestriction;
 import com.ge.research.sadl.sADL.SadlRangeRestriction;
 import com.ge.research.sadl.sADL.SadlResource;
+import com.ge.research.sadl.sADL.SadlReturnDeclaration;
 import com.ge.research.sadl.sADL.SadlSameAs;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.sADL.SadlStringLiteral;
@@ -985,6 +986,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		addAnnotationsToResource(modelOntology, anns);
 
 		OntModelProvider.registerResource(resource);
+		// clear any pre-existing content
+		List<Object> oc = OntModelProvider.getOtherContent(resource);
+		if (oc != null) {
+			Iterator<Object> itr = oc.iterator();
+			List<Equation> eqs = new ArrayList<Equation>();
+			while (itr.hasNext()) {
+				Object nxt = itr.next();
+				if (nxt instanceof Equation) {
+					eqs.add((Equation)nxt);
+				}
+			}
+			if (eqs.size() > 0) {
+				oc.removeAll(eqs);
+			}
+		}
 
 		try {
 			// Add SadlBaseModel to everything except the SadlImplicitModel
@@ -2713,7 +2729,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
 		SadlResource nm = element.getName();
 		EList<SadlParameterDeclaration> params = element.getParameter();
-		SadlTypeReference rtype = element.getReturnType();
+		EList<SadlReturnDeclaration> rtype = element.getReturnType();
 		Expression bdy = element.getBody();
 		Equation eq = createEquation(element, nm, rtype, params, bdy);
 		addEquation(element.eResource(), eq, nm);
@@ -2727,13 +2743,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	protected Equation createEquation(EquationStatement element, SadlResource nm, SadlTypeReference rtype,
+	protected Equation createEquation(EquationStatement element, SadlResource nm, EList<SadlReturnDeclaration> rtype,
 			EList<SadlParameterDeclaration> params, Expression bdy)
 			throws JenaProcessorException, TranslationException, InvalidNameException, InvalidTypeException {
 		Equation eq = new Equation(getDeclarationExtensions().getConcreteName(nm));
 		eq.setNamespace(getDeclarationExtensions().getConceptNamespace(nm));
-		Node rtnode = sadlTypeReferenceToNode(rtype);
-		eq.setReturnType(rtnode);
+		List<Node> rtypes = new ArrayList<Node>();
+		for (SadlReturnDeclaration srd : rtype) {
+			SadlTypeReference rt = srd.getType();
+			if (rt != null) {
+				Node rtnode = sadlTypeReferenceToNode(rt);
+				rtypes.add(rtnode);
+			}
+			else {
+				rtypes.add(null);
+			}
+		}
+		eq.setReturnTypes(rtypes);
 		if (params != null && params.size() > 0) {
 			List<Node> args = new ArrayList<Node>();
 			List<Node> argtypes = new ArrayList<Node>();
@@ -2803,7 +2829,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// }
 		SadlResource nm = element.getName();
 		EList<SadlParameterDeclaration> params = element.getParameter();
-		SadlTypeReference rtype = element.getReturnType();
+		EList<SadlReturnDeclaration> rtype = element.getReturnType();
 		String location = element.getLocation();
 		Equation eq = createExternalEquation(nm, uri, rtype, params, location);
 		addEquation(element.eResource(), eq, nm);
@@ -2824,7 +2850,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	protected Equation createExternalEquation(SadlResource nm, String uri, SadlTypeReference rtype,
+	protected Equation createExternalEquation(SadlResource nm, String uri, EList<SadlReturnDeclaration> rtype,
 			EList<SadlParameterDeclaration> params, String location)
 			throws JenaProcessorException, TranslationException, InvalidNameException {
 		Equation eq = new Equation(getDeclarationExtensions().getConcreteName(nm));
@@ -2834,10 +2860,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (location != null) {
 			eq.setLocation(location);
 		}
-		if (rtype != null) {
-			Node rtnode = sadlTypeReferenceToNode(rtype);
-			eq.setReturnType(rtnode);
+		List<Node> rtypes = new ArrayList<Node>();
+		for (SadlReturnDeclaration srd : rtype) {
+			SadlTypeReference rt = srd.getType();
+			if (rt != null) {
+				Node rtnode = sadlTypeReferenceToNode(rt);
+				rtypes.add(rtnode);
+			}
+			else {
+				rtypes.add(null);
+			}
 		}
+		eq.setReturnTypes(rtypes);
 		if (params != null && params.size() > 0) {
 			if (params.get(0).getUnknown() == null) {
 				List<Node> args = new ArrayList<Node>();
@@ -3151,6 +3185,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// is this a variable definition?
 		boolean isLeftVariableDefinition = false;
 		Name leftVariableName = null;
+		ValueTable leftVariableNames = null;
 		Expression leftVariableDefn = null;
 		TypeCheckInfo leftVariableDefnTci = null;
 		boolean leftVariableDefnTripleMissingObject = false;
@@ -3161,16 +3196,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Name rightVariableName = null;
 		Expression rightVariableDefn = null;
 		try {
-			if (expr.getLeft() instanceof Name && isVariableDefinition((Name) expr.getLeft())) {
+			if (isBinaryOpVariableDefinition(expr.getLeft())) {
+//			if (expr.getLeft() instanceof Name && isVariableDefinition((Name) expr.getLeft())) {
 				// left is variable name, right is variable definition
 				isLeftVariableDefinition = true;
-				leftVariableName = (Name) expr.getLeft();
+				if (expr.getLeft() instanceof Name) {
+					leftVariableName = (Name) expr.getLeft();
+				}
+				else if (expr.getLeft() instanceof ValueTable) {
+					leftVariableNames = (ValueTable)expr.getLeft();
+				}
 				leftVariableDefn = expr.getRight();
 			}
-			if (expr.getRight() instanceof Name && isVariableDefinition((Name) expr.getRight())) {
+			if (isBinaryOpVariableDefinition(expr.getRight())) {
+//			if (expr.getRight() instanceof Name && isVariableDefinition((Name) expr.getRight())) {
 				// right is variable name, left is variable definition
 				isRightVariableDefinition = true;
-				rightVariableName = (Name) expr.getRight();
+				if (expr.getRight() instanceof Name) {
+					rightVariableName = (Name) expr.getRight();
+				}
+				else if (expr.getRight() instanceof ValueTable) {
+					addError("Multi-variable definition on right is not supported at this time", expr);
+				}
 				rightVariableDefn = expr.getLeft();
 				
 				if (EcoreUtil2.getContainerOfType(expr, QueryStatement.class) == null
@@ -3186,190 +3233,216 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 
 		if (isLeftVariableDefinition) {
-			try {
-				VariableNode leftVar = createVariable(
-						getDeclarationExtensions().getConceptUri(leftVariableName.getName()), expr);
-				if (leftVar == null) { // this can happen on clean/build when file is open in editor
-					return null;
-				}
-				addVariableNamingEObject(leftVar, leftVariableName.getName());
-				Declaration varkey = getLeftDeclaration(leftVariableDefn);
-				if (varkey != null) {
-					setVariableInDefinition(varkey, leftVar);
-				}
-				Object rest = null;
-				Object leftTranslatedDefn = processExpression(leftVariableDefn);
-				if (varkey != null) {
-					setVariableInDefinition(varkey, null);
-				}
-				if (leftTranslatedDefn instanceof Object[] && ((Object[]) leftTranslatedDefn).length == 2) {
-					rest = ((Object[]) leftTranslatedDefn)[1];
-					if (((Object[]) leftTranslatedDefn)[0].equals(leftVar)) {
+			List<Name> variableNames = new ArrayList<Name>();
+			if (leftVariableName != null) {
+				variableNames.add(leftVariableName);
+			}
+			else if (leftVariableNames != null) {
+				variableNames.addAll(getNamesFromValueTable(leftVariableNames));
+			}
+			int leftMultiVarIndex = 0;
+			Object leftTranslatedDefn = null;
+			for (Name varnm : variableNames) {
+				try {
+					VariableNode leftVar = createVariable(
+							getDeclarationExtensions().getConceptUri(varnm.getName()), expr);
+					if (leftVar == null) { // this can happen on clean/build when file is open in editor
+						return null;
+					}
+					addVariableNamingEObject(leftVar, varnm.getName());
+					Declaration varkey = getLeftDeclaration(leftVariableDefn);
+					if (varkey != null) {
+						setVariableInDefinition(varkey, leftVar);
+					}
+					Object rest = null;
+					if (leftTranslatedDefn == null) {
+						leftTranslatedDefn = processExpression(leftVariableDefn);
+					}
+					if (varkey != null) {
+						setVariableInDefinition(varkey, null);
+					}
+					if (leftTranslatedDefn instanceof Object[] && ((Object[]) leftTranslatedDefn).length == 2) {
+						rest = ((Object[]) leftTranslatedDefn)[1];
+						if (((Object[]) leftTranslatedDefn)[0].equals(leftVar)) {
+							Node vtype = leftVar.getType();
+							if (vtype instanceof NamedNode) {
+								leftVariableDefnTripleMissingObject = checkForMissingObjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+								if (!leftVariableDefnTripleMissingObject) {
+									leftVariableDefnTripleMissingSubject = checkForMissingSubjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+								}
+								addVariableDefinition(leftVar, rest, (NamedNode) vtype, expr);
+							}
+							return rest;
+						}
+						leftTranslatedDefn = ((Object[]) leftTranslatedDefn)[0];
+					}
+					else {
 						Node vtype = leftVar.getType();
+						if (vtype == null && leftVariableDefn != null) {
+							leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
+							if (leftVariableNames != null && leftVariableDefnTci.getCompoundTypes() != null) {
+								leftVariableDefnTci = leftVariableDefnTci.getCompoundTypes().get(leftMultiVarIndex);
+							}
+							if (leftVariableDefnTci != null && leftVariableDefnTci.getTypeCheckType() != null) {
+								vtype = leftVariableDefnTci.getTypeCheckType();
+								if (vtype != null) {
+									validateNode(vtype);
+								}
+							}
+						}
 						if (vtype instanceof NamedNode) {
+							leftVar.setType(vtype);
 							leftVariableDefnTripleMissingObject = checkForMissingObjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
 							if (!leftVariableDefnTripleMissingObject) {
 								leftVariableDefnTripleMissingSubject = checkForMissingSubjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
 							}
-							addVariableDefinition(leftVar, rest, (NamedNode) vtype, expr);
 						}
-						return rest;
+						else if (vtype != null) {
+							throw new TranslationException("This shouldn't happen!");
+						}
 					}
-					leftTranslatedDefn = ((Object[]) leftTranslatedDefn)[0];
-				}
-				else {
-					Node vtype = leftVar.getType();
-					if (vtype == null && leftVariableDefn != null) {
-						leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
-						if (leftVariableDefnTci != null && leftVariableDefnTci.getTypeCheckType() != null) {
-							vtype = leftVariableDefnTci.getTypeCheckType();
-							if (vtype != null) {
-								validateNode(vtype);
+					NamedNode leftDefnType = null;
+					if (leftTranslatedDefn instanceof NamedNode) {
+						if (leftTranslatedDefn instanceof VariableNode) {
+							leftDefnType = (NamedNode) ((VariableNode) leftTranslatedDefn).getType();
+						} else {
+							leftDefnType = (NamedNode) leftTranslatedDefn;
+						}
+						setVarType(leftVar, leftDefnType, (Boolean) null, leftVariableDefn);
+						if (isRightVariableDefinition) {
+							// 11/14/2018 awc: this can't happen--we're already in a isLeftVariableDefinition true so this can't be true
+							Object rightTranslatedDefn = processExpression(rightVariableDefn);
+							NamedNode rightDefnType = null;
+							VariableNode rightVar = createVariable(
+									getDeclarationExtensions().getConceptUri(rightVariableName.getName()), expr);
+							if (rightVar == null) {
+								return null;
 							}
+							addVariableNamingEObject(rightVar, rightVariableName.getName());
+							if (rightTranslatedDefn instanceof NamedNode) {
+								rightDefnType = (NamedNode) rightTranslatedDefn;
+								setVarType(rightVar, rightDefnType, (Boolean) null, rightVariableDefn);
+							}
+							return combineRest(createBinaryBuiltin(expr.getOp(), leftVar, rightVar), rest);
 						}
-					}
-					if (vtype instanceof NamedNode) {
-						leftVar.setType(vtype);
-						leftVariableDefnTripleMissingObject = checkForMissingObjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
-						if (!leftVariableDefnTripleMissingObject) {
-							leftVariableDefnTripleMissingSubject = checkForMissingSubjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
+						// TODO shouldn't generate triple for type as variable contains all type info.
+						// should just return rest?
+						// problem is that rest can be null and to just return the variable doesn't work
+						// because callers expect GraphPatternElements returned
+						// normally the variable will be in a TripleElement and/or a BuiltinElement and
+						// could be dropped entirely
+						// but for now returning this extra type although for a list range will be
+						// incorrect? awc 12/6/2017
+						TripleElement trel;
+						if (leftVariableDefn instanceof Declaration) {
+							trel = new TripleElement(leftVar, new RDFTypeNode(), (Node) leftTranslatedDefn);
 						}
-					}
-					else if (vtype != null) {
-						throw new TranslationException("This shouldn't happen!");
-					}
-				}
-				NamedNode leftDefnType = null;
-				if (leftTranslatedDefn instanceof NamedNode) {
-					if (leftTranslatedDefn instanceof VariableNode) {
-						leftDefnType = (NamedNode) ((VariableNode) leftTranslatedDefn).getType();
+						else {
+							trel = new TripleElement(leftVar, new RDFTypeNode(), leftDefnType);
+						}
+						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
+						trel.setSourceType(TripleSourceType.SPV);
+						return combineRest(trel, rest);
 					} else {
-						leftDefnType = (NamedNode) leftTranslatedDefn;
-					}
-					setVarType(leftVar, leftDefnType, (Boolean) null, leftVariableDefn);
-					if (isRightVariableDefinition) {
-						Object rightTranslatedDefn = processExpression(rightVariableDefn);
-						NamedNode rightDefnType = null;
-						VariableNode rightVar = createVariable(
-								getDeclarationExtensions().getConceptUri(rightVariableName.getName()), expr);
-						if (rightVar == null) {
-							return null;
+						if (leftVariableDefnTci == null) {
+							leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
 						}
-						addVariableNamingEObject(rightVar, rightVariableName.getName());
-						if (rightTranslatedDefn instanceof NamedNode) {
-							rightDefnType = (NamedNode) rightTranslatedDefn;
-							setVarType(rightVar, rightDefnType, (Boolean) null, rightVariableDefn);
-						}
-						return combineRest(createBinaryBuiltin(expr.getOp(), leftVar, rightVar), rest);
-					}
-					// TODO shouldn't generate triple for type as variable contains all type info.
-					// should just return rest?
-					// problem is that rest can be null and to just return the variable doesn't work
-					// because callers expect GraphPatternElements returned
-					// normally the variable will be in a TripleElement and/or a BuiltinElement and
-					// could be dropped entirely
-					// but for now returning this extra type although for a list range will be
-					// incorrect? awc 12/6/2017
-					TripleElement trel;
-					if (leftVariableDefn instanceof Declaration) {
-						trel = new TripleElement(leftVar, new RDFTypeNode(), (Node) leftTranslatedDefn);
-					}
-					else {
-						trel = new TripleElement(leftVar, new RDFTypeNode(), leftDefnType);
-					}
-					addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
-					trel.setSourceType(TripleSourceType.SPV);
-					return combineRest(trel, rest);
-				} else {
-					if (leftVariableDefnTci == null) {
-						leftVariableDefnTci = getModelValidator().getType(leftVariableDefn);
-					}
-					if (leftVariableDefnTci != null) {
-						if (leftVar.getType() == null) {
-							if (leftVariableDefnTci.getCompoundTypes() != null) {
-								Object jct = compoundTypeCheckTypeToNode(leftVariableDefnTci, leftVariableDefn);
-								if (jct != null && jct instanceof Junction) {
-									setVarType(leftVar, nodeCheck(jct), leftVariableDefnTci.isList(), leftVariableDefn);
-								} else {
-									addTypeCheckingError(
-											"Compound type check did not process into expected result for variable type",
-											leftVariableDefn);
+						if (leftVariableDefnTci != null) {
+							if (leftVar.getType() == null) {
+								// can only be multiple variables on left if the right is a multi-return value function, which will be a BuiltinElement as the translation
+								if (leftVariableDefnTci.getCompoundTypes() != null) {
+									Object jct = compoundTypeCheckTypeToNode(leftVariableDefnTci, leftVariableDefn);
+									if (jct != null && jct instanceof Junction) {
+										setVarType(leftVar, nodeCheck(jct), leftVariableDefnTci.isList(), leftVariableDefn);
+									} else {
+										addTypeCheckingError(
+												"Compound type check did not process into expected result for variable type",
+												leftVariableDefn);
+									}
+								} else if (leftVariableDefnTci.getTypeCheckType() != null
+										&& leftVariableDefnTci.getTypeCheckType() instanceof NamedNode) {
+									leftDefnType = (NamedNode) leftVariableDefnTci.getTypeCheckType();
+									setVarType(leftVar, leftDefnType, leftVariableDefnTci.isList(), leftVariableDefn);
 								}
-							} else if (leftVariableDefnTci.getTypeCheckType() != null
-									&& leftVariableDefnTci.getTypeCheckType() instanceof NamedNode) {
+							}
+							if (leftVariableDefnTci.getTypeCheckType() != null && leftVariableDefnTci.getTypeCheckType() instanceof NamedNode) {
 								leftDefnType = (NamedNode) leftVariableDefnTci.getTypeCheckType();
-								setVarType(leftVar, leftDefnType, leftVariableDefnTci.isList(), leftVariableDefn);
+							}
+							if (leftTranslatedDefn instanceof GraphPatternElement) {
+								leftVar.addDefinition(nodeCheck((GraphPatternElement) leftTranslatedDefn));
+							}
+						} else if (leftTranslatedDefn instanceof GraphPatternElement) {
+							leftVar.addDefinition(nodeCheck((GraphPatternElement) leftTranslatedDefn));
+						} else if (leftTranslatedDefn instanceof List<?>) {
+	//						leftVar.setDefinition((List<GraphPatternElement>) leftTranslatedDefn);
+							throw new TranslationException("This shouldn't happen!");
+						}
+						if (leftVariableDefnTripleMissingObject) {
+							// this is a variable definition and the definition is a triple and the triple
+							// had no object
+	//						((TripleElement) leftTranslatedDefn).setObject(leftVar);
+	//						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
+							return leftTranslatedDefn;
+						} else if (leftVariableDefnTripleMissingSubject) {
+							return leftTranslatedDefn;
+						} else if (leftTranslatedDefn instanceof BuiltinElement) {
+							int eArgCnt = ((BuiltinElement) leftTranslatedDefn).getExpectedArgCount();
+							int currentArgCnt = ((BuiltinElement) leftTranslatedDefn).getArguments() != null
+									? ((BuiltinElement) leftTranslatedDefn).getArguments().size()
+									: 0;
+							if (eArgCnt > currentArgCnt) {
+								((BuiltinElement) leftTranslatedDefn).addArgument(leftVar);
+								if (leftMultiVarIndex == variableNames.size() - 1) {
+									// all variables processed
+									return leftTranslatedDefn;
+								}
 							}
 						}
-						if (leftVariableDefnTci.getTypeCheckType() != null && leftVariableDefnTci.getTypeCheckType() instanceof NamedNode) {
-							leftDefnType = (NamedNode) leftVariableDefnTci.getTypeCheckType();
-						}
-						if (leftTranslatedDefn instanceof GraphPatternElement) {
-							leftVar.addDefinition(nodeCheck((GraphPatternElement) leftTranslatedDefn));
-						}
-					} else if (leftTranslatedDefn instanceof GraphPatternElement) {
-						leftVar.addDefinition(nodeCheck((GraphPatternElement) leftTranslatedDefn));
-					} else if (leftTranslatedDefn instanceof List<?>) {
-//						leftVar.setDefinition((List<GraphPatternElement>) leftTranslatedDefn);
-						throw new TranslationException("This shouldn't happen!");
-					}
-					if (leftVariableDefnTripleMissingObject) {
-						// this is a variable definition and the definition is a triple and the triple
-						// had no object
-//						((TripleElement) leftTranslatedDefn).setObject(leftVar);
-//						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
-						return leftTranslatedDefn;
-					} else if (leftVariableDefnTripleMissingSubject) {
-						return leftTranslatedDefn;
-					} else if (leftTranslatedDefn instanceof BuiltinElement) {
-						int eArgCnt = ((BuiltinElement) leftTranslatedDefn).getExpectedArgCount();
-						int currentArgCnt = ((BuiltinElement) leftTranslatedDefn).getArguments() != null
-								? ((BuiltinElement) leftTranslatedDefn).getArguments().size()
-								: 0;
-						if (eArgCnt == currentArgCnt + 1) {
-							((BuiltinElement) leftTranslatedDefn).addArgument(leftVar);
+						else if (leftTranslatedDefn instanceof TripleElement
+								&& ((TripleElement) leftTranslatedDefn).getSubject() instanceof VariableNode) {
+							replaceVariable((TripleElement) leftTranslatedDefn, leftVar);
+							addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
 							return leftTranslatedDefn;
+						} else {
+							Node defn = nodeCheck(leftTranslatedDefn);
+							GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, defn);
+							if (bi instanceof BuiltinElement && (defn instanceof com.ge.research.sadl.model.gp.Literal || defn instanceof ConstantNode || 
+									(defn instanceof NamedNode && ((NamedNode)defn).getNodeType().equals(NodeType.InstanceNode)))) {
+								((BuiltinElement)bi).setFuncName("assign");
+							}
+							addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
+							if (leftMultiVarIndex == variableNames.size() - 1) {
+								// all variables processed
+								return bi;
+							}
 						}
 					}
-					if (leftTranslatedDefn instanceof TripleElement
-							&& ((TripleElement) leftTranslatedDefn).getSubject() instanceof VariableNode) {
-						replaceVariable((TripleElement) leftTranslatedDefn, leftVar);
-						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
-						return leftTranslatedDefn;
-					} else {
-						Node defn = nodeCheck(leftTranslatedDefn);
-						GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, defn);
-						if (bi instanceof BuiltinElement && (defn instanceof com.ge.research.sadl.model.gp.Literal || defn instanceof ConstantNode || 
-								(defn instanceof NamedNode && ((NamedNode)defn).getNodeType().equals(NodeType.InstanceNode)))) {
-							((BuiltinElement)bi).setFuncName("assign");
-						}
-						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
-						return bi;
-					}
+				} catch (URISyntaxException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (DontTypeCheckException e) {
+					// TODO Auto-generated catch block
+	//				e.printStackTrace();
+				} catch (CircularDefinitionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (CircularDependencyException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (PropertyWithoutRangeException e) {
+					addTypeCheckingError("Property does not have a range", leftVariableDefn);
+				} catch (PrefixNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (DontTypeCheckException e) {
-				// TODO Auto-generated catch block
-//				e.printStackTrace();
-			} catch (CircularDefinitionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (CircularDependencyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (PropertyWithoutRangeException e) {
-				addTypeCheckingError("Property does not have a range", leftVariableDefn);
-			} catch (PrefixNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				leftMultiVarIndex++;
+				leftVariableDefnTci = null;
 			}
 		} else if (isRightVariableDefinition) { // only, left is not variable definition
 			/*
@@ -3463,6 +3536,90 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			checkForArticleForNameInBuiltinElement(rexpr, result);
 		}
 		return result;
+	}
+
+	/**
+	 * Method to get all of the Names contained in a ValueTable
+	 * @param expr
+	 * @return
+	 */
+	private Collection<? extends Name> getNamesFromValueTable(ValueTable expr) {
+		List<Name> names = new ArrayList<Name>();
+		ValueRow row = ((ValueTable) expr).getRow();
+		if (row == null) {
+			EList<ValueRow> rows = ((ValueTable) expr).getRows();
+			if (rows == null || rows.size() == 0) {
+				ValueTable vtbl = ((ValueTable) expr).getValueTable();
+				if (vtbl != null) {
+					row = vtbl.getRow();
+				}
+				
+			}
+		}
+		if (row != null) {
+			EList<Expression> vals = row.getExplicitValues();
+			if (vals != null) {
+				if (vals.size() > 1) {
+					for (Expression val : vals) {
+						if (val instanceof Name) {
+							names.add((Name) val);
+						}
+					}	
+				}
+			}
+		}
+		return names;
+	}
+
+	/**
+	 * Method to look at an expression and decide if it is the variable(s) side of a binary operation defining the variable(s).
+	 * Note that multiple variables only occur in the context of a rule with variables accepting the return values of an equation
+	 * returning multiple values.
+	 * @param expr
+	 * @return
+	 * @throws CircularDefinitionException
+	 */
+	private boolean isBinaryOpVariableDefinition(Expression expr) throws CircularDefinitionException {
+		if (expr instanceof Name) {
+			if(isVariableDefinition((Name) expr)) {
+				return true;
+			}
+		}
+		if (EcoreUtil2.getContainerOfType(expr, RuleStatement.class) != null) {
+			// in a rule
+			if (expr instanceof ValueTable) {
+				ValueRow row = ((ValueTable) expr).getRow();
+				if (row == null) {
+					EList<ValueRow> rows = ((ValueTable) expr).getRows();
+					if (rows == null || rows.size() == 0) {
+						ValueTable vtbl = ((ValueTable) expr).getValueTable();
+						if (vtbl != null) {
+							row = vtbl.getRow();
+						}
+						
+					}
+				}
+				if (row != null) {
+					EList<Expression> vals = row.getExplicitValues();
+					if (vals != null) {
+						if (vals.size() > 1) {
+							boolean allVariableDefs = true;
+							for (Expression val : vals) {
+								if (val instanceof Name && getDeclarationExtensions().getOntConceptType(((Name) val).getName())
+										.equals(OntConceptType.VARIABLE)) {
+									if (!getDeclarationExtensions().getDeclaration(((Name) val).getName()).equals((Name) val)) {
+										allVariableDefs = false;
+									}
+								}
+							}	
+							return allVariableDefs;
+						}
+					}
+					
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -5154,6 +5311,61 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (arg instanceof GraphPatternElement) {
 						((GraphPatternElement) arg).setEmbedded(true);
 					}
+				}
+			}
+		}
+		if (expr.getName() != null) {
+			EObject contr = expr.getName().eContainer();
+			EList<SadlParameterDeclaration> argtypes = null;
+			EList<SadlReturnDeclaration> rtypes = null;
+			if (contr instanceof ExternalEquationStatement) {
+				argtypes = ((ExternalEquationStatement)contr).getParameter();
+				rtypes = ((ExternalEquationStatement)contr).getReturnType();
+			}
+			else if (contr instanceof EquationStatement) {
+				argtypes = ((EquationStatement)contr).getParameter();
+				rtypes = ((EquationStatement)contr).getReturnType();
+			}
+			if (argtypes != null) {
+				List<Node> argTypeNodes = new ArrayList<Node>();
+				for (SadlParameterDeclaration spd : argtypes) {
+					try {
+						SadlTypeReference typ = spd.getType();
+						if (typ != null) {
+							NamedNode typnode = sadlTypeReferenceToNode(typ);
+							if (typnode != null) {
+								argTypeNodes.add(typnode);
+							}	
+						}
+					} catch (JenaProcessorException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				builtin.setArgumentTypes(argTypeNodes);
+				builtin.setExpectedArgCount(argTypeNodes.size());
+			}
+			if (rtypes != null) {
+				List<Node> rTypeNodes = new ArrayList<Node>();
+				for (SadlReturnDeclaration srd : rtypes) {
+					try {
+						SadlTypeReference typ = srd.getType();
+						if (typ != null) {
+							NamedNode typnode = sadlTypeReferenceToNode(typ);
+							if (typnode != null) {
+								rTypeNodes.add(typnode);
+							}
+						}
+					} catch (JenaProcessorException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+				}
+				builtin.setReturnTypes(rTypeNodes);
+				if (rTypeNodes.size() > 1 || 
+						(rTypeNodes.size() > 0 && !rTypeNodes.get(0).getURI().equals(XSD.xboolean.getURI()))) {
+					builtin.setExpectedArgCount(builtin.getExpectedArgCount() + rTypeNodes.size());
 				}
 			}
 		}
