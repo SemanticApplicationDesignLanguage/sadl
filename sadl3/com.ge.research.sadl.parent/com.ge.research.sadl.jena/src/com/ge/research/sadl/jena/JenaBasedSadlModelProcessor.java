@@ -3262,6 +3262,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 						return combineRest(createBinaryBuiltin(expr.getOp(), leftVar, rightVar), rest);
 					}
+					if(((NamedNode) leftTranslatedDefn).isList() && ((NamedNode) leftTranslatedDefn).getListLiterals() != null) {
+						addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
+						GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, leftTranslatedDefn);
+						((BuiltinElement)bi).setFuncName("assign");
+						return combineRest(bi, rest);
+					}
 					// TODO shouldn't generate triple for type as variable contains all type info.
 					// should just return rest?
 					// problem is that rest can be null and to just return the variable doesn't work
