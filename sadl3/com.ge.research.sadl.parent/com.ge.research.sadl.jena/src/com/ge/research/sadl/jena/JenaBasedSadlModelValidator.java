@@ -5552,8 +5552,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	public boolean validateBinaryOperationByParts(EquationStatement element, EList<SadlReturnDeclaration> rtype,
 			Expression bdy, String op, StringBuilder errorMessageBuilder, boolean forceValidation) {
-		// TODO Auto-generated method stub
-		return false;
+		if (rtype != null ) {
+			if (rtype.size() == 1) {
+				SadlReturnDeclaration typ = rtype.get(0);
+				if (typ.getType() != null) {
+					return validateBinaryOperationByParts(element, typ.getType(), bdy, op, errorMessageBuilder, forceValidation);
+				}
+			}
+		}
+		return true;	// this will need more checking when the body grammar is sufficent to support multiple return values
 	}
 
 }

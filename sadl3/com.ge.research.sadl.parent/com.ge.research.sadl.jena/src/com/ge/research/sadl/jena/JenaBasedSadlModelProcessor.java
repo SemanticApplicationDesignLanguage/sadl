@@ -3377,6 +3377,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	//						leftVar.setDefinition((List<GraphPatternElement>) leftTranslatedDefn);
 							throw new TranslationException("This shouldn't happen!");
 						}
+						
+						boolean iterationComplete = false;
 						if (leftVariableDefnTripleMissingObject) {
 							// this is a variable definition and the definition is a triple and the triple
 							// had no object
@@ -3396,24 +3398,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									// all variables processed
 									return leftTranslatedDefn;
 								}
+								iterationComplete = true;
 							}
 						}
-						else if (leftTranslatedDefn instanceof TripleElement
-								&& ((TripleElement) leftTranslatedDefn).getSubject() instanceof VariableNode) {
-							replaceVariable((TripleElement) leftTranslatedDefn, leftVar);
-							addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
-							return leftTranslatedDefn;
-						} else {
-							Node defn = nodeCheck(leftTranslatedDefn);
-							GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, defn);
-							if (bi instanceof BuiltinElement && (defn instanceof com.ge.research.sadl.model.gp.Literal || defn instanceof ConstantNode || 
-									(defn instanceof NamedNode && ((NamedNode)defn).getNodeType().equals(NodeType.InstanceNode)))) {
-								((BuiltinElement)bi).setFuncName("assign");
-							}
-							addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
-							if (leftMultiVarIndex == variableNames.size() - 1) {
-								// all variables processed
-								return bi;
+						if (!iterationComplete) {
+							if (leftTranslatedDefn instanceof TripleElement
+									&& ((TripleElement) leftTranslatedDefn).getSubject() instanceof VariableNode) {
+								replaceVariable((TripleElement) leftTranslatedDefn, leftVar);
+								addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
+								return leftTranslatedDefn;
+							} else {
+								Node defn = nodeCheck(leftTranslatedDefn);
+								GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, defn);
+								if (bi instanceof BuiltinElement && (defn instanceof com.ge.research.sadl.model.gp.Literal || defn instanceof ConstantNode || 
+										(defn instanceof NamedNode && ((NamedNode)defn).getNodeType().equals(NodeType.InstanceNode)))) {
+									((BuiltinElement)bi).setFuncName("assign");
+								}
+								addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
+								if (leftMultiVarIndex == variableNames.size() - 1) {
+									// all variables processed
+									return bi;
+								}
 							}
 						}
 					}
@@ -3441,8 +3446,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				if (leftMultiVarIndex < variableNames.size() - 1) {
+					leftVariableDefnTci = null;
+				}
 				leftMultiVarIndex++;
-				leftVariableDefnTci = null;
 			}
 		} else if (isRightVariableDefinition) { // only, left is not variable definition
 			/*
