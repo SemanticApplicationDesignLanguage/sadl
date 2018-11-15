@@ -6,7 +6,7 @@ public class FunctionSignature {
 	
 	private String name;
 	private String[] parameterTypes;
-	private String returnType;
+	private String[] returnTypes;
 	private String uri;
 	
 	public FunctionSignature(String fullEquationDefinition, String uri){
@@ -14,7 +14,7 @@ public class FunctionSignature {
 		String nm = equationSplit[0];
 		this.setName(nm);
 		this.setParameterTypes(equationSplit[1].split(",", -1));
-		this.setReturnType(equationSplit[2]);
+		this.setReturnTypes(equationSplit[2].split(",", -1));
 		this.setUri(uri);	
 	}
 	
@@ -41,7 +41,14 @@ public class FunctionSignature {
 			}
 		}
 		sb.append(") returns ");
-		sb.append(this.getReturnType());
+		for (int i = 0; i < this.getReturnTypes().length; i++) {
+			if (!this.getReturnTypes()[i].isEmpty()) {
+				sb.append(this.getReturnTypes()[i]);
+				if ( i != this.getReturnTypes().length - 1) {
+					sb.append(", ");
+				}
+			}
+		}
 		sb.append(":\n\""); 
 		sb.append(this.getUri());
 		sb.append("\".");
@@ -65,12 +72,12 @@ public class FunctionSignature {
 		this.uri = uri;
 	}
 
-	public String getReturnType() {
-		return returnType;
+	public String[] getReturnTypes() {
+		return returnTypes;
 	}
 
-	private void setReturnType(String returnType) {
-		this.returnType = returnType;
+	private void setReturnTypes(String[] returnTypes) {
+		this.returnTypes = returnTypes;
 	}
 
 	public String[] getParameterTypes() {

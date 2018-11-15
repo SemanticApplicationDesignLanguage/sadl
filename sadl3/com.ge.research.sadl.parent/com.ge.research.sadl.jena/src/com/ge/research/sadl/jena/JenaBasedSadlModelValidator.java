@@ -80,6 +80,7 @@ import com.ge.research.sadl.sADL.SadlProperty;
 import com.ge.research.sadl.sADL.SadlPropertyCondition;
 import com.ge.research.sadl.sADL.SadlPropertyInitializer;
 import com.ge.research.sadl.sADL.SadlResource;
+import com.ge.research.sadl.sADL.SadlReturnDeclaration;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
 import com.ge.research.sadl.sADL.SadlStringLiteral;
 import com.ge.research.sadl.sADL.SadlTypeReference;
@@ -93,6 +94,7 @@ import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.UnitExpression;
+import com.ge.research.sadl.sADL.ValueRow;
 import com.ge.research.sadl.sADL.ValueTable;
 import com.ge.research.sadl.sADL.impl.ElementInListImpl;
 import com.ge.research.sadl.sADL.impl.ExternalEquationStatementImpl;
@@ -1401,6 +1403,33 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			returnedTci =  getType((SadlConstantLiteral)expression);
 		}
 		else if(expression instanceof ValueTable){
+			ValueTable vt = null;
+			ValueRow row = ((ValueTable) expression).getRow();
+			if (row == null) {
+				EList<ValueRow> rows = ((ValueTable) expression).getRows();
+				if (rows == null || rows.size() == 0) {
+					vt = ((ValueTable) expression).getValueTable();
+					if (vt != null) {
+						row = vt.getRow();
+					}
+				}
+			}
+			if (row != null) {
+				EList<Expression> vals = row.getExplicitValues();
+				if (vals != null) {
+					if (vals.size() > 1) {
+						TypeCheckInfo tci = new TypeCheckInfo(new ConceptName("ValueTable"));
+						for (Expression val : vals) {
+							TypeCheckInfo rttci = getType(val);
+							tci.addCompoundType(rttci);
+						}	
+						return tci;
+					}
+					else {
+						return getType(vals.get(0));
+					}
+				}
+			}
 			ConceptName declarationConceptName = new ConceptName("TODO");
 			returnedTci =  new TypeCheckInfo(declarationConceptName, null, this, expression);
 		}
@@ -2968,17 +2997,31 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}else if(fsr.eContainer() instanceof ExternalEquationStatement){
 			ExternalEquationStatement ees = (ExternalEquationStatement)fsr.eContainer();
 			if(ees != null) {
-				if (ees.getUnknown() == null){
-					return getType(ees.getReturnType());
-				}
-				else {
-					throw new DontTypeCheckException("External Equation '" + declarationExtensions.getConceptUri(fsr) + "' does not specify a return type.");
-				}
+				return getType(ees.getReturnType());
 			}
 		}
 		return null;
 	}
 	
+	private TypeCheckInfo getType(EList<SadlReturnDeclaration> returnType) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
+		if (returnType.size() > 1) {
+			TypeCheckInfo tci = new TypeCheckInfo(new ConceptName("ValueTable"));
+			for (SadlReturnDeclaration rtype : returnType) {
+				TypeCheckInfo rttci = getType(rtype.getType());
+				tci.addCompoundType(rttci);
+			}
+			return tci;
+		}
+		else {
+			if (returnType.get(0).getUnknown() == null) {
+				return getType(returnType.get(0).getType());
+			}
+			else {
+                throw new DontTypeCheckException("External or Equation does not specify a return type.");
+			}
+		}
+	}
+
 	private boolean isInQuery(EObject expression) {
 		EObject cntr = expression.eContainer();
 		if (cntr != null) {
@@ -5507,4 +5550,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
+	public boolean validateBinaryOperationByParts(EquationStatement element, EList<SadlReturnDeclaration> rtype,
+			Expression bdy, String op, StringBuilder errorMessageBuilder, boolean forceValidation) {
+		if (rtype != null ) {
+			if (rtype.size() == 1) {
+				SadlReturnDeclaration typ = rtype.get(0);
+				if (typ.getType() != null) {
+					return validateBinaryOperationByParts(element, typ.getType(), bdy, op, errorMessageBuilder, forceValidation);
+				}
 			}
+		}
+		return true;	// this will need more checking when the body grammar is sufficent to support multiple return values
+	}
+
+}

@@ -61,13 +61,18 @@ ExternalEquationStatement:
 ;
 
 fragment EquationSignature returns AbstractSadlEquation:
-	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' (returnType=SadlPrimaryTypeReference | unknown='--') ':'
+	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' (returnType+=SadlReturnDeclaration (',' returnType+=SadlReturnDeclaration)*) ':'
 ;
 
 SadlParameterDeclaration:
 		type=SadlPrimaryTypeReference name=SadlResource
 	|   unknown='--'
 	|   ellipsis='...'
+;
+
+SadlReturnDeclaration:
+		type=SadlPrimaryTypeReference
+	|   unknown='--'
 ;
 
 // These are the things that translate directly to OWL.
