@@ -5513,6 +5513,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				aListNode.setListLength(Integer.parseInt(aExpression.getLen()));
 			}
 		}
+		try {
+			addLocalizedTypeToNode(aListNode,getModelValidator().getType(aExpression));
+		} catch (CircularDefinitionException | InvalidNameException | URISyntaxException
+				| IOException | ConfigurationException | InvalidTypeException | CircularDependencyException
+				| PropertyWithoutRangeException e) {
+			e.printStackTrace();
+		} catch (DontTypeCheckException e) {
+			//this is acceptable
+		}
 	}
 	
 	protected EObject getHostEObject() {

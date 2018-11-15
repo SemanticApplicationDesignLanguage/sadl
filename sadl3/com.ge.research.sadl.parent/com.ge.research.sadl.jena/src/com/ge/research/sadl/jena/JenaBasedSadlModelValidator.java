@@ -2036,23 +2036,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		Node tctype = tci.getTypeCheckType();
 		if (expression.isList()) {
 			tci.setRangeValueType(RangeValueType.LIST);
-			if(expression.eContainer() instanceof Declaration && tctype instanceof NamedNode) {
-				getModelProcessor().processListDeclaration((Declaration)expression.eContainer(), (NamedNode)tctype);
-				((NamedNode)tctype).setNodeType(NodeType.DataTypeListNode);
-			}else {
-				int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
-				if(tctype instanceof NamedNode) {
-					if (lenRest != null) {
-						if (lenRest.length == 1) {
-							((NamedNode)tctype).setListLength(lenRest[0]);
-						}
-						else if (lenRest.length == 2) {
-							((NamedNode)tctype).setMinListLength(lenRest[0]);
-							((NamedNode)tctype).setMaxListLength(lenRest[1]);
-						}
+			int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
+			if(tctype instanceof NamedNode) {
+				if (lenRest != null) {
+					if (lenRest.length == 1) {
+						((NamedNode)tctype).setListLength(lenRest[0]);
 					}
-					((NamedNode)tctype).setNodeType(NodeType.DataTypeListNode);
+					else if (lenRest.length == 2) {
+						((NamedNode)tctype).setMinListLength(lenRest[0]);
+						((NamedNode)tctype).setMaxListLength(lenRest[1]);
+					}
 				}
+				((NamedNode)tctype).setNodeType(NodeType.DataTypeListNode);
 			}
 		}
 		return tci;
@@ -2075,19 +2070,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		Node tctype = tci.getTypeCheckType();
 		if (expression.isList()) {
 			tci.setRangeValueType(RangeValueType.LIST);
-			if(expression.eContainer() instanceof Declaration && tctype instanceof NamedNode) {
-				getModelProcessor().processListDeclaration((Declaration)expression.eContainer(), (NamedNode)tctype);
-			}else {
-				int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
-				if(tctype instanceof NamedNode) {
-					if (lenRest != null) {
-						if (lenRest.length == 1) {
-							((NamedNode)tctype).setListLength(lenRest[0]);
-						}
-						else if (lenRest.length == 2) {
-							((NamedNode)tctype).setMinListLength(lenRest[0]);
-							((NamedNode)tctype).setMaxListLength(lenRest[1]);
-						}
+			int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
+			if(tctype instanceof NamedNode) {
+				if (lenRest != null) {
+					if (lenRest.length == 1) {
+						((NamedNode)tctype).setListLength(lenRest[0]);
+					}
+					else if (lenRest.length == 2) {
+						((NamedNode)tctype).setMinListLength(lenRest[0]);
+						((NamedNode)tctype).setMaxListLength(lenRest[1]);
 					}
 				}
 			}
