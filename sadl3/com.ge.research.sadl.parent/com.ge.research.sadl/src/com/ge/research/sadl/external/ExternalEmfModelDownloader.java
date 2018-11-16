@@ -161,7 +161,7 @@ public class ExternalEmfModelDownloader {
 				is = url.openStream(); // throws an IOException
 				ReadableByteChannel rbc = Channels.newChannel(is);
 
-				String outputPath = downloadsRootFolder.resolve(destinationRelativePath).toString();
+				String outputPath = downloadsRootFolder.toString() + File.separator + destinationRelativePath;
 				File file1 = new File(outputPath.substring(0, outputPath.lastIndexOf("/")));
 				file1.mkdirs();
 				FileOutputStream fos = new FileOutputStream(outputPath);
