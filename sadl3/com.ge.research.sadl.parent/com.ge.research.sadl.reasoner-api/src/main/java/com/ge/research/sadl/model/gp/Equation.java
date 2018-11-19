@@ -31,7 +31,7 @@ public class Equation {
 	private String namespace = null;
 	private List<Node> arguments = null;
 	private List<Node> argumentTypes = null;
-	private Node returnType = null;
+	private List<Node> returnTypes = null;
 	private List<GraphPatternElement> body = null;
 	private String uri = null;
 	private String location = null;
@@ -56,12 +56,12 @@ public class Equation {
 		this.arguments = arguments;
 	}
 	
-	public Node getReturnType() {
-		return returnType;
+	public List<Node> getReturnTypes() {
+		return returnTypes;
 	}
 	
-	public void setReturnType(Node returnType) {
-		this.returnType = returnType;
+	public void setReturnTypes(List<Node> returnTypes) {
+		this.returnTypes = returnTypes;
 	}
 	
 	public List<GraphPatternElement> getBody() {
@@ -81,8 +81,20 @@ public class Equation {
 	
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if (getReturnType() != null) {
-			sb.append(getReturnType().toString());
+		if (getReturnTypes() != null) {
+			List<Node> rtypes = getReturnTypes();
+			int cntr = 0;
+			for (Node rt : rtypes) {
+				if (cntr++ > 0) {
+					sb.append(",");
+				}
+				if (rt != null) {
+					sb.append(rt.toString());
+				}
+				else {
+					sb.append("--");
+				}
+			}
 		}
 		else {
 			sb.append("--");
@@ -130,8 +142,20 @@ public class Equation {
 	
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder();
-		if (getReturnType() != null) {
-			sb.append(getReturnType().toDescriptiveString());
+		if (getReturnTypes() != null) {
+			List<Node> rtypes = getReturnTypes();
+			int cntr = 0;
+			for (Node rt : rtypes) {
+				if (cntr++ > 0) {
+					sb.append(",");
+				}
+				if (rt != null) {
+					sb.append(rt.toDescriptiveString());
+				}
+				else {
+					sb.append("--");
+				}
+			}
 		}
 		else {
 			sb.append("--");
@@ -179,8 +203,20 @@ public class Equation {
 	
 	public String toFullyQualifiedString() {
 		StringBuilder sb = new StringBuilder();
-		if (getReturnType() != null) {
-			sb.append(getReturnType().toFullyQualifiedString());
+		if (getReturnTypes() != null) {
+			List<Node> rtypes = getReturnTypes();
+			int cntr = 0;
+			for (Node rt : rtypes) {
+				if (cntr++ > 0) {
+					sb.append(",");
+				}
+				if (rt != null) {
+					sb.append(rt.toFullyQualifiedString());
+				}
+				else {
+					sb.append("--");
+				}
+			}
 		}
 		else {
 			sb.append("--");
@@ -277,7 +313,7 @@ public class Equation {
 		result = prime * result + (isExternal ? 1231 : 1237);
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((namespace == null) ? 0 : namespace.hashCode());
-		result = prime * result + ((returnType == null) ? 0 : returnType.hashCode());
+		result = prime * result + ((returnTypes == null) ? 0 : returnTypes.hashCode());
 		result = prime * result + ((uri == null) ? 0 : uri.hashCode());
 		return result;
 	}
@@ -318,10 +354,10 @@ public class Equation {
 				return false;
 		} else if (!namespace.equals(other.namespace))
 			return false;
-		if (returnType == null) {
-			if (other.returnType != null)
+		if (returnTypes == null) {
+			if (other.returnTypes != null)
 				return false;
-		} else if (!returnType.equals(other.returnType))
+		} else if (!returnTypes.equals(other.returnTypes))
 			return false;
 		if (uri == null) {
 			if (other.uri != null)

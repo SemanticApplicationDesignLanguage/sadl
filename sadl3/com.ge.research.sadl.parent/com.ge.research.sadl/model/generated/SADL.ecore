@@ -35,9 +35,8 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="parameter" upperBound="-1"
         eType="#//SadlParameterDeclaration" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="returnType" eType="#//SadlTypeReference"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="unknown" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="returnType" upperBound="-1"
+        eType="#//SadlReturnDeclaration" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlParameterDeclaration">
     <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//SadlTypeReference"
@@ -46,6 +45,11 @@
         containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="unknown" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="ellipsis" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SadlReturnDeclaration">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//SadlTypeReference"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="unknown" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="SadlStatement" eSuperTypes="#//SadlModelElement"/>
   <eClassifiers xsi:type="ecore:EClass" name="SadlPropertyCondition" eSuperTypes="#//SadlTypeReference">

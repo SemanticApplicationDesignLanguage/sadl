@@ -99,7 +99,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage PROPERTY_WITHOUT_RANGE = new SadlErrorMessage("property_without_range");
 /**
-* {0} is not defined so return type is unknown, can't do type checking
+* {0} is not defined so return type is unknown, can''t do type checking
 **/
     public static final SadlErrorMessage RETURN_TYPE_WARNING = new SadlErrorMessage("return_type_warning");
 /**
