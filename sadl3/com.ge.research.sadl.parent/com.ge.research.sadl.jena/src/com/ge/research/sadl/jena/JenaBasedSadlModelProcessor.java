@@ -1820,6 +1820,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			} else if (sr.eContainer() instanceof Name && ((Name)sr.eContainer()).isFunction()) {
 				addWarning("Variable '" + var.getName() + "' is not defined", sr);
+			} else if (EcoreUtil2.getContainerOfType(sr, EquationStatement.class) != null) {
+				Equation cureq = getCurrentEquation();
+				if (cureq != null) {
+					cureq.addVariable(var);
+					tci = getModelValidator().getType(getDeclarationExtensions().getDeclaration(sr));
+				}
 			} else if (EcoreUtil2.getContainerOfType(sr, QueryStatement.class) == null
 					&& EcoreUtil2.getContainerOfType(sr, RuleStatement.class) == null) {
 				addError("Variable '" + var.getName() + "' is not defined", sr);
@@ -1870,6 +1876,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		} else if (trgt instanceof Test) {
 			// TODO
+		}
+		else if (getCurrentEquation() != null) {
+			if (getCurrentEquation().getVariable(variableNameToUri(name)) != null) {
+				return getCurrentEquation().getVariable(variableNameToUri(name));
+			}
 		}
 		VariableNode newVar = new VariableNode(name);
 		if (trgt instanceof Rule) {
@@ -2731,7 +2742,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		EList<SadlParameterDeclaration> params = element.getParameter();
 		EList<SadlReturnDeclaration> rtype = element.getReturnType();
 		Expression bdy = element.getBody();
-		Equation eq = createEquation(element, nm, rtype, params, bdy);
+		Expression retVal = element.getRetval();
+		Expression whrExpr = element.getWhere();
+		Equation eq = createEquation(element, nm, rtype, params, bdy, retVal, whrExpr);
 		addEquation(element.eResource(), eq, nm);
 		Individual eqinst = getTheJenaModel().createIndividual(getDeclarationExtensions().getConceptUri(nm),
 				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EQUATION_URI));
@@ -2741,10 +2754,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// these can be null during clean/build with resource open in editor
 			eqinst.addProperty(dtp, literal);
 		}
+		EList<SadlAnnotation> anns = nm.getAnnotations();
+		if (anns != null) {
+			addAnnotationsToResource(eqinst, anns);
+		}
 	}
 
 	protected Equation createEquation(EquationStatement element, SadlResource nm, EList<SadlReturnDeclaration> rtype,
-			EList<SadlParameterDeclaration> params, Expression bdy)
+			EList<SadlParameterDeclaration> params, Expression bdy, Expression retVal, Expression whrExpr)
 			throws JenaProcessorException, TranslationException, InvalidNameException, InvalidTypeException {
 		Equation eq = new Equation(getDeclarationExtensions().getConcreteName(nm));
 		eq.setNamespace(getDeclarationExtensions().getConceptNamespace(nm));
@@ -2777,11 +2794,45 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		// put equation in context for sub-processing
 		setCurrentEquation(eq);
+		
+		// do where's first so that variables defined there will exist when processing body and return
+		if (whrExpr != null) {
+			Object whrObj = processExpression(whrExpr);
+			if (whrObj instanceof List<?>) {
+				eq.setWheres((List<GraphPatternElement>) whrObj);
+			}
+			else if (whrObj instanceof GraphPatternElement) {
+				eq.addWhereElement((GraphPatternElement) whrObj);
+			}
+			else {
+				throw new TranslationException("Equation where translation not of expected type.");
+			}
+		}
+		
 		Object bdyobj = processExpression(bdy);
 		if (bdyobj instanceof List<?>) {
 			eq.setBody((List<GraphPatternElement>) bdyobj);
 		} else if (bdyobj instanceof GraphPatternElement) {
 			eq.addBodyElement((GraphPatternElement) bdyobj);
+		}
+		if (retVal != null) {
+			Object retObj = processExpression(retVal);
+			if (retObj instanceof List<?>) {
+				for (Object obj : (List<?>)retObj) {
+					if (obj instanceof Node) {
+						eq.addReturnNode((Node)obj);
+					}
+					else {
+						throw new TranslationException("Equation return not of expected type.");
+					}
+				}
+			}
+			else if (retObj instanceof Node) {
+				eq.addReturnNode((Node)retObj);
+			}
+			else {
+				throw new TranslationException("Equation return not of expected type.");
+			}
 		}
 		if (getModelValidator() != null) {
 			// check return type against body expression
@@ -2831,7 +2882,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		EList<SadlParameterDeclaration> params = element.getParameter();
 		EList<SadlReturnDeclaration> rtype = element.getReturnType();
 		String location = element.getLocation();
-		Equation eq = createExternalEquation(nm, uri, rtype, params, location);
+		Expression whrExpr = element.getWhere();
+		Equation eq = createExternalEquation(nm, uri, rtype, params, location, whrExpr);
 		addEquation(element.eResource(), eq, nm);
 		Individual eqinst = getTheJenaModel().createIndividual(getDeclarationExtensions().getConceptUri(nm),
 				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EXTERNAL_URI));
@@ -2851,14 +2903,26 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	protected Equation createExternalEquation(SadlResource nm, String uri, EList<SadlReturnDeclaration> rtype,
-			EList<SadlParameterDeclaration> params, String location)
-			throws JenaProcessorException, TranslationException, InvalidNameException {
+			EList<SadlParameterDeclaration> params, String location, Expression whrExpr)
+			throws JenaProcessorException, TranslationException, InvalidNameException, InvalidTypeException {
 		Equation eq = new Equation(getDeclarationExtensions().getConcreteName(nm));
 		eq.setNamespace(getDeclarationExtensions().getConceptNamespace(nm));
 		eq.setExternal(true);
 		eq.setUri(uri);
 		if (location != null) {
 			eq.setLocation(location);
+		}
+		if (whrExpr != null) {
+			Object whrObj = processExpression(whrExpr);
+			if (whrObj instanceof List<?>) {
+				eq.setWheres((List<GraphPatternElement>) whrObj);
+			} 
+			else if (whrObj instanceof GraphPatternElement){
+				eq.addWhereElement((GraphPatternElement) whrObj);
+			}
+			else {
+				throw new TranslationException("External equation where translation not of expected type.");
+			}
 		}
 		List<Node> rtypes = new ArrayList<Node>();
 		for (SadlReturnDeclaration srd : rtype) {
@@ -6036,6 +6100,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (srnm != null) {
 				return processExpression(srnm);
 			}
+			else {
+				srnm = aExpr;
+				lName = getDeclarationExtensions().getConcreteName(srnm);
+				if (lName != null) {
+					return processExpression(srnm);
+				}
+			}
 			addError(SadlErrorMessages.TRANSLATE_NAME_SADLRESOURCE.toString(), aExpr);
 			
 		// make sure the right side is defined for binary operation
@@ -6688,7 +6759,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (shpTriples.get(preCallListSize) instanceof TripleElement) {
 						TripleElement informingTriple = (TripleElement) shpTriples.get(preCallListSize);
 						tr.setSubject(informingTriple.getSubject());
-						shpTriples.add(tr);
+						if (informingTriple.getPredicate() == null && informingTriple.getObject() == null) {
+							shpTriples.set(preCallListSize, tr);
+						}
+						else {
+							shpTriples.add(tr);
+						}
 						subjectFound = true;
 					}
 				}
@@ -6729,6 +6805,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						tr.setObject(informingTriple.getSubject());
 						objectFound = true;
 					}
+				}
+			} else if (obj == null) {
+				if (EcoreUtil2.getContainerOfType(expr, EquationStatement.class) != null && subj instanceof Declaration && tr.getSubject() instanceof VariableNode && predObj instanceof VariableNode) {
+					VariableNode unDeclaredTypedVariable = (VariableNode) tr.getSubject();
+					VariableNode declaredTypedVariable = (VariableNode) predObj;
+					if (getCurrentEquation() != null) {
+						getCurrentEquation().addVariable(declaredTypedVariable);
+					}
+					declaredTypedVariable.setType(unDeclaredTypedVariable.getType());
+					tr.setSubject(declaredTypedVariable);
+					tr.setPredicate(null);
+					return shpTriples;
+				}
+				else {
+					throw new TranslationException("Object for triple is null, which was not expected.");
 				}
 			} else {
 				Object objObj = processExpression(obj);
@@ -12055,6 +12146,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return ((Rule) trgt).getVariable(variableNameToUri(name));
 		} else if (trgt instanceof Query) {
 			return ((Query) trgt).getVariable(variableNameToUri(name));
+		}
+		else if (getCurrentEquation() != null) {
+			return getCurrentEquation().getVariable(variableNameToUri(name));
 		}
 		return null;
 	}
