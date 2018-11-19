@@ -52,12 +52,16 @@ SadlModelElement :
 
 EquationStatement:
 	'Equation' EquationSignature
-	body = Expression
+	(body = Expression)?
+	('return' retval = Expression)?
+	('where' where=Expression)?
 ;
 
 ExternalEquationStatement:
 	'External' EquationSignature
-	uri = STRING ('located' 'at' location=STRING)?
+	uri = STRING 
+	('located' 'at' location=STRING)? 
+	('where' where=Expression)?
 ;
 
 fragment EquationSignature returns AbstractSadlEquation:

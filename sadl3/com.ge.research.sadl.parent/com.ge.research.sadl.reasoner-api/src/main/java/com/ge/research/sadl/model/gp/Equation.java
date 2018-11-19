@@ -33,6 +33,9 @@ public class Equation {
 	private List<Node> argumentTypes = null;
 	private List<Node> returnTypes = null;
 	private List<GraphPatternElement> body = null;
+	private List<VariableNode> equationVariables = null;
+	private List<GraphPatternElement> wheres = null;
+	private List<Node> returnNodes = null;
 	private String uri = null;
 	private String location = null;
 	
@@ -77,6 +80,21 @@ public class Equation {
 			body = new ArrayList<GraphPatternElement>();
 		}
 		body.add(bdyelement);
+	}
+	
+	public List<GraphPatternElement> getWheres() {
+		return wheres;
+	}
+	
+	public void setWheres(List<GraphPatternElement> wheres) {
+		this.wheres = wheres;
+	}
+	
+	public void addWhereElement(GraphPatternElement whereelement) {
+		if (wheres == null) {
+			wheres = new ArrayList<GraphPatternElement>();
+		}
+		wheres.add(whereelement);
 	}
 	
 	public String toString() {
@@ -318,6 +336,25 @@ public class Equation {
 		return result;
 	}
 
+	public boolean addVariable(VariableNode ruleVariable) {
+		if (equationVariables == null) {
+			equationVariables = new ArrayList<VariableNode>();
+		}
+		equationVariables.add(ruleVariable);
+		return true;
+	}
+	
+	public VariableNode getVariable(String uri) {
+		if (equationVariables != null) {
+			for (int i = 0; i < equationVariables.size(); i++) {
+				if (equationVariables.get(i).toFullyQualifiedString().equals(uri)) {
+					return equationVariables.get(i);
+				}
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -365,5 +402,20 @@ public class Equation {
 		} else if (!uri.equals(other.uri))
 			return false;
 		return true;
+	}
+
+	public List<Node> getReturnNodes() {
+		return returnNodes;
+	}
+
+	public void setReturnNodes(List<Node> returnNodes) {
+		this.returnNodes = returnNodes;
+	}
+	
+	public void addReturnNode(Node retNode) {
+		if (returnNodes == null) {
+			returnNodes = new ArrayList<Node>();
+		}
+		returnNodes.add(retNode);
 	}
 }
