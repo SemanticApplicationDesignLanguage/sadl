@@ -2922,7 +2922,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		SadlResource qnm =expression.getName();
 		if (qnm.eIsProxy()) {
-			handleUndefinedFunctions(expression);
+			if (expression.isFunction()) {
+				handleUndefinedFunctions(expression);
+			}
 		}
 		
 		//If the expression is a function, find equation definition from name and get the return type
