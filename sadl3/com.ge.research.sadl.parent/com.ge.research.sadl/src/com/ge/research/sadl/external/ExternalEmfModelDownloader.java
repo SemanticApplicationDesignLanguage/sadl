@@ -78,7 +78,7 @@ public class ExternalEmfModelDownloader {
 		String editorText = readFileContent(modelDefinitionUri);
 		List<String>[] urlsAndPrefixes = su.getUrlsAndPrefixesFromExternalUrlContent(editorText);
 		List<String> urls = urlsAndPrefixes[0];
-		Path modelsFolder = Paths.get(this.projectHelper.getRoot(modelDefinitionUri)).resolve(ResourceManager.OWLDIR);
+		Path modelsFolder = Paths.get(projectHelper.getRoot(modelDefinitionUri)).resolve(ResourceManager.OWLDIR);
 		String modelFolderPath = modelsFolder.toString();
 		IConfigurationManagerForIDE cm = null;
 		try {
@@ -87,8 +87,9 @@ public class ExternalEmfModelDownloader {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		String sFolder = su.getExternalModelRootFromUrlFilename(new File(modelDefinitionUri));
-		Path outputPath = Paths.get(modelDefinitionUri).getParent().resolve(sFolder);
+		Path modelDefinitionPath = projectHelper.toPath(modelDefinitionUri);
+		String sFolder = su.getExternalModelRootFromUrlFilename(modelDefinitionPath.toFile());
+		Path outputPath = modelDefinitionPath.getParent().resolve(sFolder);
 		SadlUtils.recursiveDelete(outputPath.toFile());
 		List<String> uploadedFiles = new ArrayList<String>();
 		for (int i = 0; i < urls.size(); i++) {
@@ -128,7 +129,8 @@ public class ExternalEmfModelDownloader {
 
 	private String readFileContent(URI modelDefinitionUri){
 		try {
-			return Files.toString(new File(modelDefinitionUri), StandardCharsets.UTF_8);
+			File file = projectHelper.toPath(modelDefinitionUri).toFile();
+			return Files.toString(file, StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -149,7 +151,7 @@ public class ExternalEmfModelDownloader {
 					Object prop = p.get(key);
 					// System.out.println("Key=" + key.toString() + ", value = " + prop.toString());
 				}
-				if (EMFPlugin.IS_ECLIPSE_RUNNING) {					
+				if (EMFPlugin.IS_ECLIPSE_RUNNING) {
 					for (Entry<String, String> entry : new NetworkProxySettingsProvider().getConfigurations().entrySet()) {
 						p.put(entry.getKey(), entry.getValue());
 					}
@@ -159,7 +161,7 @@ public class ExternalEmfModelDownloader {
 				is = url.openStream(); // throws an IOException
 				ReadableByteChannel rbc = Channels.newChannel(is);
 
-				String outputPath = downloadsRootFolder.resolve(destinationRelativePath).toString();
+				String outputPath = downloadsRootFolder.toString() + File.separator + destinationRelativePath;
 				File file1 = new File(outputPath.substring(0, outputPath.lastIndexOf("/")));
 				file1.mkdirs();
 				FileOutputStream fos = new FileOutputStream(outputPath);
