@@ -41,6 +41,9 @@ public class BuiltinElement extends GraphPatternElement {
 	private boolean createdFromInterval = false;
 	private NamedNode mImpliedPropertyNode = null;		// contains the implied property information of the named node
 
+	private List<Node> argumentTypes = null;
+	private List<Node> returnTypes = null;
+
 	
 	public static enum BuiltinType {
 		Equal, NotEqual, Only, NotOnly, LT,	 				// these are boolean built-ins requiring two input arguments to be bound
@@ -171,10 +174,10 @@ public class BuiltinElement extends GraphPatternElement {
 		this.funcName = name;
 		this.funcType = BuiltinType.getType(name);
 		if (funcType.isBooleanBuiltin || funcType.isUnaryBuiltin) {
-			expectedArgCount = 2;
+			setExpectedArgCount(2);
 		}
 		else if (funcType.isBinaryBuiltin) {
-			expectedArgCount = 3;
+			setExpectedArgCount(3);
 		}
 	}
 
@@ -217,7 +220,7 @@ public class BuiltinElement extends GraphPatternElement {
 //		if (argument instanceof VariableNode) {
 //			((VariableNode)argument).incrementReferences();
 //		}
-		if (expectedArgCount > 0 && arguments.size() > expectedArgCount) {
+		if (getExpectedArgCount() > 0 && arguments.size() > getExpectedArgCount()) {
 			logger.warn("Added too many arguments to {}", this);
 		}
 	}
@@ -244,7 +247,7 @@ public class BuiltinElement extends GraphPatternElement {
 //		if (argument instanceof VariableNode) {
 //			((VariableNode)argument).incrementReferences();
 //		}
-		if (expectedArgCount > 0 && arguments.size() > expectedArgCount) {
+		if (getExpectedArgCount() > 0 && arguments.size() > getExpectedArgCount()) {
 			logger.warn("Added too many arguments to {}", this);
 		}
 	}
@@ -416,8 +419,8 @@ public class BuiltinElement extends GraphPatternElement {
 	 * @return -- true if expected argument count is > 0 and > actual argument count else false
 	 */
 	public boolean hasMissingArgument() {
-		if (expectedArgCount > 0) { // && funcType != null && !funcType.isBooleanBuiltin) {
-			if (arguments == null || arguments.size() < expectedArgCount) {
+		if (getExpectedArgCount() > 0) { // && funcType != null && !funcType.isBooleanBuiltin) {
+			if (arguments == null || arguments.size() < getExpectedArgCount()) {
 				return true;
 			}
 		}
@@ -438,7 +441,7 @@ public class BuiltinElement extends GraphPatternElement {
 		else {
 			arguments.add(argument);
 		}
-		if (expectedArgCount > 0 && arguments.size() > expectedArgCount) {
+		if (getExpectedArgCount() > 0 && arguments.size() > getExpectedArgCount()) {
 			logger.warn("Added too many (missing) arguments to {}", this);
 		}
 	}
@@ -542,5 +545,45 @@ public class BuiltinElement extends GraphPatternElement {
 	 */
 	public void setImpliedPropertyNode(NamedNode aImpliedPropertyNode) {
 		this.mImpliedPropertyNode = aImpliedPropertyNode;
+	}
+
+	/**
+	 * Method to get the argument types (if known)
+	 * @return
+	 */
+	public List<Node> getArgumentTypes() {
+		return argumentTypes;
+	}
+
+	/**
+	 * Method to set the argument types
+	 * @param argumentTypes
+	 */
+	public void setArgumentTypes(List<Node> argumentTypes) {
+		this.argumentTypes = argumentTypes;
+	}
+
+	/**
+	 * Method to get the return types (if known)
+	 * @return
+	 */
+	public List<Node> getReturnTypes() {
+		return returnTypes;
+	}
+
+	/**
+	 * Method to set the return types
+	 * @param returnTypes
+	 */
+	public void setReturnTypes(List<Node> returnTypes) {
+		this.returnTypes = returnTypes;
+	}
+
+	/**
+	 * Method to set the expected arg count when appropriate to the context
+	 * @param expectedArgCount
+	 */
+	public void setExpectedArgCount(int expectedArgCount) {
+		this.expectedArgCount = expectedArgCount;
 	}
 }
