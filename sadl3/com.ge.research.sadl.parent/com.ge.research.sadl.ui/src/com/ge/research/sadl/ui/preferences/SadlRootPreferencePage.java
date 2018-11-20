@@ -30,7 +30,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
-import org.eclipse.xtext.ui.editor.preferences.fields.LabelFieldEditor;
 
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -43,8 +42,11 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 	@SuppressWarnings("restriction")
 	@Override
 	protected void createFieldEditors() {
-		addField(new LabelFieldEditor("General SADL Settings", getFieldEditorParent()));
-		addField(new StringFieldEditor(SadlPreferences.SADL_BASE_URI.getId(), "Base URI", getFieldEditorParent()) {
+		// General SADL Settings
+		Group generalSettings = new Group(getFieldEditorParent(), SWT.NONE);
+		generalSettings.setLayout(new FillLayout(SWT.HORIZONTAL));
+		generalSettings.setText("General SADL Settings");
+		addField(new StringFieldEditor(SadlPreferences.SADL_BASE_URI.getId(), "Base URI:", generalSettings) {
 
 			@Override
 			protected void doStore() {
@@ -60,7 +62,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 						{ SadlPreferences.N3_FORMAT.getId(), SadlPreferences.N3_FORMAT.getId() },
 						{ SadlPreferences.N_TRIPLE_FORMAT.getId(), SadlPreferences.N_TRIPLE_FORMAT.getId() },
 						{ SadlPreferences.JENA_TDB.getId(), SadlPreferences.JENA_TDB.getId() }, },
-				getFieldEditorParent()) {
+				generalSettings) {
 
 			@Override
 			protected void doStore() {
@@ -72,7 +74,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 				new RadioGroupFieldEditor("importBy", "Show import model list as:", 2,
 						new String[][] { { "Model Namespaces", SadlPreferences.MODEL_NAMESPACES.getId() },
 								{ "SADL File Names", SadlPreferences.SADL_FILE_NAMES.getId() } },
-						getFieldEditorParent()) {
+						generalSettings) {
 
 					@Override
 					protected void doStore() {
@@ -81,34 +83,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 
 				});
 		addField(new BooleanFieldEditor(SadlPreferences.PREFIXES_ONLY_AS_NEEDED.getId(),
-				"Show prefixes for imported concepts only when needed for disambiguation", getFieldEditorParent()) {
-
-			@Override
-			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
-			}
-
-		});
-		addField(new BooleanFieldEditor(SadlPreferences.VALIDATE_BEFORE_TEST.getId(), "Validate before Testing",
-				getFieldEditorParent()) {
-
-			@Override
-			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
-			}
-
-		});
-		addField(new BooleanFieldEditor(SadlPreferences.TEST_WITH_KSERVER.getId(), "Test/Query with Knowledge Server",
-				getFieldEditorParent()) {
-
-			@Override
-			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
-			}
-
-		});
-		addField(new BooleanFieldEditor(SadlPreferences.NAMESPACE_IN_QUERY_RESULTS.getId(),
-				"Show Namespaces in Query Results", getFieldEditorParent()) {
+				"Show prefixes for imported concepts only when needed for disambiguation", generalSettings) {
 
 			@Override
 			protected void doStore() {
@@ -117,7 +92,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 
 		});
 		addField(new BooleanFieldEditor(SadlPreferences.SHOW_TIMING_INFORMATION.getId(),
-				"Show Timing Informaton (Build, Reasoning)", getFieldEditorParent()) {
+				"Show Timing Informaton (Build, Reasoning)", generalSettings) {
 
 			@Override
 			protected void doStore() {
@@ -128,7 +103,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		addField(new RadioGroupFieldEditor("dmyOrder", "Interpret Date 10/11/2012 as:", 2,
 				new String[][] { { "MM/DD/YYYY", SadlPreferences.DMY_ORDER_MDY.getId() },
 						{ "DD/MM/YYYY", SadlPreferences.DMY_ORDER_DMY.getId() } },
-				getFieldEditorParent()) {
+				generalSettings) {
 
 			@Override
 			protected void doStore() {
@@ -136,8 +111,8 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
-		addField(new BooleanFieldEditor(SadlPreferences.DEEP_VALIDATION_OFF.getId(), "Disable Deep Validation of Model",
-				getFieldEditorParent()) {
+		addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names",
+				generalSettings) {
 
 			@Override
 			protected void doStore() {
@@ -145,8 +120,13 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
-		addField(new StringFieldEditor(SadlPreferences.GRAPH_RENDERER_CLASS.getId(), "Graph renderer package and class",
-				getFieldEditorParent()) {
+		
+		// Graph Settings
+		Group graphSettings = new Group(getFieldEditorParent(), SWT.NONE);
+		graphSettings.setLayout(new FillLayout(SWT.HORIZONTAL));
+		graphSettings.setText("Graphing Settings");
+		addField(new StringFieldEditor(SadlPreferences.GRAPH_RENDERER_CLASS.getId(), "Graph renderer package and class:",
+				graphSettings) {
 
 			@Override
 			protected void doStore() {
@@ -155,30 +135,26 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 
 		});
 		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), "&Include Implicit Elements in Graph", 
-				getFieldEditorParent()){
+				graphSettings){
 			@Override
 			protected void doStore() {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
 		});
 		addField(new BooleanFieldEditor(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId(), "&Include Implicit Element Instances in Graph", 
-				getFieldEditorParent()){
+				graphSettings){
 			@Override
 			protected void doStore() {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
 		});
-		addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names",
-				getFieldEditorParent()) {
 
-			@Override
-			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
-			}
-
-		});
-		addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN.getId(), "Check for cardinality of property on specific domain",
-				getFieldEditorParent()) {
+		// Inference and Querying Settings
+		Group inferenceSettings = new Group(getFieldEditorParent(), SWT.NONE);
+		inferenceSettings.setLayout(new FillLayout(SWT.HORIZONTAL));
+		inferenceSettings.setText("Inference and Querying Settings");
+		addField(new BooleanFieldEditor(SadlPreferences.VALIDATE_BEFORE_TEST.getId(), "Validate before Testing",
+				inferenceSettings) {
 
 			@Override
 			protected void doStore() {
@@ -186,8 +162,70 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
+//		addField(new BooleanFieldEditor(SadlPreferences.TEST_WITH_KSERVER.getId(), "Test/Query with Knowledge Server",
+//				inferenceSettings) {
+//
+//			@Override
+//			protected void doStore() {
+//				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+//			}
+//
+//		});
+		addField(new BooleanFieldEditor(SadlPreferences.NAMESPACE_IN_QUERY_RESULTS.getId(),
+				"Show Namespaces in Query Results", inferenceSettings) {
+
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+
+		});
+		addField(new BooleanFieldEditor(SadlPreferences.DEEP_VALIDATION_OFF.getId(), "Disable Deep Validation of Model",
+				inferenceSettings) {
+
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+
+		});
+		addField(new StringFieldEditor(SadlPreferences.TABULAR_DATA_IMPORTER_CLASS.getId(), "Tabular data importer package and class:",
+				inferenceSettings) {
+
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), getTextControl().getText());
+			}
+
+		});
+
+		// Metrics Settings
+		Group metricsSettings = new Group(getFieldEditorParent(), SWT.NONE);
+		metricsSettings.setLayout(new FillLayout(SWT.HORIZONTAL));
+		metricsSettings.setText("Metrics Settings");
+		addField(new BooleanFieldEditor(SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD.getId(),
+				"Generate metrics report during project clean/build", metricsSettings) {
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+		});
+		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ",
+				metricsSettings) {
+
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), getTextControl().getText());
+			}
+
+		});
+		
+		// Translation Settings
+		Group translationSettings = new Group(getFieldEditorParent(), SWT.NONE);
+		translationSettings.setLayout(new FillLayout(SWT.HORIZONTAL));
+		translationSettings.setText("Translation Settings");
 		addField(new BooleanFieldEditor(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.getId(), "Use indefinite and definite articles in validation and translation", 
-				getFieldEditorParent()) {
+				translationSettings) {
 			
 			@Override
 			protected void doStore() {
@@ -195,19 +233,8 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 
 		});
-
-		// addField(new BooleanFieldEditor(SadlPreferences.DISABLE_TYPE_CHECKING.getId(), "Disable type checking of model", getFieldEditorParent()));
-		addField(new BooleanFieldEditor(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.getId(),
-				"Type checking issues as warning only", getFieldEditorParent()) {
-
-			@Override
-			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
-			}
-
-		});
 		addField(new BooleanFieldEditor(SadlPreferences.IGNORE_UNITTEDQUANTITIES.getId(),
-				"Ignore Unitted Quantities (treat as numeric only) during translation", getFieldEditorParent()) {
+				"Ignore Unitted Quantities (treat as numeric only) during translation", translationSettings) {
 
 			@Override
 			protected void doStore() {
@@ -216,31 +243,46 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 
 		});
 		addField(new BooleanFieldEditor(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(),
-				"Translate multiple-class domain or range as union class (owl:unionOf)", getFieldEditorParent()) {
+				"Translate multiple-class domain or range as union class (owl:unionOf)", translationSettings) {
 
 			@Override
 			protected void doStore() {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
 		});
+		
+		// Type Checking Settings
+		Group typeCheckSettings = new Group(getFieldEditorParent(), SWT.NONE);
+		typeCheckSettings.setLayout(new FillLayout(SWT.HORIZONTAL));
+		typeCheckSettings.setText("Type Checking Settings");	
+		addField(new BooleanFieldEditor(SadlPreferences.CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN.getId(), "Check for cardinality of property on specific domain",
+				typeCheckSettings) {
 
-		// addField(new BooleanFieldEditor(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), "Enable metrics collection during project build", getFieldEditorParent()));
-		addField(new BooleanFieldEditor(SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD.getId(),
-				"Generate metrics report during project clean/build", getFieldEditorParent()) {
 			@Override
 			protected void doStore() {
 				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
+
 		});
-		addField(new FileFieldEditor(SadlPreferences.METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ",
-				getFieldEditorParent()) {
+		addField(new BooleanFieldEditor(SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED.getId(),
+				"Property range specification required", typeCheckSettings) {
 
 			@Override
 			protected void doStore() {
-				getPreferenceStore().putValue(getPreferenceName(), getTextControl().getText());
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
 			}
 
 		});
+		addField(new BooleanFieldEditor(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.getId(),
+				"Type checking issues as warning only", typeCheckSettings) {
+
+			@Override
+			protected void doStore() {
+				getPreferenceStore().putValue(getPreferenceName(), Boolean.toString(getBooleanValue()));
+			}
+
+		});
+
 	}
 	
 	private void doStoreFieldEditorValue(RadioGroupFieldEditor editor) {
@@ -269,6 +311,8 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 
 		//General Settings
 		store.setDefault(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(), true);
+		store.setDefault(SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED.getId(), true);
+		store.setDefault(SadlPreferences.GRAPH_RENDERER_CLASS.getId(), SadlPreferences.GRAPH_RENDERER_CLASS.getDefaultValue());
 //		store.setDefault(RAEConstants.ANALYSIS_TIMEOUT,"600");
 //		store.setDefault(RAEConstants.RUN_PARTIAL_ANALYSIS,false);
 //		store.setDefault(RAEConstants.ENABLE_PREPROCESSING,true);

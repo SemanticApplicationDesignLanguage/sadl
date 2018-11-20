@@ -787,6 +787,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private boolean typeCheckingWarningsOnly;
 	
+	private boolean typeCheckingRangeRequired = true;
+	
 	private boolean typeUnsupportedDownstreamWarnings;
 	
 	//-----------END PEFERENCES --------------
@@ -1139,6 +1141,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (domainAndRangeAsUnionClassesStr != null) {
 			domainAndRangeAsUnionClasses = Boolean.parseBoolean(domainAndRangeAsUnionClassesStr);
 		}
+		setTypeCheckingRangeRequired(true);
+		String typeCheckingRangeRequiredStr = context.getPreferenceValues()
+				.getPreference(SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED);
+		if (typeCheckingRangeRequiredStr != null) {
+			setTypeCheckingRangeRequired(Boolean.parseBoolean(typeCheckingRangeRequiredStr));
+		}
+		
 	}
 
 	protected void processModelElement(SadlModelElement element) {
@@ -12355,5 +12364,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public boolean isAssignment(EObject expr) {
 		// TODO make this smarter
 		return false;
+	}
+
+	public boolean isTypeCheckingRangeRequired() {
+		return typeCheckingRangeRequired;
+	}
+
+	private void setTypeCheckingRangeRequired(boolean typeCheckingRangeRequired) {
+		this.typeCheckingRangeRequired = typeCheckingRangeRequired;
 	}
 }
