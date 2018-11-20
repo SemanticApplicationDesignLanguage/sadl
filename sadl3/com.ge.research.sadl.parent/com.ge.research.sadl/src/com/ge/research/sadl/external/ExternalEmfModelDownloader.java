@@ -210,7 +210,7 @@ public class ExternalEmfModelDownloader {
 			}
 			return result;
 		}
-	    return path.resolve(tail);
+		return Paths.get(path.toString(), tail);
 	} 
 
 	private IConfigurationManagerForIDE getConfigMgr(String modelFolder, String format) throws ConfigurationException {
