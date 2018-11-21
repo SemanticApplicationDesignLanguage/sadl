@@ -183,6 +183,16 @@ public class NamedNode extends Node {
 		if (getNodeType() != null && 
 				(getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode))) {
 			sb.append(" List");
+			if(listLiterals != null) {
+				sb.append(" [");
+				for(int i = 0; i < listLiterals.size(); i++) {
+					if(i > 0) {
+						sb.append(",");
+					}
+					sb.append(listLiterals.get(i));
+				}
+				sb.append("]");
+			}
 		}
 		return sb.toString();
 	}
