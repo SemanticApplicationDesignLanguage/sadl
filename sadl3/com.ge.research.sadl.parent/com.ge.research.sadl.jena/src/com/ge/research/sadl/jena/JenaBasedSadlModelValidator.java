@@ -1421,7 +1421,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						TypeCheckInfo tci = new TypeCheckInfo(new ConceptName("ValueTable"));
 						for (Expression val : vals) {
 							TypeCheckInfo rttci = getType(val);
-							tci.addCompoundType(rttci);
+							if (rttci != null) {
+								tci.addCompoundType(rttci);
+							}
 						}	
 						return tci;
 					}

@@ -2839,6 +2839,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else if (retObj instanceof Node) {
 				eq.addReturnNode((Node)retObj);
 			}
+			else if (retObj instanceof GraphPatternElement) {
+				eq.addReturnNode(nodeCheck(retObj));
+			}
 			else {
 				throw new TranslationException("Equation return not of expected type.");
 			}
