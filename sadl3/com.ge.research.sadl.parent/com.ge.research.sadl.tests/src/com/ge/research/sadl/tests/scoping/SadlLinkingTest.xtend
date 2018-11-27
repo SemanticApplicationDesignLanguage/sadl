@@ -1340,4 +1340,35 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		B is a type of <seconds>.
 		'''.assertLinking[sadl]
 	}
+	
+	@Test
+	def void testEquationStatementScoping_GH344() {
+		'''
+			uri "http://sadl.org/MinimalExample.sadl" alias mex.
+			
+			ScientificConcept is a class.
+			sadlimplicitmodel:UnittedQuantity is a type of ScientificConcept.
+			
+			External unitResolver(string u, ...) returns string: "http://sadl.org/unitSelector".
+			External derivative(ScientificConcept numerator, ScientificConcept denominator, int n) returns decimal, string: "http://sadl.org/derivative".
+			
+			Mass is a type of UnittedQuantity.
+			Velocity is a type of UnittedQuantity.
+			Momentum is a type of UnittedQuantity.
+			Force is a type of UnittedQuantity.
+			Time is a type of UnittedQuantity.
+			
+			Equation newtons2ndLaw
+			  (note "Force is equal to the derivative of momentum with respect to time.")
+			  (Mass m, Velocity v) returns Force:
+			  a Force f with ^value fv, with unit fu
+			
+			  return f
+			
+			  where mv is a Momentum
+			    with ^value (^value of m * ^value of v),
+			    with unit unitResolver("*", unit of m, unit of v)
+			    and [fv,fu] = derivative(mv, Time, 1).
+		'''.assertLinking[sadl];
+	}
 }
