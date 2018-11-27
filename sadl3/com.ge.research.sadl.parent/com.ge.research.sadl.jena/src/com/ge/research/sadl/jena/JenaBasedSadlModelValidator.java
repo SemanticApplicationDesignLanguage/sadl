@@ -808,9 +808,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
+		else if (leftTypeCheckInfo.getCompoundTypes() != null || rightTypeCheckInfo.getCompoundTypes() != null) {
+			// this is OK? At least it shouldn't create the exception below... AWC 11/26/2018
+		}
 		else {
 			try {
-				throw new TranslationException("Unexpected failure to find binary operation type");
+				throw new TranslationException("Unexpected failure to find binary operation type checking type");
 			} catch (TranslationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
