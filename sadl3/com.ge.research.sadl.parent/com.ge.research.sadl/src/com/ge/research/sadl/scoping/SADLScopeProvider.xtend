@@ -567,10 +567,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	protected def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
 		if (canAddToScope(scope, qn, obj)) {
 			scope.put(qn, new EObjectDescription(qn, obj, emptyMap));
-		} else {
-			if (qn.toString == 'f') {
-				println()
-			}
 		}
 	}
 
