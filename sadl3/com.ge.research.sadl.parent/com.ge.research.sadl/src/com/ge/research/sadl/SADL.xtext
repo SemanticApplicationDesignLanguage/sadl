@@ -76,6 +76,7 @@ SadlParameterDeclaration:
 
 SadlReturnDeclaration:
 		type=SadlPrimaryTypeReference
+	|   none ='None'
 	|   unknown='--'
 ;
 

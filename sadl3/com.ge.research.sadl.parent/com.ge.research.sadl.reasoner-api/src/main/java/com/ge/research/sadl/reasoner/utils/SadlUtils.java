@@ -1109,6 +1109,16 @@ public class SadlUtils {
 				if (sprcls.equals(cls)) {
 					return true;
 				}
+				if (sprcls.isIntersectionClass()) {
+					ExtendedIterator<? extends OntClass> exitr = sprcls.asIntersectionClass().listOperands();
+					while (exitr.hasNext()) {
+						OntClass intersectionClass = exitr.next();
+						if (classIsSuperClassOf(cls, intersectionClass)) {
+							exitr.close();
+							return true;
+						}
+					}
+				}
 				if (classIsSuperClassOf(cls, sprcls)) {
 					return true;
 				}

@@ -10336,8 +10336,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (srType == null) {
 						throw new JenaProcessorException("Unable to resolve SadlResource value");
 					}
+					String valUri = getDeclarationExtensions().getConceptUri(srValue);
 					if (srType.equals(OntConceptType.INSTANCE)) {
-						String valUri = getDeclarationExtensions().getConceptUri(srValue);
 						if (valUri == null) {
 							throw new JenaProcessorException("Failed to find SadlResource in Xtext model");
 						}
@@ -10386,9 +10386,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 										"Failed to retrieve instance '" + valUri + "' from Jena model");
 							}
 						}
+					} else if (isProperty(srType)) {
+						if (isTypeCheckingWarningsOnly()) {
+							addWarning("Value restriction is not expected to be a property", cond);
+						}
+						else {
+							addError("Value restriction is not expected to be a property", cond);
+						}
+						val = getTheJenaModel().getProperty(valUri);
 					} else {
-						throw new JenaProcessorException(
-								"A has value restriction is to a SADL resource that did not resolve to an instance in the model");
+						if (isTypeCheckingWarningsOnly()){
+							addWarning("Value restriction is expected to resolve to an instance in the model", cond);
+						}
+						else {
+							addError(
+								"Value restriction is expected to resolve to an instance in the model", cond);
+						}
+						val = getTheJenaModel().getResource(valUri);
 					}
 				} else {
 					if (prop.canAs(OntProperty.class)) {
@@ -10405,16 +10419,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
-				Individual valInst = val.as(Individual.class);
+//				Individual valInst = val.as(Individual.class);
 				if (prop.canAs(OntProperty.class)
-						&& valueInObjectTypePropertyRange(prop.as(OntProperty.class), valInst, cond)) {
-					HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null, prop, valInst);
-					logger.debug("New has value restriction on '" + prop.getURI() + "' to value '" + valInst.toString()
+						&& valueInObjectTypePropertyRange(prop.as(OntProperty.class), val, cond)) {
+					HasValueRestriction hvr = getTheJenaModel().createHasValueRestriction(null, prop, val);
+					logger.debug("New has value restriction on '" + prop.getURI() + "' to value '" + val.toString()
 							+ "'");
 					retval = hvr;
 				} else {
 					throw new JenaProcessorException(
-							SadlErrorMessages.NOT_IN_RANGE.get(valInst.getURI(), prop.getURI()));
+							SadlErrorMessages.NOT_IN_RANGE.get(val.toString(), prop.getURI()));
 				}
 			} else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
 				if (prop != null && val != null && prop.canAs(OntProperty.class) && val.isLiteral()
@@ -10605,18 +10619,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
-	private boolean valueInObjectTypePropertyRange(OntProperty prop, Individual valInst, EObject cond)
+	private boolean valueInObjectTypePropertyRange(OntProperty prop, RDFNode val, EObject cond)
 			throws JenaProcessorException {
 		ExtendedIterator<? extends OntResource> itr = prop.listRange();
-		while (itr.hasNext()) {
-			OntResource nxt = itr.next();
-			if (nxt.isClass()) {
-				if (instanceBelongsToClass(getTheJenaModel(), valInst, nxt)) {
-					return true;
+		if (itr.hasNext()) {
+			if (val.isResource() && val.canAs(Individual.class)) { 
+				Individual valInst = val.as(Individual.class);
+				while (itr.hasNext()) {
+					OntResource nxt = itr.next();
+					if (nxt.isClass()) {
+						if (instanceBelongsToClass(getTheJenaModel(), valInst, nxt)) {
+							return true;
+						}
+					}
 				}
 			}
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	private IntersectionClass createIntersectionClass(RDFNode... members) throws JenaProcessorException {
