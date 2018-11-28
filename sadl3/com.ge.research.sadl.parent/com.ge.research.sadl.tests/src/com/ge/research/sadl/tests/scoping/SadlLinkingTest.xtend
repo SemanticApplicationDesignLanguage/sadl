@@ -1340,35 +1340,44 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		B is a type of <seconds>.
 		'''.assertLinking[sadl]
 	}
-	
+
+	/**
+	 * From: https://github.com/crapo/sadlos2/issues/344#issue-382432616
+	 * <ul>
+	 * <li><b>a)</b> If a variable is defined in the "where" clause and used in the body, the definition is the reference in the "where" clause.</li>
+	 * <li><b>b)</b> If a variable is referenced in the body and referenced in the "return" statement, the definition is the reference in the body.</li>
+	 * </ul>
+	 */
 	@Test
-	def void testEquationStatementScoping_GH344() {
+	def void testEquationStatementScoping_GH_344_A() {
 		'''
+			// ------ SETUP ------
 			uri "http://sadl.org/MinimalExample.sadl" alias mex.
-			
 			ScientificConcept is a class.
 			sadlimplicitmodel:UnittedQuantity is a type of ScientificConcept.
-			
 			External unitResolver(string u, ...) returns string: "http://sadl.org/unitSelector".
 			External derivative(ScientificConcept numerator, ScientificConcept denominator, int n) returns decimal, string: "http://sadl.org/derivative".
-			
 			Mass is a type of UnittedQuantity.
 			Velocity is a type of UnittedQuantity.
 			Momentum is a type of UnittedQuantity.
 			Force is a type of UnittedQuantity.
 			Time is a type of UnittedQuantity.
+			// ------ END OF SETUP ------
 			
 			Equation newtons2ndLaw
 			  (note "Force is equal to the derivative of momentum with respect to time.")
-			  (Mass m, Velocity v) returns Force:
-			  a Force f with ^value fv, with unit fu
+			  (Mass [m], Velocity [v]) returns Force:
+			// BODY
+			  a Force f with ^value <fv>, with unit <fu>
 			
-			  return f
+			// RETURN
+			  return <f>
 			
-			  where mv is a Momentum
-			    with ^value (^value of m * ^value of v),
-			    with unit unitResolver("*", unit of m, unit of v)
-			    and [fv,fu] = derivative(mv, Time, 1).
+			// WHERE
+			  where [mv] is a Momentum
+			    with ^value (^value of <m> * ^value of <v>),
+			    with unit unitResolver("*", unit of <m>, unit of <v>)
+			    and [[fv],[fu]] = derivative(<mv>, Time, 1).
 		'''.assertLinking[sadl];
 	}
 }

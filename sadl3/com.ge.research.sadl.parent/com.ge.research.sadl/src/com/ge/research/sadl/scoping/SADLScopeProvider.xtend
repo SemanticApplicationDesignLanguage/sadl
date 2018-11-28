@@ -43,10 +43,13 @@ import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SelectExpression
 import com.ge.research.sadl.sADL.SubjHasProp
 import com.ge.research.sadl.sADL.TestStatement
+import com.ge.research.sadl.sADL.UpdateExpression
+import com.ge.research.sadl.sADL.UpdateStatement
 import com.google.common.base.Predicate
 import com.google.common.base.Predicates
 import com.google.common.collect.ImmutableMap
 import com.google.inject.Inject
+import com.google.inject.Provider
 import java.util.List
 import java.util.Map
 import java.util.Set
@@ -71,9 +74,6 @@ import static com.ge.research.sadl.processing.SadlConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension com.ge.research.sadl.utils.SadlASTUtils.*
-import com.ge.research.sadl.sADL.UpdateStatement
-import com.ge.research.sadl.sADL.UpdateExpression
-import com.google.inject.Provider
 
 /**
  * This class contains custom scoping description.
@@ -93,14 +93,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	 */	
 	static val IMPLICIT_MODELS = ImmutableMap.of(SADL_IMPLICIT_MODEL_FILENAME, SADL_IMPLICIT_MODEL_URI,
 		SADL_BUILTIN_FUNCTIONS_FILENAME, IReasoner.SADL_BUILTIN_FUNCTIONS_URI);
-		
+
 	@Inject protected extension DeclarationExtensions
 	@Inject protected IQualifiedNameConverter converter
 	@Inject protected AmbiguousNameHelper ambiguousNameHelper;
 	@Inject protected GlobalScopeProviderFilterProvider globalScopeProviderFilterProvider;
-	
+
 	@Inject OnChangeEvictingCache cache
-	
+
 	val LocalScopeProvider localScope_01 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope, true) [
 			if (it instanceof SadlResource) {
@@ -111,7 +111,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return false;
 		];
 	], '01');
-	
+
 	val LocalScopeProvider localScope_02 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
@@ -131,7 +131,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return false;
 		];
 	], '03');
-	
+
 	// SADL nested instance support: https://github.com/crapo/sadlos2/issues/250
 	val LocalScopeProvider localScope_04 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
@@ -141,7 +141,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return false;
 		];
 	], '04');
-	
+
 	val LocalScopeProvider localScope_05 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
@@ -160,8 +160,20 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return false;
 		];
 	], '06');
-	
-	
+
+	// https://github.com/crapo/sadlos2/issues/344
+	val LocalScopeProvider localScope_07 = namedScopeProvider([resource, namespace, parentScope, importScope |
+		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
+			if (it instanceof SadlResource) {
+				val equationStatement = EcoreUtil2.getContainerOfType(it, EquationStatement);
+				if (equationStatement !== null) {
+					return equationStatement.where !== null && EcoreUtil2.isAncestor(equationStatement.where, it);
+				}
+			} 
+			return false;
+		];
+	], '07');
+
 	override getScope(EObject context, EReference reference) {
 		// resolving imports against external models goes directly to the global scope
 		if (reference.EReferenceType === SADL_MODEL) {
@@ -178,7 +190,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		throw new UnsupportedOperationException(
 			"Couldn't build scope for elements of type " + reference.EReferenceType.name)
 	}
-	
+
 	protected def IScope getSadlResourceScope(EObject context, EReference reference) {
 		val parent = createResourceScope(context.eResource, null, newHashSet)
 		
@@ -188,8 +200,19 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		val equation = EcoreUtil2.getContainerOfType(context, EquationStatement)
 		if (equation !== null) {
-			return MapBasedScope.createScope(parent, 
-				equation.parameter.map[EObjectDescription.create(name.concreteName, it.name)])
+			// Filter items with `null` `concreteName`.
+			// E.g.: `Equation add(decimal x, /* no "type" here */ y) returns decimal: x + y.`
+			val parentScopeForParameters = MapBasedScope.createScope(parent,
+				equation.parameter
+					.map[name.concreteName -> it]
+					.filter[!key.nullOrEmpty]
+					.map[EObjectDescription.create(key, value.name)])
+
+			// Equation can have `body`, `where`, and `retval`. (https://github.com/crapo/sadlos2/issues/344#issue-382432616)
+			// So we cannot just stop after adding the SADL resources from the parameter list to the scope,
+			// but we have to process them further for the local scope.
+			val childExpressions = #[equation.body, equation.where, equation.retval].filterNull
+			return getLocalVariableScope(childExpressions, parentScopeForParameters)
 		}
 		val ask = EcoreUtil2.getContainerOfType(context, QueryStatement)
 		if (ask?.expr !== null) {
@@ -206,7 +229,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		return parent
 	}
-	
+
 	protected def IScope getLocalVariableScope(Iterable<Expression> expressions, IScope parent) {
 		if (expressions.nullOrEmpty) {
 			return parent;
@@ -225,7 +248,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			if (container instanceof BinaryOperation) {
 				if (container.op == 'is' || container.op == '==' || container.op == '=' ||
 					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, SelectExpression) !== null) || // we are in the middle of a select expression.
-					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, RuleStatement) !== null)    // we are in the middle of a rule statement (GH-245).
+					(container.op == 'and' && EcoreUtil2.getContainerOfType(it, RuleStatement) !== null) // we are in the middle of a rule statement (GH-245).
 				) {
 					return true;
 				}
@@ -244,7 +267,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		]
 		return doGetLocalVariableScope(expressions, newParent, [true]);
 	}
-	
+
 	protected def IScope doGetLocalVariableScope(Iterable<Expression> expressions, IScope parent, Predicate<SadlResource> predicate) {
 		if (expressions.nullOrEmpty) {
 			return parent;
@@ -265,11 +288,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		return MapBasedScope.createScope(parent, map.values)
 	}
-	
+
 	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources) {
 		return createResourceScope(resource, alias, importedResources, Predicates.alwaysTrue); 
 	}
-	
+
 	protected def IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources, Predicate<EObject> isIncluded) {
 		val provider = [
 			val shouldWrap = importedResources.empty
@@ -279,7 +302,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			
 			var newParent = createImportScope(resource, importedResources)
 			if (shouldWrap) {
-				newParent = wrap(newParent)				
+				newParent = wrap(newParent)
 			}
 			val importScope = newParent;
 			val aliasToUse = alias ?: resource.getAlias
@@ -302,7 +325,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val key = 'resource_scope' -> alias;
 		return cache.get(key, resource, provider);
 	}
-	
+
 	protected def List<LocalScopeProvider> getLocalScopeProviders() {
 		return newArrayList(
 			localScope_01,
@@ -310,10 +333,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			localScope_03,
 			localScope_04,
 			localScope_05,
-			localScope_06
+			localScope_06,
+			localScope_07
 		);
 	}
-	
+
 	protected def IScope internalGetLocalResourceScope(Resource resource, QualifiedName namespace, IScope parentScope,
 		IScope importScope, Predicate<EObject> isIncluded) {
 
@@ -413,7 +437,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		return MapBasedScope.createScope(parentScope, map.values)
 	}
-		
+
 	protected def handleSadlResource(ScopeContext context) {
 		val it = context.obj as SadlResource;
 		val parentScope = context.parentScope;
@@ -458,30 +482,30 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			map.addElement(name2, it)
 		}
 	}
-	
+
 	protected def QualifiedName getName(SadlResource it) {
 		return getName(it, false);
 	}
-	
+
 	protected def QualifiedName getName(SadlResource it, boolean trimPrefix) {
 		return converter.toQualifiedName(getConcreteName(it, trimPrefix));
 	}
-	
+
 	/**
 	 * Clients may override to handle anything before visiting the contents of the resource for the internal resource scope.
 	 */
 	protected def (ScopeContext)=>void doSwitch(ScopeContext context) {
 		return null;
 	}
-	
+
 	protected def pruneScope(EObject object) {
 		return object instanceof RuleStatement || object instanceof EquationStatement || object instanceof QueryStatement || object instanceof TestStatement || object instanceof ExternalEquationStatement
 	}
-	
+
 	protected def String getAlias(Resource resource) {
 		(resource.contents.head as SadlModel).alias
 	}
-	
+
 	protected def IScope createImportScope(Resource resource, Set<Resource> importedResources) {
 		val ambiguousNameDetection = ambiguousNameHelper.isAmbiguousNameCheckEnabled(resource)
 		val imports = resource.contents.head.eContents.filter(SadlImport).toList.reverseView
@@ -519,7 +543,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		
 		return new MapScope(IScope.NULLSCOPE, importedSymbols, false)
 	}
-	
+
 	def private IEObjectDescription checkDuplicate(IEObjectDescription existing, IEObjectDescription other, boolean ambiguousNameDetection) {
 		if (!ambiguousNameDetection || existing === null || other === null ||
 			EcoreUtil.getURI(existing.EObjectOrProxy) == EcoreUtil.getURI(other.EObjectOrProxy)) {
@@ -539,25 +563,31 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		
 	}
-	
+
 	protected def void addElement(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
 		if (canAddToScope(scope, qn, obj)) {
 			scope.put(qn, new EObjectDescription(qn, obj, emptyMap));
+		} else {
+			if (qn.toString == 'f') {
+				println()
+			}
 		}
 	}
-	
+
 	protected def boolean canAddToScope(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
 		var canAdd = true;
 		if (obj instanceof SadlResource) {
-			canAdd = !obj.inExternalOrLocalEquationStatement
-				&& !obj.inExpression
-				&& !obj.inQueryStatement
-				&& !obj.inRuleStatement
-				&& !obj.unit;
+			if (!obj.inEquationWhere) {
+				canAdd = !obj.inExternalOrLocalEquationStatement
+					&& !obj.inExpression
+					&& !obj.inQueryStatement
+					&& !obj.inRuleStatement
+					&& !obj.unit;
+			}
 		}
 		return canAdd && !scope.containsKey(qn);
 	}
-	
+
 	// Do not put parameters of external and local equation statements into the scope.
 	protected def boolean isInExternalOrLocalEquationStatement(SadlResource it) {
 		if (eContainer instanceof SadlParameterDeclaration) {
@@ -567,12 +597,12 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		return false;
 	}
-	
+
 	// Also filter out resources from the expression of any equations.
 	protected def boolean isInExpression(SadlResource it) {
 		return EcoreUtil2.getContainerOfType(it, BinaryOperation) !== null;
 	}
-	
+
 	// The SADL resource from the use-site should not go into the scope.
 	// In such cases the statement does not have an expression.
 	protected def boolean isInQueryStatement(SadlResource it) {
@@ -581,14 +611,26 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		return false;
 	}
-	
+
 	protected def boolean isInRuleStatement(SadlResource it) {
 		if (eContainer instanceof RuleStatement) {
 			return (eContainer as RuleStatement).thens === null;
 		}
 		return false;
 	}
-	
+
+	/**
+	 * {@code true} if the argument is contained in an {@link EquationStatement}'s {@link EquationStatement#getWhere() where} expression.
+	 * The containment is not necessarily direct. Otherwise, {@code false}.
+	 */
+	protected def boolean isInEquationWhere(SadlResource it) {
+		val equationStatement = EcoreUtil2.getContainerOfType(it, EquationStatement);
+		if (equationStatement !== null && equationStatement.where !== null) {
+			return EcoreUtil2.isAncestor(equationStatement.where, it);
+		}
+		return false;
+	}
+
 	/**
 	 * Sugar for having a name for the local scope provider. This is only for debugging purposes. 
 	 */
@@ -605,7 +647,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			
 		}
 	}
-	
+
 	/**
 	 * Local helper that is used to modify the declaration/reference precedences of the SADL resources inside a SADL model.
 	 */
@@ -626,11 +668,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		}
 		
 	}
-	
+
 	//----------------------------------------
 	// Helper things.
 	//----------------------------------------
-	
+
 	/**
 	 * Hack to have a static flag bug no warnings due to dead code.
 	 */
@@ -642,5 +684,5 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	static def boolean isDEBUG() {
 		return DEBUG_FLAG === Debug.TRUE;
 	}
-	
+
 }
