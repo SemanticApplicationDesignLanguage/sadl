@@ -165,11 +165,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	val LocalScopeProvider localScope_07 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
-				val equationStatement = EcoreUtil2.getContainerOfType(it, EquationStatement);
-				if (equationStatement !== null) {
-					return equationStatement.where !== null && EcoreUtil2.isAncestor(equationStatement.where, it);
-				}
-			} 
+				return inEquationWhere && EcoreUtil2.getContainerOfType(it, SubjHasProp) === null;
+			}
 			return false;
 		];
 	], '07');
@@ -193,7 +190,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 
 	protected def IScope getSadlResourceScope(EObject context, EReference reference) {
 		val parent = createResourceScope(context.eResource, null, newHashSet)
-		
 		val rule = EcoreUtil2.getContainerOfType(context, RuleStatement)
 		if (rule !== null) {
 			return getLocalVariableScope(rule.ifs + rule.thens, parent)
@@ -202,17 +198,11 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		if (equation !== null) {
 			// Filter items with `null` `concreteName`.
 			// E.g.: `Equation add(decimal x, /* no "type" here */ y) returns decimal: x + y.`
-			val parentScopeForParameters = MapBasedScope.createScope(parent,
-				equation.parameter
+			val params = equation.parameter
 					.map[name.concreteName -> it]
 					.filter[!key.nullOrEmpty]
-					.map[EObjectDescription.create(key, value.name)])
-
-			// Equation can have `body`, `where`, and `retval`. (https://github.com/crapo/sadlos2/issues/344#issue-382432616)
-			// So we cannot just stop after adding the SADL resources from the parameter list to the scope,
-			// but we have to process them further for the local scope.
-			val childExpressions = #[equation.body, equation.where, equation.retval].filterNull
-			return getLocalVariableScope(childExpressions, parentScopeForParameters)
+					.map[EObjectDescription.create(key, value.name)].toList;
+			return MapBasedScope.createScope(parent, params)
 		}
 		val ask = EcoreUtil2.getContainerOfType(context, QueryStatement)
 		if (ask?.expr !== null) {
