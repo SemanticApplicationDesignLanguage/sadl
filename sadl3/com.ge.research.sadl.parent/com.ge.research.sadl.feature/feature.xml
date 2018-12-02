@@ -123,6 +123,13 @@ SADL also includes POJava licensed under Apache License V2.0.
          unpack="false"/>
 
    <plugin
+         id="com.ge.research.sadl.applications"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="com.ge.research.sadl.perspective"
          download-size="0"
          install-size="0"
