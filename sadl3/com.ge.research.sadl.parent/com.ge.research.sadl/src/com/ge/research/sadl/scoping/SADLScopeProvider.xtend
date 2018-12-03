@@ -161,16 +161,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		];
 	], '06');
 
-	// https://github.com/crapo/sadlos2/issues/344
-	val LocalScopeProvider localScope_07 = namedScopeProvider([resource, namespace, parentScope, importScope |
-		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
-			if (it instanceof SadlResource) {
-				return inEquationWhere && EcoreUtil2.getContainerOfType(it, SubjHasProp) === null;
-			}
-			return false;
-		];
-	], '07');
-
 	override getScope(EObject context, EReference reference) {
 		// resolving imports against external models goes directly to the global scope
 		if (reference.EReferenceType === SADL_MODEL) {
@@ -226,6 +216,10 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return parent;
 		}
 		var newParent = doGetLocalVariableScope(expressions, parent) [
+			// https://github.com/crapo/sadlos2/issues/344
+			if (it instanceof SadlResource && EcoreUtil2.getContainerOfType(it, EquationStatement) !== null) {
+				return  EcoreUtil2.getContainerOfType(it, SubjHasProp) === null;
+			}
 			var container = eContainer;
 			if (container instanceof SelectExpression) {
 				if (container.whereExpression instanceof SubjHasProp) {
@@ -324,8 +318,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			localScope_03,
 			localScope_04,
 			localScope_05,
-			localScope_06,
-			localScope_07
+			localScope_06
 		);
 	}
 
