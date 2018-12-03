@@ -202,7 +202,8 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 					.map[name.concreteName -> it]
 					.filter[!key.nullOrEmpty]
 					.map[EObjectDescription.create(key, value.name)].toList;
-			return MapBasedScope.createScope(parent, params)
+			val newParent = MapBasedScope.createScope(parent, params)
+			return getLocalVariableScope(#[equation.where, equation.body, equation.retval].filterNull, newParent);
 		}
 		val ask = EcoreUtil2.getContainerOfType(context, QueryStatement)
 		if (ask?.expr !== null) {
