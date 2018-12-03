@@ -77,13 +77,24 @@ class EquationStatementLinkingTest extends AbstractLinkingTest {
 			sadlimplicitmodel:UnittedQuantity is a type of ScientificConcept.
 			// ------ END OF SETUP ------
 			
+			Equation newtons2ndLaw
+				(note "net Force on a physical object is equal to the derivative of the momentum of the object with respect to time.")
+				(PhysicalObject [o]) returns Force: a Force [f] with ^value <fv>, with unit <fu>
+					return <f>
+						where [mv] is a Momentum with ^value (^value of mass of <o> * ^value of velocity of <o>), 
+							with unit unitResolver("*", unit of mass of <o>, unit of velocity of <o>) and
+							[[fv],[fu]] = derivative(<mv>, ^time, 1). 
+				
 			Equation newtons2ndLawConstantMass
 				(note "net Force on a physical object is equal to the mass of the object times its acceleration for constant mass.")
-				(PhysicalObject [o]) returns Force: a Force [f] with ^value <accv>, with unit <accu>
+				(PhysicalObject [o]) returns Force: a Force [f] with ^value <fv>, with unit <fu>
 					return <f>
-						where [[mdotv], [mdotu]] is derivative(mass of <o>, ^time, 1) and <mdotv> is 0 and
-							[acc] is an Acceleration with ^value <accv>, with unit <accu> and
-							[[accv],[accu]] = derivative(velocity of <o>, ^time, 1).
+						where [acc] is an Acceleration with ^value <accv>, with unit <accu> and
+							[[mdotv], [mdotu]] is derivative(mass of <o>, ^time, 1) and 
+							<mdotv> is 0 and
+							[[accv],[accu]] = derivative(velocity of <o>, ^time, 1) and
+							[fv] = ^value of mass of <o> * <accv> and
+							[fu] = unitResolver("*", unit of mass of <o>, <accu>).
 		'''.assertLinking[sadl];
 	}
 
