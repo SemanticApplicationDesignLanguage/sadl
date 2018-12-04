@@ -207,7 +207,26 @@ public class NamedNode extends Node {
 
 	@Override
 	public String toDescriptiveString() {
-		StringBuilder sb = new StringBuilder(toString());
+		StringBuilder sb = new StringBuilder();
+		if (prefix != null && prefix.length() > 0) {
+			sb.append(prefix);
+			sb.append(":");
+		}
+		sb.append(name);
+		if (getNodeType() != null && 
+				(getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode))) {
+			sb.append(" List");
+			if(listLiterals != null) {
+				sb.append(" [");
+				for(int i = 0; i < listLiterals.size(); i++) {
+					if(i > 0) {
+						sb.append(",");
+					}
+					sb.append(listLiterals.get(i));
+				}
+				sb.append("]");
+			}
+		}
 		if (getMissingTripleReplacement() != null) {
 			sb.append(missingTripleReplacementToDescriptiveString());
 		}
