@@ -39,27 +39,36 @@ interface SadlProjectHelper {
 	 * Returns with {@code null} if the SADL project cannot be found, accessed or does not exist.
 	 */
 	def URI getRoot(URI nested);
-	
+
 	/**
 	 * Converts the FS path to the appropriate URI format.
 	 */
 	def URI toUri(Path path) {
 		return path.toFile.toURI;
 	}
-	
+
+	/**
+	 * Converts the URI to a file-system path.
+	 */
+	def Path toPath(URI uri);
+
 	/**
 	 * The default project helper. Does not help too much. This is the default and should be used for the headless tool-chain. 
 	 */
 	class Noop implements SadlProjectHelper {
-		
+
 		override isRoot(URI uri) {
 			return false;
 		}
-		
+
 		override getRoot(URI nested) {
 			return null;
 		}
-		
+
+		override toPath(URI uri) {
+			return null;
+		}
+
 	}
 
 }

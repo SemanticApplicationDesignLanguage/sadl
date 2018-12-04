@@ -249,7 +249,7 @@ class SADLValidator extends AbstractSADLValidator {
 		if (nm1 !== null) {
 			nm = declarationExtensions.getConcreteName(nm1) 
 		}
-		else {
+		if (nm === null) {
 			nm = declarationExtensions.getConcreteName(sr)
 		}
 		if (nm === null) {

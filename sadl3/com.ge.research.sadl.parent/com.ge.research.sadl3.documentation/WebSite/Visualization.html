@@ -12,7 +12,7 @@
 
 <h1>Model Visualization in the SADL-IDE</h1>
 <h6>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/05/2018<!--webbot bot="Timestamp" endspan i-checksum="12576" --> 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/20/2018<!--webbot bot="Timestamp" endspan i-checksum="12512" --> 
 by <a href="mailto:crapo@research.ge.com?subject=Model Visualization">A. W. 
 Crapo</a></h6>
 <p>The SADL-IDE Version 2.2.0.201411111033 and later includes the ability to 
@@ -34,7 +34,7 @@ folder under the installation directory with &quot;dot&quot; and &quot;dotty&quo
 (Window -&gt; Preferences) . Click on &quot;Sadl&quot; in the left-side menu. The global 
 preferences will include, at the bottom, &quot;GraphViz bin folder&quot;. Fill in the path 
 to the bin folder of your installation, e.g., &quot;<a href="file:///C:/win32app/graphviz/release/bin">C:\win32app\graphviz\release\bin</a>&quot;.</p>
-<p>In SADL Version 3, the graphing package is a plugin accessed as a service 
+<p>In SADL Version 3, the graphing package is a plug-in accessed as a service 
 implementing the Java Interface class<i> 
 com.ge.research.sadl.model.visualizer.IGraphVisualizer. </i>The SADL-IDE SADL 
 preference &quot;Graph renderer package and class&quot; setting is, by default, the 
@@ -43,14 +43,17 @@ com.ge.research.sadl.model.visualizer.GraphVizVisualizer</i>. Any visualizer
 implementing the <i>IGraphVisualizer</i> Interface class can be placed on the 
 Java classpath and specified in this preference.</p>
 <p>When the GraphVizVisualizer is used, the location of the GraphViz bin folder 
-(see above) must be specified in the OS environment variable </p>
+(see above) must be specified in the OS environment variable GRAPHVIZPATH, e.g,
+<br>
+<i>&nbsp;&nbsp; GRAPHVIZPATH=C:\Apps\graphviz-2.36\release\bin</i></p>
 <p>A neighborhood can now be graphed by opening a model in the SADL editor and 
 selecting the entire text of a concept name, then right-clicking for a context 
 menu and selecting &quot;Graph Neighborhood&quot;. </p>
 <p>Note that arbitrary graphs can also be created with the &quot;Ask: construct...&quot; 
 directive in a SADL model. (See
 <a href="http://www.w3.org/TR/sparql11-query/#construct">
-http://www.w3.org/TR/sparql11-query/#construct</a>.) The result of the SPARQL 
+http://www.w3.org/TR/sparql11-query/#construct</a>.) If graphing is configured, 
+the result of the SPARQL 
 construct will be displayed as graph using GraphViz as described above.</p>
 <p>&nbsp;</p>
 

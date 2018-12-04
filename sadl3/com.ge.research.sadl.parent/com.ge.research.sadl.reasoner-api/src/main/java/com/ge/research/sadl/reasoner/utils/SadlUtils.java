@@ -970,7 +970,7 @@ public class SadlUtils {
 		else {
 			previousClassesSizeOnCall = previousClasses.size();
 		}
-		if (cls.isAnon()) {
+//		if (cls.isAnon()) {
 			if (cls.canAs(OntClass.class)) {
 				OntClass ocls = cls.as(OntClass.class);
 				if (ocls.isUnionClass()) {
@@ -992,7 +992,7 @@ public class SadlUtils {
 					}
 				}
 			}
-		}
+//		}
 		try {
 			if (cls.canAs(OntClass.class)) {
 				ExtendedIterator<OntClass> eitr = cls.as(OntClass.class).listSubClasses();
@@ -1014,8 +1014,39 @@ public class SadlUtils {
 //				if (rootCall && classIsSuperClassOf(cls.as(OntClass.class), subcls)) {
 //					return true;
 //				}
+				if (rootCall) {
+					// One more condition: if subcls has a superclass which is an intersection containing cls
+					//	or a superclass of cls,
+					//	then subcls is a subclass of cls
+					ExtendedIterator<OntClass> eitr2 = subcls.as(OntClass.class).listSuperClasses(true);
+					while (eitr2.hasNext()) {
+						OntClass superClsOfCls = eitr2.next();
+						if (superClsOfCls.isIntersectionClass()) {
+							IntersectionClass icls = superClsOfCls.asIntersectionClass();
+							try {
+								ExtendedIterator<? extends OntClass> eitr3 = icls.listOperands();
+								while (eitr3.hasNext()) {
+									OntClass iclsmember = eitr3.next();
+	//								previousClasses = checkPreviousClassList(previousClasses, iclsmember);
+									// this is a new start for cycles
+									if (classIsSubclassOf(cls.as(OntClass.class), iclsmember, false, null)) {
+										eitr2.close();
+										eitr3.close();
+										return true;
+									}
+								}
+							}
+							catch (CircularDependencyException e) {
+								throw e;
+							}
+							catch (Exception e) {
+								logger.error("Unexpected error during deep validation: apparent Intersection Class does not return operands.");
+							}						
+						}
+					}
+				}
 			}
-			if (subcls.isAnon()) {
+//			if (subcls.isAnon()) {
 				if (subcls.isIntersectionClass()) {
 					IntersectionClass icls = subcls.asIntersectionClass();
 					try {
@@ -1036,7 +1067,8 @@ public class SadlUtils {
 						logger.error("Unexpected error during deep validation: apparent Intersection Class does not return operands.");
 					}
 				}
-			}
+//			}
+				
 // TODO We need to look for equivalent classes that provide a definition for a subclass, 
 //			e.g. Component is equivalent to System is class, (System and connectedTo someValueFrom Network) => Component subclass of System.
 			if (cls.canAs(OntClass.class)) {
@@ -1108,6 +1140,16 @@ public class SadlUtils {
 				OntClass sprcls = eitr.next();
 				if (sprcls.equals(cls)) {
 					return true;
+				}
+				if (sprcls.isIntersectionClass()) {
+					ExtendedIterator<? extends OntClass> exitr = sprcls.asIntersectionClass().listOperands();
+					while (exitr.hasNext()) {
+						OntClass intersectionClass = exitr.next();
+						if (classIsSuperClassOf(cls, intersectionClass)) {
+							exitr.close();
+							return true;
+						}
+					}
 				}
 				if (classIsSuperClassOf(cls, sprcls)) {
 					return true;

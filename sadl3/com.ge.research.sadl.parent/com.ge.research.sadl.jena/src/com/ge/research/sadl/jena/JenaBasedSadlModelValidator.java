@@ -1424,7 +1424,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						TypeCheckInfo tci = new TypeCheckInfo(new ConceptName("ValueTable"));
 						for (Expression val : vals) {
 							TypeCheckInfo rttci = getType(val);
-							tci.addCompoundType(rttci);
+							if (rttci != null) {
+								tci.addCompoundType(rttci);
+							}
 						}	
 						return tci;
 					}
@@ -1596,7 +1598,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				SadlResource prop = expression.getProp();
 				TypeCheckInfo propTci = getType(prop);
 				if (propTci != null && propTci.getTypeCheckType() == null && isInQuery(expression) && 
-						propTci.getExpressionType() instanceof ConceptName && ((ConceptName)propTci.getExpressionType()).getType().equals(ConceptType.VARIABLE)) {
+						propTci.getExpressionType() instanceof ConceptName && ((ConceptName)propTci.getExpressionType()).getType() != null && 
+						((ConceptName)propTci.getExpressionType()).getType().equals(ConceptType.VARIABLE)) {
 					throw new DontTypeCheckException();	// OK to not get a type for a property which is a variable in a query
 				}
 				return propTci;
@@ -2628,7 +2631,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									 * However, sometimes the range R2 isn't really a range but rather a local restriction, and in this case D1 may not be a subclass of R2,
 									 *    but it will then be the case that 
 									 */
-									if (SadlUtils.classIsSubclassOf(subj, dmn.as(OntClass.class), true, null)) {
+									if (SadlUtils.classIsSubclassOf(subj, dmn.as(OntClass.class), true, null))
+									{
 										domainMatched = true;
 										break;
 									}
@@ -2927,7 +2931,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private TypeCheckInfo getType(Name expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		SadlResource qnm =expression.getName();
 		if (qnm.eIsProxy()) {
-			handleUndefinedFunctions(expression);
+			if (expression.isFunction()) {
+				handleUndefinedFunctions(expression);
+			}
 		}
 		
 		//If the expression is a function, find equation definition from name and get the return type
@@ -3127,21 +3133,42 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (propcheckinfo != null) {
 				return propcheckinfo;
 			}
-			throw new PropertyWithoutRangeException(declarationExtensions.getConcreteName(sr));
+			if (getModelProcessor().isTypeCheckingRangeRequired()) {
+				throw new PropertyWithoutRangeException(declarationExtensions.getConcreteName(sr));
+			}
+			else {
+//				ConceptName declarationConceptName = new ConceptName("DontTypeCheck");
+//				return new TypeCheckInfo(declarationConceptName, null, this, reference);
+				throw new DontTypeCheckException("OK to have no range per preference");
+			}
 		}
 		else if(conceptType.equals(OntConceptType.CLASS_PROPERTY)){
 			TypeCheckInfo propcheckinfo =  getNameProperty(sr, ConceptType.OBJECTPROPERTY, conceptUri, reference);
 			if (propcheckinfo != null) {
 				return propcheckinfo;
 			}
-			throw new PropertyWithoutRangeException(declarationExtensions.getConcreteName(sr));
+			if (getModelProcessor().isTypeCheckingRangeRequired()) {
+				throw new PropertyWithoutRangeException(declarationExtensions.getConcreteName(sr));
+			}
+			else {
+//				ConceptName declarationConceptName = new ConceptName("DontTypeCheck");
+//				return new TypeCheckInfo(declarationConceptName, null, this, reference);
+				throw new DontTypeCheckException("OK to have no range per preference");
+			}
 		}
 		else if (conceptType.equals(OntConceptType.RDF_PROPERTY)) {
 			TypeCheckInfo rdfpropcheckinfo = getNameProperty(sr, ConceptType.RDFPROPERTY, conceptUri, reference);
 			if (rdfpropcheckinfo != null) {
 				return rdfpropcheckinfo;
 			}
-			throw new PropertyWithoutRangeException(declarationExtensions.getConcreteName(sr));
+			if (getModelProcessor().isTypeCheckingRangeRequired()) {
+				throw new PropertyWithoutRangeException(declarationExtensions.getConcreteName(sr));
+			}
+			else {
+//				ConceptName declarationConceptName = new ConceptName("DontTypeCheck");
+//				return new TypeCheckInfo(declarationConceptName, null, this, reference);
+				throw new DontTypeCheckException("OK to have no range per preference");
+			}
 		}
 		else if(conceptType.equals(OntConceptType.INSTANCE)){
 			// this is an instance--if it is already in the ontology we can get its type. If not maybe we can get it from its declaration
