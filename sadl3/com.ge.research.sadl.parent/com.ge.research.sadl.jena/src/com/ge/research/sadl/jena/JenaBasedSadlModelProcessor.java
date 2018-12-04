@@ -2793,10 +2793,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				SadlParameterDeclaration param = params.get(i);
 				SadlResource pr = param.getName();
 				Object pn = processExpression(pr);
-				args.add((Node) pn);
+				if (pn != null) {
+					args.add((Node) pn);
+				}
 				SadlTypeReference prtype = param.getType();
 				Node prtnode = sadlTypeReferenceToNode(prtype);
-				argtypes.add(prtnode);
+				if (prtnode != null) {
+					argtypes.add(prtnode);
+				}
 			}
 			eq.setArguments(args);
 			eq.setArgumentTypes(argtypes);

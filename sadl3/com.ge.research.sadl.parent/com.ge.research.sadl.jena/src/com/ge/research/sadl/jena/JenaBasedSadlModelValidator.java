@@ -2629,8 +2629,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									 * However, sometimes the range R2 isn't really a range but rather a local restriction, and in this case D1 may not be a subclass of R2,
 									 *    but it will then be the case that 
 									 */
-									if (SadlUtils.classIsSubclassOf(subj, dmn.as(OntClass.class), true, null) ||
-											SadlUtils.classIsSuperClassOf(dmn.as(OntClass.class), subj)) {
+									if (SadlUtils.classIsSubclassOf(subj, dmn.as(OntClass.class), true, null))
+									{
 										domainMatched = true;
 										break;
 									}

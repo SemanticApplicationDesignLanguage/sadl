@@ -122,17 +122,19 @@ public class Equation {
 		sb.append("(");
 		List<Node> args = getArguments();
 		List<Node> argtypes = getArgumentTypes();
-		if (!(args.size() == argtypes.size())) {
-			System.err.println("Error: equation arguments and argument types are not the same size");
-		}
-		else {
-			for (int i = 0; args != null && i < args.size(); i++) {
-				Node n = args.get(i);
-				Node nt = argtypes.get(i);
-				if (i > 0) sb.append(",");
-				sb.append(nt.toString());
-				sb.append(" ");
-				sb.append(n.toString());
+		if (args != null && argtypes != null) {
+			if (!(args.size() == argtypes.size())) {
+				System.err.println("Error: equation arguments and argument types are not the same size");
+			}
+			else {
+				for (int i = 0; args != null && i < args.size(); i++) {
+					Node n = args.get(i);
+					Node nt = argtypes.get(i);
+					if (i > 0) sb.append(",");
+					sb.append(nt.toString());
+					sb.append(" ");
+					sb.append(n.toString());
+				}
 			}
 		}
 		sb.append(")");
