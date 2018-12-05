@@ -18,6 +18,7 @@
 package com.ge.research.sadl.utils
 
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.NumberLiteral
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SadlResource
@@ -96,7 +97,7 @@ class SadlASTUtils {
 		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
 			val container = eContainer as SubjHasProp;
 			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null &&
-				!container.inQueryStatement;
+				!container.inQueryStatement && !container.inEquationStatement;
 		}
 		return false;
 	}
@@ -104,6 +105,10 @@ class SadlASTUtils {
 	// TOOD this logic should be much smarter.
 	private static def isInQueryStatement(EObject it) {
 		return getContainerOfType(QueryStatement) !== null;
+	}
+	
+	private static def isInEquationStatement(EObject it) {
+		return getContainerOfType(EquationStatement) !== null;
 	}
 
 	/**

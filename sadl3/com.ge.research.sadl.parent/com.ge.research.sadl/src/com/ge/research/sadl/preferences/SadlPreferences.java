@@ -42,12 +42,13 @@ public class SadlPreferences {
 	public static final PreferenceKey DMY_ORDER_DMY = new PreferenceKey("dmy", "");
 	public static final PreferenceKey DMY_ORDER_MDY = new PreferenceKey("mdy", "");
 	public static final PreferenceKey DEEP_VALIDATION_OFF = new PreferenceKey("deepValidationOff", "");
-	public static final PreferenceKey GRAPH_RENDERER_CLASS= new PreferenceKey("graphrendererclass", "");
-	public static final PreferenceKey TABULAR_DATA_IMPORTER_CLASS= new PreferenceKey("tabulardataimporterclass", "");
+	public static final PreferenceKey GRAPH_RENDERER_CLASS= new PreferenceKey("graphrendererclass", "com.ge.research.sadl.model.visualizer.GraphVizVisualizer");
+	public static final PreferenceKey TABULAR_DATA_IMPORTER_CLASS= new PreferenceKey("tabulardataimporterclass", "com.ge.research.sadl.jena.importer.CsvImporter");
 	public static final PreferenceKey CHECK_FOR_AMBIGUOUS_NAMES = new PreferenceKey("ambiguousNameCheckOn", String.valueOf(true));
 	public static final PreferenceKey CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN = new PreferenceKey("cardinalityCheck", String.valueOf(false));
 	public static final PreferenceKey P_USE_ARTICLES_IN_VALIDATION= new PreferenceKey("use_articles_in_validation", String.valueOf(false));
 	public static final PreferenceKey TYPE_CHECKING_WARNING_ONLY = new PreferenceKey("typeCheckingWarningOnly", String.valueOf(false));
+	public static final PreferenceKey TYPE_CHECKING_RANGE_REQUIRED = new PreferenceKey("typeCheckingRangeRequired", String.valueOf(true));
 	public static final PreferenceKey IGNORE_UNITTEDQUANTITIES = new PreferenceKey("ignoreUnittedQuantities", String.valueOf(false));
 	public static final PreferenceKey CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES = new PreferenceKey("domainAndRangeAsUnionClasses", String.valueOf(true));
 	//	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
@@ -77,10 +78,13 @@ public class SadlPreferences {
 			DMY_ORDER_MDY,
 			DEEP_VALIDATION_OFF,
 			GRAPH_RENDERER_CLASS,
+			TABULAR_DATA_IMPORTER_CLASS,
 			CHECK_FOR_AMBIGUOUS_NAMES,
 			CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN,
+			P_USE_ARTICLES_IN_VALIDATION,
 //			DISABLE_TYPE_CHECKING,
 			TYPE_CHECKING_WARNING_ONLY,
+			TYPE_CHECKING_RANGE_REQUIRED,
 			IGNORE_UNITTEDQUANTITIES,
 			CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES,
 //			ENABLE_METRICS_COLLECTION,

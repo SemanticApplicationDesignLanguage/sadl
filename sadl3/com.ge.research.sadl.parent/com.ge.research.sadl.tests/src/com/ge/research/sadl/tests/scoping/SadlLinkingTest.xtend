@@ -1340,4 +1340,5 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		B is a type of <seconds>.
 		'''.assertLinking[sadl]
 	}
+
 }
