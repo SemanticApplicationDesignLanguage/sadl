@@ -21,6 +21,7 @@ import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.common.base.Preconditions
 import java.net.URI
 import java.nio.file.Path
+import java.nio.file.Paths
 import org.eclipse.core.resources.ResourcesPlugin
 
 /**
@@ -53,7 +54,7 @@ class EclipseSadlProjectHelper implements SadlProjectHelper {
 		}
 		return getRoot(new URI(emfUri.trimSegments(1).toString));
 	}
-	
+
 	override toUri(Path path) {
 		val project = ResourcesPlugin.workspace.root.projects.map[location.toFile.toPath -> it].findFirst[path.startsWith(key)];
 		if (project === null) {
@@ -68,13 +69,23 @@ class EclipseSadlProjectHelper implements SadlProjectHelper {
 		}
 		return new URI(org.eclipse.emf.common.util.URI.createPlatformResourceURI(file.fullPath.toString, true).toString);
 	}
-	
+
+	override toPath(URI uri) {
+		uri.checkUri;
+		val path = org.eclipse.emf.common.util.URI.createURI(uri.toString(), false).toPlatformString(false);
+		val resource = ResourcesPlugin.workspace.root.findMember(path);
+		if (!resource.exists) {
+			throw new IllegalArgumentException('''The resource does not exits for the «uri» URI. Converted path was: «path».''');
+		}
+		return Paths.get(resource.locationURI);
+	}
+
 	protected def checkUri(URI uri) {
 		Preconditions.checkNotNull(uri, 'uri');
 		Preconditions.checkArgument(uri.toEmfUri.platformResource, '''Expected a `platform:/resource/` URI. Got instead: «uri».''')
 		return uri;
 	}
-	
+
 	protected def getProject(org.eclipse.emf.common.util.URI platformResourceUri) {
 		Preconditions.checkArgument(platformResourceUri.segmentCount === 2, '''Expected a `platform:/resource/ URI with two segments. URI: «platformResourceUri».''');
 		val root = ResourcesPlugin.workspace.root;
@@ -84,9 +95,9 @@ class EclipseSadlProjectHelper implements SadlProjectHelper {
 		}
 		return null;
 	}
-	
+
 	protected def toEmfUri(URI uri) {
 		return org.eclipse.emf.common.util.URI.createURI(uri.toString);
 	}
-	
+
 }

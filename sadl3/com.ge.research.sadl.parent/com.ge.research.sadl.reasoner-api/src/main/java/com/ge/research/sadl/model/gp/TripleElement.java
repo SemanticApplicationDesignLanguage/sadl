@@ -234,10 +234,16 @@ public class TripleElement extends GraphPatternElement {
 			sb.append(")");
 		}
 		if (subject instanceof NamedNode && ((NamedNode)subject).getMissingTripleReplacement() != null) {
-			sb.append(subject.toString());
+			sb.append(subject.toDescriptiveString());
+		}else if(subject instanceof NamedNode && ((NamedNode)subject).getMissingPatterns() != null){
+			sb.append(subject.toDescriptiveString());
+		}else if(subject instanceof ProxyNode) {
+			sb.append(subject.toDescriptiveString());
+		}else if(subject instanceof VariableNode) {
+			sb.append(subject.toDescriptiveString());
 		}
 		else {
-			sb.append(subject != null ? subject.toDescriptiveString() : "null");
+			sb.append(subject != null ? subject.toString() : "null");
 		}
 		sb.append(", ");
 		if (predicate instanceof NamedNode && ((NamedNode)predicate).getMissingTripleReplacement() != null) {

@@ -55,10 +55,13 @@
     <genClasses ecoreClass="SADL.ecore#//SadlModelElement"/>
     <genClasses ecoreClass="SADL.ecore#//EquationStatement">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//EquationStatement/body"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//EquationStatement/retval"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//EquationStatement/where"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//ExternalEquationStatement">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ExternalEquationStatement/uri"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//ExternalEquationStatement/location"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//ExternalEquationStatement/where"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//AbstractSadlEquation">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//AbstractSadlEquation/name"/>
@@ -73,6 +76,7 @@
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlReturnDeclaration">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlReturnDeclaration/type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlReturnDeclaration/none"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlReturnDeclaration/unknown"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlStatement"/>

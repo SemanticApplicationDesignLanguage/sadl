@@ -227,8 +227,10 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 			IPath outputPath = (editorFile.getParent().getLocation())
 					.append(sFolder);
 			
-			java.net.URI modelDefinitionUri = ((FileEditorInput) editor.getEditorInput()).getFile().getLocation().toFile().toURI();
-			new ExternalEmfModelDownloader(new EclipseSadlProjectHelper()).downloadModels(modelDefinitionUri);			
+			java.nio.file.Path modelDefinitionPath = ((FileEditorInput) editor.getEditorInput()).getFile().getLocation().toFile().toPath();
+			EclipseSadlProjectHelper projectHelper = new EclipseSadlProjectHelper();
+			java.net.URI modelDefinitionUri = projectHelper.toUri(modelDefinitionPath);
+			new ExternalEmfModelDownloader(projectHelper).downloadModels(modelDefinitionUri);
 			// check to see if there are any imports that are not either SADL models or external models processed above
 // TODO
 			// refresh the folder

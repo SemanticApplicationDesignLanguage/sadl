@@ -21,10 +21,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
@@ -34,10 +36,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.eclipse.emf.common.EMFPlugin;
-
-import java.util.Properties;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
@@ -47,6 +49,7 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.NetworkProxySettingsProvider;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlProjectHelper;
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -78,7 +81,7 @@ public class ExternalEmfModelDownloader {
 		String editorText = readFileContent(modelDefinitionUri);
 		List<String>[] urlsAndPrefixes = su.getUrlsAndPrefixesFromExternalUrlContent(editorText);
 		List<String> urls = urlsAndPrefixes[0];
-		Path modelsFolder = Paths.get(this.projectHelper.getRoot(modelDefinitionUri)).resolve(ResourceManager.OWLDIR);
+		Path modelsFolder = Paths.get(projectHelper.getRoot(modelDefinitionUri)).resolve(ResourceManager.OWLDIR);
 		String modelFolderPath = modelsFolder.toString();
 		IConfigurationManagerForIDE cm = null;
 		try {
@@ -87,8 +90,9 @@ public class ExternalEmfModelDownloader {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		String sFolder = su.getExternalModelRootFromUrlFilename(new File(modelDefinitionUri));
-		Path outputPath = Paths.get(modelDefinitionUri).getParent().resolve(sFolder);
+		Path modelDefinitionPath = projectHelper.toPath(modelDefinitionUri);
+		String sFolder = su.getExternalModelRootFromUrlFilename(modelDefinitionPath.toFile());
+		Path outputPath = modelDefinitionPath.getParent().resolve(sFolder);
 		SadlUtils.recursiveDelete(outputPath.toFile());
 		List<String> uploadedFiles = new ArrayList<String>();
 		for (int i = 0; i < urls.size(); i++) {
@@ -128,7 +132,8 @@ public class ExternalEmfModelDownloader {
 
 	private String readFileContent(URI modelDefinitionUri){
 		try {
-			return Files.toString(new File(modelDefinitionUri), StandardCharsets.UTF_8);
+			File file = projectHelper.toPath(modelDefinitionUri).toFile();
+			return Files.toString(file, StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -149,7 +154,7 @@ public class ExternalEmfModelDownloader {
 					Object prop = p.get(key);
 					// System.out.println("Key=" + key.toString() + ", value = " + prop.toString());
 				}
-				if (EMFPlugin.IS_ECLIPSE_RUNNING) {					
+				if (EMFPlugin.IS_ECLIPSE_RUNNING) {
 					for (Entry<String, String> entry : new NetworkProxySettingsProvider().getConfigurations().entrySet()) {
 						p.put(entry.getKey(), entry.getValue());
 					}
@@ -159,16 +164,16 @@ public class ExternalEmfModelDownloader {
 				is = url.openStream(); // throws an IOException
 				ReadableByteChannel rbc = Channels.newChannel(is);
 
-				String outputPath = downloadsRootFolder.resolve(destinationRelativePath).toString();
-				File file1 = new File(outputPath.substring(0, outputPath.lastIndexOf("/")));
+				Path outputPath = append(downloadsRootFolder, destinationRelativePath);
+				File file1 = outputPath.getParent().toFile();
 				file1.mkdirs();
-				FileOutputStream fos = new FileOutputStream(outputPath);
+				FileOutputStream fos = new FileOutputStream(outputPath.toFile());
 				long bytesTransferred = fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 				fos.close();
 				if (bytesTransferred < 1) {
 					System.err.println("Failed to get any content from external source '" + downloadUrl + "'");
 				}
-				return outputPath;
+				return outputPath.toString();
 
 			} catch (MalformedURLException mue) {
 				mue.printStackTrace();
@@ -185,6 +190,28 @@ public class ExternalEmfModelDownloader {
 		}
 		return null;
 	}
+	
+	// For instance `C:\` or `/c:/`. Case insensitive, match all dots. The leading and trailing anchors (^ and $) are implicit.
+	private static final Pattern WINDOWS_DRIVE_PATTERN = Pattern.compile("((?i)(?s)(/)?[A-Z]):.*");
+	
+	private Path append(Path path, String tail) {
+		if (WINDOWS_DRIVE_PATTERN.matcher(tail).matches()) {
+			String normalizedTail = tail.startsWith("/") ? tail.substring(1) : tail;
+			List<Path> segments = Lists.newArrayList(Paths.get(normalizedTail).iterator());
+			Path result = path;
+			for (Path segment : segments) {
+				String decoded = segment.toString();
+				try {
+					decoded = URLDecoder.decode(decoded, StandardCharsets.UTF_8.name());
+				} catch (UnsupportedEncodingException e) {
+					// NOOP
+				}
+				result = result.resolve(decoded);
+			}
+			return result;
+		}
+		return Paths.get(path.toString(), tail);
+	} 
 
 	private IConfigurationManagerForIDE getConfigMgr(String modelFolder, String format) throws ConfigurationException {
 		return ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, format);

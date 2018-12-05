@@ -246,7 +246,9 @@ interface ISadlOntologyHelper {
 		}
 
 		def Context build() {
-			Preconditions.checkNotNull(ontModel, 'ontModel');
+			if (ontModel === null) {
+				return null;
+			}
 			return new ContextImpl(ontModel, subject, modelProcessor, acceptor, grammarContextId, contextClass, restrictions);
 		}
 

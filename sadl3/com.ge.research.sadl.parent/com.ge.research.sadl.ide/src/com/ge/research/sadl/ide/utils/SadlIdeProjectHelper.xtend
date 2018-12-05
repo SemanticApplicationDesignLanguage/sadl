@@ -72,6 +72,11 @@ class SadlIdeProjectHelper implements SadlProjectHelper {
 		return getRoot(parent.toFile.toURI);
 	}
 
+	override toPath(URI uri) {
+		uri.checkUri;
+		return Paths.get(uri);
+	}
+
 	/**
 	 * Checks the URI and returns with the argument.
 	 */

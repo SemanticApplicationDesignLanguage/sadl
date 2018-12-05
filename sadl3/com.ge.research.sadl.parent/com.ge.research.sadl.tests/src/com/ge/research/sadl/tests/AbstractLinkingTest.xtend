@@ -38,6 +38,15 @@ import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
 import com.ge.research.sadl.sADL.SadlRangeRestriction
 
+/**
+ * Notes on writing linking tests:
+ * <p>
+ * <ul>
+ * <li>When defining the SADL model, <b>[RESOURCE]</b> is the <b>definition</b> of a SADL resource and <i>&lt;RESOURCE&gt;</i> is the <i>reference</i>.</li>
+ * <li>When CTRL/CMD + Clicking on an item, <b>[RESORUCE]</b> stays, as it is the <b>definition</b> and <i>&lt;RESOURCE&gt;</i> jumps to <b>[RESORUCE]</b>.</li>
+ * </ul>
+ * </p>
+ */
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 abstract class AbstractLinkingTest extends AbstractSadlTest {
@@ -89,8 +98,14 @@ abstract class AbstractLinkingTest extends AbstractSadlTest {
 			var result = parseableContents
 			var addedChars = 0
 			for (decl : actualNames.sortBy[region.offset]) {
-				val brackets = if (decl.isDeclaration === null) "?"->"?" else if (decl.isDeclaration) "["->"]" else "<"->">"
-				result = result.substring(0,decl.region.offset + addedChars) + brackets.key+ decl.value + brackets.value + result.substring(decl.region.offset + decl.region.length + addedChars)
+				val brackets = if (decl.isDeclaration === null) {
+					"?"->"?" 
+				} else if (decl.isDeclaration) {
+					"["->"]"
+				} else {
+					"<"->">"
+				}
+				result = result.substring(0, decl.region.offset + addedChars) + brackets.key + decl.value + brackets.value + result.substring(decl.region.offset + decl.region.length + addedChars)
 				addedChars += 2
 			}
 			return result
@@ -103,8 +118,8 @@ abstract class AbstractLinkingTest extends AbstractSadlTest {
 		TextRegion region
 	}
 	
-	private static val NAME = "[a-zA-Z0-9_\\.:]+"
-	private static val markerPattern = Pattern.compile("[\\[\\<]("+NAME+")[\\]|\\>]")
+	static val NAME = "[a-zA-Z0-9_\\.:]+"
+	static val markerPattern = Pattern.compile("[\\[\\<]("+NAME+")[\\]|\\>]")
 	
 	private def TestFile parseReferenceMarker(CharSequence txt) {
 		val result = new TestFile() => [
