@@ -2625,6 +2625,43 @@ public class CsvImporter implements ITabularDataImporter {
 				}
 				throw new InvalidNameException("'" + token + "' in row " + rowNum + " does not seem to be a valid class.");
 			}
+			else {
+				StmtIterator stmtitr = getModel(modelArrayPosition).listStatements(predicate, RDFS.range, (RDFNode)null);
+				if (stmtitr.hasNext()) {
+					RDFNode obj = stmtitr.nextStatement().getObject();
+					if (obj.isURIResource()) {
+						String rnguri = obj.asResource().getURI();
+						Literal lit;
+						try {
+							lit = SadlUtils.getLiteralMatchingDataPropertyRange(getModel(modelArrayPosition), rnguri, token);
+							if (lit != null) {
+								return lit;
+							}
+						} catch (TranslationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+				else if (predicate.getNameSpace().equals(OWL.getURI()) && 
+						(predicate.getLocalName().equals(OWL.cardinality.getLocalName()) ||
+								predicate.getLocalName().equals(OWL.maxCardinality.getLocalName()) ||
+								predicate.getLocalName().equals(OWL.minCardinality.getLocalName()) ||
+								predicate.getLocalName().equals(OWL2.qualifiedCardinality.getLocalName()) ||
+								predicate.getLocalName().equals(OWL2.maxQualifiedCardinality.getLocalName()) ||
+								predicate.getLocalName().equals(OWL2.minQualifiedCardinality.getLocalName()))) {
+					Literal lit;
+					try {
+						lit = SadlUtils.getLiteralMatchingDataPropertyRange(getModel(modelArrayPosition), XSD.xint.getURI(), token);
+						if (lit != null) {
+							return lit;
+						}
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
 			return getModel(modelArrayPosition).createTypedLiteral(token);
 		}
 		else if (object instanceof String) {
