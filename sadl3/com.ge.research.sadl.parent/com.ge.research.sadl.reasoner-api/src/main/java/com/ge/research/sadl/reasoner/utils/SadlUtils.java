@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -880,6 +881,7 @@ public class SadlUtils {
 		if (m == null) {
 			return null;	// this may happen on startup
 		}
+		ConceptName cn = null;
 		ConceptType ctype = null;
 		Resource r;
 		if (uri.equals(RDF.type.getURI())) {
@@ -904,42 +906,87 @@ public class SadlUtils {
 				else if (r.canAs(AnnotationProperty.class)) {
 					ctype = ConceptType.ANNOTATIONPROPERTY;
 				}
+				else if (r.canAs(Property.class)) {
+					ctype = ConceptType.RDFPROPERTY;
+				}
 				else if (r.canAs(Individual.class)) {
 					ctype = ConceptType.INDIVIDUAL;
 				}
 			}
 		}
-		if (r == null) {
-			if (uri.equals(RDFS.label.getURI())) {
-				r = RDFS.label;
-				ctype = ConceptType.ANNOTATIONPROPERTY;
-			}
-			else if (uri.equals(RDFS.domain.getURI())) {
-				r = RDFS.domain;
-				ctype = ConceptType.OBJECTPROPERTY;
-			}
-			else if (uri.equals(RDFS.range.getURI())) {
-				r = RDFS.range;
-				ctype = ConceptType.OBJECTPROPERTY;
-			}
-			else if (uri.equals(OWL.Class.getURI())) {
-				r = OWL.Class;
-				ctype = ConceptType.ONTCLASS;
-			}
-			else if (uri.equals(OWL.DatatypeProperty.getURI())) {
-				r = OWL.DatatypeProperty;
-				ctype = ConceptType.ONTCLASS;
-			}
-			else if (uri.equals(OWL.ObjectProperty.getURI())) {
-				r = OWL.ObjectProperty;
-				ctype = ConceptType.ONTCLASS;
-			}
-		}
 		if (r != null) {
-			ConceptName cn = new ConceptName(r.getLocalName());
+			cn = new ConceptName(r.getLocalName());
 			cn.setNamespace(r.getNameSpace());
 			cn.setType(ctype);
-			return cn;
+		}
+		else {
+			int lbloc = uri.indexOf('#');
+			String ns = uri.substring(0, lbloc + 1);
+			Object[] retvals = null;
+			if (ns.equals(OWL.getURI())) {
+				retvals = getImplicitResourceAndType(uri, ns, OWL.class);
+				if (retvals == null) {
+					retvals = getImplicitResourceAndType(uri, ns, OWL2.class);
+				}
+			}
+			else if (ns.equals(RDFS.getURI())) {
+				retvals = getImplicitResourceAndType(uri, ns, RDFS.class);
+			}
+			else if (ns.equals(RDF.getURI())) {
+				retvals = getImplicitResourceAndType(uri, ns, RDF.class);
+			}
+			if (retvals != null) {
+				cn = new ConceptName((String) retvals[0]);
+				cn.setType((ConceptType) retvals[1]);
+			}
+
+//			if (uri.equals(RDFS.label.getURI())) {
+//				r = RDFS.label;
+//				ctype = ConceptType.ANNOTATIONPROPERTY;
+//			}
+//			else if (uri.equals(RDFS.domain.getURI())) {
+//				r = RDFS.domain;
+//				ctype = ConceptType.OBJECTPROPERTY;
+//			}
+//			else if (uri.equals(RDFS.range.getURI())) {
+//				r = RDFS.range;
+//				ctype = ConceptType.OBJECTPROPERTY;
+//			}
+//			else if (uri.equals(OWL.Class.getURI())) {
+//				r = OWL.Class;
+//				ctype = ConceptType.ONTCLASS;
+//			}
+//			else if (uri.equals(OWL.DatatypeProperty.getURI())) {
+//				r = OWL.DatatypeProperty;
+//				ctype = ConceptType.ONTCLASS;
+//			}
+//			else if (uri.equals(OWL.ObjectProperty.getURI())) {
+//				r = OWL.ObjectProperty;
+//				ctype = ConceptType.ONTCLASS;
+//			}
+//			else if (uri.equals(OWL2.onClass.getURI())) {
+//				r = OWL2.onClass;
+//				ctype = ConceptType.OBJECTPROPERTY;
+//			}
+		}
+		return cn;
+	}
+
+	private Object[] getImplicitResourceAndType(String uri, String ns, Class cls) {
+		Field[] fields = cls.getDeclaredFields();
+		for (Field field : fields) {
+			if ((ns + field.getName()).equals(uri)) {
+				Object ft = field.getType();
+				Object[] retvals = new Object[2];
+				retvals[0] = uri;
+				if (field.getType().equals(Resource.class)) {
+					retvals[1] = ConceptType.OBJECTPROPERTY;
+				}
+				else if (field.getType().equals(Property.class)) {
+					retvals[1] = ConceptType.OBJECTPROPERTY;
+				}
+				return retvals;
+			}
 		}
 		return null;
 	}

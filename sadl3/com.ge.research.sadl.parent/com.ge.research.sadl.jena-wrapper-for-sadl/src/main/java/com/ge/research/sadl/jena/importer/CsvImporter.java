@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -107,6 +108,7 @@ import com.hp.hpl.jena.tdb.TDB;
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.OWL2;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
@@ -1955,14 +1957,14 @@ public class CsvImporter implements ITabularDataImporter {
 			IConfigurationManager cmgr = getConfigMgr();
 			if (cmgr instanceof ConfigurationManagerForEditing) {
 				((ConfigurationManagerForEditing)cmgr).addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, false, CSV_IMPORTER);
-				((ConfigurationManagerForEditing)cmgr).saveOntPolicyFile();
+//				((ConfigurationManagerForEditing)cmgr).saveOntPolicyFile();
 			}
 			else {
 				String currentMapping = getConfigMgr().getAltUrlFromPublicUri(importModelNS);
 				if ( currentMapping == null || !currentMapping.equals(actualUrl)) {
 					ConfigurationManagerForEditing cfmfe = new ConfigurationManagerForEditing(modelFolderName, IConfigurationManager.JENA_TDB);
 					cfmfe.addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, false, CSV_IMPORTER);
-					cfmfe.saveOntPolicyFile();
+//					cfmfe.saveOntPolicyFile();
 				}
 			}
 		}
@@ -2694,7 +2696,52 @@ public class CsvImporter implements ITabularDataImporter {
 				predicate.equals(RDFS.subClassOf) ||
 				predicate.equals(RDFS.domain) ||
 				predicate.equals(RDFS.range)) {
-			return getModel(modelArrayPosition).getOntClass(((ConceptName)cn).getUri());
+			OntResource or = getModel(modelArrayPosition).getOntClass(((ConceptName)cn).getUri());
+			if (or == null) {
+				if (cn.getNamespace().equals(OWL.getURI())) {
+					Field fld;
+					try {
+						fld = OWL2.class.getDeclaredField(cn.getName());
+						String nm = fld.getName();
+						or = getModel(modelArrayPosition).createOntResource(OWL.getURI() + nm);
+					} catch (NoSuchFieldException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else if (cn.getNamespace().equals(RDFS.getURI()) ) {
+					Field fld;
+					try {
+						fld = RDFS.class.getDeclaredField(cn.getName());
+						String nm = fld.getName();
+						or = getModel(modelArrayPosition).createOntResource(RDFS.getURI() + nm);
+					} catch (NoSuchFieldException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else if (cn.getNamespace().equals(RDF.getURI()) ) {
+					Field fld;
+					try {
+						fld = RDF.class.getDeclaredField(cn.getName());
+						String nm = fld.getName();
+						or = getModel(modelArrayPosition).createOntResource(RDF.getURI() + nm);
+					} catch (NoSuchFieldException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			return or;
 		}
 		else {
 			return getModel(modelArrayPosition).getIndividual(((ConceptName)cn).getUri());
