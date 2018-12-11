@@ -232,6 +232,12 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 		return OntModelProvider.find(eResource);
 	}
 
+	//--------------getPropertyInitializer--------------------------
+
+	private def dispatch getPropertyInitializer(EObject it) {
+		return null;
+	}
+
 	private def dispatch getPropertyInitializer(SadlModel it) {
 		val spi = EcoreUtil2.getAllContentsOfType(it, SadlPropertyInitializer)
 		if (!spi.empty) {
@@ -241,21 +247,27 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 		if (!spsr.empty) {
 			return (spsr as List<SadlResource>).head;
 		}
-		return null
+		return null;
 	}
-	
+
 	private def dispatch getPropertyInitializer(SadlSimpleTypeReference it) {
-		return it
+		return it;
 	}
 
 	private def dispatch getPropertyInitializer(SadlPropertyInitializer it) {
 		return it;
 	}
-	
+
+	//--------------getClassOrPropertyInitializer--------------------------
+
+	private def dispatch getClassOrPropertyInitializer(EObject it) {
+		return null;
+	}
+
 	private def dispatch getClassOrPropertyInitializer(SadlInstance it) {
 		return it;
-	} 
-	
+	}
+
 	private def dispatch getClassOrPropertyInitializer(SadlSimpleTypeReference it) {
 		return it;
 	}
@@ -267,13 +279,19 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 	private def dispatch getClassOrPropertyInitializer(SadlRangeRestriction it) {
 		return it;
 	}
-	
+
 	private def dispatch getClassOrPropertyInitializer(BinaryOperation it) {
 		return it;
 	}
 
 	private def dispatch getClassOrPropertyInitializer(SadlModel it) {
 		return EcoreUtil2.getAllContentsOfType(it, SadlClassOrPropertyDeclaration).head;
+	}
+
+	//--------------getPropOfSubjectInitializer--------------------------
+
+	private def dispatch getPropOfSubjectInitializer(EObject it) {
+		return null;
 	}
 
 	private def dispatch getPropOfSubjectInitializer(PropOfSubject it) {
@@ -284,6 +302,12 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 		return EcoreUtil2.getAllContentsOfType(it, PropOfSubject).head;
 	}
 
+	//--------------getSubjHasPropInitializer--------------------------
+
+	protected def dispatch getSubjHasPropInitializer(EObject it) {
+		return null;
+	}
+
 	protected def dispatch getSubjHasPropInitializer(SubjHasProp it) {
 		return it;
 	}
@@ -291,8 +315,9 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 	protected def dispatch getSubjHasPropInitializer(SadlModel it) {
 		return EcoreUtil2.getAllContentsOfType(it, SubjHasProp).head;
 	}
-	
+
 	protected def dispatch getSubjHasPropInitializer(QueryStatement it) {
 		return EcoreUtil2.getAllContentsOfType(it, SubjHasProp).head;
 	}
+
 }

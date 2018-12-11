@@ -360,23 +360,29 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 						SadlResource case concreteName !== null: {
 							handleSadlResource(context);
 						}
+						// if (!it.name.concreteName.nullOrEmpty) as a workaround for the broken AST
+						// E.g.: `Equation Equation Equation Equation <|>newtons2ndLaw`
 						EquationStatement: {
-							val name = converter.toQualifiedName(it.name.concreteName)
-							map.addElement(name, it.name)
-							if (name.segmentCount > 1) {
-								map.addElement(name.skipFirst(1), it.name)
-							} else if (namespace !== null) {
-								map.addElement(namespace.append(name), it.name)
+							if (!it.name.concreteName.nullOrEmpty) {
+								val name = converter.toQualifiedName(it.name.concreteName)
+								map.addElement(name, it.name)
+								if (name.segmentCount > 1) {
+									map.addElement(name.skipFirst(1), it.name)
+								} else if (namespace !== null) {
+									map.addElement(namespace.append(name), it.name)
+								}
 							}
 							iter.prune
 						}
 						ExternalEquationStatement: {
-							val name = converter.toQualifiedName(it.name.concreteName)
-							map.addElement(name, it.name)
-							if (name.segmentCount > 1) {
-								map.addElement(name.skipFirst(1), it.name)
-							} else if (namespace !== null) {
-								map.addElement(namespace.append(name), it.name)
+							if (!it.name.concreteName.nullOrEmpty) {
+								val name = converter.toQualifiedName(it.name.concreteName)
+								map.addElement(name, it.name)
+								if (name.segmentCount > 1) {
+									map.addElement(name.skipFirst(1), it.name)
+								} else if (namespace !== null) {
+									map.addElement(namespace.append(name), it.name)
+								}
 							}
 							iter.prune
 						}
