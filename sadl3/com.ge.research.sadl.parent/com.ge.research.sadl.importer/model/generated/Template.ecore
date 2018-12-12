@@ -153,8 +153,10 @@
         eType="#//Replacement" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Replacement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="beforeIDEXT" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="beforeLit" eType="#//LiteralValue"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="afterIDEXT" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="afterLit" eType="#//LiteralValue"
         containment="true"/>
   </eClassifiers>

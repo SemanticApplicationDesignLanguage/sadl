@@ -139,13 +139,13 @@ Find:
 ;
 
 Replace:
-	to=(IndexedColRef | NonIndexedColRef) WS 'replace' WS replacements+=Replacement (','replacements+=Replacement)*
+	to=(IndexedColRef | NonIndexedColRef) WS 'replace' WS replacements+=Replacement (WS? ',' WS? replacements+=Replacement)*
 ;
 
 Replacement:
 //	before=(NUMBER | STRING | IDEXT | 'true' | 'false') ':' after=( NUMBER |STRING | IDEXT | 'true' | 'false')
 //	(beforeLit=LiteralValue | beforeStr=STRING) ':' (afterLit=LiteralValue | afterStr=STRING)
-	(beforeLit=LiteralValue) ':' (afterLit=LiteralValue)
+	(beforeIDEXT=IDEXT | beforeLit=LiteralValue) WS? ':' WS? (afterIDEXT = IDEXT | afterLit=LiteralValue)
 ;
 
 Group:
