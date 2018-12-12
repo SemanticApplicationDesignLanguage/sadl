@@ -1,0 +1,22 @@
+ uri "http://sadl.org/TransitiveProperty.sadl" alias TransitiveProperty.
+ 
+ Region is a class.
+ {City, County, State, Country} are types of Region.
+ 
+ locatedIn describes Region with values of type Region.
+ locatedIn is transitive.
+ 
+ NewYork is a State.
+ USA is a Country.
+ Saratoga is a County.
+ BalstonSpa is a City.
+ BalstonSpa locatedIn Saratoga.
+ Saratoga locatedIn NewYork.
+ NewYork locatedIn USA.
+ 
+ Ask: select x, y where x locatedIn y.
+ 
+ // this will pass with OWL_MEM_MINI_RULE selected as Jena Spec Model.
+ Test: BalstonSpa locatedIn USA.
+ 
+ 

@@ -1,0 +1,7 @@
+ uri "http://sadl.org/M3.sadl" alias M3.
+ 
+ import "http://sadl.org/M1.sadl".
+ import "http://sadl.org/M2.sadl".
+ 
+ George is a Person with hardness Moderate.
+ 

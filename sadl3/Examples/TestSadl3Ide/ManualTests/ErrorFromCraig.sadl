@@ -1,0 +1,21 @@
+ uri "http://sadl.org/ErrorFromCraig.sadl" alias ErrorFromCraig.
+ 
+SYSTEM is a class.	// this must have been imported?
+
+THING is a class.
+THING describes SYSTEM.
+THING has exactly 2 values.
+input describes THING with values of type INPUT.
+INPUT is a class.
+stuff describes INPUT with values of type integer.
+    
+ /*
+  * he meant:
+THING is a class.
+thing describes SYSTEM with values of type THING.
+thing has exactly 2 values.
+input describes THING with values of type INPUT.
+INPUT is a class.
+stuff describes INPUT with values of type integer.
+  
+  */

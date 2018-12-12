@@ -1,0 +1,21 @@
+ uri "http://sadl.org/LiteralOutOfRangeLong.sadl" alias LiteralOutOfRangeLong.
+ 
+ Foo is a class described by bar with values of type long.
+ MyFoo1 is a Foo with bar -9223372036854775809 .
+ MyFoo2 is a Foo with bar 9223372036854775808 .
+ 
+ Rule R1 if f is a Foo and bar of f >= 9223372036854775807 then print("bigger than long").
+ Rule R2 if f is a Foo then bar of f is -9223372036854775808 .   
+
+ Rule R3 if f is a Foo and bar of f > 9223372036854775807 then print("bigger than long").
+ Rule R4 if f is a Foo then bar of f is -9223372036854775809 .
+  
+ Rule R5 if f is a Foo and bar of f = 9223372036854775807 then print("bigger than long").
+ Rule R6 if f is a Foo then bar of f is -9223372036854775808 .   
+  
+ Rule R7 if f is a Foo and bar of f <= 9223372036854775807 then print("bigger than long").
+ Rule R8 if f is a Foo then bar of f is -9223372036854775808 .   
+
+ Rule R9 if f is a Foo and bar of f < 9223372036854775807 then print("bigger than long").
+ Rule R10 if f is a Foo then bar of f is -9223372036854775808 .
+  

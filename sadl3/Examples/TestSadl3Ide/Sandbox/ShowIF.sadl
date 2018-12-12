@@ -1,0 +1,8 @@
+ uri "http://sadl.org/ShowIF.sadl" alias ShowIF.
+ 
+ Person is a class described by friend with values of type Person, described by age with values of type int.
+ 
+ Nick is a Person.
+ 
+ Expr: age of friend of Nick.
+ 

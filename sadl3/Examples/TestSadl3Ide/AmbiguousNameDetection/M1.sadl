@@ -1,0 +1,4 @@
+ uri "http://sadl.org/M1.sadl" alias M1.
+ 
+ Rock is a class described by hardness with values of type decimal.
+ 

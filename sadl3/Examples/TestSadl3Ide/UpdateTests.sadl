@@ -1,0 +1,23 @@
+ uri "http://sadl.org/UpdateTests.sadl" alias UpdateTests.
+ 
+ Person is a class described by name with values of type string, described by owns with values of type Thing, described by loves with values of type Thing.
+ Thing is a class.
+ George is a Person with name "George".
+ Fido is a Thing.
+ George owns Fido.
+ 
+ John is a Person with name "Johnny".
+ 
+ Rule LoveWhatYouOwn: if x owns y then x loves y.
+ 
+ Ask Ownership (note "This query is a select."): select s,p where s p Fido.
+// Update: "delete {?person <UpdateTests:owns> <UpdateTests:Fido> . ?person <UpdateTests:loves> <UpdateTests:Fido>}
+//		  insert {<UpdateTests:John> <UpdateTests:owns> <UpdateTests:Fido>}
+//		  where {?person <UpdateTests:owns> <UpdateTests:Fido> . ?person <UpdateTests:name> 'George'}".
+ Update UpdateToJohn: delete x owns Fido and x loves Fido
+		 insert John owns Fido
+		 where x owns Fido and x has name "George"
+		 .
+Ask: Ownership.
+
+Update UpdateToJohn.

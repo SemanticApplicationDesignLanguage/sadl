@@ -1,0 +1,10 @@
+ uri "http://sadl.org/CustomAnnotations.sadl" alias CustomAnnotations.
+ 
+ giberish is a type of annotation.
+ 
+ AllThingsGood (alias "all things good", "good things", "things that are good") 
+ 	(note "This is a first comment", "this is a second comment") is a class.
+ 
+// TheBestThings is a type of AllThingsGood (alias "all good things").
+ 
+ 

@@ -1,0 +1,26 @@
+ uri "http://sadl.org/Test1.sadl" alias Test1.
+ 
+ PhysicalThing is a class,
+ 	described by weight with values of type UnittedQuantity,
+ 	described by density with values of type float.
+ 	
+ LivingThing is a type of PhysicalThing,
+ 	described by dateOfBirth with values of type dateTime,
+ 	described by age with values of type float.
+ 	
+ Mammal is a type of LivingThing,
+ 	described by child with values of type Mammal.
+ 	
+ Person is a type of Mammal.
+ child of Person only has values of type Person.
+ 
+ Pet is a class, described by caredFor with a single value of type boolean.
+ owns describes Person with values of type Pet.
+ 
+ External subtractDates(dateTime t1, dateTime t2, string u) returns float : "http://sadl.org/builtins/subtractDates".
+ 
+ Rule AgeRule: if p is a LivingThing then age of p is subtractDates(now(), dateOfBirth of p, "y"). 	
+ 
+ Rule AgeRule2: if p is a LivingThing then age of p is Test1:subtractDates(now(), dateOfBirth of p, "y"). 	
+ 
+ 

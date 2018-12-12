@@ -1,0 +1,17 @@
+ uri "http://sadl.org/PropertyInitializationAsRulePremise.sadl" alias PropertyInitializationAsRulePremise.
+ 
+ Person is a class described by age with values of type decimal.
+ 
+ Child is a type of Person.
+ 
+// Rule ChildRule2: if x is a Person with age <= 12 then x is a Child.
+Rule ChildRule2: if the age of a Person <= 12 then the Person is a Child. 
+Rule ChildRule2b: if x is a Person and age of x <= 12 then x is a Child.
+ 
+// Rule ChildRule3b:
+// 	if x is a Person
+// 	//and age of x <= 12 
+// 	then x is a Child .
+  
+
+Rule ChildRule3: then print("hello world").

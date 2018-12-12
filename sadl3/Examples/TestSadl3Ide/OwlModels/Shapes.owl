@@ -1,0 +1,43 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:Shapes="http://sadl.org/Shapes.sadl#"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/Shapes.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Shapes.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Shape"/>
+  <owl:Class rdf:ID="Circle">
+    <rdfs:subClassOf rdf:resource="#Shape"/>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:ID="radius">
+    <rdfs:domain rdf:resource="#Circle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="area">
+    <rdfs:domain rdf:resource="#Shape"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:AnnotationProperty rdf:ID="comment"/>
+  <Shapes:Circle rdf:ID="MyCircle">
+    <Shapes:radius rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
+    >3.0</Shapes:radius>
+  </Shapes:Circle>
+  <j.0:Rule rdf:ID="AreaOfCircle">
+    <Shapes:comment rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ho</Shapes:comment>
+  </j.0:Rule>
+  <j.0:NamedQuery rdf:ID="Q1">
+    <rdfs:isDefinedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >select ?v4 where {&lt;http://sadl.org/Shapes.sadl#MyCircle&gt; &lt;http://sadl.org/Shapes.sadl#area&gt; ?v4}</rdfs:isDefinedBy>
+  </j.0:NamedQuery>
+</rdf:RDF>

@@ -1,0 +1,12 @@
+ uri "http://sadl.org/RuleWithList.sadl" alias RuleWithList.
+ 
+ Scores is a type of int List.
+ 
+ MyScores is the Scores [25, 54, 86].
+ 
+ Rule testListVar:
+ 	if x is the Scores [23, 45, 68]
+ 	   and y is length of MyScores
+ 	then
+ 	   print("length of list is ", y).
+  
