@@ -124,6 +124,14 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Find/to"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Find/query"/>
     </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Replace">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Replace/to"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Replace/replacements"/>
+    </genClasses>
+    <genClasses ecoreClass="Template.ecore#//Replacement">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Replacement/beforeLit"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Replacement/afterLit"/>
+    </genClasses>
     <genClasses ecoreClass="Template.ecore#//Group">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Group/groupLines"/>
     </genClasses>
