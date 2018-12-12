@@ -1,0 +1,4 @@
+ uri "http://sadl.org/NotCircular2.sadl" alias NotCircular2.
+ 
+ import "http://sadl.org/NotCircular1a.sadl".
+ 

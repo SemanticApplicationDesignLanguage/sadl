@@ -1,0 +1,79 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:ListOfList="http://sadl.org/ListOfList.sadl#"
+    xmlns:j.0="http://sadl.org/sadllistmodel#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:sadllistmodel="http://sadl.org/sadllistmodel"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/ListOfList.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="sadllistmodel"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'ListOfList.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="IntList">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="#IntList"/>
+        <owl:onProperty rdf:resource="sadllistmodel#rest"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+        <owl:onProperty rdf:resource="sadllistmodel#first"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="sadllistmodel#List"/>
+  </owl:Class>
+  <ListOfList:IntList rdf:ID="L3">
+    <j.0:rest>
+      <ListOfList:IntList>
+        <j.0:first>
+          <xsd:int rdf:ID="L2">
+            <j.0:rest>
+              <ListOfList:IntList>
+                <j.0:rest>
+                  <ListOfList:IntList>
+                    <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+                    >6</j.0:first>
+                  </ListOfList:IntList>
+                </j.0:rest>
+                <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+                >5</j.0:first>
+              </ListOfList:IntList>
+            </j.0:rest>
+            <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+            >4</j.0:first>
+            <rdf:type rdf:resource="#IntList"/>
+          </xsd:int>
+        </j.0:first>
+      </ListOfList:IntList>
+    </j.0:rest>
+    <j.0:first>
+      <xsd:int rdf:ID="L1">
+        <j.0:rest>
+          <ListOfList:IntList>
+            <j.0:rest>
+              <ListOfList:IntList>
+                <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+                >3</j.0:first>
+              </ListOfList:IntList>
+            </j.0:rest>
+            <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+            >2</j.0:first>
+          </ListOfList:IntList>
+        </j.0:rest>
+        <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</j.0:first>
+        <rdf:type rdf:resource="#IntList"/>
+      </xsd:int>
+    </j.0:first>
+  </ListOfList:IntList>
+</rdf:RDF>

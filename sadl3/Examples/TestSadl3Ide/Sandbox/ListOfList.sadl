@@ -1,0 +1,6 @@
+ uri "http://sadl.org/ListOfList.sadl" alias ListOfList.
+ 
+IntList is a type of int List.
+L1 is the IntList [1,2,3].
+L2 is the IntList [4,5,6].
+L3 is the IntList List [L1,L2].

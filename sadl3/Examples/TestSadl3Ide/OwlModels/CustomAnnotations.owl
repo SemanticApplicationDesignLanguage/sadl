@@ -1,0 +1,25 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:CustomAnnotations="http://sadl.org/CustomAnnotations.sadl#"
+  xml:base="http://sadl.org/CustomAnnotations.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'CustomAnnotations.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="AllThingsGood">
+    <rdfs:comment xml:lang="en">this is a second comment</rdfs:comment>
+    <rdfs:comment xml:lang="en">This is a first comment</rdfs:comment>
+    <rdfs:label xml:lang="en">things that are good</rdfs:label>
+    <rdfs:label xml:lang="en">good things</rdfs:label>
+    <rdfs:label xml:lang="en">all things good</rdfs:label>
+  </owl:Class>
+  <owl:AnnotationProperty rdf:ID="giberish"/>
+</rdf:RDF>

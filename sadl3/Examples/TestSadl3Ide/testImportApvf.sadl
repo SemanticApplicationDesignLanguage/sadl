@@ -1,0 +1,23 @@
+uri "http://sadl.imp/test_import_apvf" version "$Revision: 1.6 $ Last modified on $Date: 2015/06/30 21:27:34 $".
+
+import "http://research.ge.com/Acuity/aulo.owl" as aulo.
+
+Genius is a type of Person.
+iq describes Person has values of type string. 
+iq of Person must be one of {"low", "average", "high"}.
+
+a Person is a Genius only if iq always has value "high".
+
+//Rule GeniusRule: if p is a Person and p has iq "high" then p is a Genius.
+
+George is a Person, has iq "high".
+
+Print: "This test will pass only if OWL entailments are enabled in the reasoner.".
+Test: George is a Genius.
+  
+
+//Print: Model.
+//Print: Deductions .
+//Explain: Rule GeniusRule.
+
+  

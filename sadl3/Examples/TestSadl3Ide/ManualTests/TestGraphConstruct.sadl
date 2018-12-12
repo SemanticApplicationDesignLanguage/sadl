@@ -1,0 +1,17 @@
+ uri "http://sadl.org/TestGraphConstruct.sadl" alias TestGraphConstruct.
+ 
+ Person is a class described by friend with values of type Person,
+ 	described by age with values of type int.
+ 	
+ George is a Person with friend (a Person Meg).
+ 
+ Ask: "construct {?s ?p ?v} where {?s ?p ?v}". 	
+ Ask: construct s p v where s has p v .
+ Ask: construct s p v where s p v .
+ Ask: construct s p v where s p v .
+ Ask: construct s,p,v where s p v.
+ Graph: "select ?s ?p ?v where {?s ?p ?v}".
+ Graph: select s p v where s p v .
+// Expr: s p v.
+ Ask: select s,p,v where s p v.
+ 

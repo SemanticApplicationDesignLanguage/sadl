@@ -1,0 +1,10 @@
+ uri "http://sadl.org/VariableScope.sadl" alias VariableScope.
+ 
+ Shape is a class described by area with values of type float.
+ Rectangle is a type of Shape described by height with values of type float, described by width with values of type float.
+ Circle is a type of Shape described by radius with values of type float.
+ 
+ Rule AreaOfRect: if x is a Rectangle then area of x is width of x * height of x.
+ 
+ Rule AreaOfCircle: if x is a Circle then area of x is radius of x ^ 2 * PI.
+ 

@@ -1,0 +1,6 @@
+ uri "http://sadl.org/NotCircular1a.sadl" alias NotCircular1a.
+ 
+ import "http://sadl.org/NotCircularRoot.sadl".
+ 
+ Bar is a type of Foo.
+ 

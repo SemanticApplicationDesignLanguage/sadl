@@ -113,7 +113,8 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 						File actualFile = new File(actualUrl);
 						String fileName = actualFile.getName();
 						fileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".sadl";
-						Path projectPath = Paths.get(projectHelper.getRoot(path.toUri()));
+//						Path projectPath = Paths.get(projectHelper.getRoot(path.toUri()));
+						Path projectPath = new File(owlModelPath).getParentFile().toPath();
 						Path file = findFileRecursively(projectPath, fileName);
 						if (file != null) {
 							Resource res = findAndPrepareResource(resourceSet, file);

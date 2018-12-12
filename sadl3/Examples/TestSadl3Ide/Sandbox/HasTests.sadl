@@ -1,0 +1,25 @@
+ uri "http://sadl.org/HasTests.sadl" alias ht.
+ 
+ Person is a class.
+ age describes Person with values of type int.		// a "passive" property--a characteristic that a Person has; also a DatatypeProperty
+ child describes Person with values of type Person.	// another "passive" property, this time an ObjectProperty
+ 
+ 
+ teaches describes Person with values of type Person. // an "action" property--something that a Person does
+ 
+ // Instance declarations
+ George is a Person.
+ John is a Person, has age 23, has teaches George.	// this is currently valid SADL grammar but not good English
+ Julia is a Person, teaches George.	// this does not work but is desired
+ 
+ Sue is a Person. 
+ Sue teaches George.	// this works currently, which is good
+ 
+ 
+ knows describes Person with values of type Person.		// an "active" property
+ The relationship of Person to Person is acquaintance.	// a "passive" property
+ 
+ Rule R1 if x is a Person and x has teaches y then x has acquaintance y.	// this works
+ 
+ Rule R2 if x is a Person and x teaches y then x knows y.	// this doesn't but is desired
+ 

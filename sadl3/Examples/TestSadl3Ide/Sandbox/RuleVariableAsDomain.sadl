@@ -1,0 +1,20 @@
+ uri "http://sadl.org/RuleVariableAsDomain.sadl"alias RuleVariableAsDomain.
+ 
+ PhysicalThing is a class,
+ 	described by weight with values of type UnittedQuantity,
+ 	described by density with values of type float.
+ 	
+ LivingThing is a type of PhysicalThing,
+ 	described by dateOfBirth with values of type dateTime.
+ 	
+ Mammal is a type of LivingThing,
+ 	described by child with values of type Mammal.
+ 	
+ Person is a type of Mammal.
+ child of Person only has values of type Person.
+ 
+ Pet is a class, described by caredFor with a single value of type boolean.
+ owns describes Person with values of type Pet.
+ 
+ Rule R1: if p1 is a Person and p2 is a Pet and p2 has owns p1 then p1 has caredFor true.
+ 

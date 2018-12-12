@@ -1,0 +1,37 @@
+ uri "http://sadl.org/UsingNumericConstants.sadl" alias UsingNumericConstants.
+ 
+ Foo is a class described by fprop with values of type decimal.
+ 
+ MyFoo is a Foo with fprop PI.
+ 
+// MyFoo2 is a Foo with fprop PI * -1 .	// this should not work--it involves a computation 
+ 
+ MyFoo3 is a Foo with fprop -PI.	// grammar error: this should work just like the negative number below
+ MyFoo4 is a Foo with fprop 3.14.
+ MyFoo5 is a Foo with fprop -3.14.
+ 
+ MyFoo5 is a Foo with fprop e.
+ MyFoo5 has fprop -e.				// this should work 
+ 
+ 
+ Test: fprop of MyFoo3 is PI.
+ Test: fprop of MyFoo3 is -PI.
+ Test: fprop of MyFoo3 is not PI.
+ Test: fprop of MyFoo3 is known.
+ Test: fprop of MyFoo3 is not known.
+ Test: fprop of MyFoo3 is e.
+ Test: fprop of MyFoo3 is -e.
+
+ Test: MyFoo3 has fprop PI.
+ Test: MyFoo3 has fprop -PI.
+ Test: MyFoo3 has fprop not PI.		// grammar error
+ Test: MyFoo3 has fprop known.
+ Test: MyFoo3 has fprop not known.	// grammar error
+ Test: MyFoo3 has fprop e.
+ Test: MyFoo3 has fprop -e.
+ Test: MyFoo3 has fprop not e.		// grammar error
+ Test: MyFoo3 has fprop not (-e).		// grammar error
+ 
+// Expr: not -e.
+ 
+ 

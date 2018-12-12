@@ -1,0 +1,21 @@
+ uri "http://sadl.org/PathFindingTest.sadl" alias PathFindingTest.
+ 
+ Root1 is a class.
+ Root2 is a class.
+ 
+ Class1_1 is a type of Root1.
+ Class1_1_1 is a type of Class1_1.
+ Class1_1_2 is a type of Class1_1.
+ Class1_2 is a type of Root1.
+ Class1_2_1 is a type of Class1_2.
+ Class1_2_2 is a type of Class1_2.
+ Class2_1 is a type of Root2.
+ Class2_1_1 is a type of Class2_1.
+ Class2_1_2 is a type of Class2_1.
+ Class2_2 is a type of Root2.
+ Class2_2_1 is a type of Class2_2.
+ Class2_2_2 is a type of Class2_2.
+ 
+ p1_1_1_to_1_1_2 describes Class1_1_1 with values of type Class1_1_2.
+ 
+ 
