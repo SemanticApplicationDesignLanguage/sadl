@@ -43,7 +43,7 @@
 					<dependency>
 						<groupId>com.ge.research.sadl</groupId>
 						<artifactId>com.ge.research.sadl.xtextgenerator</artifactId>
-						<version>${sadlVersion}</version>
+						<version>${project.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -90,7 +90,7 @@
 							</includes>
 						</fileset>
 						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.importer.ui.tests/src-gen/</directory>
+							<directory>${basedir}/../com.ge.research.sadl.importer/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
 							</includes>

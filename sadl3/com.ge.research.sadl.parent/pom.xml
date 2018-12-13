@@ -29,12 +29,22 @@
 		<module>com.ge.research.sadl.ui.tests</module>
 		<module>com.ge.research.sadl.jena</module>
 		<module>com.ge.research.sadl.jena-wrapper-for-sadl</module>
+		<module>com.ge.research.sadl.swi-prolog-plugin</module>
+		<module>com.ge.research.sadl.errorgenerator</module>
+		<module>com.ge.research.sadl.importer</module>
+		<module>com.ge.research.sadl.importer.ide</module>
+		<module>com.ge.research.sadl.importer.tests</module>
+		<module>com.ge.research.sadl.importer.ui</module>
+		<module>com.ge.research.sadl.importer.ui.tests</module>
+		<module>com.ge.research.sadl.testsuite</module>
+		<module>com.ge.research.sadl.testsuite.ide</module>
+		<module>com.ge.research.sadl.testsuite.tests</module>
+		<module>com.ge.research.sadl.testsuite.ui</module>
+		<module>com.ge.research.sadl.testsuite.ui.tests</module>
 		<module>com.ge.research.sadl.applications</module>
 		<module>com.ge.research.sadl.feature</module>
 		<module>com.ge.research.sadl.perspective</module>
 		<module>com.ge.research.sadl.update</module>
-		<module>com.ge.research.sadl.swi-prolog-plugin</module>
-		<module>com.ge.research.sadl.errorgenerator</module>
 	</modules>
 	<build>
 		<finalName>${project.groupId}-${sadlOsgiVersion}.${maven.build.timestamp}</finalName>
