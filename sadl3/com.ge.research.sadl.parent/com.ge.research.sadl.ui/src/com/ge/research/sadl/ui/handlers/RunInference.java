@@ -1,8 +1,5 @@
 package com.ge.research.sadl.ui.handlers;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.commands.ExecutionEvent;
@@ -19,9 +16,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.xtext.resource.XtextResource;
 
 import com.ge.research.sadl.ide.handlers.SadlRunInferenceHandler;
-import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
-import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ResultSet;
 import com.google.common.base.Supplier;
 import com.google.common.base.Throwables;
 import com.google.inject.Inject;
@@ -75,15 +69,9 @@ public class RunInference extends SadlActionHandler {
 								Supplier<XtextResource> resourceSupplier = () -> resource;
 								final IProject currentProject = project;
 								final IFile targetFile = trgtFile;
-								new DelegatingInferenceHandler(handlerProvider.get()) {
-									protected void resultSetToGraph(Path path, ResultSet resultSet, String description, String baseFileName, Orientation orientation, java.util.Map<String,String> properties) {
-										try {
-											RunInference.this.resultSetToGraph(currentProject, targetFile, resultSet, description, baseFileName, orientation, properties);
-										} catch (ConfigurationException | IOException e) {
-											console.error(Throwables.getStackTraceAsString(e));
-										}
-									};
-								}.run(trgtFile.getLocation().toFile().toPath(), resourceSupplier);
+								SadlRunInferenceHandler delegate = handlerProvider.get();
+								delegate.setGraphVisualizerHandler(new SadlEclipseGraphVisualizerHandler(RunInference.this, currentProject, targetFile));
+								delegate.run(trgtFile.getLocation().toFile().toPath(), resourceSupplier);
 								project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 							} catch (Exception e) {
 								console.error(Throwables.getStackTraceAsString(e));
@@ -123,24 +111,6 @@ public class RunInference extends SadlActionHandler {
 	protected String[] getValidTargetFileTypes() {
 		String[] types = {"sadl","test"};
 		return types;
-	}
-	
-	private class DelegatingInferenceHandler extends SadlRunInferenceHandler {
-		
-		final SadlRunInferenceHandler delegate;		
-
-		private DelegatingInferenceHandler(SadlRunInferenceHandler delegate) {
-			this.delegate = delegate;
-		}
-
-		public void run(Path path, Supplier<XtextResource> resourceSupplier) {
-			delegate.run(path, resourceSupplier);
-		}
-		
-		public void run(Path path, Supplier<XtextResource> resourceSupplier, Map<String, String> properties) {
-			delegate.run(path, resourceSupplier, properties);
-		}
-		
 	}
 
 }

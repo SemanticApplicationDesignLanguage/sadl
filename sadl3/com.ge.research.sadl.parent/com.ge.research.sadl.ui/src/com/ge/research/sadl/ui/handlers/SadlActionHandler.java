@@ -61,6 +61,7 @@ import com.ge.research.sadl.builder.MessageManager.MessageType;
 
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
+import com.ge.research.sadl.ide.handlers.SadlGraphVisualizerHandler;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
 import com.ge.research.sadl.preferences.SadlPreferences;
@@ -488,6 +489,29 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		else {
 			console.error("Unable to render graph for query; ResultSet has less than 3 columns.\n");
 		}
+	}
+	
+	public class SadlEclipseGraphVisualizerHandler implements SadlGraphVisualizerHandler {
+		
+		private SadlActionHandler uiHandler;
+		private IProject project;
+		private IFile targetFile;
+
+		public SadlEclipseGraphVisualizerHandler(SadlActionHandler uiHandler, IProject project, IFile targetFile) {
+			this.uiHandler = uiHandler;
+			this.project = project;
+			this.targetFile = targetFile;
+		}
+
+		@Override
+		public void resultSetToGraph(java.nio.file.Path path, ResultSet resultSet, String description,
+				String baseFileName, Orientation orientation, Map<String, String> properties)
+				throws ConfigurationException, IOException {
+
+			uiHandler.resultSetToGraph(project, targetFile, resultSet, description, baseFileName, orientation, properties);
+			
+		}
+		
 	}
 
 }

@@ -57,8 +57,17 @@ class SadlIdeActionHandler {
 
 	@Inject
 	protected SadlInferenceProcessorProvider inferenceProcessorProvider;
-
+	
+	protected SadlGraphVisualizerHandler graphVisualizerHandler;
 	protected ISadlInferenceProcessor inferenceProcessor;
+
+	/**
+	 * NOTE: This is mutable now. We can get rid of this after removing the Eclipse dependency from the graph generation.
+	 */
+	@Inject
+	def void setGraphVisualizerHandler(SadlGraphVisualizerHandler graphVisualizerHandler) {
+		this.graphVisualizerHandler = graphVisualizerHandler;
+	}
 
 	/**
 	 * Prepares the Xtext resource by validating it and acquiring a inference processor for the give resource.
@@ -84,12 +93,10 @@ class SadlIdeActionHandler {
 		return null;
 	}
 
-	/**
-	 * Does <b>nothing</b> by default. 
-	 */
 	protected def void resultSetToGraph(Path path, ResultSet resultSet, String description, String baseFileName,
 		Orientation orientation, Map<String, String> properties) {
-		// NOOP
+
+		this.graphVisualizerHandler.resultSetToGraph(path, resultSet, description, baseFileName, orientation, properties);
 	}
 
 	protected def Path getOwlModelsFolderPath(Path it) {
