@@ -7259,7 +7259,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			SadlResource superSR = ((SadlSimpleTypeReference) superElement).getType();
 			String superSRUri = getDeclarationExtensions().getConceptUri(superSR);
 			if (superSR != null && superSRUri == null) {
-				addError("Unable to find superclass in the ontology", superElement);
+				if (element.getOftype() != null && element.getOftype().equals(SadlConstants.OF_TYPE_INSTANCES)) {
+					addError(SadlErrorMessages.OF_CLASS_NOT_FOUND.get("class", superSRUri), superElement);
+				}
+				else {
+					addError(SadlErrorMessages.OF_CLASS_NOT_FOUND.get("class", superSRUri), superElement);
+				}
 			}
 			OntConceptType superElementType;
 			try {
@@ -7273,11 +7278,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (superElementType.equals(OntConceptType.CLASS)) {
 				for (int i = 0; i < newNames.size(); i++) {
-					OntClass cls = createOntClass(newNames.get(i), superSRUri, superSR);
-					if (nmanns != null && nmanns.get(newNames.get(i)) != null) {
-						addAnnotationsToResource(cls, nmanns.get(newNames.get(i)));
+					OntResource or;
+					if (element.getOftype() != null && element.getOftype().equals(SadlConstants.OF_TYPE_INSTANCES)) {
+						or = createIndividual(newNames.get(i), getOrCreateOntClass(superSRUri));
 					}
-					rsrcList.add(cls);
+					else {
+						or = createOntClass(newNames.get(i), superSRUri, superSR);
+					}
+					if (nmanns != null && nmanns.get(newNames.get(i)) != null) {
+						addAnnotationsToResource(or, nmanns.get(newNames.get(i)));
+					}
+					rsrcList.add(or);
 				}
 			} else if (superElementType.equals(OntConceptType.CLASS_LIST)
 					|| superElementType.equals(OntConceptType.DATATYPE_LIST)) {

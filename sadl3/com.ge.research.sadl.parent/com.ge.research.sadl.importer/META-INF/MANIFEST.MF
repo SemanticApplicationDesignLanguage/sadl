@@ -11,10 +11,10 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.equinox.common;bundle-version="3.5.0",
  com.ge.research.sadl;bundle-version="3.2.0";visibility:=reexport,
  com.ge.research.jena;bundle-version="3.2.0",
- org.eclipse.xtext.xbase.lib,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
  org.antlr.runtime,
  org.eclipse.xtext.util,
- org.eclipse.xtend.lib,
+ org.eclipse.xtend.lib;bundle-version="2.14.0",
  org.eclipse.emf.ecore,
  org.eclipse.emf.common
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -25,11 +25,7 @@ Export-Package: com.ge.research.sadl.importer.validation,
  com.ge.research.sadl.importer,
  com.ge.research.sadl.importer.parser.antlr.internal,
  com.ge.research.sadl.importer.scoping,
-  com.ge.research.sadl.importer.template.impl,
+ com.ge.research.sadl.importer.template.impl,
  com.ge.research.sadl.importer.template,
- com.ge.research.sadl.importer.template.util,
- com.ge.research.sadl.importer.scoping,
- com.ge.research.sadl.importer.services,
- com.ge.research.sadl.importer.validation,
- com.ge.research.sadl.importer.generator
+ com.ge.research.sadl.importer.template.util
 Import-Package: org.apache.log4j

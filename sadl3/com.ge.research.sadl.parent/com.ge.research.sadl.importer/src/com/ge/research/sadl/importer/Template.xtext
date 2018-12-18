@@ -107,7 +107,7 @@ RdfsSubClass:
 
 Transform:
 //	WS? 'transform' WS (from+=NonIndexedColRef)+ WS 'to' WS tt=(Split | Encode | Find | UserDefinedFunction) 
-	WS? 'transform' WS from=TransformFrom WS 'to' WS tt=(Split | Encode | Find | UserDefinedFunction) 
+	WS? 'transform' WS from=TransformFrom WS 'to' WS tt=(Split | Encode | Find | Replace | UserDefinedFunction) 
 ;
 
 TransformFrom :
@@ -136,6 +136,16 @@ EncodeMapping:
 
 Find:
 	to=(IndexedColRef | NonIndexedColRef) WS 'find' WS query=STRING
+;
+
+Replace:
+	to=(IndexedColRef | NonIndexedColRef) WS 'replace' WS replacements+=Replacement (WS? ',' WS? replacements+=Replacement)*
+;
+
+Replacement:
+//	before=(NUMBER | STRING | IDEXT | 'true' | 'false') ':' after=( NUMBER |STRING | IDEXT | 'true' | 'false')
+//	(beforeLit=LiteralValue | beforeStr=STRING) ':' (afterLit=LiteralValue | afterStr=STRING)
+	(beforeIDEXT=IDEXT | beforeLit=LiteralValue) WS? ':' WS? (afterIDEXT = IDEXT | afterLit=LiteralValue)
 ;
 
 Group:
