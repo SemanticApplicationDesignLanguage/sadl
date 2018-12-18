@@ -4,7 +4,7 @@ Eclipse [Theia](https://github.com/theia-ide/theia) extension with a bundled lan
 
 ## Usage
 
-The language server (`sadl-language-server`) is available under the `bin` folder as a plain language server.
+The language server `sadl-language-server` is available under the `bin` folder as a plain language server.
 
 ## Requirements
 
@@ -24,8 +24,55 @@ The language server (`sadl-language-server`) is available under the `bin` folder
     && cd browser-app \
     && yarn run start
 
+# Docker - SADL Web
 
-# Release Engineering
+### Pull the most recent `next` version
+```
+docker pull theiaide/sadl:next
+```
+
+### Build without caches
+```
+docker build --no-cache . -t theiaide/sadl:${VERSION}
+```
+
+### Run the most recent `next` locally on UNIX
+```
+docker run -it -p 3000:3000 -v "$(pwd):/home/project" theiaide/sadl:next
+```
+
+### Run the most recent `next` locally on Windows<sup>[1](#foot-note-1)</sup>
+ - CMD.EXE:
+   ```
+   docker run -it -p 3000:3000 -v "%cd%:/home/project" theiaide/sadl:next
+   ```
+
+ - PowerShell:
+   ```
+   docker run -it -p 3000:3000 -v "${PWD}:/home/project" theiaide/sadl:next
+   ```
+
+ - Git Bash:
+   ```
+   winpty docker run -it -p 3000:3000 -v "/$(pwd -W):/home/project" theiaide/sadl:next
+   ```
+
+<a name="foot-note-1">1</a>: Running on Windows requires enabled [Hyper-V](https://en.wikipedia.org/wiki/Hyper-V) on the host environment.
+
+If you want to use the `latest` version, just drop the `:next` tag from each command.
+
+### Push to Docker Hub
+```
+docker login
+docker push theiaide/sadl:${VERSION}
+```
+
+### Pull the image from Docker Hub
+```
+docker pull theiaide/sadl:${VERSION}
+```
+
+# Release Engineering - Manual Steps
 
 The language server has to be manually updated inside the `bin` folder before publishing to NPM each time when the underlying Java implementation changes.
 
