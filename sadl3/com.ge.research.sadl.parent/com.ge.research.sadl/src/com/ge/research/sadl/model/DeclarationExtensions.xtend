@@ -271,9 +271,12 @@ class DeclarationExtensions {
 				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype: 
 					OntConceptType.DATATYPE
 					
+				SadlClassOrPropertyDeclaration case e.oftype !== null && e.oftype.equals('instances'):
+					OntConceptType.INSTANCE
+						
 				SadlNecessaryAndSufficient,
 				SadlClassOrPropertyDeclaration: 
-					OntConceptType.CLASS
+					OntConceptType.CLASS						
 					
 	//			SadlDataTypeDeclaration :
 	//				OntConceptType.DATATYPE

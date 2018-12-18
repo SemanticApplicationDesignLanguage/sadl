@@ -184,6 +184,7 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/facet"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/describedBy"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlClassOrPropertyDeclaration/restrictions"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SADL.ecore#//SadlClassOrPropertyDeclaration/oftype"/>
     </genClasses>
     <genClasses ecoreClass="SADL.ecore#//SadlSameAs">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference SADL.ecore#//SadlSameAs/nameOrRef"/>
