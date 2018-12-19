@@ -32,8 +32,6 @@ import com.ge.research.sadl.validation.ResourceValidator
 import com.ge.research.sadl.validation.SoftLinkingMessageProvider
 import java.io.IOException
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.xtext.builder.clustering.CurrentDescriptions
 import org.eclipse.xtext.documentation.IEObjectDocumentationProvider
 import org.eclipse.xtext.generator.IContextualOutputConfigurationProvider
 import org.eclipse.xtext.generator.IOutputConfigurationProvider
@@ -43,9 +41,6 @@ import org.eclipse.xtext.linking.impl.LinkingDiagnosticMessageProvider
 import org.eclipse.xtext.naming.IQualifiedNameConverter
 import org.eclipse.xtext.parsetree.reconstr.IParseTreeConstructor
 import org.eclipse.xtext.parsetree.reconstr.ITokenStream
-import org.eclipse.xtext.resource.IResourceDescriptions
-import org.eclipse.xtext.resource.containers.IAllContainersState.Provider
-import org.eclipse.xtext.resource.containers.ResourceSetBasedAllContainersStateProvider
 import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionManager
 import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy
 import org.eclipse.xtext.validation.ResourceValidatorImpl
@@ -62,24 +57,6 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	
 	override bindIQualifiedNameProvider() {
 		return SadlQualifiedNameProvider;
-	}
-	
-	override Class<? extends Provider> bindIAllContainersState$Provider() {
-		return MyResourceSetBasedAllContainersStateProvider//org.eclipse.xtext.ui.containers.ContainerStateProvider
-	}
-
-	static class MyResourceSetBasedAllContainersStateProvider extends ResourceSetBasedAllContainersStateProvider implements Provider {
-		override getResourceSet(IResourceDescriptions context) {
-			switch context {
-				CurrentDescriptions : {
-					var target = context.getTarget()
-					if (target instanceof ResourceSet) {
-						return target
-					}
-				}
-			}
-			return super.getResourceSet(context)
-		}
 	}
 
 	def Class<? extends IOutputConfigurationProvider> bindIOutputConfigurationProvider() {

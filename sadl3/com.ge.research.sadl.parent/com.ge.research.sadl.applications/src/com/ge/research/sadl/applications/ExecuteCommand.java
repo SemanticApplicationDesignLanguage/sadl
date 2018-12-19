@@ -25,8 +25,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.emf.common.util.URI;
@@ -49,7 +47,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.ge.research.sadl.SADLStandaloneSetup;
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlImplicitModelContentProvider;
@@ -489,7 +486,7 @@ public class ExecuteCommand implements IApplication {
 		sverFiles = obtainFiles(this.importDirectory, new ArrayList<File>(), ".sver");
 
 		//Create and register dependency injectors
-		injector = new SADLStandaloneSetup().createInjectorAndDoEMFRegistration();
+		injector = new SADLCliAppStandaloneSetup().createInjectorAndDoEMFRegistration();
 
 		//Obtain a resource set
 		resourceSet = injector.getInstance(XtextResourceSet.class);
