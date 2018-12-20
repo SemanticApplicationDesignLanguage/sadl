@@ -116,6 +116,7 @@ class SadlIdeActionHandler {
 			preferences.putBoolean(preferenceValues, SadlPreferences.SHOW_TIMING_INFORMATION);
 			preferences.putBoolean(preferenceValues, SadlPreferences.VALIDATE_BEFORE_TEST);
 			preferences.putBoolean(preferenceValues, SadlPreferences.NAMESPACE_IN_QUERY_RESULTS);
+			preferences.putNonBoolean(preferenceValues, SadlPreferences.GRAPH_RENDERER_CLASS);
 		}
 		return preferences;
 	}
@@ -130,4 +131,13 @@ class SadlIdeActionHandler {
 		return putHere;
 	}
 
+	protected def Map<String, String> putNonBoolean(Map<String, String> putHere, IPreferenceValues values,
+		PreferenceKey key) {
+
+		if (values === null) {
+			return putHere;
+		}
+		putHere.put(key.id, String.valueOf(values.getPreference(key)).toString);
+		return putHere;
+	}
 }

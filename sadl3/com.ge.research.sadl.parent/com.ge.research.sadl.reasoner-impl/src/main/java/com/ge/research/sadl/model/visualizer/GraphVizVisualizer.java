@@ -31,6 +31,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 	private boolean repeatObjNode;
 	private boolean repeatSubjNode;
 	private List<String> nodes;
+	private List<Object> subjectList;
+	private List<Object> objectList;
 
 	@Override
 	public void initialize(String tempDir, String bfn, String graphName, String anchorNode, Orientation orientation, String description) {
@@ -191,6 +193,19 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		nothingCount = 0;
 		graphedSubjectMap = null;
 		duplicateObjectMap = null;
+		
+		subjectList = new ArrayList<Object>();
+		objectList = new ArrayList<Object>();
+		while (rs.hasNext()) {
+			Object[] row = rs.next();
+			if (row[0] != null) {
+				subjectList.add(rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]));
+			}
+			if (row[2] != null) {
+				objectList.add(rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]));
+			}
+		}
+		rs.first();	// reset cursor
 		
 		while (rs.hasNext()) {
 			Object[] row = rs.next();
@@ -374,6 +389,9 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				anchored = true;
 			}
 			applyAttributesToNode(headAttributes, row, anchored);
+			if (objectList.contains(s)) {
+				applyAttributesToNode(tailAttributes, row, anchored);
+			}
 			sb.append("];\n");
 		}
 		if (!repeatObjNode) {
@@ -392,6 +410,9 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				anchored = true;
 			}
 			applyAttributesToNode(tailAttributes, row, anchored);
+			if (subjectList.contains(o)) {
+				applyAttributesToNode(headAttributes, row, anchored);
+			}
 			sb.append("];\n");
 		}
 		sb.append("     ");
@@ -465,7 +486,13 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 						sb.append("\"");
 					}
 					else {
-						sb.append(row[key.intValue()]);
+						Object rval = row[key.intValue()];
+						if (rval instanceof String && rval.toString().indexOf(" ") >= 0) {
+							sb.append("\"" + rval + "\"");
+						}
+						else {
+							sb.append(rval);
+						}
 					}
 				}
 			}
