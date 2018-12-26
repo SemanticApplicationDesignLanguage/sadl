@@ -3,7 +3,9 @@
   "scripts": {
     "prepare": "node ./scripts/lerna.js run prepare",
     "rebuild:browser": "theia rebuild:browser",
-    "rebuild:electron": "theia rebuild:electron"
+    "rebuild:electron": "theia rebuild:electron",
+    "publish:latest": "lerna publish --registry=https://registry.npmjs.org/ --skip-git --force-publish",
+    "publish:next": "lerna publish --registry=https://registry.npmjs.org/ --exact --canary=next --npm-tag=next --force-publish --skip-git --yes"
   },
   "devDependencies": {
     "lerna": "2.4.0"
