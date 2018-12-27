@@ -110,8 +110,6 @@
   <eClassifiers xsi:type="ecore:EClass" name="TransformFrom">
     <eStructuralFeatures xsi:type="ecore:EReference" name="firstfrom" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
         containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="restfrom" upperBound="-1"
-        eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="UserDefinedFunction">
     <eStructuralFeatures xsi:type="ecore:EReference" name="to" eType="ecore:EClass http://www.eclipse.org/emf/2002/Ecore#//EObject"
@@ -153,12 +151,8 @@
         eType="#//Replacement" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Replacement">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="beforeIDEXT" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="beforeLit" eType="#//LiteralValue"
-        containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="afterIDEXT" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="afterLit" eType="#//LiteralValue"
-        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="before" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="after" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Group">
     <eStructuralFeatures xsi:type="ecore:EReference" name="groupLines" upperBound="-1"
