@@ -31,8 +31,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 	private boolean repeatObjNode;
 	private boolean repeatSubjNode;
 	private List<String> nodes;
-	private List<Object> subjectList;
-	private List<Object> objectList;
+	private HashMap<Object, List<Object[]>> subjectList;
+	private HashMap<Object, List<Object[]>> objectList;
 
 	@Override
 	public void initialize(String tempDir, String bfn, String graphName, String anchorNode, Orientation orientation, String description) {
@@ -194,15 +194,17 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		graphedSubjectMap = null;
 		duplicateObjectMap = null;
 		
-		subjectList = new ArrayList<Object>();
-		objectList = new ArrayList<Object>();
+		subjectList = new HashMap<Object, List<Object[]>>();
+		objectList = new HashMap<Object, List<Object[]>>();
 		while (rs.hasNext()) {
 			Object[] row = rs.next();
 			if (row[0] != null) {
-				subjectList.add(rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]));
+				addRowToMap(subjectList, rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]), row);
+//				subjectList.add(rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]));
 			}
 			if (row[2] != null) {
-				objectList.add(rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]));
+				addRowToMap(objectList, rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]), row);
+//				objectList.add(rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]));
 			}
 		}
 		rs.first();	// reset cursor
@@ -293,6 +295,17 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		return dotFile;
 	}
 	
+	private void addRowToMap(HashMap<Object, List<Object[]>> list, Object key, Object[] row) {
+		if (list.containsKey(key)) {
+			list.get(key).add(row);
+		}
+		else {
+			List<Object[]> valList = new ArrayList<Object[]>();
+			valList.add(row);
+			list.put(key, valList);
+		}	
+	}
+
 	private void createGraphTriple(Object s, String edgeLbl, Object o, Map<Integer, String> headAttributes, Map<Integer, String> edgeAttributes, Map<Integer, 
 			String> tailAttributes, Object[] row, String anchorNodeLabel, String subjectNode) {
 		String slbl = subjectNode;
@@ -389,8 +402,11 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				anchored = true;
 			}
 			applyAttributesToNode(headAttributes, row, anchored);
-			if (objectList.contains(s)) {
-				applyAttributesToNode(tailAttributes, row, anchored);
+			if (objectList.containsKey(s)) {
+				List<Object[]> valList = objectList.get(s);
+				for (int i = 0; i < valList.size(); i++) {
+					applyAttributesToNode(tailAttributes, valList.get(i), anchored);
+				}
 			}
 			sb.append("];\n");
 		}
@@ -410,8 +426,11 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				anchored = true;
 			}
 			applyAttributesToNode(tailAttributes, row, anchored);
-			if (subjectList.contains(o)) {
-				applyAttributesToNode(headAttributes, row, anchored);
+			if (subjectList.containsKey(o)) {
+				List<Object[]> valList = subjectList.get(o);
+				for (int i = 0; i < valList.size(); i++) {
+					applyAttributesToNode(headAttributes, valList.get(i), anchored);
+				}
 			}
 			sb.append("];\n");
 		}
