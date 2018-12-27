@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
-    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="***********************************************************************&#xA;Copyright 2007-2016- General Electric Company, All Rights Reserved&#xA; *&#xA;Project: SADL&#xA; *&#xA;Description: The Semantic Application Design Language (SADL) is a&#xA;language for building semantic models and expressing rules that&#xA;capture additional domain knowledge. The SADL-IDE (integrated&#xA;development environment) is a set of Eclipse plug-ins that&#xA;support the editing and testing of semantic models using the&#xA;SADL language.&#xA; *&#xA;This software is distributed &quot;AS-IS&quot; without ANY WARRANTIES&#xA;and licensed under the Eclipse Public License - v 1.0&#xA;which is available at http://www.eclipse.org/org/documents/epl-v10.php&#xA; *&#xA; **********************************************************************"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" copyrightText="***********************************************************************&#xD;&#xA;Copyright 2007-2019- General Electric Company, All Rights Reserved&#xD;&#xA; *&#xD;&#xA;Project: SADL&#xD;&#xA; *&#xD;&#xA;Description: The Semantic Application Design Language (SADL) is a&#xD;&#xA;language for building semantic models and expressing rules that&#xD;&#xA;capture additional domain knowledge. The SADL-IDE (integrated&#xD;&#xA;development environment) is a set of Eclipse plug-ins that&#xD;&#xA;support the editing and testing of semantic models using the&#xD;&#xA;SADL language.&#xD;&#xA; *&#xD;&#xA;This software is distributed &quot;AS-IS&quot; without ANY WARRANTIES&#xD;&#xA;and licensed under the Eclipse Public License - v 1.0&#xD;&#xA;which is available at http://www.eclipse.org/org/documents/epl-v10.php&#xD;&#xA; *&#xD;&#xA; **********************************************************************"
     modelDirectory="/com.ge.research.sadl.importer/src-gen" modelPluginID="com.ge.research.sadl.importer"
     forceOverwrite="true" modelName="Template" updateClasspath="false" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
     complianceLevel="6.0" copyrightFields="false" runtimeVersion="2.12" usedGenPackages="platform:/resource/com.ge.research.sadl/model/generated/SADL.genmodel#//sADL">
@@ -97,7 +97,6 @@
     </genClasses>
     <genClasses ecoreClass="Template.ecore#//TransformFrom">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TransformFrom/firstfrom"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//TransformFrom/restfrom"/>
     </genClasses>
     <genClasses ecoreClass="Template.ecore#//UserDefinedFunction">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//UserDefinedFunction/to"/>
@@ -129,10 +128,8 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Replace/replacements"/>
     </genClasses>
     <genClasses ecoreClass="Template.ecore#//Replacement">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Replacement/beforeIDEXT"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Replacement/beforeLit"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Replacement/afterIDEXT"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Replacement/afterLit"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Replacement/before"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Replacement/after"/>
     </genClasses>
     <genClasses ecoreClass="Template.ecore#//Group">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Group/groupLines"/>

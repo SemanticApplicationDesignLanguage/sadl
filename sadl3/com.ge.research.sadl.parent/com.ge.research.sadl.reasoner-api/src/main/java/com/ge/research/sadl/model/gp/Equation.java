@@ -131,7 +131,7 @@ public class Equation {
 					Node n = args.get(i);
 					Node nt = argtypes.get(i);
 					if (i > 0) sb.append(",");
-					sb.append(nt.toString());
+					sb.append(nt != null ? nt.toString() : "<error>");
 					sb.append(" ");
 					sb.append(n.toString());
 				}
@@ -193,7 +193,7 @@ public class Equation {
 				Node n = args.get(i);
 				Node nt = argtypes.get(i);
 				if (i > 0) sb.append(",");
-				sb.append(nt.toDescriptiveString());
+				sb.append(nt != null ? nt.toDescriptiveString() : "<error>");
 				sb.append(" ");
 				sb.append(n.toDescriptiveString());
 			}
@@ -255,7 +255,7 @@ public class Equation {
 				Node n = args.get(i);
 				Node nt = argtypes.get(i);
 				if (i > 0) sb.append(",");
-				sb.append(nt.toFullyQualifiedString());
+				sb.append(nt != null ? nt.toFullyQualifiedString() : "<error>");
 				sb.append(" ");
 				sb.append(n.toFullyQualifiedString());
 			}

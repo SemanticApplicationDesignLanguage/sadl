@@ -25,7 +25,6 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -36,7 +35,6 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
@@ -58,8 +56,6 @@ import org.eclipse.xtext.validation.IResourceValidator;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
-
-
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.ide.handlers.SadlGraphVisualizerHandler;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
@@ -404,8 +400,13 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			String renderClass = prefMap.get(SadlPreferences.GRAPH_RENDERER_CLASS.getId());
 			
 			List<IGraphVisualizer> visualizers = configMgr.getAvailableGraphRenderers();
-		
+					
 			if (visualizers != null && visualizers.size() > 0) {
+				for (IGraphVisualizer igv : visualizers) {
+					if (igv.getClass().getCanonicalName().equals(renderClass)) {
+						return igv;
+					}
+				}
 				visualizer = visualizers.get(0);		// replace this by selection and setting preference
 			}
 		}

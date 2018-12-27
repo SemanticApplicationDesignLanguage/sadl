@@ -219,7 +219,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage NOT_IN_RANGE = new SadlErrorMessage("not_in_range");
 /**
-* Unable to find {0} {1} in the ontology
+* Unable to find {0} in the ontology
 **/
     public static final SadlErrorMessage OF_CLASS_NOT_FOUND = new SadlErrorMessage("of_class_not_found");
 /**

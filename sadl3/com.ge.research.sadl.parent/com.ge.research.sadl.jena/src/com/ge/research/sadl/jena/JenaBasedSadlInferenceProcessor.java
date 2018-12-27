@@ -1301,6 +1301,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		Query q = processQuery(query);
 		q.setUpdate(cmd.isUpdate());
 		q.setGraph(cmd.isGraph());
+		q.setFqName(cmd.getFqName());
 		SadlCommandResult result = new SadlCommandResult(q);
 		result.setResults(processAdhocQuery(translator, q));
 		result.setErrors(getInitializedReasoner().getErrors());

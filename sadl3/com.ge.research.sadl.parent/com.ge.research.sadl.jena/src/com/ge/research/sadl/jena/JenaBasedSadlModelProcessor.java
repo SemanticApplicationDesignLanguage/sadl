@@ -7260,10 +7260,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			String superSRUri = getDeclarationExtensions().getConceptUri(superSR);
 			if (superSR != null && superSRUri == null) {
 				if (element.getOftype() != null && element.getOftype().equals(SadlConstants.OF_TYPE_INSTANCES)) {
-					addError(SadlErrorMessages.OF_CLASS_NOT_FOUND.get("class", superSRUri), superElement);
+					addError(SadlErrorMessages.OF_CLASS_NOT_FOUND.get("class"), superElement);
 				}
 				else {
-					addError(SadlErrorMessages.OF_CLASS_NOT_FOUND.get("class", superSRUri), superElement);
+					addError(SadlErrorMessages.OF_CLASS_NOT_FOUND.get("superclass"), superElement);
 				}
 			}
 			OntConceptType superElementType;
