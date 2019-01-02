@@ -124,10 +124,13 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				}
 			}
 			else {
-				// delete the .dot file
-				File dotfile = new File(dotfilepath);
-				if (dotfile.exists()) {
-					dotfile.delete();
+				String dontdelete = System.getenv("GraphVizKeepDot");
+				if (dontdelete == null || !dontdelete.equalsIgnoreCase("true")) {
+					// delete the .dot file
+					File dotfile = new File(dotfilepath);
+					if (dotfile.exists()) {
+						dotfile.delete();
+					}
 				}
 			}
 		}
@@ -506,7 +509,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 					}
 					else {
 						Object rval = row[key.intValue()];
-						if (rval instanceof String && rval.toString().indexOf(" ") >= 0) {
+						if (needsQuotes(rval)) {
+							rval = escapeQuotes(rval.toString());
 							sb.append("\"" + rval + "\"");
 						}
 						else {
@@ -527,6 +531,40 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		}
 	}
 	
+	private Object escapeQuotes(String str) {
+		if (str.indexOf('\"') > 0) {
+			str = str.replace("\"", "\\\"");
+		}
+		return str;
+	}
+
+	/**
+	 * Method to detect if an attribute value needs to be quoted.
+	 * @param rval
+	 * @return
+	 */
+	private boolean needsQuotes(Object rval) {
+		if (rval instanceof String) {
+			if (rval.toString().indexOf(" ") >= 0) {
+				return true;
+			}
+			String str = (String)rval;
+			for(int i =0; i<str.length(); i++) {
+				char ch = str.charAt(i);
+				if (Character.isWhitespace(ch) || Character.isISOControl(ch)) {
+					return true;
+				}
+				if (ch == '.'){
+					return true;
+				} 
+				if (ch == '-') {
+					return true;
+				}
+			}		
+		}
+		return false;
+	}
+
 	private long getSequenceNumber(Map<Integer, String> attributes, Object[] row) {
 		if (attributes != null && attributes.containsValue("sequence_number")) {
 			Iterator<Integer> keyitr = attributes.keySet().iterator();
