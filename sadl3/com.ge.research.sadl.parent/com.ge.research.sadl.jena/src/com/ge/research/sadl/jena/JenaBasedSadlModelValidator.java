@@ -764,7 +764,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private boolean isLocalTypeRestriction(String op, EObject leftExpression, EObject rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidTypeException {
 		if (getModelProcessor().isEqualOperator(op) && leftExpression instanceof PropOfSubject && rightExpression instanceof Declaration) {
-			if (leftTypeCheckInfo.getExpressionType() instanceof ConceptName && rightTypeCheckInfo.getTypeCheckType() instanceof NamedNode) {
+			if (leftTypeCheckInfo != null && rightTypeCheckInfo != null &&
+					leftTypeCheckInfo.getExpressionType() instanceof ConceptName && rightTypeCheckInfo.getTypeCheckType() instanceof NamedNode) {
 				return true;
 			}
 		}
