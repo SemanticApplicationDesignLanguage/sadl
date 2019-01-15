@@ -17,6 +17,14 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
+import com.ge.research.sadl.model.gp.Query
+import com.ge.research.sadl.reasoner.ConfigurationException
+import com.ge.research.sadl.reasoner.InvalidNameException
+import com.ge.research.sadl.reasoner.QueryCancelledException
+import com.ge.research.sadl.reasoner.QueryParseException
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException
+import com.ge.research.sadl.reasoner.SadlCommandResult
+import com.ge.research.sadl.reasoner.TranslationException
 import java.util.Map
 import org.eclipse.emf.ecore.resource.Resource
 
@@ -40,4 +48,6 @@ interface ISadlInferenceProcessor {
 	 * 0th and only element is SadlCmdResults
 	 */
 	def Object[] runNamedQuery(Resource resource, String queryName) throws SadlInferenceException;
+	
+	def SadlCommandResult processAdhocQuery(Resource resource, Query query) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException;
 }
