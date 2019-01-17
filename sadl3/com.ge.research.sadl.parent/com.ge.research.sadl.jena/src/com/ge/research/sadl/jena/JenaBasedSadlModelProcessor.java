@@ -9721,7 +9721,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (superProp == null) {
 				// throw new JenaProcessorException("Unable to find super property '" +
 				// superSRUri + "'");
-				getTheJenaModel().createObjectProperty(superSRUri);
+				superProp = getTheJenaModel().createObjectProperty(superSRUri);
 			}
 			newProp.addSuperProperty(superProp);
 			logger.debug("   Object property '" + newProp.getURI() + "' given super property '" + superSRUri + "'");
@@ -11167,8 +11167,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		sb.append("	    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n");
 		sb.append("	    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n");
 		sb.append("	    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n");
-		sb.append("	    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel#\"\n");
 		sb.append("	    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n");
+		sb.append("	    xmlns=\"http://sadl.org/sadlbasemodel#\"\n");
+		sb.append("	    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel#\"\n");
 		sb.append("	    xml:base=\"http://sadl.org/sadlbasemodel\">\n");
 		sb.append("	  <owl:Ontology rdf:about=\"\">\n");
 		sb.append(
