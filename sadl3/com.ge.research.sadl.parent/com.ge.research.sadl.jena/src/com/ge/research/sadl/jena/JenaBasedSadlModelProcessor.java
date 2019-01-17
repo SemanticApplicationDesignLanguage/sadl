@@ -7113,7 +7113,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	private EObject getOperationPullingUp() {
+	protected EObject getOperationPullingUp() {
 		if (operationsPullingUp != null && operationsPullingUp.size() > 0) {
 			EObject removed = operationsPullingUp.remove(operationsPullingUp.size() - 1);
 			return removed;
