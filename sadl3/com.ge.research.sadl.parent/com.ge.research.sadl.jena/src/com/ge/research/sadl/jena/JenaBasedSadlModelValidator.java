@@ -1260,7 +1260,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //		return null;
 	}
 
-	private String getListLengthAsString(NamedNode node) {
+	String getListLengthAsString(NamedNode node) {
 		StringBuilder sb = new StringBuilder();	
 		int length = node.getListLength();
 		int minLength = node.getMinListLength();

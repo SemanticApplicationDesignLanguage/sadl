@@ -8424,13 +8424,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			NamedNode cn;
 			try {
 				cn = getTypedListType(obj);
-				sb.append(cn.getName());
+				sb.append(cn.getName() + " List");
+				String lLengthInfo = getModelValidator().getListLengthAsString(cn);
+				if(!lLengthInfo.isEmpty()) {
+					sb.append(" " + lLengthInfo);
+				}
 			} catch (TranslationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				sb.append("<null>");
 			}
-			sb.append(" List");
 		} else {
 			sb.append("<blank node>");
 		}
@@ -8737,6 +8740,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public NamedNode getTypedListType(RDFNode node) throws TranslationException {
 		if (node.isResource()) {
 			StmtIterator sitr = theJenaModel.listStatements(node.asResource(), RDFS.subClassOf, (RDFNode) null);
+			OntConceptType tctypetype = null;
+			RDFNode type = null;
+			int lMaxLengthRestriction = -1;
+			int lMinLengthRestriction = -1;
+			int lLengthRestriction = -1;
 			while (sitr.hasNext()) {
 				RDFNode supercls = sitr.nextStatement().getObject();
 				if (supercls.isResource()) {
@@ -8744,9 +8752,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
 						Statement avfstmt = supercls.asResource().getProperty(OWL.allValuesFrom);
 						if (avfstmt != null) {
-							RDFNode type = avfstmt.getObject();
+							type = avfstmt.getObject();
 							if (type.isURIResource()) {
-								OntConceptType tctypetype = OntConceptType.CLASS_LIST;
+								tctypetype = OntConceptType.CLASS_LIST;
 								if (type.asResource().getNameSpace().equals(XSD.getURI())) {
 									tctypetype = OntConceptType.DATATYPE_LIST;
 								}
@@ -8759,15 +8767,44 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 										}
 									}
 								}
-								NamedNode tctype = validateNamedNode(new NamedNode(type.asResource().getURI(),
-										ontConceptTypeToNodeType(tctypetype)));
-								sitr.close();
-								return tctype;
 							}
+						}
+					}
+					if(supercls.asResource().hasProperty(OWL.onProperty,
+							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI))) {
+						Statement lHasValueStmt = supercls.asResource().getProperty(OWL.hasValue);
+						if(lHasValueStmt != null) {
+							lMaxLengthRestriction = lHasValueStmt.getObject().asLiteral().getInt();
+							
+						}
+					}
+					if(supercls.asResource().hasProperty(OWL.onProperty,
+							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI))) {
+						Statement lHasValueStmt = supercls.asResource().getProperty(OWL.hasValue);
+						if(lHasValueStmt != null) {
+							lMinLengthRestriction = lHasValueStmt.getObject().asLiteral().getInt();
+							
+						}
+					}
+					if(supercls.asResource().hasProperty(OWL.onProperty,
+							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI))) {
+						Statement lHasValueStmt = supercls.asResource().getProperty(OWL.hasValue);
+						if(lHasValueStmt != null) {
+							lLengthRestriction = lHasValueStmt.getObject().asLiteral().getInt();
+							
 						}
 					}
 				}
 			}
+			if(tctypetype != null) {
+				NamedNode tctype = validateNamedNode(new NamedNode(type.asResource().getURI(),
+						ontConceptTypeToNodeType(tctypetype)));
+				tctype.setMaxListLength(lMaxLengthRestriction);
+				tctype.setMinListLength(lMinLengthRestriction);
+				tctype.setListLength(lLengthRestriction);
+				return tctype;
+			}
+			
 			// maybe it's an instance
 			if (node.asResource().canAs(Individual.class)) {
 				ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> itr = node.asResource().as(Individual.class)
@@ -8782,7 +8819,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
 								Statement avfstmt = supercls.asResource().getProperty(OWL.allValuesFrom);
 								if (avfstmt != null) {
-									RDFNode type = avfstmt.getObject();
+									type = avfstmt.getObject();
 									if (type.isURIResource()) {
 										NamedNode tctype = validateNamedNode(new NamedNode(type.asResource().getURI(),
 												ontConceptTypeToNodeType(OntConceptType.CLASS)));
@@ -8791,6 +8828,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									}
 								}
 							}
+							
 						}
 					}
 				}
