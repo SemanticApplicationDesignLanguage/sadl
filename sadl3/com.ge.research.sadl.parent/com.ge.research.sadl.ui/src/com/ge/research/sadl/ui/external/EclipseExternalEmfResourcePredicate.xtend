@@ -46,6 +46,16 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 		if (!project.accessible) {
 			return false;
 		}
+		// We consider SadlBaseModel.owl files in the OwlModels folder as external resources.
+		// No need to validate the file location based on the external model definition file (*.url) names.
+		// Segment count `4` comes from: platform:/resource/PROJECT_NAME/OwlModels/SadlBaseModel
+		if (platform && segmentCount === 4) {
+			val segments = segments;
+			if ('resource' == segments.get(0) && project.name == segments.get(1) && 'OwlModels' == segments.get(2) && 'SadlBaseModel.owl' == segments.get(3)) {
+				return true;
+			}
+		}
+		
 		val externalDefinitions = newArrayList;
 		project.accept([
 			if (it instanceof IFile) {

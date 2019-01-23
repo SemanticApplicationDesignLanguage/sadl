@@ -19,7 +19,16 @@ class ExternalEmfUIResourceServiceProvider extends ExternalEmfResourceServicePro
 	Injector injector;
 	
 	override canHandle(URI uri, IStorage storage) {
-		super.canHandle(uri) && !storage.isReadOnly && (storage instanceof IResource) && !(storage as IResource).isDerived
+		if (super.canHandle(uri) && storage instanceof IResource) {
+			// SadlBaseModel.owl should be treated as an external resource although it is read-only (by default) and derived.
+			// TODO: this and the predicate must go into a IDE independent place so we can reuse it in the LS
+			if (uri.platform && uri.segmentCount === 4 && uri.toString.endsWith('OwlModels/SadlBaseModel.owl')) {
+				return true;
+			}
+			
+			return !storage.isReadOnly && !(storage as IResource).isDerived;
+		}
+		return false;
 	}
 	
 	override <T> get(Class<T> clazz) {
@@ -28,5 +37,5 @@ class ExternalEmfUIResourceServiceProvider extends ExternalEmfResourceServicePro
 		}
 		return delegate.get(clazz);
 	}
-		
+
 }

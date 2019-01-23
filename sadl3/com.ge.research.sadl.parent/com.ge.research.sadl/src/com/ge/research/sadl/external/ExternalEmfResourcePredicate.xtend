@@ -41,7 +41,6 @@ interface ExternalEmfResourcePredicate extends Predicate<URI> {
 	static class Default implements ExternalEmfResourcePredicate {
 
 		static val IGNORED_FILES = #[
-			'SadlBaseModel.owl',
 			'SadlListModel.owl',
 			'SadlBuiltinFunctions.owl',
 			'SadlImplicitModel.owl',
