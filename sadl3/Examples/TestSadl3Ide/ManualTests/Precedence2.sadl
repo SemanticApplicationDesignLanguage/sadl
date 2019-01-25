@@ -1,0 +1,25 @@
+ uri "http://sadl.org/Precedence2.sadl" alias Precedence2.
+ 
+ Equation strcat(string s1, string s2) returns string : s1 and s2.
+
+ Paper is a class described by abstract with values of type string,
+ 	described by author with values of type string,
+ 	described by titlePageContent with values of type string.
+ 	
+ Rule PaperTitle:
+   then a Paper has titlePageContent strcat(abstract of the Paper, author of the Paper).
+   
+ Rule PT2:
+ 	if x is a Paper
+ 	then x has titlePageContent strcat(abstract of x, author of x).
+ 	
+  
+ Rectangle is a class described by height with values of type float,
+ 	described by width with values of type float,
+ 	described by area with values of type float.
+ 	
+ Equation areaOfRect(float h, float w) returns float: h * w.
+ 
+ Rule RectArea:
+  then area of a Rectangle is areaOfRect(width of the Rectangle, height of the Rectangle).
+   	

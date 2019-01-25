@@ -12,7 +12,7 @@
 
 <h1>Model Visualization in the SADL-IDE</h1>
 <h6>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/20/2018<!--webbot bot="Timestamp" endspan i-checksum="12512" --> 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->01/02/2019<!--webbot bot="Timestamp" endspan i-checksum="12529" --> 
 by <a href="mailto:crapo@research.ge.com?subject=Model Visualization">A. W. 
 Crapo</a></h6>
 <p>The SADL-IDE Version 2.2.0.201411111033 and later includes the ability to 
@@ -45,7 +45,12 @@ Java classpath and specified in this preference.</p>
 <p>When the GraphVizVisualizer is used, the location of the GraphViz bin folder 
 (see above) must be specified in the OS environment variable GRAPHVIZPATH, e.g,
 <br>
-<i>&nbsp;&nbsp; GRAPHVIZPATH=C:\Apps\graphviz-2.36\release\bin</i></p>
+<i>&nbsp;&nbsp; GRAPHVIZPATH=C:\Apps\graphviz-2.36\release\bin<br>
+</i>Also, when the GraphVizVisualizer is used, the dot file can be retained (not 
+automatically deleted after the SVG file is created) by setting the OS 
+environment variable GRAPHVIZKEEPDOT to true: GRAPHVIZKEEPDOT=true.<br>
+Note that Eclipse must be restarted after setting environment variables for them 
+to become visible to Eclipse.</p>
 <p>A neighborhood can now be graphed by opening a model in the SADL editor and 
 selecting the entire text of a concept name, then right-clicking for a context 
 menu and selecting &quot;Graph Neighborhood&quot;. </p>

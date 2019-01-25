@@ -1,0 +1,10 @@
+ uri "http://sadl.org/UsingListExpression.sadl" alias UsingListExpression.
+ 
+ Person is a class.
+ PersonList is a type of Person List.
+ 
+ External elementAt(PersonList lst, int idx) returns Person : "".
+ Equation firstElement(PersonList people) returns Person: elementAt(people,0). 
+ Equation lastElement(PersonList people) returns Person: elementAt(people,(length of people) - 1). 
+ 
+ 

@@ -1,0 +1,36 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:Shapes="http://sadl.org/Shapes.sadl"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:Polygons="http://sadl.org/Polygons.sadl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/Polygons.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="Shapes.sadl"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Polygons.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Rectangle">
+    <rdfs:subClassOf rdf:resource="Shapes.sadl#Shape"/>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:ID="area">
+    <rdfs:comment xml:lang="en">URI is 'http://sadl.org/Polygons.sadl#area'</rdfs:comment>
+    <rdfs:subPropertyOf rdf:resource="Shapes.sadl#area"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="height">
+    <rdfs:domain rdf:resource="#Rectangle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="width">
+    <rdfs:domain rdf:resource="#Rectangle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <j.0:Rule rdf:ID="AreaOfRectangle"/>
+</rdf:RDF>

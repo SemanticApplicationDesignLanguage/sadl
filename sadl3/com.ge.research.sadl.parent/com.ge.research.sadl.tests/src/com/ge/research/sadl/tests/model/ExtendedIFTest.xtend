@@ -601,7 +601,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //			for (issue:issues) {
 //				println(issue.message)
 //			}
- 			issues.assertHasNoIssues;
+ 			issues.assertHasErrors(0);
 			val ifrs = processor.getIntermediateFormResults();
 			var idx = 0
  			for (ifr:ifrs) {

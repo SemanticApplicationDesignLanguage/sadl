@@ -1,0 +1,8 @@
+ uri "http://sadl.org/SingleReturnValueEquation.sadl" alias srveq.
+ 
+  External piVal() returns float: "http://sadl.org/pival".
+ 
+ Rule UseIt:
+ if x is piVal() 
+   then print("Great!!", x).
+ 

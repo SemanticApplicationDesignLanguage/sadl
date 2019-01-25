@@ -95,7 +95,7 @@ SadlStatement returns SadlStatement:
 			|{SadlDisjointClasses.classes+=current} ('and' classes+=SadlResource)+ 'are' 'disjoint'
 			)
 	| 	{SadlClassOrPropertyDeclaration}  '{' classOrProperty+=SadlResource (','  classOrProperty+=SadlResource)* '}' 'are' 
-				(('top-level'? 'classes' | 'types' 'of' superElement=SadlPrimaryTypeReference) describedBy+=SadlPropertyDeclarationInClass* 
+				(('top-level'? 'classes' | (oftype='types'  | oftype='instances') 'of' superElement=SadlPrimaryTypeReference) describedBy+=SadlPropertyDeclarationInClass* 
 			|	{SadlDisjointClasses.types+=current} 'disjoint'
 			|	{SadlDifferentFrom.types+=current} (complement?='not')? 'the' 'same')
     | 	{SadlProperty} AnArticle? 'relationship' 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource 

@@ -1,0 +1,48 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:TransitiveProperty="http://sadl.org/TransitiveProperty.sadl#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/TransitiveProperty.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TransitiveProperty.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Region"/>
+  <owl:Class rdf:ID="County">
+    <rdfs:subClassOf rdf:resource="#Region"/>
+  </owl:Class>
+  <owl:Class rdf:ID="State">
+    <rdfs:subClassOf rdf:resource="#Region"/>
+  </owl:Class>
+  <owl:Class rdf:ID="City">
+    <rdfs:subClassOf rdf:resource="#Region"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Country">
+    <rdfs:subClassOf rdf:resource="#Region"/>
+  </owl:Class>
+  <owl:TransitiveProperty rdf:ID="locatedIn">
+    <rdfs:range rdf:resource="#Region"/>
+    <rdfs:domain rdf:resource="#Region"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:TransitiveProperty>
+  <TransitiveProperty:City rdf:ID="BalstonSpa">
+    <TransitiveProperty:locatedIn>
+      <TransitiveProperty:County rdf:ID="Saratoga">
+        <TransitiveProperty:locatedIn>
+          <TransitiveProperty:State rdf:ID="NewYork">
+            <TransitiveProperty:locatedIn>
+              <TransitiveProperty:Country rdf:ID="USA"/>
+            </TransitiveProperty:locatedIn>
+          </TransitiveProperty:State>
+        </TransitiveProperty:locatedIn>
+      </TransitiveProperty:County>
+    </TransitiveProperty:locatedIn>
+  </TransitiveProperty:City>
+</rdf:RDF>

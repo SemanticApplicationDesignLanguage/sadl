@@ -26,14 +26,19 @@
 					</execution>
 				</executions>
 				<configuration>
-					<cleanupDaemonThreads>false</cleanupDaemonThreads>
 					<mainClass>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</mainClass>
+					<classpathScope>
+						compile
+					</classpathScope>
 					<arguments>
-						<argument>/${project.basedir}/src/com/ge/research/sadl/GenerateSADL.mwe2</argument>
+						<argument>/${project.basedir}/src/com/ge/research/sadl/testsuite/GenerateTestSuite.mwe2</argument>
 						<argument>-p</argument>
-						<argument>projectPath=/${project.basedir}</argument>
+						<argument>rootPath=/${project.basedir}/..</argument>
+						<argument>toBeScanned1=.</argument>
+						<argument>toBeScanned2=.</argument>
 					</arguments>
 					<includePluginDependencies>true</includePluginDependencies>
+					<cleanupDaemonThreads>false</cleanupDaemonThreads><!-- see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475098#c3 -->
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -49,28 +54,70 @@
 				<version>${xtextVersion}</version>
 				<dependencies>
 					<dependency>
-						<groupId>org.eclipse.platform</groupId>
-						<artifactId>org.eclipse.equinox.common</artifactId>
-						<version>3.10.0</version>
+					    <groupId>org.eclipse.platform</groupId>
+					    <artifactId>org.eclipse.equinox.common</artifactId>
+					    <version>3.10.0</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.jdt</groupId>
+						<artifactId>org.eclipse.jdt.core</artifactId>
+						<version>3.13.102</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.jdt</groupId>
+						<artifactId>org.eclipse.jdt.compiler.apt</artifactId>
+						<version>1.3.110</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.jdt</groupId>
+						<artifactId>org.eclipse.jdt.compiler.tool</artifactId>
+						<version>1.2.101</version>
+					</dependency>
+					<dependency>
+						<groupId>org.eclipse.emf</groupId>
+						<artifactId>org.eclipse.emf.codegen</artifactId>
+						<version>2.11.0</version>
 					</dependency>
 				</dependencies>
 			</plugin>
+	
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
 				<configuration>
 					<filesets combine.children="append">
 						<fileset>
-							<directory>${basedir}/src-gen/</directory>
+							<directory>${basedir}/../com.ge.research.sadl.testsuite/src-gen/</directory>
+							<includes>
+								<include>**/*</include>
+							</includes>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/../com.ge.research.sadl.testsuite.tests/src-gen/</directory>
+							<includes>
+								<include>**/*</include>
+							</includes>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/../com.ge.research.sadl.testsuite.ide/src-gen/</directory>
+							<includes>
+								<include>**/*</include>
+							</includes>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/../com.ge.research.sadl.testsuite.ui/src-gen/</directory>
+							<includes>
+								<include>**/*</include>
+							</includes>
+						</fileset>
+						<fileset>
+							<directory>${basedir}/../com.ge.research.sadl.testsuite/src-gen/</directory>
+							<includes>
+								<include>**/*</include>
+							</includes>
 						</fileset>
 						<fileset>
 							<directory>${basedir}/model/generated/</directory>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../${project.artifactId}.ide/src-gen/</directory>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../${project.artifactId}.ui/src-gen/</directory>
 						</fileset>
 					</filesets>
 				</configuration>

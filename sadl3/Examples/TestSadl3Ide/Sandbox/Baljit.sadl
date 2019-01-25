@@ -1,0 +1,11 @@
+uri "http://ge.com/coreality/example".
+
+Location is a top-level class,
+      described by within with values of type Location.
+
+Galaxy is a type of Location.
+
+Universe is a Location.
+MilkyWay is a Galaxy within Universe.
+
+Ask: within of MilkyWay.

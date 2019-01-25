@@ -1,0 +1,19 @@
+ uri "http://sadl.org/GetInstance.sadl" alias GetInstance.
+ 
+ Person is a class described by child with values of type Person.
+ Parent is a type of Person.
+ A Person is a Parent only if child has at least 1 value.
+ 
+ Rule UnNamedChild:
+ 	if a Person is a Parent
+ 	then there exists a second Person and the Person has child the second Person.
+ 
+ MyMom is a Parent.
+ 
+ Ask: select p,c where p has child c.
+ 
+ Ask: "select ?c where {<MyMom> <rdf:type> ?c}".
+ 
+ Print: Model . 
+ 
+ 

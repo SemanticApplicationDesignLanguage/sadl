@@ -764,7 +764,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private boolean isLocalTypeRestriction(String op, EObject leftExpression, EObject rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) throws InvalidTypeException {
 		if (getModelProcessor().isEqualOperator(op) && leftExpression instanceof PropOfSubject && rightExpression instanceof Declaration) {
-			if (leftTypeCheckInfo.getExpressionType() instanceof ConceptName && rightTypeCheckInfo.getTypeCheckType() instanceof NamedNode) {
+			if (leftTypeCheckInfo != null && rightTypeCheckInfo != null &&
+					leftTypeCheckInfo.getExpressionType() instanceof ConceptName && rightTypeCheckInfo.getTypeCheckType() instanceof NamedNode) {
 				return true;
 			}
 		}
@@ -1259,7 +1260,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //		return null;
 	}
 
-	private String getListLengthAsString(NamedNode node) {
+	String getListLengthAsString(NamedNode node) {
 		StringBuilder sb = new StringBuilder();	
 		int length = node.getListLength();
 		int minLength = node.getMinListLength();
@@ -2102,18 +2103,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	
 	private TypeCheckInfo getType(SadlSimpleTypeReference expression) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		TypeCheckInfo tci = getType(expression.getType());
-		Node tctype = tci.getTypeCheckType();
-		if (expression.isList()) {
-			tci.setRangeValueType(RangeValueType.LIST);
-			int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
-			if(tctype instanceof NamedNode) {
-				if (lenRest != null) {
-					if (lenRest.length == 1) {
-						((NamedNode)tctype).setListLength(lenRest[0]);
-					}
-					else if (lenRest.length == 2) {
-						((NamedNode)tctype).setMinListLength(lenRest[0]);
-						((NamedNode)tctype).setMaxListLength(lenRest[1]);
+		if (tci != null) {
+			Node tctype = tci.getTypeCheckType();
+			if (expression.isList()) {
+				tci.setRangeValueType(RangeValueType.LIST);
+				int[] lenRest = getModelProcessor().getLengthRestrictions(expression.eContainer());
+				if(tctype instanceof NamedNode) {
+					if (lenRest != null) {
+						if (lenRest.length == 1) {
+							((NamedNode)tctype).setListLength(lenRest[0]);
+						}
+						else if (lenRest.length == 2) {
+							((NamedNode)tctype).setMinListLength(lenRest[0]);
+							((NamedNode)tctype).setMaxListLength(lenRest[1]);
+						}
 					}
 				}
 			}

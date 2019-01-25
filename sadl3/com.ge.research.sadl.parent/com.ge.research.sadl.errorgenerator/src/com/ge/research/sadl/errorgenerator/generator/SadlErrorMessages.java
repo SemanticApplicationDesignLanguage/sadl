@@ -219,6 +219,10 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage NOT_IN_RANGE = new SadlErrorMessage("not_in_range");
 /**
+* Unable to find {0} in the ontology
+**/
+    public static final SadlErrorMessage OF_CLASS_NOT_FOUND = new SadlErrorMessage("of_class_not_found");
+/**
 * Invalid property type: {0}.
 **/
     public static final SadlErrorMessage INVALID_PROP_TYPE = new SadlErrorMessage("invalid_prop_type");

@@ -1,0 +1,57 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:UserDefinedDataTypes="http://sadl.org/UserDefinedDataTypes.sadl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/UserDefinedDataTypes.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'UserDefinedDataTypes.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <rdfs:Datatype rdf:ID="SL">
+    <owl:equivalentClass>
+      <rdfs:Datatype>
+        <owl:withRestrictions rdf:parseType="Collection">
+          <rdf:Description>
+            <xsd:maxInclusive>5</xsd:maxInclusive>
+            <xsd:minInclusive>1</xsd:minInclusive>
+          </rdf:Description>
+        </owl:withRestrictions>
+        <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+      </rdfs:Datatype>
+    </owl:equivalentClass>
+  </rdfs:Datatype>
+  <rdfs:Datatype rdf:ID="UDT">
+    <owl:equivalentClass>
+      <rdfs:Datatype>
+        <owl:unionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="http://www.w3.org/2001/XMLSchema#int"/>
+          <rdf:Description rdf:about="http://www.w3.org/2001/XMLSchema#string"/>
+        </owl:unionOf>
+      </rdfs:Datatype>
+    </owl:equivalentClass>
+  </rdfs:Datatype>
+  <owl:Class rdf:ID="MyClass"/>
+  <owl:DatatypeProperty rdf:ID="p1">
+    <rdfs:domain rdf:resource="#MyClass"/>
+    <rdfs:range rdf:resource="#SL"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="p2">
+    <rdfs:domain rdf:resource="#MyClass"/>
+    <rdfs:range rdf:resource="#UDT"/>
+  </owl:DatatypeProperty>
+  <UserDefinedDataTypes:MyClass rdf:ID="mc1">
+    <UserDefinedDataTypes:p2 rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >4</UserDefinedDataTypes:p2>
+    <UserDefinedDataTypes:p2 rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >hi</UserDefinedDataTypes:p2>
+    <UserDefinedDataTypes:p1 rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >5</UserDefinedDataTypes:p1>
+  </UserDefinedDataTypes:MyClass>
+</rdf:RDF>

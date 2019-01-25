@@ -180,14 +180,14 @@ class SadlLinkingTest extends AbstractLinkingTest {
 	@Test
 	def void testLinkingPrecedence_06() {
 		'''
-			 uri "http://sadl.org/instances.sadl" alias instances.
+			 uri "http://sadl.org/instances.sadl" alias nsinstances.
 			 
 			 import "http://sadl.org/classes.sadl".
 			 
 			[Gregory] is a Human with friend <Lassie>. 
 			 
 			[Lassie] is a Dog.	// this is the declaration of Lassie
-			// {MrEd, SeaBuiscut, Flicka} are instances of Horse.
+			{[MrEd], [SeaBuiscu]t, [Flicka]} are instances of Horse.
 			 
 			[Winter] is a <Season>. 
 			 

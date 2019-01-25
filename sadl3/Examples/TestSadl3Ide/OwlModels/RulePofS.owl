@@ -1,0 +1,38 @@
+<rdf:RDF
+    xmlns:RulePofS="http://sadl.org/RulePofS.sadl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/RulePofS.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RulePofS.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <rdfs:Datatype rdf:ID="SL">
+    <owl:equivalentClass>
+      <rdfs:Datatype>
+        <owl:withRestrictions rdf:parseType="Collection">
+          <rdf:Description>
+            <xsd:maxInclusive>5</xsd:maxInclusive>
+            <xsd:minInclusive>1</xsd:minInclusive>
+          </rdf:Description>
+        </owl:withRestrictions>
+        <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+      </rdfs:Datatype>
+    </owl:equivalentClass>
+  </rdfs:Datatype>
+  <owl:Class rdf:ID="Cls"/>
+  <owl:DatatypeProperty rdf:ID="prop">
+    <rdfs:domain rdf:resource="#Cls"/>
+    <rdfs:range rdf:resource="#SL"/>
+  </owl:DatatypeProperty>
+  <j.0:Rule rdf:ID="ClsProp"/>
+  <j.0:Rule rdf:ID="ClsProp2"/>
+</rdf:RDF>

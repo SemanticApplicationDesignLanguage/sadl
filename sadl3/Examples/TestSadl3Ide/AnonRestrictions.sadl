@@ -1,0 +1,64 @@
+uri "http://sadl.org/TestSadlIde/AnonRestrictions" alias anonrest version "$Revision: 1.3 $ Last modified on   $Date: 2015/06/30 21:27:33 $". 
+
+LegalEntity is a class described by owns with values of type Artifact.
+{Person, Organization} are types of LegalEntity.
+
+Artifact is a class described by manufacturer with values of type LegalEntity.
+
+Manufacturer is a type of Organization.
+Apple is a Manufacturer.
+Dell is a Manufacturer.
+
+Computer is a type of Artifact.
+
+Person is a class.
+teaches describes Person with values of type Person.
+A Person is a Professor only if teaches has at least one value of type Student.
+Student is a type of Person.
+
+A Professor is an AppleProfessor only if teaches has at least one value of type
+	{Student and (owns has at least one value of type {Computer and (manufacturer always has value Apple)})}.
+	
+Department is a type of Organization.	
+department describes Person with values of type Department.
+parentDepartment describes Department with values of type Department.
+parentDepartment is transitive.
+
+Engineering is a type of Department.
+
+A Person is an EngineeringProfessor only if
+    teaches has at least one value of type Student and
+	department has at least one value of type {Engineering or
+		(parentDepartment has at least one value of type Engineering)}.
+	
+
+A Professor is an DellProfessor only if teaches has at least one value of type
+	(owns has at least one value of type {Computer and (manufacturer always has value Dell)}).
+	
+//AppleLovingStudent is a type of Student, described by owns with values of type {Computer and (manufacturer always has value Apple)}.
+owns of AppleLovingStudent only has values of type {Computer and (manufacturer always has value Apple)}.
+A Student is an AppleLovingStudent only if owns only has values of type {Computer and (manufacturer always has value Apple)}.
+	
+A Computer is an AppleComputer only if manufacturer always has value Apple.
+manufacturer of AppleComputer always has value Apple.
+
+Foo is a Computer.
+//Foo has 
+AppleSkin is a Computer with manufacturer Apple.
+AppleCore is a Student with owns AppleSkin.
+MyProf is a Professor, has teaches AppleCore.
+
+DellSkin is a Computer with manufacturer Dell.
+DellCore is a Student with owns DellSkin.
+YourProf is an AppleProfessor, has teaches DellCore.
+
+Test: MyProf is an AppleProfessor.
+
+Food is a class.
+{Meat, Vegetable} are types of Food.
+
+eats describes Person with values of type Food.
+
+Vegetable is the same as not Meat.
+A Person is a Carnivor only if eats has at least one value of type Meat.
+A Person is a Vegetarian only if eats only has values of type Vegetable.
