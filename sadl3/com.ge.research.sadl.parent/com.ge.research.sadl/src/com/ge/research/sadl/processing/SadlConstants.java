@@ -57,6 +57,7 @@ public class SadlConstants {
 	public static final String CONSTANT_PI = "PI";
 	public static final String CONSTANT_E = "e";
 	public static final String CONSTANT_KNOWN = "known";
+	public static final String OF_TYPE_INSTANCES = "instances";
 		
 	public static enum OWL_FLAVOR {OWL_FULL, OWL_DL, OWL_LITE};
 }

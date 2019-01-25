@@ -22,7 +22,7 @@
  ```
  git clone https://github.com/crapo/sadlos2.git \
 && cd sadlos2 \
-&& git checkout origin/web_sadl -b web_sadl
+&& git checkout origin/master
  ```
  
 #### Import the projects into the Eclipse workspace

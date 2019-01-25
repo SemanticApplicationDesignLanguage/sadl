@@ -54,6 +54,7 @@ import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
@@ -568,7 +569,8 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			while (itr.hasNext()) {
 				String key = itr.next();
 				String val = map.get(key);
-				if (!key.equals(SadlConstants.SADL_BASE_MODEL_URI) && !key.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
+				if (!key.equals(SadlConstants.SADL_BASE_MODEL_URI) && !key.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI) &&
+						!key.equals(IReasoner.SADL_BUILTIN_FUNCTIONS_URI)) {
 					String obj = parentPublicUri; //nodeText(parentPublicUri, parentPrefix);
 					String pred = "importedBy";
 					String subj = key;

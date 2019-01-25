@@ -204,6 +204,15 @@
 			</activeWhen>
 		</handler>
 	</extension>
+	<extension point="org.eclipse.core.contenttype.contentTypes">
+		<content-type
+			base-type="org.eclipse.core.runtime.text"
+			file-extensions="tmpl"
+			id="com.ge.research.sadl.importer.Template.contenttype"
+			name="Template File"
+			priority="normal">
+		</content-type>
+	</extension>
 	<!-- adding resource factories -->
 	<extension
 		point="org.eclipse.emf.ecore.extension_parser">
@@ -239,6 +248,15 @@
 			point="org.eclipse.core.resources.markers">
 		<super type="org.eclipse.xtext.ui.check.expensive"/>
 		<persistent value="true"/>
+	</extension>
+	<extension point="org.eclipse.ui.preferencePages">
+		<page
+			category="com.ge.research.sadl.importer.Template"
+			class="com.ge.research.sadl.importer.ui.TemplateExecutableExtensionFactory:org.eclipse.xtext.ui.validation.ValidatorPreferencePage"
+			id="com.ge.research.sadl.importer.Template.validator.preferencePage"
+			name="Errors/Warnings">
+			<keywordReference id="com.ge.research.sadl.importer.ui.keyword_Template"/>
+		</page>
 	</extension>
 	<extension point="org.eclipse.xtext.builder.participant">
 		<participant
@@ -388,12 +406,18 @@
 			class="com.ge.research.sadl.importer.ui.TemplateExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
 			extensions="tmpl">
 		</viewer>
+		<contentTypeBinding
+			contentTypeId="com.ge.research.sadl.importer.Template.contenttype"
+			contentViewerId="com.ge.research.sadl.importer.Template.compare.contentViewers" />
 	</extension>
 	<extension point="org.eclipse.compare.contentMergeViewers">
 		<viewer id="com.ge.research.sadl.importer.Template.compare.contentMergeViewers"
 			class="com.ge.research.sadl.importer.ui.TemplateExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
 			extensions="tmpl" label="Template Compare">
 		</viewer>
+		<contentTypeBinding
+			contentTypeId="com.ge.research.sadl.importer.Template.contenttype"
+			contentMergeViewerId="com.ge.research.sadl.importer.Template.compare.contentMergeViewers" />
 	</extension>
 	<extension point="org.eclipse.ui.editors.documentProviders">
 		<provider id="com.ge.research.sadl.importer.Template.editors.documentProviders"

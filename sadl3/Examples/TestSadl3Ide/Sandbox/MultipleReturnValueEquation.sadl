@@ -1,0 +1,8 @@
+ uri "http://sadl.org/MultipleReturnValueEquation.sadl" alias mrveq.
+ 
+ External testMrveq(int x, float y) returns string, float: "http://sadl.org/mrveq" located at "location".
+ 
+ Rule UseIt:
+ if [x,y] is testMrveq(4, 3.14) 
+   then print("Great!!", x, y).
+ 

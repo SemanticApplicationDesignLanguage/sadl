@@ -1,0 +1,6 @@
+ uri "http://sadl.org/SubtleClassUse2.sadl" alias SubtleClassUse2.
+ 
+ import "http://sadl.org/SubtleClassUse1.sadl".
+ 
+ ClassyClass is a class.
+ 

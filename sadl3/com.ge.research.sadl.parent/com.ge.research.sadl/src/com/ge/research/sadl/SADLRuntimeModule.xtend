@@ -58,7 +58,7 @@ class SADLRuntimeModule extends AbstractSADLRuntimeModule {
 	override bindIQualifiedNameProvider() {
 		return SadlQualifiedNameProvider;
 	}
-	
+
 	def Class<? extends IOutputConfigurationProvider> bindIOutputConfigurationProvider() {
 		return SADLOutputConfigurationProvider;	
 	}

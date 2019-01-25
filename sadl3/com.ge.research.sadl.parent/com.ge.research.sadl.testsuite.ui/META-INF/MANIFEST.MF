@@ -3,7 +3,7 @@ Automatic-Module-Name: com.ge.research.sadl.testsuite.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.testsuite.ui
 Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 3.2.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.testsuite.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.sadl.testsuite,
@@ -17,7 +17,7 @@ Require-Bundle: com.ge.research.sadl.testsuite,
  org.eclipse.compare,
  org.eclipse.xtext.builder,
  org.eclipse.xtend.lib;resolution:=optional,
- org.eclipse.xtext.xbase.lib,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
  com.ge.research.jena;bundle-version="3.2.0",
  com.ge.research.sadl;bundle-version="3.2.0",
  com.ge.research.sadl.ui;bundle-version="3.2.0"

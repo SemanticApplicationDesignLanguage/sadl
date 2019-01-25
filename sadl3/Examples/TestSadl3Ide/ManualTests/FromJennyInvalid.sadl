@@ -1,0 +1,24 @@
+ uri "http://sadl.org/FromJennyInvalid.sadl" alias FromJennyInvalid.
+ 
+ FundingSourceType is a class, must be one of {Internal,Assessed,Government,Commercial}.
+
+AssessedFundingType is a class, must be one of {AT, CEO, MPGD, TD}.
+
+FundingSource is a class, 
+       described by fundingSourceType with a single value of type FundingSourceType.
+
+InternalFundingSource is a type of FundingSource.
+	fundingSourceType of InternalFundingSource always has value Internal.
+GovernmentFundingSource is a type of FundingSource described by fundingSourceType always has value Government.
+CommercialFundingSource is a FundingSource with fundingSourceType Commercial.
+AssessedFundingSource is a FundingSource with fundingSourceType Assessed,
+       described by assessedFundingType with a single value of type AssessedFundingType.
+ 
+// Is it possible to say something like “if a FundingSource has fundingSourceType Government, then it is a GovernmentFundingSource”?
+
+A FundingSource is a GovernmentFundingSource only if fundingSourceType always has value Government.
+
+Rule GFS: if fs is a FundingSource and x has fundingSourceType Government then fs is a GovernmentFundingSource.
+
+Rule GFSCR: if a FundingSource has fundingSourceType Government then the FundingSource is a GovernmentFundingSource.
+

@@ -1,0 +1,48 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:UsingListExpression="http://sadl.org/UsingListExpression.sadl#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:sadllistmodel="http://sadl.org/sadllistmodel"
+    xmlns:j.0="http://sadl.org/sadlbasemodel#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/UsingListExpression.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="sadllistmodel"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'UsingListExpression.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Person"/>
+  <owl:Class rdf:ID="PersonList">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="#PersonList"/>
+        <owl:onProperty rdf:resource="sadllistmodel#rest"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="#Person"/>
+        <owl:onProperty rdf:resource="sadllistmodel#first"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="sadllistmodel#List"/>
+  </owl:Class>
+  <j.0:Equation rdf:ID="firstElement">
+    <j.0:expression rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Person firstElement(PersonList List people): elementAt(people,0)</j.0:expression>
+  </j.0:Equation>
+  <j.0:Equation rdf:ID="lastElement">
+    <j.0:expression rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Person lastElement(PersonList List people): elementAt(people,-(length(people),1))</j.0:expression>
+  </j.0:Equation>
+  <j.0:ExternalEquation rdf:ID="elementAt">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    ></j.0:externalURI>
+  </j.0:ExternalEquation>
+</rdf:RDF>

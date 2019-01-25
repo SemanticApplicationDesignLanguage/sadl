@@ -1,0 +1,70 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:PathFindingTest="http://sadl.org/PathFindingTest.sadl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/PathFindingTest.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'PathFindingTest.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Class2_2">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Root2"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Class1_1_2">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Class1_1"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Class1_2_1">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Class1_2"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Class1_1_1">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Class1_1"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Class1_2_2">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="#Class1_2"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Root1"/>
+  <owl:Class rdf:ID="Class2_1_1">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Class2_1"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#Class1_1">
+    <rdfs:subClassOf rdf:resource="#Root1"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Class1_2">
+    <rdfs:subClassOf rdf:resource="#Root1"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Class2_2_1">
+    <rdfs:subClassOf rdf:resource="#Class2_2"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Class2_1">
+    <rdfs:subClassOf rdf:resource="#Root2"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Class2_2_2">
+    <rdfs:subClassOf rdf:resource="#Class2_2"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Class2_1_2">
+    <rdfs:subClassOf rdf:resource="#Class2_1"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="p1_1_1_to_1_1_2">
+    <rdfs:range rdf:resource="#Class1_1_2"/>
+    <rdfs:domain rdf:resource="#Class1_1_1"/>
+  </owl:ObjectProperty>
+</rdf:RDF>

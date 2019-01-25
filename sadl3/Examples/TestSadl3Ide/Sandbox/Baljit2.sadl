@@ -1,0 +1,11 @@
+uri "http://ge.com/coreality/example2".
+
+Region is a top-level class,
+      described by inside with a single value of type Region.
+
+Galaxy is a type of Region.
+MilkyWay is a Galaxy.
+
+//Print: Model.
+Print: "Hello".
+Print: 'World'.

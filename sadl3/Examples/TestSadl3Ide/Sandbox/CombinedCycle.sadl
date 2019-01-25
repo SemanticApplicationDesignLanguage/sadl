@@ -1,0 +1,12 @@
+ uri "http://sadl.org/CombinedCycle.sadl" alias cc.
+ 
+ System is a class.
+ Subsystem is a type of System.
+ PowerPlant is a type of System.
+ Equipment is a type of Subsystem.
+ part describes System with values of type Subsystem.
+ 
+ SteamTurbine is a type of Equipment.
+ 
+ CombinedCycle is a type of PowerPlant.
+ part of CombinedCycle has at least 1 value of type SteamTurbine.

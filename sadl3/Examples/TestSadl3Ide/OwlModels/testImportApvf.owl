@@ -1,0 +1,71 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:aulo="http://research.ge.com/Acuity/aulo.owl"
+    xmlns="http://sadl.imp/test_import_apvf#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:j.0="http://research.ge.com/Acuity/aulo.owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.imp/test_import_apvf">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="http://research.ge.com/Acuity/aulo.owl"/>
+    <owl:imports rdf:resource="http://sadl.org/builtinfunctions"/>
+    <owl:imports rdf:resource="http://sadl.org/sadlimplicitmodel"/>
+    <owl:imports rdf:resource="http://sadl.org/sadlbasemodel"/>
+    <owl:versionInfo>$Revision: 1.6 $ Last modified on $Date: 2015/06/30 21:27:34 $</owl:versionInfo>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'testImportApvf.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Genius">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <rdf:Description rdf:about="http://research.ge.com/Acuity/aulo.owl#Person">
+            <rdfs:subClassOf>
+              <owl:Restriction>
+                <owl:someValuesFrom>
+                  <owl:Class>
+                    <owl:oneOf rdf:parseType="Resource">
+                      <rdf:rest rdf:parseType="Resource">
+                        <rdf:rest rdf:parseType="Resource">
+                          <rdf:rest rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"/>
+                          <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                          >high</rdf:first>
+                        </rdf:rest>
+                        <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                        >average</rdf:first>
+                      </rdf:rest>
+                      <rdf:first rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+                      >low</rdf:first>
+                    </owl:oneOf>
+                  </owl:Class>
+                </owl:someValuesFrom>
+                <owl:onProperty>
+                  <owl:DatatypeProperty rdf:ID="iq"/>
+                </owl:onProperty>
+              </owl:Restriction>
+            </rdfs:subClassOf>
+          </rdf:Description>
+          <owl:Restriction>
+            <owl:hasValue rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >high</owl:hasValue>
+            <owl:onProperty>
+              <owl:DatatypeProperty rdf:about="#iq"/>
+            </owl:onProperty>
+          </owl:Restriction>
+        </owl:intersectionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+    <rdfs:subClassOf rdf:resource="http://research.ge.com/Acuity/aulo.owl#Person"/>
+  </owl:Class>
+  <owl:DatatypeProperty rdf:about="#iq">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:domain rdf:resource="http://research.ge.com/Acuity/aulo.owl#Person"/>
+  </owl:DatatypeProperty>
+  <j.0:Person rdf:ID="George">
+    <iq rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >high</iq>
+  </j.0:Person>
+</rdf:RDF>

@@ -1,0 +1,9 @@
+ uri "http://sadl.org/RulePofS.sadl" alias RulePofS.
+
+ SL is a type of int [1,5].
+ Cls is a class described by prop with values of type SL.
+ 
+ Rule ClsProp: if x is a Cls then prop of x is 5.
+ Rule ClsProp2: if x is a Cls then x has prop 5.
+ 
+ 

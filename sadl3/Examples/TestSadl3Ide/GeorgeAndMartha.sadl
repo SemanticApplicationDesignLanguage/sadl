@@ -1,0 +1,71 @@
+uri "http://com.ge.research.sadlGeorgeAndMartha" alias gm.
+
+Person is a type of PhysicalObject, described by spouse with  a single value of type Person,
+	described by friend with values of type Person,
+	described by age with a single value of type decimal,
+	described by likes with values of type string
+	described by weight with values of type DATA
+	.
+	
+Birth is a class described by child with values of type Person,
+	described by mother with a single value of type Person,
+	described by location with a single value of type Location,
+	described by ^when with a single value of type dateTime,
+	described by weight. // with a single value of type float.
+	
+Location is a class, described by latitude with a single value of type double,
+	described by longitude with a single value of type double,
+	described by gm:description with values of type string.
+	
+Philadelphia is a Location with latitude 39.9522. 
+	
+Rule NorthernerAtHeart 
+	if     the latitude of the location of a Birth > latitude of Philadelphia  	  
+	then (a child of the Birth) likes "cold weather in the winter".
+
+Rule NorthernerAtHeart2 
+	if    x is a Birth with location (a Location with latitude l)
+		  and l > latitude of Philadelphia and 
+		  y is a child of the Birth
+	then  y has likes "cold weather in the winter". 
+	
+Rule NorthernerAtHeart3 
+	if    x is a Birth with location l
+		  and latitude of l > latitude of Philadelphia and 
+		  y is a child of x
+	then  y has likes "cold weather in the winter". 
+
+ DATA is a class, 
+ 	described by gm:^value with a single value of type decimal,
+ 	described by gm:validity with a single value of type boolean,
+ 	described by gm:unit with a single value of type string.
+ DATA has impliedProperty gm:^value.
+ DATA has impliedProperty gm:unit.
+ DATA has impliedProperty gm:validity.
+ 	
+ PhysicalObject is a class
+// 	described by weight with values of type DATA
+.
+	
+//child describes Person with values of type Person.	
+Margie is a Person with weight (a DATA with gm:^value 135, with gm:unit "lbs").	
+John is a Person with weight (a DATA with gm:^value 180, with gm:unit "lbs").
+John has child (a Person with friend (a Person with spouse Margie)).
+
+NewYorkNY is a Location with latitude 40.7141667.
+
+A Birth has child Margie, has mother (a Person Mary), 
+	has location NewYorkNY,
+	has ^when "1732-02-22".
+
+//Ask: select p where p has child with friend with spouse Margie and weight of p > 150.
+//Ask: select q where q is the spouse of a friend of a child of John and weight of q < 150.
+//Ask: select w where w is  has child with friend with spouse Margie and weight of p > 150.
+//Ask: select w where w is the weight of the spouse of a friend of a child of John and w < 150.
+ 
+//Ask: select wv where wv is the ^value of the weight of the spouse of a friend of a child of John and wv < 150.
+ 
+Rule R2: if sp is spouse of friend of spouse of Margie then print("hello", sp).
+Ask: select p, s where p has likes s. 
+Explain: Rule NorthernerAtHeart.
+ 

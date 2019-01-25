@@ -1,0 +1,32 @@
+ uri "http://sadl.org/TestArticles.sadl" alias TestArticles.
+ 
+ Shape is a class described by area with values of type decimal.
+ 
+ Rectangle is a type of Shape, described by height with values of type decimal, described by width with values of type decimal.
+ 
+ Circle is a type of Shape, described by radius with values of type decimal.
+ 
+ ShapeCalculator is a class.
+ MyShapeCalculator is a ShapeCalculator.
+ MyCircle is a Circle.
+ 
+ Rule R1: 
+	if X is the radius of MyCircle and
+		X > 0 and
+		Y is X^2*PI
+	then
+		the area of MyCircle is Y.
+
+Rule R2: 
+	if X is radius of the MyCircle and
+		X > 0 and
+		Y is X^2*PI
+	then
+		the area of a MyCircle is Y.
+
+Rule R3: // this rule will have an error if useArticles is true
+ 	if X is radius of Circle and
+		X > 0 and
+		Y is X^2*PI
+	then
+		area of Circle is Y.

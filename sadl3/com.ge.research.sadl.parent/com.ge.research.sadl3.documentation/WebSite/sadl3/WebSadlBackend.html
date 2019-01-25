@@ -17,7 +17,7 @@
 
 <h1>Web SADL Backend Services</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/03/2018<!--webbot bot="Timestamp" endspan i-checksum="12542" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->12/27/2018<!--webbot bot="Timestamp" endspan i-checksum="12626" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 
 <h2>Introduction</h2>
@@ -37,7 +37,7 @@ editor.</p>
 <p class="MsoNormal">Generation (OWL, N3, and NT) based on valid SADL models.</p>
   </li>
   <li>
-<p class="MsoNormal">LS based semantic highlighting.</p>
+<p class="MsoNormal">LS-based semantic highlighting.</p>
   </li>
   <li>
 <p class="MsoNormal">Navigation between the SADL model elements.</p>
@@ -65,7 +65,7 @@ statements.</p>
 </ul>
 
 <p>This document is primarily about configuring and running the Web SADL backend 
-services. For more information using Web SADL in a browser, please see
+services. For more information about using Web SADL in a browser, please see
 <a href="WebSADL.html">Web SADL</a>.</p>
 
 <p>The Web SADL backend services are downloaded and run as Docker images.</p>
@@ -138,132 +138,61 @@ run), container location &quot;/home/project&quot;.</p>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-family: Courier New">docker 
 run -it -p 3000:3000 -v &quot;$(pwd):/home/project&quot;&nbsp;theiaide/sadl</span></p>
 
+<p>You can see a list of the images that are locally available with the command:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style="font-family: Courier New">docker images</span></p>
+
+<p>You can get information about currently running containers with the command:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style="font-family: Courier New">docker ps</span></p>
+
+<p>You can get information about containers, past and present, with the command:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span style="font-family: Courier New">docker ps -a</span></p>
+
+<p>The results of this command will reveal the name of the running container, 
+e.g. &quot;angry_fermat&quot; in the output below: <br>
+</p>
+
+<blockquote>
+  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111">
+    <tr>
+      <td width="14%" align="center"><b>CONTAINER ID</b></td>
+      <td width="14%" align="center"><b>IMAGE</b></td>
+      <td width="14%" align="center"><b>COMMAND</b></td>
+      <td width="14%" align="center"><b>CREATED</b></td>
+      <td width="14%" align="center"><b>STATUS</b></td>
+      <td width="15%" align="center"><b>PORTS</b></td>
+      <td width="15%" align="center"><b>NAMES</b></td>
+    </tr>
+    <tr>
+      <td width="14%" align="center">9ce78044d643</td>
+      <td width="14%" align="center">theiaide/sadl</td>
+      <td width="14%" align="center">&nbsp;&quot;yarn theia start /h…&quot;</td>
+      <td width="14%" align="center">7 minutes ago</td>
+      <td width="14%" align="center">Up 7 minutes</td>
+      <td width="15%" align="center">0.0.0.0:3000-&gt;3000/tcp</td>
+      <td width="15%" align="center">angry_fermat</td>
+    </tr>
+  </table>
+</blockquote>
+
+<p>This name can then be used to get more information or to stop the container:</p>
+
+<ul>
+  <li>Show logs: <span style="font-family: Courier New">docker logs angry_fermat</span></li>
+  <li>Stop: <span style="font-family: Courier New">docker stop angry_fermat</span></li>
+</ul>
+
+<p>For more information see
+<a href="https://docs.docker.com/engine/reference/commandline/docker/">
+https://docs.docker.com/engine/reference/commandline/docker/</a>. </p>
+
 <h2>Configuring with Git</h2>
 
-<p>The Web SADL server environment can be configured so that Git integration is 
-available in the browser. </p>
-
-<p>&nbsp;</p>
-
-<p>&nbsp;</p>
-
-<p>&nbsp;</p>
-
-<p>&nbsp;</p>
-
-<h2>From Original Documentation from Akos</h2>
-
-<h2>Notes</h2>
-<p class="MsoNormal">Web SADL has been exercised on both OS X and Windows 10 (VMWare).</p>
-<p class="MsoNormal">&nbsp;</p>
-<h2>Current state</h2>
-<p class="MsoNormal">&nbsp;- The source code is ready for review within a PR [1]. I 
-have rebased the branch from the <span style="font-family: Courier New">
-development</span>. As always, the source has an&nbsp;EPL v 1.0 license.&nbsp;</p>
-<p class="MsoNormal">&nbsp;- I have also published a new version of the Theia SADL 
-extension [2].</p>
-<p class="MsoNormal">&nbsp;- The Web SADL application is publicly available [3] as a 
-Docker image.</p>
-<p class="MsoNormal">&nbsp;</p>
-<h2>Web SADL Features</h2>
-<p class="MsoNormal">&nbsp;- Authoring of SADL model files in a feature-rich text 
-editor.</p>
-<p class="MsoNormal">&nbsp;- Live model instance validation.</p>
-<p class="MsoNormal">&nbsp;- Generation (OWL, N3, and NT) based on valid SADL models.</p>
-<p class="MsoNormal">&nbsp;- LS based semantic highlighting.</p>
-<p class="MsoNormal">&nbsp;- Navigation between the SADL model elements.</p>
-<p class="MsoNormal">&nbsp;- Content assist in the SADL editors.</p>
-<p class="MsoNormal">&nbsp;- Downloading and managing external SADL resources into 
-the workspace.</p>
-<p class="MsoNormal">&nbsp;- Preferences.</p>
-<p class="MsoNormal">&nbsp;- Testing and querying SADL models.</p>
-<p class="MsoNormal">&nbsp;- Reviewing the output of any SADL model via Ask and Test 
-statements.</p>
-<p class="MsoNormal">&nbsp;- Collaboration with the Theia Git extension.</p>
-<p class="MsoNormal">&nbsp;</p>
-<h2>Running WebSADL</h2>
-<p class="MsoNormal">&nbsp;(Although this section contains documentation about the 
-Windows version, it was tested and verified on both OS X and Windows platforms.)</p>
-<p class="MsoNormal">&nbsp;</p>
-<h3>Prerequisites</h3>
-<p class="MsoNormal">&nbsp;- If the host machine is running the Windows 
-operating system, Hyper-V [4] must be enabled. 
-Otherwise, Docker cannot run Linux-based containers. (Either it is already 
-available on your Windows, or your system administrator can help to turn this 
-on.)</p>
-<p class="MsoNormal">&nbsp;- A free/community Docker ID (account).</p>
-<p class="MsoNormal">&nbsp;- The Docker image comes with Git (2.13.7), but it is not 
-configured. It requires manual configuration [5].&nbsp;</p>
-<h3>&nbsp;Instructions</h3>
-<p class="MsoNormal">- Download Docker for Windows from the Docker Store[6]. I 
-used the &quot;Edge&quot; release [7] on my Windows 10 image. Once I have enabled Hyper-V, 
-I had to run the installer, log in with my Docker ID and start the Web SADL 
-Docker image.</p>
-<p class="MsoNormal">- Pull the latest Web SADL image:</p>
-<p class="MsoNormal"><span style="font-family: Courier New">docker pull theiaide/sadl</span></p>
-<p class="MsoNormal">- Run the Web SADL image (from the current working 
-directory):</p>
-<ul type="disc" style="margin-bottom: 0in">
-  <li class="MsoNormal">CMD.EXE:&nbsp;<span style="font-family: Courier New">docker 
-  run -it -p 3000:3000 -v &quot;%cd%:/home/project&quot;&nbsp;theiaide/sadl</span></li>
-  <li class="MsoNormal">PowerShell:&nbsp;<span style="font-family: Courier New">docker 
-  run -it -p 3000:3000 -v &quot;${PWD}:/home/project&quot;&nbsp;theiaide/sadl</span></li>
-  <li class="MsoNormal">Git Bash:&nbsp;<span style="font-family: Courier New">winpty&nbsp;docker 
-  run -it -p 3000:3000 -v &quot;/$(pwd&nbsp;-W):/home/project&quot;&nbsp;theiaide/sadl</span></li>
-</ul>
-<h2>Known Limitations</h2>
-<p class="MsoNormal">&nbsp;- There is no support for user specific access-control.</p>
-<p class="MsoNormal">&nbsp;- The LS-based semantic highlighting works only on current 
-workspace resources. What does that mean? When you open any historical revision 
-of a SADL model file (with the Theia Git extension), coloring is not available. 
-The coloring is also not available in diff editors when comparing the current 
-state of a SADL model file with any other historical revisions.</p>
-<p class="MsoNormal">&nbsp;- Time to time, a native file change event does not arrive 
-from the Docker container to the Theia backend. What does that mean? It might 
-happen that after downloading external SADL resources, you have to refresh your 
-browser (Ctrl/Cmd+R) to get rid of the compiler errors.</p>
-<p class="MsoNormal">&nbsp;- Publishing a new version of Web SADL is not automated. 
-What does that mean? If you change something relevant in the SADL Java code, a 
-new version of Theia SADL extension has to be published manually based on the 
-documentation [8]. Finally, a new Docker image has to be released as well based 
-on the new extension.</p>
-<p class="MsoNormal">&nbsp;</p>
-<h2>Notes</h2>
-<p class="MsoNormal">&nbsp;- There are CIs on the
-<span style="font-family: Courier New">development</span> branch of 
-sadlos2/sadl3.</p>
-<p class="MsoNormal">&nbsp;- Some general documentation on Theia as an IDE (with the 
-Git integration) is available [9] as part of Gitpod.</p>
-<p class="MsoNormal">&nbsp;</p>
-<p class="MsoNormal">[1]:
-<a href="https://github.com/crapo/sadlos2/pull/296/" style="color: blue; text-decoration: underline; text-underline: single">
-https://github.com/crapo/sadlos2/pull/296/</a></p>
-<p class="MsoNormal">[2]:
-<a href="https://www.npmjs.com/package/sadl-extension/" style="color: blue; text-decoration: underline; text-underline: single">
-https://www.npmjs.com/package/sadl-extension/</a></p>
-<p class="MsoNormal">[3]:
-<a href="https://hub.docker.com/r/theiaide/sadl/" style="color: blue; text-decoration: underline; text-underline: single">
-https://hub.docker.com/r/theiaide/sadl/</a></p>
-<p class="MsoNormal">[4]:
-<a href="https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v/" style="color: blue; text-decoration: underline; text-underline: single">
-https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v/</a></p>
-<p class="MsoNormal">[5]:
+<p>The Web SADL server docker images comes with Git (2.13.7) but it must be 
+configured so that Git integration is 
+available in the browser. For details on how to do this see
 <a href="https://github.com/theia-ide/theia/issues/1037#issuecomment-376180725/" style="color: blue; text-decoration: underline; text-underline: single">
-https://github.com/theia-ide/theia/issues/1037#issuecomment-376180725/</a></p>
-<p class="MsoNormal">[6]:
-<a href="https://store.docker.com/editions/community/docker-ce-desktop-windows/" style="color: blue; text-decoration: underline; text-underline: single">
-https://store.docker.com/editions/community/docker-ce-desktop-windows/</a></p>
-<p class="MsoNormal">[7]:
-<a href="https://download.docker.com/win/edge/Docker%20for%20Windows%20Installer.exe/" style="color: blue; text-decoration: underline; text-underline: single">
-https://download.docker.com/win/edge/Docker%20for%20Windows%20Installer.exe/</a></p>
-<p class="MsoNormal">[8]:
-<a href="https://www.npmjs.com/package/sadl-extension#release-engineering/" style="color: blue; text-decoration: underline; text-underline: single">
-https://www.npmjs.com/package/sadl-extension#release-engineering/</a></p>
-<p class="MsoNormal">[9]:&nbsp;<a href="https://docs.gitpod.io/50_IDE.html/" style="color: blue; text-decoration: underline; text-underline: single">https://docs.gitpod.io/50_IDE.html/</a></p>
-<p class="MsoNormal">&nbsp;</p>
+https://github.com/theia-ide/theia/issues/1037#issuecomment-376180725/</a>.</p>
 
-<p>&nbsp;</p>
-
-<p>&nbsp;</p>
-
-<p>&nbsp;</p>

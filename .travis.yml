@@ -1,7 +1,7 @@
-language: java
+sudo: required
 
-jdk:
-  - oraclejdk8
+git:
+  depth: 1
 
 os:
   - linux
@@ -9,19 +9,76 @@ os:
 branches:
   only:
     - development
+    - GH-339 # TODO: remove this!
 
 cache:
   directories:
   - $HOME/.m2/repository
+  - $HOME/.gradle
 
 env:
    global:
     - DISPLAY=:99.0
 
-before_install: 
-  - export M2_HOME=/usr/local/maven
-  - export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m -XX:PermSize=512m"
-  - sh -e /etc/init.d/xvfb start - sleep 10 
+jobs:
+  include:
+  - stage: test
+    language: java
+    jdk: oraclejdk8
+    before_install: 
+      - export M2_HOME=/usr/local/maven
+      - export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m -XX:PermSize=512m"
+      - sh -e /etc/init.d/xvfb start - sleep 10
+    script: mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean verify
 
-script:
-  - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean verify
+  - stage: publish-npm
+    language: java
+    jdk: oraclejdk8
+    node_js: '8'
+    before_script: 
+      - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.12.3
+      - export PATH=$HOME/.yarn/bin:$PATH
+      - sudo apt-get -y install jq
+    script:
+      - rm -rf ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ # Wipe the previous state.
+      - rm -rf ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/
+      - ./sadl3/com.ge.research.sadl.parent/gradlew -p ./sadl3/com.ge.research.sadl.parent/ build installDist --refresh-dependencies # Build the LS.
+      - cp -rf ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/ # Copy the LS to the Theia extension.
+      - yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension # Build the Theia extension.
+    before_deploy:
+      - printf "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n" >> ~/.npmrc
+    deploy:
+      provider: script
+      script:
+        - yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension run publish:next
+      on:
+        all_branches: true
+        condition: $TRAVIS_BRANCH =~ ^development|GH-339$
+      skip_cleanup: true
+
+  - stage: publish-docker
+    language: generic
+    services:
+      - docker
+    before_script: 
+      - sudo apt-get update
+      - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+      - sudo apt-get -y install jq
+    script:
+      - cp -rf sadl3/com.ge.research.sadl.parent/theia-sadl-extension/yarn.lock sadl3/com.ge.research.sadl.parent/theia-sadl-extension/browser-app/yarn.lock # Reuse the yarn.lock file.
+      - NEXT_VERSION=`npm view sadl-extension@next version` # Get the next version that we want to include in the image.
+      - cd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/browser-app # Here is the Dockerfile
+      - mv -f ./package.json ./package.json.original # Rename the package.json. We want to update the version and used the updated one for Docker.
+      - cat ./package.json.original | jq .version=\"$NEXT_VERSION\" > package.json # Update the version to use the most recent `next`.
+      - travis_wait docker build --build-arg "GITHUB_TOKEN=$GITHUB_TOKEN" --no-cache . -t theiaide/sadl:$NEXT_VERSION  # Build the Docker image.
+      - docker tag theiaide/sadl:$NEXT_VERSION theiaide/sadl:next # Tag the Docker image.
+    before_deploy:
+      - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+    deploy:
+      provider: script
+      script:
+        - docker push theiaide/sadl
+      on:
+        all_branches: true
+        condition: $TRAVIS_BRANCH =~ ^development|GH-339$
+      skip_cleanup: true

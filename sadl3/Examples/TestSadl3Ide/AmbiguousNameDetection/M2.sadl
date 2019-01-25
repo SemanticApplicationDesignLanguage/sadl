@@ -1,0 +1,5 @@
+ uri "http://sadl.org/M2.sadl" alias M2.
+ 
+ Person is a class described by hardness with values of type Character.
+ Character is a class, must be one of {Soft, Moderate, Hard}.
+ 

@@ -1,0 +1,8 @@
+ uri "http://sadl.org/AgeOfMarthaIsAnInt.sadl" alias AgeOfMarthaIsAnInt.
+ 
+ Person is a class described by age with values of type data.
+ Martha is a Person.
+ 
+ Rule R1: if age of Martha is an int then Martha has age 3.
+ 
+ 

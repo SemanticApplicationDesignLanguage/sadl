@@ -1,0 +1,26 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:mrveq="http://sadl.org/MultipleReturnValueEquation.sadl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:j.1="http://sadl.org/sadlbasemodel#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/MultipleReturnValueEquation.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'MultipleReturnValueEquation.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <j.1:ExternalEquation rdf:ID="testMrveq">
+    <j.1:location rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >location</j.1:location>
+    <j.1:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >http://sadl.org/mrveq</j.1:externalURI>
+  </j.1:ExternalEquation>
+  <j.0:Rule rdf:ID="UseIt"/>
+</rdf:RDF>

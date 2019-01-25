@@ -1,9 +1,6 @@
 package com.ge.research.sadl.ui.handlers;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -28,17 +25,14 @@ import org.eclipse.xtext.resource.XtextResource;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.ide.handlers.SadlRunQueryHandler;
-import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
-import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.common.base.Supplier;
-import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -123,15 +117,9 @@ public class RunQuery extends SadlActionHandler {
 				Supplier<XtextResource> resourceSupplier = () -> resource;
 				final IProject currentProject = project;
 				final IFile targetFile = trgtFile;
-				new DelegatingQueryHandler(handlerProvider.get()) {
-					protected void resultSetToGraph(Path path, ResultSet resultSet, String description, String baseFileName, Orientation orientation, java.util.Map<String,String> properties) {
-						try {
-							RunQuery.this.resultSetToGraph(currentProject, targetFile, resultSet, description, baseFileName, orientation, properties);
-						} catch (ConfigurationException | IOException e) {
-							console.error(Throwables.getStackTraceAsString(e));
-						}
-					};
-				}.run(trgtFile.getLocation().toFile().toPath(), resourceSupplier, getQuery(configMgr));
+				SadlRunQueryHandler delegate = handlerProvider.get();
+				delegate.setGraphVisualizerHandler(new SadlEclipseGraphVisualizerHandler(RunQuery.this, currentProject, targetFile));
+				delegate.run(trgtFile.getLocation().toFile().toPath(), resourceSupplier, getQuery(configMgr));
 			}
 			else {
 				throw new TranslationException("Please select a target for querying");
@@ -338,26 +326,6 @@ public class RunQuery extends SadlActionHandler {
 	protected String[] getValidTargetFileTypes() {
 		String[] types = {"sadl","owl"};
 		return types;
-	}
-	
-	private class DelegatingQueryHandler extends SadlRunQueryHandler {
-		
-		final SadlRunQueryHandler delegate;		
-
-		public void run(Path path, Supplier<XtextResource> resourceSupplier, String query) {
-			delegate.run(path, resourceSupplier, query);
-		}
-
-		public void run(Path path, Supplier<XtextResource> resourceSupplier, String query,
-				Map<String, String> properties) {
-			delegate.run(path, resourceSupplier, query, properties);
-		}
-
-		private DelegatingQueryHandler(SadlRunQueryHandler delegate) {
-			this.delegate = delegate;
-		}
-
-		
 	}
 
 }
