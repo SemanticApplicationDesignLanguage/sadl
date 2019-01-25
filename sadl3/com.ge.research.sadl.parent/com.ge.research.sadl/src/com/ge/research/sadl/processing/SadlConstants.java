@@ -3,6 +3,7 @@ package com.ge.research.sadl.processing;
 public class SadlConstants {
 	public static final String SADL_BASE_MODEL_FILENAME = "SadlBaseModel";
 	public static final String SADL_BASE_MODEL_URI = "http://sadl.org/sadlbasemodel";
+	public static final String SADL_BASW_MODEL_SYNTHETIC_URI = "synthetic://test/SadlBaseModel.owl";
 	public static final String SADL_BASE_MODEL_PREFIX = "sadlbasemodel";
 	public static final String SADL_BASE_MODEL_EQUATION_URI = SADL_BASE_MODEL_URI + "#Equation";
 	public static final String SADL_BASE_MODEL_EQ_EXPRESSION_URI = SADL_BASE_MODEL_URI + "#expression";

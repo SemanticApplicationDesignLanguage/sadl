@@ -36,11 +36,6 @@ class SadlQualifiedNameProvider implements IQualifiedNameProvider {
 
 	override getFullyQualifiedName(EObject obj) {
 		if (obj instanceof SadlModel) {
-			// TODO: We need a baseUri
-			// TODO: Check the XML error
-			if (obj.eResource.URI.toString == 'platform:/resource/eee/OwlModels/SadlBaseModel.owl') {
-				return QualifiedName.create('SadlBaseModel.owl');
-			}
 			Preconditions.checkNotNull(obj.baseUri, '''Base URI was null for SADL model in resource: «obj.eResource.URI».''');
 			return QualifiedName.create(obj.baseUri)
 		}

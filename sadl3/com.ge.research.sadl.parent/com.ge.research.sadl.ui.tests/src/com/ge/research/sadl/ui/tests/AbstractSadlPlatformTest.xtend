@@ -175,7 +175,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	protected def void deleteProjects() {
 		projects.forEach[
 			try {
-				delete(true, monitor);				
+				delete(true, monitor);
 			} catch (Exception e) {
 				println('''Error while trying to delete test project: «it».''');
 				e.printStackTrace;

@@ -29,10 +29,14 @@ import com.ge.research.sadl.ide.external.SadlIdeExternalEmfResourcePredicate
 import com.ge.research.sadl.ide.lsp.^extension.ISadlLanguageServerExtension
 import com.ge.research.sadl.ide.lsp.^extension.SadlLanguageServerExtension
 import com.ge.research.sadl.ide.preferences.SadlIdePreferenceValuesProvider
+import com.ge.research.sadl.ide.scoping.SadlIdeGlobalScopeProviderFilterProvider
+import com.ge.research.sadl.ide.utils.SadIdelBaseModelHelper
 import com.ge.research.sadl.ide.utils.SadlIdeProjectHelper
 import com.ge.research.sadl.ide.validator.SadlIdeResourceValidator
 import com.ge.research.sadl.model.SadlEObjectDocumentationProvider.DocumentationUtils
 import com.ge.research.sadl.model.SadlEObjectDocumentationProvider.Markdown
+import com.ge.research.sadl.scoping.GlobalScopeProviderFilterProvider
+import com.ge.research.sadl.utils.SadlBaseModelHelper
 import com.ge.research.sadl.utils.SadlConsole
 import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.inject.Binder
@@ -46,8 +50,6 @@ import org.eclipse.xtext.ide.server.ILanguageServerExtension
 import org.eclipse.xtext.ide.server.coloring.IColoringService
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.validation.ResourceValidatorImpl
-import com.ge.research.sadl.scoping.GlobalScopeProviderFilterProvider
-import com.ge.research.sadl.ide.scoping.SadlIdeGlobalScopeProviderFilterProvider
 
 /**
  * Use this class to register generic IDE components.
@@ -101,13 +103,17 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 	def Class<? extends ContentAssistContextFactory> bindContentAssistContextFactory() {
 		return SadlContentAssistContextFactory;
 	}
-	
+
 	def Class<? extends DocumentationUtils> bindDocumentationUtils() {
 		return Markdown;
 	}
-	
+
 	def Class<? extends GlobalScopeProviderFilterProvider> bindGlobalScopeProviderFilterProvider() {
 		return SadlIdeGlobalScopeProviderFilterProvider;
+	}
+
+	def Class<? extends SadlBaseModelHelper> bindSadlBaseModelHelper() {
+		return SadIdelBaseModelHelper;
 	}
 
 }

@@ -19,7 +19,7 @@
  *
  ***********************************************************************/
 package com.ge.research.sadl.scoping
-
+import static com.ge.research.sadl.processing.SadlConstants.SADL_BASE_MODEL_URI
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.reasoner.IReasoner
 import com.ge.research.sadl.sADL.BinaryOperation
@@ -74,6 +74,7 @@ import static com.ge.research.sadl.processing.SadlConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension com.ge.research.sadl.utils.SadlASTUtils.*
+import com.ge.research.sadl.utils.SadlBaseModelHelper
 
 /**
  * This class contains custom scoping description.
@@ -90,9 +91,10 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 
 	/**
 	 * Mapping of implicit/built-in resource file name and the corresponding model URIs.
-	 */	
+	 */
 	static val IMPLICIT_MODELS = ImmutableMap.of(SADL_IMPLICIT_MODEL_FILENAME, SADL_IMPLICIT_MODEL_URI,
-		SADL_BUILTIN_FUNCTIONS_FILENAME, IReasoner.SADL_BUILTIN_FUNCTIONS_URI);
+		SADL_BUILTIN_FUNCTIONS_FILENAME, IReasoner.SADL_BUILTIN_FUNCTIONS_URI, SadlBaseModelHelper.SADL_BASE_MODEL,
+		SADL_BASE_MODEL_URI);
 
 	@Inject protected extension DeclarationExtensions
 	@Inject protected IQualifiedNameConverter converter

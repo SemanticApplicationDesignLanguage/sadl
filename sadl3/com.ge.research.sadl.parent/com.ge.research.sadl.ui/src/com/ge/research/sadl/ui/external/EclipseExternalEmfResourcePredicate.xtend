@@ -18,12 +18,14 @@
 package com.ge.research.sadl.ui.external
 
 import com.ge.research.sadl.external.ExternalEmfResourcePredicate
+import com.ge.research.sadl.utils.SadlBaseModelHelper
 import com.google.common.base.Preconditions
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import org.eclipse.core.resources.IFile
 import org.eclipse.core.resources.IResource
 import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.emf.common.util.URI
-import com.google.inject.Singleton
 
 /**
  * External EMF resource that uses the Eclipse workspace.
@@ -32,6 +34,9 @@ import com.google.inject.Singleton
  */
 @Singleton
 class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.Default {
+	
+	@Inject
+	SadlBaseModelHelper baseModelHelper;
 
 	override apply(URI it) {
 		Preconditions.checkArgument(platformResource, '''Implementation error. Expected a `file` URI. Was: «it»''');
@@ -48,14 +53,10 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 		}
 		// We consider SadlBaseModel.owl files in the OwlModels folder as external resources.
 		// No need to validate the file location based on the external model definition file (*.url) names.
-		// Segment count `4` comes from: platform:/resource/PROJECT_NAME/OwlModels/SadlBaseModel
-		if (platform && segmentCount === 4) {
-			val segments = segments;
-			if ('resource' == segments.get(0) && project.name == segments.get(1) && 'OwlModels' == segments.get(2) && 'SadlBaseModel.owl' == segments.get(3)) {
-				return true;
-			}
+		if (baseModelHelper.is(it)) {
+			return true;
 		}
-		
+
 		val externalDefinitions = newArrayList;
 		project.accept([
 			if (it instanceof IFile) {

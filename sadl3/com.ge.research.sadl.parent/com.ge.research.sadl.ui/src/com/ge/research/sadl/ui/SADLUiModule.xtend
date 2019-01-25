@@ -41,7 +41,9 @@ import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
+import com.ge.research.sadl.ui.utils.EclipseSadlBaseModelHelper
 import com.ge.research.sadl.ui.utils.EclipseSadlProjectHelper
+import com.ge.research.sadl.utils.SadlBaseModelHelper
 import com.ge.research.sadl.utils.SadlConsole
 import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.inject.Binder
@@ -72,7 +74,7 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	new(AbstractUIPlugin plugin) {
 		super(plugin);
-		OutputStreamStrategy.SADL.use;
+		OutputStreamStrategy.STD.use;
 	}
 
 	// Registers our own syntax coloring styles.
@@ -163,6 +165,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	def Class<? extends ContentAssistContextFactory> bindContentAssistContextFactory() {
 		return SadlContentAssistContextFactory;
+	}
+
+	def Class<? extends SadlBaseModelHelper> bindSadlBaseModelHelper() {
+		return EclipseSadlBaseModelHelper;
 	}
 
 }

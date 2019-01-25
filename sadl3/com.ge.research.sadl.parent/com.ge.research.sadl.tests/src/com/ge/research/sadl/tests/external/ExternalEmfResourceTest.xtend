@@ -163,7 +163,15 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 			MyHero is an ArtificialAgent.
 		'''.sadl.assertNoErrors;
 	}
-	
+
+	@Test
+	def void testImplicitBaseModelIsAvailable() {
+		'''
+			uri "http://sadl.org/Exploratory.sadl" alias explore.
+			BBN is a type of ^Equation.
+		'''.sadl.assertNoErrors;
+	}
+
 	protected def void assertContents(Resource resource) {
 		val sadlFile = '''
 			uri "http://sadl.org/Tests/External".

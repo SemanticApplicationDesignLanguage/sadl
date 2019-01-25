@@ -19,6 +19,7 @@ package com.ge.research.sadl.tests
 
 import com.ge.research.sadl.external.ExternalEmfResource
 import com.ge.research.sadl.jena.IJenaBasedModelProcessor
+import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.gp.Rule
 import com.ge.research.sadl.model.gp.SadlCommand
@@ -30,6 +31,7 @@ import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.scoping.TestScopeProvider
 import com.ge.research.sadl.tests.helpers.XtendTemplateHelper
+import com.ge.research.sadl.utils.SadlBaseModelHelper
 import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import com.google.inject.Inject
@@ -74,7 +76,7 @@ abstract class AbstractSadlTest {
 	@Accessors(PROTECTED_GETTER)
 	XtextResourceSet currentResourceSet;
 
-	private val Supplier<Void> implicitModelSupplier = Suppliers.memoize [
+	val Supplier<Void> implicitModelSupplier = Suppliers.memoize [
 		val implicitModelUri = URI.createURI(SadlConstants.SADL_IMPLICIT_MODEL_SYNTHETIC_URI);
 		if (!currentResourceSet.resources.map[URI.lastSegment].exists[it == SadlConstants.SADL_IMPLICIT_MODEL_FILENAME]) {
 			val resource = loadResource(implicitModelContentProvider.content, implicitModelUri);
@@ -83,6 +85,11 @@ abstract class AbstractSadlTest {
 		val builtinFunctionsUri = URI.createURI(IReasoner.SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI);
 		if (!currentResourceSet.resources.map[URI.lastSegment].exists[it == SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME]) {
 			val resource = loadResource(SadlTestHelper.SADL_BUILTIN_FUNCTIONS_CONTENT, builtinFunctionsUri);
+			OntModelProvider.find(resource)
+		}
+		val baseModelUri = URI.createURI(SadlConstants.SADL_BASW_MODEL_SYNTHETIC_URI);
+		if (!currentResourceSet.resources.map[URI.lastSegment].exists[it == SadlBaseModelHelper.SADL_BASE_MODEL]) {
+			val resource = loadResource(JenaBasedSadlModelProcessor.getSadlBaseModel(), baseModelUri);
 			OntModelProvider.find(resource)
 		}
 		return null;

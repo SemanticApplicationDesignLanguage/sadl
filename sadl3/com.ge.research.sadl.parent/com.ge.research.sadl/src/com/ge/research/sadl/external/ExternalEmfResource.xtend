@@ -17,12 +17,12 @@
  ***********************************************************************/
 package com.ge.research.sadl.external
 
-import com.ge.research.sadl.builder.ConfigurationManagerForIDE
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.reasoner.ConfigurationManager
 import com.ge.research.sadl.sADL.SADLFactory
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.utils.ResourceManager
+import com.ge.research.sadl.utils.SadlBaseModelHelper
 import com.google.inject.Inject
 import com.google.inject.Injector
 import com.hp.hpl.jena.ontology.AnnotationProperty
@@ -61,6 +61,7 @@ import org.eclipse.xtext.util.internal.Log
 import org.eclipse.xtext.validation.IResourceValidator
 
 import static com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory.*
+import static com.ge.research.sadl.processing.SadlConstants.SADL_BASE_MODEL_URI
 import static org.eclipse.emf.common.util.URI.createURI
 
 @Log
@@ -129,16 +130,10 @@ class ExternalEmfResource extends ResourceImpl {
 		return ontModel;
 	}
 
-	/**
-	 * Returns with the public URI (from the configuration manager) for the URI of the current EMF resource.
-	 */
-	protected def getBaseUri(ConfigurationManagerForIDE configurationManager) {
-		val absoluteFilePath = ResourceManager.toAbsoluteFilePath(URI);
-		val fileUrl = configurationManager.fileNameToFileUrl(absoluteFilePath);
-		return configurationManager.getPublicUriFromActualUrl(fileUrl);
-	}
-
 	private def getBaseUri(OntModel model, String content) {
+		if (sadlBaseModelHelper.is(this.URI)) {
+			return SADL_BASE_MODEL_URI
+		}
 		val baseUri = model.getNsPrefixURI('');
 		if (baseUri === null) {
 			val fileExtension = fileExtension;
@@ -213,6 +208,10 @@ class ExternalEmfResource extends ResourceImpl {
 
 	private def getScopeProvider() {
 		return injector.getInstance(IScopeProvider);
+	}
+
+	private def getSadlBaseModelHelper() {
+		return injector.getInstance(SadlBaseModelHelper);
 	}
 
 	private def getAlias(String ontResourceUri) {
