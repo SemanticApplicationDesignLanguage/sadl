@@ -1661,10 +1661,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (rightTypeCheckInfo != null && !isNumeric(rightTypeCheckInfo) && !isNumericWithImpliedProperty(rightTypeCheckInfo, ((BinaryOperation)expression).getRight())) {
 				getModelProcessor().addTypeCheckingError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getRight());
 			}
-			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
-			ConceptName decimalLiteralConceptName = getModelProcessor().namedNodeToConceptName(tctype);
-			decimalLiteralConceptName.setType(ConceptType.RDFDATATYPE);
-			return new TypeCheckInfo(decimalLiteralConceptName, tctype, this, expression);
+			
+			NamedNode tctype = null;
+			if(binopreturn != null) {
+				tctype = (NamedNode) binopreturn.getTypeCheckType();
+			}else {
+				tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
+			}
+			ConceptName lConceptName = getModelProcessor().namedNodeToConceptName(tctype);
+			lConceptName.setType(ConceptType.RDFDATATYPE);
+			return new TypeCheckInfo(lConceptName, tctype, this, expression);
 		}
 		if (binopreturn != null) {
 			return binopreturn;
@@ -4612,6 +4618,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 					else if ((getModelProcessor().isNumericOperator(operations) || getModelProcessor().canBeNumericOperator(operations)) && 
 						(getModelProcessor().isNumericType(leftConceptName) && getModelProcessor().isNumericType(rightConceptName))) {
+						if(getModelProcessor().isAssignmentOperator(operations)) {
+							if(isInteger(leftConceptName) && isDecimal(rightConceptName)) {
+								return false;
+							}
+						}
 						return true;
 					}
 					else if (leftConceptName.getType() == null || rightConceptName.getType() == null) {

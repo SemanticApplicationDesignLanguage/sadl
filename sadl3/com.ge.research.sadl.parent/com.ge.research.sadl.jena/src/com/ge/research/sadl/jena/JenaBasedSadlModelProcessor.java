@@ -298,6 +298,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private List<String> numericOperators = Arrays.asList("*", "+", "/", "-", "%", "^");
 	private List<String> numericComparisonOperators = Arrays.asList(">=", ">", "<=", "<");
 	private List<String> equalityInequalityComparisonOperators = Arrays.asList("==", "!=", "is", "=");
+	private List<String> mAssignmentOperators = Arrays.asList("is","=");
 	private List<String> canBeNumericOperators = Arrays.asList(">=", ">", "<=", "<", "==", "!=", "is", "=");
 
 	public enum OPERATORS_RETURNING_BOOLEAN {
@@ -11819,6 +11820,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
+	public boolean isAssignmentOperator(List<String> aOperators) {
+		for(String lOperator : aOperators) {
+			if(isAssignmentOperator(lOperator)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isAssignmentOperator(String aOperator) {
+		return mAssignmentOperators.contains(aOperator);
+	}
+	
 	public boolean isNumericComparisonOperator(String operation) {
 		if (numericComparisonOperators.contains(operation)) {
 			return true;
