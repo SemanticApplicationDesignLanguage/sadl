@@ -9345,6 +9345,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if(lRange.equals(aRangeNode)) {
 				return;
 			}
+			
+			if(ignoreUnittedQuantities) {
+				if(lRange.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && 
+						(aRangeNode.canAs(OntResource.class) && aRangeNode.as(OntResource.class).getURI().equals(XSD.decimal.getURI()))) {
+					return;
+				}
+				if(lRange.getURI().equals(XSD.decimal.getURI()) && 
+						(aRangeNode.canAs(OntResource.class) && aRangeNode.as(OntResource.class).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI))) {
+					return;
+				}
+			}
 			//If not list types, is new restriction a sub-type of original restriction?
 			try {
 				if(!isTypedListSubclass(lRange) && !isTypedListSubclass(aRangeNode)) {
