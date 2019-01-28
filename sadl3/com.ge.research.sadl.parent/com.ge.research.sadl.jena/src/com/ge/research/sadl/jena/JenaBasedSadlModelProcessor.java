@@ -2762,6 +2762,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		EList<SadlParameterDeclaration> params = element.getParameter();
 		EList<SadlReturnDeclaration> rtype = element.getReturnType();
 		Expression bdy = element.getBody();
+		if (bdy == null) {
+			addError("Equation body can't be empty", element);
+			return;
+		}
 		Expression retVal = element.getRetval();
 		Expression whrExpr = element.getWhere();
 		Equation eq = createEquation(element, nm, rtype, params, bdy, retVal, whrExpr);
@@ -11213,20 +11217,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		sb.append(
 				"	    <rdfs:comment xml:lang=\"en\">Base model for SADL. These concepts can be used without importing.</rdfs:comment>\n");
 		sb.append("	  </owl:Ontology>\n");
-		sb.append("	  <owl:Class rdf:ID=\"Equation\"/>\n");
-		sb.append("	  <owl:Class rdf:ID=\"ExternalEquation\"/>\n");
-		sb.append("	  <owl:DatatypeProperty rdf:ID=\"expression\">\n");
-		sb.append("	    <rdfs:domain rdf:resource=\"#Equation\"/>\n");
-		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
-		sb.append("	  </owl:DatatypeProperty>\n");
-		sb.append("	  <owl:DatatypeProperty rdf:ID=\"externalURI\">\n");
-		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
-		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#anyURI\"/>\n");
-		sb.append("	  </owl:DatatypeProperty>\n");
-		sb.append("	  <owl:DatatypeProperty rdf:ID=\"location\">\n");
-		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
-		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
-		sb.append("	  </owl:DatatypeProperty>\n");
+//		sb.append("	  <owl:Class rdf:ID=\"Equation\"/>\n");
+//		sb.append("	  <owl:Class rdf:ID=\"ExternalEquation\"/>\n");
+//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"expression\">\n");
+//		sb.append("	    <rdfs:domain rdf:resource=\"#Equation\"/>\n");
+//		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
+//		sb.append("	  </owl:DatatypeProperty>\n");
+//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"externalURI\">\n");
+//		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
+//		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#anyURI\"/>\n");
+//		sb.append("	  </owl:DatatypeProperty>\n");
+//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"location\">\n");
+//		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
+//		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
+//		sb.append("	  </owl:DatatypeProperty>\n");
 		sb.append("</rdf:RDF>\n");
 		return sb.toString();
 	}

@@ -560,6 +560,9 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				if (ch == '-') {
 					return true;
 				}
+				if (ch == ';') {
+					return true;
+				}
 			}		
 		}
 		return false;
