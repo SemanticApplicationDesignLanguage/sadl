@@ -1009,11 +1009,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)) {
 				addSadlBaseModelImportToJenaModel(resource);
 			}
-			// Add the SadlImplicitModel to everything except itself and the
-			// SadlBuilinFunctions
+			// Add the SadlImplicitModel to everything except itself
+			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)) {
+				addImplicitSadlModelImportToJenaModel(resource, context);
+
+			}
+			// Add the SadlBuilinFunctions to everything except itself and the SadlImplicitModel
 			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)
 					&& !resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
-				addImplicitSadlModelImportToJenaModel(resource, context);
 				addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
 
 			}
@@ -2771,13 +2774,60 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Equation eq = createEquation(element, nm, rtype, params, bdy, retVal, whrExpr);
 		addEquation(element.eResource(), eq, nm);
 		Individual eqinst = getTheJenaModel().createIndividual(getDeclarationExtensions().getConceptUri(nm),
-				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EQUATION_URI));
-		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EQ_EXPRESSION_URI);
-		Literal literal = getTheJenaModel().createTypedLiteral(eq.toString());
-		if (eqinst != null && dtp != null) {
-			// these can be null during clean/build with resource open in editor
-			eqinst.addProperty(dtp, literal);
+				getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI));
+		if (eqinst != null) {
+			addEquationPropertiesToJenaModel(nm, eq, eqinst);
 		}
+	}
+
+	private void addEquationPropertiesToJenaModel(SadlResource nm, Equation eq, Individual eqinst) {
+		// add the expression, if any
+		String expr = eq.toString();
+		if (expr != null && expr.length() > 0) {
+			Literal literal = getTheJenaModel().createTypedLiteral(expr);
+			DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXPRESSTION_PROPERTY_URI);
+			if (dtp != null) {
+				// these can be null during clean/build with resource open in editor
+				eqinst.addProperty(dtp, literal);
+			}
+		}
+		
+		// add the signature
+		List<Node> args = eq.getArguments();
+		List<Node> argTypes = eq.getArgumentTypes();
+		if (args != null && args.size() > 0) {
+			OntClass argcls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENT_CLASS_URI);
+			ObjectProperty argsProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI);
+			DatatypeProperty nameProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI);
+			DatatypeProperty typeProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI);
+			List<Individual> argInstances = new ArrayList<Individual>();
+			for (int i = 0; i < args.size(); i++) {
+				Individual arginst = getTheJenaModel().createIndividual(argcls);
+				argInstances.add(arginst);
+				arginst.addProperty(nameProp, args.get(i).getName());
+				arginst.addProperty(typeProp, argTypes.get(i).getURI());
+			}
+			RDFList argInstList = getTheJenaModel().createList(argInstances.iterator());
+			eqinst.addProperty(argsProp, argInstList);
+		}
+		List<Node> rettypes = eq.getReturnTypes();
+		if (rettypes != null && rettypes.size() > 0) {
+			Literal[] retTypeLits = new Literal[rettypes.size()];
+			int cntr = 0;
+			for (int i = 0; i < rettypes.size(); i++) {
+				Node rt = rettypes.get(i);
+				if (rt != null) {
+					retTypeLits[i] = getTheJenaModel().createLiteral(rt.getURI());
+					cntr++;
+				}
+			}
+			if (cntr > 0) {
+				RDFList retTypeList = getTheJenaModel().createList(retTypeLits);
+				ObjectProperty returnTypesProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI);
+				eqinst.addProperty(returnTypesProp, retTypeList);
+			}
+		}
+		// add annotations
 		EList<SadlAnnotation> anns = nm.getAnnotations();
 		if (anns != null) {
 			addAnnotationsToResource(eqinst, anns);
@@ -2917,18 +2967,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Equation eq = createExternalEquation(nm, uri, rtype, params, location, whrExpr);
 		addEquation(element.eResource(), eq, nm);
 		Individual eqinst = getTheJenaModel().createIndividual(getDeclarationExtensions().getConceptUri(nm),
-				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EXTERNAL_URI));
-		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_URI);
-		Literal literal = uri != null ? getTheJenaModel().createTypedLiteral(uri) : null;
-		if (eqinst != null && dtp != null && literal != null) {
-			// these can be null if a resource is open in the editor and a clean/build is
-			// performed
-			eqinst.addProperty(dtp, literal);
-			if (location != null && location.length() > 0) {
-				DatatypeProperty dtp2 = getTheJenaModel()
-						.getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_LOCATIOIN);
-				Literal literal2 = getTheJenaModel().createTypedLiteral(location);
-				eqinst.addProperty(dtp2, literal2);
+				getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI));
+		if (eqinst != null) {
+			addEquationPropertiesToJenaModel(nm, eq, eqinst);
+			DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNALURL_PROPERTY_URI);
+			Literal literal = uri != null ? getTheJenaModel().createTypedLiteral(uri) : null;
+			if (eqinst != null && dtp != null && literal != null) {
+				// these can be null if a resource is open in the editor and a clean/build is
+				// performed
+				eqinst.addProperty(dtp, literal);
+				if (location != null && location.length() > 0) {
+					DatatypeProperty dtp2 = getTheJenaModel()
+							.getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_LOCATION_PROPERTY_URI);
+					Literal literal2 = getTheJenaModel().createTypedLiteral(location);
+					eqinst.addProperty(dtp2, literal2);
+				}
 			}
 		}
 	}

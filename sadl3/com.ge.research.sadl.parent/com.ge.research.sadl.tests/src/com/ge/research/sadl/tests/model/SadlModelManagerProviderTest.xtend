@@ -141,13 +141,19 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
+//			jenaModel.write(System.out)
+//			val smitr =  jenaModel.listSubModels
+//			while (smitr.hasNext) {
+//				smitr.next.write(System.out)
+//			}
+			
 			assertTrue(issues.size == 0)
 			var itr = jenaModel.listClasses().toIterable().iterator
 			var found = false
 			// some weird garbage values at the end of itr causing null pointer
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt.localName.equals("Foo")) {
+				if (nxt.isURIResource && nxt.localName.equals("Foo")) {
 					found = true;
 				}
 			}	
@@ -166,10 +172,12 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			var found = 0
 			while (itr.hasNext()) {
 				val nxt = itr.next
-				if (nxt.localName.equals("Spring")) found++
-				if (nxt.localName.equals("Summer")) found++
-				if (nxt.localName.equals("Fall")) found++
-				if (nxt.localName.equals("Winter")) found++
+				if (nxt.URIResource) {
+					if (nxt.localName.equals("Spring")) found++
+					if (nxt.localName.equals("Summer")) found++
+					if (nxt.localName.equals("Fall")) found++
+					if (nxt.localName.equals("Winter")) found++
+				}
 			}
 			assertTrue(found == 4);
 		]
@@ -193,7 +201,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			// some weird garbage values at the end of itr causing null pointer
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt.localName.equals("Shape")) {
+				if (nxt.URIResource && nxt.localName.equals("Shape")) {
 					found = true;
 				}
 			}	
@@ -214,7 +222,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			var found = false
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt.localName.equals("Shape")) {
+				if (nxt.URIResource && nxt.localName.equals("Shape")) {
 					found = true;
 				}
 			}	
@@ -226,7 +234,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			found = false;
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt.localName.equals("int")) {
+				if (nxt.URIResource && nxt.localName.equals("int")) {
 					found = true;
 				}
 			}	
@@ -309,7 +317,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			var found = false
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt.localName.equals("MyClass")) {
+				if (nxt.URIResource && nxt.localName.equals("MyClass")) {
 					found = true;
 				}
 			}	
@@ -339,7 +347,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			var found = false
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt.localName.equals("Food")) {
+				if (nxt.URIResource && nxt.localName.equals("Food")) {
 					found = true;
 				}
 			}
@@ -366,7 +374,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			while (itr.hasNext()) {
 				val nxt = itr.next;
 				if (nxt !== null && nxt.isURIResource) {
-					if (nxt.localName.equals("Refreshment")) {
+					if (nxt.isURIResource && nxt.localName.equals("Refreshment")) {
 						found = true;
 						var sciter = nxt.listSuperClasses(true);
 						while (sciter.hasNext()) {
@@ -402,7 +410,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			while (itr.hasNext()) {
 				val nxt = itr.next;
 				if (nxt !== null && nxt.isURIResource) {
-					if (nxt.localName.equals("Parent")) {
+					if (nxt.isURIResource && nxt.localName.equals("Parent")) {
 						found = true;
 						var sciter = nxt.listSuperClasses(true);
 						while (sciter.hasNext()) {
@@ -442,7 +450,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			while (itr.hasNext()) {
 				val nxt = itr.next;
 				if (nxt !== null && nxt.isURIResource) {
-					if (nxt.localName.equals("PotableLiquid")) {
+					if (nxt.isURIResource && nxt.localName.equals("PotableLiquid")) {
 						found = true;
 						var sciter = nxt.listSuperClasses(true);
 						while (sciter.hasNext()) {
@@ -667,7 +675,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			var found = false
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt.localName.equals("prop1")) {
+				if (nxt.isURIResource && nxt.localName.equals("prop1")) {
 					found = true;
 				}
 			}
@@ -1060,7 +1068,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			var found = false
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt.localName.equals("MyFoo")) {
+				if (nxt.isURIResource && nxt.localName.equals("MyFoo")) {
 					found = true;
 				}
 			}	
@@ -1080,7 +1088,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			var found = false
 			while (itr.hasNext()) {
 				val nxt = itr.next;
-				if (nxt.localName.equals("annprop")) {
+				if (nxt.isURIResource && nxt.localName.equals("annprop")) {
 					found = true;
 				}
 			}	
