@@ -17,9 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.model
 
-import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
 import com.ge.research.sadl.processing.SadlConstants
-import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.ge.research.sadl.reasoner.ConfigurationManager
 import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
@@ -33,15 +31,8 @@ import com.hp.hpl.jena.vocabulary.OWL
 import com.hp.hpl.jena.vocabulary.RDF
 import com.hp.hpl.jena.vocabulary.XSD
 import java.util.ArrayList
-import java.util.List
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.util.CancelIndicator
-import org.eclipse.xtext.validation.CheckMode
-import org.eclipse.xtext.validation.Issue
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
