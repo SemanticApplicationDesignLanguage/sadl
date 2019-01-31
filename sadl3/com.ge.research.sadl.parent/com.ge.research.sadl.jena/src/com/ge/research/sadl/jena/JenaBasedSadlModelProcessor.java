@@ -2793,38 +2793,45 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		
 		// add the signature
+		boolean equationModelFound = true;
 		List<Node> args = eq.getArguments();
 		List<Node> argTypes = eq.getArgumentTypes();
-		if (args != null && args.size() > 0) {
-			OntClass argcls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENT_CLASS_URI);
-			ObjectProperty argsProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI);
-			DatatypeProperty nameProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI);
-			DatatypeProperty typeProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI);
-			List<Individual> argInstances = new ArrayList<Individual>();
-			for (int i = 0; i < args.size(); i++) {
-				Individual arginst = getTheJenaModel().createIndividual(argcls);
-				argInstances.add(arginst);
-				arginst.addProperty(nameProp, args.get(i).getName());
-				arginst.addProperty(typeProp, argTypes.get(i).getURI());
-			}
-			RDFList argInstList = getTheJenaModel().createList(argInstances.iterator());
-			eqinst.addProperty(argsProp, argInstList);
+		OntClass argcls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENT_CLASS_URI);
+		ObjectProperty argsProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI);
+		if (argcls == null || argsProp == null) {
+			addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
+			equationModelFound = false;
 		}
-		List<Node> rettypes = eq.getReturnTypes();
-		if (rettypes != null && rettypes.size() > 0) {
-			Literal[] retTypeLits = new Literal[rettypes.size()];
-			int cntr = 0;
-			for (int i = 0; i < rettypes.size(); i++) {
-				Node rt = rettypes.get(i);
-				if (rt != null) {
-					retTypeLits[i] = getTheJenaModel().createLiteral(rt.getURI());
-					cntr++;
+		if (equationModelFound) {
+			if (args != null && args.size() > 0) {
+				DatatypeProperty nameProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI);
+				DatatypeProperty typeProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI);
+				List<Individual> argInstances = new ArrayList<Individual>();
+				for (int i = 0; i < args.size(); i++) {
+					Individual arginst = getTheJenaModel().createIndividual(argcls);
+					argInstances.add(arginst);
+					arginst.addProperty(nameProp, args.get(i).getName());
+					arginst.addProperty(typeProp, argTypes.get(i).getURI());
 				}
+				RDFList argInstList = getTheJenaModel().createList(argInstances.iterator());
+				eqinst.addProperty(argsProp, argInstList);
 			}
-			if (cntr > 0) {
-				RDFList retTypeList = getTheJenaModel().createList(retTypeLits);
-				ObjectProperty returnTypesProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI);
-				eqinst.addProperty(returnTypesProp, retTypeList);
+			List<Node> rettypes = eq.getReturnTypes();
+			if (rettypes != null && rettypes.size() > 0) {
+				Literal[] retTypeLits = new Literal[rettypes.size()];
+				int cntr = 0;
+				for (int i = 0; i < rettypes.size(); i++) {
+					Node rt = rettypes.get(i);
+					if (rt != null) {
+						retTypeLits[i] = getTheJenaModel().createLiteral(rt.getURI());
+						cntr++;
+					}
+				}
+				if (cntr > 0) {
+					RDFList retTypeList = getTheJenaModel().createList(retTypeLits);
+					ObjectProperty returnTypesProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI);
+					eqinst.addProperty(returnTypesProp, retTypeList);
+				}
 			}
 		}
 		// add annotations
@@ -9096,6 +9103,46 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						throw new JenaProcessorException(
 								"unhandled value type SadlResource that isn't an instance (URI is '" + uri + "')");
 					}
+				} else if (val instanceof SadlValueList) {
+					// EList<SadlExplicitValue> vals = ((SadlValueList)val).getExplicitValues();
+					// convert to SADL Typed List
+					try {
+						String typstr = getModelValidator().getType(val).getTypeCheckType().getURI();
+						OntClass lstcls = getOrCreateListSubclass(null, typstr, prop.eResource(), null, (SadlValueList) val);
+						Individual lval = getTheJenaModel().createIndividual(lstcls);
+						addListValues(lval, lstcls, (SadlValueList) val);
+						addInstancePropertyValue(inst, oprop, lval, val);
+						RDFNode nv = inst.getPropertyValue(oprop);
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (URISyntaxException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (DontTypeCheckException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidTypeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (PropertyWithoutRangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+//					addListValues(inst, cls, (SadlValueList) val);  // This was replaced by the code above because the
+																	// list is the value of a triple, not elements of the subject (inst)
 				} else if (val instanceof SadlExplicitValue) {
 					OntResource rng = oprop.getRange();
 					if (val instanceof SadlNumberLiteral && ((SadlNumberLiteral) val).getUnit() != null) {
@@ -9130,26 +9177,99 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							addError("A SadlExplicitValue is given to an ObjectProperty", val);
 						}
 					}
-				} else if (val instanceof SadlValueList) {
-					// EList<SadlExplicitValue> vals = ((SadlValueList)val).getExplicitValues();
-					addListValues(inst, cls, (SadlValueList) val);
 				} else {
 					throw new JenaProcessorException("unhandled value type for object property");
 				}
 			}
 		} else if (type.equals(OntConceptType.DATATYPE_PROPERTY)) {
-			DatatypeProperty dprop = getTheJenaModel().getDatatypeProperty(propuri);
-			if (dprop == null) {
+			OntProperty oprop = getTheJenaModel().getDatatypeProperty(propuri);
+			if (oprop == null) {
+				// maybe this is actually a list range, which means it's really an ObjectProperty
+				oprop = getTheJenaModel().getObjectProperty(propuri);
+				if (oprop != null) {
+					try {
+						TypeCheckInfo ptci = getModelValidator().getType(prop);
+						if (!ptci.isList()) {
+							addError("Something is wrong with this property; there is confusion about its type", prop);
+						}
+					} catch (DontTypeCheckException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (URISyntaxException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidTypeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (PropertyWithoutRangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			if (oprop == null) {
 //				dumpModel(getTheJenaModel());
 				addError(SadlErrorMessages.PROPERTY_NOT_EXIST.get(propuri), prop);
 			} else {
 				if (val instanceof SadlValueList) {
 					// EList<SadlExplicitValue> vals = ((SadlValueList)val).getExplicitValues();
-					addListValues(inst, cls, (SadlValueList) val);
+					// convert to SADL Typed List
+					String typstr;
+					try {
+						typstr = getModelValidator().getType(val).getTypeCheckType().getURI();
+						OntClass lstcls = getOrCreateListSubclass(null, typstr, prop.eResource(), null, (SadlValueList) val);
+						Individual lval = getTheJenaModel().createIndividual(lstcls);
+						addListValues(lval, lstcls, (SadlValueList) val);
+						addInstancePropertyValue(inst, oprop, lval, val);
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (URISyntaxException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (DontTypeCheckException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidTypeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (PropertyWithoutRangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+//					addListValues(inst, cls, (SadlValueList) val);	// This was replaced by the code above because the
+																	// list is the value of a triple, not elements of the subject (inst)
 				} else if (val instanceof SadlExplicitValue) {
-					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, dprop.getRange());
+					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, oprop.getRange());
 					if (lval != null) {
-						addInstancePropertyValue(inst, dprop, lval, val);
+						addInstancePropertyValue(inst, oprop, lval, val);
 					}
 				} else {
 					addError("Invalid value (" + val.getClass().getCanonicalName() + ") for data property", val);
@@ -12555,4 +12675,26 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private void setTypeCheckingRangeRequired(boolean typeCheckingRangeRequired) {
 		this.typeCheckingRangeRequired = typeCheckingRangeRequired;
 	}
+	
+	/**
+	 * Method to get the length of an instance of a SADL typed list.
+	 * @param stl -- an instance of a SADL typed list
+	 * @return -- number of elements in the list else 0 if stl is not a SADL typed list
+	 */
+	public int getSadlTypedListLength(com.hp.hpl.jena.rdf.model.Resource stl) {
+		Property fprop = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
+		Property rprop = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI);
+		int cnt = 0;
+		com.hp.hpl.jena.rdf.model.Resource lst = stl;
+		while (lst != null) {
+			if (lst.getProperty(fprop) != null) {
+				cnt++;
+				Statement nxt = lst.getProperty(rprop);
+				lst = (nxt != null) ? nxt.getObject().asResource() : null;
+			}
+		}
+		return cnt;
+	}
+
+	
 }

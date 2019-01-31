@@ -67,6 +67,7 @@ import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf;
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
 import com.ge.research.sadl.sADL.SadlConstantLiteral;
 import com.ge.research.sadl.sADL.SadlDataType;
+import com.ge.research.sadl.sADL.SadlExplicitValue;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlModel;
@@ -1438,6 +1439,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			ConceptName declarationConceptName = new ConceptName("TODO");
 			returnedTci =  new TypeCheckInfo(declarationConceptName, null, this, expression);
+		}
+		else if (expression instanceof SadlValueList) {
+			EList<SadlExplicitValue> vals = ((SadlValueList)expression).getExplicitValues();
+			if (vals != null) {
+				if (vals.size() > 0) {
+					TypeCheckInfo svltci = null;
+					for (int i = 0; i < vals.size(); i++) {
+						SadlExplicitValue val = vals.get(i);
+						TypeCheckInfo rttci = getType(val);
+						if (i == 0) {
+							svltci = rttci;
+						}
+						else if (!svltci.getTypeCheckType().equals(rttci.getTypeCheckType()) ) {
+							getModelProcessor().addTypeCheckingError("Not all list values are of the same type", expression);
+						}
+					}		
+					return convertElementOfListToListType(svltci);
+				}
+			}
 		}
 		else if(expression instanceof PropOfSubject){
 			returnedTci =  getType((PropOfSubject)expression);
