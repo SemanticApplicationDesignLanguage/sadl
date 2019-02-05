@@ -2124,6 +2124,9 @@ public class CsvImporter implements ITabularDataImporter {
 									}
 									if (!found || !includesHeader()) {
 										int colNum = convertCharSeqToColumnNumber(varNm);
+										if (colNum < 0) {
+											throw new InvalidNameException("Variable name '" + varNm + "' was not found in header and as a column designation (" + colNum + ") is invalid.");											
+										}
 										if (colNum >= nextLine.length) {
 											throw new InvalidNameException("Variable name '" + varNm + "' was not found in header and as a column designation (" + colNum + ") is larger than the number of columns in the input.");
 										}
