@@ -3226,6 +3226,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if(!ontResource.isURIResource()){
 					if (isSadlTypedList(ontResource) && ontResource.canAs(OntClass.class)) {
 						tci = getSadlTypedListTypeCheckInfo(ontResource.as(OntClass.class), null, reference, null);
+						//Get length for List Literals if they exist
+						int lLength = getModelProcessor().getSadlTypedListLength(individual);
+						if(lLength > 0) {
+							NamedNode lNN = (NamedNode)tci.getTypeCheckType();
+							lNN.setListLength(lLength);
+						}
 					}
 					else {
 						ConceptName declarationConceptName = new ConceptName("TODO");
