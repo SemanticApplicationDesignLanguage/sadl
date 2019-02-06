@@ -12674,49 +12674,26 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		this.typeCheckingRangeRequired = typeCheckingRangeRequired;
 	}
 	
-//	/**
-//<<<<<<< HEAD
-//	 * Method to get the length of an instance of a SADL typed list.
-//	 * @param stl -- an instance of a SADL typed list
-//	 * @return -- number of elements in the list else 0 if stl is not a SADL typed list
-//	 */
-//	public int getSadlTypedListLength(com.hp.hpl.jena.rdf.model.Resource stl) {
-//		Property fprop = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
-//		Property rprop = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI);
-//		int cnt = 0;
-//		com.hp.hpl.jena.rdf.model.Resource lst = stl;
-//		while (lst != null) {
-//			if (lst.getProperty(fprop) != null) {
-//				cnt++;
-//				Statement nxt = lst.getProperty(rprop);
-//				lst = (nxt != null) ? nxt.getObject().asResource() : null;
-//			}
-//		}
-//		return cnt;
-//	}
-//
-//	
-//=======
-//     * Method to get the length of an instance of a SADL typed list.
-//     * @param stl -- an instance of a SADL typed list
-//     * @return -- number of elements in the list else 0 if stl is not a SADL typed list
-//     */
-//     public int getSadlTypedListLength(com.hp.hpl.jena.rdf.model.Resource stl) {
-//            Property fprop = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
-//            Property rprop = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI);
-//            int cnt = 0;
-//            com.hp.hpl.jena.rdf.model.Resource lst = stl;
-//            while (lst != null) {
-//                   if (lst.getProperty(fprop) != null) {
-//                         cnt++;
-//                         Statement nxt = lst.getProperty(rprop);
-//                         lst = (nxt != null) ? nxt.getObject().asResource() : null;
-//                   } else {
-//                	   break;
-//                   }
-//            }
-//            return cnt;
-//     }
-//
-//>>>>>>> development
+	/**
+     * Method to get the length of an instance of a SADL typed list.
+     * @param stl -- an instance of a SADL typed list
+     * @return -- number of elements in the list else 0 if stl is not a SADL typed list
+     */
+     public int getSadlTypedListLength(com.hp.hpl.jena.rdf.model.Resource stl) {
+            Property fprop = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
+            Property rprop = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI);
+            int cnt = 0;
+            com.hp.hpl.jena.rdf.model.Resource lst = stl;
+            while (lst != null) {
+                   if (lst.getProperty(fprop) != null) {
+                         cnt++;
+                         Statement nxt = lst.getProperty(rprop);
+                         lst = (nxt != null) ? nxt.getObject().asResource() : null;
+                   } else {
+                	   break;
+                   }
+            }
+            return cnt;
+     }
+
 }
