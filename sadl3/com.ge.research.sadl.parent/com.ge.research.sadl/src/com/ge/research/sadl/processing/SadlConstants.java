@@ -35,10 +35,10 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#ExternalEquation";
 	public static final String SADL_IMPLICIT_MODEL_EXPRESSTION_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#expression";
 	public static final String SADL_IMPLICIT_MODEL_EXTERNALURL_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#externalURI";
-	public static final String SADL_IMPLICIT_MODEL_LOCATION_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#location";
+	public static final String SADL_IMPLICIT_MODEL_LOCATION_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#externalURL";
 	public static final String SADL_IMPLICIT_MODEL_ARGUMENT_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Argument";
-	public static final String SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#name";
-	public static final String SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#type";
+	public static final String SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#argName";
+	public static final String SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#argTtype";
 	public static final String SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#arguments";
 	public static final String SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#returnTypes";
 	
