@@ -128,8 +128,10 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Replace/replacements"/>
     </genClasses>
     <genClasses ecoreClass="Template.ecore#//Replacement">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Replacement/before"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Replacement/after"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Replacement/beforeIDEXT"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Replacement/beforeLit"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Template.ecore#//Replacement/afterIDEXT"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Replacement/afterLit"/>
     </genClasses>
     <genClasses ecoreClass="Template.ecore#//Group">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Template.ecore#//Group/groupLines"/>

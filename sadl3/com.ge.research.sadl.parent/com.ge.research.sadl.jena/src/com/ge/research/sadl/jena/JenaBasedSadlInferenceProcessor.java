@@ -1265,7 +1265,15 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return mfp.toString();
 	}
 
-	private SadlCommandResult processAdhocQuery(Query cmd) throws ConfigurationException, JenaProcessorException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
+	public SadlCommandResult processAdhocQuery(Resource resource, Query cmd) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
+		setCurrentResource(resource);
+		setTheJenaModel(OntModelProvider.find(resource));
+		setModelFolderPath(getModelFolderPath(resource));
+		setModelName(OntModelProvider.getModelName(resource));
+		return processAdhocQuery(cmd);
+	}
+
+	private SadlCommandResult processAdhocQuery(Query cmd) throws TranslationException, InvalidNameException, ConfigurationException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		String queryString;
 		String query = cmd.getSparqlQueryString();
 		ITranslator translator = null;
@@ -1336,7 +1344,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return reasoner;
 	}
 
-	private Query processQuery(Object qobj) throws JenaProcessorException {
+	private Query processQuery(Object qobj) throws TranslationException {
 		String qstr;
 		if (qobj instanceof com.ge.research.sadl.model.gp.Literal) {
 			qstr = ((com.ge.research.sadl.model.gp.Literal)qobj).getValue().toString();
@@ -1345,7 +1353,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			qstr = qobj.toString();
 		}
 		else {
-			throw new JenaProcessorException("Unexpected query type: " + qobj.getClass().getCanonicalName());
+			throw new TranslationException("Unexpected query type: " + qobj.getClass().getCanonicalName());
 		}
 		Query q = new Query();
 		q.setSparqlQueryString(qstr);
