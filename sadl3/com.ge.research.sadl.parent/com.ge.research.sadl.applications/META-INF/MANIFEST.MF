@@ -10,15 +10,21 @@ Export-Package: com.ge.research.sadl.applications;
    org.eclipse.core.runtime,
    org.eclipse.equinox.app,
    org.eclipse.ui.plugin"
-Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.xtext,
- org.eclipse.ui.workbench,
+Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
- com.ge.research.jena,
+ com.ge.research.sadl.ide,
+ com.ge.research.sadl.jena,
+ com.ge.research.sadl.ui,
  org.eclipse.core.resources,
+ org.eclipse.core.runtime,
+ org.eclipse.ui.workbench,
+ org.eclipse.xtext,
  org.eclipse.xtext.builder
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: com.ge.research.sadl.applications.Activator
-Import-Package: com.ge.research.sadl.jena,
+Import-Package: com.ge.research.sadl.ide.handlers,
+ com.ge.research.sadl.ide.utils,
+ com.ge.research.sadl.jena,
+ com.ge.research.sadl.ui.handlers,
  org.apache.log4j
 Automatic-Module-Name: com.ge.research.sadl.applications
