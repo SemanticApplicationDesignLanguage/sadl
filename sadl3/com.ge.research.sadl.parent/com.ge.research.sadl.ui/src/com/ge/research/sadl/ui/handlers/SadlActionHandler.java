@@ -79,7 +79,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("restriction")
 public abstract class SadlActionHandler extends AbstractHandler {
 
-	private final Logger logger = LoggerFactory.getLogger(SadlActionHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SadlActionHandler.class);
 	private boolean isCanceled = false;
 	@Inject
 	protected IResourceSetProvider resourceSetProvider;
@@ -162,7 +162,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	    		        	}
 	    				}
 	    			} catch (Throwable e) {
-	    				logger.error("Ignoring " + e, e);
+	    				LOGGER.error("Ignoring " + e, e);
 	    			}
 	            }
 	        }
@@ -452,7 +452,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 						}
 					}
 				} catch (IOException e) {
-					logger.error("Ignoring " + e, e);
+					LOGGER.error("Ignoring " + e, e);
 				}
 			}
 		});

@@ -59,7 +59,7 @@ import org.w3c.dom.NodeList;
 public class ExecuteCommand implements IApplication {
 
     // Logger to print what we do
-    private Logger logger = LoggerFactory.getLogger(ExecuteCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExecuteCommand.class);
 
     // Default Configuration file location
     private String configFilePath = "SadlConfiguration.xml";
@@ -155,7 +155,7 @@ public class ExecuteCommand implements IApplication {
         // Create Resources from sadl/sreq files and initiate Direct-Write
         if (inferFlag) {
             if (!importAndBuildSadlProject()) {
-                logger.error("Failure on import and build of SADL Project");
+                LOGGER.error("Failure on import and build of SADL Project");
                 return null;
             }
         }
@@ -163,7 +163,7 @@ public class ExecuteCommand implements IApplication {
         // Invoke SADL RunInference Tool
         if (inferFlag) {
             if (!runInference()) {
-                logger.error("Failure on inference of SADL file");
+                LOGGER.error("Failure on inference of SADL file");
                 return null;
             }
         }
@@ -172,7 +172,7 @@ public class ExecuteCommand implements IApplication {
         restoreEclipsePreferences();
         refreshWorkspace();
 
-        logger.info("SADL Command-Line Interface complete");
+        LOGGER.info("SADL Command-Line Interface complete");
 
         return IApplication.EXIT_OK;
     }
@@ -197,12 +197,12 @@ public class ExecuteCommand implements IApplication {
                         project.delete(true, true, null);
                         break;
                     } catch (CoreException e) {
-                        logger.error(
+                        LOGGER.error(
                                 "Preexisting project could not be deleted from workspace: " + e);
                         return false;
                     }
                 } else {
-                    logger.error(
+                    LOGGER.error(
                             "This project already exists within the workspace; use the \"-force\" flag to overwrite");
                     return false;
                 }
@@ -220,7 +220,7 @@ public class ExecuteCommand implements IApplication {
             }
             copyDirectory(this.importDirectory.toPath(), lNewProjectPath);
         } catch (IOException e) {
-            logger.error("Unable to copy project into workspace: " + e);
+            LOGGER.error("Unable to copy project into workspace: " + e);
             return false;
         }
 
@@ -234,7 +234,7 @@ public class ExecuteCommand implements IApplication {
             project.create(description, null);
             project.open(null);
         } catch (CoreException e) {
-            logger.error("Unable to import project into workspace: " + e);
+            LOGGER.error("Unable to import project into workspace: " + e);
             return false;
         }
 
@@ -256,7 +256,7 @@ public class ExecuteCommand implements IApplication {
         try {
             Files.copy(aSource, aDestination, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            logger.error("Unable to copy file to workspace: " + aSource);
+            LOGGER.error("Unable to copy file to workspace: " + aSource);
         }
     }
 
@@ -271,7 +271,7 @@ public class ExecuteCommand implements IApplication {
                     try {
                         project.open(null);
                     } catch (CoreException e) {
-                        logger.error(
+                        LOGGER.error(
                                 projectName
                                         + " cannot be opened through this interface. Please open project within SADL GUI and execute again.");
                         return false;
@@ -281,7 +281,7 @@ public class ExecuteCommand implements IApplication {
             }
         }
 
-        logger.error(
+        LOGGER.error(
                 "The project that is attempting to be processed is not part of the current workspace. Please set the correct workspace location within the .cmd file.");
         return false;
     }
@@ -291,7 +291,7 @@ public class ExecuteCommand implements IApplication {
             IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
             workspaceRoot.refreshLocal(IResource.DEPTH_INFINITE, null);
         } catch (CoreException e) {
-            logger.error("Error refreshing workspace: " + e);
+            LOGGER.error("Error refreshing workspace: " + e);
         }
         return true;
     }
@@ -306,7 +306,7 @@ public class ExecuteCommand implements IApplication {
         try {
             ep.flush();
         } catch (BackingStoreException e) {
-            logger.error("Error setting Eclipse preferences: " + e);
+            LOGGER.error("Error setting Eclipse preferences: " + e);
         }
     }
 
@@ -318,7 +318,7 @@ public class ExecuteCommand implements IApplication {
         try {
             ep.flush();
         } catch (BackingStoreException e) {
-            logger.error("Error restoring Eclipse preferences: " + e);
+            LOGGER.error("Error restoring Eclipse preferences: " + e);
         }
     }
 
@@ -326,7 +326,7 @@ public class ExecuteCommand implements IApplication {
         // Default location, will be update later to be passed in as argument perhaps
         File configFile = new File(this.configFilePath);
         if (!configFile.exists()) {
-            logger.error("Configuration file " + configFile + " does not exist");
+            LOGGER.error("Configuration file " + configFile + " does not exist");
             return false;
         }
 
@@ -488,7 +488,7 @@ public class ExecuteCommand implements IApplication {
                 }
             }
         } catch (Exception e) {
-            logger.error("Error loading configuration file: " + e);
+            LOGGER.error("Error loading configuration file: " + e);
             return false;
         }
 
@@ -516,11 +516,11 @@ public class ExecuteCommand implements IApplication {
         if (importDirectory != null) {
             this.importDirectory = new File(importDirectory);
             if (!this.importDirectory.isDirectory()) {
-                logger.error("Given directory for -import argument was not valid");
+                LOGGER.error("Given directory for -import argument was not valid");
                 return false;
             }
         } else {
-            logger.error("Argument is missing: -import=[Directory of Project]");
+            LOGGER.error("Argument is missing: -import=[Directory of Project]");
             return false;
         }
 
@@ -531,11 +531,11 @@ public class ExecuteCommand implements IApplication {
         if (runInferenceFilePath != null) {
             this.runInferenceFilePath = runInferenceFilePath;
             if (!new File(this.importDirectory, runInferenceFilePath).canRead()) {
-                logger.error("Given file for -infer argument was not valid");
+                LOGGER.error("Given file for -infer argument was not valid");
                 return false;
             }
         } else {
-            logger.error("Argument is missing: -infer=[File to infer]");
+            LOGGER.error("Argument is missing: -infer=[File to infer]");
             return false;
         }
 
@@ -573,7 +573,7 @@ public class ExecuteCommand implements IApplication {
         preferencesByLanguage.attachToEmfObject(resourceSet);
 
         // build resource sets
-        logger.info("Creating resources in memory");
+        LOGGER.info("Creating resources in memory");
         for (File file : sadlFiles) {
             resourceSet.getResource(URI.createFileURI(file.getAbsolutePath()), true);
         }
@@ -583,7 +583,7 @@ public class ExecuteCommand implements IApplication {
         for (File file : sverFiles) {
             resourceSet.getResource(URI.createFileURI(file.getAbsolutePath()), true);
         }
-        logger.info("Resolving interdependencies between resources");
+        LOGGER.info("Resolving interdependencies between resources");
         EcoreUtil2.resolveAll(resourceSet);
 
         // Direct Write
@@ -637,7 +637,7 @@ public class ExecuteCommand implements IApplication {
             final Supplier<XtextResource> resourceSupplier = () -> sadlResource;
             runInferenceHandler.run(runInferenceFile.toPath(), resourceSupplier, sadlPreferences);
         } catch (Exception e) {
-            logger.error("Error running inference: " + e);
+            LOGGER.error("Error running inference: " + e);
             return false;
         }
 
@@ -662,7 +662,7 @@ public class ExecuteCommand implements IApplication {
             JenaBasedSadlModelProcessor.createBuiltinFunctionImplicitModel(
                     this.importDirectory.getAbsolutePath());
         } catch (Exception e) {
-            logger.error("Error creating SadlBuiltinFunctions.sadl: " + e);
+            LOGGER.error("Error creating SadlBuiltinFunctions.sadl: " + e);
         }
     }
 
@@ -684,7 +684,7 @@ public class ExecuteCommand implements IApplication {
 
     private void directWrite(Resource resource) {
         URI resourceUri = ((XtextResource) resource).getURI();
-        logger.info("Building " + resourceUri);
+        LOGGER.info("Building " + resourceUri);
 
         // Validation
         IResourceValidator validator =

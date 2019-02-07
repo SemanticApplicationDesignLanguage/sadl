@@ -72,22 +72,22 @@ public class SADLCliAppRuntimeModule extends SADLRuntimeModule {
     }
 
     public static class MySadlConsole implements SadlConsole {
-        private Logger logger = LoggerFactory.getLogger(MySadlConsole.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(MySadlConsole.class);
 
         @Override
         public void print(final MessageManager.MessageType type, final String message) {
             switch (type) {
                 case ERROR:
-                    logger.error(message);
+                    LOGGER.error(message);
                     break;
                 case WARN:
-                    logger.warn(message);
+                    LOGGER.warn(message);
                     break;
                 case INFO:
-                    logger.info(message);
+                    LOGGER.info(message);
                     break;
                 default:
-                    logger.debug(message);
+                    LOGGER.debug(message);
                     break;
             }
         }

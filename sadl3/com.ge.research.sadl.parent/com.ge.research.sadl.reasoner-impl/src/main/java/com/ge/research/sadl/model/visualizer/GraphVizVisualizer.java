@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class GraphVizVisualizer implements IGraphVisualizer {
 	
-	private final Logger logger = LoggerFactory.getLogger(GraphVizVisualizer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(GraphVizVisualizer.class);
 	private String tempFolder = null;
 	private String baseFileName = null;
 	private String graphName = null;
@@ -72,7 +72,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			while (mitr.hasNext()) {
 				String key = mitr.next();
 				String val = map.get(key);
-				logger.debug(key + " -> " + val);
+				LOGGER.debug(key + " -> " + val);
 			}
 		}
 		if (exec == null || exec.length() == 0) {
@@ -105,7 +105,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			} catch (IOException e) {
 				throw new IOException("Unable to run GraphViz dot to generate PNG file; is GraphViz path set properly? (" + e.getMessage() + ")");
 			} catch (InterruptedException e) {
-				logger.error("Ignoring " + e, e);
+				LOGGER.error("Ignoring " + e, e);
 			}
 			int cntr = 0;
 			File fto = new File(graphFileToOpen);
@@ -113,7 +113,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				try {
 					Thread.sleep(200);
 				} catch (InterruptedException e) {
-					logger.error("Ignoring " + e, e);
+					LOGGER.error("Ignoring " + e, e);
 				}
 			}
 			if (!fto.exists()) {
