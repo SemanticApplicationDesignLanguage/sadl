@@ -13,9 +13,12 @@ import javax.activation.DataSource;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.hp.hpl.jena.vocabulary.OWL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GraphVizVisualizer implements IGraphVisualizer {
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(GraphVizVisualizer.class);
 	private String tempFolder = null;
 	private String baseFileName = null;
 	private String graphName = null;
@@ -69,7 +72,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			while (mitr.hasNext()) {
 				String key = mitr.next();
 				String val = map.get(key);
-				System.out.println(key + " -> " + val);
+				LOGGER.debug(key + " -> " + val);
 			}
 		}
 		if (exec == null || exec.length() == 0) {
@@ -102,8 +105,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			} catch (IOException e) {
 				throw new IOException("Unable to run GraphViz dot to generate PNG file; is GraphViz path set properly? (" + e.getMessage() + ")");
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				LOGGER.error("Ignoring " + e, e);
 			}
 			int cntr = 0;
 			File fto = new File(graphFileToOpen);
@@ -111,8 +113,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				try {
 					Thread.sleep(200);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Ignoring " + e, e);
 				}
 			}
 			if (!fto.exists()) {
@@ -215,7 +216,6 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		while (rs.hasNext()) {
 			Object[] row = rs.next();
 			String slbl;			// name of start of directed edge
-			String olbl;			// name of end of directed edge
 			Object s;
 			//If this is a single node to be graphed
 			if(row[0] != null && row[1] == null && row[2] == null){
@@ -276,7 +276,6 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 				String objnm = duplicateObjectMap.get(key);
 				if (graphedSubjectMap != null && graphedSubjectMap.containsValue(objnm) && !graphedSubjectMap.containsKey(key)) {
 					// we need to fill out missing branches
-//					System.out.println("need to fill out branch of '" + objnm + "' from specific object node '" + key + "'");
 					rs.first();
 					while (rs.hasNext()) {
 						Object[] row = rs.next();
@@ -291,7 +290,6 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			}
 		}
 		sb.append("}\n");
-//		System.out.println(sb.toString());
 		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
 				((bfn != null ? bfn : "") + ".dot"));
 		new SadlUtils().stringToFile(dotFile, sb.toString(), false);
