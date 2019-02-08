@@ -106,6 +106,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		}
 	}
 	
+	Map<String, Object> privateKeyValueStore = null;	
+	
 	boolean closing = false;
 	private SadlUtils sadlUtils = new SadlUtils();
 	@Inject
@@ -1000,4 +1002,19 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		if (owlFilename.endsWith("n3")) return "N3";
 		return "RDF/XML";
 	}
+	
+	public void addPrivateKeyValuePair(String key, Object value) {
+		if (privateKeyValueStore == null) {
+			privateKeyValueStore = new HashMap<String, Object>();
+		}
+		privateKeyValueStore.put(key, value);
+	}
+	
+	public Object getPrivateKeyValuePair(String key) {
+		if (privateKeyValueStore != null) {
+			return privateKeyValueStore.get(key);
+		}
+		return null;
+	}
+	
 }
