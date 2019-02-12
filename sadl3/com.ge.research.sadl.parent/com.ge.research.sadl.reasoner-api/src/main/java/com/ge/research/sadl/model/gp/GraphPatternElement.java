@@ -29,7 +29,9 @@ import java.util.List;
 public abstract class GraphPatternElement {
 	enum PatternFunction {BindsVariable, UsesBoundVariables}
 	private PatternFunction patternFunction;
-	private Object locationType;
+
+	// editor object for marker addition to editor
+	private Object context;
 	private int lineNo;
 	private int length;
 	private int offset;
@@ -164,22 +166,6 @@ public abstract class GraphPatternElement {
 	}
 
 	/**
-	 * {@link Deprecated}
-	 * @return
-	 */
-	public Object getLocationType() {
-		return locationType;
-	}
-
-	/**
-	 * {@link Deprecated}
-	 * @param locationType
-	 */
-	public void setLocationType(Object locationType) {
-		this.locationType = locationType;
-	}
-	
-	/**
 	 * Get the expanded properties to be used to augment the property chain of this GraphPatternElement
 	 * @return
 	 */
@@ -235,6 +221,14 @@ public abstract class GraphPatternElement {
 		} else if (!expandedPropertiesToBeUsed.equals(other.expandedPropertiesToBeUsed))
 			return false;
 		return true;
+	}
+
+	public Object getContext() {
+		return context;
+	}
+
+	public void setContext(Object context) {
+		this.context = context;
 	}
 	
 	//TODO Remove these functions
