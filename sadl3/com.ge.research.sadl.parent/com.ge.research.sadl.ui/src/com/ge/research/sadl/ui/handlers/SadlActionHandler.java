@@ -474,8 +474,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			IFile trgtfile = ResourceUtil.getFile(rsrc);
 			trgtpath = trgtfile.getLocation().toFile().toPath();
 		}
-		URI absuri = URI.createURI(trgtpath.toUri().toString());
-		String modelFolderUri = ResourceManager.findModelFolderPath(absuri);
+		String modelFolderUri = ResourceManager.findModelFolderPath(trgtpath.toFile().getAbsolutePath());
 		return modelFolderUri;
 	}
 
