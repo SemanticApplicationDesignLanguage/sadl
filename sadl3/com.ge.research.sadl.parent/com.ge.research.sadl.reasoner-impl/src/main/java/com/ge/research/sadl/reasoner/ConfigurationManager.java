@@ -544,6 +544,7 @@ public class ConfigurationManager implements IConfigurationManager {
 				if (translatorClassName == null) {
 					translatorClassName = reasonerInst.getDefaultTranslatorClassName();
 				}
+				clearReasoner();	// this reasoner isn't initialized properly for inference so don't keep it around awc 2/12/2019
 			}
 		}
 		if (translatorClassName == null) {

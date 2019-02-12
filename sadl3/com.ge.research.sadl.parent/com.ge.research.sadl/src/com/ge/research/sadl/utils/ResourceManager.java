@@ -122,6 +122,33 @@ public class ResourceManager {
 	}
 	
 	/**
+	 * Locates and returns with the absolute files system path of the model folder
+	 * for the given URI. Checks the current URI, direct descendants and then
+	 * traverses up.
+	 */
+	public static String findModelFolderPath(String path) {
+		File file = new File(path);
+		// Check self.
+		if (MODEL_FOLDER.apply(file)) {
+			return file.getAbsolutePath();
+		}
+		// Then direct descendants.
+		File[] children = file.listFiles();
+		if (children != null) {
+			for (File child : children) {
+				if (MODEL_FOLDER.apply(child)) {
+					return child.getAbsolutePath();
+				}
+			}
+		}
+		// Traverse up.
+		if (file.getParentFile() != null) {
+			return findModelFolderPath(file.getParent());
+		}
+		return null;
+	}
+	
+	/**
 	 * Returns with the absolute file system path from the EMF URI argument.
 	 * Currently, it handles file and platform resource schemes. 
 	 */

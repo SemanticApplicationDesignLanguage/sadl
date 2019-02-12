@@ -2794,28 +2794,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		
 		// add the signature
-		boolean equationModelFound = true;
 		List<Node> args = eq.getArguments();
 		List<Node> argTypes = eq.getArgumentTypes();
 		OntClass argcls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENT_CLASS_URI);
 		ObjectProperty argsProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI);
 		if (argcls == null || argsProp == null) {
 			addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
-			equationModelFound = false;
 		}
-		if (equationModelFound) {
+		else {
 			if (args != null && args.size() > 0) {
 				DatatypeProperty nameProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI);
 				DatatypeProperty typeProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI);
-				List<Individual> argInstances = new ArrayList<Individual>();
-				for (int i = 0; i < args.size(); i++) {
-					Individual arginst = getTheJenaModel().createIndividual(argcls);
-					argInstances.add(arginst);
-					arginst.addProperty(nameProp, args.get(i).getName());
-					arginst.addProperty(typeProp, argTypes.get(i).getURI());
+				if (nameProp == null || typeProp == null) {
+					addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
 				}
-				RDFList argInstList = getTheJenaModel().createList(argInstances.iterator());
-				eqinst.addProperty(argsProp, argInstList);
+				else {
+					List<Individual> argInstances = new ArrayList<Individual>();
+					for (int i = 0; i < args.size(); i++) {
+						Individual arginst = getTheJenaModel().createIndividual(argcls);
+						argInstances.add(arginst);
+						arginst.addProperty(nameProp, args.get(i).getName());
+						if (argTypes.get(i) == null) {
+							addError("Argument has no type", nm);
+						}
+						else {
+							arginst.addProperty(typeProp, argTypes.get(i).getURI());
+						}
+					}
+					RDFList argInstList = getTheJenaModel().createList(argInstances.iterator());
+					eqinst.addProperty(argsProp, argInstList);
+				}
 			}
 			List<Node> rettypes = eq.getReturnTypes();
 			if (rettypes != null && rettypes.size() > 0) {
@@ -2831,7 +2839,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (cntr > 0) {
 					RDFList retTypeList = getTheJenaModel().createList(retTypeLits);
 					ObjectProperty returnTypesProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI);
-					eqinst.addProperty(returnTypesProp, retTypeList);
+					if (returnTypesProp == null) {
+						addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
+					}
+					else {
+						eqinst.addProperty(returnTypesProp, retTypeList);
+					}
 				}
 			}
 		}

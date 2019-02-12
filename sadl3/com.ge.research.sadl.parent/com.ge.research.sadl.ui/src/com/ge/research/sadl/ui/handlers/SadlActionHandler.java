@@ -48,6 +48,7 @@ import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.ui.editor.utils.EditorUtils;
 import org.eclipse.xtext.ui.resource.IResourceSetProvider;
+import org.eclipse.xtext.ui.util.ResourceUtil;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.eclipse.xtext.validation.CheckMode;
@@ -463,6 +464,20 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		return project.getFullPath().append("Graphs").toPortableString();
 	}
 	
+	public static String getModelFolderFromResource(Resource rsrc) {
+		URI uri = rsrc.getURI();
+		java.nio.file.Path trgtpath;
+		if (uri.isFile()) {
+			trgtpath = new File(rsrc.getURI().toFileString()).toPath();
+		}
+		else {
+			IFile trgtfile = ResourceUtil.getFile(rsrc);
+			trgtpath = trgtfile.getLocation().toFile().toPath();
+		}
+		String modelFolderUri = ResourceManager.findModelFolderPath(trgtpath.toFile().getAbsolutePath());
+		return modelFolderUri;
+	}
+
 	protected void createGraphFromResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
 			String description, ResultSet rs) throws IOException {
 		String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 

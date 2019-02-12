@@ -349,4 +349,18 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 */
 	public abstract OntModel loadOntModel(String owlFilename);
 
+	/**
+	 * Method to persist a private key/value pair at the project scope
+	 * @param key
+	 * @param value
+	 */
+	public abstract void addPrivateKeyValuePair(String key, Object value);
+	
+	/**
+	 * Method to retrieve a private key/value pair by key at the project scope
+	 * @param key
+	 * @return
+	 */
+	public abstract Object getPrivateKeyValuePair(String key);
+
 }
