@@ -1,16 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target includeMode="feature" name="com.ge.research.sadl.target" sequenceNumber="68">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><?pde version="3.8"?><target includeMode="feature" name="com.ge.research.sadl.target" sequenceNumber="68">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.emf.mwe2.launcher.feature.group" version="0.0.0"/>
 <repository location="http://download.eclipse.org/modeling/emft/mwe/updates/releases/2.9.0/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.draw2d.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.jdt.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.pde.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.platform.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/releases/kepler/201402280900/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.apache.xerces" version="0.0.0"/>
@@ -32,5 +24,11 @@
 <unit id="org.eclipse.lsp4j.sdk.feature.group" version="0.4.0.v20180425-1137"/>
 <repository location="http://download.eclipse.org/lsp4j/updates/releases/"/>
 </location>
+	<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+		<unit id="org.eclipse.jdt.feature.group" version="3.14.0.v20180611-0500"/>
+		<unit id="org.eclipse.platform.feature.group" version="4.8.0.v20180611-0656"/>
+		<unit id="org.eclipse.platform.source.feature.group" version="4.8.0.v20180611-0656"/>
+		<repository location="http://download.eclipse.org/releases/photon"/>
+	</location>
 </locations>
 </target>
