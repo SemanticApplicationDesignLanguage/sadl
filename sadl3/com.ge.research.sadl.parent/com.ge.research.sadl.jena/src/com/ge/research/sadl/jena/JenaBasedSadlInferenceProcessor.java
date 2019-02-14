@@ -74,9 +74,17 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.QueryStatement;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
+import com.hp.hpl.jena.datatypes.xsd.XSDDuration;
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
+import com.hp.hpl.jena.rdf.model.InfModel;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor {
@@ -1403,7 +1411,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return null;
 	}
 	
-	private String getModelFolderPath(Resource resource) {
+	protected String getModelFolderPath(Resource resource) {
 		URI v = resource.getURI().trimSegments(resource.getURI().segmentCount() - 2);
 		v = v.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
 		String modelFolderPathname;
@@ -1441,7 +1449,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return currentResource;
 	}
 
-	private void setCurrentResource(Resource currentResource) {
+	protected void setCurrentResource(Resource currentResource) {
 		this.currentResource = currentResource;
 	}
 
@@ -1457,7 +1465,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return modelFolderPath;
 	}
 
-	private void setModelFolderPath(String modelFolderPath) {
+	protected void setModelFolderPath(String modelFolderPath) {
 		this.modelFolderPath = modelFolderPath.replace('\\', '/');
 	}
 
@@ -1468,8 +1476,224 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return modelName;
 	}
 
-	private void setModelName(String modelName) {
+	protected void setModelName(String modelName) {
 		this.modelName = modelName;
+	}
+
+	@Override
+	public Object[] insertTriplesAndQuery(Resource resource, TripleElement[] triples) throws SadlInferenceException {
+		setCurrentResource(resource);
+		setModelFolderPath(getModelFolderPath(resource));
+		setModelName(OntModelProvider.getModelName(resource));
+		setTheJenaModel(OntModelProvider.find(resource));
+		NamedNode commonSubject = null;
+		Individual commonSubjectInst = null;
+		Node subjectType = null;
+		List<TripleElement> insertions = new ArrayList<TripleElement>();
+		List<TripleElement> queryPatterns = new ArrayList<TripleElement>();
+		for (int i = 0; i < triples.length; i++) {
+			TripleElement tr = triples[i];
+			if (tr.getSubject() instanceof NamedNode) {
+				if (tr.getSubject() instanceof VariableNode) {
+					subjectType = ((VariableNode)tr.getSubject()).getType();
+				}
+				if (i == 0) {
+					commonSubject = (NamedNode) tr.getSubject();
+				}
+				else if (commonSubject == null || !(tr.getSubject().equals(commonSubject))) {
+					System.err.println("Not all triples have the same subject. Condition not handled.");
+					break;
+				}
+				if (tr.getPredicate() != null && 
+						tr.getObject() != null) {
+					// this is an assertion; add to model
+					System.out.println("Update model with a " + subjectType.getName() + " "
+							+ tr.getPredicate().getName() + " " 
+							+ tr.getObject().toFullyQualifiedString());
+					insertions.add(tr);
+				}
+				else {
+					// this is the question part
+					String predStr;
+					Node pred = tr.getPredicate();
+					if (pred != null) {
+						predStr = pred.toFullyQualifiedString();
+					}
+					else {
+						predStr = "?p";
+					}
+					String objStr;
+					Node objNode = tr.getObject();
+					if (objNode != null) {
+						objStr = objNode.toFullyQualifiedString();
+					}
+					else {
+						objStr = "?o";
+					}
+					System.out.println("Then ask model, the " + subjectType.getName() + " "
+							+ predStr + " " 
+							+ objStr);
+					queryPatterns.add(tr);
+				}
+			}
+		}
+		if (commonSubject != null) {
+			if (subjectType != null) {
+				OntClass type = getTheJenaModel().getOntClass(subjectType.getURI());
+				if (type != null) {
+					commonSubjectInst = getTheJenaModel().createIndividual(type);
+				}
+			}
+			else {
+				commonSubjectInst = getTheJenaModel().getIndividual(commonSubject.getURI());
+			}
+		}
+		if (insertions.size() > 0) {
+			for (int i = 0; i < insertions.size(); i++) {
+				TripleElement itr = insertions.get(i);
+				if (itr.getSubject().equals(commonSubject)) {
+					Property pred = getTheJenaModel().getProperty(itr.getPredicate().getURI());
+					Node objNode = itr.getObject();
+					RDFNode val = null;
+					if (objNode instanceof Literal) {
+						if (pred.canAs(OntProperty.class)) {
+							OntResource rng = pred.as(OntProperty.class).getRange();
+							try {
+								val = SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), ((Literal)objNode).getValue());
+							} catch (TranslationException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						else {
+							val = getTheJenaModel().createTypedLiteral(((Literal)objNode).getValue());
+						}
+					}
+					else {
+						val = getTheJenaModel().getResource(objNode.getURI());
+					}
+					getTheJenaModel().add(commonSubjectInst, pred, val);
+				}
+				else {
+					System.err.println("Unhandled condition: subject isn't expected common subject.");
+				}
+			}
+		}
+		if (queryPatterns.size() > 0) {
+			ResultSet[] results = new ResultSet[queryPatterns.size()];
+			List<RDFNode[]> queryStmts = new ArrayList<RDFNode[]>();
+			for (int i = 0; i < queryPatterns.size(); i++) {
+				TripleElement qptr = queryPatterns.get(i);
+				if (qptr.getSubject().equals(commonSubject)) {
+					Property pred = getTheJenaModel().getProperty(qptr.getPredicate().getURI());
+					Node objNode = qptr.getObject();
+					RDFNode val = null;
+					if (objNode instanceof Literal) {
+						if (pred.canAs(OntProperty.class)) {
+							OntResource rng = pred.as(OntProperty.class).getRange();
+							try {
+								val = SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), ((Literal)objNode).getValue());
+							} catch (TranslationException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						else {
+							val = getTheJenaModel().createTypedLiteral(((Literal)objNode).getValue());
+						}
+					}
+					else if (objNode != null) {
+						val = getTheJenaModel().getResource(objNode.getURI());
+					}
+					RDFNode[] stmtComponents = new RDFNode[3];
+					stmtComponents[0] = commonSubjectInst;
+					stmtComponents[1] = pred;
+					stmtComponents[2] = val;
+					queryStmts.add(stmtComponents);
+				}
+				else {
+					System.err.println("Unhandled condition: subject isn't expected common subject in query pattern.");
+				}
+			}
+			try {
+				IReasoner reasoner = getInitializedReasoner();
+				reasoner.loadInstanceData(getTheJenaModel());
+				for (int i = 0; i < queryStmts.size(); i++) {
+					RDFNode[] qstmt = queryStmts.get(i);
+					Object infModel = reasoner.getInferredModel(false);
+					if (infModel instanceof InfModel) {
+						Property pred = (Property) qstmt[1];
+						RDFNode val = qstmt[2];
+						StmtIterator stmtitr = ((InfModel)infModel).listStatements((com.hp.hpl.jena.rdf.model.Resource) qstmt[0], pred, val);
+						int cntr = 0;
+						if (pred == null) cntr++;
+						if (val == null) cntr++;
+						String[] colNames = new String[cntr];
+						ArrayList<ArrayList<Object>> rows = new ArrayList<ArrayList<Object>>();
+						cntr = 0;
+						int col = 0;
+						while (stmtitr.hasNext()) {
+							ArrayList<Object> row = new ArrayList<Object>();
+							Statement stmt = stmtitr.nextStatement();
+							if (pred == null) {
+								if (cntr == 0) {
+									colNames[col++] = "property";
+								}
+								row.add(stmt.getPredicate().getURI());
+							}
+							if (val == null) {
+								if (cntr == 0) {
+									colNames[col++] = "value";
+								}
+								RDFNode n = stmt.getObject();
+								if (n != null && n.isLiteral()) {
+									Object v = n.asLiteral().getValue();
+									if (v instanceof XSDDateTime) {
+										row.add(((XSDDateTime)val).asCalendar().getTime());
+									} 
+									else if (v instanceof XSDDuration) {
+										row.add(((XSDDuration)val).toString());
+									}
+									else {
+										row.add(v);
+									}
+								}
+								else if (n != null && n.isResource()) {
+									if (!((com.hp.hpl.jena.rdf.model.Resource)n).isAnon()){
+										row.add(((com.hp.hpl.jena.rdf.model.Resource)n).getURI());
+									}
+									else {
+										row.add(n.toString() + "(blank node)");
+									}
+								}
+								else {
+									row.add(n == null? n : n.toString());	// for queries with OPTIONAL n can be null
+								}
+							}
+							cntr++;
+							rows.add(row);
+						}
+						Object array[][] = new Object[rows.size()][colNames.length];
+						for(int j=0; j<rows.size(); j++)
+							array[j] = (rows.get(i)).toArray(new Object[colNames.length]);
+
+						ResultSet rs = new ResultSet(colNames, array);
+						results[i] = rs;
+					}
+				}
+				return results;
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ReasonerNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else {
+			System.err.println("Unhandled condition: subject isn't expected common subject.");
+		}	
+		return null;
 	}
 
 }

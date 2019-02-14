@@ -112,7 +112,8 @@ interface ISadlImplicitModelContentProvider {
 				described by externalURI with a single value of type anyURI,
 				described by externalURL with values of type string.
 			Argument is a class, described by argName with a single value of type string, 
-				described by argTtype with a single value of type anyURI.
+				described by argType.
+			argType of Argument has at most 1 value.
 			arguments describes ^Equation with a single value of type Argument List.
 			returnTypes describes ^Equation with a single value of type anyURI List.
 			^Rule is a class.
