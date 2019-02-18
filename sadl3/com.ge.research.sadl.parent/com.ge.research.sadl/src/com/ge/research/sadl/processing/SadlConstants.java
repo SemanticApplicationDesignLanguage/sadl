@@ -38,7 +38,7 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_LOCATION_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#externalURL";
 	public static final String SADL_IMPLICIT_MODEL_ARGUMENT_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Argument";
 	public static final String SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#argName";
-	public static final String SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#argTtype";
+	public static final String SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#argType";
 	public static final String SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#arguments";
 	public static final String SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#returnTypes";
 	

@@ -2804,7 +2804,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		else {
 			if (args != null && args.size() > 0) {
 				DatatypeProperty nameProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI);
-				DatatypeProperty typeProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI);
+				Property typeProp = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI);
 				if (nameProp == null || typeProp == null) {
 					addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
 				}
