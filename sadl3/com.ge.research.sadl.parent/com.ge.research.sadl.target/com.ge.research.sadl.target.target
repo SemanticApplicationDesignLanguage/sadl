@@ -11,10 +11,6 @@
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.emf.sdk.feature.group" version="0.0.0"/>
-<repository location="http://download.eclipse.org/modeling/emf/emf/updates/2.12/"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.xtend.sdk.feature.group" version="2.14.0.v20180424-2303"/>
 <unit id="org.eclipse.xtext.sdk.feature.group" version="2.14.0.v20180424-2303"/>
 <unit id="org.objectweb.asm" version="6.1.1.v20180414-0329"/>
@@ -29,6 +25,10 @@
 		<unit id="org.eclipse.platform.feature.group" version="4.10.0.v20181206-0815"/>
 		<unit id="org.eclipse.platform.source.feature.group" version="4.10.0.v20181206-0815"/>
 		<repository location="https://download.eclipse.org/releases/2018-12/"/>
+	</location>
+	<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
+		<unit id="org.eclipse.emf.sdk.feature.group" version="2.16.0.v20181206-1055"/>
+		<repository location="http://download.eclipse.org/modeling/emf/emf/builds/release/2.16"/>
 	</location>
 </locations>
 </target>
