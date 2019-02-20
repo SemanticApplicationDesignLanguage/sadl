@@ -2766,12 +2766,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		EList<SadlParameterDeclaration> params = element.getParameter();
 		EList<SadlReturnDeclaration> rtype = element.getReturnType();
 		Expression bdy = element.getBody();
-		if (bdy == null) {
-			addError("Equation body can't be empty", element);
-			return;
-		}
 		Expression retVal = element.getRetval();
 		Expression whrExpr = element.getWhere();
+		if (bdy == null && retVal == null && whrExpr == null) {
+			String equri = getDeclarationExtensions().getConceptUri(nm);
+			addError("Equation '" + equri + "' has empty body", element);
+			return;
+		}
 		Equation eq = createEquation(element, nm, rtype, params, bdy, retVal, whrExpr);
 		addEquation(element.eResource(), eq, nm);
 		Individual eqinst = getTheJenaModel().createIndividual(getDeclarationExtensions().getConceptUri(nm),
