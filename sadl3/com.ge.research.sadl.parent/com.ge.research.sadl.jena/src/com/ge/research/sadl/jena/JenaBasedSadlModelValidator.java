@@ -4309,6 +4309,29 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
 		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
+		if (leftConceptIdentifier == null && rightConceptIdentifier == null) {
+			if (leftTypeCheckInfo != null && leftTypeCheckInfo.getCompoundTypes() != null &&
+					rightTypeCheckInfo != null && rightTypeCheckInfo.getCompoundTypes() != null) {
+				// we have multiple types on each side. This happens with equations that return multiple values
+				// compare them pairwise
+				List<TypeCheckInfo> lctypes = leftTypeCheckInfo.getCompoundTypes();
+				List<TypeCheckInfo> rctypes = rightTypeCheckInfo.getCompoundTypes();
+				if (lctypes.size() == rctypes.size()) {
+					boolean allTrue = true;
+					for (int i = 0; i < lctypes.size(); i++) {
+						TypeCheckInfo lct = lctypes.get(i);
+						TypeCheckInfo rct = rctypes.get(i);
+						if (!compareTypesRecursively(operations, leftExpression, rightExpression, lct, rct)) {
+							allTrue = false;
+							break;
+						}
+					}
+					if (allTrue) {
+						return true;
+					}
+				}
+			}
+		}
 		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals(SadlConstants.CONSTANT_NONE)) || 
 				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals(SadlConstants.CONSTANT_NONE)) ||
 				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
