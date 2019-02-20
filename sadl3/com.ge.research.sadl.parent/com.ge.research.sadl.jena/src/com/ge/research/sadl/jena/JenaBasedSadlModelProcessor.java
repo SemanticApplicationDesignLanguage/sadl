@@ -804,6 +804,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private Map<EObject, VariableNode> variablesInDefinition = null;
 
+	private EObject setDefaultEObject;
+
 	public static void refreshResource(Resource newRsrc) {
 		try {
 			URI uri = newRsrc.getURI();
@@ -1155,6 +1157,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	protected void processModelElement(SadlModelElement element) {
+		setDefaultEObject(element);
 		try {
 			if (element instanceof SadlClassOrPropertyDeclaration) {
 				processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration) element);
@@ -1240,6 +1243,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
+	}
+
+	private void setDefaultEObject(EObject element) {
+		this.setDefaultEObject = element;
+	}
+	
+	private EObject getDefaultEObject() {
+		return setDefaultEObject;
 	}
 
 	private PathToFileUriConverter getUriConverter(Resource resource) {
@@ -11781,7 +11792,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (!cls.isURIResource())
 			return null; // impliedProperties can only be given to a named class
 		if (!cls.canAs(OntClass.class)) {
-			addError("Can't get implied properties of a non-class entity.", null);
+			addError("Can't get implied properties of a non-class entity. Perhaps this can't be used before it is declared?", getDefaultEObject());
 			return null;
 		}
 		List<OntResource> allImplPropClasses = getAllImpliedPropertyClasses();
