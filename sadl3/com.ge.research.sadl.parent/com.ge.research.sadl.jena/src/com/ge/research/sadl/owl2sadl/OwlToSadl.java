@@ -557,6 +557,7 @@ public class OwlToSadl {
 		if (logger.isDebugEnabled()) {
 			theModel.getBaseModel().write(System.out);
 		}
+		getSpec().getDocumentManager().setProcessImports(false);
 		theBaseModel = ModelFactory.createOntologyModel(getSpec(), theModel);
 		
 		if (allTokens == null) {
@@ -941,7 +942,7 @@ public class OwlToSadl {
 		}
 		
 		if (isVerboseMode() || !concepts.getClasses().isEmpty()) {
-			sadlModel.append("\n\n// Classes definitions:\n");
+			sadlModel.append("\n\n// Class definitions:\n");
 			List<OntClass> classes = concepts.getClasses();
 			for (int i = 0; i < classes.size(); i++) {
 				OntClass cls = classes.get(i);
@@ -970,7 +971,9 @@ public class OwlToSadl {
 			for (int i = 0; i < dtProperties.size(); i++) {
 				OntResource prop = dtProperties.get(i);
 				if (!concepts.getCompleted().contains(prop)) {
-					tempSb.append(dtPropertyToSadl(concepts, prop));
+					if (!ignoreNamespace(prop, true)) {
+						tempSb.append(dtPropertyToSadl(concepts, prop));
+					}
 				}
 			}
 			if (isVerboseMode() || tempSb.length() > 0) {
@@ -2118,8 +2121,10 @@ public class OwlToSadl {
 				return true;
 			}
 			else {
-				concepts.addClass(ontRsrc.as(OntClass.class));
-				return true;
+				if (!ignoreNamespace(ontRsrc, true)) {
+					concepts.addClass(ontRsrc.as(OntClass.class));
+					return true;
+				}
 			}
 		}
 		else if (type.equals(OWL.ObjectProperty)) {
@@ -2328,7 +2333,7 @@ public class OwlToSadl {
 		else if (ontRsrc.canAs(Individual.class)) {
 			Individual inst = ontRsrc.asIndividual();
 			// only named instances can stand alone
-			if (inst.isURIResource()) {
+			if (inst.isURIResource() && !ignoreNamespace(ontRsrc, true)) {
 				concepts.addInstance(inst);
 				return true;
 			}
