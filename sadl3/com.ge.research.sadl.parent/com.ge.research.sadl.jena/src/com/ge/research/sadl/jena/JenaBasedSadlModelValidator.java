@@ -529,7 +529,31 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			boolean dontTypeCheck = false;
 			TypeCheckInfo leftTypeCheckInfo = null;
 			try {
-				leftTypeCheckInfo = getType(leftExpression);
+				// if this is an embedded call, as opposed to a reference to the name of an Equation or ExternalEquation only, 
+				//	the leftExpression will be a Name and isFunction will be true
+				
+				// if op is "argument" then left is the argument, right is the param
+				// if the left is a name which is a not function and the containing type is Equation or ExternalEquation, 
+				//	then the return type is the type of the equation; other wise the type is returned by getType(leftExpression)
+				if (op.equals("argument") && leftExpression instanceof Name && 
+						((Name)leftExpression).getName().eContainer() instanceof ExternalEquationStatement &&
+						!((Name)leftExpression).isFunction()) {
+					NamedNode nn = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI);
+					nn.setNodeType(NodeType.ClassNode);
+					leftTypeCheckInfo = new TypeCheckInfo(new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI),
+							nn, this, leftExpression);
+				}
+				else if (op.equals("argument") && leftExpression instanceof Name && 
+						((Name)leftExpression).getName().eContainer() instanceof EquationStatement &&
+						!((Name)leftExpression).isFunction()) {
+					NamedNode nn = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI);
+					nn.setNodeType(NodeType.ClassNode);
+					leftTypeCheckInfo = new TypeCheckInfo(new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI),
+							nn, this, leftExpression);
+				}
+				else {
+					leftTypeCheckInfo = getType(leftExpression);
+				}
 				if (getModelProcessor().isConjunction(op) || getModelProcessor().isDisjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					// check for implied properties on boolean "and" or "statements"

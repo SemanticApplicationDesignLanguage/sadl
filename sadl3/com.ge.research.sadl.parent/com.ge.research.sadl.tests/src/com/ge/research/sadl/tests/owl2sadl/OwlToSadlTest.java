@@ -84,7 +84,7 @@ public class OwlToSadlTest {
 				"// Datatype properties without specified range:\n" + 
 				"\n" + 
 				"\n" + 
-				"// Classes definitions:\n" + 
+				"// Class definitions:\n" + 
 				"Circle is a type of Shape,\n" + 
 				"    described by radius with values of type float.\n" + 
 				"Shape is a class,\n" + 
@@ -164,7 +164,7 @@ public class OwlToSadlTest {
 				"comment is a type of annotation.\n" + 
 				"\n" + 
 				"\n" + 
-				"// Classes definitions:\n" + 
+				"// Class definitions:\n" + 
 				"Circle is a type of Shape,\n" + 
 				"    described by radius with values of type float.\n" + 
 				"Shape is a class,\n" + 
@@ -195,7 +195,7 @@ public class OwlToSadlTest {
 				"ColorComponent is a type of int [0,255].\n" + 
 				"\n" + 
 				"\n" + 
-				"// Classes definitions:\n" + 
+				"// Class definitions:\n" + 
 				"Color is a class,\n" + 
 				"    described by blue with values of type ColorComponent,\n" + 
 				"    described by green with values of type ColorComponent,\n" + 
@@ -237,7 +237,7 @@ public class OwlToSadlTest {
 				"import \"http://sadl.org/concepts.sadl\" as concepts.\n" + 
 				"\n" + 
 				"\n" + 
-				"// Classes definitions:\n" + 
+				"// Class definitions:\n" + 
 				"Circle is a type of concepts:Shape,\n" + 
 				"    described by radius with values of type float.\n" + 
 				"Rectangle is a type of concepts:Shape,\n" + 

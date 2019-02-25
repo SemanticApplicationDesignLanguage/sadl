@@ -25,8 +25,10 @@ package com.ge.research.sadl.reasoner;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 
+import com.ge.research.sadl.importer.AbortDataRowException;
 import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
@@ -56,6 +59,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.RDFWriter;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Seq;
 import com.hp.hpl.jena.rdf.model.Statement;
@@ -1592,6 +1596,67 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		// Note: for an editing configuration manager, 
 		//	the OntDocumentManager must be set explicitly
 		return jenaDocumentMgr;
+	}
+
+	@Override
+	public void saveOwlFile(OntModel model, String modelName, String fullyQualifiedOwlFilename)
+			throws ConfigurationException, IOException {
+		String format = "RDF/XML-ABBREV";
+		File outFile = new File(fullyQualifiedOwlFilename);
+		if (!outFile.exists()) {
+			try {
+				outFile.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new ConfigurationException("Unable to create output file '" + fullyQualifiedOwlFilename + "': " + e.getMessage());
+			}
+		}
+		FileOutputStream fps = null;
+		try {
+			fps = new FileOutputStream(fullyQualifiedOwlFilename);
+			if (fullyQualifiedOwlFilename.toLowerCase().endsWith(".owl")){
+				format = "RDF/XML-ABBREV";
+			}
+			else if (fullyQualifiedOwlFilename.toLowerCase().endsWith(".n-triple")) {
+				format = "N-TRIPLE";
+			}
+			else if (fullyQualifiedOwlFilename.toLowerCase().endsWith(".n3")) {
+				format = "N3";
+			}
+
+			try {
+				RDFWriter rdfw = model.getWriter(format);
+				// NTripleWriter.setProperty always throws UnknownPropertyException; ditto for N3.
+				if (format.startsWith("RDF/XML")) {
+					rdfw.setProperty("xmlbase", toNamespace(modelName)); 
+					rdfw.setProperty("relativeURIs", "");
+					//			            rdfw.setProperty("minimalPrefixes", true);
+				}
+				OntModel om =  model;
+				om.setNsPrefix("", toNamespace(modelName));
+				rdfw.write(om.getBaseModel(), fps, modelName);
+				fps.close();
+			}
+			catch (Throwable t) {
+				t.printStackTrace();
+				throw new ConfigurationException("Fatal error saving model file '" + modelName + "' to '" + fullyQualifiedOwlFilename + "': " + t.getLocalizedMessage());
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			throw new ConfigurationException("Unable to open output file '" + fullyQualifiedOwlFilename + "': " + e.getMessage());
+		}
+		finally {
+			if (fps != null) {
+				fps.close();
+			}
+		}
+	}
+	
+	private String toNamespace(String uri) {
+		if (!uri.endsWith("#")) {
+			return uri + "#";
+		}
+		return uri;		
 	}
 
 }
