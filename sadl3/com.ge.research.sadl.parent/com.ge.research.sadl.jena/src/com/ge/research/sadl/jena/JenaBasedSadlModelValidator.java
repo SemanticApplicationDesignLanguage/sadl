@@ -529,7 +529,24 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			boolean dontTypeCheck = false;
 			TypeCheckInfo leftTypeCheckInfo = null;
 			try {
-				leftTypeCheckInfo = getType(leftExpression);
+				// if op is "argument" then left is the argument, right is the param
+				// if the left is a name which is a function, then the type will be Equation or ExternalEquation, not
+				//	the return type of the equation, which is what is returned by getType(leftExpression
+				if (op.equals("argument") && leftExpression instanceof Name && ((Name)leftExpression).getName().eContainer() instanceof ExternalEquationStatement) {
+					NamedNode nn = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI);
+					nn.setNodeType(NodeType.ClassNode);
+					leftTypeCheckInfo = new TypeCheckInfo(new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI),
+							nn, this, leftExpression);
+				}
+				else if (op.equals("argument") && leftExpression instanceof Name && ((Name)leftExpression).getName().eContainer() instanceof EquationStatement) {
+					NamedNode nn = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI);
+					nn.setNodeType(NodeType.ClassNode);
+					leftTypeCheckInfo = new TypeCheckInfo(new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI),
+							nn, this, leftExpression);
+				}
+				else {
+					leftTypeCheckInfo = getType(leftExpression);
+				}
 				if (getModelProcessor().isConjunction(op) || getModelProcessor().isDisjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					// check for implied properties on boolean "and" or "statements"
