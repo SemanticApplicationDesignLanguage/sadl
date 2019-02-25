@@ -2951,9 +2951,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (getModelValidator() != null) {
 			// check return type against body expression
 			StringBuilder errorMessageBuilder = new StringBuilder();
-			if (!getModelValidator().validateBinaryOperationByParts(element, rtype, bdy, "function return",
-					errorMessageBuilder, false)) {
-				addTypeCheckingError(errorMessageBuilder.toString(), bdy);
+			if (retVal != null) {
+				if (!getModelValidator().validateBinaryOperationByParts(element, rtype, retVal, "function return",
+						errorMessageBuilder, false)) {
+					addTypeCheckingError(errorMessageBuilder.toString(), bdy);
+				}
+			}
+			else if (bdy != null) {
+				if (!getModelValidator().validateBinaryOperationByParts(element, rtype, bdy, "function return",
+						errorMessageBuilder, false)) {
+					addTypeCheckingError(errorMessageBuilder.toString(), bdy);
+				}
 			}
 		}
 		setCurrentEquation(null); // clear
