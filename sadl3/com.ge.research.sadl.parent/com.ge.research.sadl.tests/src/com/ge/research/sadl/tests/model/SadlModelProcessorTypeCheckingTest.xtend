@@ -178,6 +178,24 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 	}
 	
 	@Test
+	def void testUserDefinedEquation4() {
+		val sadlModel = '''
+			 uri "http://sadl.org/SpeedOfSound.sadl" alias sos.
+			 Gas is a class.
+			 Air is a type of Gas.
+			 speedOfSound describes Gas with values of type decimal.
+			 altitude describes Air with values of type decimal.
+			 
+			 External sosfromalt(decimal alt, string unt) returns decimal,string: "http://com.ge.research.darpa.aske.kchain.sosairfromalt".
+			 
+			 Rule SpeedOfSoundInAirGivenAltitude:
+			   if air is some Air and alt is altitude of air and
+			   [sosair,unt] is  sosfromalt(alt, "ft")
+			   then speedOfSound of air is sosair.
+   		'''.sadl
+		sadlModel.assertNoErrors
+	}
+	@Test
 	def void testLocalVsImportedNames_GH_226_15() {
 		'''
 			uri "http://sadl.org/I1.sadl" alias I1.
