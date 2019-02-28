@@ -1508,7 +1508,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				if (tr.getPredicate() != null && 
 						tr.getObject() != null) {
 					// this is an assertion; add to model
-					System.out.println("Update model with a " + subjectType.getName() + " "
+					System.out.println("Update model with a " + commonSubject.getName() + " "
 							+ tr.getPredicate().getName() + " " 
 							+ tr.getObject().toFullyQualifiedString());
 					insertions.add(tr);
@@ -1531,7 +1531,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					else {
 						objStr = "?o";
 					}
-					System.out.println("Then ask model, the " + subjectType.getName() + " "
+					System.out.println("Then ask model, the " + commonSubject.getName() + " "
 							+ predStr + " " 
 							+ objStr);
 					queryPatterns.add(tr);
