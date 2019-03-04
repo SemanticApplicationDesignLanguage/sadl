@@ -1816,6 +1816,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			} else if (defnContainer instanceof SadlParameterDeclaration) {
 				SadlTypeReference type = ((SadlParameterDeclaration) defnContainer).getType();
+				EObject augtype = ((SadlParameterDeclaration) defnContainer).getAugtype();
+				// TODO
 				tci = getModelValidator().getType(type);
 			} else if (defnContainer instanceof SubjHasProp) {
 				if (((SubjHasProp) defnContainer).getLeft().equals(decl)) {
@@ -2875,6 +2877,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		List<Node> rtypes = new ArrayList<Node>();
 		for (SadlReturnDeclaration srd : rtype) {
 			SadlTypeReference rt = srd.getType();
+			EObject augtype = srd.getAugtype();
+			// TODO
 			if (rt != null) {
 				Node rtnode = sadlTypeReferenceToNode(rt);
 				rtypes.add(rtnode);
@@ -2895,6 +2899,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					args.add((Node) pn);
 				}
 				SadlTypeReference prtype = param.getType();
+				EObject augtype = param.getAugtype();
+				// TODO
 				Node prtnode = sadlTypeReferenceToNode(prtype);
 				if (prtnode != null) {
 					argtypes.add(prtnode);
@@ -3052,6 +3058,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		List<Node> rtypes = new ArrayList<Node>();
 		for (SadlReturnDeclaration srd : rtype) {
 			SadlTypeReference rt = srd.getType();
+			EObject augtype = srd.getAugtype();
+			// TODO
 			if (rt != null) {
 				Node rtnode = sadlTypeReferenceToNode(rt);
 				rtypes.add(rtnode);
@@ -3072,6 +3080,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						Object pn = processExpression(pr);
 						args.add((Node) pn);
 						SadlTypeReference prtype = param.getType();
+						EObject augtype = param.getAugtype();
+						// TODO
 						Node prtnode = sadlTypeReferenceToNode(prtype);
 						argtypes.add(prtnode);
 					}
@@ -5540,6 +5550,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				for (SadlParameterDeclaration spd : argtypes) {
 					try {
 						SadlTypeReference typ = spd.getType();
+						EObject augtype = spd.getAugtype();
+						// TODO
 						if (typ != null) {
 							NamedNode typnode = sadlTypeReferenceToNode(typ);
 							if (typnode != null) {
@@ -5559,6 +5571,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				for (SadlReturnDeclaration srd : rtypes) {
 					try {
 						SadlTypeReference typ = srd.getType();
+						EObject augtype = srd.getAugtype();
+						// TODO
 						if (typ != null) {
 							NamedNode typnode = sadlTypeReferenceToNode(typ);
 							if (typnode != null) {
