@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -36,6 +38,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.xtext.findReferences.IReferenceFinder;
 import org.eclipse.xtext.findReferences.TargetURIs;
+import org.eclipse.xtext.preferences.IPreferenceValues;
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.resource.IReferenceDescription;
 import org.eclipse.xtext.resource.IResourceDescription;
@@ -51,6 +55,7 @@ import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -63,11 +68,13 @@ import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
+import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.ui.visualize.GraphGenerator;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.ge.research.sadl.ui.visualize.GraphSegment;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 @SuppressWarnings("restriction")
 public class GraphGeneratorHandler extends SadlActionHandler {
@@ -272,7 +279,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		String srnm = getSadlResourceConcreteName(sr);
 		OntConceptType srType = getSadlResourceOntConceptType(sr);
 		if (srType.equals(OntConceptType.CLASS)) {
-			GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(getSadlResourceUri(sr)), monitor);
+			GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(getSadlResourceUri(sr)), monitor, getOntologyGraphPreferences());
 			ResultSet rs = gg.generateClassNeighborhood(graphRadius); //sadlResourceToDomainRangeResultSet(configMgr, publicUri, sr);
 			if (rs != null) {
 				graphResultSet(visualizer, project, owlFileName+srnm+"dr", "dr", getSadlResourceAnchor(sr, gg.getUriStrategy()), "Domains and ranges", rs, null, true);
@@ -656,6 +663,34 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 
 	private void setConfigMgr(IConfigurationManagerForIDE configMgr) {
 		this.configMgr = configMgr;
+	}
+
+	protected Map<String,Boolean> getOntologyGraphPreferences() {
+		Injector sadlInjector = safeGetInjector(SadlActivator.COM_GE_RESEARCH_SADL_SADL);
+		IPreferenceValuesProvider pvp = sadlInjector.getInstance(IPreferenceValuesProvider.class);
+		org.eclipse.emf.ecore.resource.Resource resource = new ResourceImpl();
+		resource.setURI(org.eclipse.emf.common.util.URI.createFileURI("/"));
+	
+		IPreferenceValues preferenceValues = pvp.getPreferenceValues(resource);
+		if (preferenceValues != null) {
+			Map<String, Boolean> map = new HashMap<String, Boolean>();
+			boolean bval = Boolean.parseBoolean(preferenceValues.getPreference(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS));
+			if (bval) {
+				map.put(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), true);
+			}
+			else {
+				map.put(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId(), false);
+			}
+			bval = Boolean.parseBoolean(preferenceValues.getPreference(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES));
+			if (bval) {
+				map.put(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId(), true);
+			}
+			else {
+				map.put(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId(), false);
+			}			
+			return map;
+		}
+		return null;
 	}
 
 }
