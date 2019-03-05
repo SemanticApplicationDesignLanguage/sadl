@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1537,6 +1538,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if (expression instanceof SadlInstance) {
 			returnedTci =  getType((SadlInstance)expression);
+		}
+		else if (expression instanceof SadlReturnDeclaration) {
+			returnedTci = getType(((SadlReturnDeclaration)expression).getType());
 		}
 		else if (expression != null) {
 			getModelProcessor().addTypeCheckingError(SadlErrorMessages.DECOMPOSITION_ERROR.get(expression.toString()), expression);
@@ -3920,6 +3924,38 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						return ptci;
 					}
 				}
+			}
+			else if (defContainer instanceof ValueRow) {
+				// if this is the assignment of the return value(s) from an Equation, the type will be
+				//	given by the equation return type(s)
+				EObject cont = (ValueRow) defContainer;
+				do {
+					cont = cont.eContainer();
+				} while (cont instanceof ValueTable);
+				
+				if (cont instanceof BinaryOperation && 
+						(((BinaryOperation)cont).getOp().equals("is") || ((BinaryOperation)cont).getOp().equals("=") || ((BinaryOperation)cont).getOp().equals("=="))) {
+					if (((BinaryOperation)cont).getRight() instanceof Name &&
+							((Name)((BinaryOperation)cont).getRight()).isFunction()) {
+						EObject eqCont = ((Name)((BinaryOperation)cont).getRight()).getName().eContainer();
+						EList<SadlReturnDeclaration> retTypes = null;
+						if (eqCont instanceof ExternalEquationStatement) {
+							retTypes = ((ExternalEquationStatement)eqCont).getReturnType();
+						}
+						else if (eqCont instanceof EquationStatement) {
+							retTypes = ((EquationStatement)eqCont).getReturnType();
+						}
+						if (retTypes != null) {
+							int varIdx = ((ValueRow)defContainer).getExplicitValues().indexOf(name);
+							if (varIdx >= 0) {
+								SadlReturnDeclaration retType = retTypes.get(varIdx);
+								TypeCheckInfo rttci = getType(retType);
+								return rttci;
+							}
+						}
+					}
+				}
+				getModelProcessor().addTypeCheckingError("Variable container for variable '" + conceptNm + "' is a ValueRow but the construct isn't handled. Please report use case.", defContainer);
 			}
 		}
 		
