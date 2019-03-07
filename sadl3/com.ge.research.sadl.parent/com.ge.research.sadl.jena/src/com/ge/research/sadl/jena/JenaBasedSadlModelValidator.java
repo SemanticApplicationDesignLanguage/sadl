@@ -1477,7 +1477,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							svltci = rttci;
 						}
 						else if (!svltci.getTypeCheckType().equals(rttci.getTypeCheckType()) ) {
-							getModelProcessor().addTypeCheckingError("Not all list values are of the same type", expression);
+							OntClass svtype = theJenaModel.getOntClass(svltci.getTypeCheckType().getURI());
+							OntClass rttype = theJenaModel.getOntClass(rttci.getTypeCheckType().getURI());
+							if (SadlUtils.classIsSubclassOf(svtype, rttype, true, null)) {
+								// svtype is a subclass of rttype
+								svltci.setTypeCheckType(new NamedNode(rttype.getURI()));
+							}
+							else if (SadlUtils.classIsSubclassOf(rttype, svtype, true, null)) {
+								// rttype is a subclass of svtype
+								// this is OK; svltci already has the broader class
+							}
+							else {
+								getModelProcessor().addTypeCheckingError("Not all list values are of the same type", expression);
+							}
 						}
 					}		
 					return convertElementOfListToListType(svltci);
@@ -4788,8 +4800,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					
-					else if (leftConceptName.getType().equals(ConceptType.ONTCLASS) &&
-							rightConceptName.getType().equals(ConceptType.ONTCLASS)) {
+					else if ((leftConceptName.getType().equals(ConceptType.ONTCLASS) &&
+							rightConceptName.getType().equals(ConceptType.ONTCLASS)) ||
+							(leftConceptName.getType().equals(ConceptType.ONTCLASSLIST) &&
+									rightConceptName.getType().equals(ConceptType.ONTCLASSLIST))){
 						if (partOfTest(leftExpression, rightExpression)) {
 							// if we're in a test we don't want to type check as it may fail when not using the inferred model.
 							return true;

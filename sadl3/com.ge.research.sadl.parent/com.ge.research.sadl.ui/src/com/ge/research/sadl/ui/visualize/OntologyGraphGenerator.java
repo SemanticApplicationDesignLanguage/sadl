@@ -61,7 +61,7 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  */
 public class OntologyGraphGenerator extends GraphGenerator {
 
-	private Map<String, Boolean> preferenceValues;
+	
 	
 	
 //	public enum Orientation {TD, LR, BD, RL}
@@ -446,21 +446,6 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		return null;
 	}
 
-	private void setPreferenceValues(Map<String,Boolean> prefValues) {
-		this.preferenceValues = prefValues;
-	}
-	
-	private Boolean getPreferenceValue(String key) {
-		if(this.preferenceValues == null || this.preferenceValues.isEmpty()) {
-			return false;
-		}
-		if(this.preferenceValues.containsKey(key)) {
-			return this.preferenceValues.get(key);
-		}
-		
-		return false;
-	}
-	
 	/**
 	 * Method to get the type of the elements of a typed List from the restriction in the definition
 	 * @param rng
