@@ -298,6 +298,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private List<String> numericOperators = Arrays.asList("*", "+", "/", "-", "%", "^");
 	private List<String> numericComparisonOperators = Arrays.asList(">=", ">", "<=", "<");
 	private List<String> equalityInequalityComparisonOperators = Arrays.asList("==", "!=", "is", "=");
+	private List<String> mAssignmentOperators = Arrays.asList("is","=");
 	private List<String> canBeNumericOperators = Arrays.asList(">=", ">", "<=", "<", "==", "!=", "is", "=");
 
 	public enum OPERATORS_RETURNING_BOOLEAN {
@@ -592,12 +593,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						Object oc = otherContent.get(i);
 						if (oc instanceof List<?>) {
 							if (((List<?>) oc).get(0) instanceof Rule) {
-								rules = (List<Rule>) oc;
+								setRules((List<Rule>) oc);
 							}
 						}
 					}
 				}
-				List<ModelError> results = translateAndSaveModel(resource, owlFN, format, newMappings);
+				List<ModelError> results = translateAndSaveModel(resource, owlFN, format, newMappings, "SADL");
 				if (results != null) {
 					generationInProgress = false; // we need these errors to show up
 					modelErrorsToOutput(resource, results);
@@ -620,12 +621,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	private List<ModelError> translateAndSaveModel(Resource resource, String owlFN, String _repoType,
-			List<String[]> newMappings) {
+	protected List<ModelError> translateAndSaveModel(Resource resource, String owlFN, String _repoType,
+			List<String[]> newMappings, String source) {
 		String modelFolderPathname = getModelFolderPath(resource);
 		try {
 			if (newMappings != null) {
-				getConfigMgr(resource, _repoType).addMappings(newMappings, false, "SADL");
+				getConfigMgr(resource, _repoType).addMappings(newMappings, false, source);
 			}
 			ITranslator translator = getConfigMgr(resource, _repoType).getTranslator();
 			List<ModelError> results = translator.translateAndSaveModel(getTheJenaModel(), getRules(),
@@ -726,7 +727,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
-	private void modelErrorsToOutput(Resource resource, List<ModelError> errors) {
+	protected void modelErrorsToOutput(Resource resource, List<ModelError> errors) {
 //		EObject sm = resource.getContents().get(0);
 //		if (sm instanceof SadlModel) {
 //			sm = ((SadlModel)sm).getElements().get(0);
@@ -802,6 +803,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private EObject hostEObject = null;
 
 	private Map<EObject, VariableNode> variablesInDefinition = null;
+
+	private EObject setDefaultEObject;
 
 	public static void refreshResource(Resource newRsrc) {
 		try {
@@ -1009,11 +1012,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)) {
 				addSadlBaseModelImportToJenaModel(resource);
 			}
-			// Add the SadlImplicitModel to everything except itself and the
-			// SadlBuilinFunctions
+			// Add the SadlImplicitModel to everything except itself
+			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)) {
+				addImplicitSadlModelImportToJenaModel(resource, context);
+
+			}
+			// Add the SadlBuilinFunctions to everything except itself and the SadlImplicitModel
 			if (!resource.getURI().lastSegment().equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME)
 					&& !resource.getURI().lastSegment().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)) {
-				addImplicitSadlModelImportToJenaModel(resource, context);
 				addImplicitBuiltinFunctionModelImportToJenaModel(resource, context);
 
 			}
@@ -1151,6 +1157,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	protected void processModelElement(SadlModelElement element) {
+		setDefaultEObject(element);
 		try {
 			if (element instanceof SadlClassOrPropertyDeclaration) {
 				processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration) element);
@@ -1238,6 +1245,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
+	private void setDefaultEObject(EObject element) {
+		this.setDefaultEObject = element;
+	}
+	
+	private EObject getDefaultEObject() {
+		return setDefaultEObject;
+	}
+
 	private PathToFileUriConverter getUriConverter(Resource resource) {
 		return ((XtextResource) resource).getResourceServiceProvider().get(PathToFileUriConverter.class);
 	}
@@ -1257,7 +1272,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	private void addImplicitBuiltinFunctionModelImportToJenaModel(Resource resource, ProcessorContext context)
+	protected void addImplicitBuiltinFunctionModelImportToJenaModel(Resource resource, ProcessorContext context)
 			throws ConfigurationException, IOException, URISyntaxException, JenaProcessorException {
 		if (isSyntheticUri(null, resource)) {
 			// test case: get SadlImplicitModel OWL model from the OntModelProvider
@@ -1375,7 +1390,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
-	private void addImplicitSadlModelImportToJenaModel(Resource resource, ProcessorContext context)
+	protected void addImplicitSadlModelImportToJenaModel(Resource resource, ProcessorContext context)
 			throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
 		if (isSyntheticUri(null, resource)) {
 			// test case: get SadlImplicitModel OWL model from the OntModelProvider
@@ -1425,7 +1440,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	private void addSadlBaseModelImportToJenaModel(Resource resource)
+	protected void addSadlBaseModelImportToJenaModel(Resource resource)
 			throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
 		if (sadlBaseModel == null) {
 			sadlBaseModel = OntModelProvider.getSadlBaseModel();
@@ -2162,7 +2177,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public Query processStatement(QueryStatement element) throws JenaProcessorException, InvalidNameException,
 			InvalidTypeException, TranslationException, CircularDefinitionException {
 		Expression qexpr = element.getExpr();
+		SadlResource elementName = element.getName();
+		EList<NamedStructureAnnotation> annotations = element.getAnnotations();
+		boolean isGraph = element.getStart().equals("Graph");
+		Query query = processQueryExpression(element, qexpr, elementName, annotations, isGraph);
+		return query;
+	}
+
+	protected Query processQueryExpression(SadlModelElement element, Expression qexpr,
+			SadlResource elementName, EList<NamedStructureAnnotation> annotations, boolean isGraph) throws CircularDefinitionException,
+			InvalidNameException, InvalidTypeException, TranslationException, JenaProcessorException {
+		Query query = null;
 		if (qexpr != null) {
+			boolean returnOnError = false;
 			Query theQuery = new Query();
 			theQuery.setContext(qexpr);
 			setTarget(theQuery);
@@ -2176,71 +2203,70 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						qexpr = ((QueryStatement) qdeclcont).getExpr();
 					} else {
 						addError("Unexpected named structure name whose definition is not a query statement", qexpr);
-						return null;
+						returnOnError = true;
 					}
 				}
 			}
-			Object qobj = processExpression(qexpr);
-			Query query = null;
-			if (qobj instanceof Query) {
-				query = (Query) qobj;
-			} else if (qobj == null) {
-				// maybe this is a query by name?
-				if (qexpr instanceof Name) {
-					SadlResource qnm = ((Name) qexpr).getName();
-					String qnmuri = getDeclarationExtensions().getConceptUri(qnm);
-					if (qnmuri != null) {
-						Individual qinst = getTheJenaModel().getIndividual(qnmuri);
-						if (qinst != null) {
-							StmtIterator stmtitr = qinst.listProperties();
-							while (stmtitr.hasNext()) {
-								System.out.println(stmtitr.nextStatement().toString());
+			if (!returnOnError) {
+				Object qobj = processExpression(qexpr);
+				if (qobj instanceof Query) {
+					query = (Query) qobj;
+				} else if (qobj == null) {
+					// maybe this is a query by name?
+					if (qexpr instanceof Name) {
+						SadlResource qnm = ((Name) qexpr).getName();
+						String qnmuri = getDeclarationExtensions().getConceptUri(qnm);
+						if (qnmuri != null) {
+							Individual qinst = getTheJenaModel().getIndividual(qnmuri);
+							if (qinst != null) {
+								StmtIterator stmtitr = qinst.listProperties();
+								while (stmtitr.hasNext()) {
+									System.out.println(stmtitr.nextStatement().toString());
+								}
 							}
 						}
 					}
+				} else {
+					query = processQuery(postProcessTranslationResult(qobj));
 				}
-			} else {
-				query = processQuery(postProcessTranslationResult(qobj));
-			}
-			if (query != null) {
-				if (element.getName() != null) {
-					String uri = declarationExtensions.getConceptUri(element.getName());
-					query.setFqName(uri);
-					OntClass nqcls = getTheJenaModel()
-							.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_NAMEDQUERY_CLASS_URI);
-					if (nqcls != null) {
-						Individual nqry = createIndividual(element.getName(), nqcls);
-						// Add NamedStructureAnnotations, if any
-						EList<NamedStructureAnnotation> annotations = element.getAnnotations();
-						if (annotations != null && annotations.size() > 0) {
-							addNamedStructureAnnotations(nqry, annotations);
+				if (query != null) {
+					if (elementName != null) {
+						String uri = declarationExtensions.getConceptUri(elementName);
+						query.setFqName(uri);
+						OntClass nqcls = getTheJenaModel()
+								.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_NAMEDQUERY_CLASS_URI);
+						if (nqcls != null) {
+							Individual nqry = createIndividual(elementName, nqcls);
+							// Add NamedStructureAnnotations, if any
+							if (annotations != null && annotations.size() > 0) {
+								addNamedStructureAnnotations(nqry, annotations);
+							}
 						}
 					}
+					if (isGraph) {
+						query.setGraph(true);
+					}
+					final ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
+					if (node != null) {
+						query.setOffset(node.getOffset() - 1);
+						query.setLength(node.getLength());
+					}
+					query = addExpandedPropertiesToQuery(query, qexpr);
+					addSadlCommand(query);
 				}
-				if (element.getStart().equals("Graph")) {
-					query.setGraph(true);
-				}
-				final ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
-				if (node != null) {
-					query.setOffset(node.getOffset() - 1);
-					query.setLength(node.getLength());
-				}
-				query = addExpandedPropertiesToQuery(query, qexpr);
-				addSadlCommand(query);
-				return query;
 			}
 		} else {
 			// this is a reference to a named query defined elsewhere
-			SadlResource sr = element.getName();
+			SadlResource sr = elementName;
 			SadlResource sr2 = declarationExtensions.getDeclaration(sr);
 			if (sr2 != null) {
 				EObject cont = sr2.eContainer();
 				if (cont instanceof QueryStatement && ((QueryStatement) cont).getExpr() != null) {
-					return processStatement((QueryStatement) cont);
+					query = processStatement((QueryStatement) cont);
 				}
 			}
 		}
-		return null;
+		return query;
 	}
 
 	private Query addExpandedPropertiesToQuery(Query query, Expression expr) {
@@ -2753,16 +2779,88 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Expression bdy = element.getBody();
 		Expression retVal = element.getRetval();
 		Expression whrExpr = element.getWhere();
+		if (bdy == null && retVal == null && whrExpr == null) {
+			String equri = getDeclarationExtensions().getConceptUri(nm);
+			addError("Equation '" + equri + "' has empty body", element);
+			return;
+		}
 		Equation eq = createEquation(element, nm, rtype, params, bdy, retVal, whrExpr);
 		addEquation(element.eResource(), eq, nm);
 		Individual eqinst = getTheJenaModel().createIndividual(getDeclarationExtensions().getConceptUri(nm),
-				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EQUATION_URI));
-		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EQ_EXPRESSION_URI);
-		Literal literal = getTheJenaModel().createTypedLiteral(eq.toString());
-		if (eqinst != null && dtp != null) {
-			// these can be null during clean/build with resource open in editor
-			eqinst.addProperty(dtp, literal);
+				getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI));
+		if (eqinst != null) {
+			addEquationPropertiesToJenaModel(nm, eq, eqinst);
 		}
+	}
+
+	private void addEquationPropertiesToJenaModel(SadlResource nm, Equation eq, Individual eqinst) {
+		// add the expression, if any
+		String expr = eq.toString();
+		if (expr != null && expr.length() > 0) {
+			Literal literal = getTheJenaModel().createTypedLiteral(expr);
+			DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXPRESSTION_PROPERTY_URI);
+			if (dtp != null) {
+				// these can be null during clean/build with resource open in editor
+				eqinst.addProperty(dtp, literal);
+			}
+		}
+		
+		// add the signature
+		List<Node> args = eq.getArguments();
+		List<Node> argTypes = eq.getArgumentTypes();
+		OntClass argcls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENT_CLASS_URI);
+		ObjectProperty argsProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI);
+		if (argcls == null || argsProp == null) {
+			addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
+		}
+		else {
+			if (args != null && args.size() > 0) {
+				DatatypeProperty nameProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI);
+				Property typeProp = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI);
+				if (nameProp == null || typeProp == null) {
+					addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
+				}
+				else {
+					List<Individual> argInstances = new ArrayList<Individual>();
+					for (int i = 0; i < args.size(); i++) {
+						Individual arginst = getTheJenaModel().createIndividual(argcls);
+						argInstances.add(arginst);
+						arginst.addProperty(nameProp, args.get(i).getName());
+						if (argTypes.get(i) == null) {
+							addError("Argument has no type", nm);
+						}
+						else {
+							arginst.addProperty(typeProp, argTypes.get(i).getURI());
+						}
+					}
+					RDFList argInstList = getTheJenaModel().createList(argInstances.iterator());
+					eqinst.addProperty(argsProp, argInstList);
+				}
+			}
+			List<Node> rettypes = eq.getReturnTypes();
+			if (rettypes != null && rettypes.size() > 0) {
+				Literal[] retTypeLits = new Literal[rettypes.size()];
+				int cntr = 0;
+				for (int i = 0; i < rettypes.size(); i++) {
+					Node rt = rettypes.get(i);
+					if (rt != null) {
+						retTypeLits[i] = getTheJenaModel().createLiteral(rt.getURI());
+						cntr++;
+					}
+				}
+				if (cntr > 0) {
+					RDFList retTypeList = getTheJenaModel().createList(retTypeLits);
+					ObjectProperty returnTypesProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI);
+					if (returnTypesProp == null) {
+						addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
+					}
+					else {
+						eqinst.addProperty(returnTypesProp, retTypeList);
+					}
+				}
+			}
+		}
+		// add annotations
 		EList<SadlAnnotation> anns = nm.getAnnotations();
 		if (anns != null) {
 			addAnnotationsToResource(eqinst, anns);
@@ -2853,9 +2951,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (getModelValidator() != null) {
 			// check return type against body expression
 			StringBuilder errorMessageBuilder = new StringBuilder();
-			if (!getModelValidator().validateBinaryOperationByParts(element, rtype, bdy, "function return",
-					errorMessageBuilder, false)) {
-				addTypeCheckingError(errorMessageBuilder.toString(), bdy);
+			if (retVal != null) {
+				if (!getModelValidator().validateBinaryOperationByParts(element, rtype, retVal, "function return",
+						errorMessageBuilder, false)) {
+					addTypeCheckingError(errorMessageBuilder.toString(), bdy);
+				}
+			}
+			else if (bdy != null) {
+				if (!getModelValidator().validateBinaryOperationByParts(element, rtype, bdy, "function return",
+						errorMessageBuilder, false)) {
+					addTypeCheckingError(errorMessageBuilder.toString(), bdy);
+				}
 			}
 		}
 		setCurrentEquation(null); // clear
@@ -2902,18 +3008,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Equation eq = createExternalEquation(nm, uri, rtype, params, location, whrExpr);
 		addEquation(element.eResource(), eq, nm);
 		Individual eqinst = getTheJenaModel().createIndividual(getDeclarationExtensions().getConceptUri(nm),
-				getTheJenaModel().getOntClass(SadlConstants.SADL_BASE_MODEL_EXTERNAL_URI));
-		DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_URI);
-		Literal literal = uri != null ? getTheJenaModel().createTypedLiteral(uri) : null;
-		if (eqinst != null && dtp != null && literal != null) {
-			// these can be null if a resource is open in the editor and a clean/build is
-			// performed
-			eqinst.addProperty(dtp, literal);
-			if (location != null && location.length() > 0) {
-				DatatypeProperty dtp2 = getTheJenaModel()
-						.getDatatypeProperty(SadlConstants.SADL_BASE_MODEL_EXTERNALURI_LOCATIOIN);
-				Literal literal2 = getTheJenaModel().createTypedLiteral(location);
-				eqinst.addProperty(dtp2, literal2);
+				getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI));
+		if (eqinst != null) {
+			addEquationPropertiesToJenaModel(nm, eq, eqinst);
+			DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNALURL_PROPERTY_URI);
+			Literal literal = uri != null ? getTheJenaModel().createTypedLiteral(uri) : null;
+			if (eqinst != null && dtp != null && literal != null) {
+				// these can be null if a resource is open in the editor and a clean/build is
+				// performed
+				eqinst.addProperty(dtp, literal);
+				if (location != null && location.length() > 0) {
+					DatatypeProperty dtp2 = getTheJenaModel()
+							.getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_LOCATION_PROPERTY_URI);
+					Literal literal2 = getTheJenaModel().createTypedLiteral(location);
+					eqinst.addProperty(dtp2, literal2);
+				}
 			}
 		}
 	}
@@ -3300,7 +3409,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				rightVariableDefn = expr.getLeft();
 				
-				if (EcoreUtil2.getContainerOfType(expr, QueryStatement.class) == null
+				if (!isContainedByQuery(expr)
 						&& EcoreUtil2.getContainerOfType(expr, RuleStatement.class) == null) {
 
 					addError("Variable definition on right is not supported at this time", expr);
@@ -4903,7 +5012,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			OntProperty pred = tr.getPredicate() != null ? getTheJenaModel().getOntProperty(tr.getPredicate().toFullyQualifiedString()) : null;
 			if (pred == null) {
 				if (tr.getPredicate() instanceof VariableNode) {
-					if (EcoreUtil2.getContainerOfType(expr, QueryStatement.class) != null) {
+					if (isContainedByQuery(expr)) {
 						return; // variables as property in queries is OK
 					}
 					addTypeCheckingError("Property '" + ((VariableNode) tr.getPredicate()).toDescriptiveString()
@@ -4916,7 +5025,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				return;
 			}
-			if (!(tr.getSubject() instanceof VariableNode) || EcoreUtil2.getContainerOfType(expr, QueryStatement.class) == null) {
+			if (!(tr.getSubject() instanceof VariableNode) || !isContainedByQuery(expr)) {
 				getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true,
 						isCrVar ? varName : null);
 			}
@@ -4945,6 +5054,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						false);
 			}
 		}
+	}
+
+	protected boolean isContainedByQuery(Expression expr) {
+		if (EcoreUtil2.getContainerOfType(expr, QueryStatement.class) != null) {
+			return true;
+		}
+		return false;
 	}
 
 	private void checkTripleRange(EObject subjeo, EObject predeo, EObject objeo, Expression expr, Node subjNode,
@@ -5701,7 +5817,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addError("An article (e.g., '" + article
 					+ "') should not be used in front of the name of an instance of a class.", expr);
 		} else if (article != null && isVariable(typenode)
-				&& EcoreUtil2.getContainerOfType(expr, QueryStatement.class) == null
+				&& !isContainedByQuery(expr)
 				&& EcoreUtil2.getContainerOfType(expr, RuleStatement.class) == null) {
 			addError("An article (e.g., '" + article + "') should not be used in front of the name of a variable.",
 					expr);
@@ -5988,7 +6104,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	private Object processExpression(SadlTypeReference type) throws TranslationException {
+	protected Object processExpression(SadlTypeReference type) throws TranslationException {
 
 		if (type instanceof SadlSimpleTypeReference) {
 			Object typeobj = processExpression(((SadlSimpleTypeReference) type).getType());
@@ -7293,7 +7409,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else if (superElementType.equals(OntConceptType.CLASS_LIST)
 					|| superElementType.equals(OntConceptType.DATATYPE_LIST)) {
 				for (int i = 0; i < newNames.size(); i++) {
-					rsrcList.add(getOrCreateListSubclass(newNames.get(i), superSRUri, superSR.eResource(), element.getFacet(), null));
+					rsrcList.add(getOrCreateListSubclass(newNames.get(i), superSRUri, superSR.eResource(), element.getFacet()));
 				}
 			} else if (superElementType.equals(OntConceptType.CLASS_PROPERTY)) {
 				for (int i = 0; i < newNames.size(); i++) {
@@ -7334,7 +7450,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (isList) {
 				com.hp.hpl.jena.rdf.model.Resource spdt = getSadlPrimitiveDataTypeResource(
 						(SadlPrimitiveDataType) superElement);
-				rsrcList.add(getOrCreateListSubclass(newNames.get(0), spdt.getURI(), superElement.eResource(), element.getFacet(), null));
+				rsrcList.add(getOrCreateListSubclass(newNames.get(0), spdt.getURI(), superElement.eResource(), element.getFacet()));
 			} else {
 				com.hp.hpl.jena.rdf.model.Resource spdt = processSadlPrimitiveDataType(element,
 						(SadlPrimitiveDataType) superElement, newNames.get(0));
@@ -7571,7 +7687,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 						OntResource rngRsrc;
 						if (isList) {
-							rngRsrc = getOrCreateListSubclass(null, rngName, element.eResource(), ((SadlRangeRestriction) spr1).getFacet(), null);
+							rngRsrc = getOrCreateListSubclass(null, rngName, element.eResource(), ((SadlRangeRestriction) spr1).getFacet());
 							propType = OntConceptType.CLASS_PROPERTY;
 						} else {
 							rngRsrc = sadlTypeReferenceToOntResource(rng);
@@ -8034,15 +8150,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 	}
-	
-	private void addLengthRestrictionsToListLiteral(OntClass aClass, SadlValueList aListLiteral) {
-		int lLength = aListLiteral.getExplicitValues().size();
-		HasValueRestriction lHVR = getTheJenaModel().createHasValueRestriction(null,
-				getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI),
-				getTheJenaModel().createTypedLiteral(lLength));
-		aClass.addSuperClass(lHVR);
-	}
-
 
 	private void addCardinalityRestriction(OntResource cls, Property retProp, int cardinality) {
 		if (cls != null && cls.canAs(OntClass.class) && retProp != null) {
@@ -8632,8 +8739,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 						else {
 							try {
-								SadlValueList listInitializer = element.getListInitializer();
-								cls = getOrCreateListSubclass(null, rsrc.getURI(), type.eResource(), null, listInitializer);
+								cls = getOrCreateListSubclass(null, rsrc.getURI(), type.eResource(), null);
 							} catch (JenaProcessorException e) {
 								addError(e.getMessage(), type);
 							}
@@ -9021,6 +9127,46 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						throw new JenaProcessorException(
 								"unhandled value type SadlResource that isn't an instance (URI is '" + uri + "')");
 					}
+				} else if (val instanceof SadlValueList) {
+					// EList<SadlExplicitValue> vals = ((SadlValueList)val).getExplicitValues();
+					// convert to SADL Typed List
+					try {
+						String typstr = getModelValidator().getType(val).getTypeCheckType().getURI();
+						OntClass lstcls = getOrCreateListSubclass(null, typstr, prop.eResource(), null);
+						Individual lval = getTheJenaModel().createIndividual(lstcls);
+						addListValues(lval, lstcls, (SadlValueList) val);
+						addInstancePropertyValue(inst, oprop, lval, val);
+						RDFNode nv = inst.getPropertyValue(oprop);
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (URISyntaxException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (DontTypeCheckException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidTypeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (PropertyWithoutRangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+//					addListValues(inst, cls, (SadlValueList) val);  // This was replaced by the code above because the
+																	// list is the value of a triple, not elements of the subject (inst)
 				} else if (val instanceof SadlExplicitValue) {
 					OntResource rng = oprop.getRange();
 					if (val instanceof SadlNumberLiteral && ((SadlNumberLiteral) val).getUnit() != null) {
@@ -9055,26 +9201,99 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							addError("A SadlExplicitValue is given to an ObjectProperty", val);
 						}
 					}
-				} else if (val instanceof SadlValueList) {
-					// EList<SadlExplicitValue> vals = ((SadlValueList)val).getExplicitValues();
-					addListValues(inst, cls, (SadlValueList) val);
 				} else {
 					throw new JenaProcessorException("unhandled value type for object property");
 				}
 			}
 		} else if (type.equals(OntConceptType.DATATYPE_PROPERTY)) {
-			DatatypeProperty dprop = getTheJenaModel().getDatatypeProperty(propuri);
-			if (dprop == null) {
+			OntProperty oprop = getTheJenaModel().getDatatypeProperty(propuri);
+			if (oprop == null) {
+				// maybe this is actually a list range, which means it's really an ObjectProperty
+				oprop = getTheJenaModel().getObjectProperty(propuri);
+				if (oprop != null) {
+					try {
+						TypeCheckInfo ptci = getModelValidator().getType(prop);
+						if (!ptci.isList()) {
+							addError("Something is wrong with this property; there is confusion about its type", prop);
+						}
+					} catch (DontTypeCheckException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (URISyntaxException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidTypeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (PropertyWithoutRangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			if (oprop == null) {
 //				dumpModel(getTheJenaModel());
 				addError(SadlErrorMessages.PROPERTY_NOT_EXIST.get(propuri), prop);
 			} else {
 				if (val instanceof SadlValueList) {
 					// EList<SadlExplicitValue> vals = ((SadlValueList)val).getExplicitValues();
-					addListValues(inst, cls, (SadlValueList) val);
+					// convert to SADL Typed List
+					String typstr;
+					try {
+						typstr = getModelValidator().getType(val).getTypeCheckType().getURI();
+						OntClass lstcls = getOrCreateListSubclass(null, typstr, prop.eResource(), null);
+						Individual lval = getTheJenaModel().createIndividual(lstcls);
+						addListValues(lval, lstcls, (SadlValueList) val);
+						addInstancePropertyValue(inst, oprop, lval, val);
+					} catch (InvalidNameException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (URISyntaxException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (DontTypeCheckException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvalidTypeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (PropertyWithoutRangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+//					addListValues(inst, cls, (SadlValueList) val);	// This was replaced by the code above because the
+																	// list is the value of a triple, not elements of the subject (inst)
 				} else if (val instanceof SadlExplicitValue) {
-					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, dprop.getRange());
+					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, oprop.getRange());
 					if (lval != null) {
-						addInstancePropertyValue(inst, dprop, lval, val);
+						addInstancePropertyValue(inst, oprop, lval, val);
 					}
 				} else {
 					addError("Invalid value (" + val.getClass().getCanonicalName() + ") for data property", val);
@@ -9325,13 +9544,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			
 			if(ignoreUnittedQuantities) {
-				if(lRange.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && 
-						(aRangeNode.canAs(OntResource.class) && aRangeNode.as(OntResource.class).getURI().equals(XSD.decimal.getURI()))) {
-					return;
-				}
-				if(lRange.getURI().equals(XSD.decimal.getURI()) && 
-						(aRangeNode.canAs(OntResource.class) && aRangeNode.as(OntResource.class).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI))) {
-					return;
+				if(lRange.isURIResource()) {
+					if(lRange.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && 
+							(aRangeNode.canAs(OntResource.class) && aRangeNode.as(OntResource.class).getURI().equals(XSD.decimal.getURI()))) {
+						return;
+					}
+					if(lRange.getURI().equals(XSD.decimal.getURI()) && 
+							(aRangeNode.canAs(OntResource.class) && aRangeNode.as(OntResource.class).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI))) {
+						return;
+					}
 				}
 			}
 			//If not list types, is new restriction a sub-type of original restriction?
@@ -9638,7 +9859,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return newCls;
 	}
 
-	private OntClass getOrCreateListSubclass(String newName, String typeUri, Resource resource, SadlDataTypeFacet facet, SadlValueList listLiteral)
+	private OntClass getOrCreateListSubclass(String newName, String typeUri, Resource resource, SadlDataTypeFacet facet)
 			throws JenaProcessorException {
 		if (sadlListModel == null) {
 			try {
@@ -9651,9 +9872,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String length = "-1";
 		String lengthMax = "-1";
 		String lengthMin = "-1";
-		if(listLiteral != null) {
-			length = String.valueOf(listLiteral.getExplicitValues().size());
-		}else if(facet != null) {
+		if(facet != null) {
 			length = facet.getLen() != null ? facet.getLen() : "-1";
 			lengthMax = facet.getMaxlen() != null ? facet.getMaxlen() : "-1";
 			lengthMin = facet.getMinlen() != null ? facet.getMinlen() : "-1";
@@ -9737,8 +9956,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		newcls.addSuperClass(avf2);
 		if(facet != null) {
 			addLengthRestrictionsToList(newcls, facet);
-		}else if(listLiteral != null) {
-			addLengthRestrictionsToListLiteral(newcls, listLiteral);
 		}
 		
 		return newcls;
@@ -9752,7 +9969,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (superProp == null) {
 				// throw new JenaProcessorException("Unable to find super property '" +
 				// superSRUri + "'");
-				getTheJenaModel().createObjectProperty(superSRUri);
+				superProp = getTheJenaModel().createObjectProperty(superSRUri);
 			}
 			newProp.addSuperProperty(superProp);
 			logger.debug("   Object property '" + newProp.getURI() + "' given super property '" + superSRUri + "'");
@@ -9964,7 +10181,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (ctype.equals(OntConceptType.CLASS)) {
 				if (((SadlSimpleTypeReference) sadlTypeRef).isList()) {
-					rsrc = getOrCreateListSubclass(null, strSRUri, sadlTypeRef.eResource(), lFacet, null);
+					rsrc = getOrCreateListSubclass(null, strSRUri, sadlTypeRef.eResource(), lFacet);
 				} else {
 					rsrc = getTheJenaModel().getOntClass(strSRUri);
 					if (rsrc == null) {
@@ -9985,13 +10202,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							e.printStackTrace();
 						}
 					} else {
-						return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource(), lFacet, null);
+						return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource(), lFacet);
 					}
 				}
 			} else if (ctype.equals(OntConceptType.DATATYPE_LIST)) {
 				rsrc = getTheJenaModel().getOntClass(strSRUri);
 				if (rsrc == null) {
-					return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource(), lFacet, null);
+					return getOrCreateListSubclass(strSRUri, strSRUri, strSR.eResource(), lFacet);
 				}
 			} else if (ctype.equals(OntConceptType.INSTANCE)) {
 				rsrc = getTheJenaModel().getIndividual(strSRUri);
@@ -10165,12 +10382,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}else {
 				lFacet = element.getFacet();
 			}
-			SadlValueList lListLiteral = null;
-			if(sadlTypeRef.eContainer() instanceof SadlInstance) {
-				lListLiteral = ((SadlInstance)sadlTypeRef.eContainer()).getListInitializer();
-			}
 			
-			onDatatype = getOrCreateListSubclass(null, onDatatype.toString(), sadlTypeRef.eResource(), lFacet, lListLiteral);
+			onDatatype = getOrCreateListSubclass(null, onDatatype.toString(), sadlTypeRef.eResource(), lFacet);
 		}
 		if (newDatatypeUri == null) {
 			return onDatatype;
@@ -11120,6 +11333,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public List<Rule> getRules() {
 		return rules;
 	}
+	
+	protected void setRules(List<Rule> rls) {
+		rules = rls;
+	}
 
 	private java.nio.file.Path checkImplicitSadlModelExistence(Resource resource, ProcessorContext context)
 			throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
@@ -11194,27 +11411,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		sb.append("	    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n");
 		sb.append("	    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n");
 		sb.append("	    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n");
-		sb.append("	    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel#\"\n");
 		sb.append("	    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n");
+		sb.append("	    xmlns=\"http://sadl.org/sadlbasemodel#\"\n");
+		sb.append("	    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel#\"\n");
 		sb.append("	    xml:base=\"http://sadl.org/sadlbasemodel\">\n");
 		sb.append("	  <owl:Ontology rdf:about=\"\">\n");
 		sb.append(
 				"	    <rdfs:comment xml:lang=\"en\">Base model for SADL. These concepts can be used without importing.</rdfs:comment>\n");
 		sb.append("	  </owl:Ontology>\n");
-		sb.append("	  <owl:Class rdf:ID=\"Equation\"/>\n");
-		sb.append("	  <owl:Class rdf:ID=\"ExternalEquation\"/>\n");
-		sb.append("	  <owl:DatatypeProperty rdf:ID=\"expression\">\n");
-		sb.append("	    <rdfs:domain rdf:resource=\"#Equation\"/>\n");
-		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
-		sb.append("	  </owl:DatatypeProperty>\n");
-		sb.append("	  <owl:DatatypeProperty rdf:ID=\"externalURI\">\n");
-		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
-		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#anyURI\"/>\n");
-		sb.append("	  </owl:DatatypeProperty>\n");
-		sb.append("	  <owl:DatatypeProperty rdf:ID=\"location\">\n");
-		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
-		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
-		sb.append("	  </owl:DatatypeProperty>\n");
+//		sb.append("	  <owl:Class rdf:ID=\"Equation\"/>\n");
+//		sb.append("	  <owl:Class rdf:ID=\"ExternalEquation\"/>\n");
+//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"expression\">\n");
+//		sb.append("	    <rdfs:domain rdf:resource=\"#Equation\"/>\n");
+//		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
+//		sb.append("	  </owl:DatatypeProperty>\n");
+//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"externalURI\">\n");
+//		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
+//		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#anyURI\"/>\n");
+//		sb.append("	  </owl:DatatypeProperty>\n");
+//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"location\">\n");
+//		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
+//		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
+//		sb.append("	  </owl:DatatypeProperty>\n");
 		sb.append("</rdf:RDF>\n");
 		return sb.toString();
 	}
@@ -11407,7 +11625,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return sb.toString();
 	}
 	
-	private boolean importSadlServicesConfigConceptsModel(Resource resource) throws JenaProcessorException, ConfigurationException {
+	protected boolean importSadlServicesConfigConceptsModel(Resource resource) throws JenaProcessorException, ConfigurationException {
 		if (sadlServicesConfigConceptModel == null) {
 			try {
 				sadlServicesConfigConceptModel = getOntModelFromString(resource, getSadlServicesConfigConceptsModel());
@@ -11582,7 +11800,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (!cls.isURIResource())
 			return null; // impliedProperties can only be given to a named class
 		if (!cls.canAs(OntClass.class)) {
-			addError("Can't get implied properties of a non-class entity.", null);
+			addError("Can't get implied properties of a non-class entity. Perhaps this can't be used before it is declared?", getDefaultEObject());
 			return null;
 		}
 		List<OntResource> allImplPropClasses = getAllImpliedPropertyClasses();
@@ -11819,6 +12037,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
+	public boolean isAssignmentOperator(List<String> aOperators) {
+		for(String lOperator : aOperators) {
+			if(isAssignmentOperator(lOperator)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isAssignmentOperator(String aOperator) {
+		return mAssignmentOperators.contains(aOperator);
+	}
+	
 	public boolean isNumericComparisonOperator(String operation) {
 		if (numericComparisonOperators.contains(operation)) {
 			return true;
@@ -12475,4 +12706,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private void setTypeCheckingRangeRequired(boolean typeCheckingRangeRequired) {
 		this.typeCheckingRangeRequired = typeCheckingRangeRequired;
 	}
+	
+	/**
+     * Method to get the length of an instance of a SADL typed list.
+     * @param stl -- an instance of a SADL typed list
+     * @return -- number of elements in the list else 0 if stl is not a SADL typed list
+     */
+     public int getSadlTypedListLength(com.hp.hpl.jena.rdf.model.Resource stl) {
+            Property fprop = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
+            Property rprop = getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI);
+            int cnt = 0;
+            com.hp.hpl.jena.rdf.model.Resource lst = stl;
+            while (lst != null) {
+                   if (lst.getProperty(fprop) != null) {
+                         cnt++;
+                         Statement nxt = lst.getProperty(rprop);
+                         lst = (nxt != null) ? nxt.getObject().asResource() : null;
+                   } else {
+                	   break;
+                   }
+            }
+            return cnt;
+     }
+
 }

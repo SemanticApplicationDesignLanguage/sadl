@@ -509,6 +509,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
 			}
 			format = configurationMgr.getModelGetter().getFormat();
+			if (repoType == null) repoType = format;	
 			if (!format.equals(IConfigurationManager.JENA_TDB)) {
 				String ext = tbox.substring(tbox.lastIndexOf('.'));
 				format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;	// this will create a reader that will handle either RDF/XML or RDF/XML-ABBREV 

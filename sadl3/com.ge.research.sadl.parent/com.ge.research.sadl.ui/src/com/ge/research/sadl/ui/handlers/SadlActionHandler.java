@@ -48,6 +48,7 @@ import org.eclipse.xtext.ui.editor.XtextEditor;
 import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.ui.editor.utils.EditorUtils;
 import org.eclipse.xtext.ui.resource.IResourceSetProvider;
+import org.eclipse.xtext.ui.util.ResourceUtil;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 import org.eclipse.xtext.validation.CheckMode;
@@ -73,10 +74,13 @@ import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlConsole;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("restriction")
 public abstract class SadlActionHandler extends AbstractHandler {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(SadlActionHandler.class);
 	private boolean isCanceled = false;
 	@Inject
 	protected IResourceSetProvider resourceSetProvider;
@@ -159,8 +163,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	    		        	}
 	    				}
 	    			} catch (Throwable e) {
-	    				// TODO Auto-generated catch block
-	    				e.printStackTrace();
+	    				LOGGER.error("Ignoring " + e, e);
 	    			}
 	            }
 	        }
@@ -398,16 +401,16 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	protected IGraphVisualizer getVisualizer(IConfigurationManagerForEditing configMgr, Map<String,String> prefMap) {
 		if (visualizer == null) {
 			String renderClass = prefMap.get(SadlPreferences.GRAPH_RENDERER_CLASS.getId());
-			
 			List<IGraphVisualizer> visualizers = configMgr.getAvailableGraphRenderers();
 					
 			if (visualizers != null && visualizers.size() > 0) {
+				visualizer = visualizers.get(0);		// replace this by selection and setting preference
 				for (IGraphVisualizer igv : visualizers) {
 					if (igv.getClass().getCanonicalName().equals(renderClass)) {
-						return igv;
+						visualizer = igv;
+						break;
 					}
 				}
-				visualizer = visualizers.get(0);		// replace this by selection and setting preference
 			}
 		}
 		return visualizer;	
@@ -450,8 +453,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 						}
 					}
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					LOGGER.error("Ignoring " + e, e);
 				}
 			}
 		});
@@ -462,6 +464,20 @@ public abstract class SadlActionHandler extends AbstractHandler {
 		return project.getFullPath().append("Graphs").toPortableString();
 	}
 	
+	public static String getModelFolderFromResource(Resource rsrc) {
+		URI uri = rsrc.getURI();
+		java.nio.file.Path trgtpath;
+		if (uri.isFile()) {
+			trgtpath = new File(rsrc.getURI().toFileString()).toPath();
+		}
+		else {
+			IFile trgtfile = ResourceUtil.getFile(rsrc);
+			trgtpath = trgtfile.getLocation().toFile().toPath();
+		}
+		String modelFolderUri = ResourceManager.findModelFolderPath(trgtpath.toFile().getAbsolutePath());
+		return modelFolderUri;
+	}
+
 	protected void createGraphFromResultSet(IGraphVisualizer iGraphVisualizer, IProject project, IFile trgtFile, String baseFileName, String graphName, String anchorNode,
 			String description, ResultSet rs) throws IOException {
 		String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 

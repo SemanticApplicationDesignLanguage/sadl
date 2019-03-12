@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +68,7 @@ import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf;
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
 import com.ge.research.sadl.sADL.SadlConstantLiteral;
 import com.ge.research.sadl.sADL.SadlDataType;
+import com.ge.research.sadl.sADL.SadlExplicitValue;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlModel;
@@ -528,7 +530,31 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			boolean dontTypeCheck = false;
 			TypeCheckInfo leftTypeCheckInfo = null;
 			try {
-				leftTypeCheckInfo = getType(leftExpression);
+				// if this is an embedded call, as opposed to a reference to the name of an Equation or ExternalEquation only, 
+				//	the leftExpression will be a Name and isFunction will be true
+				
+				// if op is "argument" then left is the argument, right is the param
+				// if the left is a name which is a not function and the containing type is Equation or ExternalEquation, 
+				//	then the return type is the type of the equation; other wise the type is returned by getType(leftExpression)
+				if (op.equals("argument") && leftExpression instanceof Name && 
+						((Name)leftExpression).getName().eContainer() instanceof ExternalEquationStatement &&
+						!((Name)leftExpression).isFunction()) {
+					NamedNode nn = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI);
+					nn.setNodeType(NodeType.ClassNode);
+					leftTypeCheckInfo = new TypeCheckInfo(new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI),
+							nn, this, leftExpression);
+				}
+				else if (op.equals("argument") && leftExpression instanceof Name && 
+						((Name)leftExpression).getName().eContainer() instanceof EquationStatement &&
+						!((Name)leftExpression).isFunction()) {
+					NamedNode nn = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI);
+					nn.setNodeType(NodeType.ClassNode);
+					leftTypeCheckInfo = new TypeCheckInfo(new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI),
+							nn, this, leftExpression);
+				}
+				else {
+					leftTypeCheckInfo = getType(leftExpression);
+				}
 				if (getModelProcessor().isConjunction(op) || getModelProcessor().isDisjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					// check for implied properties on boolean "and" or "statements"
@@ -1439,6 +1465,37 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName declarationConceptName = new ConceptName("TODO");
 			returnedTci =  new TypeCheckInfo(declarationConceptName, null, this, expression);
 		}
+		else if (expression instanceof SadlValueList) {
+			EList<SadlExplicitValue> vals = ((SadlValueList)expression).getExplicitValues();
+			if (vals != null) {
+				if (vals.size() > 0) {
+					TypeCheckInfo svltci = null;
+					for (int i = 0; i < vals.size(); i++) {
+						SadlExplicitValue val = vals.get(i);
+						TypeCheckInfo rttci = getType(val);
+						if (i == 0) {
+							svltci = rttci;
+						}
+						else if (!svltci.getTypeCheckType().equals(rttci.getTypeCheckType()) ) {
+							OntClass svtype = theJenaModel.getOntClass(svltci.getTypeCheckType().getURI());
+							OntClass rttype = theJenaModel.getOntClass(rttci.getTypeCheckType().getURI());
+							if (SadlUtils.classIsSubclassOf(svtype, rttype, true, null)) {
+								// svtype is a subclass of rttype
+								svltci.setTypeCheckType(new NamedNode(rttype.getURI()));
+							}
+							else if (SadlUtils.classIsSubclassOf(rttype, svtype, true, null)) {
+								// rttype is a subclass of svtype
+								// this is OK; svltci already has the broader class
+							}
+							else {
+								getModelProcessor().addTypeCheckingError("Not all list values are of the same type", expression);
+							}
+						}
+					}		
+					return convertElementOfListToListType(svltci);
+				}
+			}
+		}
 		else if(expression instanceof PropOfSubject){
 			returnedTci =  getType((PropOfSubject)expression);
 		}
@@ -1493,6 +1550,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if (expression instanceof SadlInstance) {
 			returnedTci =  getType((SadlInstance)expression);
+		}
+		else if (expression instanceof SadlReturnDeclaration) {
+			returnedTci = getType(((SadlReturnDeclaration)expression).getType());
 		}
 		else if (expression != null) {
 			getModelProcessor().addTypeCheckingError(SadlErrorMessages.DECOMPOSITION_ERROR.get(expression.toString()), expression);
@@ -1661,10 +1721,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (rightTypeCheckInfo != null && !isNumeric(rightTypeCheckInfo) && !isNumericWithImpliedProperty(rightTypeCheckInfo, ((BinaryOperation)expression).getRight())) {
 				getModelProcessor().addTypeCheckingError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getRight());
 			}
-			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
-			ConceptName decimalLiteralConceptName = getModelProcessor().namedNodeToConceptName(tctype);
-			decimalLiteralConceptName.setType(ConceptType.RDFDATATYPE);
-			return new TypeCheckInfo(decimalLiteralConceptName, tctype, this, expression);
+			
+			NamedNode tctype = null;
+			if(binopreturn != null) {
+				tctype = (NamedNode) binopreturn.getTypeCheckType();
+			}else {
+				tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
+			}
+			ConceptName lConceptName = getModelProcessor().namedNodeToConceptName(tctype);
+			lConceptName.setType(ConceptType.RDFDATATYPE);
+			return new TypeCheckInfo(lConceptName, tctype, this, expression);
 		}
 		if (binopreturn != null) {
 			return binopreturn;
@@ -3220,6 +3286,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if(!ontResource.isURIResource()){
 					if (isSadlTypedList(ontResource) && ontResource.canAs(OntClass.class)) {
 						tci = getSadlTypedListTypeCheckInfo(ontResource.as(OntClass.class), null, reference, null);
+						//Get length for List Literals if they exist
+						int lLength = getModelProcessor().getSadlTypedListLength(individual);
+						if(lLength > 0) {
+							NamedNode lNN = (NamedNode)tci.getTypeCheckType();
+							lNN.setListLength(lLength);
+						}
 					}
 					else {
 						ConceptName declarationConceptName = new ConceptName("TODO");
@@ -3865,6 +3937,38 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 				}
 			}
+			else if (defContainer instanceof ValueRow) {
+				// if this is the assignment of the return value(s) from an Equation, the type will be
+				//	given by the equation return type(s)
+				EObject cont = (ValueRow) defContainer;
+				do {
+					cont = cont.eContainer();
+				} while (cont instanceof ValueTable);
+				
+				if (cont instanceof BinaryOperation && 
+						(((BinaryOperation)cont).getOp().equals("is") || ((BinaryOperation)cont).getOp().equals("=") || ((BinaryOperation)cont).getOp().equals("=="))) {
+					if (((BinaryOperation)cont).getRight() instanceof Name &&
+							((Name)((BinaryOperation)cont).getRight()).isFunction()) {
+						EObject eqCont = ((Name)((BinaryOperation)cont).getRight()).getName().eContainer();
+						EList<SadlReturnDeclaration> retTypes = null;
+						if (eqCont instanceof ExternalEquationStatement) {
+							retTypes = ((ExternalEquationStatement)eqCont).getReturnType();
+						}
+						else if (eqCont instanceof EquationStatement) {
+							retTypes = ((EquationStatement)eqCont).getReturnType();
+						}
+						if (retTypes != null) {
+							int varIdx = ((ValueRow)defContainer).getExplicitValues().indexOf(name);
+							if (varIdx >= 0) {
+								SadlReturnDeclaration retType = retTypes.get(varIdx);
+								TypeCheckInfo rttci = getType(retType);
+								return rttci;
+							}
+						}
+					}
+				}
+				getModelProcessor().addTypeCheckingError("Variable container for variable '" + conceptNm + "' is a ValueRow but the construct isn't handled. Please report use case.", defContainer);
+			}
 		}
 		
 		if (conceptUri == null) {
@@ -4277,6 +4381,29 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		ConceptIdentifier leftConceptIdentifier = leftTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(leftTypeCheckInfo): null;
 		ConceptIdentifier rightConceptIdentifier = rightTypeCheckInfo != null ? getConceptIdentifierFromTypeCheckInfo(rightTypeCheckInfo) : null; 
+		if (leftConceptIdentifier == null && rightConceptIdentifier == null) {
+			if (leftTypeCheckInfo != null && leftTypeCheckInfo.getCompoundTypes() != null &&
+					rightTypeCheckInfo != null && rightTypeCheckInfo.getCompoundTypes() != null) {
+				// we have multiple types on each side. This happens with equations that return multiple values
+				// compare them pairwise
+				List<TypeCheckInfo> lctypes = leftTypeCheckInfo.getCompoundTypes();
+				List<TypeCheckInfo> rctypes = rightTypeCheckInfo.getCompoundTypes();
+				if (lctypes.size() == rctypes.size()) {
+					boolean allTrue = true;
+					for (int i = 0; i < lctypes.size(); i++) {
+						TypeCheckInfo lct = lctypes.get(i);
+						TypeCheckInfo rct = rctypes.get(i);
+						if (!compareTypesRecursively(operations, leftExpression, rightExpression, lct, rct)) {
+							allTrue = false;
+							break;
+						}
+					}
+					if (allTrue) {
+						return true;
+					}
+				}
+			}
+		}
 		if ((leftConceptIdentifier != null && leftConceptIdentifier.toString().equals(SadlConstants.CONSTANT_NONE)) || 
 				(rightConceptIdentifier != null && rightConceptIdentifier.toString().equals(SadlConstants.CONSTANT_NONE)) ||
 				(leftConceptIdentifier != null && leftConceptIdentifier.toString().equals("TODO")) || 
@@ -4612,6 +4739,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 					else if ((getModelProcessor().isNumericOperator(operations) || getModelProcessor().canBeNumericOperator(operations)) && 
 						(getModelProcessor().isNumericType(leftConceptName) && getModelProcessor().isNumericType(rightConceptName))) {
+						if(getModelProcessor().isAssignmentOperator(operations)) {
+							if(isInteger(leftConceptName) && isDecimal(rightConceptName)) {
+								return false;
+							}
+						}
 						return true;
 					}
 					else if (leftConceptName.getType() == null || rightConceptName.getType() == null) {
@@ -4662,8 +4794,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					
-					else if (leftConceptName.getType().equals(ConceptType.ONTCLASS) &&
-							rightConceptName.getType().equals(ConceptType.ONTCLASS)) {
+					else if ((leftConceptName.getType().equals(ConceptType.ONTCLASS) &&
+							rightConceptName.getType().equals(ConceptType.ONTCLASS)) ||
+							(leftConceptName.getType().equals(ConceptType.ONTCLASSLIST) &&
+									rightConceptName.getType().equals(ConceptType.ONTCLASSLIST))){
 						if (partOfTest(leftExpression, rightExpression)) {
 							// if we're in a test we don't want to type check as it may fail when not using the inferred model.
 							return true;

@@ -1,8 +1,8 @@
 sadlos2
 =======
 
-[![Build Status](https://travis-ci.org/crapo/sadlos2.svg?branch=master)](https://travis-ci.org/crapo/sadlos2)
-[![Build status](https://ci.appveyor.com/api/projects/status/293aewek023j2hom/branch/master?svg=true)](https://ci.appveyor.com/project/crapo/sadlos2/branch/master)
+[![Build Status](https://travis-ci.org/crapo/sadlos2.svg?branch=development)](https://travis-ci.org/crapo/sadlos2)
+[![Build status](https://ci.appveyor.com/api/projects/status/293aewek023j2hom/branch/development?svg=true)](https://ci.appveyor.com/project/crapo/sadlos2/branch/development)
 
 Semantic Application Language (SADL) Version 2 Open Source Code
 

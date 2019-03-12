@@ -39,7 +39,7 @@ import com.google.inject.Provider;
 public class RunQuery extends SadlActionHandler {
 
 	@Inject
-	private Provider<SadlRunQueryHandler> handlerProvider;
+	protected Provider<SadlRunQueryHandler> handlerProvider;
 	
 	private static final String pSHOWNAMESPACES = "pShowNamespaces";
 	private static final String[] CONSOLE = {"Console"};
@@ -138,7 +138,7 @@ public class RunQuery extends SadlActionHandler {
 	public static final String pQUERY = "pQuery";
 	public static final String[] ADHOCQUERY = {"AdHocQuery"};
 
-	private String getQuery(IConfigurationManagerForIDE configMgr) throws ConfigurationException {
+	public String getQuery(IConfigurationManagerForIDE configMgr) throws ConfigurationException {
 		String query = null;
 		List<Object> previousQueries = null;
 		List<ConfigurationItem> config = configMgr.getConfiguration(ADHOCQUERY, false);

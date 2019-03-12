@@ -23,6 +23,14 @@ import com.google.inject.Inject
 import com.google.inject.Injector
 import org.eclipse.emf.ecore.resource.Resource
 import java.util.Map
+import com.ge.research.sadl.model.gp.Query
+import com.ge.research.sadl.reasoner.ConfigurationException
+import com.ge.research.sadl.reasoner.TranslationException
+import com.ge.research.sadl.reasoner.InvalidNameException
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException
+import com.ge.research.sadl.reasoner.QueryParseException
+import com.ge.research.sadl.reasoner.QueryCancelledException
+import com.ge.research.sadl.model.gp.TripleElement
 
 /**
  * Provides {@code SADL} inferences.
@@ -39,7 +47,16 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 		
 		override runNamedQuery(Resource resource, String queryName) throws SadlInferenceException {
 			return newArrayOfSize(0);
-		}		
+		}
+		
+		override processAdhocQuery(Resource resource, Query query) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
+			return null;
+		}
+		
+		override insertTriplesAndQuery(Resource resource, TripleElement[] triples) throws SadlInferenceException {
+			return newArrayOfSize(0);
+		}
+		
 	}
 
 	@Inject

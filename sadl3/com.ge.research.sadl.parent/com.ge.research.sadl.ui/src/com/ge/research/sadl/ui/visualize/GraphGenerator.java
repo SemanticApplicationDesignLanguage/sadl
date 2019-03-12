@@ -36,15 +36,15 @@ import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.SadlResource;
-import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
-import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
-import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
@@ -138,6 +138,7 @@ public class GraphGenerator {
 	private OntModel baseModel = null;
 	protected Map<SadlResource, Long> explicitSadlResourceNodes = null;	// a queue of SadlResource nodes that need to be further processed after first pass on Context along with their sequence numbers
 	protected Map<Long,String> ctxSequenceNumbers = null;
+	private Map<String, Boolean> preferenceValues;
 	
 	public enum Orientation {TD, LR}
 
@@ -164,6 +165,21 @@ public class GraphGenerator {
 		setAnchor(startNode);
 		setProgressMonitor(monitor);
 	}
+	
+	public GraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, ConceptName startNode, IProgressMonitor monitor, Map<String,Boolean> prefValues) throws ConfigurationException, IOException {
+		setModelUri(publicUri);
+		setConfigMgr(configMgr);
+		setVisualizer(visualizer);
+		setProject(project);
+		if (publicUri != null) {
+			setTheJenaModel(configMgr.getOntModel(publicUri, Scope.LOCALONLY));
+			setTheJenaModelWithImports(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
+		}
+		setAnchor(startNode);
+		setProgressMonitor(monitor);
+		setPreferenceValues(prefValues);
+	}
+	
 
 	public ResultSet generateClassHierarchy(int size) throws ConfigurationException, InvalidNameException {
 		isCanceled();
@@ -1142,6 +1158,8 @@ public class GraphGenerator {
 	 * @throws InvalidNameException 
 	 */
 	public ResultSet convertDataToResultSet(List<GraphSegment> data, UriStrategy uriStrategy, String publicUri) throws InvalidNameException {
+		Boolean graphImplicitElements = getPreferenceValue(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId());
+		Boolean graphImplicitElementInstances = getPreferenceValue(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId());
 		List<String> columnList = new ArrayList<String>();
 		columnList.add("head");
 		columnList.add("edge");
@@ -1151,9 +1169,32 @@ public class GraphGenerator {
 		List<String> tailKeyList = null;
 		int arraySize = data.size();
 		int listCount = 0;
+		int rowsRemoved = 0;
 		for (int i = 0; i < data.size(); i++) {
 			isCanceled();
 			GraphSegment gs = data.get(i);
+			if (!graphImplicitElements) {
+				Object pobj = gs.getPredicate();
+				if (pobj instanceof Resource && ((Resource)pobj).isURIResource()) {
+					String pns = ((Resource)pobj).getNameSpace();
+					if (pns.endsWith("#")) {
+						pns = pns.substring(0, pns.length() - 1);
+					}
+					if (pns.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI) && 
+							((Resource)pobj).canAs(OntProperty.class) && ((Resource)pobj).as(OntProperty.class).isDatatypeProperty()) {
+						rowsRemoved++;
+						data.set(i, null);
+						continue;
+					}
+					Object oobj = gs.getObject();
+					if (oobj instanceof Resource && ((Resource)oobj).isURIResource() &&
+							((Resource)oobj).getNameSpace().equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
+						rowsRemoved++;
+						data.set(i, null);
+						continue;
+					}
+				}
+			}
 			if (gs.getHeadAttributes() != null) {
 				if (headKeyList == null) headKeyList = new ArrayList<String>();
 				Iterator<String> keyitr = gs.getHeadAttributes().keySet().iterator();
@@ -1193,49 +1234,51 @@ public class GraphGenerator {
 				(edgeKeyList != null ? edgeKeyList.size() : 0) + 
 				(tailKeyList != null ? tailKeyList.size() : 0) +
 				(isIncludeDuplicates() ? 2 : 0); 
-		Object array[][] = new Object[data.size()][maxColumns]; 
+		Object array[][] = new Object[data.size() - rowsRemoved][maxColumns]; 
 		
 		objectDisplayStrings = new HashMap<Object, String>();
 		int bncntr = 1;
 		for (int i = 0; i < arraySize; i++) {
 			isCanceled();
 			GraphSegment gs = data.get(i);
-			gs.setUriStrategy(uriStrategy);
-			Object s = gs.getSubject();
-			if (s != null && s instanceof Resource) {
-				if (!objectDisplayStrings.containsKey(s)) {
-					if (!((Resource)s).canAs(OntClass.class) || 
-							(!((Resource)s).as(OntClass.class).isEnumeratedClass() && 
-									!((Resource)s).as(OntClass.class).isRestriction() &&
-									!((Resource)s).as(OntClass.class).isUnionClass() &&
-									!((Resource)s).as(OntClass.class).isIntersectionClass())) {
-						String ss = null;
-						if (!gs.isSubjectIsList() && !((Resource)s).isURIResource()) {
-							ss = "<" + getNewSequenceNumber() + ">"; //"<bn-" + bncntr++ + ">";
+			if (gs != null) {
+				gs.setUriStrategy(uriStrategy);
+				Object s = gs.getSubject();
+				if (s != null && s instanceof Resource) {
+					if (!objectDisplayStrings.containsKey(s)) {
+						if (!((Resource)s).canAs(OntClass.class) || 
+								(!((Resource)s).as(OntClass.class).isEnumeratedClass() && 
+										!((Resource)s).as(OntClass.class).isRestriction() &&
+										!((Resource)s).as(OntClass.class).isUnionClass() &&
+										!((Resource)s).as(OntClass.class).isIntersectionClass())) {
+							String ss = null;
+							if (!gs.isSubjectIsList() && !((Resource)s).isURIResource()) {
+								ss = "<" + getNewSequenceNumber() + ">"; //"<bn-" + bncntr++ + ">";
+							}
+							if (ss == null) {
+								ss = gs.subjectToString(null);
+							}
+							objectDisplayStrings.put(s,  ss);
 						}
-						if (ss == null) {
-							ss = gs.subjectToString(null);
-						}
-						objectDisplayStrings.put(s,  ss);
 					}
 				}
-			}
-			Object o = gs.getObject();
-			if (o != null && o instanceof Resource) {
-				if (!objectDisplayStrings.containsKey(o)) {
-					if (!((Resource)o).canAs(OntClass.class) || 
-							(!((Resource)o).as(OntClass.class).isEnumeratedClass() && 
-									!((Resource)o).as(OntClass.class).isRestriction() &&
-									!((Resource)o).as(OntClass.class).isUnionClass() &&
-									!((Resource)o).as(OntClass.class).isIntersectionClass())) {
-						String os = null;
-						if (!gs.isObjectIsList() && !((Resource)o).isURIResource()) {
-							os = "<" + getNewSequenceNumber() + ">"; //"<bn-" + bncntr++ + ">";
+				Object o = gs.getObject();
+				if (o != null && o instanceof Resource) {
+					if (!objectDisplayStrings.containsKey(o)) {
+						if (!((Resource)o).canAs(OntClass.class) || 
+								(!((Resource)o).as(OntClass.class).isEnumeratedClass() && 
+										!((Resource)o).as(OntClass.class).isRestriction() &&
+										!((Resource)o).as(OntClass.class).isUnionClass() &&
+										!((Resource)o).as(OntClass.class).isIntersectionClass())) {
+							String os = null;
+							if (!gs.isObjectIsList() && !((Resource)o).isURIResource()) {
+								os = "<" + getNewSequenceNumber() + ">"; //"<bn-" + bncntr++ + ">";
+							}
+							if (os == null) {
+								os = gs.objectToString(null);
+							}
+							objectDisplayStrings.put(o,  os);
 						}
-						if (os == null) {
-							os = gs.objectToString(null);
-						}
-						objectDisplayStrings.put(o,  os);
 					}
 				}
 			}
@@ -1243,25 +1286,29 @@ public class GraphGenerator {
 		
 		boolean dataFound = false;
 		listCount = 0;	// restart counter
+		int rowCnt = 0;
 		for(int i = 0; i < arraySize; i++) {
 			isCanceled();
 			GraphSegment gs = data.get(i);
-			array[i+listCount][0] = gs.getSubject() != null ? (objectDisplayStrings.containsKey(gs.getSubject()) ? objectDisplayStrings.get(gs.getSubject()) : gs.subjectToString(objectDisplayStrings)) : null;
-			array[i+listCount][1] = gs.getPredicate() != null ? gs.predicateToString() : null;
-			array[i+listCount][2] = gs.getObject() != null ? (objectDisplayStrings.containsKey(gs.getObject()) ? objectDisplayStrings.get(gs.getObject()) : gs.objectToString(objectDisplayStrings)) : null;
-			dataFound = true;
-			if (gs.getHeadAttributes() != null) {
-				array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, i, gs);
-			}
-			if (gs.getEdgeAttributes() != null) {
-				array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, i, gs);
-			}
-			if (gs.getTailAttributes() != null) {
-				array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, i, gs);
-			}
-			if (isIncludeDuplicates()) {
-				array[i+listCount][maxColumns - 2] = gs.getSubjectNodeDuplicateSequenceNumber();
-				array[i+listCount][maxColumns - 1] = gs.getObjectNodeDuplicateSequenceNumber();
+			if (gs != null) {
+				array[rowCnt+listCount][0] = gs.getSubject() != null ? (objectDisplayStrings.containsKey(gs.getSubject()) ? objectDisplayStrings.get(gs.getSubject()) : gs.subjectToString(objectDisplayStrings)) : null;
+				array[rowCnt+listCount][1] = gs.getPredicate() != null ? gs.predicateToString() : null;
+				array[rowCnt+listCount][2] = gs.getObject() != null ? (objectDisplayStrings.containsKey(gs.getObject()) ? objectDisplayStrings.get(gs.getObject()) : gs.objectToString(objectDisplayStrings)) : null;
+				dataFound = true;
+				if (gs.getHeadAttributes() != null) {
+					array = attributeToDataArray("head", gs.getHeadAttributes(), columnList, array, rowCnt, gs);
+				}
+				if (gs.getEdgeAttributes() != null) {
+					array = attributeToDataArray("edge", gs.getEdgeAttributes(), columnList, array, rowCnt, gs);
+				}
+				if (gs.getTailAttributes() != null) {
+					array = attributeToDataArray("tail", gs.getTailAttributes(), columnList, array, rowCnt, gs);
+				}
+				if (isIncludeDuplicates()) {
+					array[rowCnt+listCount][maxColumns - 2] = gs.getSubjectNodeDuplicateSequenceNumber();
+					array[rowCnt+listCount][maxColumns - 1] = gs.getObjectNodeDuplicateSequenceNumber();
+				}
+				rowCnt++;
 			}
 		}
 		if (dataFound) {
@@ -1444,5 +1491,20 @@ public class GraphGenerator {
 			return map.get(sr);
 		}
 		return -1L;
+	}
+
+	protected void setPreferenceValues(Map<String,Boolean> prefValues) {
+		this.preferenceValues = prefValues;
+	}
+
+	protected Boolean getPreferenceValue(String key) {
+		if(this.preferenceValues == null || this.preferenceValues.isEmpty()) {
+			return false;
+		}
+		if(this.preferenceValues.containsKey(key)) {
+			return this.preferenceValues.get(key);
+		}
+		
+		return false;
 	}
 }

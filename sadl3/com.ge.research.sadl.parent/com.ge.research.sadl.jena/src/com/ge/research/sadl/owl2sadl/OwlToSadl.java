@@ -20,10 +20,12 @@ package com.ge.research.sadl.owl2sadl;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -261,14 +263,14 @@ public class OwlToSadl {
 		protected void addUnMappedRestriction(Restriction unMappedRestriction) {
 			if (!unMappedRestrictions.contains(unMappedRestriction)) {
 				unMappedRestrictions.add(unMappedRestriction);
-				System.out.println("Unmapped restriction information:");
+				logger.debug("Unmapped restriction information:");
 				StmtIterator sitr = unMappedRestriction.listProperties();
 				while (sitr.hasNext()) {
-					System.out.println("    " + sitr.nextStatement().toString());
+					logger.debug("    " + sitr.nextStatement().toString());
 				}
 				OntClass equiv = unMappedRestriction.getEquivalentClass();
 				if (equiv != null) {
-					System.out.println("      equivalent class:" + equiv.toString());
+					logger.debug("      equivalent class:" + equiv.toString());
 				}
 			}
 		}
@@ -461,7 +463,7 @@ public class OwlToSadl {
 					sb.append("\"");
 				}
 				sb.append("};");
-				System.out.println(sb.toString());
+				logger.debug(sb.toString());
 				return tokens;
 			}
 		}
@@ -555,8 +557,11 @@ public class OwlToSadl {
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			theModel.getBaseModel().write(System.out);
+			OutputStream os = new ByteArrayOutputStream();
+			theModel.getBaseModel().write(os);
+			logger.debug(os.toString());
 		}
+		getSpec().getDocumentManager().setProcessImports(false);
 		theBaseModel = ModelFactory.createOntologyModel(getSpec(), theModel);
 		
 		if (allTokens == null) {
@@ -590,7 +595,7 @@ public class OwlToSadl {
 			Iterator<String> mitr = map.keySet().iterator();
 			while (mitr.hasNext()) {
 				String prefix = mitr.next();
-				System.out.println("Mapping: " + prefix + " = " + map.get(prefix));
+				logger.debug("Mapping: " + prefix + " = " + map.get(prefix));
 			}			baseUri = "http://sadl.org/baseless";
 		}
 		if (baseUri.endsWith("#")) {
@@ -773,7 +778,7 @@ public class OwlToSadl {
 		while (siter.hasNext()) {
 			Statement s = siter.nextStatement();
 			statements.add(s);
-			System.out.println("Processing model statement: " + s.toString());
+			logger.debug("Processing model statement: " + s.toString());
 			if (isVerboseMode()) {
 				verboseModeStringBuilder.append("// Processed statement: ");
 				verboseModeStringBuilder.append(s.toString());
@@ -783,7 +788,7 @@ public class OwlToSadl {
 			OntResource ontSubj = theModel.getOntResource(subj);
 			if (shouldResourceBeOutput(ontSubj, false, false, true)) {
 				if (!addResourceToList(concepts, ontSubj)) {
-					System.out.println("subject resource not added to a list: " + ontSubj.toString());
+					logger.debug("subject resource not added to a list: " + ontSubj.toString());
 					if (isVerboseMode()) {
 						verboseModeStringBuilder.append("//     subject resource not added to processing list: \": ");
 						verboseModeStringBuilder.append(ontSubj.toString());
@@ -797,7 +802,7 @@ public class OwlToSadl {
 				OntProperty ontProp = mprop.as(OntProperty.class);
 				if (shouldResourceBeOutput(ontProp, false, false, true)) {
 					if(!addResourceToList(concepts, ontProp)) {
-						System.out.println("predicate resource not added to a list: " + ontProp.toString());
+						logger.debug("predicate resource not added to a list: " + ontProp.toString());
 						if (isVerboseMode()) {
 							verboseModeStringBuilder.append("//     predicate resource not added to processing list: \": ");
 							verboseModeStringBuilder.append(ontProp.toString());
@@ -816,7 +821,7 @@ public class OwlToSadl {
 				OntResource ontObj = theModel.getOntResource(obj.asResource());
 				if (shouldResourceBeOutput(ontObj, false, false, true)) {
 					if(!addResourceToList(concepts, ontObj)) {
-						System.out.println("object resource not added to a list: " + ontObj.toString());
+						logger.debug("object resource not added to a list: " + ontObj.toString());
 						if (isVerboseMode()) {
 							verboseModeStringBuilder.append("//     object resource not added to processing list: \": ");
 							verboseModeStringBuilder.append(ontObj.toString());
@@ -941,7 +946,7 @@ public class OwlToSadl {
 		}
 		
 		if (isVerboseMode() || !concepts.getClasses().isEmpty()) {
-			sadlModel.append("\n\n// Classes definitions:\n");
+			sadlModel.append("\n\n// Class definitions:\n");
 			List<OntClass> classes = concepts.getClasses();
 			for (int i = 0; i < classes.size(); i++) {
 				OntClass cls = classes.get(i);
@@ -970,7 +975,9 @@ public class OwlToSadl {
 			for (int i = 0; i < dtProperties.size(); i++) {
 				OntResource prop = dtProperties.get(i);
 				if (!concepts.getCompleted().contains(prop)) {
-					tempSb.append(dtPropertyToSadl(concepts, prop));
+					if (!ignoreNamespace(prop, true)) {
+						tempSb.append(dtPropertyToSadl(concepts, prop));
+					}
 				}
 			}
 			if (isVerboseMode() || tempSb.length() > 0) {
@@ -998,7 +1005,7 @@ public class OwlToSadl {
 				StmtIterator oitr = theModel.listStatements(null, RDFS.subClassOf, res);
 				while (oitr.hasNext()) {
 					Statement s1 = oitr.nextStatement();
-					System.out.println(s1.toString());
+					logger.debug(s1.toString());
 					Resource subj = s1.getSubject();
 					if (subj.canAs(Ontology.class) || subj.equals(OWL.Ontology)) {
 						sadlModel.append("// restriction on Ontology not supported in SADL: \n    // ");
@@ -1324,7 +1331,7 @@ public class OwlToSadl {
 			 else if (n.canAs(OntResource.class)){
 				 StmtIterator sitr = n.as(OntResource.class).listProperties();
 				 while (sitr.hasNext()) {
-					 System.out.println(sitr.nextStatement().toString());									 
+					 logger.debug(sitr.nextStatement().toString());									 
 				 }
 			 }
 		}
@@ -1386,7 +1393,7 @@ public class OwlToSadl {
 		ExtendedIterator<Triple> litr = theModel.getGraph().find(lst, RDF.Nodes.first, null);
 		while (litr.hasNext()) {
 			Triple t = litr.next();
-			System.out.println("Triple with 'first': " + t.toString());
+			logger.debug("Triple with 'first': " + t.toString());
 			Node mo = t.getMatchObject();
 			ExtendedIterator<Triple> litr2 = theModel.getGraph().find(mo, null, null);
 			while (litr2.hasNext()) {
@@ -1402,7 +1409,7 @@ public class OwlToSadl {
 					}
 					if (!trLst.contains(t2)) {
 						trLst.add(t2);
-						System.out.println("Adding triple: " + t2.toString());
+						logger.debug("Adding triple: " + t2.toString());
 					}
 				}
 			}
@@ -1443,6 +1450,29 @@ public class OwlToSadl {
 			sb.append(uriToSadlString(concepts, inst));
 		}
 		addNotesAndAliases(sb, inst);
+		return sb.toString();
+	}
+
+	private String listToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) {
+		Individual rest = inst;
+		StringBuilder sb = new StringBuilder("[");
+		int cntr = 0;
+		while (rest != null) {
+			RDFNode first = rest.getProperty(RDF.first).getObject();
+			if (cntr++ > 0) sb.append(",");
+			sb.append(rdfNodeToSadlString(concepts, first, true));
+			Statement rststmt = rest.getProperty(RDF.rest);
+			if (rststmt != null) {
+				RDFNode rstobj = rststmt.getObject();
+				if (rstobj != null && !rstobj.equals(RDF.nil) && rstobj.canAs(Individual.class)) {
+					rest = rstobj.as(Individual.class);
+				}
+				else {
+					rest = null;
+				}
+			}
+		}
+		sb.append("]");
 		return sb.toString();
 	}
 
@@ -2000,6 +2030,10 @@ public class OwlToSadl {
 			if (concepts.getInstances().contains(object)) {
 				concepts.getInstances().remove(object);
 			}
+			// is it a list?
+			if (object.as(Individual.class).getProperty(RDF.first) != null) {
+				return listToSadl(concepts, object.as(Individual.class), true);
+			}
 			return individualToSadl(concepts, object.as(Individual.class), true);
 		}
 		else {
@@ -2118,8 +2152,10 @@ public class OwlToSadl {
 				return true;
 			}
 			else {
-				concepts.addClass(ontRsrc.as(OntClass.class));
-				return true;
+				if (!ignoreNamespace(ontRsrc, true)) {
+					concepts.addClass(ontRsrc.as(OntClass.class));
+					return true;
+				}
 			}
 		}
 		else if (type.equals(OWL.ObjectProperty)) {
@@ -2170,14 +2206,14 @@ public class OwlToSadl {
 					}
 				}
 				if (eqcls != null) {
-					System.out.println("Ignoring RDFDatatype blank node which is equivalent to '" + eqcls.toString() + "'");
+					logger.debug("Ignoring RDFDatatype blank node which is equivalent to '" + eqcls.toString() + "'");
 				}
 				return false;
 			}
-			System.out.println("Examining rdfs:Datatype: " + ontRsrc.toString());
+			logger.debug("Examining rdfs:Datatype: " + ontRsrc.toString());
 			ExtendedIterator<Resource> eitr = ontRsrc.listRDFTypes(true);
 			while (eitr.hasNext()) {
-				System.out.println("    " + eitr.next().toString());
+				logger.debug("    " + eitr.next().toString());
 			}
 			concepts.addDatatype(ontRsrc);
 			return false;
@@ -2328,7 +2364,7 @@ public class OwlToSadl {
 		else if (ontRsrc.canAs(Individual.class)) {
 			Individual inst = ontRsrc.asIndividual();
 			// only named instances can stand alone
-			if (inst.isURIResource()) {
+			if (inst.isURIResource() && !ignoreNamespace(ontRsrc, true)) {
 				concepts.addInstance(inst);
 				return true;
 			}
@@ -2391,7 +2427,7 @@ public class OwlToSadl {
 //					ExtendedIterator<OntClass> eitr = cls.listEquivalentClasses();
 //					while (eitr.hasNext()) {
 //						equivCls = eitr.next();
-//						System.out.println("Equivalent class to '" + ontClassToString(cls, null) + "': "  + ontClassToString(equivCls, null));
+//						logger.debug("Equivalent class to '" + ontClassToString(cls, null) + "': "  + ontClassToString(equivCls, null));
 //					}
 //				}
 				if (shouldResourceBeOutput(cls, true, false, false)) {
@@ -2569,7 +2605,7 @@ public class OwlToSadl {
 					}
 				}
 				catch (Throwable t) {
-					System.out.println("Unexpected error processing class '" + cls.toString() + "': " + t.getMessage());
+					logger.debug("Unexpected error processing class '" + cls.toString() + "': " + t.getMessage());
 				}
 				
 				addEndOfStatement(sadlModel, 1);
@@ -2604,7 +2640,7 @@ public class OwlToSadl {
 			}
 		}
 		catch (Throwable t) {
-			System.out.println("Unexpected erro getting super classes of '" + cls.toString() + "': " + t.getLocalizedMessage());
+			logger.debug("Unexpected erro getting super classes of '" + cls.toString() + "': " + t.getLocalizedMessage());
 		}
 		return null;
 	}
@@ -2975,12 +3011,12 @@ public class OwlToSadl {
 							rdfNodeToString(hvr, 0) + " .\n");				
 				}
 				else {
-					System.out.println("Unhandled restriction: " + rest.getClass());
+					logger.debug("Unhandled restriction: " + rest.getClass());
 				}
 				resourcesOutput.add(cls);
 			}
 			if (cls.isAnon()) {
-//				System.out.println("returning null on anon restriction--should this happen??");
+//				logger.debug("returning null on anon restriction--should this happen??");
 				return null;
 			}
 			else {
@@ -3006,7 +3042,7 @@ public class OwlToSadl {
 			return resourceToString(cls, false);
 		}
 		else {
-			System.out.println("Anon class; returning string equivalent--this shouldn't happen.");
+			logger.debug("Anon class; returning string equivalent--this shouldn't happen.");
 			return cls.toString();
 		}
 	}
@@ -3034,7 +3070,7 @@ public class OwlToSadl {
 			while (sitr.hasNext()) {
 				Statement s = sitr.next();
 				if (!s.getPredicate().equals(RDF.type)) {
-					System.out.println(s);
+					logger.debug(s.toString());
 					sitr.close();
 					return;
 				}
@@ -3297,7 +3333,7 @@ public class OwlToSadl {
 		if (!of.exists()) {
 			File cd = new File(".");
 			if (cd.exists()) {
-				System.out.println("Current directory: " + cd.getCanonicalPath());
+				logger.debug("Current directory: " + cd.getCanonicalPath());
 			}
 			throw new IOException("Ontology file '" + ontology + "' does not exist.");
 		}
@@ -3371,7 +3407,7 @@ public class OwlToSadl {
 						}
 //						StmtIterator siter = rstrct.listProperties();
 //						while (siter.hasNext()) {
-//							System.out.println(siter.nextStatement().toString());
+//							logger.debug(siter.nextStatement().toString());
 //						}
 					}
 				}

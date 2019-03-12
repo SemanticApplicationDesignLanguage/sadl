@@ -17,6 +17,15 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
+import com.ge.research.sadl.model.gp.Query
+import com.ge.research.sadl.model.gp.TripleElement
+import com.ge.research.sadl.reasoner.ConfigurationException
+import com.ge.research.sadl.reasoner.InvalidNameException
+import com.ge.research.sadl.reasoner.QueryCancelledException
+import com.ge.research.sadl.reasoner.QueryParseException
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException
+import com.ge.research.sadl.reasoner.SadlCommandResult
+import com.ge.research.sadl.reasoner.TranslationException
 import java.util.Map
 import org.eclipse.emf.ecore.resource.Resource
 
@@ -40,4 +49,15 @@ interface ISadlInferenceProcessor {
 	 * 0th and only element is SadlCmdResults
 	 */
 	def Object[] runNamedQuery(Resource resource, String queryName) throws SadlInferenceException;
+	
+	/**
+	 * Called to run an ad hoc query
+	 */
+	def SadlCommandResult processAdhocQuery(Resource resource, Query query) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException;
+
+	/**
+	 * Call to insert complete triples into model and query using incomplete triples
+	 * returns an array of ResultSet, one for each query triple pattern
+	 */
+	def Object[] insertTriplesAndQuery(Resource resource, TripleElement[] triples) throws SadlInferenceException ;
 }

@@ -25,6 +25,7 @@ import org.eclipse.xtext.resource.IResourceDescription
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.junit.Assert
 import org.junit.Test
+import org.junit.Ignore
 
 class ExternalEmfResourceTest extends AbstractLinkingTest {
 	
@@ -162,6 +163,57 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 			FooBar is a type of AcuityController.
 			MyHero is an ArtificialAgent.
 		'''.sadl.assertNoErrors;
+	}
+	
+	@Ignore
+	@Test def void testSadlBaseModel() {
+		'''
+			<rdf:RDF
+				xmlns="http://sadl.org/sadlbasemodel#"
+			    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+			    xmlns:owl="http://www.w3.org/2002/07/owl#"
+			    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+			    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel#"
+			    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+			  xml:base="http://sadl.org/sadlbasemodel">
+			  <owl:Ontology rdf:about="">
+			    <rdfs:comment xml:lang="en">Base model for SADL. These concepts can be used without importing.</rdfs:comment>
+			  </owl:Ontology>
+			  <owl:Class rdf:ID="ExternalEquation"/>
+			  <owl:Class rdf:ID="Equation"/>
+			  <owl:DatatypeProperty rdf:ID="location">
+			    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+			    <rdfs:domain rdf:resource="#ExternalEquation"/>
+			  </owl:DatatypeProperty>
+			  <owl:DatatypeProperty rdf:ID="externalURI">
+			    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#anyURI"/>
+			    <rdfs:domain rdf:resource="#ExternalEquation"/>
+			  </owl:DatatypeProperty>
+			  <owl:DatatypeProperty rdf:ID="expression">
+			    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+			    <rdfs:domain rdf:resource="#Equation"/>
+			  </owl:DatatypeProperty>
+			</rdf:RDF>
+		'''.owl.explore
+	}
+	
+	protected def void explore(Resource resource) {
+		val sadlFile = '''
+			uri "http://sadl.org/Tests/External".
+			
+			Bar is an ^Equation.
+		'''.sadl
+		
+		validator.assertNoErrors(sadlFile)
+		
+		val desc = mnr.getResourceDescription(resource)
+		val exported = desc.exportedObjects.toList
+		for (exp : exported) {
+			print(converter.toString(exp.name))
+		}
+		
+//		Assert.assertEquals("http://sadl.org/test.sadl", converter.toString(exported.get(0).name))
+		
 	}
 	
 	protected def void assertContents(Resource resource) {

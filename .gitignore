@@ -6,6 +6,9 @@ bin/
 target/
 classes/
 .DS_Store
+.classpath
+*~
+.gitignore
 com.ge.research.sadl.swi-prolog-plugin/.settings/org.eclipse.core.resources.prefs
 com.ge.research.sadl.swi-prolog-plugin/.settings/org.eclipse.jdt.core.prefs
 com.ge.research.sadl.swi-prolog-plugin/.settings/org.eclipse.m2e.core.prefs
@@ -24,3 +27,4 @@ sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-impl/tmp/graphvi
 *.svg
 sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ui/My Run SADL IDE (Eclipse) jdk 1.8 (debug).launch
 sadl3/Examples/TestSadl3Ide/Metrics/
+*.genmodel

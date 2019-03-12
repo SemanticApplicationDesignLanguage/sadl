@@ -143,9 +143,9 @@ Replace:
 ;
 
 Replacement:
-	before=(NUMBER | STRING | IDEXT | 'true' | 'false') WS ':' WS after=( NUMBER |STRING | IDEXT | 'true' | 'false')
+//	before=(NUMBER | STRING | IDEXT | 'true' | 'false') WS ':' WS after=( NUMBER |STRING | IDEXT | 'true' | 'false')
 //	(beforeLit=LiteralValue | beforeStr=STRING) ':' (afterLit=LiteralValue | afterStr=STRING)
-//	(beforeIDEXT=IDEXT | beforeLit=LiteralValue) WS? ':' WS? (afterIDEXT = IDEXT | afterLit=LiteralValue)
+	(beforeIDEXT=IDEXT | beforeLit=LiteralValue) WS? ':' WS? (afterIDEXT = IDEXT | afterLit=LiteralValue)
 ;
 
 Group:
