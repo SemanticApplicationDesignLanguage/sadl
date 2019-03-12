@@ -39,6 +39,7 @@ public class OntModelProvider {
 		List<Object> otherContent;
 		List<SadlCommand> sadlCommands = null;
 		Map<EObject, List<Property>> impliedPropertiesUsed = null;
+		Map<String, Object> privateKeyValueStore = null;
 		boolean isLoading = false;
 		
 		@Override
@@ -104,6 +105,38 @@ public class OntModelProvider {
 			return a.otherContent;
 		}
 		return null;
+	}
+	
+	public static void addPrivateKeyValuePair(Resource resource, String key, Object value) {
+		OntModelAdapter adapter = findAdapter(resource);
+		if (adapter == null) {
+			adapter = new OntModelAdapter();
+			adapter.isLoading = true;
+			resource.eAdapters().add(adapter);
+		}
+		if (adapter.privateKeyValueStore == null) {
+			adapter.privateKeyValueStore = new HashMap<String, Object>();
+		}
+		adapter.privateKeyValueStore.put(key, value);
+	}
+	
+	public static Object getPrivateKeyValuePair(Resource resource, String key) {
+		OntModelAdapter a = findAdapter(resource);
+		if (a != null && a.privateKeyValueStore != null) {
+			return a.privateKeyValueStore.get(key);
+		}
+		return null;
+	}
+	
+	public static boolean clearPrivateKeyValuePair(Resource resource, String key) {
+		OntModelAdapter a = findAdapter(resource);
+		if (a != null && a.privateKeyValueStore != null) {
+			if (a.privateKeyValueStore.containsKey(key)) {
+				a.privateKeyValueStore.remove(key);
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public static List<SadlCommand> getSadlCommands(Resource resource) {

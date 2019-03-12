@@ -35,6 +35,9 @@ public class NamedNode extends Node {
 		PropertyNode, DataTypeProperty, ObjectProperty, AnnotationProperty, 
 		FunctionNode, VariableNode}
 
+	// editor object for marker addition to editor
+	private Object context;
+
 	private Node mLocalizedType = null;
 	
 	private boolean validated = false;
@@ -521,6 +524,14 @@ public class NamedNode extends Node {
 	 */
 	public void setImpliedPropertyNode(NamedNode aImpliedPropertyNode) {
 		this.mImpliedPropertyNode = aImpliedPropertyNode;
+	}
+
+	public Object getContext() {
+		return context;
+	}
+
+	public void setContext(Object context) {
+		this.context = context;
 	}
 	
 	

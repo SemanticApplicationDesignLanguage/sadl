@@ -106,6 +106,16 @@ interface ISadlImplicitModelContentProvider {
 			UnittedQuantity is a class,
 				described by ^value with values of type decimal,
 				described by unit with values of type string.
+			^Equation is a class,
+				described by expression with a single value of type string.
+			ExternalEquation is a type of ^Equation,
+				described by externalURI with a single value of type anyURI,
+				described by externalURL with values of type string.
+			Argument is a class, described by argName with a single value of type string, 
+				described by argType.
+			argType of Argument has at most 1 value.
+			arguments describes ^Equation with a single value of type Argument List.
+			returnTypes describes ^Equation with a single value of type anyURI List.
 			^Rule is a class.
 			NamedQuery is a class.
 		''';

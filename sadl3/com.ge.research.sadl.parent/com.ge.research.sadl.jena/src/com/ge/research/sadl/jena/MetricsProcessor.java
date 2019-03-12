@@ -1,7 +1,5 @@
 package com.ge.research.sadl.jena;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -15,8 +13,6 @@ import org.eclipse.emf.common.util.URI;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
@@ -28,9 +24,6 @@ import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFWriter;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 public class MetricsProcessor implements IMetricsProcessor {
 	private String filename;
@@ -186,7 +179,7 @@ public class MetricsProcessor implements IMetricsProcessor {
 		return markerType;
 	}
 
-	private String getModelFolderPath(org.eclipse.emf.ecore.resource.Resource resource) {
+	public String getModelFolderPath(org.eclipse.emf.ecore.resource.Resource resource) {
 		URI v = resource.getURI().trimSegments(resource.getURI().segmentCount() - 2);
 		v = v.appendSegment(UtilsForJena.OWL_MODELS_FOLDER_NAME);
 		String modelFolderPathname;

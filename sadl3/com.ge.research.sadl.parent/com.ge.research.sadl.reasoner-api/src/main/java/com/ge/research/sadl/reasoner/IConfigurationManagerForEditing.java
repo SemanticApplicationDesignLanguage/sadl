@@ -164,6 +164,8 @@ public interface IConfigurationManagerForEditing extends IConfigurationManager {
 	 * @return - true if successful else false
 	 */
 	public abstract boolean saveOntPolicyFile();
+	
+	public abstract void saveOwlFile(OntModel model, String modelName, String owlFileName)  throws ConfigurationException, IOException;
 
 	public abstract boolean isConfigChanged();
 

@@ -85,12 +85,16 @@ class AmbiguousNameErrorEObjectDescription extends ForwardingEObjectDescription 
 		// Here, we are in the middle of scoping and linking, hence we cannot resolve the `alias` but the base URI.
 		return allDescriptions.map['''«baseUri» «name»'''].join(',');
 	}
+	
+	def getEObjDescAlternatives() {
+		return alternatives;
+	}
 
 	protected def getMessage() {
 		return '''Ambiguously imported name '«name»' from «allDescriptions.map["'" + baseUri + "'"].join(', ')». Please use a prefix to disambiguate name.''';
 	}
 
-	protected def getAllDescriptions() {
+	def getAllDescriptions() {
 		return ImmutableSet.of(this).concat(alternatives);
 	}
 

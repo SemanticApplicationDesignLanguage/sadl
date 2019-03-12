@@ -178,5 +178,4 @@ Bundle-ClassPath: lib/commons-codec.jar,
  lib/xml-apis.jar,
  lib/com.ge.research.sadl.jena-wrapper-for-sadl.jar,
  lib/sadlserver-api.jar,
- lib/sadlserver-impl.jar,
- target
+ lib/sadlserver-impl.jar

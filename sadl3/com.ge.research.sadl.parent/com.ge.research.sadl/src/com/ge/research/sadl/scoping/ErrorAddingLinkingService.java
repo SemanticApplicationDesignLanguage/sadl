@@ -6,6 +6,7 @@ import static com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription.
 
 import java.util.Collections;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EClass;
@@ -59,7 +60,7 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 			}
 			if (eObjectDescription != null) {
 				String errorMessage = eObjectDescription.getUserData(AMBIGUOUS_NAME_ERROR);
-				if (errorMessage != null) {
+				if (errorMessage != null && !alternativesAllSame(eObjectDescription)) {
 					createAndAddDiagnostic(context.eResource(), node, errorMessage, eObjectDescription.getUserData(AMBIGUOUS_NAME_ALTERNATIVES));
 				}
 				List<EObject> results = Collections.singletonList(eObjectDescription.getEObjectOrProxy());
@@ -69,6 +70,29 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 		return Collections.emptyList();
 	}
 	
+	/**
+	 * This tests to see if the alternatives are all the same. If they are then it is not
+	 * ambiguous as concepts with the same URI are the same concept. This can happen when 
+	 * multiple projects are used, each with their own sadlimplicitmodel.
+	 * @param eObjectDescription
+	 * @return
+	 */
+	protected boolean alternativesAllSame(IEObjectDescription eObjectDescription) {
+		String alternatives = eObjectDescription.getUserData(AMBIGUOUS_NAME_ALTERNATIVES);
+		StringTokenizer st = new StringTokenizer(alternatives, ",");
+		String lastToken = null;
+		boolean allSame = true;
+		while (st.hasMoreTokens()) {
+			String thisToken = st.nextToken();
+			if (lastToken != null && !lastToken.equals(thisToken)) {
+				allSame = false;
+				break;
+			}
+			lastToken = thisToken;
+		}
+		return allSame;
+	}
+
 	protected void createAndAddDiagnostic(Resource resource, INode node, String message, String commaSeparatedAlternatives) {
 		resource.getErrors().add(new XtextLinkingDiagnostic(node, message, AMBIGUOUS_NAME_ISSUE_CODE, commaSeparatedAlternatives));
 	}

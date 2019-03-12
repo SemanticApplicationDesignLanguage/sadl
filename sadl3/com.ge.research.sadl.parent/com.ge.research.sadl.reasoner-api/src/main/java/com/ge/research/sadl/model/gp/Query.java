@@ -201,6 +201,9 @@ public class Query extends SadlCommand {
 	}
 	
 	public String toDescriptiveString() {
+		if (sparqlQueryString != null) {
+			return sparqlQueryString;
+		}
 		StringBuilder sb = new StringBuilder();
 		if (variables != null) {
 			sb.append(getKeyword());

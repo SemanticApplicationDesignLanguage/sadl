@@ -4,11 +4,6 @@ public class SadlConstants {
 	public static final String SADL_BASE_MODEL_FILENAME = "SadlBaseModel";
 	public static final String SADL_BASE_MODEL_URI = "http://sadl.org/sadlbasemodel";
 	public static final String SADL_BASE_MODEL_PREFIX = "sadlbasemodel";
-	public static final String SADL_BASE_MODEL_EQUATION_URI = SADL_BASE_MODEL_URI + "#Equation";
-	public static final String SADL_BASE_MODEL_EQ_EXPRESSION_URI = SADL_BASE_MODEL_URI + "#expression";
-	public static final String SADL_BASE_MODEL_EXTERNAL_URI = SADL_BASE_MODEL_URI + "#ExternalEquation";
-	public static final String SADL_BASE_MODEL_EXTERNALURI_URI = SADL_BASE_MODEL_URI + "#externalURI";
-	public static final String SADL_BASE_MODEL_EXTERNALURI_LOCATIOIN = SADL_BASE_MODEL_URI + "#location";
 	
 	public static final String SADL_LIST_MODEL_FILENAME = "SadlListModel";
 	public static final String SADL_LIST_MODEL_PREFIX = "sadllistmodel";
@@ -36,6 +31,17 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_NAMEDQUERY_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#NamedQuery";
 	public static final String SADL_IMPLICIT_MODEL_QUERY_STRING_URI = SADL_IMPLICIT_MODEL_URI + "#queryString";
 	public static final String SADL_IMPLICIT_MODEL_RULE_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Rule";
+	public static final String SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Equation";
+	public static final String SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#ExternalEquation";
+	public static final String SADL_IMPLICIT_MODEL_EXPRESSTION_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#expression";
+	public static final String SADL_IMPLICIT_MODEL_EXTERNALURL_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#externalURI";
+	public static final String SADL_IMPLICIT_MODEL_LOCATION_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#externalURL";
+	public static final String SADL_IMPLICIT_MODEL_ARGUMENT_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Argument";
+	public static final String SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#argName";
+	public static final String SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#argType";
+	public static final String SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#arguments";
+	public static final String SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#returnTypes";
+	
 	
 	public static final String SADL_RULE_PATTERN_URI = "http://sadl.org/rule/patterns";
 	public static final String SADL_RULE_PATTERN_PREFIX = "srpp";
