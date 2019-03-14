@@ -1470,7 +1470,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		this.modelFolderPath = modelFolderPath.replace('\\', '/');
 	}
 
-	private String getModelName() {
+	protected String getModelName() {
 		if (modelName == null) {
 			
 		}
