@@ -38,7 +38,7 @@ public class ConfigurationManagerForIdeFactory {
 		if (configManagers == null) {
 			configManagers = new HashMap<String, ConfigurationManagerForIDE>();
 		}
-		modelFolder = modelFolder != null ? formatModelFolder(modelFolder) : null;
+		modelFolder = modelFolder != null ? formatPathRemoveBackslashes(modelFolder) : null;
 		if (!configManagers.containsKey(modelFolder)) {
 			ConfigurationManagerForIDE newCM = new ConfigurationManagerForIDE(modelFolder, format);
 			configManagers.put(modelFolder, newCM);
@@ -67,12 +67,11 @@ public class ConfigurationManagerForIdeFactory {
 		}
 	}
 	
-	private static String formatModelFolder(String modelFolder) {
-		if(modelFolder == null){
+	public static String formatPathRemoveBackslashes(String path) {
+		if(path == null){
 			return null;
 		}
-		
-		return modelFolder.replace("\\", "/");
+		return path.replace("\\", "/");
 	}
 
 }
