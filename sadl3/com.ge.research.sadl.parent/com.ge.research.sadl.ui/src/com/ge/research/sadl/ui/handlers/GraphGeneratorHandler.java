@@ -225,7 +225,15 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		Display.getDefault().asyncExec(new Runnable(){
 			@Override
 			public void run() {
-				console.print(mType, message);
+				if (console != null) {
+					console.print(mType, message);
+				}
+				else if (mType.equals(MessageType.INFO)){
+					System.out.println(message);
+				}
+				else {
+					System.err.println(message);
+				}
 			}
 		});
 	}
