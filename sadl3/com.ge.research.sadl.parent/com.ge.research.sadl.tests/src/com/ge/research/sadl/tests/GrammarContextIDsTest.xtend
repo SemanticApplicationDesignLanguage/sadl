@@ -95,7 +95,7 @@ class GrammarContextIDsTest extends Assert {
 	def void check_03() {
 		assertEquals(
 			SADLPROPERTYINITIALIZER_PROPERTY,
-			sadlPropertyInitializerAccess.propertyAssignment_0_2
+			sadlPropertyInitializerAccess.propertyAssignment_2_2
 		);
 	}
 
@@ -144,6 +144,7 @@ class GrammarContextIDsTest extends Assert {
 		assertEquals(
 			SADLPROPERTYINITIALIZER_VALUE,
 			sadlPropertyInitializerAccess.valueAssignment_0_3_0
+//			sadlPropertyInitializerAccess.valueAssignment_3_4_0
 		);
 	}
 

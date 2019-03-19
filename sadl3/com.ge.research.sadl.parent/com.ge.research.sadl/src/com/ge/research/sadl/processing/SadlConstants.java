@@ -36,12 +36,17 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_EXPRESSTION_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#expression";
 	public static final String SADL_IMPLICIT_MODEL_EXTERNALURL_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#externalURI";
 	public static final String SADL_IMPLICIT_MODEL_LOCATION_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#externalURL";
-	public static final String SADL_IMPLICIT_MODEL_ARGUMENT_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Argument";
-	public static final String SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#argName";
-	public static final String SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#argType";
+	public static final String SADL_IMPLICIT_MODEL_DATA_DESCRIPTOR_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#DataDescriptor";
+	public static final String SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#descriptorName";
+	public static final String SADL_IMPLICIT_MODEL_DATATYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#dataType";
 	public static final String SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#arguments";
 	public static final String SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#returnTypes";
 	
+	public static final String SADL_IMPLICIT_MODEL_DATA_TABLEL_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#DataTable";
+	public static final String SADL_IMPLICIT_MODEL_DATA_TABLE_ROW_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#DataTableRow";
+	public static final String SADL_IMPLICIT_MODEL_DATA_ROW_VALUES_RPOERTY_URI = SADL_IMPLICIT_MODEL_URI + "#rowValues";
+	public static final String SADL_IMPLICIT_MODEL_DATA_COLUMN_DESCRIPTORS_PROPERY_URI = SADL_IMPLICIT_MODEL_URI + "#columnDescriptors";	
+	public static final String SADL_IMPLICIT_MODEL_DATA_CONTENT_DESCRIPTORS_PROPERY_URI = SADL_IMPLICIT_MODEL_URI + "#dataContent";	
 	
 	public static final String SADL_RULE_PATTERN_URI = "http://sadl.org/rule/patterns";
 	public static final String SADL_RULE_PATTERN_PREFIX = "srpp";

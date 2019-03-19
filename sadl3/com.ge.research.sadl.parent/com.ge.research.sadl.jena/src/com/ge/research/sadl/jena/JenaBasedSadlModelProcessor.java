@@ -2810,15 +2810,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// add the signature
 		List<Node> args = eq.getArguments();
 		List<Node> argTypes = eq.getArgumentTypes();
-		OntClass argcls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENT_CLASS_URI);
+		OntClass argcls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_DATA_DESCRIPTOR_CLASS_URI);
 		ObjectProperty argsProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI);
 		if (argcls == null || argsProp == null) {
 			addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
 		}
 		else {
 			if (args != null && args.size() > 0) {
-				DatatypeProperty nameProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_NAME_PROPERTY_URI);
-				Property typeProp = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_TYPE_PROPERTY_URI);
+				DatatypeProperty nameProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI);
+				Property typeProp = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DATATYPE_PROPERTY_URI);
 				if (nameProp == null || typeProp == null) {
 					addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
 				}

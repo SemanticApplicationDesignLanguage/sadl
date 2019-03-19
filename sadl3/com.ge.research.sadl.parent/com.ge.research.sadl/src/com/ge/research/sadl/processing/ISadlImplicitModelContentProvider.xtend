@@ -100,24 +100,54 @@ interface ISadlImplicitModelContentProvider {
 		 */
 		public static val DEFAULT_CONTENT = '''
 			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-
+			
 			impliedProperty is a type of annotation.
 			expandedProperty is a type of annotation.
-			UnittedQuantity is a class,
+			ScientificConcept is a class.
+			UnittedQuantity is a type of ScientificConcept,
 				described by ^value with values of type decimal,
 				described by unit with values of type string.
+			
+			DataDescriptor is a class, described by descriptorName with a single value of type string,
+				described by dataType (note "the simple data type, e.g., float") with a single value of type anyURI,
+				described by augmentedType (note "ties the DataDescriptor to the semantic domain model") with values of type AugmentedType.
+			dataType of DataDescriptor has at most 1 value.
+			
 			^Equation is a class,
 				described by expression with a single value of type string.
+			arguments describes ^Equation with a single value of type DataDescriptor List.
+			returnTypes describes ^Equation with a single value of type anyURI List.
+			
 			ExternalEquation is a type of ^Equation,
 				described by externalURI with a single value of type anyURI,
 				described by externalURL with values of type string.
-			Argument is a class, described by argName with a single value of type string, 
-				described by argType.
-			argType of Argument has at most 1 value.
-			arguments describes ^Equation with a single value of type Argument List.
-			returnTypes describes ^Equation with a single value of type anyURI List.
+				
+			AugmentedType is a class.
+			SemanticType (note "allows direct specification of the semantic type of an argument") is a type of AugmentedType, 
+				described by semType with a single value of type class.
+			GraphPattern is a class.
+			{TriplePattern, FunctionPattern} are types of GraphPattern.
+			gpSubject describes TriplePattern.
+			gpPredicate describes TriplePattern.
+			gpObject describes TriplePattern.
+			builtin describes FunctionPattern with a single value of type ^Equation.
+			anyDataType (note "union of all relevant data types") is a type of {decimal or boolean or string or date or dateTime or anyURI}.
+			argValues (note "values of arguments to the built-in") describes FunctionPattern with a single value of type anyDataType List.
+			
+			Assumption (note "used to identify necessary patterns in semantic domain terms") is a type of AugmentedType, 
+				described by constraints with a single value of type GraphPattern List.
+			ThisArgument (note "allows reference to self within an Argument's constraints") is a DataDescriptor.
+			
+			DataTableRow is a class,
+				described by rowValues with a single value of type anyDataType List.
+			DataTable is a class,
+				described by columnDescriptors with a single value of type DataDescriptor List,
+				described by dataContent with a single value of type DataTableRow List.
+			
 			^Rule is a class.
 			NamedQuery is a class.
+			
+			Event is a class.
 		''';
 
 		override getContent() {

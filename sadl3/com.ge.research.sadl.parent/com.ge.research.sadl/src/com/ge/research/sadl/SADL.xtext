@@ -115,6 +115,7 @@ SadlPropertyCondition :
 
 SadlPropertyInitializer:
 	 ','? ('with'|'has')? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+//	 ','? ('with'|'has')? (property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')) | {SadlPropertyInitializer} ('data' (valueTable=ValueTable | 'located' 'at' location=STRING))?
 	|','? 'is' property=[SadlResource|QNAME] 'of' type=[SadlResource|QNAME]
 	|','? 'of' property=[SadlResource|QNAME] 'is' (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 ;
@@ -160,6 +161,8 @@ SadlIntersectionType returns SadlTypeReference:
 SadlPrimaryTypeReference returns SadlTypeReference:
 		{SadlSimpleTypeReference} type=[SadlResource|QNAME] list?='List'?
 	|	{SadlPrimitiveDataType} primitiveType=SadlDataType list?='List'?
+	|	{SadlTableDeclaration} 'table' '[' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?']' 
+			('with' 'data' (valueTable=ValueTable | 'located' 'at' location=STRING))
 	|	'(' SadlPropertyCondition ')'
 	|	'{' SadlTypeReference '}'
 ;
