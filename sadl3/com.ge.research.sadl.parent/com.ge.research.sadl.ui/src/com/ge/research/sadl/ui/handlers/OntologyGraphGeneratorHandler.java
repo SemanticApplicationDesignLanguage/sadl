@@ -171,6 +171,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				}
 				for (int i = 0; i < ontFiles.length; i++) {
 					if (ontFiles[i].getType() == IResource.FILE && 
+							ontFiles[i].getFullPath().getFileExtension() != null &&
 							(ontFiles[i].getFullPath().getFileExtension().equals("sadl") || 
 									ontFiles[i].getFullPath().getFileExtension().equals("owl") ||
 									ontFiles[i].getFullPath().getFileExtension().equals("nt") ||
