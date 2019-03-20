@@ -2094,26 +2094,10 @@ public class JenaTranslatorPlugin implements ITranslator {
 					for (int i = 0; builtins != null && i < builtins.size(); i++) {
 						BuiltinInfo bi = builtins.get(i);
 						if (!builtinInSignatureList(bfsigs, bi)) {
-							sb.append("External ");
-							sb.append(bi.getName());
-							sb.append("(");		
-							sb.append("--");
-	//						for(int i = 0; i < bi..parameterTypes.length; i++){
-	//							if(!this.parameterTypes[i].isEmpty()){
-	//								sb.append(this.parameterTypes[i].toLowerCase());
-	//								sb.append(" X");
-	//								if(i != this.parameterTypes.length - 1){
-	//									sb.append(", ");
-	//								}
-	//							}
-	//						}
-							sb.append(") returns ");
-	//						sb.append(this.returnType.toLowerCase());
-							sb.append("--");
-							sb.append(":\n\""); 
-	//						sb.append(this.uri);
-							sb.append(bi.getUri());
-							sb.append("\".\n\n");
+							String untypedFctSignature = bi.getName() + "(--)--";
+							FunctionSignature fs = new FunctionSignature(untypedFctSignature, bi.getUri());
+							sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
+							sb.append("\n\n");
 						}
 					}
 				} catch (ConfigurationException e) {

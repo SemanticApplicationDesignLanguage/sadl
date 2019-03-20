@@ -3896,6 +3896,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else if (defContainer instanceof SadlParameterDeclaration) {
 				SadlTypeReference exprType = ((SadlParameterDeclaration)defContainer).getType();
+				EObject augtype = ((SadlParameterDeclaration)defContainer).getAugtype();
+				// TODO
 				return getType(exprType);
 			}
 			else if (defContainer instanceof BinaryOperation) {
@@ -3921,6 +3923,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else if (defContainer instanceof SadlParameterDeclaration) {
 				SadlTypeReference exprType = ((SadlParameterDeclaration)defContainer).getType();
+				EObject augtype = ((SadlParameterDeclaration)defContainer).getAugtype();
+				// TODO
 				return getType(exprType);
 			}
 			else if (defContainer instanceof BinaryOperation) {
@@ -3977,6 +3981,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		EObject refContainer = reference.eContainer();
 		if (refContainer instanceof SadlParameterDeclaration) {
 			SadlTypeReference exprType = ((SadlParameterDeclaration)refContainer).getType();
+			EObject augtype = ((SadlParameterDeclaration)refContainer).getAugtype();
+			// TODO
 			return getType(exprType);
 		}
 		else if (refContainer instanceof SubjHasProp) {
