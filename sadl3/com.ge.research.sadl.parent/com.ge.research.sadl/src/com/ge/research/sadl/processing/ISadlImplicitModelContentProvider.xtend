@@ -147,8 +147,6 @@ interface ISadlImplicitModelContentProvider {
 			
 			^Rule is a class.
 			NamedQuery is a class.
-			
-			Event is a class.
 		''';
 
 		override getContent() {
