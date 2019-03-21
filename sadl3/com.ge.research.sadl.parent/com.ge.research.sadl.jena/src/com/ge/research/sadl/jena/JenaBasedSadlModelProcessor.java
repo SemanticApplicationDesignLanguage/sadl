@@ -2369,6 +2369,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 													}
 												}
 											}
+											else {
+												vn.setType(new NamedNode(rngcls.getURI()));
+											}
 										}
 									}
 								}
@@ -2847,10 +2850,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String expr = eq.toString();
 		if (expr != null && expr.length() > 0) {
 			Literal literal = getTheJenaModel().createTypedLiteral(expr);
-			DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXPRESSTION_PROPERTY_URI);
-			if (dtp != null) {
+			ObjectProperty exprProp = getTheJenaModel().getObjectProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXPRESSTION_PROPERTY_URI);
+			if (exprProp != null) {
 				// these can be null during clean/build with resource open in editor
-				eqinst.addProperty(dtp, literal);
+				Individual scriptInst = getTheJenaModel().createIndividual(getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_SCRIPT_CLASS_URI));
+				DatatypeProperty scriptProp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_SCRIPT_PROPERTY_URI);
+				scriptInst.addProperty(scriptProp, literal);
+				Property langProp = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_LANGUAGE_PROPERTY_URI);
+				scriptInst.addProperty(langProp, getTheJenaModel().getIndividual(SadlConstants.SADL_IMPLICIT_MODEL_TEXT_LANGUAGE_INST_URI));
+				eqinst.addProperty(exprProp, scriptInst);
 			}
 		}
 		
@@ -8980,7 +8988,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								if (augtype instanceof GraphPatternElement) {
 									updateAugmentedTypePatterns((GraphPatternElement)augtype, nm, coldesc);
 								}
-								System.out.println(augtype.toString());
+//								System.out.println(augtype.toString());
 							}
 							DataDescriptor dd = new DataDescriptor(nm, (Node)typ, units, augtype);
 							columns.add(dd);
@@ -9089,10 +9097,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		List<Individual> cddInstances = new ArrayList<Individual>();
 		for (DataDescriptor cdd : columns) {
 			Individual cddInst = dataDescriptorToOwl(context, cdd);
-			cddInstances.add(cddInst);
+			if (cddInst != null) {
+				cddInstances.add(cddInst);
+			}
 		}
-		RDFList cddInstList = getTheJenaModel().createList(cddInstances.iterator());
-		inst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DATA_COLUMN_DESCRIPTORS_PROPERY_URI), cddInstList);
+		if (cddInstances.size() > 0) {
+			RDFList cddInstList = getTheJenaModel().createList(cddInstances.iterator());
+			inst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DATA_COLUMN_DESCRIPTORS_PROPERY_URI), cddInstList);
+		}
 	}
 
 	private void updateAugmentedTypePatterns(GraphPatternElement augtype, Node nm, EObject context) {

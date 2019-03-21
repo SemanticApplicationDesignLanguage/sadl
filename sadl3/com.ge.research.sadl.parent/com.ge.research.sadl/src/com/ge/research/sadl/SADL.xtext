@@ -162,7 +162,7 @@ SadlPrimaryTypeReference returns SadlTypeReference:
 		{SadlSimpleTypeReference} type=[SadlResource|QNAME] list?='List'?
 	|	{SadlPrimitiveDataType} primitiveType=SadlDataType list?='List'?
 	|	{SadlTableDeclaration} 'table' '[' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?']' 
-			('with' 'data' (valueTable=ValueTable | 'located' 'at' location=STRING))
+			('with' 'data' (valueTable=ValueTable | 'located' 'at' location=STRING))?
 	|	'(' SadlPropertyCondition ')'
 	|	'{' SadlTypeReference '}'
 ;
