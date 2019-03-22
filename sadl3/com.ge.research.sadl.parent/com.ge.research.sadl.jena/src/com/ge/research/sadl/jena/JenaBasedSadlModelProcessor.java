@@ -177,6 +177,7 @@ import com.ge.research.sadl.sADL.SadlDefaultValue;
 import com.ge.research.sadl.sADL.SadlDifferentFrom;
 import com.ge.research.sadl.sADL.SadlDisjointClasses;
 import com.ge.research.sadl.sADL.SadlExplicitValue;
+import com.ge.research.sadl.sADL.SadlExplicitValueLiteral;
 import com.ge.research.sadl.sADL.SadlHasValueCondition;
 import com.ge.research.sadl.sADL.SadlImport;
 import com.ge.research.sadl.sADL.SadlInstance;
@@ -3009,13 +3010,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		List<Individual> paramInstances = new ArrayList<Individual>();
 		if (paramDataDescriptors != null) {
 			for (DataDescriptor pdd : paramDataDescriptors) {
-				paramInstances.add(dataDescriptorToOwl(nm, pdd));
+				Individual pddinst = dataDescriptorToOwl(nm, pdd);
+				if (pddinst != null) {
+					paramInstances.add(pddinst);
+				}
 			}
 		}
 		List<Individual> retInstances = new ArrayList<Individual>();
 		if (retDataDescriptors != null) {
 			for (DataDescriptor rdd : retDataDescriptors) {
-				retInstances.add(dataDescriptorToOwl(nm, rdd));
+				Individual rddinst = dataDescriptorToOwl(nm, rdd);
+				if (rddinst != null) {
+					retInstances.add(rddinst);
+				}
 			}
 		}
 		if (eqinst != null) {
@@ -8153,8 +8160,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									throw new JenaProcessorException("Failed to load SADL Defaults model", e);
 								}
 							}
-
-							RDFNode defVal = sadlExplicitValueToRdfNode(dv, prop, true);
+							RDFNode defVal = null;
+							try {
+								if (propType.equals(OntConceptType.CLASS_PROPERTY) && 
+										!(dv instanceof SadlResource)) {
+									addError("Object property cannot be given a literal value as default", spr2);
+								}
+								else {
+									defVal = sadlExplicitValueToRdfNode(dv, prop, true);
+								}
+							}
+							catch (Exception e) {
+								Throwable cause = e.getCause();
+								if (cause instanceof JenaProcessorException) {
+									
+								}
+							}
 							Individual seeAlsoDefault = null;
 							if (propType.equals(OntConceptType.CLASS_PROPERTY)
 									|| (propType.equals(OntConceptType.RDF_PROPERTY) && defVal.isResource())) {
@@ -8471,7 +8492,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							return litval;
 						}
 						catch (Exception e) {
-							
+							throw new JenaProcessorException(e.getMessage(), e);
 						}
 					}
 				}
