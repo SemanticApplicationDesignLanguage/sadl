@@ -55,6 +55,7 @@ import org.eclipse.xtext.resource.XtextResource
 import com.ge.research.sadl.scoping.SadlQualifiedNameConverter
 import org.eclipse.emf.ecore.resource.Resource
 import com.ge.research.sadl.sADL.UpdateStatement
+import com.ge.research.sadl.sADL.SadlTableDeclaration
 
 class DeclarationExtensions {
 	
@@ -372,6 +373,7 @@ class DeclarationExtensions {
 			SadlIntersectionType : getReferencedSadlResources(typeRef.left) + getReferencedSadlResources(typeRef.right)
 			SadlUnionType : getReferencedSadlResources(typeRef.left) + getReferencedSadlResources(typeRef.right)
 			SadlPropertyCondition : #[]
+			SadlTableDeclaration : #[]
 			default : throw new IllegalStateException("typeRef "+typeRef+" not handled.") 
 		}
 	}

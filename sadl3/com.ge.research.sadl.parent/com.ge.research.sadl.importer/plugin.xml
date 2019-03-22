@@ -8,10 +8,4 @@
 			class = "com.ge.research.sadl.importer.template.TemplatePackage"
 			genModel = "model/generated/Template.genmodel" />
 	</extension>
- <extension
-       point="com.ge.research.sadl.sadl_implicit_model_fragment_provider">
-    <provider
-          class="com.ge.research.sadl.requirements.RequirementsImplicitModelFragmentProvider">
-    </provider>
- </extension>
 </plugin>

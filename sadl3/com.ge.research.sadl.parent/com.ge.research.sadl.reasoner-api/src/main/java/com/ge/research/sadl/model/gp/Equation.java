@@ -133,7 +133,7 @@ public class Equation {
 					if (i > 0) sb.append(",");
 					sb.append(nt != null ? nt.toString() : "<error>");
 					sb.append(" ");
-					sb.append(n.toString());
+					sb.append(n != null ? n.toString() : "<error>");
 				}
 			}
 		}
@@ -195,7 +195,7 @@ public class Equation {
 				if (i > 0) sb.append(",");
 				sb.append(nt != null ? nt.toDescriptiveString() : "<error>");
 				sb.append(" ");
-				sb.append(n.toDescriptiveString());
+				sb.append(n != null ? n.toDescriptiveString() : "<error>");
 			}
 		}
 		sb.append(")");
@@ -257,7 +257,7 @@ public class Equation {
 				if (i > 0) sb.append(",");
 				sb.append(nt != null ? nt.toFullyQualifiedString() : "<error>");
 				sb.append(" ");
-				sb.append(n.toFullyQualifiedString());
+				sb.append(n != null ? n.toFullyQualifiedString() : "<error>");
 			}
 		}
 		sb.append(")");

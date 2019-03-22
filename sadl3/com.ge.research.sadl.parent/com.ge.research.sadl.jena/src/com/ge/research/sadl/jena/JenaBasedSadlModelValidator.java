@@ -1477,7 +1477,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							svltci = rttci;
 						}
 						else if (!svltci.getTypeCheckType().equals(rttci.getTypeCheckType()) ) {
-							getModelProcessor().addTypeCheckingError("Not all list values are of the same type", expression);
+							OntClass svtype = theJenaModel.getOntClass(svltci.getTypeCheckType().getURI());
+							OntClass rttype = theJenaModel.getOntClass(rttci.getTypeCheckType().getURI());
+							if (SadlUtils.classIsSubclassOf(svtype, rttype, true, null)) {
+								// svtype is a subclass of rttype
+								svltci.setTypeCheckType(new NamedNode(rttype.getURI()));
+							}
+							else if (SadlUtils.classIsSubclassOf(rttype, svtype, true, null)) {
+								// rttype is a subclass of svtype
+								// this is OK; svltci already has the broader class
+							}
+							else {
+								getModelProcessor().addTypeCheckingError("Not all list values are of the same type", expression);
+							}
 						}
 					}		
 					return convertElementOfListToListType(svltci);
@@ -2430,7 +2442,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		if (predicate != null) {
 			TypeCheckInfo predicateType = getType(predicate);
-			if (subject instanceof PropOfSubject && predicateType.getExpressionType() instanceof ConceptName) {
+			if (subject instanceof PropOfSubject && predicateType != null && predicateType.getExpressionType() instanceof ConceptName) {
 				predicateType = checkEmbeddedPropOfSubject(subject, predicate, predicateType);
 				getType(subject);
 			} else if (validSubject && predicateType != null) {
@@ -3884,6 +3896,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else if (defContainer instanceof SadlParameterDeclaration) {
 				SadlTypeReference exprType = ((SadlParameterDeclaration)defContainer).getType();
+				EObject augtype = ((SadlParameterDeclaration)defContainer).getAugtype();
+				// TODO
 				return getType(exprType);
 			}
 			else if (defContainer instanceof BinaryOperation) {
@@ -3909,6 +3923,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else if (defContainer instanceof SadlParameterDeclaration) {
 				SadlTypeReference exprType = ((SadlParameterDeclaration)defContainer).getType();
+				EObject augtype = ((SadlParameterDeclaration)defContainer).getAugtype();
+				// TODO
 				return getType(exprType);
 			}
 			else if (defContainer instanceof BinaryOperation) {
@@ -3965,6 +3981,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		EObject refContainer = reference.eContainer();
 		if (refContainer instanceof SadlParameterDeclaration) {
 			SadlTypeReference exprType = ((SadlParameterDeclaration)refContainer).getType();
+			EObject augtype = ((SadlParameterDeclaration)refContainer).getAugtype();
+			// TODO
 			return getType(exprType);
 		}
 		else if (refContainer instanceof SubjHasProp) {
@@ -4782,8 +4800,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					
-					else if (leftConceptName.getType().equals(ConceptType.ONTCLASS) &&
-							rightConceptName.getType().equals(ConceptType.ONTCLASS)) {
+					else if ((leftConceptName.getType().equals(ConceptType.ONTCLASS) &&
+							rightConceptName.getType().equals(ConceptType.ONTCLASS)) ||
+							(leftConceptName.getType().equals(ConceptType.ONTCLASSLIST) &&
+									rightConceptName.getType().equals(ConceptType.ONTCLASSLIST))){
 						if (partOfTest(leftExpression, rightExpression)) {
 							// if we're in a test we don't want to type check as it may fail when not using the inferred model.
 							return true;

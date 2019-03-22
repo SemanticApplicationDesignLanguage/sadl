@@ -1276,7 +1276,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	public SadlCommandResult processAdhocQuery(Resource resource, Query cmd) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		setCurrentResource(resource);
 		setTheJenaModel(OntModelProvider.find(resource));
-		getTheJenaModel().write(System.out);
+//		getTheJenaModel().write(System.out);
 		setModelFolderPath(getModelFolderPath(resource));
 		setModelName(OntModelProvider.getModelName(resource));
 		return processAdhocQuery(cmd);
@@ -1581,7 +1581,6 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			}
 		}
 		if (queryPatterns.size() > 0) {
-			ResultSet[] results = new ResultSet[queryPatterns.size()];
 			List<RDFNode[]> queryStmts = new ArrayList<RDFNode[]>();
 			for (int i = 0; i < queryPatterns.size(); i++) {
 				TripleElement qptr = queryPatterns.get(i);
@@ -1619,33 +1618,39 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			try {
 				IReasoner reasoner = getInitializedReasoner();
 				reasoner.loadInstanceData(getTheJenaModel());
+				List<String> colNames = new ArrayList<String>();
 				for (int i = 0; i < queryStmts.size(); i++) {
-					RDFNode[] qstmt = queryStmts.get(i);
-					Object infModel = reasoner.getInferredModel(false);
-					if (infModel instanceof InfModel) {
+					RDFNode[] stmt = queryStmts.get(i);
+					if (stmt[0] == null) {
+						colNames.add("subject" + (i+1));
+					}
+					if (stmt[1] == null) {
+						colNames.add("property" + (i+1));
+					}
+					if (stmt[2] == null) {
+						colNames.add("value" + (i+1));
+					}
+				}
+				Object infModel = reasoner.getInferredModel(false);
+				if (infModel instanceof InfModel) {
+					ArrayList<ArrayList<Object>> rows = new ArrayList<ArrayList<Object>>();
+					for (int i = 0; i < queryStmts.size(); i++) {
+						RDFNode[] qstmt = queryStmts.get(i);
+						com.hp.hpl.jena.rdf.model.Resource subj = (com.hp.hpl.jena.rdf.model.Resource)qstmt[0];
 						Property pred = (Property) qstmt[1];
 						RDFNode val = qstmt[2];
-						StmtIterator stmtitr = ((InfModel)infModel).listStatements((com.hp.hpl.jena.rdf.model.Resource) qstmt[0], pred, val);
-						int cntr = 0;
-						if (pred == null) cntr++;
-						if (val == null) cntr++;
-						String[] colNames = new String[cntr];
-						ArrayList<ArrayList<Object>> rows = new ArrayList<ArrayList<Object>>();
-						cntr = 0;
-						int col = 0;
+						StmtIterator stmtitr = ((InfModel)infModel).listStatements(subj, pred, val);
+						int rowcntr = 0;
 						while (stmtitr.hasNext()) {
-							ArrayList<Object> row = new ArrayList<Object>();
 							Statement stmt = stmtitr.nextStatement();
-							if (pred == null) {
-								if (cntr == 0) {
-									colNames[col++] = "property";
-								}
-								row.add(stmt.getPredicate().getURI());
+							if (rows.size() <= rowcntr) {
+								ArrayList<Object> row = new ArrayList<Object>();
+								rows.add(row);
 							}
+							ArrayList<Object> row = rows.get(rowcntr);
+							if (subj == null) row.add(stmt.getSubject().getURI());
+							if (pred == null) row.add(stmt.getPredicate().getURI());
 							if (val == null) {
-								if (cntr == 0) {
-									colNames[col++] = "value";
-								}
 								RDFNode n = stmt.getObject();
 								if (n != null && n.isLiteral()) {
 									Object v = n.asLiteral().getValue();
@@ -1671,18 +1676,20 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 									row.add(n == null? n : n.toString());	// for queries with OPTIONAL n can be null
 								}
 							}
-							cntr++;
-							rows.add(row);
 						}
-						Object array[][] = new Object[rows.size()][colNames.length];
-						for(int j=0; j<rows.size(); j++)
-							array[j] = (rows.get(i)).toArray(new Object[colNames.length]);
-
-						ResultSet rs = new ResultSet(colNames, array);
-						results[i] = rs;
 					}
+					Object array[][] = new Object[rows.size()][colNames.size()];
+					String[] colNameArray = new String[colNames.size()];
+					colNameArray = colNames.toArray(colNameArray);
+					for(int j=0; j < rows.size(); j++)
+						array[j] = (rows.get(j)).toArray(new Object[colNames.size()]);
+
+					ResultSet rs = new ResultSet(colNameArray, array);
+					ResultSet[] results = new ResultSet[1];
+					results[0] = rs;
+					return results;
 				}
-				return results;
+				return null;
 			} catch (ConfigurationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
