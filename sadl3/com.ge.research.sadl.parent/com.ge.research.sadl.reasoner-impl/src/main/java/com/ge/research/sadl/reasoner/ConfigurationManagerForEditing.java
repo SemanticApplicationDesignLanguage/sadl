@@ -669,7 +669,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		return false;
 	}
 
-	public synchronized boolean deleteMapping(String publicUri, String altUrl)
+	public synchronized boolean deleteMapping(String altUrl, String publicUri)
 			throws IOException, URISyntaxException, ConfigurationException {
 		if (publicUri == null) {
 			throw new ConfigurationException(
@@ -726,7 +726,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 				}
 			}
 		}
-		return deleteMapping(publicUri, altUrl);
+		return deleteMapping(altUrl, publicUri);
 	}
 
 	/**
