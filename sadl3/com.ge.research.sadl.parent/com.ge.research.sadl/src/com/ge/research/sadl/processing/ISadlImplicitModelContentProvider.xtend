@@ -113,8 +113,11 @@ interface ISadlImplicitModelContentProvider {
 				described by augmentedType (note "ties the DataDescriptor to the semantic domain model") with values of type AugmentedType.
 			dataType of DataDescriptor has at most 1 value.
 			
+			Language is a class, must be one of {Java, Python, Text, OtherLanguage}.
+			Script is a class, described by language with a single value of type Language,
+				described by script with a single value of type string.
 			^Equation is a class,
-				described by expression with a single value of type string.
+				described by expression with values of type Script.
 			arguments describes ^Equation with a single value of type DataDescriptor List.
 			returnTypes describes ^Equation with a single value of type anyURI List.
 			

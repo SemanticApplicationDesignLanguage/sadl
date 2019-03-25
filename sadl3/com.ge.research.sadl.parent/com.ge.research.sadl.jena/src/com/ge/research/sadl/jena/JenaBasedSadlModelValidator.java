@@ -2442,7 +2442,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		if (predicate != null) {
 			TypeCheckInfo predicateType = getType(predicate);
-			if (subject instanceof PropOfSubject && predicateType.getExpressionType() instanceof ConceptName) {
+			if (subject instanceof PropOfSubject && predicateType != null && predicateType.getExpressionType() instanceof ConceptName) {
 				predicateType = checkEmbeddedPropOfSubject(subject, predicate, predicateType);
 				getType(subject);
 			} else if (validSubject && predicateType != null) {

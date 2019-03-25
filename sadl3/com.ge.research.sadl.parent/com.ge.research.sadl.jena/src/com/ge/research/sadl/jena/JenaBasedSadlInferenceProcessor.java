@@ -1276,7 +1276,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	public SadlCommandResult processAdhocQuery(Resource resource, Query cmd) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		setCurrentResource(resource);
 		setTheJenaModel(OntModelProvider.find(resource));
-		getTheJenaModel().write(System.out);
+//		getTheJenaModel().write(System.out);
 		setModelFolderPath(getModelFolderPath(resource));
 		setModelName(OntModelProvider.getModelName(resource));
 		return processAdhocQuery(cmd);
