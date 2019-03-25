@@ -53,10 +53,12 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 					externalDefinitions.add(it.location.removeFileExtension)
 				}
 				return false;
+//				return true;
 			} else {
 				return true;
 			};
 		], IResource.DEPTH_INFINITE, false);
+//		return true;
 		return externalDefinitions.exists[folderPath | file.location.toString.startsWith(folderPath.toString)];
 	}
 
