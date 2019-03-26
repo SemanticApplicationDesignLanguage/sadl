@@ -2231,7 +2231,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			SadlResource elementName, EList<NamedStructureAnnotation> annotations, boolean isGraph) throws CircularDefinitionException,
 			InvalidNameException, InvalidTypeException, TranslationException, JenaProcessorException {
 		Query query = null;
-		if (qexpr != null) {
+		if (qexpr != null && !(qexpr instanceof ValueTable)) {
 			boolean returnOnError = false;
 			Query theQuery = new Query();
 			theQuery.setContext(qexpr);
@@ -2306,6 +2306,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				EObject cont = sr2.eContainer();
 				if (cont instanceof QueryStatement && ((QueryStatement) cont).getExpr() != null) {
 					query = processStatement((QueryStatement) cont);
+				}
+				if (qexpr instanceof ValueTable) {
+					Object vtobj = processExpression(qexpr);
+					query.setParameterizedValues((List<Object>) vtobj);
 				}
 			}
 		}
@@ -3569,7 +3573,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return expr;
 	}
 
-	public Object processExpression(ValueTable expr) {
+	public Object processExpression(ValueTable expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		ValueRow row = ((ValueTable) expr).getRow();
 		if (row == null) {
 			EList<ValueRow> rows = ((ValueTable) expr).getRows();
@@ -3579,7 +3583,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return null;
 		}
-		return null;
+		else {
+			EList<Expression> rowvals = row.getExplicitValues();
+			List<Object> rowObjects = new ArrayList<Object>();
+			for (Expression val : rowvals) {
+				Object valObj = processExpression(val);
+				rowObjects.add(valObj);
+			}
+			return rowObjects;
+		}
 	}
 
 	public Object processExpression(BinaryOperation expr)

@@ -1319,6 +1319,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		q.setUpdate(cmd.isUpdate());
 		q.setGraph(cmd.isGraph());
 		q.setFqName(cmd.getFqName());
+		q.setParameterizedValues(cmd.getParameterizedValues());
 		SadlCommandResult result = new SadlCommandResult(q);
 		result.setResults(processAdhocQuery(translator, q));
 		result.setErrors(getInitializedReasoner().getErrors());
@@ -1328,6 +1329,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	private ResultSet processAdhocQuery(ITranslator translator, Query q) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 		String queryString = null;
 		try {
+			if (q.getParameterizedValues() != null) {
+				q.setSparqlQueryString(translator.parameterizeQuery(getTheJenaModel(), q.getSparqlQueryString(), q.getParameterizedValues()));
+			}
 			queryString = translator.translateQuery(getTheJenaModel(), getModelName(), q);
 		}
 		catch (UnsupportedOperationException e) {
