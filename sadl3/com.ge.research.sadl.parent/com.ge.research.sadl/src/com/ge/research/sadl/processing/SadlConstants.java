@@ -68,6 +68,7 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_DATA_ROW_VALUES_RPOERTY_URI = SADL_IMPLICIT_MODEL_URI + "#rowValues";
 	public static final String SADL_IMPLICIT_MODEL_DATA_COLUMN_DESCRIPTORS_PROPERY_URI = SADL_IMPLICIT_MODEL_URI + "#columnDescriptors";	
 	public static final String SADL_IMPLICIT_MODEL_DATA_CONTENT_DESCRIPTORS_PROPERY_URI = SADL_IMPLICIT_MODEL_URI + "#dataContent";	
+	public static final String SADL_IMPLICIT_MODEL_DATA_CONTENT_LOCATION_PROPERY_URI = SADL_IMPLICIT_MODEL_URI + "#dataLocation";
 	
 	public static final String SADL_RULE_PATTERN_URI = "http://sadl.org/rule/patterns";
 	public static final String SADL_RULE_PATTERN_PREFIX = "srpp";

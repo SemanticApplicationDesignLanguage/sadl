@@ -1337,7 +1337,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	protected TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
-		if (expressionsTypeCheckCache != null && expressionsTypeCheckCache.containsKey(expression)) {
+		boolean forceValidation = false;
+		if (expressionsTypeCheckCache != null && expressionsTypeCheckCache.containsKey(expression) && !forceValidation) {
 			return expressionsTypeCheckCache.get(expression);
 		}
 		TypeCheckInfo returnedTci = null;

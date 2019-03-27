@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -229,7 +230,9 @@ import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.AnnotationProperty;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
@@ -9004,7 +9007,31 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				else if (type instanceof SadlTableDeclaration) {
 					setHostEObject(element);
 					OntClass tdClass = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_DATA_TABLE_CLASS_URI);
-					inst = getTheJenaModel().createIndividual(instUri, tdClass);
+					if (tdClass != null) {
+						inst = getTheJenaModel().createIndividual(instUri, tdClass);
+						String location = ((SadlTableDeclaration)type).getLocation();
+						if (location != null) {
+						    try {
+						        URL url = new URL(location);
+						    }
+						    catch (Exception e1) {
+						    	addWarning("'" + location + "' doesn't apprear to be a valid URL", type);
+						    }
+
+							Property dlprop = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DATA_CONTENT_LOCATION_PROPERY_URI);
+							if (dlprop != null) {
+								Literal locUri = getTheJenaModel().createTypedLiteral(location, XSDDatatype.XSDanyURI);
+								inst.addProperty(dlprop, locUri);
+							}
+							else {
+								addError("Model doesn't contain DataTable metamodel. Do you need to update the SadlImplicitModel?", type);
+							}
+						}
+					}
+					else {
+						addError("Model doesn't contain DataTable metamodel. Do you need to update the SadlImplicitModel?", type);
+					}
+					
 					EList<SadlParameterDeclaration> columnDescriptors = ((SadlTableDeclaration)type).getParameter();
 					List<DataDescriptor> columns = new ArrayList<DataDescriptor>();
 					for (SadlParameterDeclaration coldesc : columnDescriptors) {
