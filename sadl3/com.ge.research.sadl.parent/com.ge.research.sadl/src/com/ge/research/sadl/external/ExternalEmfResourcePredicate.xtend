@@ -47,13 +47,6 @@ interface ExternalEmfResourcePredicate extends Predicate<URI> {
 			'SadlImplicitModel.owl',
 			'metrics.owl'
 		];
-		
-		static val IGNORED_FOLDERS = #[
-			'OwlModels',
-			'.settings',
-			'Temp',
-			'Graphs'
-		];
 
 		override apply(URI it) {
 			if (!ExternalEmfResourceFactory.EXTERNAL_EXTENSIONS.contains(fileExtension)) {
@@ -63,9 +56,6 @@ interface ExternalEmfResourcePredicate extends Predicate<URI> {
 			if (IGNORED_FILES.exists[name.endsWith(it)]) {
 				return false
 			}
-//			if (IGNORED_FOLDERS.exists[name.endsWith(it)]) {
-//				return false;
-//			}
 			return true
 		}
 
