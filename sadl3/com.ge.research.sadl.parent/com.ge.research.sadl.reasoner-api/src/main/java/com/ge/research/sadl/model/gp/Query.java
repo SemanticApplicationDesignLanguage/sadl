@@ -47,6 +47,7 @@ public class Query extends SadlCommand {
 	private boolean toBeEvaluated = false;
 	private boolean isGraph = false;
 	private boolean isUpdate = false;
+	private List<Object> parameterizedValues = null;
 
 	public enum Order {ASC, DESC}
 	
@@ -329,5 +330,13 @@ public class Query extends SadlCommand {
 
 	public void setUpdate(boolean isUpdate) {
 		this.isUpdate = isUpdate;
+	}
+
+	public List<Object> getParameterizedValues() {
+		return parameterizedValues;
+	}
+
+	public void setParameterizedValues(List<Object> parameterizedValues) {
+		this.parameterizedValues = parameterizedValues;
 	}
 }

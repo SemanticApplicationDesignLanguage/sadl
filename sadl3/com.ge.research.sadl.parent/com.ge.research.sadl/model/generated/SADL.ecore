@@ -374,6 +374,8 @@
         eType="#//NamedStructureAnnotation" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="expr" eType="#//Expression"
         containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parameterizedValues" eType="#//ValueRow"
+        containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="UpdateStatement" eSuperTypes="#//ExpressionScope">
     <eStructuralFeatures xsi:type="ecore:EReference" name="name" eType="#//SadlResource"
