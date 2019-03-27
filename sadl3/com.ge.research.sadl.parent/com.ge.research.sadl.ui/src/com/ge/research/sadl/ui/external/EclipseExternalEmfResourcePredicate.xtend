@@ -32,6 +32,11 @@ import com.google.inject.Singleton
  */
 @Singleton
 class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.Default {
+	
+	/**
+	 * TODO: this should not be here. Move this to the downstream grammar.
+	 */
+	static val EXTRACTED_MODELS = 'ExtractedModels';
 
 	override apply(URI it) {
 		Preconditions.checkArgument(platformResource, '''Implementation error. Expected a `file` URI. Was: «it»''');
@@ -45,6 +50,15 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 		val project = file.project;
 		if (!project.accessible) {
 			return false;
+		}
+		// This is a hack here.
+		// it considers all {@code .owl|nt|n3} files inside the {@code YOUR_PROJECT/ExtractedModels} folder as an external EMF resource.
+		val extractedModelFolder = project.findMember(EXTRACTED_MODELS);
+		if (extractedModelFolder !== null && extractedModelFolder.accessible) {
+			// The current file is an external file and is inside the `ExtractedModels` folder.
+			if (extractedModelFolder.getFullPath().isPrefixOf(file.getFullPath())) {
+				return true;
+			}
 		}
 		val externalDefinitions = newArrayList;
 		project.accept([
