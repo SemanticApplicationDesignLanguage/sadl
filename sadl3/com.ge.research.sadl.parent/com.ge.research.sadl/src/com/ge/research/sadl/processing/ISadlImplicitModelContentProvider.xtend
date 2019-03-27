@@ -146,7 +146,8 @@ interface ISadlImplicitModelContentProvider {
 				described by rowValues with a single value of type anyDataType List.
 			DataTable is a class,
 				described by columnDescriptors with a single value of type DataDescriptor List,
-				described by dataContent with a single value of type DataTableRow List.
+				described by dataContent with a single value of type DataTableRow List,
+				described by dataLocation with a single value of type anyURI.
 			
 			^Rule is a class.
 			NamedQuery is a class.
