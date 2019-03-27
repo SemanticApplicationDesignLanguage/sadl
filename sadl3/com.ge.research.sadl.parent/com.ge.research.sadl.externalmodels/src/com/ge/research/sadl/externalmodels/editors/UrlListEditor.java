@@ -237,7 +237,7 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 			try {
 				for(IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()){
 					IPath prjpath = project.getLocation();
-					if (outputPath.toOSString().startsWith(prjpath.toOSString())) {
+					if (outputPath.toOSString().startsWith(prjpath.toOSString() + File.separatorChar)) {
 						project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 						break;	// there's only one at a time to refresh
 					}
