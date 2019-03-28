@@ -41,9 +41,7 @@ import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
-import com.ge.research.sadl.ui.utils.EclipseSadlProjectHelper
 import com.ge.research.sadl.utils.SadlConsole
-import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.inject.Binder
 import com.google.inject.Provider
 import com.google.inject.name.Names
@@ -143,10 +141,6 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	def Class<? extends ExternalEmfResourcePredicate> bindExternalEmfResourcePredicate() {
 		return EclipseExternalEmfResourcePredicate;
-	}
-	
-	def Class<? extends SadlProjectHelper> bindSadlProjectHelper() {
-		return EclipseSadlProjectHelper;
 	}
 	
 	def Class<? extends IdeContentProposalProvider> bindIdeContentProposalProvider() {

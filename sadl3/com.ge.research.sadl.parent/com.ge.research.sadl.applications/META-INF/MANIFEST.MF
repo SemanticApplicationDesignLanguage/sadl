@@ -23,7 +23,6 @@ Require-Bundle: com.ge.research.jena,
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: com.ge.research.sadl.applications.Activator
 Import-Package: com.ge.research.sadl.ide.handlers,
- com.ge.research.sadl.ide.utils,
  com.ge.research.sadl.jena,
  com.ge.research.sadl.ui.handlers,
  org.apache.log4j

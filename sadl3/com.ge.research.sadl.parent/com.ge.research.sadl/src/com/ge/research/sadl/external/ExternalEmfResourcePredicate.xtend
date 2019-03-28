@@ -19,17 +19,22 @@ package com.ge.research.sadl.external
 
 import com.google.common.base.Predicate
 import com.google.inject.ImplementedBy
+import com.google.inject.Inject
 import com.google.inject.Singleton
+import org.eclipse.emf.common.EMFPlugin
 import org.eclipse.emf.common.util.URI
+import org.eclipse.xtext.util.internal.Log
+
+import static extension com.google.common.base.Strings.nullToEmpty
 
 /**
  * Predicate that evaluates to {@code true} if the resource URI is an external EMF resource and has to be loaded.
  * 
  * @author akos.kitta
  */
-@ImplementedBy(Default)
+@ImplementedBy(DispatchingExternalEmfResourcePredicate)
 interface ExternalEmfResourcePredicate extends Predicate<URI> {
-	
+
 	static val EXTERNAL_EXTENSION = 'url';
 
 	/**
@@ -37,7 +42,41 @@ interface ExternalEmfResourcePredicate extends Predicate<URI> {
 	 */
 	override boolean apply(URI resourceUri);
 
+	@Log
 	@Singleton
+	static class DispatchingExternalEmfResourcePredicate implements ExternalEmfResourcePredicate {
+
+		@Inject
+		Default headless;
+
+		@Inject
+		SadlIdeExternalEmfResourcePredicate ide;
+
+		@Inject
+		EclipseExternalEmfResourcePredicate eclipse;
+
+		override apply(URI resourceUri) {
+			return resourceUri.dispatch.apply(resourceUri);
+		}
+
+		protected def ExternalEmfResourcePredicate ^dispatch(URI uri) {
+			val isFile = uri.scheme.nullToEmpty.equalsIgnoreCase('file');
+			if (EMFPlugin.IS_ECLIPSE_RUNNING) {
+				if (isFile) {
+					LOG.info('''Got a file URI while running in Eclipse. Falling back to headless case. URI: «uri»''');
+					return headless;
+				}
+				return eclipse;
+			} else {
+				if (isFile) {
+					return ide;
+				}
+				return headless;
+			}
+		}
+
+	}
+
 	static class Default implements ExternalEmfResourcePredicate {
 
 		static val IGNORED_FILES = #[

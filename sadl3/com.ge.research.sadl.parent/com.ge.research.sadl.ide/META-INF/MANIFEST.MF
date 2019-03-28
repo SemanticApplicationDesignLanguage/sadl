@@ -23,7 +23,6 @@ Export-Package: com.ge.research.sadl.ide,
  com.ge.research.sadl.ide.contentassist.antlr.lexer,
  com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex,
  com.ge.research.sadl.ide.editor.contentassist,
- com.ge.research.sadl.ide.handlers,
- com.ge.research.sadl.ide.utils
+ com.ge.research.sadl.ide.handlers
 Import-Package: org.slf4j
 Automatic-Module-Name: com.ge.research.sadl.ide
