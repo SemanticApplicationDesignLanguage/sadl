@@ -854,18 +854,19 @@ public class OwlToSadl {
 					continue;
 				}
 				String prefix = theModel.getNsURIPrefix(impUri);
-				if (prefix == null) {
-					prefix = theModel.getNsURIPrefix(impUri+"#");
-				}
-				prefix = sadlizePrefix(prefix);
 				sadlModel.append("import \"");
 				sadlModel.append(impUri);
-				sadlModel.append("\" as ");
+				sadlModel.append("\"");
 				if (prefix == null) {
-					prefix = "pre_" + prefixCntr++;
+					prefix = theModel.getNsURIPrefix(impUri+"#");
+					prefix = sadlizePrefix(prefix);
+					sadlModel.append(" as ");
+					if (prefix == null) {
+						prefix = "pre_" + prefixCntr++;
+					}
+					sadlModel.append(prefix);
+					theModel.setNsPrefix(prefix, impUri + "#");
 				}
-				sadlModel.append(prefix);
-				theModel.setNsPrefix(prefix, impUri + "#");
 				sadlModel.append(".\n");
 				if (imports == null) {
 					imports = new ArrayList<String>();
