@@ -83,6 +83,10 @@ interface SadlProjectHelper {
 			return uri.dispatch.toPath(uri);
 		}
 
+		override toUri(Path path) {
+			return (if(EMFPlugin.IS_ECLIPSE_RUNNING) eclipse else headless).toUri(path);
+		}
+
 		protected def SadlProjectHelper ^dispatch(URI uri) {
 			val isFile = uri.scheme.nullToEmpty.equalsIgnoreCase('file');
 			if (EMFPlugin.IS_ECLIPSE_RUNNING) {
