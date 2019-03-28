@@ -106,6 +106,7 @@ interface ISadlImplicitModelContentProvider {
 			ScientificConcept is a class.
 			UnittedQuantity is a type of ScientificConcept,
 				described by ^value with values of type decimal,
+				described by stddev with values of type decimal,
 				described by unit with values of type string.
 			
 			DataDescriptor is a class, described by descriptorName with a single value of type string,
