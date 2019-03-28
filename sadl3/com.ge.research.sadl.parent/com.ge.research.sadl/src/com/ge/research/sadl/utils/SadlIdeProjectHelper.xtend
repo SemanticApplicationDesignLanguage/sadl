@@ -15,7 +15,7 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.ide.utils
+package com.ge.research.sadl.utils
 
 import com.ge.research.sadl.utils.ResourceManager
 import com.ge.research.sadl.utils.SadlProjectHelper

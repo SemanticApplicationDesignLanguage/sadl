@@ -20,8 +20,6 @@ package com.ge.research.sadl.ide
 import com.ge.research.sadl.ide.builder.SadlIdeIncrementalBuilder.SadlInternalStatefulIncrementalBuilder
 import com.ge.research.sadl.ide.lsp.^extension.SadlProjectManager
 import com.ge.research.sadl.ide.lsp.^extension.SadlWorkspaceManager
-import com.ge.research.sadl.ide.utils.SadlIdeProjectHelper
-import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.inject.Binder
 import com.google.inject.Scopes
 import com.google.inject.binder.AnnotatedBindingBuilder
@@ -38,7 +36,6 @@ class SadlServerModule extends ServerModule {
 	override protected configure() {
 		super.configure()
 		binder.bindInternalStatefulIncrementalBuilder;
-		binder.bind(SadlProjectHelper).to(SadlIdeProjectHelper);
 		bind(WorkspaceManager).to(SadlWorkspaceManager).in(Scopes.SINGLETON);
 		bind(ProjectManager).to(SadlProjectManager).in(Scopes.SINGLETON);
 	}

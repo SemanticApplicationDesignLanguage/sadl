@@ -15,7 +15,7 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.ui.external
+package com.ge.research.sadl.external
 
 import com.ge.research.sadl.external.ExternalEmfResourcePredicate
 import com.google.common.base.Preconditions

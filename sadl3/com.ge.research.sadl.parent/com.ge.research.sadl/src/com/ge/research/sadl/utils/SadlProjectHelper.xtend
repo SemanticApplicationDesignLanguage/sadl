@@ -18,13 +18,19 @@
 package com.ge.research.sadl.utils
 
 import com.google.inject.ImplementedBy
+import com.google.inject.Inject
+import com.google.inject.Singleton
 import java.net.URI
 import java.nio.file.Path
+import org.eclipse.emf.common.EMFPlugin
+import org.eclipse.xtext.util.internal.Log
+
+import static extension com.google.common.base.Strings.nullToEmpty
 
 /**
  * Helper service for validating and locating SADL projects.
  */
-@ImplementedBy(Noop)
+@ImplementedBy(DispatchingProjectHelper)
 interface SadlProjectHelper {
 
 	static val DOT_PROJECT = '.project';
@@ -52,9 +58,53 @@ interface SadlProjectHelper {
 	 */
 	def Path toPath(URI uri);
 
+	@Log
+	@Singleton
+	class DispatchingProjectHelper implements SadlProjectHelper {
+
+		@Inject
+		Noop headless;
+
+		@Inject
+		SadlIdeProjectHelper ide;
+
+		@Inject
+		EclipseSadlProjectHelper eclipse;
+
+		override isRoot(URI uri) {
+			return uri.dispatch.isRoot(uri);
+		}
+
+		override getRoot(URI nested) {
+			return nested.dispatch.getRoot(nested);
+		}
+
+		override toPath(URI uri) {
+			return uri.dispatch.toPath(uri);
+		}
+
+		protected def SadlProjectHelper ^dispatch(URI uri) {
+			val isFile = uri.scheme.nullToEmpty.equalsIgnoreCase('file');
+			if (EMFPlugin.IS_ECLIPSE_RUNNING) {
+				if (isFile) {
+					LOG.info('''Got a file URI while running in Eclipse. Falling back to headless case. URI: «uri»''');
+					return headless;
+				}
+				return eclipse;
+			} else {
+				if (isFile) {
+					return ide;
+				}
+				return headless;
+			}
+		}
+
+	}
+
 	/**
-	 * The default project helper. Does not help too much. This is the default and should be used for the headless tool-chain. 
+	 * Does not help too much. This is the default and should be used for the headless tool-chain. 
 	 */
+	@Singleton
 	class Noop implements SadlProjectHelper {
 
 		override isRoot(URI uri) {
