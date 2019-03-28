@@ -30,6 +30,7 @@ import java.io.Writer;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -439,35 +440,191 @@ public class OwlToSadl {
         theModel.read(new ByteArrayInputStream(owlContent.getBytes()), null);
 	}
 	
-	private List<String> getSadlKeywords() {
-		SADLParser sparser = null;
-		Set<String> sadlkeywords = null;
-		
-	    Injector injector = new SADLStandaloneSetup().createInjectorAndDoEMFRegistration();
-	    sparser = injector.getInstance(SADLParser.class);
-		if (sparser != null) {
-			sadlkeywords = GrammarUtil.getAllKeywords(sparser.getGrammarAccess().getGrammar());
-			if (sadlkeywords != null) {
-				StringBuilder sb = new StringBuilder("public static final String[] tokenNames = new String[] {");
-				List<String> tokens = new ArrayList<String>();
-				Iterator<String> itr = sadlkeywords.iterator();
-				int cntr = 0;
-				while (itr.hasNext()) {
-					String token = itr.next();
-					tokens.add(token);
-					if (cntr++ > 0) {
-						sb.append(",");
-					}
-					sb.append("\"");
-					sb.append(token);
-					sb.append("\"");
-				}
-				sb.append("};");
-				logger.debug(sb.toString());
-				return tokens;
-			}
-		}
-		return null;
+	// This is a hack
+	public static List<String> getSadlKeywords() {
+		return Arrays.asList("select",
+"Test:",
+"construct",
+"type",
+"disjoint",
+"symmetrical",
+"property",
+"Stage",
+"if",
+"transitive",
+"order",
+"element",
+"!",
+"using",
+"in",
+"%",
+"double",
+"byte",
+"(",
+")",
+"index",
+"is",
+"*",
+"then",
+"+",
+"anyURI",
+"version",
+"-",
+"an",
+".",
+"/",
+"as",
+"contains",
+"at",
+"Graph",
+"seventh",
+"unique",
+"returns",
+":",
+"must",
+"Rule",
+"!=",
+"<",
+"=",
+">",
+"dateTime",
+"A",
+"other",
+"be",
+"E",
+"top-level",
+"another",
+"least",
+"An",
+"long",
+"matching",
+"The",
+"sixth",
+"default",
+"same",
+"known",
+"are",
+"does",
+"by",
+"Ask",
+"where",
+"[",
+"after",
+"relationship",
+"]",
+"table",
+"^",
+"annotation",
+"a",
+"contain",
+"e",
+"one",
+"uri",
+"gMonth",
+"...",
+"describes",
+"the",
+"single",
+"asc",
+"sublist",
+"ask",
+"Model",
+"located",
+"fifth",
+"exists",
+"{",
+"to",
+"fourth",
+"}",
+"None",
+"return",
+"first",
+"||",
+"date",
+"<=",
+"data",
+"before",
+"subject",
+"anySimpleType",
+"integer",
+"Update",
+"float",
+"second",
+"gYear",
+"negativeInteger",
+"only",
+"Explain:",
+"unsignedByte",
+"List",
+"from",
+"gDay",
+"has",
+"described",
+"--",
+"always",
+"==",
+"=>",
+"given",
+"last",
+"level",
+"count",
+"most",
+"base64Binary",
+"Print:",
+"Write:",
+"External",
+"true",
+"decimal",
+"desc",
+">=",
+"&&",
+"note",
+"some",
+"Expr:",
+"tenth",
+"import",
+"string",
+"instances",
+"classes",
+"values",
+"for",
+"insert",
+"distinct",
+"nonNegativeInteger",
+"delete",
+"duration",
+"can",
+"not",
+"and",
+"hexBinary",
+"of",
+"alias",
+"class",
+"value",
+"gMonthDay",
+"inverse",
+"types",
+"or",
+"length",
+"false",
+"eighth",
+"Equation",
+"exactly",
+"any",
+"int",
+"nonPositiveInteger",
+"with",
+"boolean",
+"third",
+"Read:",
+"there",
+"positiveInteger",
+"ninth",
+"unsignedInt",
+"PI",
+"Deductions",
+"time",
+"gYearMonth");
 	}
 	
 	/**

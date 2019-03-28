@@ -119,6 +119,7 @@ import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
+import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.model.gp.Update;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.parser.antlr.SADLParser;
@@ -11744,18 +11745,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	public static List<String> getSadlKeywords() {
-		if (sadlTokens == null) {
-			synchronized (JenaBasedSadlModelProcessor.class) {
-				if (sadlTokens == null) {
-					SADLStandaloneSetup setup = new SADLStandaloneSetup();
-					Injector injector = setup.createInjector();
-					SADLParser parser = injector.getInstance(SADLParser.class);
-					Grammar grammar = parser.getGrammarAccess().getGrammar();
-					sadlTokens = ImmutableList.copyOf(GrammarUtil.getAllKeywords(grammar));
-				}
-			}
-		}
-		return sadlTokens;
+		return OwlToSadl.getSadlKeywords();
 	}
 	
 	static public String getSadlBaseModel() {
