@@ -1012,7 +1012,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	
 	public Object getPrivateKeyValuePair(String key) {
 		if (privateKeyValueStore != null) {
-			return privateKeyValueStore.get(key);
+			Object val = privateKeyValueStore.get(key);
+			return val;
 		}
 		return null;
 	}
