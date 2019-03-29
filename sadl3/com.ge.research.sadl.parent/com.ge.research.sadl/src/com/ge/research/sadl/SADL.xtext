@@ -69,13 +69,16 @@ fragment EquationSignature returns AbstractSadlEquation:
 ;
 
 SadlParameterDeclaration:
-		type=SadlPrimaryTypeReference name=SadlResource
+		type=SadlPrimaryTypeReference name=SadlResource ('(' augtype=ExpressionParameterized<false,false>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')?
+//		type=SadlPrimaryTypeReference ('(' augtype=PropOfSubject<false,false>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')? name=SadlResource
+//		('(' type=PropOfSubject<false,false>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')' | type=SadlPrimaryTypeReference) name=SadlResource
 	|   unknown='--'
 	|   ellipsis='...'
 ;
 
 SadlReturnDeclaration:
-		type=SadlPrimaryTypeReference
+		type=SadlPrimaryTypeReference ('(' augtype=ExpressionParameterized<false,false>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')?
+//		('(' type=PropOfSubject<false,false> ('{' units+=UNIT (',' units+=UNIT)* '}')? ')' | type=SadlPrimaryTypeReference)
 	|   none ='None'
 	|   unknown='--'
 ;
@@ -112,6 +115,7 @@ SadlPropertyCondition :
 
 SadlPropertyInitializer:
 	 ','? ('with'|'has')? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+//	 ','? ('with'|'has')? (property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')) | {SadlPropertyInitializer} ('data' (valueTable=ValueTable | 'located' 'at' location=STRING))?
 	|','? 'is' property=[SadlResource|QNAME] 'of' type=[SadlResource|QNAME]
 	|','? 'of' property=[SadlResource|QNAME] 'is' (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 ;
@@ -157,6 +161,8 @@ SadlIntersectionType returns SadlTypeReference:
 SadlPrimaryTypeReference returns SadlTypeReference:
 		{SadlSimpleTypeReference} type=[SadlResource|QNAME] list?='List'?
 	|	{SadlPrimitiveDataType} primitiveType=SadlDataType list?='List'?
+	|	{SadlTableDeclaration} 'table' '[' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?']' 
+			('with' 'data' (valueTable=ValueTable | 'located' 'at' location=STRING))?
 	|	'(' SadlPropertyCondition ')'
 	|	'{' SadlTypeReference '}'
 ;

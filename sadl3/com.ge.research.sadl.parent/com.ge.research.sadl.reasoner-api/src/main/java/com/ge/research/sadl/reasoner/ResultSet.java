@@ -385,11 +385,15 @@ public class ResultSet {
 	 * @return
 	 */
 	public String toStringWithIndent(int indent) {
+		return toStringWithIndent(indent, true);
+	}
+
+	public String toStringWithIndent(int indent, boolean includeHeader) {
 		StringBuilder sb = new StringBuilder();
 		if (table != null && table[0] != null) {
-			if (table.length > 1) {
+			if (table.length > 1 || !includeHeader) {
 				// there is more than 1 row of data
-				if (header != null && header.length > 0) {
+				if (includeHeader && header != null && header.length > 0) {
 					for (int j = 0; j < indent; j++) {
 						sb.append(" ");
 					}
@@ -417,7 +421,7 @@ public class ResultSet {
 				}
 			}
 			else {
-				// there's just one row
+				// there's just one row or header is not to be included
 				for (int j = 0; j < indent; j++) {
 					sb.append(" ");
 				}
