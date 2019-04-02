@@ -120,7 +120,7 @@ interface ISadlImplicitModelContentProvider {
 			^Equation is a class,
 				described by expression with values of type Script.
 			arguments describes ^Equation with a single value of type DataDescriptor List.
-			returnTypes describes ^Equation with a single value of type anyURI List.
+			returnTypes describes ^Equation with a single value of type DataDescriptor List.
 			
 			ExternalEquation is a type of ^Equation,
 				described by externalURI with a single value of type anyURI,
