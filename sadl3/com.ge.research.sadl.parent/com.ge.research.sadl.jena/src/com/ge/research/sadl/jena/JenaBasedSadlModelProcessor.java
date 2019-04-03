@@ -5793,10 +5793,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 				}
 				builtin.setReturnTypes(rTypeNodes);
-				if (rTypeNodes.size() > 1 || 
-						(rTypeNodes.size() > 0 && !rTypeNodes.get(0).getURI().equals(XSD.xboolean.getURI()))) {
-					builtin.setExpectedArgCount(builtin.getExpectedArgCount() + rTypeNodes.size());
-				}
 			}
 		}
 		return builtin;
