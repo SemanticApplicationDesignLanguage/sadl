@@ -3334,7 +3334,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (tci != null) {				// will be null on invalid input, e.g., during clean
 				ConceptName et = new ConceptName(uri);
 				et.setType(ConceptType.VARIABLE);
-				tci.setExpressionType(et);
+				//tci.setExpressionType(et);
+				return new TypeCheckInfo(et, tci.getTypeCheckType(), tci.getImplicitProperties(), this, reference);
 			}
 			return tci;
 		}
