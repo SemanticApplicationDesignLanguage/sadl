@@ -27,6 +27,7 @@ import com.ge.research.sadl.reasoner.ReasonerNotFoundException
 import com.ge.research.sadl.reasoner.SadlCommandResult
 import com.ge.research.sadl.reasoner.TranslationException
 import java.util.Map
+import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 
 /**
@@ -59,5 +60,26 @@ interface ISadlInferenceProcessor {
 	 * Call to insert complete triples into model and query using incomplete triples
 	 * returns an array of ResultSet, one for each query triple pattern
 	 */
-	def Object[] insertTriplesAndQuery(Resource resource, TripleElement[] triples) throws SadlInferenceException ;
+	def Object[] insertTriplesAndQuery(Resource resource, TripleElement[] triples) throws SadlInferenceException;
+
+	/**
+	 * {@code true} if the resource can be processed with the current processor.
+	 */
+	def boolean isSupported(Resource resource) {
+		return resource?.URI.supported;
+	}
+
+	/**
+	 * {@code true} if a resource given as its URI can be processed with the current processor. Otherwise, {@code false}.
+	 */
+	def boolean isSupported(URI uri) {
+		return uri?.fileExtension.supported;
+	}
+
+	/**
+	 * {@code true} if the inference processor can be used to process files with the given file extension argument. Otherwise, {@code false}.
+	 * Clients should expect a file extension <b>without</b> the leading dot ({@code .}). So for example, in case of SADL, the argument will be
+	 * {@code "sadl"} and <b>not</b> {@code .sadl}.
+	 */
+	def boolean isSupported( /*nullable*/ String fileExtension);
 }

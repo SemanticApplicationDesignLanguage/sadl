@@ -1704,4 +1704,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return null;
 	}
 
+	@Override
+	public boolean isSupported(String fileExtension) {
+		return "sadl".equals(fileExtension);
+	}
+
 }
