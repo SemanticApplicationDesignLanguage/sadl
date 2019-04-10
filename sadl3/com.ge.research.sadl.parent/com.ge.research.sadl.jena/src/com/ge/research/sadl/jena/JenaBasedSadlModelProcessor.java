@@ -3707,7 +3707,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (leftTranslatedDefn instanceof NamedNode) {
 						if (leftTranslatedDefn instanceof VariableNode) {
 							leftDefnType = (NamedNode) ((VariableNode) leftTranslatedDefn).getType();
-						} else {
+						}else if(((NamedNode) leftTranslatedDefn).getLocalizedType() != null) {
+							leftDefnType = (NamedNode) ((NamedNode) leftTranslatedDefn).getLocalizedType(); 
+						}else {
 							leftDefnType = (NamedNode) leftTranslatedDefn;
 						}
 						setVarType(leftVar, leftDefnType, (Boolean) null, leftVariableDefn);
@@ -3727,7 +3729,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							}
 							return combineRest(createBinaryBuiltin(expr.getOp(), leftVar, rightVar), rest);
 						}
-						if(((NamedNode) leftTranslatedDefn).isList() && ((NamedNode) leftTranslatedDefn).getListLiterals() != null) {
+						if((((NamedNode) leftTranslatedDefn).isList() && ((NamedNode) leftTranslatedDefn).getListLiterals() != null) ||
+								((NamedNode) leftTranslatedDefn).getNodeType().equals(NodeType.DataTypeProperty)) {
 							addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
 							GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, leftTranslatedDefn);
 							((BuiltinElement)bi).setFuncName("assign");
@@ -3741,6 +3744,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						// could be dropped entirely
 						// but for now returning this extra type although for a list range will be
 						// incorrect? awc 12/6/2017
+						//Still uncertain if these triple elements should still be applicable
+						//NGB 4-4-2019
 						TripleElement trel;
 						if (leftVariableDefn instanceof Declaration) {
 							trel = new TripleElement(leftVar, new RDFTypeNode(), (Node) leftTranslatedDefn);
@@ -5793,10 +5798,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 				}
 				builtin.setReturnTypes(rTypeNodes);
-				if (rTypeNodes.size() > 1 || 
-						(rTypeNodes.size() > 0 && !rTypeNodes.get(0).getURI().equals(XSD.xboolean.getURI()))) {
-					builtin.setExpectedArgCount(builtin.getExpectedArgCount() + rTypeNodes.size());
-				}
 			}
 		}
 		return builtin;
