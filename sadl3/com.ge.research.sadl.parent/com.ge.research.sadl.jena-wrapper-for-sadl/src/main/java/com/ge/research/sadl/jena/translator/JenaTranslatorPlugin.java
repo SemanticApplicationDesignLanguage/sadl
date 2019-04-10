@@ -82,6 +82,7 @@ import com.hp.hpl.jena.reasoner.rulesys.BuiltinRegistry;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
+import com.hp.hpl.jena.vocabulary.XSD;
 
 public class JenaTranslatorPlugin implements ITranslator {
     private static final String THERE_EXISTS = "thereExists";
@@ -903,10 +904,20 @@ public class JenaTranslatorPlugin implements ITranslator {
 			List<Node> args = ((BuiltinElement)gpe).getArguments();
 			if ((((BuiltinElement)gpe).getFuncName().equals("is") || ((BuiltinElement)gpe).getFuncName().equals("assign"))
 					&& ((BuiltinElement)gpe).getFuncType().equals(BuiltinType.Assign)) {
-				sb.append("assign(");
-				sb.append(nodeToString(args.get(1), TranslationTarget.RULE_BUILTIN));
-				sb.append(",");
-				sb.append(nodeToString(args.get(0), TranslationTarget.RULE_BUILTIN));
+/**
+ * NGB 4-3-2019 If the right-hand side of the assignment is a BuiltinElement returning anything other than boolean,
+ * add the right-hand variable as an additional argument and ignore the assignment.
+ */
+				List<Node> lReturnTypeNodes = ((BuiltinElement)gpe).getReturnTypes();
+				if (lReturnTypeNodes.size() > 1 || 
+						(lReturnTypeNodes.size() > 0 && !lReturnTypeNodes.get(0).getURI().equals(XSD.xboolean.getURI()))) {
+					((BuiltinElement)gpe).setExpectedArgCount(((BuiltinElement)gpe).getExpectedArgCount() + lReturnTypeNodes.size());
+				}else {
+					sb.append("assign(");
+					sb.append(nodeToString(args.get(1), TranslationTarget.RULE_BUILTIN));
+					sb.append(",");
+					sb.append(nodeToString(args.get(0), TranslationTarget.RULE_BUILTIN));
+				}
 			}
 			else {
 				sb.append(builtinTypeToString((BuiltinElement)gpe));
