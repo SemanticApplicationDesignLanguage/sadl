@@ -152,6 +152,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private List<ConceptName> binaryOpRightImpliedProperties;
 	protected Object lastSuperCallExpression = null;
 	private Map<EObject,Boolean> mEObjectsValidated = null; 
+	private String variableSeekingType = null;
 
    	public enum ExplicitValueType {RESTRICTION, VALUE}
    	
@@ -3883,6 +3884,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo tci = new TypeCheckInfo(et, var.getType(), this, reference);
 			return tci;
 		}
+		if (getVariableSeekingType() != null && getVariableSeekingType().equals(conceptNm)) {
+//			setVariableSeekingType(null);
+			return null;
+		}
+		else {
+			setVariableSeekingType(conceptNm);
+		}
 		SadlResource name = sr.getName();
 		if (name != null) {
 			SadlResource def = declarationExtensions.getDeclaration(name);
@@ -5738,6 +5746,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return true;	// this will need more checking when the body grammar is sufficent to support multiple return values
+	}
+
+	protected String getVariableSeekingType() {
+		return variableSeekingType;
+	}
+
+	protected void setVariableSeekingType(String variableSeekingType) {
+		this.variableSeekingType = variableSeekingType;
 	}
 
 }
