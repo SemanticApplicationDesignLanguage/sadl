@@ -234,7 +234,7 @@ public class OwlToSadlTest {
 		String expected = "uri \"http://sadl.org/specificshapes.sadl\" alias specificshapes\n" + 
 				"    (note \"This ontology was created from a SADL file 'specificshapes.sadl' and should not be directly edited.\").\n" + 
 				"\n" + 
-				"import \"http://sadl.org/concepts.sadl\" as concepts.\n" + 
+				"import \"http://sadl.org/concepts.sadl\".\n" + 
 				"\n" + 
 				"\n" + 
 				"// Class definitions:\n" + 
