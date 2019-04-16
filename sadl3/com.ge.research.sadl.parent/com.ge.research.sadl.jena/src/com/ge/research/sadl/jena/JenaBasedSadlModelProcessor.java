@@ -7203,6 +7203,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					tr.setPredicate(null);
 					return shpTriples;
 				}
+				else if (subj.eContainer() instanceof SubjHasProp && 
+						subj.eContainer().eContainer() instanceof BinaryOperation) {
+					addError("Triple pattern as part of binary operation is incomplete", subj.eContainer());
+					return shpTriples;
+				}
 				else {
 					throw new TranslationException("Object for triple is null, which was not expected.");
 				}
@@ -9636,6 +9641,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 //					addListValues(inst, cls, (SadlValueList) val);	// This was replaced by the code above because the
 																	// list is the value of a triple, not elements of the subject (inst)
+				} else if (val instanceof SadlResource) {
+					try {
+						Node nval = processExpression((SadlResource)val);
+						if (nval != null && nval instanceof VariableNode) {
+							
+						}
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				} else if (val instanceof SadlExplicitValue) {
 					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, oprop.getRange());
 					if (lval != null) {
@@ -11104,7 +11119,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (type != null) {
 				typersrc = sadlTypeReferenceToOntResource(type);
 			}
-			if (cardinality.equals("one")) {
+			if (type != null && typersrc == null) {
+				addError("The type could not be resolved", type);
+			}
+			else if (cardinality.equals("one")) {
 				// this is interpreted as a someValuesFrom restriction
 				if (type == null) {
 					throw new JenaProcessorException("'one' means some value from class so a type must be given");

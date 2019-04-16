@@ -1478,7 +1478,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (i == 0) {
 							svltci = rttci;
 						}
-						else if (!svltci.getTypeCheckType().equals(rttci.getTypeCheckType()) ) {
+						else if (svltci == null && rttci != null) {
+							svltci = rttci;
+						}
+						else if (svltci != null && rttci != null && 
+								!svltci.getTypeCheckType().equals(rttci.getTypeCheckType()) ) {
 							OntClass svtype = theJenaModel.getOntClass(svltci.getTypeCheckType().getURI());
 							OntClass rttype = theJenaModel.getOntClass(rttci.getTypeCheckType().getURI());
 							if (SadlUtils.classIsSubclassOf(svtype, rttype, true, null)) {
@@ -3350,7 +3354,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return tci;
 		}
 		else if (conceptType.equals(OntConceptType.FUNCTION_DEFN)) {
-			return getFunctionType(sr);
+			return getFunctionType(declarationExtensions.getDeclaration(sr));
 		}
 		else if (conceptType.equals(OntConceptType.CLASS_LIST)) {
 			if (conceptUri != null) {
