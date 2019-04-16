@@ -226,6 +226,7 @@ public class OwlToSadlTest {
 		assertEquals(expected, sadlModelContent);
 	}
 	
+	@Ignore("https://github.com/crapo/sadlos2/issues/372")
 	@Test
 	public void test04() throws Exception {
 		String owlModelContent = ExternalResourceContentHelper.getContent("Shapes/specificshapes.owl");
