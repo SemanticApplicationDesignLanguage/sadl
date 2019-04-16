@@ -467,6 +467,7 @@ public class OwlToSadl {
 "*",
 "then",
 "+",
+",",
 "anyURI",
 "version",
 "-",
