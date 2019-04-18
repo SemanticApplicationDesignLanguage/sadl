@@ -100,6 +100,7 @@ interface ISadlImplicitModelContentProvider {
 		 */
 		public static val DEFAULT_CONTENT = '''
 			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+			/****** The content of this model is automatically included in every SADL model ******/
 			
 			impliedProperty is a type of annotation.
 			expandedProperty is a type of annotation.
@@ -139,7 +140,7 @@ interface ISadlImplicitModelContentProvider {
 			anyDataType (note "union of all relevant data types") is a type of {decimal or boolean or string or date or dateTime or anyURI}.
 			argValues (note "values of arguments to the built-in") describes FunctionPattern with a single value of type anyDataType List.
 			
-			Assumption (note "used to identify necessary patterns in semantic domain terms") is a type of AugmentedType, 
+			SemanticConstraint (note "used to identify necessary patterns in semantic domain terms") is a type of AugmentedType, 
 				described by constraints with a single value of type GraphPattern List.
 			ThisArgument (note "allows reference to self within an Argument's constraints") is a DataDescriptor.
 			

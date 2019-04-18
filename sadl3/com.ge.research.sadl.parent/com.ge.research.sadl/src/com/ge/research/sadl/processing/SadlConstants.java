@@ -54,7 +54,7 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_SEM_TYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#semType";
 	public static final String SADL_IMPLICIT_MODEL_TRIPLE_PATTERN_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#TriplePattern";
 	public static final String SADL_IMPLICIT_MODEL_FUNCTION_PATTERN_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#FunctionPattern";
-	public static final String SADL_IMPLICIT_MODEL_ASSUMPTION_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Assumption";
+	public static final String SADL_IMPLICIT_MODEL_SEMANTIC_CONSTRAINT_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#SemanticConstraint";
 	public static final String SADL_IMPLICIT_MODEL_CONSTRAINTS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#constraints";
 	public static final String SADL_IMPLICIT_MODEL_AUG_TYPE_UNITS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#augTypeUnits";
 	public static final String SADL_IMPLICIT_MODEL_GP_SUBJECT_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#gpSubject";
