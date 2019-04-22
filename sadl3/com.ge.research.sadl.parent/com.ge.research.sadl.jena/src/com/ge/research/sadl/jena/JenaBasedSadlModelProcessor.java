@@ -3160,7 +3160,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		RDFList constList = getTheJenaModel().createList(constraints.iterator());
-		Individual assumptInst = getTheJenaModel().createIndividual(getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_ASSUMPTION_CLASS_URI));
+		Individual assumptInst = getTheJenaModel().createIndividual(getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_SEMANTIC_CONSTRAINT_CLASS_URI));
 		assumptInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_CONSTRAINTS_PROPERTY_URI), constList);
 		ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_AUGMENTED_TYPE_PROPERTY_URI), assumptInst);
 	}
@@ -4341,22 +4341,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected Object processBinaryExpressionByParts(EObject container, String op, Expression lexpr, Expression rexpr)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		StringBuilder errorMessage = new StringBuilder();
-		if (lexpr != null && rexpr != null) {
-			if(!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
-				addTypeCheckingError(errorMessage.toString(), container);
-			}
-			else {
-				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
-				if (ip != null) {
-					Iterator<EObject> ipitr = ip.keySet().iterator();
-					while (ipitr.hasNext()) {
-						EObject eobj = ipitr.next();
-						OntModelProvider.addImpliedProperty(lexpr.eResource(), eobj, ip.get(eobj));
+//		if (!op.equals("and") && !op.equals("or")) {
+//			// don't validate these as they will be validated in their parts and to do so now will not always work
+			if (lexpr != null && rexpr != null) {
+				if(!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
+					addTypeCheckingError(errorMessage.toString(), container);
+				}
+				else {
+					Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+					if (ip != null) {
+						Iterator<EObject> ipitr = ip.keySet().iterator();
+						while (ipitr.hasNext()) {
+							EObject eobj = ipitr.next();
+							OntModelProvider.addImpliedProperty(lexpr.eResource(), eobj, ip.get(eobj));
+						}
+						// TODO must add implied properties to rules, tests, etc.
 					}
-					// TODO must add implied properties to rules, tests, etc.
 				}
 			}
-		}
+//		}
 		BuiltinType optype = BuiltinType.getType(op);
 		Object lobj = null;
 		if (lexpr != null) {
@@ -4378,6 +4381,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return null;
 		}
 
+//		if (op.equals("and") || op.equals("or")) {
+			// now validate these (needed?)
+//			if (lexpr != null && rexpr != null) {
+//				if(!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
+//					addTypeCheckingError(errorMessage.toString(), container);
+//				}
+//				else {
+//					Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+//					if (ip != null) {
+//						Iterator<EObject> ipitr = ip.keySet().iterator();
+//						while (ipitr.hasNext()) {
+//							EObject eobj = ipitr.next();
+//							OntModelProvider.addImpliedProperty(lexpr.eResource(), eobj, ip.get(eobj));
+//						}
+//						// TODO must add implied properties to rules, tests, etc.
+//					}
+//				}
+//			}
+//		}
 
 		if(lobj != null && robj !=null ) {
 			//Check to see if we need to add implied property to entire built in element
@@ -5121,6 +5143,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// return decl;
 			// }
 		}
+		else if (rexpr instanceof Declaration) {
+			return (Declaration) rexpr;
+		}
 		return null;
 	}
 
@@ -5751,11 +5776,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				args.add(processExpression(arglist.get(i)));
 			}
 			if (args != null) {
+				int i = 0;
 				for (Object arg : args) {
-					builtin.addArgument(nodeCheck(arg));
-					if (arg instanceof GraphPatternElement) {
-						((GraphPatternElement) arg).setEmbedded(true);
+					try {
+						builtin.addArgument(nodeCheck(arg));
+						if (arg instanceof GraphPatternElement) {
+							((GraphPatternElement) arg).setEmbedded(true);
+						}
 					}
+					catch (TranslationException e) {
+						addError("Invalid argument ", arglist.get(i));
+					}
+					i++;
 				}
 			}
 		}
@@ -6495,23 +6527,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			addError(SadlErrorMessages.TRANSLATE_NAME_SADLRESOURCE.toString(), aExpr);
-			
-		// make sure the right side is defined for binary operation
-		} else if (lQName.equals(aExpr) && aExpr.eContainer() instanceof BinaryOperation
-			&& ((BinaryOperation) aExpr.eContainer()).getRight() != null
-			&& ((BinaryOperation) aExpr.eContainer()).getRight().equals(lQName)) {
-			
+		}
+		else if (getTarget() != null && getTarget() instanceof Rule && 
+				((Rule)getTarget()).getVariable(getModelNamespace() + lName) != null) {
+			return ((Rule)getTarget()).getVariable(getModelNamespace() + lName);
+		}			// make sure the right side is defined for binary operation
+		else if (lQName.equals(aExpr) && aExpr.eContainer() instanceof BinaryOperation
+				&& ((BinaryOperation) aExpr.eContainer()).getRight() != null
+				&& ((BinaryOperation) aExpr.eContainer()).getRight().equals(lQName)) {
+
 			addError("It appears that '" + lName + "' is not defined.", aExpr);
-			
-		// make sure the left side is defined for binary operation
+
+			// make sure the left side is defined for binary operation
 		} else if (lQName.equals(aExpr) && aExpr.eContainer() instanceof BinaryOperation
-			&& ((BinaryOperation) aExpr.eContainer()).getLeft() != null
-			&& ((BinaryOperation) aExpr.eContainer()).getLeft().equals(lQName)) {
-			
+				&& ((BinaryOperation) aExpr.eContainer()).getLeft() != null
+				&& ((BinaryOperation) aExpr.eContainer()).getLeft().equals(lQName)) {
+
 			addError("It appears that '" + lName + "' is not defined.", aExpr);
-			
 		} else {
-			
 			return processExpression(lQName);
 		}
 		
@@ -8966,6 +8999,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// this has two forms:
 		// 1) <name> is a <type> ...
 		// 2) a <type> <name> ....
+		// 3) <name> is a <property> of <instance>
 		SadlTypeReference type = element.getType();
 		boolean isList = typeRefIsList(type);
 		SadlResource sr = sadlResourceFromSadlInstance(element);
@@ -9090,7 +9124,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (cls != null) {
 					inst = createIndividual(instUri, cls);
 				} else if (instUri != null) {
-					inst = createIndividual(instUri, (OntClass) null);
+					inst = getTheJenaModel().getIndividual(instUri);
+					if (inst != null) {
+						// instance already exists
+					}
+					else {
+						inst = createIndividual(instUri, (OntClass) null);
+					}
 				} else {
 					throw new JenaProcessorException("Can't create an unnamed instance with no class given");
 				}
@@ -9109,6 +9149,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addWarning(SadlErrorMessages.CLASS_PROPERTY_VALUE_OWL_FULL.get(), element);
 			}
 			EObject val = propinit.getValue();
+			if (val == null) {
+				val = propinit.getType();
+			}
 			if (val != null) {
 				try {
 					if (getModelValidator() != null) {
@@ -9912,7 +9955,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							(aRangeNode.canAs(OntResource.class) && aRangeNode.as(OntResource.class).getURI().equals(XSD.decimal.getURI()))) {
 						return;
 					}
-					if(lRange.getURI().equals(XSD.decimal.getURI()) && 
+					if(lRange.getURI().equals(XSD.decimal.getURI()) && aRangeNode.isURIResource() &&
 							(aRangeNode.canAs(OntResource.class) && aRangeNode.as(OntResource.class).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI))) {
 						return;
 					}
