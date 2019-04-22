@@ -2379,7 +2379,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 												}
 											}
 											else {
-												vn.setType(new NamedNode(rngcls.getURI()));
+												NamedNode nn = new NamedNode(rngcls.getURI());
+												nn.setNodeType(NodeType.ClassNode);
+												vn.setType(nn);
 											}
 										}
 									}
