@@ -5177,10 +5177,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						OntConceptType stype = declarationExtensions.getOntConceptType((SadlResource)subject);
 						String subjuri = declarationExtensions.getConceptUri((SadlResource) subject);
 						String preduri = declarationExtensions.getConceptUri(predicate);
-						NamedNode subjnn = new NamedNode(subjuri);
-						subjnn.setNodeType(NodeType.ClassNode);
-						NamedNode prednn = new NamedNode(preduri);
-						prednn.setNodeType(getModelProcessor().ontConceptTypeToNodeType(ptype));
+						NamedNode subjnn = subjuri != null ? new NamedNode(subjuri) : null;
+						if (subjnn != null) {
+							subjnn.setNodeType(NodeType.ClassNode);
+						}
+						NamedNode prednn = preduri != null ? new NamedNode(preduri) : null;
+						if (prednn != null) {
+							prednn.setNodeType(getModelProcessor().ontConceptTypeToNodeType(ptype));
+						}
+						if (subjnn == null || prednn == null) {
+							return;
+						}
 						List<Node> lrs = getApplicableLocalRestrictions(subjnn, prednn);
 						
 						OntResource subj = null;
