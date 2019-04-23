@@ -3341,6 +3341,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				ConceptName et = new ConceptName(uri);
 				et.setType(ConceptType.VARIABLE);
 				//tci.setExpressionType(et);
+				setVariableSeekingType(null);  // this has to be reset somewhere or test fails. Not sure this is the right place awc 4/23/19
 				return new TypeCheckInfo(et, tci.getTypeCheckType(), tci.getImplicitProperties(), this, reference);
 			}
 			return tci;
