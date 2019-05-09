@@ -121,6 +121,7 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.model.gp.Update;
+import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.parser.antlr.SADLParser;
 import com.ge.research.sadl.preferences.SadlPreferences;
@@ -2532,7 +2533,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private Query processAsk(Expression expr) {
-		Query query = (Query) getTarget();
+		Object trgt = getTarget();
+		Query query = null;
+		if (trgt instanceof Query) {
+			query = (Query) getTarget();
+		}
+		else if (trgt instanceof Test) {
+			query = new Query();
+			addInfo("Creating query as part of test", expr);
+		}
+		else {
+			addError("Unhandled construct with target of type " + expr.getClass().getCanonicalName(), expr);
+		}
 		// if (parent != null) {
 		// getIfTranslator().setEncapsulatingTarget(parent);
 		// }
@@ -3596,8 +3608,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				Object valObj = processExpression(val);
 				rowObjects.add(valObj);
 			}
-			return rowObjects;
+			return convertToValueTableNode(rowObjects);
 		}
+	}
+
+	private ValueTableNode convertToValueTableNode(List<Object> rowObjects) throws TranslationException {
+		List<Node> row = new ArrayList<Node>();
+		for (Object robj : rowObjects) {
+			if (robj instanceof Node) {
+				row.add((Node)robj);
+			}
+			else {
+				throw new TranslationException("Unexpected non-Node in value table content");
+			}
+		}
+		List<List<Node>> tbl = new ArrayList<List<Node>>();
+		tbl.add(row);
+		ValueTableNode vtn = new ValueTableNode();
+		vtn.setRows(tbl);
+		return vtn;
 	}
 
 	public Object processExpression(BinaryOperation expr)
@@ -6025,6 +6054,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			jct.setLhs(nodeCheck(lobj));
 			jct.setRhs(nodeCheck(robj));
 			return jct;
+		} else if (name.equals("is") && getTarget() instanceof Test) {
+			((Test)getTarget()).setLhs(lobj);
+			((Test)getTarget()).setRhs(robj);
+			((Test)getTarget()).setCompName(name);
+			return null;
 		} else {
 			BuiltinElement builtin = new BuiltinElement();
 			builtin.setFuncName(transformOpName(name));
@@ -7957,18 +7991,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						addPropertyRange(propType, prop, rngNode, rngValueType, rng);
 						retProp = prop;
 					} else {
-						ConceptName rngcn = sadlSimpleTypeReferenceToConceptName(rng);
-						if (rngcn != null) {
-							rngName = rngcn.toFQString();
-						} else {
-							addError("No range found in statement", rng);
+						OntResource rngRsrc = null;
+						if (rng instanceof SadlUnionType || rng instanceof SadlIntersectionType) {
+							Object rngObj = sadlTypeReferenceToObject(rng);
+							if (rngObj instanceof OntResource) {
+								rngRsrc = (OntResource) rngObj;
+							}
+							else {
+								addError("Unable to resolve to a range", rng);
+							}
 						}
-						OntResource rngRsrc;
-						if (isList) {
-							rngRsrc = getOrCreateListSubclass(null, rngName, element.eResource(), ((SadlRangeRestriction) spr1).getFacet());
-							propType = OntConceptType.CLASS_PROPERTY;
-						} else {
-							rngRsrc = sadlTypeReferenceToOntResource(rng);
+						else {
+							ConceptName rngcn = sadlSimpleTypeReferenceToConceptName(rng);
+							if (rngcn != null) {
+								rngName = rngcn.toFQString();
+							} else {
+								addError("No range found in statement", rng);
+							}
+							if (isList) {
+								rngRsrc = getOrCreateListSubclass(null, rngName, element.eResource(), ((SadlRangeRestriction) spr1).getFacet());
+								propType = OntConceptType.CLASS_PROPERTY;
+							} else {
+								rngRsrc = sadlTypeReferenceToOntResource(rng);
+							}
 						}
 						if (rngRsrc != null) {
 							retProp = assignRangeToProperty(propUri, propType, rngRsrc, rngValueType, rng);

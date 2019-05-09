@@ -952,6 +952,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (rExpr instanceof Constant && isSkippedConstant((Constant)rExpr)) {
 			return true;
 		}
+		if (leftExpression instanceof SelectExpression) {
+			// ignore Select queries for now awc 4/26/2019
+			return true;
+		}
 		return false;
 	}
 	
@@ -1559,6 +1563,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if (expression instanceof SadlReturnDeclaration) {
 			returnedTci = getType(((SadlReturnDeclaration)expression).getType());
+		}
+		else if (expression instanceof SelectExpression) {
+			ConceptName declarationConceptName = new ConceptName("Query");
+			returnedTci =  new TypeCheckInfo(declarationConceptName, null, this, expression);
+//            throw new DontTypeCheckException("Select expression can't be type checked.");
 		}
 		else if (expression != null) {
 			getModelProcessor().addTypeCheckingError(SadlErrorMessages.DECOMPOSITION_ERROR.get(expression.toString()), expression);
@@ -3060,15 +3069,21 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			Expression arg = args.get(i);
 			SadlParameterDeclaration param = null;
 			if (variableNumArgs) {
-				param = (i >= minNumArgs) ? params.get(minNumArgs - 1) : params.get(i);
+				param = (i >= minNumArgs && minNumArgs > 0) ? params.get(minNumArgs - 1) : params.get(i);
 			}
 			else if (i < params.size()) {
 				param = params.get(i);
 			}
 			if (param != null) {
-				validateBinaryOperationByParts(expression, arg, param.getType(), "argument", sb, false);
-				if (sb.length() > 0) {
-					getModelProcessor().addTypeCheckingError(sb.toString(), expression);
+				if (param.getEllipsis() == null) {
+					validateBinaryOperationByParts(expression, arg, param.getType(), "argument", sb, false);
+					if (sb.length() > 0) {
+						getModelProcessor().addTypeCheckingError(sb.toString(), expression);
+					}
+				}
+				else {
+					// don't try to typecheck if it's an ellipsis
+					break;
 				}
 			}
 		}
