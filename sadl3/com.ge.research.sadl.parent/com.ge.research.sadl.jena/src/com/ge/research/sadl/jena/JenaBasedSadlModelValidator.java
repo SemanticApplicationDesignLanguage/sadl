@@ -3416,7 +3416,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	private ConceptName createTypedConceptName(String conceptUri, OntConceptType conceptType) {
+	private ConceptName createTypedConceptName(String conceptUri, OntConceptType conceptType) throws InvalidTypeException {
 		return modelProcessor.createTypedConceptName(conceptUri, conceptType);
 	}
 	

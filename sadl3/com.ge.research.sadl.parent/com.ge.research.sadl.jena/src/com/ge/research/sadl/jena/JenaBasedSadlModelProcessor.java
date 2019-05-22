@@ -2425,6 +2425,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			predcn.setType(ConceptType.DATATYPEPROPERTY);
 		} else if (predProp instanceof AnnotationProperty) {
 			predcn.setType(ConceptType.ANNOTATIONPROPERTY);
+		} else if (predProp.canAs(ObjectProperty.class)) {
+			predcn.setType(ConceptType.OBJECTPROPERTY);
+		} else if (predProp.canAs(DatatypeProperty.class)) {
+			predcn.setType(ConceptType.DATATYPEPROPERTY);
+		}
+		else if (predProp.canAs(AnnotationProperty.class)) {
+			predcn.setType(ConceptType.ANNOTATIONPROPERTY);
 		} else {
 			predcn.setType(ConceptType.RDFPROPERTY);
 		}
@@ -4920,6 +4927,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			ConceptName cn = litr.next();
 			Property prop = theJenaModel.getProperty(cn.getUri());
 			if(aPropertyToMatch.equals(prop)){
+				if (cn.getType() == null) {
+					setPropertyConceptNameType(cn, prop);
+				}
 				baseImpliedPropertyTci = getModelValidator().getTypeInfoFromRange(cn, prop, aEObj);
 			}
 		}
@@ -9384,8 +9394,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
-	public ConceptName createTypedConceptName(String conceptUri, OntConceptType conceptType) {
+	public ConceptName createTypedConceptName(String conceptUri, OntConceptType conceptType) throws InvalidTypeException {
 		ConceptName cn = new ConceptName(conceptUri);
+		setConceptNameType(cn, conceptType);
+		return cn;
+	}
+
+	private ConceptName setConceptNameType(ConceptName cn, OntConceptType conceptType) throws InvalidTypeException {
 		if (conceptType.equals(OntConceptType.CLASS)) {
 			cn.setType(ConceptType.ONTCLASS);
 		} else if (conceptType.equals(OntConceptType.ANNOTATION_PROPERTY)) {
@@ -9404,6 +9419,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			cn.setType(ConceptType.VARIABLE);
 		} else if (conceptType.equals(OntConceptType.FUNCTION_DEFN)) {
 			cn.setType(ConceptType.FUNCTION_DEFN);
+		}
+		else {
+			throw new InvalidTypeException("OntConceptType " + conceptType.toString() + " is not recognized.");
 		}
 		return cn;
 	}
