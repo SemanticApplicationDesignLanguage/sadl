@@ -11,7 +11,7 @@
 
 	<build>
 		<!-- We do not want to run the headless tests in an OSGi container. -->
-		<!-- We use Mave Surefire instead of Tycho Surefire to run the tests outside of the OSGi container. -->
+		<!-- We use Maven Surefire instead of Tycho Surefire to run the tests outside of the OSGi container. -->
 		<!-- Source: https://wiki.eclipse.org/Tycho/FAQ#Can_I_run_eclipse-plugin_tests_also_outside_an_OSGi_container.3F -->
 		<!-- GH issue: https://github.com/crapo/sadlos2/issues/370 -->
 		<!-- Maven Surefire expects test classes in ${project.build.directory}/test-classes by default. -->
