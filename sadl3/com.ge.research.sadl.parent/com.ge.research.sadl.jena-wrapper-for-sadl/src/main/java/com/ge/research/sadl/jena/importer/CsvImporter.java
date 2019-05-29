@@ -646,13 +646,29 @@ public class CsvImporter implements ITabularDataImporter {
 					while (repItr.hasNext()) {
 						String replace = repItr.next();
 						String repWith = replacements.get(replace);
-						String transformed = input.replaceAll(replace, repWith).trim();
-						if (logger.isDebugEnabled()) {
-							if (transformed == null || !transformed.equals(input)) {
-								logger.debug("Encode (" + getInputIdentifier() + ")(" + replace + ":" + repWith + ") transformed '" + input + "' -> '" + transformed + "' (before URL encoding)");
+						String transformed = null;
+						if (replace.length() == 0) {
+							// this is replace for an empty value
+							if (input.length() == 0) {
+								// this is an empty value
+								transformed = repWith;
+								if (logger.isDebugEnabled()) {
+									if (transformed == null || !transformed.equals(input)) {
+										logger.debug("Encode (" + getInputIdentifier() + ")(" + replace + ":" + repWith + ") transformed '" + input + "' -> '" + transformed + "' (before URL encoding)");
+									}
+								}
+								input = transformed;
 							}
 						}
-						input = transformed;
+						else {
+							transformed = input.replaceAll(replace, repWith).trim();
+							if (logger.isDebugEnabled()) {
+								if (transformed == null || !transformed.equals(input)) {
+									logger.debug("Encode (" + getInputIdentifier() + ")(" + replace + ":" + repWith + ") transformed '" + input + "' -> '" + transformed + "' (before URL encoding)");
+								}
+							}
+							input = transformed;
+						}
 					}
 				}
 				try {
