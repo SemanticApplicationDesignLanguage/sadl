@@ -2740,8 +2740,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (TranslationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			addError(e1.getMessage(), whexpr);
 		}
 
 		if (names != null && names.size() > 0) {
