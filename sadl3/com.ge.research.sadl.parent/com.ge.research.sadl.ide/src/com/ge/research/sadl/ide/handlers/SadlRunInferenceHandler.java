@@ -173,6 +173,8 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 										(query.getSparqlQueryString().toLowerCase().startsWith("construct")))) {
 //    						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
 							String msg = "Graph: " + query.toString() + "\n";
+							String nsiqr = prefMap.get(SadlPreferences.NAMESPACE_IN_QUERY_RESULTS.getId());
+							rs.setShowNamespaces(Boolean.parseBoolean(nsiqr));
 							msg += rs.toStringWithIndent(5);
     						console.info(msg);
 							String desc = query.getName();

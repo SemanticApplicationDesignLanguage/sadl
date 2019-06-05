@@ -277,7 +277,7 @@ RuleStatement returns ExpressionScope :
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
 	start = ('Ask'|'Graph') ((name=SadlResource (annotations+=NamedStructureAnnotation)* )? ':' expr=(ConstructExpression | AskExpression | Expression) 
-		| name=SadlResource
+		| name=SadlResource ('['parameterizedValues = ValueRow']')?
 	)
 ;
 

@@ -15,7 +15,7 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.ui.utils
+package com.ge.research.sadl.utils
 
 import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.common.base.Preconditions

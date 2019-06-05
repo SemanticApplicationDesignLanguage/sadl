@@ -33,7 +33,7 @@ import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
 import com.hp.hpl.jena.reasoner.rulesys.Util;
 import com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin;
 
-public class CountMatches extends BaseBuiltin {
+public class CountMatches extends TypedBaseBuiltin {
     protected static final Logger logger = LoggerFactory.getLogger(CountMatches.class);
 	
 	private int argLength = 0;
@@ -100,6 +100,11 @@ public class CountMatches extends BaseBuiltin {
      */
     public boolean isSafe() {
          return true;
+    }
+    
+	@Override
+	public String getFunctionSignatureString() {
+    	return "countMatches(...)int";
     }
 
 }

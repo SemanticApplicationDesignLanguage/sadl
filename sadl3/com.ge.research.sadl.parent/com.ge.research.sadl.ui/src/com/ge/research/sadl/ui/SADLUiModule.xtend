@@ -20,7 +20,6 @@
  */
 package com.ge.research.sadl.ui
 
-import com.ge.research.sadl.external.ExternalEmfResourcePredicate
 import com.ge.research.sadl.ide.editor.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlContentAssistContextFactory
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalProvider
@@ -31,7 +30,6 @@ import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
 import com.ge.research.sadl.ui.editor.SadlProblemAnnotationHover
-import com.ge.research.sadl.ui.external.EclipseExternalEmfResourcePredicate
 import com.ge.research.sadl.ui.generator.SadlShouldGenerate
 import com.ge.research.sadl.ui.hover.SadlEObjectHoverProvider
 import com.ge.research.sadl.ui.markers.EclipseMarkerSeverityMapper
@@ -41,9 +39,7 @@ import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
-import com.ge.research.sadl.ui.utils.EclipseSadlProjectHelper
 import com.ge.research.sadl.utils.SadlConsole
-import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.inject.Binder
 import com.google.inject.Provider
 import com.google.inject.name.Names
@@ -141,14 +137,6 @@ class SADLUiModule extends AbstractSADLUiModule {
 		];
 	}
 
-	def Class<? extends ExternalEmfResourcePredicate> bindExternalEmfResourcePredicate() {
-		return EclipseExternalEmfResourcePredicate;
-	}
-	
-	def Class<? extends SadlProjectHelper> bindSadlProjectHelper() {
-		return EclipseSadlProjectHelper;
-	}
-	
 	def Class<? extends IdeContentProposalProvider> bindIdeContentProposalProvider() {
 		return SadlIdeContentProposalProvider;
 	}

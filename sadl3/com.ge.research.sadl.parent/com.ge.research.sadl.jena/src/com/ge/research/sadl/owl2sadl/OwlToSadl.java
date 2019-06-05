@@ -30,6 +30,7 @@ import java.io.Writer;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -439,35 +440,192 @@ public class OwlToSadl {
         theModel.read(new ByteArrayInputStream(owlContent.getBytes()), null);
 	}
 	
-	private List<String> getSadlKeywords() {
-		SADLParser sparser = null;
-		Set<String> sadlkeywords = null;
-		
-	    Injector injector = new SADLStandaloneSetup().createInjectorAndDoEMFRegistration();
-	    sparser = injector.getInstance(SADLParser.class);
-		if (sparser != null) {
-			sadlkeywords = GrammarUtil.getAllKeywords(sparser.getGrammarAccess().getGrammar());
-			if (sadlkeywords != null) {
-				StringBuilder sb = new StringBuilder("public static final String[] tokenNames = new String[] {");
-				List<String> tokens = new ArrayList<String>();
-				Iterator<String> itr = sadlkeywords.iterator();
-				int cntr = 0;
-				while (itr.hasNext()) {
-					String token = itr.next();
-					tokens.add(token);
-					if (cntr++ > 0) {
-						sb.append(",");
-					}
-					sb.append("\"");
-					sb.append(token);
-					sb.append("\"");
-				}
-				sb.append("};");
-				logger.debug(sb.toString());
-				return tokens;
-			}
-		}
-		return null;
+	// This is a hack
+	public static List<String> getSadlKeywords() {
+		return Arrays.asList("select",
+"Test:",
+"construct",
+"type",
+"disjoint",
+"symmetrical",
+"property",
+"Stage",
+"if",
+"transitive",
+"order",
+"element",
+"!",
+"using",
+"in",
+"%",
+"double",
+"byte",
+"(",
+")",
+"index",
+"is",
+"*",
+"then",
+"+",
+",",
+"anyURI",
+"version",
+"-",
+"an",
+".",
+"/",
+"as",
+"contains",
+"at",
+"Graph",
+"seventh",
+"unique",
+"returns",
+":",
+"must",
+"Rule",
+"!=",
+"<",
+"=",
+">",
+"dateTime",
+"A",
+"other",
+"be",
+"E",
+"top-level",
+"another",
+"least",
+"An",
+"long",
+"matching",
+"The",
+"sixth",
+"default",
+"same",
+"known",
+"are",
+"does",
+"by",
+"Ask",
+"where",
+"[",
+"after",
+"relationship",
+"]",
+"table",
+"^",
+"annotation",
+"a",
+"contain",
+"e",
+"one",
+"uri",
+"gMonth",
+"...",
+"describes",
+"the",
+"single",
+"asc",
+"sublist",
+"ask",
+"Model",
+"located",
+"fifth",
+"exists",
+"{",
+"to",
+"fourth",
+"}",
+"None",
+"return",
+"first",
+"||",
+"date",
+"<=",
+"data",
+"before",
+"subject",
+"anySimpleType",
+"integer",
+"Update",
+"float",
+"second",
+"gYear",
+"negativeInteger",
+"only",
+"Explain:",
+"unsignedByte",
+"List",
+"from",
+"gDay",
+"has",
+"described",
+"--",
+"always",
+"==",
+"=>",
+"given",
+"last",
+"level",
+"count",
+"most",
+"base64Binary",
+"Print:",
+"Write:",
+"External",
+"true",
+"decimal",
+"desc",
+">=",
+"&&",
+"note",
+"some",
+"Expr:",
+"tenth",
+"import",
+"string",
+"instances",
+"classes",
+"values",
+"for",
+"insert",
+"distinct",
+"nonNegativeInteger",
+"delete",
+"duration",
+"can",
+"not",
+"and",
+"hexBinary",
+"of",
+"alias",
+"class",
+"value",
+"gMonthDay",
+"inverse",
+"types",
+"or",
+"length",
+"false",
+"eighth",
+"Equation",
+"exactly",
+"any",
+"int",
+"nonPositiveInteger",
+"with",
+"boolean",
+"third",
+"Read:",
+"there",
+"positiveInteger",
+"ninth",
+"unsignedInt",
+"PI",
+"Deductions",
+"time",
+"gYearMonth");
 	}
 	
 	/**
@@ -539,68 +697,17 @@ public class OwlToSadl {
 		return null;
 	}
 
-	private void process() throws OwlImportException {
+	public void process() throws OwlImportException {
 		if (theModel == null) {
 			throw new OwlImportException("There is no OWL model to translate!");
 		}
 
-		ModelConcepts concepts = new ModelConcepts();
-
-		theModel.getDocumentManager().setProcessImports(false);
-		Map<String,String> modelPrefixMap = theModel.getNsPrefixMap();
-		if (modelPrefixMap != null) {
-			Iterator<String> pitr = modelPrefixMap.keySet().iterator();
-			while (pitr.hasNext()) {
-				String prefix = pitr.next();
-				String uri = modelPrefixMap.get(prefix);
-				qNamePrefixes.put(uri, prefix);
-			}
-		}
-		if (logger.isDebugEnabled()) {
-			OutputStream os = new ByteArrayOutputStream();
-			theModel.getBaseModel().write(os);
-			logger.debug(os.toString());
-		}
-		getSpec().getDocumentManager().setProcessImports(false);
-		theBaseModel = ModelFactory.createOntologyModel(getSpec(), theModel);
+		initialize();
 		
-		if (allTokens == null) {
-//			allTokens = new ArrayList<String>();
-//			String[] tokens = tokenNames;
-//			for (int i = 0; i < tokens.length; i++) {
-//				String strippedToken = stripQuotes(tokens[i]);
-//				String[] words = strippedToken.trim().split(" ");
-//				if (words != null) {
-//					for (int j = 0; j < words.length; j++) {
-//						allTokens.add(words[j]);
-//					}
-//				}
-//			}
-			allTokens = getSadlKeywords();
-		}
 		if (sadlModel == null) {
 			sadlModel = new StringBuilder();
 		}
-		baseUri = theModel.getNsPrefixURI("");
-		if (baseUri == null) {
-			ExtendedIterator<Ontology> eitr = theModel.listOntologies();
-			while (eitr.hasNext()) {
-				Ontology ont = eitr.next();
-				baseUri = ont.getURI();
-				break;		// will this model's ontology always be first?
-			}
-		}
-		if (baseUri == null) {
-			Map<String, String> map = theModel.getNsPrefixMap();
-			Iterator<String> mitr = map.keySet().iterator();
-			while (mitr.hasNext()) {
-				String prefix = mitr.next();
-				logger.debug("Mapping: " + prefix + " = " + map.get(prefix));
-			}			baseUri = "http://sadl.org/baseless";
-		}
-		if (baseUri.endsWith("#")) {
-			baseUri = baseUri.substring(0, baseUri.length() - 1);
-		}
+
 		sadlModel.append("uri \"");
 		sadlModel.append(baseUri);
 		sadlModel.append("\"");
@@ -697,18 +804,19 @@ public class OwlToSadl {
 					continue;
 				}
 				String prefix = theModel.getNsURIPrefix(impUri);
-				if (prefix == null) {
-					prefix = theModel.getNsURIPrefix(impUri+"#");
-				}
-				prefix = sadlizePrefix(prefix);
 				sadlModel.append("import \"");
 				sadlModel.append(impUri);
-				sadlModel.append("\" as ");
+				sadlModel.append("\"");
 				if (prefix == null) {
-					prefix = "pre_" + prefixCntr++;
+					prefix = theModel.getNsURIPrefix(impUri+"#");
+					prefix = sadlizePrefix(prefix);
+					sadlModel.append(" as ");
+					if (prefix == null) {
+						prefix = "pre_" + prefixCntr++;
+					}
+					sadlModel.append(prefix);
+					theModel.setNsPrefix(prefix, impUri + "#");
 				}
-				sadlModel.append(prefix);
-				theModel.setNsPrefix(prefix, impUri + "#");
 				sadlModel.append(".\n");
 				if (imports == null) {
 					imports = new ArrayList<String>();
@@ -787,7 +895,7 @@ public class OwlToSadl {
 			Resource subj = s.getSubject();
 			OntResource ontSubj = theModel.getOntResource(subj);
 			if (shouldResourceBeOutput(ontSubj, false, false, true)) {
-				if (!addResourceToList(concepts, ontSubj)) {
+				if (!addResourceToList(getConcepts(), ontSubj)) {
 					logger.debug("subject resource not added to a list: " + ontSubj.toString());
 					if (isVerboseMode()) {
 						verboseModeStringBuilder.append("//     subject resource not added to processing list: \": ");
@@ -801,7 +909,7 @@ public class OwlToSadl {
 			if (mprop.canAs(OntProperty.class)) {
 				OntProperty ontProp = mprop.as(OntProperty.class);
 				if (shouldResourceBeOutput(ontProp, false, false, true)) {
-					if(!addResourceToList(concepts, ontProp)) {
+					if(!addResourceToList(getConcepts(), ontProp)) {
 						logger.debug("predicate resource not added to a list: " + ontProp.toString());
 						if (isVerboseMode()) {
 							verboseModeStringBuilder.append("//     predicate resource not added to processing list: \": ");
@@ -813,14 +921,14 @@ public class OwlToSadl {
 			}
 			else {
 				if (shouldResourceBeOutput(mprop, false, false, true)) {
-					concepts.addRdfProperty(mprop);
+					getConcepts().addRdfProperty(mprop);
 				}
 			}
 			RDFNode obj = s.getObject();
 			if (obj.isResource()) {
 				OntResource ontObj = theModel.getOntResource(obj.asResource());
 				if (shouldResourceBeOutput(ontObj, false, false, true)) {
-					if(!addResourceToList(concepts, ontObj)) {
+					if(!addResourceToList(getConcepts(), ontObj)) {
 						logger.debug("object resource not added to a list: " + ontObj.toString());
 						if (isVerboseMode()) {
 							verboseModeStringBuilder.append("//     object resource not added to processing list: \": ");
@@ -836,9 +944,9 @@ public class OwlToSadl {
 		}
 		
 		// Output messages as SADL comments
-		if (concepts.getErrorMessages() != null && concepts.getErrorMessages().size() > 0) {
+		if (getConcepts().getErrorMessages() != null && getConcepts().getErrorMessages().size() > 0) {
 			sadlModel.append("\n\n// Errors:\n");
-			Iterator<String> erritr = concepts.getErrorMessages().iterator();
+			Iterator<String> erritr = getConcepts().getErrorMessages().iterator();
 			while (erritr.hasNext()) {
 				sadlModel.append("// ");
 				sadlModel.append(erritr.next());
@@ -849,9 +957,9 @@ public class OwlToSadl {
 			sadlModel.append("\n\n// No Errors\n");
 		}
 		
-		if (concepts.getWarningMessages() != null && concepts.getWarningMessages().size() > 0) {
+		if (getConcepts().getWarningMessages() != null && getConcepts().getWarningMessages().size() > 0) {
 			sadlModel.append("\n\n// Warnings:\n");
-			Iterator<String> erritr = concepts.getWarningMessages().iterator();
+			Iterator<String> erritr = getConcepts().getWarningMessages().iterator();
 			while (erritr.hasNext()) {
 				sadlModel.append("// ");
 				sadlModel.append(erritr.next());
@@ -862,9 +970,9 @@ public class OwlToSadl {
 			sadlModel.append("\n\n// No Warnings\n");
 		}
 		
-		if (concepts.getInfoMessages() != null && concepts.getInfoMessages().size() > 0) {
+		if (getConcepts().getInfoMessages() != null && getConcepts().getInfoMessages().size() > 0) {
 			sadlModel.append("\n\n// Info:\n");
-			Iterator<String> erritr = concepts.getInfoMessages().iterator();
+			Iterator<String> erritr = getConcepts().getInfoMessages().iterator();
 			while (erritr.hasNext()) {
 				sadlModel.append("// ");
 				sadlModel.append(erritr.next());
@@ -876,11 +984,11 @@ public class OwlToSadl {
 		}
 		
 		// sort before starting to generate output
-		concepts.sort();
+		getConcepts().sort();
 		
 		if (isVerboseMode()) {
 			sadlModel.append("\n\n// Ontologies:\n");
-			List<Ontology> onts = concepts.getOntologies();
+			List<Ontology> onts = getConcepts().getOntologies();
 			for (int i = 0; i < onts.size(); i++) {
 				Ontology onti = onts.get(i);
 				sadlModel.append("//    ");
@@ -889,42 +997,42 @@ public class OwlToSadl {
 			}
 		}
 		
-		if (isVerboseMode() || !concepts.getDatatypes().isEmpty()) {
+		if (isVerboseMode() || !getConcepts().getDatatypes().isEmpty()) {
 			sadlModel.append("\n\n// Datatype Declarations:\n");
-			List<OntResource> datatypes = concepts.getDatatypes();
+			List<OntResource> datatypes = getConcepts().getDatatypes();
 			for (int i = 0; i < datatypes.size(); i++) {
-				sadlModel.append(datatypeToSadl(concepts, datatypes.get(i)));
+				sadlModel.append(datatypeToSadl(getConcepts(), datatypes.get(i)));
 			}
 		}
 		
-		if (isVerboseMode() || !concepts.getAnnProperties().isEmpty()) {
+		if (isVerboseMode() || !getConcepts().getAnnProperties().isEmpty()) {
 			sadlModel.append("\n\n// Annotation Properties:\n");
-			List<AnnotationProperty> anns = concepts.getAnnProperties();
+			List<AnnotationProperty> anns = getConcepts().getAnnProperties();
 			for (int i = 0; i < anns.size(); i++) {
 				AnnotationProperty ann = anns.get(i);
-				if (!concepts.getCompleted().contains(ann)) {
-					sadlModel.append(annotationsToSadl(concepts, ann));
-					concepts.addCompleted(ann);
+				if (!getConcepts().getCompleted().contains(ann)) {
+					sadlModel.append(annotationsToSadl(getConcepts(), ann));
+					getConcepts().addCompleted(ann);
 				}
 			}
 		}
-		if (isVerboseMode() || !concepts.getRdfProperties().isEmpty()) {
+		if (isVerboseMode() || !getConcepts().getRdfProperties().isEmpty()) {
 			sadlModel.append("\n\n// RDF Properties:\n");
-			List<Property> rdfProperties = concepts.getRdfProperties();
+			List<Property> rdfProperties = getConcepts().getRdfProperties();
 			for (int i = 0; i < rdfProperties.size(); i++) {
 				Property prop = rdfProperties.get(i);
-				addRdfProperty(concepts, sadlModel, prop);
-				concepts.addCompleted(prop);
+				addRdfProperty(getConcepts(), sadlModel, prop);
+				getConcepts().addCompleted(prop);
 			}
 		}
 		
-		List<ObjectProperty> objProperties = concepts.getObjProperties();
+		List<ObjectProperty> objProperties = getConcepts().getObjProperties();
 		if (isVerboseMode() || !objProperties.isEmpty()) {
 			StringBuilder tempSb = new StringBuilder();
 			for (int i = 0; i < objProperties.size(); i++) {
 				OntResource prop = objProperties.get(i);
-				addSuperPropertiesWithoutRange(concepts, tempSb, prop);
-				concepts.addCompleted(prop);
+				addSuperPropertiesWithoutRange(getConcepts(), tempSb, prop);
+				getConcepts().addCompleted(prop);
 			}
 			if (isVerboseMode() || tempSb.length() > 0) {
 				sadlModel.append("\n\n// Object properties without specified range:\n");
@@ -932,12 +1040,12 @@ public class OwlToSadl {
 			}
 		}
 		
-		List<DatatypeProperty> dtProperties = concepts.getDtProperties();
+		List<DatatypeProperty> dtProperties = getConcepts().getDtProperties();
 		if (isVerboseMode() || !dtProperties.isEmpty()) {
 			StringBuilder tempSb = new StringBuilder();
 			for (int i = 0; i < dtProperties.size(); i++) {
 				OntResource prop = dtProperties.get(i);
-				addSuperPropertiesWithoutRange(concepts, tempSb, prop);
+				addSuperPropertiesWithoutRange(getConcepts(), tempSb, prop);
 			}
 			if (isVerboseMode() || tempSb.length() > 0) {
 				sadlModel.append("\n\n// Datatype properties without specified range:\n");
@@ -945,22 +1053,22 @@ public class OwlToSadl {
 			}
 		}
 		
-		if (isVerboseMode() || !concepts.getClasses().isEmpty()) {
+		if (isVerboseMode() || !getConcepts().getClasses().isEmpty()) {
 			sadlModel.append("\n\n// Class definitions:\n");
-			List<OntClass> classes = concepts.getClasses();
+			List<OntClass> classes = getConcepts().getClasses();
 			for (int i = 0; i < classes.size(); i++) {
 				OntClass cls = classes.get(i);
-				sadlModel.append(classToSadl(concepts, cls));
+				sadlModel.append(classToSadl(getConcepts(), cls));
 			}
 		}
 		
 		if (isVerboseMode() || objProperties.size() > 0) {
 			StringBuilder tempSb = new StringBuilder();
-			objProperties = concepts.getObjProperties();
+			objProperties = getConcepts().getObjProperties();
 			for (int i = 0; i < objProperties.size(); i++) {
 				OntResource prop = objProperties.get(i);
-				if (!concepts.getCompleted().contains(prop)) {
-					tempSb.append(objPropertyToSadl(concepts, prop));
+				if (!getConcepts().getCompleted().contains(prop)) {
+					tempSb.append(objPropertyToSadl(getConcepts(), prop));
 				}
 			}
 			if (isVerboseMode() || tempSb.length() > 0) {
@@ -971,12 +1079,12 @@ public class OwlToSadl {
 		
 		if (isVerboseMode() || dtProperties.size() > 0) {
 			StringBuilder tempSb = new StringBuilder();
-			dtProperties = concepts.getDtProperties();
+			dtProperties = getConcepts().getDtProperties();
 			for (int i = 0; i < dtProperties.size(); i++) {
 				OntResource prop = dtProperties.get(i);
-				if (!concepts.getCompleted().contains(prop)) {
+				if (!getConcepts().getCompleted().contains(prop)) {
 					if (!ignoreNamespace(prop, true)) {
-						tempSb.append(dtPropertyToSadl(concepts, prop));
+						tempSb.append(dtPropertyToSadl(getConcepts(), prop));
 					}
 				}
 			}
@@ -986,18 +1094,18 @@ public class OwlToSadl {
 			}
 		}
 		
-		if (isVerboseMode() || !concepts.getInstances().isEmpty()) {
+		if (isVerboseMode() || !getConcepts().getInstances().isEmpty()) {
 			sadlModel.append("\n\n// Individuals:\n");
-			List<Individual> instances = concepts.getInstances();
+			List<Individual> instances = getConcepts().getInstances();
 			for (int i = 0; i < instances.size(); i++) {
 				Individual inst = instances.get(i);
-				sadlModel.append(individualToSadl(concepts, inst, false));
+				sadlModel.append(individualToSadl(getConcepts(), inst, false));
 			}
 		}
 		
-		if (isVerboseMode() || !concepts.getUnMappedRestrictions().isEmpty()) {
+		if (isVerboseMode() || !getConcepts().getUnMappedRestrictions().isEmpty()) {
 			sadlModel.append("\n\n// Other restrictions:\n");
-			List<Restriction> ress = concepts.getUnMappedRestrictions();
+			List<Restriction> ress = getConcepts().getUnMappedRestrictions();
 			for (int i = 0; i < ress.size(); i++) {
 				Restriction res = ress.get(i);
 				boolean invalid = false;
@@ -1009,14 +1117,14 @@ public class OwlToSadl {
 					Resource subj = s1.getSubject();
 					if (subj.canAs(Ontology.class) || subj.equals(OWL.Ontology)) {
 						sadlModel.append("// restriction on Ontology not supported in SADL: \n    // ");
-						sadlModel.append(restrictionToString(concepts, null, res));
+						sadlModel.append(restrictionToString(getConcepts(), null, res));
 						sadlModel.append("\n");
 						invalid = true;
 						break;
 					}
 				}
 				if (!invalid) {
-					sadlModel.append(restrictionToString(concepts, null, res));
+					sadlModel.append(restrictionToString(getConcepts(), null, res));
 					addEndOfStatement(sadlModel, 1);
 				}
 			}
@@ -1027,11 +1135,70 @@ public class OwlToSadl {
 			sadlModel.append(verboseModeStringBuilder);
 		}
 	}
+
+	private void initialize() {
+		setConcepts(new ModelConcepts());
+
+		theModel.getDocumentManager().setProcessImports(false);
+		Map<String,String> modelPrefixMap = theModel.getNsPrefixMap();
+		if (modelPrefixMap != null) {
+			Iterator<String> pitr = modelPrefixMap.keySet().iterator();
+			while (pitr.hasNext()) {
+				String prefix = pitr.next();
+				String uri = modelPrefixMap.get(prefix);
+				qNamePrefixes.put(uri, prefix);
+			}
+		}
+		if (logger.isDebugEnabled()) {
+			OutputStream os = new ByteArrayOutputStream();
+			theModel.getBaseModel().write(os);
+			logger.debug(os.toString());
+		}
+		getSpec().getDocumentManager().setProcessImports(false);
+		theBaseModel = ModelFactory.createOntologyModel(getSpec(), theModel);
+		
+		if (allTokens == null) {
+//			allTokens = new ArrayList<String>();
+//			String[] tokens = tokenNames;
+//			for (int i = 0; i < tokens.length; i++) {
+//				String strippedToken = stripQuotes(tokens[i]);
+//				String[] words = strippedToken.trim().split(" ");
+//				if (words != null) {
+//					for (int j = 0; j < words.length; j++) {
+//						allTokens.add(words[j]);
+//					}
+//				}
+//			}
+			allTokens = getSadlKeywords();
+		}
+		baseUri = theModel.getNsPrefixURI("");
+		if (baseUri == null) {
+			ExtendedIterator<Ontology> eitr = theModel.listOntologies();
+			while (eitr.hasNext()) {
+				Ontology ont = eitr.next();
+				baseUri = ont.getURI();
+				break;		// will this model's ontology always be first?
+			}
+		}
+		if (baseUri == null) {
+			Map<String, String> map = theModel.getNsPrefixMap();
+			Iterator<String> mitr = map.keySet().iterator();
+			while (mitr.hasNext()) {
+				String prefix = mitr.next();
+				logger.debug("Mapping: " + prefix + " = " + map.get(prefix));
+			}			baseUri = "http://sadl.org/baseless";
+		}
+		if (baseUri.endsWith("#")) {
+			baseUri = baseUri.substring(0, baseUri.length() - 1);
+		}
+	}
 	
 	public static final String SADL_BASE_MODEL_URI = "http://sadl.org/sadlbasemodel";
 	public static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
 	public static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
 	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
+
+	private ModelConcepts concepts;
 
 	private boolean isImplicitUri(String impUri) {
 		if (impUri.equals(SADL_BASE_MODEL_URI)) {
@@ -1178,6 +1345,14 @@ public class OwlToSadl {
 			}
 		}
 		return false;
+	}
+	
+	public String datatypeToSadl(String rsrcUri) {
+		OntResource rsrc = theModel.getOntResource(rsrcUri);
+		if (rsrc != null) {
+			return datatypeToSadl(getConcepts(), rsrc).toString();
+		}
+		return null;
 	}
 
 	private Object datatypeToSadl(ModelConcepts concepts,
@@ -1475,6 +1650,14 @@ public class OwlToSadl {
 		sb.append("]");
 		return sb.toString();
 	}
+	
+	public String individualToSadl(String instUri, boolean embeddedBNode) {
+		Individual inst = theModel.getIndividual(instUri);
+		if (inst != null) {
+			return individualToSadl(getConcepts(), inst, embeddedBNode);
+		}
+		return null;
+	}
 
 	private String individualToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) {
 		StringBuilder sb = new StringBuilder();
@@ -1555,11 +1738,27 @@ public class OwlToSadl {
 		return sb.toString();
 	}
 
+	public String rdfPropertyToSadl(String propUri) {
+		Property prop = theModel.getProperty(propUri);
+		if (prop != null) {
+			return rdfPropertyToSadl(getConcepts(), prop);
+		}
+		return null;
+	}
+	
 	private String rdfPropertyToSadl(ModelConcepts concepts, Property prop) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(uriToSadlString(concepts, prop));
 		sb.append(" is a property.\n");
 		return sb.toString();
+	}
+	
+	public String dtPropertyToSadl(String propUri) {
+		OntResource or = theModel.getOntResource(propUri);
+		if (or != null) {
+			return dtPropertyToSadl(getConcepts(), or);
+		}
+		return null;
 	}
 	
 	private String dtPropertyToSadl(ModelConcepts concepts, OntResource prop) {
@@ -1584,6 +1783,14 @@ public class OwlToSadl {
 		}
 		return sb.toString();
 	}
+	
+	public String objPropertyToSadl(String propUri) {
+		OntResource prop = theModel.getOntResource(propUri);
+		if (prop != null) {
+			return objPropertyToSadl(getConcepts(), prop);
+		}
+		return null;
+	}
 
 	private String objPropertyToSadl(ModelConcepts concepts, OntResource prop) {
 		StringBuilder sb = new StringBuilder();
@@ -1605,6 +1812,14 @@ public class OwlToSadl {
 		return sb.toString();
 	}
 
+	public String classToSadl(String clsUri) {
+		OntClass cls = theModel.getOntClass(clsUri);
+		if (cls != null) {
+			return classToSadl(getConcepts(), cls);
+		}
+		return null;
+	}
+	
 	private String classToSadl(ModelConcepts concepts, OntClass cls) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(uriToSadlString(concepts, cls));
@@ -3469,5 +3684,16 @@ public class OwlToSadl {
 		if (verboseMode && verboseModeStringBuilder == null) {
 			verboseModeStringBuilder = new StringBuilder();
 		}
+	}
+
+	private ModelConcepts getConcepts() {
+		if (concepts == null) {
+			initialize();
+		}
+		return concepts;
+	}
+
+	private void setConcepts(ModelConcepts concepts) {
+		this.concepts = concepts;
 	}
 }

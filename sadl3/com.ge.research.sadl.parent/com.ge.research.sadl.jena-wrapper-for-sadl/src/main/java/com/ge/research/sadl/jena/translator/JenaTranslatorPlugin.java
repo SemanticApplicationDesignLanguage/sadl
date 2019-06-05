@@ -1560,6 +1560,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 		ParameterizedSparqlString pss = new ParameterizedSparqlString(q) ;
         idx = 0;
 		for (Object val : values) {
+			if (val instanceof NamedNode) {
+				val = "<" + ((NamedNode)val).getURI() + ">";
+			}
 			if (val instanceof String) {
 				if (val.toString().startsWith( "<") && val.toString().endsWith(">")) {
 					val = prepareQuery(model, val.toString());
