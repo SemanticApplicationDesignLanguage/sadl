@@ -11,11 +11,13 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.jena.reasoner.builtin.Utils;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
+import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.graph.impl.LiteralLabelFactory;
 import com.hp.hpl.jena.reasoner.InfGraph;
 import com.hp.hpl.jena.reasoner.rulesys.Builtin;
 import com.hp.hpl.jena.reasoner.rulesys.BuiltinException;
+import com.hp.hpl.jena.reasoner.rulesys.Node_RuleVariable;
 import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
 import com.hp.hpl.jena.reasoner.rulesys.Util;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
@@ -122,6 +124,16 @@ public class GeUtils {
 
     public static synchronized Node getArg(int n, Node[] args, RuleContext context) {
         return context.getEnv().getGroundVersion(args[n]);
+    }
+    
+    public static synchronized boolean isGraphPatternInput(Builtin bi, Node[] args, int length, RuleContext context) {
+    	boolean isGP = true;
+    	for (Node n : args) {
+    		if (!(n instanceof Node_URI) && !(n instanceof Node_RuleVariable)) {
+    			return false;
+    		}
+    	}
+    	return true;
     }
 
     public static synchronized Node[] matchNonSparqlPattern(Builtin bi, Node[] args, int length, RuleContext context) {
