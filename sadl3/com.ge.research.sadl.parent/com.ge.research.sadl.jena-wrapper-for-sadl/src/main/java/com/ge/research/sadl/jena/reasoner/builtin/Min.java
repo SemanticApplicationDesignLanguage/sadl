@@ -88,7 +88,7 @@ public class Min extends TypedBaseBuiltin {
              }
         }
         if (nodes != null) {
-	        for (int i = 0; i < length; i++) {
+	        for (int i = 0; i < nodes.length; i++) {
 	        	Node n1 = nodes[i]; //getArg(i, args, context);
 	        	if (n1.isLiteral()) {
 	        		Object v1 = n1.getLiteralValue();

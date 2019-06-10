@@ -20,6 +20,9 @@ package com.ge.research.sadl.jena.reasoner.builtin;
 
 import com.hp.hpl.jena.reasoner.rulesys.*;
 import com.hp.hpl.jena.vocabulary.RDF;
+
+import java.util.Arrays;
+
 import com.hp.hpl.jena.graph.*;
 
 /**
@@ -36,10 +39,6 @@ public class Sum extends com.hp.hpl.jena.reasoner.rulesys.builtins.Sum {
         return argLength;
     }
     
-    private void setArgLength(int len) {
-    	argLength = len;
-    }
-
     /**
      * This method is invoked when the builtin is called in a rule body.
      * @param args the array of argument values for the builtin, this is an array 
@@ -51,7 +50,23 @@ public class Sum extends com.hp.hpl.jena.reasoner.rulesys.builtins.Sum {
      * the current environment
      */
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
-    	if (length == 3) {
+        checkArgs(length, context);
+        BindingEnvironment env = context.getEnv();
+        if (GeUtils.isGraphPatternInput(this, args, length, context)) {
+        	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, context);
+        	Number nSum = new Long(0);
+        	nSum = addList(nSum, Arrays.asList(nodes), context);
+        	Node sum = null;
+        	if (nSum instanceof Float || nSum instanceof Double) {
+        		sum = Util.makeDoubleNode(nSum.doubleValue());
+        	}
+        	else {
+        		sum = Util.makeLongNode(nSum.longValue());
+        	}
+//        	System.out.println("builtin product assigning value: " + sum);
+        	return env.bind(args[length - 1], sum);
+        }
+        else if (length == 3) {
     		// this is just the normal case implemented by HP Labs (standard Jena)
     		if (getArg(0, args, context).isURI()) {
     			throw new BuiltinException(this, context, "First argument to sum is a URI: " + getArg(0, args, context).getURI());
@@ -61,8 +76,6 @@ public class Sum extends com.hp.hpl.jena.reasoner.rulesys.builtins.Sum {
     		}
     		return super.bodyCall(args, length, context);
     	}
-        checkArgs(length, context);
-        BindingEnvironment env = context.getEnv();
         Node n1 = getArg(0, args, context);
         Node n2 = getArg(1, args, context);
         if (n1.isVariable()) {
@@ -112,6 +125,10 @@ public class Sum extends com.hp.hpl.jena.reasoner.rulesys.builtins.Sum {
     
     private Number addList(Number sum, Node lst, RuleContext context) {
     	java.util.List<Node> l = Util.convertList(lst, context);
+        return addList(sum, l, context);
+    }
+    
+    private Number addList(Number sum, java.util.List<Node> l, RuleContext context) {
     	for (int i = 0; l != null && i < l.size(); i++) {
     		Node elt = (Node) l.get(i);
             if (elt != null && elt.isLiteral()) {
@@ -140,5 +157,4 @@ public class Sum extends com.hp.hpl.jena.reasoner.rulesys.builtins.Sum {
     	}
         return sum;
     }
-    
 }
