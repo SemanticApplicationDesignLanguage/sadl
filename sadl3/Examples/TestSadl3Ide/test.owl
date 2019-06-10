@@ -1,0 +1,29 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:tbm="http://sadl.org/TransBlank.sadl#"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:base="http://sadl.org/sadllistmodel"
+    xmlns="http://sadl.org/tabimport/blanks#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <owl:Ontology rdf:about="http://sadl.org/tabimport/blanks">
+    <owl:imports rdf:resource="http://sadl.org/TransBlank.sadl"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a CSV data source.</rdfs:comment>
+  </owl:Ontology>
+  <tbm:Thingy rdf:about="http://sadl.org/tabimport/blanks#Thing3">
+    <tbm:bdprop rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</tbm:bdprop>
+  </tbm:Thingy>
+  <tbm:Thingy rdf:about="http://sadl.org/tabimport/blanks#Thing2">
+    <tbm:bdprop rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</tbm:bdprop>
+  </tbm:Thingy>
+  <tbm:Thingy rdf:about="http://sadl.org/tabimport/blanks#Thing1">
+    <tbm:bdprop rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >true</tbm:bdprop>
+  </tbm:Thingy>
+</rdf:RDF>

@@ -16,66 +16,106 @@
       <rdf:Bag>
         <rdf:li>
           <Builtin>
-            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >com.ge.research.sadl.jena.reasoner.builtin.GreaterThan</class>
             <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
             >greaterThan</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.GreaterThan</class>
           </Builtin>
         </rdf:li>
         <rdf:li>
           <Builtin>
-            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >pow</name>
             <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
             >com.ge.research.sadl.jena.reasoner.builtin.Pow</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >pow</name>
           </Builtin>
         </rdf:li>
         <rdf:li>
           <Builtin>
-            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >com.ge.research.sadl.jena.reasoner.builtin.Product</class>
             <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
             >product</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Product</class>
           </Builtin>
         </rdf:li>
         <rdf:li>
           <Builtin>
-            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >sum</name>
             <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
             >com.ge.research.sadl.jena.reasoner.builtin.Sum</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >sum</name>
           </Builtin>
         </rdf:li>
         <rdf:li>
           <Builtin>
-            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >getInstance</name>
             <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
             >com.ge.research.sadl.jena.reasoner.builtin.GetInstance</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >getInstance</name>
           </Builtin>
         </rdf:li>
         <rdf:li>
           <Builtin>
-            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >com.ge.research.sadl.jena.reasoner.builtin.Print</class>
             <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
             >print</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Print</class>
           </Builtin>
         </rdf:li>
         <rdf:li>
           <Builtin>
-            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >subtractDates</name>
             <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
             >com.ge.research.sadl.jena.reasoner.builtin.SubtractDates</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >subtractDates</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >noValue</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.NoValue</class>
           </Builtin>
         </rdf:li>
         <rdf:li>
           <Builtin>
             <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >com.ge.research.sadl.jena.reasoner.builtin.NoValue</class>
+            >com.ge.research.sadl.jena.reasoner.builtin.OneOf</class>
             <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >noValue</name>
+            >oneOf</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >lessThan</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.LessThan</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Average</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >average</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >min</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Min</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Max</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >max</name>
           </Builtin>
         </rdf:li>
       </rdf:Bag>

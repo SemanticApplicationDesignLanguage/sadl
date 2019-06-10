@@ -4,822 +4,886 @@
   <j.0:OntologySpec>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ListOfList2.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/ListOfList2.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/InstancesOf.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/InstancesOf.sadl.metrics"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/TerseRule.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TerseRule.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >terserule</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/UsingListExpression.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UsingListExpression.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/SubtleClassUse2.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SubtleClassUse2.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >WhimWham</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/WhimWham.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/WhimWham.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/AgeOfMarthaIsAnInt.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/AgeOfMarthaIsAnInt.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/rulevars2.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/rulevars2.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/builtinfunctions"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SadlBuiltinFunctions.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >builtinfunctions</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/rulevars.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/rulevars.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >rulevars</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular3.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular3.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >NotCircular3</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/LiteralOutOfRangeLong.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/LiteralOutOfRangeLong.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/Test1.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Test1.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Test1</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >ListOfList</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ListOfList.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/ListOfList.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >GrammarCoverage</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GrammarCoverage.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/GrammarCoverage.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Polygons</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Polygons.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Polygons.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UsingNumericConstants.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/UsingNumericConstants.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/HasTests.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/HasTests.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Precedence</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/D:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Precedence.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Precedence.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/RuleWithList.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RuleWithList.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >RuleWithList</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/SubtleClassUse1.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SubtleClassUse1.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >SubtleClassUse1</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/RulePofS.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RulePofS.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >RulePofS</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >gm</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GeorgeAndMartha.owl"/>
-    <j.0:publicURI rdf:resource="http://com.ge.research.sadlGeorgeAndMartha"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/MultipleInstances.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/MultipleInstances.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Polygons.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Polygons.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >NotCircular2</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular2.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular2.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/MultipleReturnValueEquation.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/MultipleReturnValueEquation.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/CustomAnnotations.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/CustomAnnotations.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >UserDefinedDataTypes</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UserDefinedDataTypes.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/UserDefinedDataTypes.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/TransitiveProperty.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TransitiveProperty.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >TransitiveProperty</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/LiteralOutOfRange.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/LiteralOutOfRange.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.imp/test_import_apvf"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/testImportApvf.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    ></j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >mrveq</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/MultipleReturnValueEquation.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/MultipleReturnValueEquation.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UserDefinedDataTypes.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/UserDefinedDataTypes.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/ShowIF.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ShowIF.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/UsingNumericConstants.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UsingNumericConstants.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >UsingNumericConstants</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/RuleVariableAsDomain.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RuleVariableAsDomain.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >sadlimplicitmodel</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SadlImplicitModel.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/sadlimplicitmodel"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://research.ge.com/Acuity/aulo.owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/externalmodels/sadl.sourceforge.net/owl/aulo.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>External Model</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/MultipleInstances.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/MultipleInstances.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >MultipleInstances</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/RuleWithList.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RuleWithList.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/AnonRestrictions.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >M2</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/M2.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/M2.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/TestArticles.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestArticles.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >AVF</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/AVF.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/AVF.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >cc</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/CombinedCycle.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/CombinedCycle.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/PropertyInitializationAsRulePremise.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/PropertyInitializationAsRulePremise.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/Precedence2.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Precedence2.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Precedence2</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/Test.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Test.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/defaults.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >defs</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/Precidence.sadl.metrics"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/TerseRule.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TerseRule.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ImpliedPropertyInTest.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/ImpliedPropertyInTest.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/Test1.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Test1.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Shapes.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Shapes.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/SingleReturnValueEquation.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SingleReturnValueEquation.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >srveq</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/WhimWham.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/WhimWham.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >VariableScope</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/VariableScope.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/VariableScope.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/ImpliedPropertyInTest.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ImpliedPropertyInTest.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >ImpliedPropertyInTest</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GrammarCoverage.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/GrammarCoverage.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/NotCircularRoot.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircularRoot.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SubjHasProp.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/SubjHasProp.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/Test.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Test.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Test</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/VariableScope.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/VariableScope.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/FromJennyInvalid.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/FromJennyInvalid.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/EnumTest.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/EnumTest.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/TestGraphConstruct.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestGraphConstruct.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/TransitiveProperty.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TransitiveProperty.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/rulevars.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/rulevars.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/NotCircularRoot.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircularRoot.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >NotCircularRoot</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Precedence2.sadl.metrics"/>
     <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Precedence2.sadl.metrics.owl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >M1</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:publicURI rdf:resource="http://sadl.org/Precedence2.sadl.metrics"/>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/M1.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/M1.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    ></j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Baljit2.owl"/>
-    <j.0:publicURI rdf:resource="http://ge.com/coreality/example2"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UpdateTests.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/UpdateTests.sadl.metrics"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://www.isi.edu/~pan/damltime/time-entry.owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/externalmodels/sadl.sourceforge.net/owl/time-entry.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Shapes.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Shapes.sadl.metrics.owl"/>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>ExternalResource</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/RuleVariableAsDomain.sadl"/>
-    <j.0:altURL rdf:resource="file:/D:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RuleVariableAsDomain.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >RuleVariableAsDomain</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/PropertyInitializationAsRulePremise.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/PropertyInitializationAsRulePremise.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >PropertyInitializationAsRulePremise</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >UsingListExpression</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UsingListExpression.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/UsingListExpression.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >GetInstance</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GetInstance.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/GetInstance.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >sadlbasemodel</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SadlBaseModel.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/sadlbasemodel"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >PathFindingTest</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/PathFindingTest.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/PathFindingTest.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/M2.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/M2.sadl.metrics"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/HasTests.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/HasTests.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >ht</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/SingleReturnValueEquation.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SingleReturnValueEquation.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/UsingNumericConstants.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UsingNumericConstants.sadl.metrics.owl"/>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular1a.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular1a.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/CombinedCycle.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/CombinedCycle.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/testImportApvf.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.imp/test_import_apvf.metrics"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular3.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular3.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/MultipleInstances.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/MultipleInstances.sadl.metrics"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >QueryWithEmbeddedDecl</j.0:prefix>
+    >tgpb</j.0:prefix>
     <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/QueryWithEmbeddedDecl.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/QueryWithEmbeddedDecl.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestGraphPatternBuiltins.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TestGraphPatternBuiltins.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/sadllistmodel"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SadlListModel.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >sadllistmodel</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/TestGraphConstruct.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestGraphConstruct.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >TestGraphConstruct</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://com.ge.research.sadl/sadlmetricsmodel"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/sadlmetricsmodel.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://ge.com/coreality/example2.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Baljit2.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >NotCircular1a</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular1a.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular1a.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/UpdateTests.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UpdateTests.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >UpdateTests</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GetInstance.sadl.metrics.owl"/>
     <j.0:publicURI rdf:resource="http://sadl.org/GetInstance.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/M3.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/M3.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/RulePofS.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RulePofS.sadl.metrics.owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GetInstance.sadl.metrics.owl"/>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://com.ge.research.slr/srl2model"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/srl2model.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/CustomAnnotations.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/CustomAnnotations.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >CustomAnnotations</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/M1.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/M1.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/PathFindingTest.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/PathFindingTest.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TransBlank.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TransBlank.sadl.metrics"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >EnumTest</j.0:prefix>
+    >io</j.0:prefix>
     <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/EnumTest.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/EnumTest.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/InstancesOf.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/InstancesOf.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/ErrorFromCraig.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ErrorFromCraig.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Shapes</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Shapes.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Shapes.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://ge.com/coreality/example"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Baljit.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TestArticles.sadl"/>
+    <j.0:altURL rdf:resource="file:/D:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestArticles.owl"/>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
     <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    ></j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular2.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular2.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Precedence.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Precedence.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
     >TestArticles</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/D:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestArticles.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/TestArticles.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/QueryWithEmbeddedDecl.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/QueryWithEmbeddedDecl.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/SubtleClassUse1.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SubtleClassUse1.sadl.metrics.owl"/>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestGraphConstruct.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TestGraphConstruct.sadl.metrics"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >anonrest</j.0:prefix>
+    >SubtleClassUse1</j.0:prefix>
     <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/AnonRestrictions.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SubtleClassUse1.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/SubtleClassUse1.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://com.ge.research.sadl/srl/metricsummary"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SrlSummaryMetrics.metrics.owl"/>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >NotCircular3</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular3.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular3.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GeorgeAndMartha.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://com.ge.research.sadlGeorgeAndMartha.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/AVF.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/AVF.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://research.ge.com/Acuity/apvf.owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/externalmodels/sadl.sourceforge.net/owl/apvf.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
     <j.0:createdBy>ExternalResource</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/externalmodels/sadl.sourceforge.net/owl/time-entry.owl"/>
+    <j.0:publicURI rdf:resource="http://www.isi.edu/~pan/damltime/time-entry.owl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/VariableScope.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/VariableScope.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >MultipleInstances</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/MultipleInstances.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/MultipleInstances.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadlbasemodel"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SadlBaseModel.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >sadlbasemodel</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://com.ge.research.sadlGeorgeAndMartha.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GeorgeAndMartha.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ListOfList.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/ListOfList.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/LiteralOutOfRange.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/LiteralOutOfRange.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/UserDefinedDataTypes.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UserDefinedDataTypes.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://ge.com/coreality/example.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Baljit.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >ShowIF</j.0:prefix>
+    >NotCircularRoot</j.0:prefix>
     <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ShowIF.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/ShowIF.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircularRoot.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/NotCircularRoot.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/rulevars2.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/rulevars2.owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ErrorFromCraig.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/ErrorFromCraig.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestArticles.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TestArticles.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/UpdateTests.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UpdateTests.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/sadlmetricsmodel.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://com.ge.research.sadl/sadlmetricsmodel"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TerseRule.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TerseRule.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/M1.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/M1.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
     >rulevars2</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/rulevars2.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/rulevars2.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Baljit.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://ge.com/coreality/example.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SingleReturnValueEquation.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/SingleReturnValueEquation.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular3.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular3.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircularRoot.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/NotCircularRoot.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Test1</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Test1.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Test1.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RuleWithList.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/RuleWithList.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TestGraphConstruct</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestGraphConstruct.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TestGraphConstruct.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/EnumTest.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/EnumTest.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >EnumTest</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/TestImportExternal.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestImportExternal.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TestImportExternal</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >tbm</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TransBlank.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TransBlank.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/ImpliedPropertyInTest.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ImpliedPropertyInTest.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>External Model</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/externalmodels/tmp/aulo.owl"/>
+    <j.0:publicURI rdf:resource="http://research.ge.com/Acuity/aulo.owl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/GrammarCoverage.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GrammarCoverage.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GrammarCoverage</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestImportExternal.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TestImportExternal.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular2.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular2.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >NotCircular2</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    ></j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Baljit.owl"/>
+    <j.0:publicURI rdf:resource="http://ge.com/coreality/example"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://com.ge.research.sadlGeorgeAndMartha"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GeorgeAndMartha.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >gm</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ShowIF.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/ShowIF.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/ShowIF.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ShowIF.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ShowIF</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular2.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular2.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/CustomAnnotations.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/CustomAnnotations.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/FromJennyInvalid.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/FromJennyInvalid.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RuleWithList</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RuleWithList.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/RuleWithList.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/MultipleReturnValueEquation.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/MultipleReturnValueEquation.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/VariableScope.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/VariableScope.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >VariableScope</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RulePofS.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/RulePofS.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/M2.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/M2.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >M2</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >builtinfunctions</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SadlBuiltinFunctions.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/builtinfunctions"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >PropertyInitializationAsRulePremise</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/PropertyInitializationAsRulePremise.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/PropertyInitializationAsRulePremise.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/CombinedCycle.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/CombinedCycle.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >cc</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/AVF.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/AVF.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >AVF</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Test.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Test.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/srl2model.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://com.ge.research.slr/srl2model"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TransitiveProperty.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TransitiveProperty.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Baljit2.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://ge.com/coreality/example2.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/M2.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/M2.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >terserule</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TerseRule.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TerseRule.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TestGraphPatternBuiltins.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TestGraphPatternBuiltins.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/WhimWham.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/WhimWham.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/WhimWham.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/WhimWham.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >WhimWham</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/tabimport/blanks"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/test.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>CsvImporter</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >blks</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/AgeOfMarthaIsAnInt.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/AgeOfMarthaIsAnInt.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/LiteralOutOfRangeLong.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/LiteralOutOfRangeLong.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:publicURI rdf:resource="http://sadl.imp/test_import_apvf.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/testImportApvf.sadl.metrics.owl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >TransitiveProperty</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/TransitiveProperty.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TransitiveProperty.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/AVF.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/AVF.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/UserDefinedDataTypes.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UserDefinedDataTypes.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >UserDefinedDataTypes</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/GrammarCoverage.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GrammarCoverage.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >srveq</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SingleReturnValueEquation.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/SingleReturnValueEquation.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/ListOfList.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ListOfList.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >defs</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/defaults.owl"/>
+    <j.0:publicURI rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SubtleClassUse1.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/SubtleClassUse1.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Shapes.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Shapes.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Shapes</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ImpliedPropertyInTest</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ImpliedPropertyInTest.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/ImpliedPropertyInTest.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/rulevars2.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/rulevars2.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/HasTests.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/HasTests.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadlimplicitmodel"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SadlImplicitModel.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >sadlimplicitmodel</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Polygons.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Polygons.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular1a.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular1a.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >NotCircular1a</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RuleVariableAsDomain.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/RuleVariableAsDomain.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RulePofS</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RulePofS.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/RulePofS.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/UsingListExpression.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UsingListExpression.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >UsingListExpression</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UsingListExpression.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/UsingListExpression.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://ge.com/coreality/example2"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Baljit2.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    ></j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/ListOfList.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ListOfList.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ListOfList</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >ht</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/HasTests.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/HasTests.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/AnonRestrictions.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Test</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Test.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Test.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/SubjHasProp.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SubjHasProp.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >rulevars</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/rulevars.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/rulevars.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/QueryWithEmbeddedDecl.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/QueryWithEmbeddedDecl.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >QueryWithEmbeddedDecl</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/QueryWithEmbeddedDecl.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/QueryWithEmbeddedDecl.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >CustomAnnotations</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/CustomAnnotations.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/CustomAnnotations.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Precedence.sadl"/>
+    <j.0:altURL rdf:resource="file:/D:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Precedence.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Precedence</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >RuleVariableAsDomain</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/D:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/RuleVariableAsDomain.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/RuleVariableAsDomain.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SubtleClassUse2.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/SubtleClassUse2.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Test1.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Test1.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/PathFindingTest.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/PathFindingTest.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    ></j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/testImportApvf.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.imp/test_import_apvf"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >UpdateTests</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UpdateTests.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/UpdateTests.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >sadllistmodel</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SadlListModel.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadllistmodel"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/GetInstance.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/GetInstance.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >GetInstance</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/EnumTest.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/EnumTest.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/rulevars.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/rulevars.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/PathFindingTest.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/PathFindingTest.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >PathFindingTest</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/M3.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/M3.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/SrlSummaryMetrics.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://com.ge.research.sadl/srl/metricsummary"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:publicURI rdf:resource="http://sadl.org/Precidence.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/PropertyInitializationAsRulePremise.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/PropertyInitializationAsRulePremise.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/CombinedCycle.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/CombinedCycle.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/MultipleReturnValueEquation.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/MultipleReturnValueEquation.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >mrveq</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Precedence2</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Precedence2.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Precedence2.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >UsingNumericConstants</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/UsingNumericConstants.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/UsingNumericConstants.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>ExternalResource</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/externalmodels/sadl.sourceforge.net/owl/apvf.owl"/>
+    <j.0:publicURI rdf:resource="http://research.ge.com/Acuity/apvf.owl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/ListOfList2.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/ListOfList2.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/NotCircular1a.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/NotCircular1a.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/M1.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/M1.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >M1</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Polygons.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Polygons.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Polygons</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Precedence.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/Precedence.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/TestSadlIde/AnonRestrictions"/>
+    <j.0:altURL rdf:resource="file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/TestSadl3Ide/OwlModels/AnonRestrictions.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >anonrest</j.0:prefix>
   </j.0:OntologySpec>
 </rdf:RDF>

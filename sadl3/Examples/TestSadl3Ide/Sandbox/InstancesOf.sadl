@@ -1,0 +1,5 @@
+ uri "http://sadl.org/InstancesOf.sadl" alias io.
+ 
+ Dog is a class.
+ {Spot (alias "spot"), Lassie (note "an awesome TV star")} are instances of Dog.
+ 

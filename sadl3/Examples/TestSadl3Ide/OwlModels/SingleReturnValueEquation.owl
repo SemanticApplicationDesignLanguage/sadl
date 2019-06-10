@@ -7,7 +7,6 @@
     xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
     xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-    xmlns:j.1="http://sadl.org/sadlbasemodel#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
   xml:base="http://sadl.org/SingleReturnValueEquation.sadl">
   <owl:Ontology rdf:about="">
@@ -16,9 +15,21 @@
     <owl:imports rdf:resource="sadlbasemodel"/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'SingleReturnValueEquation.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <j.1:ExternalEquation rdf:ID="piVal">
-    <j.1:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >http://sadl.org/pival</j.1:externalURI>
-  </j.1:ExternalEquation>
+  <j.0:ExternalEquation rdf:ID="piVal">
+    <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >http://sadl.org/pival</j.0:externalURI>
+    <j.0:returnTypes rdf:parseType="Collection">
+      <j.0:DataDescriptor>
+        <j.0:dataType>http://www.w3.org/2001/XMLSchema#float</j.0:dataType>
+      </j.0:DataDescriptor>
+    </j.0:returnTypes>
+    <j.0:expression>
+      <j.0:Script>
+        <j.0:language rdf:resource="sadlimplicitmodel#Text"/>
+        <j.0:script rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >float piVal(): uri("http://sadl.org/pival")</j.0:script>
+      </j.0:Script>
+    </j.0:expression>
+  </j.0:ExternalEquation>
   <j.0:Rule rdf:ID="UseIt"/>
 </rdf:RDF>
