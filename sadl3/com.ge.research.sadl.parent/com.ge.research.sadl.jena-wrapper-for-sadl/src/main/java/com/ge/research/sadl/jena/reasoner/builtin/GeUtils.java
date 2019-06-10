@@ -22,6 +22,7 @@ import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
 import com.hp.hpl.jena.reasoner.rulesys.Util;
 import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 /**
@@ -127,9 +128,32 @@ public class GeUtils {
     }
     
     public static synchronized boolean isGraphPatternInput(Builtin bi, Node[] args, int length, RuleContext context) {
-    	boolean isGP = true;
     	for (Node n : args) {
     		if (!(n instanceof Node_URI) && !(n instanceof Node_RuleVariable)) {
+    			return false;
+    		}
+    	}
+    	// verify--the 2nd and then every 3rd arg is a property
+    	for (int i = 1; i < args.length; i = i + 3) {
+    		Node n = args[i];
+    		ClosableIterator<Triple> itr = context.find(n, RDF.type.asNode(), null);
+    		boolean isProp = false;
+    		while (itr.hasNext()) {
+    			Node on = itr.next().getObject();
+    			if (!on.isURI()) {
+    				return false;
+    			}
+    			if (on.equals(OWL.ObjectProperty.asNode()) ||
+    					on.equals(OWL.DatatypeProperty.asNode()) ||
+    					on.equals(OWL.AnnotationProperty.asNode()) ||
+    					on.equals(RDF.Property.asNode())) {
+    				itr.close();
+    				isProp = true;
+    				break;
+    			}
+    		}
+    		if (!isProp) {
+    			itr.close();
     			return false;
     		}
     	}

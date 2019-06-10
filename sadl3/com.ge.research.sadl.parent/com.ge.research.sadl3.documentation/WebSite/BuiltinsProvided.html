@@ -12,7 +12,7 @@
 
 <h1>Provided Jena Built-ins</h1>
 <h6>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->01/31/2014<!--webbot bot="Timestamp" endspan i-checksum="12527" --> 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/10/2019<!--webbot bot="Timestamp" endspan i-checksum="12515" --> 
 by A. W. Crapo</h6>
 <p>This document describes the built-in functions for use in Jena rules that are 
 included as a part of the SADL Open Source release, along with information on 
@@ -77,6 +77,11 @@ registration references the entire fully-qualified class name must be specified.
     value in radians)</td>
   </tr>
   <tr>
+    <td width="21%">&nbsp;</td>
+    <td width="24%">Assign</td>
+    <td width="38%">&nbsp;</td>
+  </tr>
+  <tr>
     <td width="21%">y is atan(x)</td>
     <td width="24%">Atan</td>
     <td width="38%">Return the inverse tangent of the numerical value x (return 
@@ -99,9 +104,24 @@ registration references the entire fully-qualified class name must be specified.
     angle in radians</td>
   </tr>
   <tr>
+    <td width="21%">&nbsp;</td>
+    <td width="24%">CountMatches</td>
+    <td width="38%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="21%">&nbsp;</td>
+    <td width="24%">CountUniqueMatches</td>
+    <td width="38%">&nbsp;</td>
+  </tr>
+  <tr>
     <td width="21%">y is floor(x)</td>
     <td width="24%">Floor</td>
     <td width="38%">Return the largest integer smaller than x</td>
+  </tr>
+  <tr>
+    <td width="21%">&nbsp;</td>
+    <td width="24%">GetInstance</td>
+    <td width="38%">&nbsp;</td>
   </tr>
   <tr>
     <td width="21%">greaterThan(x,y) <br>
@@ -124,6 +144,31 @@ registration references the entire fully-qualified class name must be specified.
     returned boolean value to be bound to a variable (&quot;bval is lessThan(x,y)&quot;). 
     Note that the latter only works with the explicit form of the built-in, not 
     with the &quot;x &lt; y&quot; representation.</td>
+  </tr>
+  <tr>
+    <td width="27%">&nbsp;</td>
+    <td width="24%">List</td>
+    <td width="37%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="27%">&nbsp;</td>
+    <td width="24%">ListConcat</td>
+    <td width="37%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="27%">&nbsp;</td>
+    <td width="24%">ListSubtract</td>
+    <td width="37%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="27%">&nbsp;</td>
+    <td width="24%">ListToString</td>
+    <td width="37%">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="27%">&nbsp;</td>
+    <td width="24%">Localname</td>
+    <td width="37%">&nbsp;</td>
   </tr>
   <tr>
     <td width="27%">y is max(x1, x2, ...)<br>
@@ -165,6 +210,11 @@ registration references the entire fully-qualified class name must be specified.
     <td width="37%">For the given subject s, if all values of the object 
     property op have at least one value of the property p2, return true. 
     Otherwise return false.</td>
+  </tr>
+  <tr>
+    <td width="27%">&nbsp;</td>
+    <td width="24%">NoValue</td>
+    <td width="37%">&nbsp;</td>
   </tr>
   <tr>
     <td width="27%">noValuesOtherThan(s, p, o)</td>
@@ -243,6 +293,11 @@ registration references the entire fully-qualified class name must be specified.
     Jena-provided built-ins of the same name (different package). They may be 
     used for strings and URIs.</td>
   </tr>
+  <tr>
+    <td width="27%">&nbsp;</td>
+    <td width="24%">Unique</td>
+    <td width="37%">&nbsp;</td>
+  </tr>
 </table>
 <p>Several of these built-ins have special syntax in SADL. These include the 
 following.</p>
@@ -251,6 +306,22 @@ following.</p>
   <li>NoValuesOtherThan: p of x is only y</li>
   <li>NotOnlyValue: p of x is not only y</li>
 </ol>
+<p>Several of these built-ins allow graph patterns as arguments. A graph pattern 
+is a set of triples which may be related through shared variables and which 
+specify a graph pattern to be matched. This is the same concept as the use of 
+graph patterns in the body of a rule or the where clauses of a SPARQL query. 
+Each triple has a subject, a predicate, and an object. Built-ins allowing a set 
+of graph patterns as arguments include the following:</p>
+
+<ul>
+  <li>Average</li>
+  <li>List</li>
+  <li>Max</li>
+  <li>Min</li>
+  <li>NoValue</li>
+  <li>Project</li>
+  <li>Sum</li>
+</ul>
 <p>&nbsp;</p>
 
 </body>
