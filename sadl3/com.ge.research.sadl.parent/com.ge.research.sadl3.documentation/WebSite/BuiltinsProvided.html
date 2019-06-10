@@ -77,9 +77,10 @@ registration references the entire fully-qualified class name must be specified.
     value in radians)</td>
   </tr>
   <tr>
-    <td width="21%">&nbsp;</td>
+    <td width="21%">y is 3.4</td>
     <td width="24%">Assign</td>
-    <td width="38%">&nbsp;</td>
+    <td width="38%">Used in translation&nbsp; of assignment of a literal to a 
+    variable in a rule body</td>
   </tr>
   <tr>
     <td width="21%">y is atan(x)</td>
@@ -104,14 +105,25 @@ registration references the entire fully-qualified class name must be specified.
     angle in radians</td>
   </tr>
   <tr>
-    <td width="21%">&nbsp;</td>
+    <td width="21%">(1): n is countMatches(s, p)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; or<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; n is countMatches(s, p, x)<br>
+    (2): n is countMatches(s1, p1, o1, s2, p2, o2, ..., sn, pn)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; n is countMatches(s1, p1, o1, s2, p2, o2, ..., sn, pn, x)</td>
     <td width="24%">CountMatches</td>
-    <td width="38%">&nbsp;</td>
+    <td width="38%">This built-in returns the same value as &quot;listLength(list(...))&quot; 
+    for the same arguments; it counts the number of&nbsp; matches to the graph 
+    pattern specified in the arguments. This built-in does not create an 
+    rdf:List so there are no additions to the inferred model as a side-effect. 
+    See the &quot;list&quot; built-in below for a detailed discussion of the arguments. 
+    See also &quot;countUniqueMatches&quot;.</td>
   </tr>
   <tr>
-    <td width="21%">&nbsp;</td>
+    <td width="21%">n is countUniqueMatches(....)</td>
     <td width="24%">CountUniqueMatches</td>
-    <td width="38%">&nbsp;</td>
+    <td width="38%">Counts the number of unique matches (duplicates removed); 
+    same argument pattern as CountMatches</td>
   </tr>
   <tr>
     <td width="21%">y is floor(x)</td>
@@ -119,9 +131,61 @@ registration references the entire fully-qualified class name must be specified.
     <td width="38%">Return the largest integer smaller than x</td>
   </tr>
   <tr>
-    <td width="21%">&nbsp;</td>
+    <td width="21%"><font SIZE="2" COLOR="#800080">
+    <p ALIGN="LEFT">then</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">there</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">exists</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#000080"><b>Velocity</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#ff00ff"><b>sosair</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#000080"><b>Velocity</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#ff00ff"><b>vunit</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">and </font><font SIZE="2" COLOR="#008000"><b>
+    speedOfSound</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#ff00ff"><b>air</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#000080"><b>Velocity<br>
+    </b></font>&nbsp;&nbsp;&nbsp; or<br>
+    ...<font SIZE="2" COLOR="#800080">then</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">there</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">exists</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#000080"><b>Velocity</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#ff00ff"><b>sosair</b></font><font SIZE="2">, </font>
+    <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> &quot;m/sec&quot;)
+    </font><font SIZE="2" COLOR="#800080">and </font>
+    <font SIZE="2" COLOR="#008000"><b>speedOfSound</b></font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#ff00ff"><b>air</b></font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#000080"><b>Velocity</b></font><font face="Times New Roman"><br>
+&nbsp;&nbsp; or<br>
+    y is getInstance(cls)<br>
+    </font>y is getInstance(cls, c1a, c1b, c2a, c2b, ..., cna, cnb)<br>
+    y is getInstance(cls, c1a, c1b, c2a, c2b, ..., cna, cnb, true)</td>
     <td width="24%">GetInstance</td>
-    <td width="38%">&nbsp;</td>
+    <td width="38%">Return the instance of the class cls which also matches the 
+    set of constraints specified by {c1a, c1b, c2a, c2b, ..., cna, cnb}. Each 
+    pair of constraints represents either a triple pattern for which the 
+    matching instance is the subject, e.g., (?, c1a, c1b) and hence c1a is a 
+    property, or a triple pattern for which the matching instance is the object 
+    value, e.g., (c1a, c1b, ?) and hence c1a is an instance and c1b is a 
+    property. If no match exists create an instance of type cls and instantiate 
+    triples for all of the constraints. (A subsequent call with the same 
+    arguments will then return the new instance.) If there is a last boolean 
+    argument whose value is true, the new instance will always be created, 
+    matching the constraints, even if a match already exists.</td>
   </tr>
   <tr>
     <td width="21%">greaterThan(x,y) <br>
@@ -146,43 +210,79 @@ registration references the entire fully-qualified class name must be specified.
     with the &quot;x &lt; y&quot; representation.</td>
   </tr>
   <tr>
-    <td width="27%">&nbsp;</td>
+    <td width="27%">(1): lst is list(s, p)<p style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font size="3">or</font></p>
+    <p style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font size="3">lst is list(s, p, x)</font></p>
+    <p style="color: rgb(0, 0, 0); font-family: Times New Roman; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
+    (2): lst is list(s1, p1, o1, s2, p2, o2, ..., sn, pn)</p>
+    <p style="color: rgb(0, 0, 0); font-family: Times New Roman; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or</p>
+    <p style="color: rgb(0, 0, 0); font-family: Times New Roman; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; lst is list(s1, p1, o1, s2, p2, o2, ..., sn, pn, x)</p>
+    <p style="color: rgb(0, 0, 0); font-family: Times New Roman; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
+    (3): lst is list(lit1, lit2, lit3, ....)</td>
     <td width="24%">List</td>
-    <td width="37%">&nbsp;</td>
+    <td width="37%">This built-in returns an rdf:List instance whose contents is 
+    determined by the arguments. There are three forms as shown in the first 
+    column. The first two forms specify graph patterns with one unbound variable 
+    node (implicit or explicit) that are to be matched to create the list. Form 
+    (1) identifies a graph node anchor or subject as the first argument and a 
+    graph edge or property as the second argument. A free (unbound) variable may 
+    be specified as the 3rd argument but is implied if not explicit--the list is 
+    the possible bindings of this variable. Form (2) is an extension of form (1) 
+    and has a series of subject-predicate-object specifications in triple 
+    patterns. The subject of a subsequent triple pattern can be the object of a 
+    previous pattern, or any other combination as long as the triple patterns 
+    are related in some way. The unbound variable, whose bindings will 
+    constitute the list, is the last argument, either implicit or explicit. Form 
+    (3) creates a list of all of the arguments when they are all literal values 
+    or individuals. (Note that the actual test is not property and not class.)<p>
+    Note that this built-in will return duplicate list items if the occur. To 
+    remove duplicate items from a list use the &quot;unique&quot; built-in.</td>
   </tr>
   <tr>
-    <td width="27%">&nbsp;</td>
+    <td width="27%">list3 is listConcat(list1, list2)</td>
     <td width="24%">ListConcat</td>
-    <td width="37%">&nbsp;</td>
+    <td width="37%">This built-in is for use in a rule premise and concatenates 
+    two lists together to form a new list.</td>
   </tr>
   <tr>
-    <td width="27%">&nbsp;</td>
+    <td width="27%">lst is listSubtract(list1, list2)</td>
     <td width="24%">ListSubtract</td>
-    <td width="37%">&nbsp;</td>
+    <td width="37%">Remove all members of list2 from list1, if they are in 
+    list1, and return what remains.</td>
   </tr>
   <tr>
-    <td width="27%">&nbsp;</td>
+    <td width="27%">str is listToString(lst)</td>
     <td width="24%">ListToString</td>
-    <td width="37%">&nbsp;</td>
+    <td width="37%">Converts a list to a string representation of the list</td>
   </tr>
   <tr>
-    <td width="27%">&nbsp;</td>
+    <td width="27%">ln is localname(concept)</td>
     <td width="24%">Localname</td>
-    <td width="37%">&nbsp;</td>
+    <td width="37%">Where concept is an rdf:Resource with a URI, return the 
+    local name</td>
   </tr>
   <tr>
     <td width="27%">y is max(x1, x2, ...)<br>
-    y is max(lst)</td>
+    y is max(lst)<br>
+    y is max(s1,p1,o1,s2,p2,o2,...)</td>
     <td width="24%">Max</td>
     <td width="37%">Return the minimum of any number of arguments, each of which 
-    must be a numerical value.&nbsp; Can take a single argument of type rdf:List.</td>
+    must be a numerical value.&nbsp; Can take a single argument of type rdf:List. 
+    Can also take a graph pattern (3rd example) as input, see notes after this 
+    table.</td>
   </tr>
   <tr>
     <td width="27%">y is min(x1, x2, ...)<br>
-    y is min(lst)</td>
+    y is min(lst)<br>
+    y is min(s1,p1,o1,s2,p2,o2,...)</td>
     <td width="24%">Min</td>
     <td width="37%">Return the minimum of any number of arguments, each of which 
-    must be a numerical value. Can take a single argument of type rdf:List.</td>
+    must be a numerical value. Can take a single argument of type rdf:List. Can 
+    also take a graph pattern (3rd example) as input, see notes after this 
+    table.</td>
   </tr>
   <tr>
     <td width="27%">z is mod(x,y)</td>
@@ -212,9 +312,20 @@ registration references the entire fully-qualified class name must be specified.
     Otherwise return false.</td>
   </tr>
   <tr>
-    <td width="27%">&nbsp;</td>
+    <td width="27%">noValue(s, p)<br style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+    noValue(s, p, o)<br style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+    noValue(s, p1, p2, p3, ..., pn)<br style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial;">
+    noValue(s, p1, p2, p3, ..., pn, o)<br>
+    noValue(s1,p1,o1,s2,p2,o2,...)</td>
     <td width="24%">NoValue</td>
-    <td width="37%">&nbsp;</td>
+    <td width="37%">
+    <span style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">
+    1</span>) Subject s has no property p. 2) Subject s does not have property p 
+    with value o. 3) Starting at node s, there is no set of triples with edges 
+    p1, p2, .. , pn that leads to one or more values. 4) Starting at node s, 
+    there is no set of triples with edges p1, p2, ...,pn that lead to a value o. 
+    5) The triple pattern expressed by the arguments (see notes below table) 
+    does not exist in the graph.</td>
   </tr>
   <tr>
     <td width="27%">noValuesOtherThan(s, p, o)</td>
@@ -237,13 +348,15 @@ registration references the entire fully-qualified class name must be specified.
     stdout. For the IDE, this will be the console window.</td>
   </tr>
   <tr>
-    <td width="27%">y is product(x1, x2, ...)
-    <p>y is product(lst)</td>
+    <td width="27%">y is product(x1, x2, ...) <br>
+    y is product(lst)<br>
+    y is product(s1,p1,o1,s2,p2,o2,...)</td>
     <td width="24%">Product</td>
     <td width="37%">For 2 or more arguments, return the product of the 
     arguments, all of which must be numerical values. Alternatively, a single 
     argument is an rdf:List of numerical values which are multiplied together to 
-    determine the return value.</td>
+    determine the return value. Can also take a graph pattern (3rd example) as 
+    input, see notes after this table.</td>
   </tr>
   <tr>
     <td width="21%">y is sin(x)</td>
@@ -272,13 +385,15 @@ registration references the entire fully-qualified class name must be specified.
     returned.</td>
   </tr>
   <tr>
-    <td width="27%">y is sum(x1, x2, ...)
-    <p>y is sum(lst)</td>
+    <td width="27%">y is sum(x1, x2, ...) <br>
+    y is sum(lst)<br>
+    y is sum(s1,p1,o1,s2,p2,o2,...)</td>
     <td width="24%">Sum</td>
     <td width="37%">For 2 or more arguments, return the sum of the arguments, 
     all of which must be numerical values. Alternatively, a single argument is 
     an rdf:List of numerical values which are summed to determine the return 
-    value.</td>
+    value. Can also take a graph pattern (3rd example) as input, see notes after 
+    this table.</td>
   </tr>
   <tr>
     <td width="21%">y is tan(x)</td>
@@ -287,16 +402,11 @@ registration references the entire fully-qualified class name must be specified.
     angle in radians</td>
   </tr>
   <tr>
-    <td width="27%">x &lt; y, x &gt; y</td>
-    <td width="24%">lessThan, greaterThan</td>
-    <td width="37%">These two comparison built-ins are extensions of the 
-    Jena-provided built-ins of the same name (different package). They may be 
-    used for strings and URIs.</td>
-  </tr>
-  <tr>
-    <td width="27%">&nbsp;</td>
+    <td width="27%">lst2 is unique(lst1)</td>
     <td width="24%">Unique</td>
-    <td width="37%">&nbsp;</td>
+    <td width="37%">Takes an rdf:List instance as input and removes any 
+    duplicate list items, returning the resulting list. If there are no 
+    duplicates the original list is returned.</td>
   </tr>
 </table>
 <p>Several of these built-ins have special syntax in SADL. These include the 
