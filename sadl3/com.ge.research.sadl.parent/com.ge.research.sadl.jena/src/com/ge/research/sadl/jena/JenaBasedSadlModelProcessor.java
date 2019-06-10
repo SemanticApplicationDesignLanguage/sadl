@@ -13062,7 +13062,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected void checkForArticleForNameInBuiltinElement(Expression aValue, Object aBuiltinElement) throws InvalidNameException {
 		if(aBuiltinElement instanceof BuiltinElement) {
 			List<Node> lNodeList = ((BuiltinElement) aBuiltinElement).getArguments();
-			if(lNodeList.size() == 2) {
+			if(lNodeList != null && lNodeList.size() == 2) {
 				Node lNode = lNodeList.get(1);
 				if(isUseArticlesInValidation() && aValue instanceof Name && lNode instanceof NamedNode && !(lNode instanceof VariableNode)) {
 					addError(SadlErrorMessages.NEEDS_ARTICLE.get(), aValue);
