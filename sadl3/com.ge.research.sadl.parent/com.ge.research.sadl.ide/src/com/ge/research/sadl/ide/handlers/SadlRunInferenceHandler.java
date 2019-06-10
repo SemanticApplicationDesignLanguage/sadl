@@ -79,6 +79,7 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 	public void run(Path path, Supplier<XtextResource> resourceSupplier, Map<String, String> properties) {
 		try {
 			// *** NOTE: Copied from com.ge.research.sadl.ui.handlers.RunInference.execute(ExecutionEvent) *** 
+
 			if (path.getFileName().toString().endsWith(".sadl")) {
 				// run inference on this model
 				console.info("Inference of '" + path.toAbsolutePath().toString() + "' requested.\n");
@@ -98,6 +99,7 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 				Scanner s = new Scanner(f).useDelimiter("\\n");
 				int totalTestCount = 0;
 				int passedTestCount = 0;
+				IConfigurationManager configMgr = null;
 				ResourceSet resourceSet = resourceSupplier.get().getResourceSet();
 				while (s.hasNext()) {
 					String templateLine = s.next();
@@ -107,13 +109,15 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 						String testfile = templateLine.substring(testLoc + 5).trim();
 						String modelFolderPath = getOwlModelsFolderPath(path).toString();
 						String owlModelPath = modelFolderPath + "/" + path.getFileName().toString().replaceFirst("[.][^.]+$", ".owl");
-						IConfigurationManager configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderPath, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+						if (configMgr == null) {
+							configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderPath, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+						}
 						String actualUrl = new SadlUtils().fileUrlToFileName(configMgr.getAltUrlFromPublicUri(SadlUtils.stripQuotes(testfile)));
 						File actualFile = new File(actualUrl);
 						String fileName = actualFile.getName();
 						fileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".sadl";
 //						Path projectPath = Paths.get(projectHelper.getRoot(path.toUri()));
-						Path projectPath = new File(owlModelPath).getParentFile().toPath();
+						Path projectPath = new File(modelFolderPath).getParentFile().toPath();
 						Path file = findFileRecursively(projectPath, fileName);
 						if (file != null) {
 							Resource res = findAndPrepareResource(resourceSet, file);
@@ -139,6 +143,12 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 									}
 								}
 							}
+							else {
+								console.error("Unable to find Resource for '" + testfile + "'\n");
+							}
+						}
+						else {
+							console.error("Unable to find actual file for '" + testfile + "'\n");
 						}
 					}
 				}
@@ -154,6 +164,8 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 		if (retvals == null || retvals.length < 1) {
     		
     	}
+		int numTests = 0;
+		int numTestsPassed = 0;
     	for (int idx = 0; idx < retvals.length; idx++) {
     		if (!(retvals[idx] instanceof SadlCommandResult)) {
     			console.error("Unexpected inference result is not a SadlCommandResult (" + (retvals[idx] != null ? retvals[idx].toString() : "null"));
@@ -194,11 +206,13 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
     				}
     			}
 				else if (infresults instanceof TestResult) {
+					numTests++;
 					TestResult tr = (TestResult)infresults;
 //					SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
 					String msg;
 					if (tr.isPassed()) {
 						msg = "Test passed: " + cmd.toString() + "\n";
+						numTestsPassed++;
 					}
 					else {
 						msg = "Test failed: " + cmd.toString() + "(" + tr.toString() + ")\n";
@@ -269,7 +283,14 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
     			console.info(writeDerivationsToFile(trgtFile, ds));
     		}
     	}
-
+    	if (numTests > 0) {
+    		String msg = "Test summary: ";
+    		msg += numTestsPassed;
+    		msg += " of ";
+    		msg += numTests;
+    		msg += " tests passed.";
+    		console.info(msg);
+    	}
 	}
 	
 	public Path findFileRecursively(Path path, String name) throws IOException {

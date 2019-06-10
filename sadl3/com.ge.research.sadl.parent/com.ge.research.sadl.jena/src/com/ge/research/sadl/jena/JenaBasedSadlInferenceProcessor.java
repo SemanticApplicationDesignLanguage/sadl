@@ -722,7 +722,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					if (rs != null && (rcnt = rs.getRowCount()) > 0) {
 						// see if we can get a match on the literal
 						if (triple.getModifierType().equals(
-								TripleModifierType.None)) {
+								TripleModifierType.None) ||
+								triple.getModifierType().equals(TripleModifierType.Assignment)) {
 							OntProperty oprop = getTheJenaModel().getOntProperty(
 									predicate);
 							if (!(on instanceof ValueTableNode) && oprop != null && oprop.isDatatypeProperty()) {
