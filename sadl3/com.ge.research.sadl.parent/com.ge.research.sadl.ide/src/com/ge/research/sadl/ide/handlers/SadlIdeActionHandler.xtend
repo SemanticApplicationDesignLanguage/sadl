@@ -85,8 +85,8 @@ class SadlIdeActionHandler {
 	 * the validation on it and return with the resource. Otherwise, returns {@code null}. 
 	 */
 	protected def XtextResource findAndPrepareResource(ResourceSet resourceSet, Path resourcePath) {
-		val uri = resourcePath.toUri.toEmfUri;
-		val resource = resourceSet.getResource(uri, false);
+		val uri = projectHelper.toUri(resourcePath).toEmfUri;
+		val resource = resourceSet.getResource(uri, true);
 		if (resource instanceof XtextResource) {
 			return resource.prepareResource;
 		}
