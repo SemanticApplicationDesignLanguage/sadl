@@ -45,11 +45,10 @@
 		<module>com.ge.research.sadl.feature</module>
 		<module>com.ge.research.sadl.perspective</module>
 		<module>com.ge.research.sadl.update</module>
-		<module>com.ge.research.sadl.sadlserver-api</module>
-		<module>com.ge.research.sadl.sadlserver-impl</module>
+		<module>com.ge.research.sadl.server</module>
 	</modules>
 	<build>
-		<finalName>${project.groupId}-${sadlOsgiVersion}.${maven.build.timestamp}</finalName>
+		<finalName>${project.artifactId}-${sadlOsgiVersion}.${maven.build.timestamp}</finalName>
 		<plugins>
 			<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
