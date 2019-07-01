@@ -37,13 +37,13 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.server.ISadlServerMD;
 import com.ge.research.sadl.server.SessionNotFoundException;
-import com.ge.research.sadl.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD {
     protected static final Logger logger = LoggerFactory.getLogger(SadlServerMDImpl.class);	

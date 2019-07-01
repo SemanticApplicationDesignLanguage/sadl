@@ -53,9 +53,6 @@ import java.util.Scanner;
 import com.ge.research.sadl.server.ISadlServer;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
-import com.ge.research.sadl.utils.SadlUtils;
-import com.ge.research.sadl.utils.StringDataSource;
-import com.ge.research.sadl.utils.UtilsForJena;
 
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -64,8 +61,8 @@ import javax.activation.URLDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.importer.CsvImporter;
 import com.ge.research.sadl.importer.TemplateException;
+import com.ge.research.sadl.jena.importer.CsvImporter;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
@@ -80,6 +77,8 @@ import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.reasoner.utils.StringDataSource;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -207,7 +206,7 @@ public class SadlServerImpl implements ISadlServer {
 			}
 		}
 		CsvImporter importer = new CsvImporter(getConfigurationMgr());
-		importer.setCsvFilename(serverCsvDataLocator, includesHeader);
+		importer.setImportFilename(serverCsvDataLocator, includesHeader);
 		importer.setModelFolder(getKBaseIdentifier());
 		importer.setImportModelNamespace(defaultInstanceDataNS);
 		importer.setImports(getModelName());
@@ -430,7 +429,7 @@ public class SadlServerImpl implements ISadlServer {
 			}
 		}
 		CsvImporter importer = new CsvImporter(getConfigurationMgr());
-		importer.setCsvDataSource(csvDataSrc, includesHeader);
+		importer.setImportDataSource(csvDataSrc, includesHeader);
 		importer.setModelFolder(getKBaseIdentifier());
 		importer.setImportModelNamespace(defaultInstanceDataNS);
 		
@@ -880,7 +879,7 @@ public class SadlServerImpl implements ISadlServer {
 	}
 	
 	public String createInstance(String name, String className) throws ConfigurationException, InvalidNameException, IOException {
-		String error = UtilsForJena.validateRdfUri(name);
+		String error = SadlUtils.validateRdfUri(name);
 		if (error != null) {
 			throw new InvalidNameException("Invalid instance name (" + name + "): " + error);
 		}

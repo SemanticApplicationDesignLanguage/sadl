@@ -59,11 +59,10 @@ import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.server.ISadlServerPE;
 import com.ge.research.sadl.server.SessionNotFoundException;
 import com.ge.research.sadl.server.server.SadlServerImpl;
-import com.ge.research.sadl.utils.SadlUtils;
-import com.ge.research.sadl.utils.UtilsForJena;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
 import com.hp.hpl.jena.ontology.HasValueRestriction;
@@ -630,7 +629,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		OntModel ontModel;
 		try {
 			String baseUri = namespace + baseLocalName;
-			String error = UtilsForJena.validateRdfUri(baseUri);
+			String error = SadlUtils.validateRdfUri(baseUri);
 			if (error != null) {
 				throw new InvalidNameException("Invalid instance name (" + baseUri + "): " + error);
 			}
@@ -640,7 +639,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				throw new InvalidNameException("Namespace '" + namespace + "' does not correspond with any known model.");
 			}
 			int cntr = 1;
-			uri = UtilsForJena.getUniqueOntUri(ontModel, baseUri);
+			uri = SadlUtils.getUniqueOntUri(ontModel, baseUri);
 			while (ontModel.getOntResource(uri) != null) {
 				uri = baseUri + "_" + cntr++;
 			}
@@ -661,7 +660,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	@Override
 	public String getUniqueNamespaceUri(String baseUri)
 			throws InvalidNameException, SessionNotFoundException, MalformedURLException, ConfigurationException {
-		Object[] split = UtilsForJena.splitUriIntoBaseAndCounter(baseUri);
+		Object[] split = SadlUtils.splitUriIntoBaseAndCounter(baseUri);
 		baseUri = (String) split[0];
 		long cntr = (long) split[1];
 		String newNSUri = null;
@@ -690,7 +689,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			if (instName.indexOf('#') < 0) {
 				instName = getUri(modelName, instName);
 			}
-			String error = UtilsForJena.validateRdfUri(instName);
+			String error = SadlUtils.validateRdfUri(instName);
 			if (error != null) {
 				throw new InvalidNameException("Invalid URI (" + instName + ") for new instance: " + error + ".");
 			}
