@@ -27,6 +27,11 @@
 
 package com.ge.research.sadl.server.server;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -44,6 +49,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
@@ -56,9 +62,7 @@ import com.ge.research.sadl.server.ISadlServerPE;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
 
-import junit.framework.TestCase;
-
-public class TestSadlServerDemo extends TestCase {
+public class TestSadlServerDemo {
 
 	private String kbaseRoot;
 	private String modelFolder;
@@ -104,7 +108,6 @@ public class TestSadlServerDemo extends TestCase {
 	
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
 		kbaseRoot = ClassLoader.getSystemResource("DataModels").getFile();
 //		modelFolder = ClassLoader.getSystemResource("DataModels/Advise2").getFile();
 //		modelFolder = ClassLoader.getSystemResource("DataModels/ShapesSadlServerTest/OwlModels").getFile();
@@ -233,6 +236,46 @@ public class TestSadlServerDemo extends TestCase {
 		assertEquals(rs2.getResultAt(0, 0),120.0);
 	}
 
+	@Ignore
+	@Test
+	public void testSTEM() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, IOException, InvalidNameException, QueryCancelledException, QueryParseException, TemplateException, URISyntaxException {
+		String stemKbaseLocation = "C:\\Users\\200005201\\sadl3-master2\\runtime-New_configuration\\STEM";
+		ISadlServer srvr = new SadlServerImpl(stemKbaseLocation);
+		assertNotNull(srvr);
+		
+		String modelName = "http://sadl.org/STEM/Test1";
+		String sessionId = srvr.selectServiceModel(stemKbaseLocation + "/OwlModels", modelName);
+		assertNotNull(sessionId);
+		
+		srvr.setInstanceDataNamespace("http://sadl.org/STEM/Components#");
+			
+		String serverCsvDataBaseUrl = "file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/STEM/CSVData";
+		boolean includesHeader = true;
+		String serverCsvTemplateBaseUrl = "file:/C:/Users/200005201/sadl3-master2/runtime-New_configuration/STEM/Templates";
+		assertTrue(srvr.loadCsvData(serverCsvDataBaseUrl + "/CompPorts.csv", includesHeader, serverCsvTemplateBaseUrl + "/CompPorts.tmpl"));
+		assertTrue(srvr.loadCsvData(serverCsvDataBaseUrl + "/ScnArchitecture.csv", includesHeader, serverCsvTemplateBaseUrl + "/ScnArchitecture.tmpl"));
+		assertTrue(srvr.loadCsvData(serverCsvDataBaseUrl + "/ScnCompProps.csv", includesHeader, serverCsvTemplateBaseUrl + "/ScnCompProps.tmpl"));
+		assertTrue(srvr.loadCsvData(serverCsvDataBaseUrl + "/CompDep.csv", includesHeader, serverCsvTemplateBaseUrl + "/CompDep.tmpl"));
+		assertTrue(srvr.loadCsvData(serverCsvDataBaseUrl + "/Mission.csv", includesHeader, serverCsvTemplateBaseUrl + "/Mission.tmpl"));
+		
+		String qry = srvr.prepareQuery("select count(*) where {{select distinct ?z2  ?CAPEC ?z4  where {   \r\n" + 
+				"?x <affectedComponent> ?z2 . ?x <ciaIssue> ?z4  \r\n" + 
+				". ?x <capec> ?CAPEC}} } ");
+		System.out.println(qry);
+		ResultSet rs = srvr.query(qry);
+		assertNotNull(rs);
+		assertTrue(rs.getRowCount() > 0);
+		System.out.println(rs.toString());
+		
+		String wqry1 = "select (?x as ?Component) (?z as ?InputPort) where {?x <inputPort> ?z} order by ?x ?z";
+		ResultSet wrs1 = srvr.query(srvr.prepareQuery(wqry1));
+		System.out.println(wrs1.toString());
+//		String[] cols = rs.getColumnNames();
+//		assertTrue(cols[0].equals("shape"));
+//		assertTrue(cols[1].equals("area"));
+//		assertTrue(rs.getResultAt(0, 0).equals(test1NS+"MyRect"));
+//		assertTrue(rs.getResultAt(0, 1).equals(13.75));
+	}
 //	@Test
 //	public void testSadlServerClienSideScenarioPersistencedAsNamedService() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException {
 //		ISadlServerPE srvr = new SadlServerPEImpl(kbaseRoot);
