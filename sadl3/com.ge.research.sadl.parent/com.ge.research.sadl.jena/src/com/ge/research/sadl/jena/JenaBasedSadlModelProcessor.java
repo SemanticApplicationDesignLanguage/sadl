@@ -8060,7 +8060,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								+ subject.toString() + ") to an OntClass.");
 					}
 				} else {
-					// I think this is OK... AWC 3/13/2017
+					addError("A property restriction requires specifying the class to which it applies.", element);
 				}
 			} else if (spitr.hasNext()) {
 				SadlPropertyRestriction spr2 = spitr.next();
