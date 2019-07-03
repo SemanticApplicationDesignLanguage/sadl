@@ -8060,10 +8060,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								+ subject.toString() + ") to an OntClass.");
 					}
 				} else {
-					// I think this is OK... AWC 3/13/2017
-				}
-				if(spr1 instanceof SadlCardinalityCondition) {
-					addError("A domain is required for the property within this cardinality restriction.", element);
+					addError("A property restriction requires specifying the class to which it applies.", element);
 				}
 			} else if (spitr.hasNext()) {
 				SadlPropertyRestriction spr2 = spitr.next();
