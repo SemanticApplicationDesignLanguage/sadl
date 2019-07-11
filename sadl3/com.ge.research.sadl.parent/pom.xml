@@ -162,12 +162,23 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 					<configuration>
 						<filesets>
 							<fileset>
-								<directory>${basedir}/xtend-gen</directory>
-								<directory>${basedir}/xtend-gen</directory>
+								<directory>${basedir}</directory>
+								<includes>
+									<include>plugin.xml_gen</include>
+								</includes>
+							</fileset>
+							<fileset>
+								<directory>model/generated</directory>
+							</fileset>
+							<fileset>
+								<directory>src-gen</directory>
+							</fileset>
+							<fileset>
+								<directory>xtend-gen</directory>
 							</fileset>
 						</filesets>
 					</configuration>

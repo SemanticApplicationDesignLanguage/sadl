@@ -8,3 +8,8 @@ DS_Store
 *.xtendbin
 xtend-gen/
 sadl-ide.log
+plugin.xml_gen
+.classpath
+.project
+.settings/
+*/model/generated/

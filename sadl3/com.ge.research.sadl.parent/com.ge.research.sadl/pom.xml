@@ -25,14 +25,15 @@
 					</execution>
 				</executions>
 				<configuration>
-					<cleanupDaemonThreads>false</cleanupDaemonThreads>
 					<mainClass>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</mainClass>
 					<arguments>
 						<argument>/${project.basedir}/src/com/ge/research/sadl/GenerateSADL.mwe2</argument>
 						<argument>-p</argument>
 						<argument>projectPath=/${project.basedir}</argument>
 					</arguments>
+					<classpathScope>compile</classpathScope>
 					<includePluginDependencies>true</includePluginDependencies>
+					<cleanupDaemonThreads>false</cleanupDaemonThreads><!-- see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475098#c3 -->
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -73,26 +74,6 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets combine.children="append">
-						<fileset>
-							<directory>${basedir}/src-gen/</directory>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/model/generated/</directory>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../${project.artifactId}.ide/src-gen/</directory>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../${project.artifactId}.ui/src-gen/</directory>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -129,5 +110,4 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
 </project>

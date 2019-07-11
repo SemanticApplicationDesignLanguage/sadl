@@ -16,7 +16,7 @@
 				<configuration>
 					<filesets>
 						<fileset>
-							<directory>${project.basedir}/lib/</directory>
+							<directory>lib/</directory>
 							<includes>
 								<include>**/*</include>
 							</includes>
@@ -28,7 +28,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>2.10</version>
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
