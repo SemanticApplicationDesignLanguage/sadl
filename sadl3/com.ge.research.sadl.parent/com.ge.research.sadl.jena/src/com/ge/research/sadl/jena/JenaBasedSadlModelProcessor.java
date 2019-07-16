@@ -3153,7 +3153,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addTriplePatternConstraint((TripleElement) gpe2, ddInst, typeNode, nameNode, gpVarCls, constraints, variablesTyped,	context);
 			}
 			else if (gpe2 instanceof BuiltinElement) {
-//				addWarning("BuiltinElement constraint not yet handled", context);
 				addFunctionPatternConstraint((BuiltinElement)gpe2, ddInst, typeNode, nameNode, gpVarCls, constraints, variablesTyped, context);
 			}
 			else {
@@ -3184,27 +3183,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					argNodeRsrc = getTheJenaModel().createIndividual(argNode.getURI(), gpVarCls);
 				}
 				else if (argNode instanceof com.ge.research.sadl.model.gp.Literal) {
-					addWarning("Literals arguments in constraints not yet implemented", context);
 					OntClass litCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_GP_LITERAL_VALUE_CLASS_URI);
 					argNodeRsrc = getTheJenaModel().createIndividual(litCls);
+					Property gpLitValProp = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_GP_LITERAL_VLAUE_PROPERTYS_URI);
+					 Literal litvalval = getTheJenaModel().createTypedLiteral(((com.ge.research.sadl.model.gp.Literal)argNode).getValue());
+					argNodeRsrc.addProperty(gpLitValProp, litvalval); 
 				}
 				else {
-					addWarning("Resource arguments in constraints not yet implemented", context);
 					OntClass litCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_GP_RESOURCE_CLASS_URI);
 					argNodeRsrc = getTheJenaModel().createIndividual(argNode.getURI(), gpVarCls);
 				}
 				argValues.add(argNodeRsrc);
 			}
 			if (argValues != null && argValues.size() > 0) {
-				OntClass lstcls;
-				try {
-					lstcls = getOrCreateListSubclass(null, SadlConstants.SADL_IMPLICIT_MODEL_GP_ATOM_CLASS_URI, context.eResource(), null);
-					Individual lval = getTheJenaModel().createIndividual(lstcls);
-					createTypedList(lval, lstcls, getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_GP_ATOM_CLASS_URI), argValues, context);
-					fpInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARG_VALUES_PROPERTY_URI), lval);
-				} catch (JenaProcessorException e) {
-					addError(e.getMessage(), context);
-				}
+				RDFList argInstList = getTheJenaModel().createList(argValues.iterator());
+				fpInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARG_VALUES_PROPERTY_URI), argInstList);
+				constraints.add(fpInst);//				} catch (JenaProcessorException e) {
 			}
 		} catch (Exception e) {
 			addError(e.getMessage(), context);
@@ -3432,19 +3426,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return null;
 		}
 		return conceptNameToNamedNode(cn);
-		// com.hp.hpl.jena.rdf.model.Resource rtobj =
-		// sadlTypeReferenceToResource(rtype);
-		// if (rtobj == null) {
-		//// throw new JenaProcessorException("SadlTypeReference was not resolved to a
-		// model resource.");
-		// return null;
-		// }
-		// if (rtobj.isURIResource()) {
-		// NamedNode rtnn = new
-		// NamedNode(((com.hp.hpl.jena.rdf.model.Resource)rtobj).getLocalName());
-		// rtnn.setNamespace(((com.hp.hpl.jena.rdf.model.Resource)rtobj).getNameSpace());
-		// return rtnn;
-		// }
 	}
 
 	public NamedNode conceptNameToNamedNode(ConceptName cn) throws TranslationException, InvalidNameException {
@@ -9589,35 +9570,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		addValueToList(null, inst, cls, to, values);
 	}
 	
-	private Individual createTypedList(Individual theList, OntClass theListClass, OntClass theElementClass, List<Individual> theElements, EObject context) {
-		if (theList == null) {
-			theList = getTheJenaModel().createIndividual(theListClass);
-		}
-		for (Individual theElement : theElements) {
-			ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> itr = theElement.listRDFTypes(false);
-			boolean match = false;
-			while (itr.hasNext() && !match) {
-				com.hp.hpl.jena.rdf.model.Resource typ = itr.next();
-				if (typ.equals(theElementClass)) {
-					match = true;
-					itr.close();
-				}
-				ExtendedIterator<OntClass> subitr = theElementClass.listSubClasses();
-				while (subitr.hasNext()) {
-					if (subitr.next().equals(typ)) {
-						match = true;
-						subitr.close();
-						itr.close();
-					}
-				}
-			}
-			if (!match) {
-				addTypeCheckingError("The Instance '" + theElement.toString() + "' doesn't match the List type.", context);
-			}
-		}
-		return theList;
-	}
-
 	private Individual addValueToList(Individual lastInst, Individual inst, OntClass cls,
 			com.hp.hpl.jena.rdf.model.Resource type, Iterator<SadlExplicitValue> valueIterator) {
 		if (inst == null) {

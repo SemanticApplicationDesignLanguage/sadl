@@ -137,13 +137,16 @@ interface ISadlImplicitModelContentProvider {
 			gpPredicate describes TriplePattern.
 			gpObject describes TriplePattern.
 			builtin describes FunctionPattern with a single value of type ^Equation.
-			anyDataType (note "union of all relevant data types") is a type of {decimal or boolean or string or date or dateTime or anyURI}.
-			argValues (note "values of arguments to the built-in") describes FunctionPattern with a single value of type anyDataType List.
+			GPAtom is a class.
+			{GPVariable, GPLiteralValue, GPResource} are types of GPAtom.
+			gpLiteralValue describes GPLiteralValue with values of type data.
+			argValues (note "values of arguments to the built-in") describes FunctionPattern with a single value of type GPAtom List.
 			
-			SemanticConstraint (note "used to identify necessary patterns in semantic domain terms") is a type of AugmentedType, 
+			Assumption (note "used to identify necessary patterns in semantic domain terms") is a type of AugmentedType, 
 				described by constraints with a single value of type GraphPattern List.
 			ThisArgument (note "allows reference to self within an Argument's constraints") is a DataDescriptor.
 			
+			anyDataType (note "union of all relevant data types") is a type of {decimal or boolean or string or date or dateTime or anyURI}.
 			DataTableRow is a class,
 				described by rowValues with a single value of type anyDataType List.
 			DataTable is a class,
