@@ -62,6 +62,10 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_GP_OBJECT_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#gpObject";
 	public static final String SADL_IMPLICIT_MODEL_BUILTIN_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#builtin";
 	public static final String SADL_IMPLICIT_MODEL_ARG_VALUES_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#argValues";
+	public static final String SADL_IMPLICIT_MODEL_GP_ATOM_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#GPAtom";
+	public static final String SADL_IMPLICIT_MODEL_GP_VARIABLE_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#GPVariable";
+	public static final String SADL_IMPLICIT_MODEL_GP_LITERAL_VALUE_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#GPLiteralValue";
+	public static final String SADL_IMPLICIT_MODEL_GP_RESOURCE_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#GPResource";
 	
 	public static final String SADL_IMPLICIT_MODEL_DATA_TABLE_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#DataTable";
 	public static final String SADL_IMPLICIT_MODEL_DATA_TABLE_ROW_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#DataTableRow";

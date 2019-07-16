@@ -1251,7 +1251,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		return null;
 	}
 	
-	private String builtinTypeToString(BuiltinElement bin) throws TranslationException {
+	public String builtinTypeToString(BuiltinElement bin) throws TranslationException {
 		BuiltinType ftype = bin.getFuncType();
 		String builtinName = null;
 		if (ftype.equals(BuiltinType.Divide)) {

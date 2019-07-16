@@ -1171,7 +1171,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 	}
 
-	private Object builtinTypeToString(BuiltinElement bin) throws TranslationException {
+	public String builtinTypeToString(BuiltinElement bin) throws TranslationException {
 		BuiltinType ftype = bin.getFuncType();
 		if (ftype.equals(BuiltinType.Divide)) {
 //			return "quotient";

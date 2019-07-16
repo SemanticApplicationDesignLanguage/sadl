@@ -119,28 +119,29 @@ public class TestSadlServerMD_Mobius extends TestCase {
 //		System.out.println(rs.toStringWithIndent(5));		
 //	}
 	
-	@Test
-	public void testCreateAndDelete() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, URISyntaxException {
-		String modelName = "http://www.mobius.illinois.edu/advise/ont/core/InitInstanceModel";
-		ISadlServerMD srvr = new SadlServerMDImpl();
-		assertNotNull(srvr);
-		assertNotNull(srvr.selectServiceModel(modelFolder, modelName));
-		String instMn = "http://www.mobius.illinois.edu/advise/ont/inst1";
-		String instNs = instMn + "#";
-		String newUri = srvr.getUniqueInstanceUri(instMn, instNs, "Device");
-		String newInst = srvr.createInstance(instMn, newUri, "http://www.mobius.illinois.edu/advise/ont/core/System#Device");
-		assertNotNull(newInst);
-		assertEquals(newUri, newInst);
-		assertFalse(srvr.updateRdfsLabel(instMn, newUri, "Ken's Device", null));
-		assertTrue(srvr.addTriple(instMn, newInst, "http://www.mobius.illinois.edu/advise/ont/core/System#loginPolicyImpact", 0.0));
-		System.out.println(srvr.ask(instMn, newUri, null, null));
-		assertTrue(srvr.deleteTriple(instMn, newUri, null, null));
-		assertFalse(srvr.deleteTriple(instMn, null, null, newInst));
-		System.out.println(srvr.ask(instMn, newUri, null, null));
-		System.out.println(srvr.ask(instMn, null, null, newUri));
-		assertNotNull(srvr.getErrors());
-		String owlInstanceFileName = "file:///c:/tmp/inst1.owl";
-		String globalPrefix = "inst1";
-		assertTrue(srvr.persistInstanceModel(instMn, owlInstanceFileName, globalPrefix));
-	}
+//	@Ignore
+//	@Test
+//	public void testCreateAndDelete() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, URISyntaxException {
+//		String modelName = "http://www.mobius.illinois.edu/advise/ont/core/InitInstanceModel";
+//		ISadlServerMD srvr = new SadlServerMDImpl();
+//		assertNotNull(srvr);
+//		assertNotNull(srvr.selectServiceModel(modelFolder, modelName));
+//		String instMn = "http://www.mobius.illinois.edu/advise/ont/inst1";
+//		String instNs = instMn + "#";
+//		String newUri = srvr.getUniqueInstanceUri(instMn, instNs, "Device");
+//		String newInst = srvr.createInstance(instMn, newUri, "http://www.mobius.illinois.edu/advise/ont/core/System#Device");
+//		assertNotNull(newInst);
+//		assertEquals(newUri, newInst);
+//		assertFalse(srvr.updateRdfsLabel(instMn, newUri, "Ken's Device", null));
+//		assertTrue(srvr.addTriple(instMn, newInst, "http://www.mobius.illinois.edu/advise/ont/core/System#loginPolicyImpact", 0.0));
+//		System.out.println(srvr.ask(instMn, newUri, null, null));
+//		assertTrue(srvr.deleteTriple(instMn, newUri, null, null));
+//		assertFalse(srvr.deleteTriple(instMn, null, null, newInst));
+//		System.out.println(srvr.ask(instMn, newUri, null, null));
+//		System.out.println(srvr.ask(instMn, null, null, newUri));
+//		assertNotNull(srvr.getErrors());
+//		String owlInstanceFileName = "file:///c:/tmp/inst1.owl";
+//		String globalPrefix = "inst1";
+//		assertTrue(srvr.persistInstanceModel(instMn, owlInstanceFileName, globalPrefix));
+//	}
 }

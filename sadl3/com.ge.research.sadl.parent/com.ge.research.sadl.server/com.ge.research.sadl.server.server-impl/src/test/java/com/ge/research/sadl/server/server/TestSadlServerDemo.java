@@ -205,6 +205,7 @@ public class TestSadlServerDemo {
 		assertEquals(rs.getResultAt(0, 0),120.0);
 	}
 
+	@Ignore
 	@Test
 	public void testSadlServerClientSideScenarioWithPersistence() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, URISyntaxException {
 		ISadlServerPE srvr = new SadlServerPEImpl(kbaseRoot);
