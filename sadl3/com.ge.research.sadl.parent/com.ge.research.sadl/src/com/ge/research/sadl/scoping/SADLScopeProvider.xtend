@@ -189,11 +189,23 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			// Filter items with `null` `concreteName`.
 			// E.g.: `Equation add(decimal x, /* no "type" here */ y) returns decimal: x + y.`
 			val params = equation.parameter
+					.filter[unknown.nullOrEmpty && ellipsis.nullOrEmpty]
 					.map[name.concreteName -> it]
 					.filter[!key.nullOrEmpty]
 					.map[EObjectDescription.create(key, value.name)].toList;
 			val newParent = MapBasedScope.createScope(parent, params)
 			return getLocalVariableScope(#[equation.where, equation.body, equation.retval].filterNull, newParent);
+		}
+		val externalEquation = EcoreUtil2.getContainerOfType(context, ExternalEquationStatement)
+		// https://github.com/crapo/sadlos2/issues/376
+		if (externalEquation !== null) {
+			val params = externalEquation.parameter
+					.filter[unknown.nullOrEmpty && ellipsis.nullOrEmpty] // XXX: otherwise we run into a NPE for the concrete names for `--` and `...`.
+					.map[name.concreteName -> it]
+					.filter[!key.nullOrEmpty]
+					.map[EObjectDescription.create(key, value.name)].toList;
+			val newParent = MapBasedScope.createScope(parent, params)
+			return getLocalVariableScope(#[externalEquation.where].filterNull, newParent);
 		}
 		val ask = EcoreUtil2.getContainerOfType(context, QueryStatement)
 		if (ask?.expr !== null) {
@@ -218,6 +230,9 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		var newParent = doGetLocalVariableScope(expressions, parent) [
 			// https://github.com/crapo/sadlos2/issues/344
 			if (it instanceof SadlResource && EcoreUtil2.getContainerOfType(it, EquationStatement) !== null) {
+				return  EcoreUtil2.getContainerOfType(it, SubjHasProp) === null;
+			}
+			if (it instanceof SadlResource && EcoreUtil2.getContainerOfType(it, ExternalEquationStatement) !== null) {
 				return  EcoreUtil2.getContainerOfType(it, SubjHasProp) === null;
 			}
 			var container = eContainer;
@@ -563,7 +578,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	protected def boolean canAddToScope(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
 		var canAdd = true;
 		if (obj instanceof SadlResource) {
-			if (!obj.inEquationWhere) {
+			if (!obj.inEquationWhere && !obj.inExternalEquationWhere) {
 				canAdd = !obj.inExternalOrLocalEquationStatement
 					&& !obj.inExpression
 					&& !obj.inQueryStatement
@@ -613,6 +628,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val equationStatement = EcoreUtil2.getContainerOfType(it, EquationStatement);
 		if (equationStatement !== null && equationStatement.where !== null) {
 			return EcoreUtil2.isAncestor(equationStatement.where, it);
+		}
+		return false;
+	}
+
+	protected def boolean isInExternalEquationWhere(SadlResource it) {
+		val externalEquationStatement = EcoreUtil2.getContainerOfType(it, ExternalEquationStatement);
+		if (externalEquationStatement !== null && externalEquationStatement.where !== null) {
+			return EcoreUtil2.isAncestor(externalEquationStatement.where, it);
 		}
 		return false;
 	}
