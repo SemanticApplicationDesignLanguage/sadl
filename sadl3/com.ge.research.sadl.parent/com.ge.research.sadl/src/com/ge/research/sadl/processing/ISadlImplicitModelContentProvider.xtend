@@ -142,7 +142,7 @@ interface ISadlImplicitModelContentProvider {
 			gpLiteralValue describes GPLiteralValue with values of type data.
 			argValues (note "values of arguments to the built-in") describes FunctionPattern with a single value of type GPAtom List.
 			
-			Assumption (note "used to identify necessary patterns in semantic domain terms") is a type of AugmentedType, 
+			SemanticConstraint (note "used to identify necessary patterns in semantic domain terms") is a type of AugmentedType, 
 				described by constraints with a single value of type GraphPattern List.
 			ThisArgument (note "allows reference to self within an Argument's constraints") is a DataDescriptor.
 			
