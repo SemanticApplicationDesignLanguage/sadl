@@ -2848,6 +2848,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public void processStatement(EquationStatement element)
 			throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
 		setHostEObject(element);
+		clearCruleVariables();
 		SadlResource nm = element.getName();
 		EList<SadlParameterDeclaration> params = element.getParameter();
 		EList<SadlReturnDeclaration> rtype = element.getReturnType();
@@ -2932,19 +2933,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					args.add((Node) pn);
 				}
 				SadlTypeReference prtype = param.getType();
-				EObject augtype = param.getAugtype();
-				Object augTypeObj = null;
-				if (augtype != null) {
-					augTypeObj = processExpression(augtype);
-				}
 				Node prtnode = sadlTypeReferenceToNode(prtype);
 				if (prtnode != null) {
 					argtypes.add(prtnode);
 				}
-				paramDataDescriptors.add(new DataDescriptor((Node) pn, prtnode, param.getUnits(), augTypeObj));
 			}
 			eq.setArguments(args);
 			eq.setArgumentTypes(argtypes);
+			// put equation in context for sub-processing
+			setCurrentEquation(eq);
+			for (int i = 0; i < params.size(); i++) {
+				if (i < args.size()) {
+					Node pn = args.get(i);
+					Node prtnode = argtypes.get(i);
+					SadlParameterDeclaration param = params.get(i);
+					EObject augtype = param.getAugtype();
+					Object augTypeObj = null;
+					if (augtype != null) {
+						augTypeObj = processExpression(augtype);
+					}
+					if (pn != null && prtnode != null) {
+						// must have a name and a type
+						paramDataDescriptors.add(new DataDescriptor((Node) pn, prtnode, param.getUnits(), augTypeObj));
+					}
+					else if (param.getEllipsis() == null) {
+						int k = 0;
+					}
+				}
+			}
+			// clear current equation
+			setCurrentEquation(null);
 		}
 		List<Node> rtypes = new ArrayList<Node>();
 		List<DataDescriptor> retDataDescriptors = new ArrayList<DataDescriptor>();
@@ -3171,7 +3189,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				constraints.add(tpInst);
 			}
 			else if (gpe2 instanceof BuiltinElement) {
-				addError("BuiltinElement constraint not yet handled", context);
+				addWarning("BuiltinElement constraint not yet handled", context);
 			}
 			else {
 				addError("Unexpected augmented type constraint: " + gpe2.getClass().getCanonicalName(), context);
@@ -3215,6 +3233,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// return;
 		// }
 		setHostEObject(element);
+		clearCruleVariables();
 		SadlResource nm = element.getName();
 		EList<SadlParameterDeclaration> params = element.getParameter();
 		EList<SadlReturnDeclaration> rtype = element.getReturnType();
@@ -3275,28 +3294,41 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					SadlResource pr = param.getName();
 					Object pn = null;
 					Node prtnode = null;
-					Object augTypeObj = null;
 					if (pr != null) {
 						pn = processExpression(pr);
 						args.add((Node) pn);
 						SadlTypeReference prtype = param.getType();
-						EObject augtype = param.getAugtype();
-						if (augtype != null) {
-							augTypeObj = processExpression(augtype);
-						}
 						prtnode = sadlTypeReferenceToNode(prtype);
-						argtypes.add(prtnode);
-					}
-					if (pn != null && prtnode != null) {
-						// must have a name and a type
-						paramDataDescriptors.add(new DataDescriptor((Node) pn, prtnode, param.getUnits(), augTypeObj));
-					}
-					else if (param.getEllipsis() == null) {
-						int k = 0;
+						if (prtnode != null) {
+							argtypes.add(prtnode);
+						}
 					}
 				}
 				eq.setArguments(args);
 				eq.setArgumentTypes(argtypes);
+				// put equation in context for sub-processing
+				setCurrentEquation(eq);
+				for (int i = 0; i < params.size(); i++) {
+					if (i < args.size()) {
+						Node pn = args.get(i);
+						Node prtnode = argtypes.get(i);
+						SadlParameterDeclaration param = params.get(i);
+						EObject augtype = param.getAugtype();
+						Object augTypeObj = null;
+						if (augtype != null) {
+							augTypeObj = processExpression(augtype);
+						}
+						if (pn != null && prtnode != null) {
+							// must have a name and a type
+							paramDataDescriptors.add(new DataDescriptor((Node) pn, prtnode, param.getUnits(), augTypeObj));
+						}
+						else if (param.getEllipsis() == null) {
+							int k = 0;
+						}
+				}
+			}
+				// clear current equation
+				setCurrentEquation(null);
 			}
 		}
 		List<Node> rtypes = new ArrayList<Node>();
