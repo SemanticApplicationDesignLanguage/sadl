@@ -29,11 +29,6 @@
       <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
-	<dependency>
-		<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
-		<artifactId>serviceloader-maven-plugin</artifactId>
-		<version>1.0.2</version>
-	</dependency>
   </dependencies>
   
   	<!-- Define where to deploy this project's artifacts -->
@@ -51,16 +46,14 @@
 			<plugin>
 				<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
 				<artifactId>serviceloader-maven-plugin</artifactId>
-				<version>1.0.2</version>
+				<version>1.1.0</version>
 				<configuration>
 					<services>
 						<param>com.ge.research.sadl.model.visualizer.IGraphVisualizer</param>
-						<param>com.ge.research.sadl.importer.ITabularDataImporter</param>
 					</services>
 				</configuration>
 				<executions>
 					<execution>
-						<phase>compile</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
@@ -98,20 +91,6 @@
 					</instructions>
 				</configuration>
 			</plugin>
-            <plugin>
-                   <groupId>org.apache.maven.plugins</groupId>
-                   <artifactId>maven-jar-plugin</artifactId>
-                   <version>2.4</version>
-                     <configuration>
-                           <archive>
-                                 <manifest>
-                                       <addClasspath>true</addClasspath>
-                                       <mainClass>com.ge.research.sadl.model.visualizer.IGraphVisualizer</mainClass>
-                                       <mainClass>com.ge.research.sadl.importer.ITabularDataImporter</mainClass>
-                                  </manifest>
-                           </archive>
-                      </configuration>
-             </plugin>        
 	        <plugin>
 	          <artifactId>maven-compiler-plugin</artifactId>
 	          <version>3.1</version>
@@ -140,29 +119,10 @@
 											serviceloader-maven-plugin
 										</artifactId>
 										<versionRange>
-											[1.0-SNAPSHOT,)
+											[1.1.0,)
 										</versionRange>
 										<goals>
 											<goal>generate</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-compiler-plugin
-										</artifactId>
-										<versionRange>
-											[3.1,)
-										</versionRange>
-										<goals>
-											<goal>compile</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

@@ -71,17 +71,15 @@
 			<plugin>
 				<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
 				<artifactId>serviceloader-maven-plugin</artifactId>
-				<version>1.0.2</version>
+				<version>1.1.0</version>
 				<configuration>
 					<services>
 						<param>com.ge.research.sadl.reasoner.IReasoner</param>
 						<param>com.ge.research.sadl.reasoner.ITranslator</param>
-						<param>com.hp.hpl.jena.reasoner.rulesys.Builtin</param>
 					</services>
 				</configuration>
 				<executions>
 					<execution>
-						<phase>compile</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
@@ -174,7 +172,7 @@
 											serviceloader-maven-plugin
 										</artifactId>
 										<versionRange>
-											[1.0-SNAPSHOT,)
+											[1.1.0,)
 										</versionRange>
 										<goals>
 											<goal>generate</goal>
