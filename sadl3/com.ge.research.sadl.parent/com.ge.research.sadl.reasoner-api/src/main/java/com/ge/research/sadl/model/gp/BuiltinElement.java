@@ -132,10 +132,10 @@ public class BuiltinElement extends GraphPatternElement {
 		static {
 			Equal.setBooleanBuiltin(true).setTokens("=", "==", "is", "to");
 			NotEqual.setBooleanBuiltin(true).setTokens("!=");
-			LT.setBooleanBuiltin(true).setTokens("<");
-			LTE.setBooleanBuiltin(true).setTokens("<=");
-			GT.setBooleanBuiltin(true).setTokens(">");
-			GTE.setBooleanBuiltin(true).setTokens(">=");
+			LT.setBooleanBuiltin(true).setTokens("<", "lt");
+			LTE.setBooleanBuiltin(true).setTokens("<=", "le");
+			GT.setBooleanBuiltin(true).setTokens(">", "gt");
+			GTE.setBooleanBuiltin(true).setTokens(">=", "ge");
 			Assign.setBooleanBuiltin(true).setTokens("assign");
 
 			Plus.setBinaryBuiltin(true).setTokens("+");

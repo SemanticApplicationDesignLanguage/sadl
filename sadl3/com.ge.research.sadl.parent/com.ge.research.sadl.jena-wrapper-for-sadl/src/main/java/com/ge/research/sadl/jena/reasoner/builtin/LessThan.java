@@ -32,7 +32,7 @@ public class LessThan extends com.hp.hpl.jena.reasoner.rulesys.builtins.LessThan
     }
     
 	/**
-	 * This extends the Jena GreaterThan built-in to compare string literals and URIs
+	 * This extends the Jena LessThan built-in to compare string literals and URIs
 	 */
     @Override
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
