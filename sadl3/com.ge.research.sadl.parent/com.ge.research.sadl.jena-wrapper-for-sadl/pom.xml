@@ -17,7 +17,7 @@
 			<url>https://devcloud.swcoe.ge.com/artifactory/CYNZT</url>
 		</repository>
 	</distributionManagement>
-   
+
 	<build>
 		<defaultGoal>install</defaultGoal>
         <plugins>
@@ -79,48 +79,17 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											eu.somatik.serviceloader-maven-plugin
-										</groupId>
-										<artifactId>
-											serviceloader-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.1.0,)
-										</versionRange>
-										<goals>
-											<goal>generate</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 	<dependencies>
 		<dependency>
 			<groupId>net.sf.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
 			<version>2.3</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.ge.research.sadl</groupId>
+		    <artifactId>reasoner-api</artifactId>
+		    <version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

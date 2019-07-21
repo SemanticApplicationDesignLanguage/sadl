@@ -29,10 +29,12 @@
 		  <dependency>
 			<groupId>com.ge.research.sadl</groupId>
 			<artifactId>reasoner-api</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		  <dependency>
 			<groupId>com.ge.research.sadl</groupId>
 			<artifactId>reasoner-impl</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -50,11 +52,6 @@
 <!-- 			<artifactId>jpl</artifactId> -->
 <!-- 			<version>3.1.4-alpha</version> -->
 <!-- 		</dependency> -->
-		<dependency>
-			<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
-			<artifactId>serviceloader-maven-plugin</artifactId>
-			<version>1.0.2</version>
-		</dependency>
 	</dependencies>
 
 	<!-- Define where to deploy this project's artifacts -->
@@ -152,57 +149,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											eu.somatik.serviceloader-maven-plugin
-										</groupId>
-										<artifactId>
-											serviceloader-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.1.0,)
-										</versionRange>
-										<goals>
-											<goal>generate</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.ge.research.sadl</groupId>
-				<artifactId>reasoner-api</artifactId>
-	  		<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.ge.research.sadl</groupId>
-				<artifactId>reasoner-impl</artifactId>
-	  		<version>${project.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	<parent>
 		<groupId>com.ge.research.sadl</groupId>
 		<artifactId>com.ge.research.sadl.parent</artifactId>
