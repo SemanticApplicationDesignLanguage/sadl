@@ -3065,10 +3065,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		// set return Nodes in reDataDescriptors
-		for (int i = 0; i < eq.getReturnNodes().size(); i++) {
-			Node retNode = eq.getReturnNodes().get(i);
-			DataDescriptor rdd = retDataDescriptors.get(i);
-			rdd.setName(retNode);
+		if (eq.getReturnNodes() != null) {
+			for (int i = 0; i < eq.getReturnNodes().size(); i++) {
+				Node retNode = eq.getReturnNodes().get(i);
+				DataDescriptor rdd = retDataDescriptors.get(i);
+				rdd.setName(retNode);
+			}
 		}
 		equationToOwl(nm, eqinst, eq, retDataDescriptors, paramDataDescriptors);
 		setCurrentEquation(null); // clear
