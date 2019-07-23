@@ -196,7 +196,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 							writeAccumulator.append(((ResultSet)scr.getResults()).toStringWithIndent(indent));
 							writeAccumulator.append("\n");
 						}
-						else {
+						else if (scr.getResults() != null) {
 							writeAccumulator.append(scr.getResults().toString());
 							writeAccumulator.append("\n");
 						}						
@@ -235,6 +235,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 						String prjDir = modelFolderFile.getParent();
 						String filepath = prjDir + File.separator + ofn;
 						of = new File(filepath);
+						of.getParentFile().mkdirs();
 					}
 					getConfigMgr(getOwlFormat()).getSadlUtils().stringToFile(of, writeAccumulator.toString(), false);
 					writeInEffect = null;

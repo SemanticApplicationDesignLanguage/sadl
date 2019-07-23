@@ -131,7 +131,7 @@ public class BuiltinElement extends GraphPatternElement {
 		}
 		static {
 			Equal.setBooleanBuiltin(true).setTokens("=", "==", "is", "to");
-			NotEqual.setBooleanBuiltin(true).setTokens("!=");
+			NotEqual.setBooleanBuiltin(true).setTokens("!=", "notEqual");
 			LT.setBooleanBuiltin(true).setTokens("<", "lt");
 			LTE.setBooleanBuiltin(true).setTokens("<=", "le");
 			GT.setBooleanBuiltin(true).setTokens(">", "gt");
@@ -141,7 +141,7 @@ public class BuiltinElement extends GraphPatternElement {
 			Plus.setBinaryBuiltin(true).setTokens("+");
 			Minus.setBinaryBuiltin(true).setTokens("-");
 			Multiply.setBinaryBuiltin(true).setTokens("*");
-			Divide.setBinaryBuiltin(true).setTokens("/");
+			Divide.setBinaryBuiltin(true).setTokens("/", "quotient");
 			Power.setBinaryBuiltin(true).setTokens("^");
 			Modulus.setBinaryBuiltin(true).setTokens("%");
 

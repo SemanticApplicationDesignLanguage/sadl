@@ -69,7 +69,7 @@ public class CountUniqueMatches extends BaseBuiltin {
        	if (length < 2) {
             throw new BuiltinException(this, context, "builtin '" + getName() + "' requires at least 2 arguments.");
       	}
-       	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, context);
+       	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
         if (nodes == null || nodes.length == 0) {
         	logger.debug("countUniqueMatches returning 0, no matches found");
         	return env.bind(args[length - 1], Util.makeIntNode(0));

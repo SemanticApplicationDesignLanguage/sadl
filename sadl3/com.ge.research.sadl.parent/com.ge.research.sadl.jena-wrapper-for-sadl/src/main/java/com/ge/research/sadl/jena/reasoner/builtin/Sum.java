@@ -53,7 +53,7 @@ public class Sum extends com.hp.hpl.jena.reasoner.rulesys.builtins.Sum {
         checkArgs(length, context);
         BindingEnvironment env = context.getEnv();
         if (GeUtils.isGraphPatternInput(this, args, length, context)) {
-        	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, context);
+        	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
         	Number nSum = new Long(0);
         	nSum = addList(nSum, Arrays.asList(nodes), context);
         	Node sum = null;

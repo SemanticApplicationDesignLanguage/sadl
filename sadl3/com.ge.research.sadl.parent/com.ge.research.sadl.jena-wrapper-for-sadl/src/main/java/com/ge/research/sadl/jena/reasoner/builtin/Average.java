@@ -66,7 +66,7 @@ public class Average extends BaseBuiltin {
         BindingEnvironment env = context.getEnv();
         double avg = 0;
         if (GeUtils.isGraphPatternInput(this, args, length, context)) {
-        	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, context);
+        	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
         	java.util.List<Node> nodeLst = Arrays.asList(nodes);
         	avg = averageOfList(nodeLst, context);
         }

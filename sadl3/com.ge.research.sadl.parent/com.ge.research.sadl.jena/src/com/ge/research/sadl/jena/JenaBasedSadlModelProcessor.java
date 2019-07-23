@@ -319,6 +319,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private int vNum = 0; // used to create unique variables
 	private List<String> userDefinedVariables = new ArrayList<String>();
+	
+	private int gpVariableNumber = 0;	// these must not get reset during processing of an entire model
 
 	// A "crule" variable has a type, a number indicating its ordinal, and a name
 	// They are stored by type as key to a list of names, the index in the list is
@@ -388,6 +390,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		private Node type = null;
 		private List<String> units = null;
 		private Object augType = null;
+		private Individual gpVariable = null;
 		
 		public DataDescriptor(Node nm, Node typ, EList<String> units, Object augTypeObj) {
 			setName(nm);
@@ -419,6 +422,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		public void setName(Node name) {
 			this.name = name;
+		}
+
+		public Individual getGpVariable() {
+			return gpVariable;
+		}
+
+		public void setGpVariable(Individual gpVariable) {
+			this.gpVariable = gpVariable;
 		}
 		
 	}
@@ -3053,6 +3064,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
+		// set return Nodes in reDataDescriptors
+		for (int i = 0; i < eq.getReturnNodes().size(); i++) {
+			Node retNode = eq.getReturnNodes().get(i);
+			DataDescriptor rdd = retDataDescriptors.get(i);
+			rdd.setName(retNode);
+		}
 		equationToOwl(nm, eqinst, eq, retDataDescriptors, paramDataDescriptors);
 		setCurrentEquation(null); // clear
 		logger.debug("Equation: " + eq.toFullyQualifiedString());
@@ -3097,8 +3114,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		else {
 			ddInst = getTheJenaModel().createIndividual(argcls);
 			Node nameNode = dd.getName();
-			if (nameNode != null) {
+			if (nameNode != null && nameNode instanceof NamedNode) {
 				ddInst.addProperty(nameProp, nameNode.getName());
+				if (dd.getGpVariable() == null) {
+					dd.setGpVariable(getOrCreateGPVariableNode(nameNode, dd.getType(), true, context));
+				}
 			}
 			Node typeNode = dd.getType();
 			if (typeNode == null) {
@@ -3120,13 +3140,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					for (int i = 0; i < ((Object[])dd.getAugType()).length; i++) {
 						Object o = ((Object[])dd.getAugType())[i];
 						if (o instanceof GraphPatternElement) {
+							if (o instanceof TripleElement && ((TripleElement)o).getObject() == null) {
+								if (isReturnValueDescriptor && nameNode == null) {
+									if (getCurrentEquation() != null) {
+										List<Node> retNodes = getCurrentEquation().getReturnNodes();
+										if (retNodes != null) {
+											if (retNodes.size() > 1) {
+												addWarning("Semantic constraints on multiple return values not yet implemented", context);
+											}
+											((TripleElement)o).setObject(retNodes.get(0));
+										}
+									}
+									else {
+										addError("Processing augmented type but no current equation; this shouldn't happen", context);
+									}
+								}
+								else {
+									((TripleElement)o).setObject(nameNode);
+								}
+							}
 							gpes.add((GraphPatternElement)o);
 						}
 						else {
 							addError("Data descriptor has a list but not all elements are graph patterns (" + o.getClass().getCanonicalName() + ")", context);
 						}
 					}
-					addConstraintsAsAssumptions(context, ddInst, nameNode, typeNode, gpes, constraints);
+					addConstraintsAsAssumptions(context, ddInst, nameNode, typeNode, gpes, constraints, isReturnValueDescriptor);
 				}
 				else if (dd.getAugType() instanceof GraphPatternElement) {
 					GraphPatternElement gpe = (GraphPatternElement) dd.getAugType();
@@ -3152,6 +3191,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									}
 									((TripleElement)gpes.get(0)).setObject(retNodes.get(0));
 								}
+								else {
+									retNodes = new ArrayList<Node>();
+									// this return has name; create a typed VariableNode
+									String nvar = getNewVar(context);
+									try {
+										VariableNode obj = addCruleVariable((NamedNode) typeNode, 1, nvar, context, getHostEObject());
+//										Individual gpVarObject = getOrCreateGPVariableNode(obj, typeNode, true, context);
+										ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI), obj.getName());
+										retNodes.add(obj);
+									} catch (TranslationException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									} catch (InvalidNameException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									getCurrentEquation().setReturnNodes(retNodes);
+								}
 							}
 							else {
 								addError("Processing augmented type but no current equation; this shouldn't happen", context);
@@ -3161,7 +3218,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							((TripleElement)gpes.get(0)).setObject(nameNode);
 						}
 					}
-					addConstraintsAsAssumptions(context, ddInst, nameNode, typeNode, gpes, constraints);
+					addConstraintsAsAssumptions(context, ddInst, nameNode, typeNode, gpes, constraints, isReturnValueDescriptor);
 				}
 				else {
 					addError("Augmented type is not a graph pattern nor a name, not handled (" + dd.getAugType().getClass().getCanonicalName() + ")", context);
@@ -3172,15 +3229,48 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private void addConstraintsAsAssumptions(EObject context, Individual ddInst, Node nameNode, Node typeNode,
-			List<GraphPatternElement> gpes, List<Individual> constraints) {
+			List<GraphPatternElement> gpes, List<Individual> constraints, boolean isReturnValueDescriptor) {
+		try {
+			Object gpesOut;
+			if (!isReturnValueDescriptor) {
+				gpesOut = getIfTranslator().cook(gpes, true);	// this prevents the adding of notEqual(vx, vy)
+			}
+			else {
+				gpesOut = getIfTranslator().cook(gpes);	// t
+			}
+			if (nameNode instanceof ProxyNode) {
+				if (((ProxyNode)nameNode).getProxyFor() instanceof BuiltinElement) {
+					List<Node> args = ((BuiltinElement)((ProxyNode)nameNode).getProxyFor()).getArguments();
+					Node newNamedNode = args.get(args.size() - 1);
+					if (newNamedNode instanceof VariableNode) {
+						((VariableNode)newNamedNode).setType(typeNode);
+					}
+					nameNode = newNamedNode;
+				}
+				else if (((ProxyNode)nameNode).getProxyFor() instanceof TripleElement) {
+					nameNode = ((TripleElement)((ProxyNode)nameNode).getProxyFor()).getObject();
+				}
+			}
+			if (gpesOut instanceof List<?> && ((List<?>)gpesOut).get(0) instanceof Junction) {
+				gpes = IntermediateFormTranslator.junctionToList((Junction) ((List<?>)gpesOut).get(0));
+			}
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidNameException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		List<Node> variablesTyped = new ArrayList<Node>();
-		OntClass gpVarCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_GP_VARIABLE_CLASS_URI);		// get Variable Class
 		for (GraphPatternElement gpe2 : gpes) {
 			if (gpe2 instanceof TripleElement) {
-				addTriplePatternConstraint((TripleElement) gpe2, ddInst, typeNode, nameNode, gpVarCls, constraints, variablesTyped,	context);
+				addTriplePatternConstraint((TripleElement) gpe2, ddInst, typeNode, nameNode, constraints, variablesTyped,	context);
 			}
 			else if (gpe2 instanceof BuiltinElement) {
-				addFunctionPatternConstraint((BuiltinElement)gpe2, ddInst, typeNode, nameNode, gpVarCls, constraints, variablesTyped, context);
+				addFunctionPatternConstraint((BuiltinElement)gpe2, ddInst, typeNode, nameNode, constraints, variablesTyped, context);
 			}
 			else {
 				addError("Unexpected augmented type constraint: " + gpe2.getClass().getCanonicalName(), context);
@@ -3193,7 +3283,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private void addFunctionPatternConstraint(BuiltinElement fp, Individual ddInst, Node typeNode, Node nameNode,
-			OntClass gpVarCls, List<Individual> constraints, List<Node> variablesTyped, EObject context) {
+			List<Individual> constraints, List<Node> variablesTyped, EObject context) {
 		OntClass functionPatternClass = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_FUNCTION_PATTERN_CLASS_URI);	// get FunctionPattern class
 		Individual fpInst = getTheJenaModel().createIndividual(functionPatternClass);			// create new FunctionPattern 
 		String bieqUri;
@@ -3207,12 +3297,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				fpInst.addProperty(getTheJenaModel().getOntProperty(SadlConstants.SADL_IMPLICIT_MODEL_BUILTIN_PROPERTY_URI), bieq);
 			}
 			Iterator<Node> argitr = fp.getArguments().iterator();
-			List<Individual> argValues = argitr.hasNext() ? new ArrayList<Individual>() : null;
+			List<com.hp.hpl.jena.rdf.model.Resource> argValues = argitr.hasNext() ? new ArrayList<com.hp.hpl.jena.rdf.model.Resource>() : null;
 			while (argitr.hasNext()) {
 				Node argNode = argitr.next();
-				Individual argNodeRsrc = null;
+				com.hp.hpl.jena.rdf.model.Resource argNodeRsrc = null;
 				if (argNode instanceof VariableNode) {
-					argNodeRsrc = getTheJenaModel().createIndividual(argNode.getURI(), gpVarCls);
+					argNodeRsrc = getOrCreateGPVariableNode((VariableNode)argNode, typeNode, true, context);
 				}
 				else if (argNode instanceof com.ge.research.sadl.model.gp.Literal) {
 					OntClass litCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_GP_LITERAL_VALUE_CLASS_URI);
@@ -3223,7 +3313,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				else {
 					OntClass litCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_GP_RESOURCE_CLASS_URI);
-					argNodeRsrc = getTheJenaModel().createIndividual(argNode.getURI(), gpVarCls);
+					argNodeRsrc = getTheJenaModel().getResource(argNode.getURI());
 				}
 				argValues.add(argNodeRsrc);
 			}
@@ -3237,28 +3327,50 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
+	private Individual getOrCreateGPVariableNode(Node var, Node type, boolean userNamed, EObject container) {
+		Individual varInstance = getTheJenaModel().getIndividual(var.toFullyQualifiedString());
+		if (varInstance != null) {
+			return varInstance;
+		}
+		return createGPVariable(var, type, container);
+	}
+	
+	private Individual createGPVariable(Node var, Node type, EObject container) {
+		OntClass gpVarCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_GP_VARIABLE_CLASS_URI);		// get Variable Class
+		String varName = getNewVar(container);
+		Individual varInstance = getTheJenaModel().createIndividual(createUri(varName), gpVarCls);
+		OntClass typeCls = getTheJenaModel().getOntClass(type.toFullyQualifiedString());
+		if (typeCls != null) {
+			varInstance.addRDFType(typeCls);
+		}
+		return varInstance;
+	}
+	
 	private void addTriplePatternConstraint(TripleElement tp, Individual ddInst, Node typeNode, Node nameNode,
-			OntClass gpVarCls, List<Individual> constraints, List<Node> variablesTyped, EObject context) {
+			List<Individual> constraints, List<Node> variablesTyped, EObject context) {
 		OntClass triplePatternClass = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_TRIPLE_PATTERN_CLASS_URI);	// get TriplePattern class
 		Individual tpInst = getTheJenaModel().createIndividual(triplePatternClass);												// create new TriplePattern 
 		Node subj = tp.getSubject();	
 		Individual gpVarSubjInst = null;
 		if (subj instanceof VariableNode) {
-			gpVarSubjInst = getTheJenaModel().createIndividual(subj.toFullyQualifiedString(), gpVarCls);				// create new instance of Variable for subject
+			// the Variable Individual in the ontology must be a unique, system-named node, of the correct type as well as of GPVariable type
+			//	so that if it is used in another equation there is no issue (types, semantic constrains can be different, so variables with 
+			//	same name in different scope contexts can't have the same URI)
+			gpVarSubjInst = getOrCreateGPVariableNode(subj, typeNode, true, context);				// create new instance of Variable for subject
 		}
 		
 		
 		Node obj = tp.getObject();
 		Individual gpVarObject = null;
 		if (obj instanceof VariableNode) {
-			gpVarObject = getTheJenaModel().createIndividual(obj.toFullyQualifiedString(), gpVarCls);
+			gpVarObject = getOrCreateGPVariableNode(obj, typeNode, true, context);
 		}
 		if (obj == null && nameNode == null) {
 			// this object has no value; create a typed VariableNode
 			String nvar = getNewVar(context);
 			try {
 				obj = addCruleVariable((NamedNode) typeNode, 1, nvar, context, getHostEObject());
-				gpVarObject = getTheJenaModel().createIndividual(obj.toFullyQualifiedString(), gpVarCls);
+				gpVarObject = getOrCreateGPVariableNode(obj, typeNode, true, context);
 				ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI), obj.getName());
 			} catch (TranslationException e) {
 				// TODO Auto-generated catch block
@@ -3271,7 +3383,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Individual namedNodeInst = null;
 		if (nameNode != null) {
 			if (nameNode instanceof VariableNode) {
-				namedNodeInst = getTheJenaModel().createIndividual(nameNode.getName(), gpVarCls);
+				namedNodeInst = getOrCreateGPVariableNode(nameNode, typeNode, true, context);
 			}
 		}
 
@@ -3302,7 +3414,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (gpVarObject != null) {
 			tpInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_GP_OBJECT_PROPERTY_URI), gpVarObject);
 		}
-		else {
+		else if (nameNode instanceof com.ge.research.sadl.model.gp.Literal) {
+			tpInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_GP_OBJECT_PROPERTY_URI), getTheJenaModel().createTypedLiteral(((com.ge.research.sadl.model.gp.Literal)nameNode).getValue()));
+		}
+		else if (!(obj instanceof com.ge.research.sadl.model.gp.Literal) && nameNode != null) {
 			tpInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_GP_OBJECT_PROPERTY_URI), nameNode.getName());
 		}
 		constraints.add(tpInst);
@@ -3460,8 +3575,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		eq.setReturnTypes(rtypes);
+		setCurrentEquation(eq);
 		equationToOwl(nm, eqinst, eq, retDataDescriptors, paramDataDescriptors);
 		logger.debug("External Equation: " + eq.toFullyQualifiedString());
+		setCurrentEquation(null);
 		return eq;
 	}
 
@@ -7246,7 +7363,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return vn;
 		} else if (nm != null) {
-			NamedNode n = new NamedNode(nm, ontConceptTypeToNodeType(type));
+			NamedNode n = new NamedNode(createUri(ns, nm), ontConceptTypeToNodeType(type));
 			n.setNamespace(ns);
 			n.setPrefix(prfx);
 			try {
@@ -7402,7 +7519,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (getCurrentEquation() != null) {
 						getCurrentEquation().addVariable(declaredTypedVariable);
 					}
-					declaredTypedVariable.setType(unDeclaredTypedVariable.getType());
+					try {
+						declaredTypedVariable.setType(unDeclaredTypedVariable.getType());
+					}
+					catch (Exception e) {
+						addError(e.getMessage(), pred);
+					}
 					tr.setSubject(declaredTypedVariable);
 					tr.setPredicate(null);
 					return shpTriples;
@@ -11891,7 +12013,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected int getVariableNumber() {
 		return vNum;
 	}
-
+	
 	/**
 	 * Supporting method for the method above (getVariableNode(Node, Node, Node))
 	 * 
@@ -12901,7 +13023,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		if (!cruleVariables.containsKey(type)) {
 			List<VariableNode> newList = new ArrayList<VariableNode>();
-			VariableNode var = new VariableNode(name);
+			VariableNode var = new VariableNode(createUri(name));
 			var.setCRulesVariable(true);
 			var.setType(validateNode(type));
 			var.setHostObject(getHostEObject());
@@ -12938,6 +13060,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
+	/**
+	 * Method to make sure that name has a URI namespace in front; if not add one for this namespace
+	 * @param name
+	 * @return
+	 */
+	private String createUri(String name) {
+		if (!(name.indexOf('#') > 0)) {
+			name = getModelNamespace() + name;
+		}
+		return name;
+	}
+	
+	private String createUri(String ns, String name) {
+		if (ns.endsWith("#")) {
+			return ns+name;
+		}
+		return ns + "#" + name;
+	}
+
 	private boolean isInDisjunctiveContainer(EObject expr) {
 		if (expr instanceof BinaryOperation && ((BinaryOperation)expr).getOp().equals("or")) {
 			return true;
@@ -12952,7 +13093,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (cruleVariables != null) {
 			cruleVariables.clear();
 		}
-		vNum = 0; // reset system-generated variable name counter
+//		vNum = 0; // reset system-generated variable name counter		// AWC 7/18/2019: for semantic constraints, names must be unique across the entire model (namespace)
 	}
 
 	protected void clearCruleVariablesForHostObject(EObject host) {

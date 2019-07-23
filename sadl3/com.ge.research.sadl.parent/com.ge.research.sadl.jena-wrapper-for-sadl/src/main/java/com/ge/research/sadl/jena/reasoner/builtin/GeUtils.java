@@ -160,14 +160,14 @@ public class GeUtils {
     	return true;
     }
 
-    public static synchronized Node[] matchNonSparqlPattern(Builtin bi, Node[] args, int length, RuleContext context) {
+    public static synchronized Node[] matchNonSparqlPattern(Builtin bi, Node[] args, int length, boolean retValIsVariable, RuleContext context) {
 		int numTriples = length / 3;
     	int retvarcnt = length % 3;
     	// Here we are looking for evidence that the arguments are not correct. The correct arguments will be one of:
     	//	1. some multiple of three arguments (each set of 3 a triple pattern) followed by the return variable argument
     	//	2. as above except that the last triple pattern does not have an object as the list is those values (1 less arg than above)
     	// If it isn't one of these throw an exception so that the user is notified of the problem.
-    	if ((retvarcnt == 0 && numTriples > 0 && args[length - 2].isVariable()) || retvarcnt > 1) {
+    	if ((retvarcnt == 0 && numTriples > 0 && args[length - 2].isVariable()) || (retValIsVariable ? retvarcnt > 1 : retvarcnt > 2)) {
     		// it's ok to have a missing object in the last triple pattern, in which case the last one in the pattern 
     		//   will not be a variable (Note: this is ignoring the actual last argument which is the return variable)
     		throw new BuiltinException(bi, context, "Invalid number of arguments; complete set of triple patterns required.");

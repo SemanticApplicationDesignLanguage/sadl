@@ -71,7 +71,7 @@ public class Max extends TypedBaseBuiltin {
         boolean allLongs = true;
         Node[] nodes = null;
         if (GeUtils.isGraphPatternInput(this, args, length, context)) {
-        	nodes = GeUtils.matchNonSparqlPattern(this, args, length, context);
+        	nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
         }
         else if (length >= 3) {
         	nodes = new Node[length];

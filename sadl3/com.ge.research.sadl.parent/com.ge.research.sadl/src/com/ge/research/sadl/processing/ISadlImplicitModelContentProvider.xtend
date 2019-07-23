@@ -110,10 +110,11 @@ interface ISadlImplicitModelContentProvider {
 				described by stddev with values of type decimal,
 				described by unit with values of type string.
 			
-			DataDescriptor is a class, described by descriptorName with a single value of type string,
+			DataDescriptor is a class, described by localDescriptorName with a single value of type string,
 				described by dataType (note "the simple data type, e.g., float") with a single value of type anyURI,
 				described by augmentedType (note "ties the DataDescriptor to the semantic domain model") with values of type AugmentedType.
 			dataType of DataDescriptor has at most 1 value.
+			descriptorVariable of DataDescriptor has at most 1 value.
 			
 			Language is a class, must be one of {Java, Python, Text, OtherLanguage}.
 			Script is a class, described by language with a single value of type Language,
@@ -125,7 +126,7 @@ interface ISadlImplicitModelContentProvider {
 			
 			ExternalEquation is a type of ^Equation,
 				described by externalURI with a single value of type anyURI,
-				described by externalURL with values of type string.
+				described by externalURL with values of type anyURI.
 				
 			AugmentedType is a class.
 			augTypeUnits describes AugmentedType with a single value of type string List.
@@ -139,6 +140,7 @@ interface ISadlImplicitModelContentProvider {
 			builtin describes FunctionPattern with a single value of type ^Equation.
 			GPAtom is a class.
 			{GPVariable, GPLiteralValue, GPResource} are types of GPAtom.
+			gpVariableName describes GPVariable with a single value of type string.
 			gpLiteralValue describes GPLiteralValue with values of type data.
 			argValues (note "values of arguments to the built-in") describes FunctionPattern with a single value of type GPAtom List.
 			

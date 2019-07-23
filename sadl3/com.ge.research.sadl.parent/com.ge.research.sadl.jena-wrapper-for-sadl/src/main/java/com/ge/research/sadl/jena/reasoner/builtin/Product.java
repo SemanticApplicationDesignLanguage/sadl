@@ -53,7 +53,7 @@ public class Product extends com.hp.hpl.jena.reasoner.rulesys.builtins.Product {
         checkArgs(length, context);
         BindingEnvironment env = context.getEnv();
     	if (GeUtils.isGraphPatternInput(this, args, length, context)) {
-        	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, context);
+        	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
         	Number nProd = new Long(1);
         	nProd = multiplyList(nProd, Arrays.asList(nodes), context);
         	Node prod = null;

@@ -69,7 +69,7 @@ public class CountMatches extends TypedBaseBuiltin {
        	if (length < 2) {
             throw new BuiltinException(this, context, "builtin '" + getName() + "' requires at least 2 arguments.");
       	}
-       	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, context);
+       	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
         if (nodes == null || nodes.length == 0) {
         	if (logger.isDebugEnabled()) {
         		String inputs = "";
