@@ -35,6 +35,9 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +53,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.importer.TemplateException;
+import com.ge.research.sadl.model.visualizer.GraphVizVisualizer;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
@@ -247,12 +252,12 @@ public class TestSadlServerDemo {
 		String sessionId = srvr.selectServiceModel(stemKbaseLocation + "/OwlModels", modelName);
 		assertNotNull(sessionId);
 
-		final String instanceNS = "http://sadl.org/STEM/Scenario#";
-		srvr.setInstanceDataNamespace(instanceNS);
+		srvr.setInstanceDataNamespace("http://sadl.org/STEM/Scenario#");
+		final String anyInstanceNS = "http[^#]*#";
 
-		String serverCsvDataBaseUrl = "file:/C:/New/STEM/CSVData";
+		String serverCsvDataBaseUrl = stemKbaseLocation + "/CSVData";
 		boolean includesHeader = true;
-		String serverCsvTemplateBaseUrl = "file:/C:/New/STEM/Templates";
+		String serverCsvTemplateBaseUrl = stemKbaseLocation + "/Templates";
 		System.out.println("Import ScnArch.csv\n");
 		assertTrue(srvr.loadCsvData(serverCsvDataBaseUrl + "/ScnArch.csv", includesHeader, serverCsvTemplateBaseUrl + "/ScnArch.tmpl"));
 		System.out.println("Import ScnCompProps.csv\n");
@@ -277,7 +282,7 @@ public class TestSadlServerDemo {
 		rs = srvr.query(qry);
 		assertNotNull(rs);
 		assertTrue(rs.getRowCount() > 0);
-		System.out.println(rs.toString().replaceAll(instanceNS, ""));
+		System.out.println(rs.toString().replaceAll(anyInstanceNS, ""));
 
 		System.out.println("All the protections");
 		qry = srvr.prepareQuery("select distinct  (?z6 as ?CompType) (?z2 as ?CompInst) (?z8 as ?CAPEC) (?z4 as ?CIAIssue) " +
@@ -290,9 +295,9 @@ public class TestSadlServerDemo {
 		rs = srvr.query(qry);
 		assertNotNull(rs);
 		assertTrue(rs.getRowCount() > 0);
-		System.out.println(rs.toString().replaceAll(instanceNS, ""));
+		System.out.println(rs.toString().replaceAll(anyInstanceNS, ""));
 
-		System.out.println("Write out CAPEC.csv for SOTERIA++");
+		System.out.println("Write out Output/CAPEC.csv for SOTERIA++");
 		qry = srvr.prepareQuery("select distinct (?z5 as ?CompType) (?z2 as ?CompInst) ?CAPEC ?CAPECDescription " +
 				"(?ic as ?Confidentiality) (?ii as ?Integrity) (?ia as ?Availability) ?LikelihoodOfSuccess " +
 				"where {?x <affectedComponent> ?z2 " +
@@ -306,9 +311,11 @@ public class TestSadlServerDemo {
 		rs = srvr.query(qry);
 		assertNotNull(rs);
 		assertTrue(rs.getRowCount() > 0);
-		System.out.println(rs.toString().replaceAll(instanceNS, ""));
+		System.out.println(rs.toString().replaceAll(anyInstanceNS, ""));
+		String outputDir = "C:/New/STEM/Output";
+		Files.write(Paths.get(outputDir, "CAPEC.csv"), rs.toString().replaceAll(anyInstanceNS, "").getBytes(StandardCharsets.UTF_8));
 
-		System.out.println("Write out Defenses.csv for SOTERIA++");
+		System.out.println("Write out Output/Defenses.csv for SOTERIA++");
 		qry = srvr.prepareQuery("select distinct  (?z6 as ?CompType) (?z2 as ?CompInst) (?z8 as ?CAPEC) " +
 				"(?z10 as ?CAPECDescription) " +
 				"(?ic as ?Confidentiality) (?ii as ?Integrity) (?ia as ?Availability) " +
@@ -327,7 +334,59 @@ public class TestSadlServerDemo {
 		rs = srvr.query(qry);
 		assertNotNull(rs);
 		assertTrue(rs.getRowCount() > 0);
-		System.out.println(rs.toString().replaceAll(instanceNS, ""));
+		System.out.println(rs.toString().replaceAll(anyInstanceNS, ""));
+		Files.write(Paths.get(outputDir, "Defenses.csv"), rs.toString().replaceAll(anyInstanceNS, "").getBytes(StandardCharsets.UTF_8));
+
+		System.out.println("Write out Graphs/Run_sadl12.svg");
+		qry = srvr.prepareQuery("select distinct ?N1 ?link ?N2 ?N1_style ?N1_fillcolor ?N2_style ?N2_fillcolor (?cplist as ?N1_tooltip) where " +
+				"{  ?x <rdf:type> ?z . FILTER(regex(str(?z),'Connection')) " +
+				" . ?x <connectionSource> ?src . ?x <connectionDestination> ?dest " +
+				" . ?x <outPort> ?oport . ?x <inPort> ?iport " +
+				" . LET(?N1 := replace(str(?src),'^.*#','')) . LET(?N2 := replace(str(?dest),'^.*#','')) " +
+				" . LET(?N1_style := 'filled') . LET(?N2_style := 'filled') " +
+				" . OPTIONAL{  ?u <affectedComponent> ?src . ?u <addressed> ?c1 . FILTER(regex(str(?c1), 'true')) " +
+				"            . ?src <capecString> ?str . LET(?N1_fillcolor := 'yellow')} " +
+				" . OPTIONAL{  ?u2 <affectedComponent> ?dest . ?u2 <addressed> ?c1 . FILTER(regex(str(?c1), 'true')) " +
+				"            . ?dest <capecString> ?str . LET(?N2_fillcolor := 'yellow')} " +
+				" . OPTIONAL{?u <affectedComponent> ?src . ?src <capecString> ?str . LET(?N1_fillcolor := 'red')} " +
+				" . OPTIONAL{?u2 <affectedComponent> ?dest . ?dest <capecString> ?str . LET(?N2_fillcolor := 'red')} " +
+				" . ?x <connectionFlow> ?cf0 " +
+				" . LET(?cf := replace(str(?cf0),'^.*#','')) " +
+				" . LET(?link := ?cf) . " +
+				"   {select distinct ?src (group_concat(distinct ?capec;separator='; &#10;') as ?capeclist) where " +
+				"      {?x <rdf:type> <Connection> . ?x <connectionSource> ?src . OPTIONAL{?src <capecString> ?capec} " +
+				"      } group by ?src " +
+				"   } " +
+				" . {select distinct ?src (group_concat(distinct ?c6;separator='; &#10;') as ?plist) where " +
+				"    { { " +
+				"         ?src ?prop ?z3 " +
+				"       . ?prop <tooltipProp> ?r2 . ?z3 <val> ?prop_val " +
+				"      } " +
+				"    UNION " +
+				"    {?x <rdf:type> ?z . FILTER(regex(str(?z),'Connection')) . ?x <connectionSource> ?src " +
+				"     . OPTIONAL{?src ?prop ?prop_val . ?prop <tooltipProp> ?r2 . FILTER(regex(str(?prop_val),'true') || regex(str(?prop_val),'false'))} " +
+				"    } " +
+				"   . LET(?c3 := concat(str(?prop_val),str(?prop))) " +
+				"   . LET(?c4 := replace(str(?c3),'http.*#','')) " +
+				"   . LET(?c5 := replace(str(?c4),'^true','')) " +
+				"   . LET(?c6 := replace(str(?c5),'^false','NOT_')) " +
+				"   } group by ?src} " +
+				" . LET(?clist     := COALESCE(?capeclist,'')) " +
+				" . LET(?templist  := concat(concat(?clist,'; &#10;'),?plist)) " +
+				" . LET(?templist2 := replace(?templist,'^; ','')) " +
+				" . LET(?templist3 := replace(?templist2,';','; ')) " +
+				" . LET(?cplist    := replace(?templist3,'  ',' ')) " +
+				"}");
+		System.out.println(qry);
+		rs = srvr.query(qry);
+		assertNotNull(rs);
+		assertTrue(rs.getRowCount() > 0);
+		System.out.println(rs.toString().replaceAll(anyInstanceNS, ""));
+		GraphVizVisualizer visualizer = new GraphVizVisualizer();
+		String graphDir = "C:/New/STEM/Graphs";
+		String graphName = "Run_sadl12";
+		visualizer.initialize(graphDir, graphName, graphName, null, Orientation.TD, "Cmd 13  (Graph)");
+		visualizer.graphResultSetData(rs);
 	}
 
 //	@Test
