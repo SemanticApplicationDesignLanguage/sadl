@@ -13095,7 +13095,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (cruleVariables != null) {
 			cruleVariables.clear();
 		}
-//		vNum = 0; // reset system-generated variable name counter		// AWC 7/18/2019: for semantic constraints, names must be unique across the entire model (namespace)
+		vNum = 0; 	// reset system-generated variable name counter (where uniqueness across an OWL namespace is required this is achieved 
+					//  via special check to create unique OWL variable)
 	}
 
 	protected void clearCruleVariablesForHostObject(EObject host) {
