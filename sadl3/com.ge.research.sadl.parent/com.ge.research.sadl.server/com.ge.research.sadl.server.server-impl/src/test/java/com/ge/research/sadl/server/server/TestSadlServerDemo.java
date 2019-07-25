@@ -37,6 +37,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -242,26 +243,28 @@ public class TestSadlServerDemo {
 		assertEquals(rs2.getResultAt(0, 0),120.0);
 	}
 
+	@Ignore
 	@Test
 	public void testSTEM() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, IOException, InvalidNameException, QueryCancelledException, QueryParseException, TemplateException, URISyntaxException {
-		String stemKbaseLocation = "file:/C:/New/STEM";
-		ISadlServer srvr = new SadlServerImpl(stemKbaseLocation);
+		//Path stemKbaseLocation = Paths.get(ClassLoader.getSystemResource("STEM").toURI());
+		Path stemKbaseLocation = Paths.get("C:/New/STEM");
+		ISadlServer srvr = new SadlServerImpl(stemKbaseLocation.toString());
 		assertNotNull(srvr);
 
 		String modelName = "http://sadl.org/STEM/Run";
-		String sessionId = srvr.selectServiceModel(stemKbaseLocation + "/OwlModels", modelName);
+		String sessionId = srvr.selectServiceModel(stemKbaseLocation.resolve("OwlModels").toString(), modelName);
 		assertNotNull(sessionId);
 
 		srvr.setInstanceDataNamespace("http://sadl.org/STEM/Scenario#");
 		final String anyInstanceNS = "http[^#]*#";
 
-		String serverCsvDataBaseUrl = stemKbaseLocation + "/CSVData";
+		Path csvData = stemKbaseLocation.resolve("CSVData");
 		boolean includesHeader = true;
-		String serverCsvTemplateBaseUrl = stemKbaseLocation + "/Templates";
+		Path csvTemplate = stemKbaseLocation.resolve("Templates");
 		System.out.println("Import ScnArch.csv\n");
-		assertTrue(srvr.loadCsvData(serverCsvDataBaseUrl + "/ScnArch.csv", includesHeader, serverCsvTemplateBaseUrl + "/ScnArch.tmpl"));
+		assertTrue(srvr.loadCsvData(csvData.resolve("ScnArch.csv").toUri().toString(), includesHeader, csvTemplate.resolve("ScnArch.tmpl").toUri().toString()));
 		System.out.println("Import ScnCompProps.csv\n");
-		assertTrue(srvr.loadCsvData(serverCsvDataBaseUrl + "/ScnCompProps.csv", includesHeader, serverCsvTemplateBaseUrl + "/ScnCompProps.tmpl"));
+		assertTrue(srvr.loadCsvData(csvData.resolve("ScnCompProps.csv").toUri().toString(), includesHeader, csvTemplate.resolve("ScnCompProps.tmpl").toUri().toString()));
 
 		System.out.println("Just get the counts of all DIRECT CIA Issues");
 		String qry = srvr.prepareQuery("select count(*) where {{select distinct ?z2  ?CAPEC ?z4  where { " +
@@ -312,8 +315,8 @@ public class TestSadlServerDemo {
 		assertNotNull(rs);
 		assertTrue(rs.getRowCount() > 0);
 		System.out.println(rs.toString().replaceAll(anyInstanceNS, ""));
-		String outputDir = "C:/New/STEM/Output";
-		Files.write(Paths.get(outputDir, "CAPEC.csv"), rs.toString().replaceAll(anyInstanceNS, "").getBytes(StandardCharsets.UTF_8));
+		Path outputDir = stemKbaseLocation.resolve("Output");
+		Files.write(outputDir.resolve("CAPEC.csv"), rs.toString().replaceAll(anyInstanceNS, "").getBytes(StandardCharsets.UTF_8));
 
 		System.out.println("Write out Output/Defenses.csv for SOTERIA++");
 		qry = srvr.prepareQuery("select distinct  (?z6 as ?CompType) (?z2 as ?CompInst) (?z8 as ?CAPEC) " +
@@ -335,7 +338,7 @@ public class TestSadlServerDemo {
 		assertNotNull(rs);
 		assertTrue(rs.getRowCount() > 0);
 		System.out.println(rs.toString().replaceAll(anyInstanceNS, ""));
-		Files.write(Paths.get(outputDir, "Defenses.csv"), rs.toString().replaceAll(anyInstanceNS, "").getBytes(StandardCharsets.UTF_8));
+		Files.write(outputDir.resolve("Defenses.csv"), rs.toString().replaceAll(anyInstanceNS, "").getBytes(StandardCharsets.UTF_8));
 
 		System.out.println("Write out Graphs/Run_sadl12.svg");
 		qry = srvr.prepareQuery("select distinct ?N1 ?link ?N2 ?N1_style ?N1_fillcolor ?N2_style ?N2_fillcolor (?cplist as ?N1_tooltip) where " +
@@ -383,7 +386,7 @@ public class TestSadlServerDemo {
 		assertTrue(rs.getRowCount() > 0);
 		System.out.println(rs.toString().replaceAll(anyInstanceNS, ""));
 		GraphVizVisualizer visualizer = new GraphVizVisualizer();
-		String graphDir = "C:/New/STEM/Graphs";
+		String graphDir = stemKbaseLocation.resolve("Graphs").toString();
 		String graphName = "Run_sadl12";
 		visualizer.initialize(graphDir, graphName, graphName, null, Orientation.TD, "Cmd 13  (Graph)");
 		visualizer.graphResultSetData(rs);
