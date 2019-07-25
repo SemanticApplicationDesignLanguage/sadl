@@ -3080,27 +3080,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private Individual equationToOwl(SadlResource nm, Individual eqinst, Equation eq, List<DataDescriptor> retDataDescriptors,
 			List<DataDescriptor> paramDataDescriptors) {
-		List<Individual> paramInstances = new ArrayList<Individual>();
-		if (paramDataDescriptors != null) {
-			for (DataDescriptor pdd : paramDataDescriptors) {
-				Individual pddinst = dataDescriptorToOwl(nm, pdd, false);
-				if (pddinst != null) {
-					paramInstances.add(pddinst);
-				}
-			}
-		}
-		List<Individual> retInstances = new ArrayList<Individual>();
-		if (retDataDescriptors != null) {
-			for (DataDescriptor rdd : retDataDescriptors) {
-				Individual rddinst = dataDescriptorToOwl(nm, rdd, true);
-				if (rddinst != null) {
-					retInstances.add(rddinst);
-				}
-			}
-		}
-		if (eqinst != null) {
-			addEquationPropertiesToJenaModel(nm, eq, eqinst, paramInstances, retInstances);
-		}
+//		List<Individual> paramInstances = new ArrayList<Individual>();
+//		if (paramDataDescriptors != null) {
+//			for (DataDescriptor pdd : paramDataDescriptors) {
+//				Individual pddinst = dataDescriptorToOwl(nm, pdd, false);
+//				if (pddinst != null) {
+//					paramInstances.add(pddinst);
+//				}
+//			}
+//		}
+//		List<Individual> retInstances = new ArrayList<Individual>();
+//		if (retDataDescriptors != null) {
+//			for (DataDescriptor rdd : retDataDescriptors) {
+//				Individual rddinst = dataDescriptorToOwl(nm, rdd, true);
+//				if (rddinst != null) {
+//					retInstances.add(rddinst);
+//				}
+//			}
+//		}
+//		if (eqinst != null) {
+//			addEquationPropertiesToJenaModel(nm, eq, eqinst, paramInstances, retInstances);
+//		}
 		
 		return eqinst;
 	}
