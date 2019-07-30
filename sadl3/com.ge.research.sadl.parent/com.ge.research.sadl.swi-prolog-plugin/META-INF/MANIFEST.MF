@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Swi-Prolog-Plugin
 Bundle-SymbolicName: com.ge.research.sadl.swi-prolog-plugin;singleton:=true
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.2.1.qualifier
 Bundle-Activator: com.ge.research.sadl.swi_prolog.plugin.Activator
 Bundle-Vendor: GE Global Research
 Require-Bundle: org.eclipse.core.runtime,

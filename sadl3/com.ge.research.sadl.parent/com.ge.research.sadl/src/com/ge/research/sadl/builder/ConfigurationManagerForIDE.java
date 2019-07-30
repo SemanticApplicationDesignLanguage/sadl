@@ -1007,7 +1007,12 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		if (privateKeyValueStore == null) {
 			privateKeyValueStore = new HashMap<String, Object>();
 		}
-		privateKeyValueStore.put(key, value);
+		if (value != null) {
+			privateKeyValueStore.put(key, value);
+		}
+		else if (privateKeyValueStore.containsKey(key)) {
+			privateKeyValueStore.remove(key);
+		}
 	}
 	
 	public Object getPrivateKeyValuePair(String key) {

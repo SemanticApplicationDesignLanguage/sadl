@@ -100,12 +100,14 @@ interface ISadlImplicitModelContentProvider {
 		 */
 		public static val DEFAULT_CONTENT = '''
 			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
+			/****** The content of this model is automatically included in every SADL model ******/
 			
 			impliedProperty is a type of annotation.
 			expandedProperty is a type of annotation.
 			ScientificConcept is a class.
 			UnittedQuantity is a type of ScientificConcept,
 				described by ^value with values of type decimal,
+				described by stddev with values of type decimal,
 				described by unit with values of type string.
 			
 			DataDescriptor is a class, described by descriptorName with a single value of type string,
@@ -119,7 +121,7 @@ interface ISadlImplicitModelContentProvider {
 			^Equation is a class,
 				described by expression with values of type Script.
 			arguments describes ^Equation with a single value of type DataDescriptor List.
-			returnTypes describes ^Equation with a single value of type anyURI List.
+			returnTypes describes ^Equation with a single value of type DataDescriptor List.
 			
 			ExternalEquation is a type of ^Equation,
 				described by externalURI with a single value of type anyURI,
@@ -138,7 +140,7 @@ interface ISadlImplicitModelContentProvider {
 			anyDataType (note "union of all relevant data types") is a type of {decimal or boolean or string or date or dateTime or anyURI}.
 			argValues (note "values of arguments to the built-in") describes FunctionPattern with a single value of type anyDataType List.
 			
-			Assumption (note "used to identify necessary patterns in semantic domain terms") is a type of AugmentedType, 
+			SemanticConstraint (note "used to identify necessary patterns in semantic domain terms") is a type of AugmentedType, 
 				described by constraints with a single value of type GraphPattern List.
 			ThisArgument (note "allows reference to self within an Argument's constraints") is a DataDescriptor.
 			
@@ -146,7 +148,8 @@ interface ISadlImplicitModelContentProvider {
 				described by rowValues with a single value of type anyDataType List.
 			DataTable is a class,
 				described by columnDescriptors with a single value of type DataDescriptor List,
-				described by dataContent with a single value of type DataTableRow List.
+				described by dataContent with a single value of type DataTableRow List,
+				described by dataLocation with a single value of type anyURI.
 			
 			^Rule is a class.
 			NamedQuery is a class.

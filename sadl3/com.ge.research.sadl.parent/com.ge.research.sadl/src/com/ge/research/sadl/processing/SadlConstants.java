@@ -54,7 +54,7 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_SEM_TYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#semType";
 	public static final String SADL_IMPLICIT_MODEL_TRIPLE_PATTERN_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#TriplePattern";
 	public static final String SADL_IMPLICIT_MODEL_FUNCTION_PATTERN_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#FunctionPattern";
-	public static final String SADL_IMPLICIT_MODEL_ASSUMPTION_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#Assumption";
+	public static final String SADL_IMPLICIT_MODEL_SEMANTIC_CONSTRAINT_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#SemanticConstraint";
 	public static final String SADL_IMPLICIT_MODEL_CONSTRAINTS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#constraints";
 	public static final String SADL_IMPLICIT_MODEL_AUG_TYPE_UNITS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#augTypeUnits";
 	public static final String SADL_IMPLICIT_MODEL_GP_SUBJECT_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#gpSubject";
@@ -68,6 +68,7 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_DATA_ROW_VALUES_RPOERTY_URI = SADL_IMPLICIT_MODEL_URI + "#rowValues";
 	public static final String SADL_IMPLICIT_MODEL_DATA_COLUMN_DESCRIPTORS_PROPERY_URI = SADL_IMPLICIT_MODEL_URI + "#columnDescriptors";	
 	public static final String SADL_IMPLICIT_MODEL_DATA_CONTENT_DESCRIPTORS_PROPERY_URI = SADL_IMPLICIT_MODEL_URI + "#dataContent";	
+	public static final String SADL_IMPLICIT_MODEL_DATA_CONTENT_LOCATION_PROPERY_URI = SADL_IMPLICIT_MODEL_URI + "#dataLocation";
 	
 	public static final String SADL_RULE_PATTERN_URI = "http://sadl.org/rule/patterns";
 	public static final String SADL_RULE_PATTERN_PREFIX = "srpp";

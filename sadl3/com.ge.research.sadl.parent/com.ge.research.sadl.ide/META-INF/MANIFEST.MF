@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.ide
 Bundle-Vendor: My Company
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.2.1.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.ide; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.antlr.runtime,
@@ -23,7 +23,6 @@ Export-Package: com.ge.research.sadl.ide,
  com.ge.research.sadl.ide.contentassist.antlr.lexer,
  com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex,
  com.ge.research.sadl.ide.editor.contentassist,
- com.ge.research.sadl.ide.handlers,
- com.ge.research.sadl.ide.utils
+ com.ge.research.sadl.ide.handlers
 Import-Package: org.slf4j
 Automatic-Module-Name: com.ge.research.sadl.ide
