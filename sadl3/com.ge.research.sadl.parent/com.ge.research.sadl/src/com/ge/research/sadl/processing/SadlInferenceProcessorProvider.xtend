@@ -17,20 +17,19 @@
  ***********************************************************************/
 package com.ge.research.sadl.processing
 
+import com.ge.research.sadl.model.gp.Query
+import com.ge.research.sadl.model.gp.TripleElement
+import com.ge.research.sadl.reasoner.ConfigurationException
+import com.ge.research.sadl.reasoner.InvalidNameException
+import com.ge.research.sadl.reasoner.QueryCancelledException
+import com.ge.research.sadl.reasoner.QueryParseException
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException
+import com.ge.research.sadl.reasoner.TranslationException
 import com.google.common.base.Optional
-import com.google.common.collect.ImmutableList
 import com.google.inject.Inject
 import com.google.inject.Injector
-import org.eclipse.emf.ecore.resource.Resource
 import java.util.Map
-import com.ge.research.sadl.model.gp.Query
-import com.ge.research.sadl.reasoner.ConfigurationException
-import com.ge.research.sadl.reasoner.TranslationException
-import com.ge.research.sadl.reasoner.InvalidNameException
-import com.ge.research.sadl.reasoner.ReasonerNotFoundException
-import com.ge.research.sadl.reasoner.QueryParseException
-import com.ge.research.sadl.reasoner.QueryCancelledException
-import com.ge.research.sadl.model.gp.TripleElement
+import org.eclipse.emf.ecore.resource.Resource
 
 /**
  * Provides {@code SADL} inferences.
@@ -40,23 +39,27 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 	static val EXTENSION_ID = 'com.ge.research.sadl.sadl_inference_processor';
 
 	static val ISadlInferenceProcessor NOOP_INFERENCER = new ISadlInferenceProcessor() {
-		
+
 		override runInference(Resource resource, String owlModelPath, String modelFolderPath, Map<String, String> prefMap) throws SadlInferenceException {
 			return newArrayOfSize(0);
 		}
-		
+
 		override runNamedQuery(Resource resource, String queryName) throws SadlInferenceException {
 			return newArrayOfSize(0);
 		}
-		
+
 		override processAdhocQuery(Resource resource, Query query) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
 			return null;
 		}
-		
+
 		override insertTriplesAndQuery(Resource resource, TripleElement[] triples) throws SadlInferenceException {
 			return newArrayOfSize(0);
 		}
-		
+
+		override isSupported(String fileExtension) {
+			return false;
+		}
+
 	}
 
 	@Inject
@@ -64,7 +67,6 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 		super(ISadlInferenceProcessor, injector);
 	}
 
-	
 	override getProcessor(Resource resource) {
 		return doCreateProcessor(resource);
 	}
@@ -75,8 +77,8 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 	}
 
 	protected def doCreateProcessor(Resource resource) {
-		val processors = ImmutableList.copyOf(allProcessors);
-		return processors.head ?: NOOP_INFERENCER;
+		val processor = allProcessors.findFirst[isSupported(resource)];
+		return if(processor === null) NOOP_INFERENCER else processor;
 	}
 
 }

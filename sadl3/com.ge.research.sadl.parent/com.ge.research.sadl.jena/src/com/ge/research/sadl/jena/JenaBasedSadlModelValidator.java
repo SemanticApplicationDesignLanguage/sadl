@@ -152,6 +152,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private List<ConceptName> binaryOpRightImpliedProperties;
 	protected Object lastSuperCallExpression = null;
 	private Map<EObject,Boolean> mEObjectsValidated = null; 
+	private String variableSeekingType = null;
 
    	public enum ExplicitValueType {RESTRICTION, VALUE}
    	
@@ -951,6 +952,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (rExpr instanceof Constant && isSkippedConstant((Constant)rExpr)) {
 			return true;
 		}
+		if (leftExpression instanceof SelectExpression) {
+			// ignore Select queries for now awc 4/26/2019
+			return true;
+		}
 		return false;
 	}
 	
@@ -1337,7 +1342,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	protected TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
-		if (expressionsTypeCheckCache != null && expressionsTypeCheckCache.containsKey(expression)) {
+		boolean forceValidation = false;
+		if (expressionsTypeCheckCache != null && expressionsTypeCheckCache.containsKey(expression) && !forceValidation) {
 			return expressionsTypeCheckCache.get(expression);
 		}
 		TypeCheckInfo returnedTci = null;
@@ -1476,7 +1482,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (i == 0) {
 							svltci = rttci;
 						}
-						else if (!svltci.getTypeCheckType().equals(rttci.getTypeCheckType()) ) {
+						else if (svltci == null && rttci != null) {
+							svltci = rttci;
+						}
+						else if (svltci != null && rttci != null && 
+								!svltci.getTypeCheckType().equals(rttci.getTypeCheckType()) ) {
 							OntClass svtype = theJenaModel.getOntClass(svltci.getTypeCheckType().getURI());
 							OntClass rttype = theJenaModel.getOntClass(rttci.getTypeCheckType().getURI());
 							if (SadlUtils.classIsSubclassOf(svtype, rttype, true, null)) {
@@ -1553,6 +1563,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if (expression instanceof SadlReturnDeclaration) {
 			returnedTci = getType(((SadlReturnDeclaration)expression).getType());
+		}
+		else if (expression instanceof SelectExpression) {
+			ConceptName declarationConceptName = new ConceptName("Query");
+			returnedTci =  new TypeCheckInfo(declarationConceptName, null, this, expression);
+//            throw new DontTypeCheckException("Select expression can't be type checked.");
 		}
 		else if (expression != null) {
 			getModelProcessor().addTypeCheckingError(SadlErrorMessages.DECOMPOSITION_ERROR.get(expression.toString()), expression);
@@ -3054,15 +3069,21 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			Expression arg = args.get(i);
 			SadlParameterDeclaration param = null;
 			if (variableNumArgs) {
-				param = (i >= minNumArgs) ? params.get(minNumArgs - 1) : params.get(i);
+				param = (i >= minNumArgs && minNumArgs > 0) ? params.get(minNumArgs - 1) : params.get(i);
 			}
 			else if (i < params.size()) {
 				param = params.get(i);
 			}
 			if (param != null) {
-				validateBinaryOperationByParts(expression, arg, param.getType(), "argument", sb, false);
-				if (sb.length() > 0) {
-					getModelProcessor().addTypeCheckingError(sb.toString(), expression);
+				if (param.getEllipsis() == null) {
+					validateBinaryOperationByParts(expression, arg, param.getType(), "argument", sb, false);
+					if (sb.length() > 0) {
+						getModelProcessor().addTypeCheckingError(sb.toString(), expression);
+					}
+				}
+				else {
+					// don't try to typecheck if it's an ellipsis
+					break;
 				}
 			}
 		}
@@ -3335,6 +3356,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				ConceptName et = new ConceptName(uri);
 				et.setType(ConceptType.VARIABLE);
 				//tci.setExpressionType(et);
+				setVariableSeekingType(null);  // this has to be reset somewhere or test fails. Not sure this is the right place awc 4/23/19
 				return new TypeCheckInfo(et, tci.getTypeCheckType(), tci.getImplicitProperties(), this, reference);
 			}
 			return tci;
@@ -3348,7 +3370,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return tci;
 		}
 		else if (conceptType.equals(OntConceptType.FUNCTION_DEFN)) {
-			return getFunctionType(sr);
+			return getFunctionType(declarationExtensions.getDeclaration(sr));
 		}
 		else if (conceptType.equals(OntConceptType.CLASS_LIST)) {
 			if (conceptUri != null) {
@@ -3394,7 +3416,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	private ConceptName createTypedConceptName(String conceptUri, OntConceptType conceptType) {
+	private ConceptName createTypedConceptName(String conceptUri, OntConceptType conceptType) throws InvalidTypeException {
 		return modelProcessor.createTypedConceptName(conceptUri, conceptType);
 	}
 	
@@ -3881,6 +3903,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName et = getModelProcessor().namedNodeToConceptName(tctype);
 			TypeCheckInfo tci = new TypeCheckInfo(et, var.getType(), this, reference);
 			return tci;
+		}
+		if (getVariableSeekingType() != null && getVariableSeekingType().equals(conceptNm)) {
+//			setVariableSeekingType(null);
+			return null;
+		}
+		else {
+			setVariableSeekingType(conceptNm);
 		}
 		SadlResource name = sr.getName();
 		if (name != null) {
@@ -5164,10 +5193,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						OntConceptType stype = declarationExtensions.getOntConceptType((SadlResource)subject);
 						String subjuri = declarationExtensions.getConceptUri((SadlResource) subject);
 						String preduri = declarationExtensions.getConceptUri(predicate);
-						NamedNode subjnn = new NamedNode(subjuri);
-						subjnn.setNodeType(NodeType.ClassNode);
-						NamedNode prednn = new NamedNode(preduri);
-						prednn.setNodeType(getModelProcessor().ontConceptTypeToNodeType(ptype));
+						NamedNode subjnn = subjuri != null ? new NamedNode(subjuri) : null;
+						if (subjnn != null) {
+							subjnn.setNodeType(NodeType.ClassNode);
+						}
+						NamedNode prednn = preduri != null ? new NamedNode(preduri) : null;
+						if (prednn != null) {
+							prednn.setNodeType(getModelProcessor().ontConceptTypeToNodeType(ptype));
+						}
+						if (subjnn == null || prednn == null) {
+							return;
+						}
 						List<Node> lrs = getApplicableLocalRestrictions(subjnn, prednn);
 						
 						OntResource subj = null;
@@ -5737,6 +5773,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		return true;	// this will need more checking when the body grammar is sufficent to support multiple return values
+	}
+
+	protected String getVariableSeekingType() {
+		return variableSeekingType;
+	}
+
+	protected void setVariableSeekingType(String variableSeekingType) {
+		this.variableSeekingType = variableSeekingType;
 	}
 
 }

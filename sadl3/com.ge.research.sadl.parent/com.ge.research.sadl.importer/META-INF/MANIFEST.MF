@@ -3,7 +3,7 @@ Automatic-Module-Name: com.ge.research.sadl.importer
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.importer
 Bundle-Vendor: General Electric Company
-Bundle-Version: 3.2.0.qualifier
+Bundle-Version: 3.2.1.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.importer; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext,

@@ -64,7 +64,7 @@ import com.ge.research.sadl.external.ExternalEmfModelDownloader;
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.ui.utils.EclipseSadlProjectHelper;
+import com.ge.research.sadl.utils.EclipseSadlProjectHelper;
 import com.ge.research.sadl.utils.ResourceManager;
 
 /**
@@ -237,7 +237,7 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 			try {
 				for(IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()){
 					IPath prjpath = project.getLocation();
-					if (outputPath.toOSString().startsWith(prjpath.toOSString())) {
+					if (outputPath.toOSString().startsWith(prjpath.toOSString() + File.separatorChar)) {
 						project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 						break;	// there's only one at a time to refresh
 					}

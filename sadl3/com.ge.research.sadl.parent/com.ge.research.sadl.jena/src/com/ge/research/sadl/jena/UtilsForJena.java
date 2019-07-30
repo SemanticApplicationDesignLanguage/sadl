@@ -85,7 +85,7 @@ public class UtilsForJena {
      * Call this method to remove double quotes from the beginning and end of a string so quoted.
      * @param quotedString -- the string from which quotes are to be removed
      */
-    protected static String stripQuotes(String quotedString) {
+    public static String stripQuotes(String quotedString) {
         if (quotedString != null && !quotedString.isEmpty()) {
             while (quotedString.charAt(0) == '\"') {
                 quotedString = quotedString.substring(1);

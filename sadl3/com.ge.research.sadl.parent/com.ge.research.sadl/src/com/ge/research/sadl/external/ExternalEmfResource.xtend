@@ -255,6 +255,12 @@ class ExternalEmfResource extends ResourceImpl {
 			} else if (r.canAs(AnnotationProperty)) {
 				ctype = OntConceptType.ANNOTATION_PROPERTY
 			} else if (r.canAs(Individual)) {
+				var ExtendedIterator<Resource> itr = r.^as(Individual).listRDFTypes(true)
+				while(itr.hasNext()) {
+					if (itr.next().equals(RDF.Property)) {
+						return OntConceptType.RDF_PROPERTY
+					}
+				}
 				ctype = OntConceptType.INSTANCE
 			} else if (r.canAs(Property)) {
 				ctype = OntConceptType.RDF_PROPERTY
