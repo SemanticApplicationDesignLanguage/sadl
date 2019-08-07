@@ -110,9 +110,11 @@ interface ISadlImplicitModelContentProvider {
 				described by stddev with values of type decimal,
 				described by unit with values of type string.
 			
-			DataDescriptor is a class, described by localDescriptorName with a single value of type string,
+			DataDescriptor is a class, described by localDescriptorName (note "If this DataDescriptor is associated with a named parameter, this is the name") with a single value of type string,
 				described by dataType (note "the simple data type, e.g., float") with a single value of type anyURI,
-				described by augmentedType (note "ties the DataDescriptor to the semantic domain model") with values of type AugmentedType.
+				described by specifiedUnits (note "the array of possible units") with a single value of type string List,
+				described by augmentedType (note "ties the DataDescriptor to the semantic domain model") with values of type AugmentedType,
+				described by descriptorVariable (note "This identifies the GPVariable, if any, in the AugmentedType which is associated with this DataDescriptor").
 			dataType of DataDescriptor has at most 1 value.
 			descriptorVariable of DataDescriptor has at most 1 value.
 			
