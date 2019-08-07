@@ -1778,4 +1778,10 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		return null;
 	}
 
+	@Override
+	public String getBuiltinClassName(String builtinName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
