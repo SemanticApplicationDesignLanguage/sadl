@@ -47,7 +47,9 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_DATA_DESCRIPTOR_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#DataDescriptor";
 	public static final String SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#localDescriptorName";
 	public static final String SADL_IMPLICIT_MODEL_DATATYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#dataType";
+	public static final String SADL_IMPLICIT_MODEL_SPECIFIED_UNITS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#specifiedUnits";
 	public static final String SADL_IMPLICIT_MODEL_AUGMENTED_TYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#augmentedType";
+	public static final String SADL_IMPLICIT_MODEL_DESCRIPTOR_VARIABLE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#descriptorVariable";
 	public static final String SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#arguments";
 	public static final String SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#returnTypes";
 	public static final String SADL_IMPLICIT_MODEL_SEMANTIC_TYPE_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#SemanticType";
