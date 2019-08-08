@@ -10,6 +10,7 @@ branches:
   only:
     - development
     - GH-339 # TODO: remove this!
+    - ji-experimental-changes # TODO: Remove before merging PR
 
 cache:
   directories:
