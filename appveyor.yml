@@ -9,7 +9,8 @@ platform:
   - x64
 
 build_script:
-  - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean verify
+  - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean
+  - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml verify
 
 cache:
  - C:\Users\appveyor\.m2
