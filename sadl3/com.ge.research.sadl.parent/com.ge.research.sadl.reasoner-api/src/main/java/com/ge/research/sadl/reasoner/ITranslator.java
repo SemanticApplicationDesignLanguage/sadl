@@ -281,4 +281,11 @@ public interface ITranslator {
 	 * @throws TranslationException
 	 */
 	public String builtinTypeToString(BuiltinElement bin) throws TranslationException;
+	
+	/**
+	 * Return the full package and name of the class implementing the named builtin
+	 * @param builtinName -- name of builtin for which class name is desired
+	 * @return class name
+	 */
+	public String getBuiltinClassName(String builtinName);
 }
