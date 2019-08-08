@@ -25,12 +25,14 @@ jobs:
   include:
   - stage: test
     language: java
-    jdk: oraclejdk8
+    jdk: oraclejdk11
     before_install: 
       - export M2_HOME=/usr/local/maven
       - export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m -XX:PermSize=512m"
       - sh -e /etc/init.d/xvfb start - sleep 10
-    script: mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean verify
+    script:
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml verify
 
   - stage: publish-npm
     language: java
