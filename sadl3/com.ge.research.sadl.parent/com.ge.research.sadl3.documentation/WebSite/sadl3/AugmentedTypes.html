@@ -15,25 +15,26 @@
 <!--webbot bot="Timestamp" s-type="EDITED" s-format="%m/%d/%Y" startspan -->08/08/2019<!--webbot bot="Timestamp" endspan i-checksum="12639" --> by
 <a href="mailto:crapo@research.ge.com?subject=Model Visualization">A. W. Crapo</a></h5>
 <h3>Acknowledgement</h3>
-<p>Augmented Types were developed during work funding from the Defense Advanced 
+<p>Augmented Types were developed in the course of work funded by the Defense Advanced 
 Research Projects Agency (DARPA) under Agreement No. HR00111990006.</p>
 <h1>Introduction</h1>
 <p>The purpose of SADL is to capture knowledge in the form of semantic models. 
 In Version 3, simple equations can be expressed in the SADL grammar and more 
 complex equations can be referenced as external equations. In either case, the 
-signature of the equation identifies the the name of the equation, the type and 
+signature of the equation identifies the  name of the equation, the type and 
 name of each argument, and the type of any values returned by the equation. 
 (Since some languages in which external equations might be expressed allow the 
 return of multiple values, so does the SADL grammar.) However, all but the 
 simplest equations have implicit constraints placed on their usage. Almost 
 always these constraints are not captured in the code and often they are not 
 captured in the documentation because it is assumed implicitly that anyone using 
-the equation will have the domain understanding or these constraints. Augmented 
-Types deals with the explicit capture of these constraints so that the knowledge 
-of how to properly use the equation is also be captured. This is a necessity if 
-equations are to be used by an artificial intelligence.</p>
+the equation will have  domain knowledge sufficient to understand these constraints. Augmented 
+Types deal with the explicit capture of these constraints so that the knowledge 
+of how to properly use the equation is also  captured. This is a necessity if 
+equations are to be used by an artificial intelligence or by people less 
+knowledgeable about a domain.</p>
 
-<p>One can consider the problem of capturing the semantic constraints associated 
+<p>We will consider the problem of capturing the semantic constraints associated 
 with an equation in three parts.</p>
 
 <ol>
@@ -44,7 +45,7 @@ with an equation in three parts.</p>
   them?</li>
 </ol>
 <p>The solutions to questions 2 and 3 may be the same or may be different. Also, 
-the best way to represent semantic constraints for human understanding my vary 
+the best way to represent semantic constraints for human understanding may vary 
 from person to person.</p>
 
 <h1>A Example</h1>
@@ -53,7 +54,8 @@ from person to person.</p>
 Glenn Research Center's Hypersonics Web site:
 <a href="https://www.grc.nasa.gov/WWW/BGH/shorth.html">
 https://www.grc.nasa.gov/WWW/BGH/shorth.html</a>. Mach number and the various 
-regions of flight is illustrated by this figure.</p>
+regions of flight which it defines are illustrated by this figure from the 
+referenced site.</p>
 
 <p><img border="0" src="images/Augmen1.gif" width="748" height="514"></p>
 
@@ -66,7 +68,7 @@ following.</p>
   <li>The speeds in the numerator and denominator must have the same units to 
   yield the desired ratio.</li>
 </ol>
-<p>From another Web page on the NASA Glenn site, we find an equation for the 
+<p>On another  page in the NASA Glenn Web site, we find an equation for the 
 speed of sound.</p>
 <p><img border="0" src="images/Augmen2.jpg" width="392" height="119"></p>
 <p><i><b>Figure 2: Equation for the Speed of Sound</b></i></p>
@@ -74,13 +76,14 @@ speed of sound.</p>
 the surrounding text.</p>
 <ol>
   <li>The speed of sound &quot;a&quot;, the ratio &quot;<font face="Times New Roman">&#947;</font>&quot;, 
-  the gas constant &quot;R&quot;, and the temperature &quot;T&quot; are all for the same thing--a 
+  the gas constant &quot;R&quot;, and the temperature &quot;T&quot; are all 
+  properties of the same thing--a 
   gaseous medium.</li>
   <li>The temperature &quot;T&quot; must be in degrees Kelvin.</li>
 </ol>
 <p>Finally, we find a set of equations for temperature of atmospheric air on 
 Earth on another page. We are interested in the three equations for temperature 
-T as a function of altitude h.</p>
+&quot;T&quot; as a function of altitude &quot;h&quot;.</p>
 <p><img border="0" src="images/Augmen3.jpg" width="350" height="352"></p>
 <p><i><b>Figure 3: Earth Atmospheric Model</b></i></p>
 <p>Constraints for these equations include the following.</p>
@@ -90,7 +93,6 @@ T as a function of altitude h.</p>
   <li>Each of the three equations has a range restriction on the values of h for 
   which it is valid.</li>
 </ol>
-<p>&nbsp;</p>
 <p>Putting the three pages together gives us the following graphical view of 
 computing the Mach number.</p>
 <p><img border="0" src="images/Augmen4.jpg" width="1222" height="556"></p>
@@ -100,8 +102,10 @@ Sound, and Atmospheric Temperature</b></i></p>
 
 <h2>Representing Equation Constraints in SADL</h2>
 
-<p>SADL allows us to capture the signatures of equations, so here are the 
-signatures of the five equations in SADL syntax.</p>
+<p>SADL, a controlled-English language for expressing semantic models, allows us to capture the signatures of equations. 
+Here are the 
+signatures of the five equations in SADL syntax at the level of detail one would 
+expect to find in a procedural language such as Java or C.</p>
 <ol>
   <li><font SIZE="2" COLOR="#800080">Equation</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#801480"><b>machNumber</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
@@ -138,14 +142,14 @@ signatures of the five equations in SADL syntax.</p>
   <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#800080">decimal</font></li>
 </ol>
-<p>Representing the constraints is fundamentally a question of capturing the 
+<p>Representing the constraints on the use of these equations is fundamentally a question of capturing the 
 graph patterns that relate the equation arguments and returned values to each 
-other, in domain terms, as well as any additional functional constraints. The 
-SADL expression grammar already allows us to capture graph patterns and 
-functions, so we will use this capability. Of course we need to establish a 
+other, in domain terms, as well as any additional functional constraints. The SADL expression grammar already allows us to capture graph patterns and 
+functions, so we will use this capability to augment the signatures. Of course we need to establish a 
 domain model before we can express constraints in that domain model. Here is a 
 simple model for the domain to which these equations apply. <i>UnittedQuantity</i> 
-is a class in the SADL implicit model with properties <i>value</i> and <i>unit</i>.</p>
+is a class in the SADL implicit model (implicitly imported into every SADL 
+model) with properties <i>value</i> and <i>unit</i>.</p>
 <font SIZE="2">
 <blockquote>
   <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#000080"><b>Temperature</b></font><font SIZE="2">
@@ -246,9 +250,7 @@ is a class in the SADL implicit model with properties <i>value</i> and <i>unit</
   </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#008000"><b>gasConstant</b></font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#000080"><b>GasConstant</b></font><font SIZE="2">,<br>
@@ -256,9 +258,7 @@ is a class in the SADL implicit model with properties <i>value</i> and <i>unit</
   </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#008000"><b>speedOfSound</b></font><font SIZE="2">
   </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
   <font SIZE="2" COLOR="#000080"><b>Speed</b></font><font SIZE="2">. </p>
@@ -304,11 +304,11 @@ is a class in the SADL implicit model with properties <i>value</i> and <i>unit</
   <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">. </p>
 </blockquote>
 </font>
-<p>Here are the augmented signatures of the five equations with constraints made 
+<p>Using this domain model, we can now express the augmented signatures of the five equations with constraints made 
 explicit. Note that &quot;value&quot; is escaped with a &quot;^&quot; at the beginning because it is 
 also a keyword in the grammar. Note also that this example uses English 
 indefinite and definite articles to generate variables to link graph patterns 
-together, and &quot;some&quot; is added as an indefinite article to be more English-like 
+together, and &quot;some&quot; is treated as an indefinite article because it is more English-like 
 for substances (as opposed to objects). Hence &quot;some Air&quot; creates a variable of 
 type Air and &quot;the Air&quot; references that variable, &quot;an Object&quot; creates a variable 
 of type Object and &quot;the Object&quot; references that variable. </p>
@@ -436,25 +436,25 @@ of type Object and &quot;the Object&quot; references that variable. </p>
 </ol>
 <h2>Viewing Equation Constraints as a Graph</h2>
 
-<p>Equation constraints can also be viewed as a graph. For example, the 
+<p>Equation constraints can  be viewed as a graph. For example, the 
 constraints of Equation 4, <i>lowerStratosphereTemperature</i>, look like this, 
-where variable nodes are pink. Classes are in dark blue, instances in lighter 
-blue, properties in green.</p>
+where variable nodes are pink, class nodes are  dark blue, instance nodes are lighter 
+blue, and properties are green.</p>
 
 <p><img border="0" src="images/ConstraintsAsGraph.png" width="700" height="368"></p>
 
 <p><i><b>Figure 5: Equation Constraints Viewed as a Graph</b></i></p>
 
-<p>Note that while the functional constraints, <i>greaterThan</i> and <i>
-lessThanOrEqual</i>, are shown here as graph edges, this is only possible 
+<p>Note that while the functional constraints <i>greaterThan</i> and <i>
+lessThanOrEqual</i> are shown here as graph edges, this is only possible 
 because they are binary functions. For non-binary functions the function would 
 have to be a graph node with arguments linked to it.</p>
 
 <h1>Representing Equation Constraints in OWL</h1>
 
 <p>First consider the kinds of things that we need to capture in the constraint 
-model. Sticking with the example of Equation 4, <i>lowerStratosphereTemperature</i>, 
-and using Figure 5 as a guide, we need to capture the following information, 
+model. Continuing with the example of Equation 4, <i>lowerStratosphereTemperature</i>, 
+and using Figure 5 as a guide, we identify the need to capture the following information, 
 expressed here in pseudo RDF.</p>
 
 <ol>
@@ -474,30 +474,27 @@ expressed here in pseudo RDF.</p>
   decimal value computed by the equation.</li>
 </ol>
 
-<p><br>
-&nbsp;</p>
-
 <p>In order to capture equation constraints in OWL, we need a meta-model for 
 constraints. We have considered using the W3C recommended Shapes Constraint 
 Language SHACL (see <a href="https://www.w3.org/TR/shacl/">
 https://www.w3.org/TR/shacl/</a>). However, in SHACL the graph patterns of the 
-constraints would be represented in SPARQL strings, which would have to be 
-parsed to be able query or infer over the patterns. That would require parsing 
-the SPARQL into some meta-model, so we are forced in any case do provide some 
+constraints are represented as SPARQL strings, which would have to be 
+parsed into a structured representation in order to be able to query or infer over the patterns. That would require parsing 
+the SPARQL into some meta-model, so we are forced in any case to provide some 
 non-standard meta-model. The SADL Augmented Types meta-model is in the SADL 
-implicit model, which is implicitly loaded by each SADL model. Below is the 
-relevant snippet of that model.</p>
+implicit model and the 
+relevant snippet of that model is shown below.</p>
 
 <p><img border="0" src="images/AugmentedTypesMetaModel.jpg" width="937" height="572"></p>
 
 <p><i><b>Figure 6: The Equation (and Tabular Data) Constraint Meta-model</b></i></p>
 
 <p>The OWL created from the equation constraints is not easy to read in any 
-standard OWL serialization. The portion for <i>lowerStratosphereTemperture</i> 
-in RDF/XML-ABBREV format is shown in <a href="#Appendix A">Appendix A</a>.</p>
-
-<p>To relate this content to the pseudo RDF above, we will give the mappings of 
-two elements from above.</p>
+standard OWL serialization. The portion for <i>lowerStratosphereTemperture,</i> 
+in RDF/XML-ABBREV format, is shown in <a href="#Appendix A">Appendix A</a> at 
+the end of this document. To relate this content to the pseudo RDF above, we will 
+illustrate the mappings of 
+two elements from the above constraints.</p>
 
 <p>(1) TriplePattern (v0, rdf:type, Air) </p>
 
@@ -543,7 +540,7 @@ where order matters is given as a typed List, e.g., the <i>argValues</i>
 property with domain <i>FunctionPattern</i>, has range <i>GPAtom</i> <i>List</i>. 
 Similarly, the order of units matter because it is intended that if the n<sup>th</sup> 
 unit listed, when multiple are listed, not illustrated here, is used for one 
-argument, the n<sup>th</sup> unit listed must be used for all other arguments 
+argument, then the n<sup>th</sup> unit listed must be used for all other arguments 
 and for the returned value.</p>
 
 <h1><a name="Appendix A">Appendix A</a>: Semantic Constraints for Equation <i>
