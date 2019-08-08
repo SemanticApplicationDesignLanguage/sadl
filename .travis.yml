@@ -36,7 +36,7 @@ jobs:
 
   - stage: publish-npm
     language: java
-    jdk: oraclejdk8
+    jdk: oraclejdk11
     node_js: '8'
     before_script: 
       - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.12.3
