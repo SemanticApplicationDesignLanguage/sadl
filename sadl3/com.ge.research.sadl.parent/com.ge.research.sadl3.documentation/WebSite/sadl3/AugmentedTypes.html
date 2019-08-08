@@ -1,0 +1,664 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Augmented Types</title>
+</head>
+
+<body>
+
+<h1>Augmented Type for Equations and Externals</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" s-type="EDITED" s-format="%m/%d/%Y" startspan -->08/08/2019<!--webbot bot="Timestamp" endspan i-checksum="12639" --> by
+<a href="mailto:crapo@research.ge.com?subject=Model Visualization">A. W. Crapo</a></h5>
+<h3>Acknowledgement</h3>
+<p>Augmented Types were developed during work funding from the Defense Advanced 
+Research Projects Agency (DARPA) under Agreement No. HR00111990006.</p>
+<h1>Introduction</h1>
+<p>The purpose of SADL is to capture knowledge in the form of semantic models. 
+In Version 3, simple equations can be expressed in the SADL grammar and more 
+complex equations can be referenced as external equations. In either case, the 
+signature of the equation identifies the the name of the equation, the type and 
+name of each argument, and the type of any values returned by the equation. 
+(Since some languages in which external equations might be expressed allow the 
+return of multiple values, so does the SADL grammar.) However, all but the 
+simplest equations have implicit constraints placed on their usage. Almost 
+always these constraints are not captured in the code and often they are not 
+captured in the documentation because it is assumed implicitly that anyone using 
+the equation will have the domain understanding or these constraints. Augmented 
+Types deals with the explicit capture of these constraints so that the knowledge 
+of how to properly use the equation is also be captured. This is a necessity if 
+equations are to be used by an artificial intelligence.</p>
+
+<p>One can consider the problem of capturing the semantic constraints associated 
+with an equation in three parts.</p>
+
+<ol>
+  <li>What are the constraints?</li>
+  <li>How can they be expressed in a way that humans and machines can understand 
+  them unambiguously?</li>
+  <li>How can they be expressed to enable querying and automated reasoning over 
+  them?</li>
+</ol>
+<p>The solutions to questions 2 and 3 may be the same or may be different. Also, 
+the best way to represent semantic constraints for human understanding my vary 
+from person to person.</p>
+
+<h1>A Example</h1>
+
+<p>Let's use a simple example to illustrate. The example is drawn from the NASA 
+Glenn Research Center's Hypersonics Web site:
+<a href="https://www.grc.nasa.gov/WWW/BGH/shorth.html">
+https://www.grc.nasa.gov/WWW/BGH/shorth.html</a>. Mach number and the various 
+regions of flight is illustrated by this figure.</p>
+
+<p><img border="0" src="images/Augmen1.gif" width="748" height="514"></p>
+
+<p><b><i>Figure 1: Mach Number and Regions of Flight</i></b></p>
+<p>Implicit constraints on the use of this equation for Mach number are the 
+following.</p>
+<ol>
+  <li>The &quot;Speed of Sound&quot; in the denominator must be the speed of sound in the 
+  medium through which the &quot;Object&quot; is moving.</li>
+  <li>The speeds in the numerator and denominator must have the same units to 
+  yield the desired ratio.</li>
+</ol>
+<p>From another Web page on the NASA Glenn site, we find an equation for the 
+speed of sound.</p>
+<p><img border="0" src="images/Augmen2.jpg" width="392" height="119"></p>
+<p><i><b>Figure 2: Equation for the Speed of Sound</b></i></p>
+<p>This equation (in red) also has some constraints, some of which are given in 
+the surrounding text.</p>
+<ol>
+  <li>The speed of sound &quot;a&quot;, the ratio &quot;<font face="Times New Roman">&#947;</font>&quot;, 
+  the gas constant &quot;R&quot;, and the temperature &quot;T&quot; are all for the same thing--a 
+  gaseous medium.</li>
+  <li>The temperature &quot;T&quot; must be in degrees Kelvin.</li>
+</ol>
+<p>Finally, we find a set of equations for temperature of atmospheric air on 
+Earth on another page. We are interested in the three equations for temperature 
+T as a function of altitude h.</p>
+<p><img border="0" src="images/Augmen3.jpg" width="350" height="352"></p>
+<p><i><b>Figure 3: Earth Atmospheric Model</b></i></p>
+<p>Constraints for these equations include the following.</p>
+<ol>
+  <li>The altitude h must be in feet (ft).</li>
+  <li>The temperature T will be in degrees F</li>
+  <li>Each of the three equations has a range restriction on the values of h for 
+  which it is valid.</li>
+</ol>
+<p>&nbsp;</p>
+<p>Putting the three pages together gives us the following graphical view of 
+computing the Mach number.</p>
+<p><img border="0" src="images/Augmen4.jpg" width="1222" height="556"></p>
+
+<p><i><b>Figure 4: Composite Picture of Equations for Mach Number, Speed of 
+Sound, and Atmospheric Temperature</b></i></p>
+
+<h2>Representing Equation Constraints in SADL</h2>
+
+<p>SADL allows us to capture the signatures of equations, so here are the 
+signatures of the five equations in SADL syntax.</p>
+<ol>
+  <li><font SIZE="2" COLOR="#800080">Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>machNumber</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>so</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>sos</b></font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font></li>
+  <li><font SIZE="2" COLOR="#800080">Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>speedOfSoundEq</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>gamma</b></font><font SIZE="2">,
+  </font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>R</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>T</b></font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font></li>
+  <li><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>troposphereTemperature</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>alt</b></font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font></li>
+  <li><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>lowerStratosphereTemperature</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>alt</b></font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font></li>
+  <li><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>upperStratosphereTemperature</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>alt</b></font><font SIZE="2">) </font>
+  <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font></li>
+</ol>
+<p>Representing the constraints is fundamentally a question of capturing the 
+graph patterns that relate the equation arguments and returned values to each 
+other, in domain terms, as well as any additional functional constraints. The 
+SADL expression grammar already allows us to capture graph patterns and 
+functions, so we will use this capability. Of course we need to establish a 
+domain model before we can express constraints in that domain model. Here is a 
+simple model for the domain to which these equations apply. <i>UnittedQuantity</i> 
+is a class in the SADL implicit model with properties <i>value</i> and <i>unit</i>.</p>
+<font SIZE="2">
+<blockquote>
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#000080"><b>Temperature</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>UnittedQuantity</b></font><font SIZE="2">.
+  <br>
+  </font><font SIZE="2" COLOR="#000080"><b>Speed</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>UnittedQuantity</b></font><font SIZE="2">.
+  <br>
+  </font><font SIZE="2" COLOR="#000080"><b>Length</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>UnittedQuantity</b></font><font SIZE="2">.<br>
+  </font><font SIZE="2" COLOR="#000080"><b>SpecificHeat</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>UnittedQuantity</b></font><font SIZE="2">.<br>
+  </font><font SIZE="2" COLOR="#000080"><b>GasConstant</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>UnittedQuantity</b></font><font SIZE="2">.</p>
+  <p ALIGN="LEFT"></p>
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#000080"><b>PhysicalThing</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>speed</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Speed</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>temperature</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Temperature</b></font><font SIZE="2">.</font></p>
+  <font SIZE="2">
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#000080"><b>Medium</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>PhysicalThing</b></font><font SIZE="2">.
+  </font></p>
+  <font SIZE="2">
+  <p ALIGN="LEFT"></p>
+  </font>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#000080"><b>Gas</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> <font color="#000080">
+  <b>Medium</b></font>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>specificHeatCV</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>SpecificHeat</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>specificHeatCP</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>SpecificHeat</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>gamma</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>gasConstant</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>GasConstant</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>speedOfSound</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Speed</b></font><font SIZE="2">. </p>
+  <p ALIGN="LEFT"></p>
+  </font>
+  <p ALIGN="LEFT"><font SIZE="2" COLOR="#000080"><b>Air</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> <font color="#000080">
+  <b>Gas</b></font>.</p>
+  <p ALIGN="LEFT"></p>
+  <p ALIGN="LEFT"></font><font SIZE="2" COLOR="#000080"><b>Object</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>PhysicalThing</b></font><font SIZE="2">,&nbsp;
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>altitude</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Length</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>movesIn</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Medium</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>mach</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">. </p>
+</blockquote>
+</font>
+<p>Here are the augmented signatures of the five equations with constraints made 
+explicit. Note that &quot;value&quot; is escaped with a &quot;^&quot; at the beginning because it is 
+also a keyword in the grammar. Note also that this example uses English 
+indefinite and definite articles to generate variables to link graph patterns 
+together, and &quot;some&quot; is added as an indefinite article to be more English-like 
+for substances (as opposed to objects). Hence &quot;some Air&quot; creates a variable of 
+type Air and &quot;the Air&quot; references that variable, &quot;an Object&quot; creates a variable 
+of type Object and &quot;the Object&quot; references that variable. </p>
+<ol>
+  <li><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>machNumber</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>so</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>speed</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">an</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>Object</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>movesIn</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">some</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Air</b></font><font SIZE="2">)), </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>sos</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>speedOfSound</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Air</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>speed</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Object</b></font><font SIZE="2"> = </font>
+  <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>speedOfSound</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Air</b></font><font SIZE="2">)) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">
+  returns</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2"> 
+  (</font><font SIZE="2" COLOR="#008000"><b>mach</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Object</b></font><font SIZE="2">)</font></li>
+  <li><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>speedOfSoundEq</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>gama</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>gamma</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">some</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Gas</b></font><font SIZE="2">), </font>
+  <font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>R</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>gasConstant</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Gas</b></font><font SIZE="2"> 
+  {&quot;m2/sec2/K&quot;}), </font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>T</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>temperature</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Gas</b></font><font SIZE="2"> {K})) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">returns</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>speedOfSound</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Gas</b></font><font SIZE="2"> {&quot;m/sec&quot;})</font></li>
+  <li><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>troposphereTemperature</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>alt</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>altitude</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">some</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Air</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>alt</b></font><font SIZE="2"> &lt;= 36152 
+  {ft})) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">returns</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>temperature</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Air</b></font><font SIZE="2"> {F})</font></li>
+  <li><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>lowerStratosphereTemperature</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>alt</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>altitude</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">some</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Air</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>alt</b></font><font SIZE="2"> &gt; 36152 </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>alt</b></font><font SIZE="2"> &lt;= 82345 
+  {ft})) <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">returns</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>temperature</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Air</b></font><font SIZE="2"> {F})</font></li>
+  <li><font SIZE="2" COLOR="#800080">
+  <p ALIGN="LEFT">Equation</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#801480"><b>upperStratosphereTemperature</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#ff00ff"><b>alt</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>altitude</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">some</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Air</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#ff00ff"><b>alt</b></font><font SIZE="2"> &gt; 82345 {ft}))
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">returns</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">decimal</font><font SIZE="2"> (</font><font SIZE="2" COLOR="#008000"><b>^value</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>temperature</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Air</b></font><font SIZE="2"> {F})</font></li>
+</ol>
+<h2>Viewing Equation Constraints as a Graph</h2>
+
+<p>Equation constraints can also be viewed as a graph. For example, the 
+constraints of Equation 4, <i>lowerStratosphereTemperature</i>, look like this, 
+where variable nodes are pink. Classes are in dark blue, instances in lighter 
+blue, properties in green.</p>
+
+<p><img border="0" src="images/ConstraintsAsGraph.png" width="700" height="368"></p>
+
+<p><i><b>Figure 5: Equation Constraints Viewed as a Graph</b></i></p>
+
+<p>Note that while the functional constraints, <i>greaterThan</i> and <i>
+lessThanOrEqual</i>, are shown here as graph edges, this is only possible 
+because they are binary functions. For non-binary functions the function would 
+have to be a graph node with arguments linked to it.</p>
+
+<h1>Representing Equation Constraints in OWL</h1>
+
+<p>First consider the kinds of things that we need to capture in the constraint 
+model. Sticking with the example of Equation 4, <i>lowerStratosphereTemperature</i>, 
+and using Figure 5 as a guide, we need to capture the following information, 
+expressed here in pseudo RDF.</p>
+
+<ol>
+  <li>TriplePattern (v0, rdf:type, Air)</li>
+  <li>TriplePattern (v1, rdf:type, Length)</li>
+  <li>TriplePattern (v0, altitude, v1)</li>
+  <li>TriplePattern (v1, value, <b>alt</b>)</li>
+  <li>TriplePattern(v1, unit, ft)</li>
+  <li>TriplePattern (v2, rdf:type, Temperature)</li>
+  <li>TriplePattern (v0, temperature, v2)</li>
+  <li>TriplePattern (v2, value, <b>v3</b>)</li>
+  <li>TriplePattern (v2, unit, F)</li>
+  <li>FunctionPattern(greaterThan, alt, 36152)</li>
+  <li>FunctionPattern(lessThanOrEqual, alt, 82345)<br>
+  <br>
+  where <b>alt</b> is the input decimal value and <b>v3</b> is the returned 
+  decimal value computed by the equation.</li>
+</ol>
+
+<p><br>
+&nbsp;</p>
+
+<p>In order to capture equation constraints in OWL, we need a meta-model for 
+constraints. We have considered using the W3C recommended Shapes Constraint 
+Language SHACL (see <a href="https://www.w3.org/TR/shacl/">
+https://www.w3.org/TR/shacl/</a>). However, in SHACL the graph patterns of the 
+constraints would be represented in SPARQL strings, which would have to be 
+parsed to be able query or infer over the patterns. That would require parsing 
+the SPARQL into some meta-model, so we are forced in any case do provide some 
+non-standard meta-model. The SADL Augmented Types meta-model is in the SADL 
+implicit model, which is implicitly loaded by each SADL model. Below is the 
+relevant snippet of that model.</p>
+
+<p><img border="0" src="images/AugmentedTypesMetaModel.jpg" width="937" height="572"></p>
+
+<p><i><b>Figure 6: The Equation (and Tabular Data) Constraint Meta-model</b></i></p>
+
+<p>The OWL created from the equation constraints is not easy to read in any 
+standard OWL serialization. The portion for <i>lowerStratosphereTemperture</i> 
+in RDF/XML-ABBREV format is shown in <a href="#Appendix A">Appendix A</a>.</p>
+
+<p>To relate this content to the pseudo RDF above, we will give the mappings of 
+two elements from above.</p>
+
+<p>(1) TriplePattern (v0, rdf:type, Air) </p>
+
+<p>maps to</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;j.0:TriplePattern&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;j.0:gpObject rdf:resource=&quot;#Air&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;j.0:gpPredicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/j.0:gpPredicate&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;j.0:gpSubject rdf:resource=&quot;#lowerStratosphereTemperature_v0&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;/j.0:TriplePattern&gt;</p>
+
+<p>(10)FunctionPattern(greaterThan, alt, 36152)</p>
+
+<p>maps to</p>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;j.0:FunctionPattern&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;j.0:argValues rdf:parseType=&quot;Collection&quot;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;j.0:GPVariable rdf:about=&quot;#lowerStratosphereTemperature_alt&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;j.0:GPLiteralValue&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;j.0:gpLiteralValue rdf:datatype=&quot;http://www.w3.org/2001/XMLSchema#decimal&quot;&gt;36152&lt;/j.0:gpLiteralValue&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;/j.0:GPLiteralValue&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;/j.0:argValues&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;j.0:builtin rdf:resource=&quot;builtinfunctions#greaterThan&quot;/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+&lt;/j.0:FunctionPattern&gt;</p>
+
+<p>Note that order matters in a number of places in the OWL representation of 
+the constraints of the equation. In the meta-model, the range of a property 
+where order matters is given as a typed List, e.g., the <i>argValues</i> 
+property with domain <i>FunctionPattern</i>, has range <i>GPAtom</i> <i>List</i>. 
+Similarly, the order of units matter because it is intended that if the n<sup>th</sup> 
+unit listed, when multiple are listed, not illustrated here, is used for one 
+argument, the n<sup>th</sup> unit listed must be used for all other arguments 
+and for the returned value.</p>
+
+<h1><a name="Appendix A">Appendix A</a>: Semantic Constraints for Equation <i>
+lowerStratosphereTemperature</i></h1>
+
+<pre> &lt;j.0:Equation rdf:ID=&quot;lowerStratosphereTemperature&quot;&gt;
+   &lt;j.0:returnTypes rdf:parseType=&quot;Collection&quot;&gt;
+     &lt;j.0:DataDescriptor&gt;
+       &lt;j.0:descriptorVariable&gt;
+         &lt;j.0:GPVariable rdf:ID=&quot;lowerStratosphereTemperature_v3&quot;/&gt;
+       &lt;/j.0:descriptorVariable&gt;
+       &lt;j.0:augmentedType&gt;
+         &lt;j.0:SemanticConstraint&gt;
+           &lt;j.0:constraints rdf:parseType=&quot;Collection&quot;&gt;
+             &lt;j.0:TriplePattern&gt;
+               &lt;j.0:gpObject rdf:resource=&quot;#Temperature&quot;/&gt;
+               &lt;j.0:gpPredicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/j.0:gpPredicate&gt;
+               &lt;j.0:gpSubject&gt;
+                 &lt;j.0:GPVariable rdf:ID=&quot;lowerStratosphereTemperature_v2&quot;/&gt;
+               &lt;/j.0:gpSubject&gt;
+             &lt;/j.0:TriplePattern&gt;
+             &lt;j.0:TriplePattern&gt;
+               &lt;j.0:gpObject rdf:resource=&quot;#lowerStratosphereTemperature_v2&quot;/&gt;
+               &lt;j.0:gpPredicate&gt;http://sadl.org/SemanticConstraintsExample.sadl#temperature&lt;/j.0:gpPredicate&gt;
+               &lt;j.0:gpSubject&gt;
+                 &lt;j.0:GPVariable rdf:ID=&quot;lowerStratosphereTemperature_v0&quot;/&gt;
+               &lt;/j.0:gpSubject&gt;
+             &lt;/j.0:TriplePattern&gt;
+             &lt;j.0:TriplePattern&gt;
+               &lt;j.0:gpObject rdf:resource=&quot;http://www.w3.org/2001/XMLSchema#decimal&quot;/&gt;
+               &lt;j.0:gpPredicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/j.0:gpPredicate&gt;
+               &lt;j.0:gpSubject rdf:resource=&quot;#lowerStratosphereTemperature_v3&quot;/&gt;
+             &lt;/j.0:TriplePattern&gt;
+             &lt;j.0:TriplePattern&gt;
+               &lt;j.0:gpObject rdf:resource=&quot;#lowerStratosphereTemperature_v3&quot;/&gt;
+               &lt;j.0:gpPredicate&gt;http://sadl.org/sadlimplicitmodel#value&lt;/j.0:gpPredicate&gt;
+               &lt;j.0:gpSubject rdf:resource=&quot;#lowerStratosphereTemperature_v2&quot;/&gt;
+             &lt;/j.0:TriplePattern&gt;
+           &lt;/j.0:constraints&gt;
+         &lt;/j.0:SemanticConstraint&gt;
+       &lt;/j.0:augmentedType&gt;
+       &lt;j.0:specifiedUnits rdf:parseType=&quot;Resource&quot;&gt;
+         &lt;rdf:rest rdf:resource=&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#nil&quot;/&gt;
+         &lt;rdf:first rdf:datatype=&quot;http://www.w3.org/2001/XMLSchema#string&quot;&gt;F&lt;/rdf:first&gt;
+       &lt;/j.0:specifiedUnits&gt;
+       &lt;j.0:dataType&gt;http://www.w3.org/2001/XMLSchema#decimal&lt;/j.0:dataType&gt;
+     &lt;/j.0:DataDescriptor&gt;
+   &lt;/j.0:returnTypes&gt;
+   &lt;j.0:arguments rdf:parseType=&quot;Collection&quot;&gt;
+     &lt;j.0:DataDescriptor&gt;
+       &lt;j.0:augmentedType&gt;
+         &lt;j.0:SemanticConstraint&gt;
+           &lt;j.0:constraints rdf:parseType=&quot;Collection&quot;&gt;
+             &lt;j.0:TriplePattern&gt;
+               &lt;j.0:gpObject rdf:resource=&quot;#Air&quot;/&gt;
+               &lt;j.0:gpPredicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/j.0:gpPredicate&gt;
+               &lt;j.0:gpSubject rdf:resource=&quot;#lowerStratosphereTemperature_v0&quot;/&gt;
+             &lt;/j.0:TriplePattern&gt;
+             &lt;j.0:TriplePattern&gt;
+               &lt;j.0:gpObject rdf:resource=&quot;#Length&quot;/&gt;
+               &lt;j.0:gpPredicate&gt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&lt;/j.0:gpPredicate&gt;
+               &lt;j.0:gpSubject&gt;
+                 &lt;j.0:GPVariable rdf:ID=&quot;lowerStratosphereTemperature_v1&quot;/&gt;
+               &lt;/j.0:gpSubject&gt;
+             &lt;/j.0:TriplePattern&gt;
+             &lt;j.0:TriplePattern&gt;
+               &lt;j.0:gpObject rdf:resource=&quot;#lowerStratosphereTemperature_v1&quot;/&gt;
+               &lt;j.0:gpPredicate&gt;http://sadl.org/SemanticConstraintsExample.sadl#altitude&lt;/j.0:gpPredicate&gt;
+               &lt;j.0:gpSubject rdf:resource=&quot;#lowerStratosphereTemperature_v0&quot;/&gt;
+             &lt;/j.0:TriplePattern&gt;
+             &lt;j.0:TriplePattern&gt;
+               &lt;j.0:gpObject&gt;
+                 &lt;j.0:GPVariable rdf:ID=&quot;lowerStratosphereTemperature_alt&quot;/&gt;
+               &lt;/j.0:gpObject&gt;
+               &lt;j.0:gpPredicate&gt;http://sadl.org/sadlimplicitmodel#value&lt;/j.0:gpPredicate&gt;
+               &lt;j.0:gpSubject rdf:resource=&quot;#lowerStratosphereTemperature_v1&quot;/&gt;
+             &lt;/j.0:TriplePattern&gt;
+             &lt;j.0:FunctionPattern&gt;
+               &lt;j.0:argValues rdf:parseType=&quot;Collection&quot;&gt;
+                 &lt;j.0:GPVariable rdf:about=&quot;#lowerStratosphereTemperature_alt&quot;/&gt;
+                 &lt;j.0:GPLiteralValue&gt;
+                   &lt;j.0:gpLiteralValue rdf:datatype=&quot;http://www.w3.org/2001/XMLSchema#decimal&quot;&gt;36152&lt;/j.0:gpLiteralValue&gt;
+                 &lt;/j.0:GPLiteralValue&gt;
+               &lt;/j.0:argValues&gt;
+               &lt;j.0:builtin rdf:resource=&quot;builtinfunctions#greaterThan&quot;/&gt;
+             &lt;/j.0:FunctionPattern&gt;
+             &lt;j.0:FunctionPattern&gt;
+               &lt;j.0:argValues rdf:parseType=&quot;Collection&quot;&gt;
+                 &lt;j.0:GPVariable rdf:about=&quot;#lowerStratosphereTemperature_alt&quot;/&gt;
+                 &lt;j.0:GPLiteralValue&gt;
+                   &lt;j.0:gpLiteralValue rdf:datatype=&quot;http://www.w3.org/2001/XMLSchema#decimal&quot;&gt;82345&lt;/j.0:gpLiteralValue&gt;
+                 &lt;/j.0:GPLiteralValue&gt;
+               &lt;/j.0:argValues&gt;
+               &lt;j.0:builtin rdf:resource=&quot;builtinfunctions#le&quot;/&gt;
+             &lt;/j.0:FunctionPattern&gt;
+           &lt;/j.0:constraints&gt;
+         &lt;/j.0:SemanticConstraint&gt;
+       &lt;/j.0:augmentedType&gt;
+       &lt;j.0:specifiedUnits rdf:parseType=&quot;Resource&quot;&gt;
+         &lt;rdf:rest rdf:resource=&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#nil&quot;/&gt;
+         &lt;rdf:first rdf:datatype=&quot;http://www.w3.org/2001/XMLSchema#string&quot;&gt;ft&lt;/rdf:first&gt;
+       &lt;/j.0:specifiedUnits&gt;
+       &lt;j.0:dataType&gt;http://www.w3.org/2001/XMLSchema#decimal&lt;/j.0:dataType&gt;
+       &lt;j.0:descriptorVariable rdf:resource=&quot;#lowerStratosphereTemperature_alt&quot;/&gt;
+       &lt;j.0:localDescriptorName&gt;alt&lt;/j.0:localDescriptorName&gt;
+     &lt;/j.0:DataDescriptor&gt;
+   &lt;/j.0:arguments&gt;
+   &lt;j.0:expression&gt;
+     &lt;j.0:Script&gt;
+       &lt;j.0:language rdf:resource=&quot;sadlimplicitmodel#Text&quot;/&gt;
+       &lt;j.0:script rdf:datatype=&quot;http://www.w3.org/2001/XMLSchema#string&quot;&gt;decimal lowerStratosphereTemperature(decimal alt): &lt;/j.0:script&gt;
+     &lt;/j.0:Script&gt;
+   &lt;/j.0:expression&gt;
+ &lt;/j.0:Equation&gt;</pre>
+
+</body>
+
+</html>

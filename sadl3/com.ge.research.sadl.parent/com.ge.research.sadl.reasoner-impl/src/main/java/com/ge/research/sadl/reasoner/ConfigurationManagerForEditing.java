@@ -682,7 +682,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 			Statement stmt = sitr.nextStatement();
 			Resource rsrc = stmt.getSubject();
 			getMappingModel().removeAll(rsrc, null, null);
-			saveOntPolicyFile();
+//			saveOntPolicyFile();
 		}
 		mappings.remove(publicUri);
 		globalPrefixes.remove(publicUri);
