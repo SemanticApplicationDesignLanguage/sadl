@@ -17,26 +17,23 @@ cache:
   - $HOME/.m2/repository
   - $HOME/.gradle
 
-env:
-   global:
-    - DISPLAY=:99.0
-
 jobs:
   include:
   - stage: test
     language: java
-    jdk: oraclejdk11
+    jdk: openjdk8
+    services:
+      - xvfb
     before_install: 
       - export M2_HOME=/usr/local/maven
       - export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m -XX:PermSize=512m"
-      - sh -e /etc/init.d/xvfb start - sleep 10
     script:
       - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean
       - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml verify
 
   - stage: publish-npm
     language: java
-    jdk: oraclejdk11
+    jdk: openjdk8
     node_js: '8'
     before_script: 
       - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.12.3
