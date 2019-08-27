@@ -35,6 +35,9 @@ jobs:
     language: java
     jdk: openjdk8
     node_js: '8'
+    before_install:
+      - export M2_HOME=/usr/local/maven
+      - export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m -XX:PermSize=512m"
     before_script: 
       - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.12.3
       - export PATH=$HOME/.yarn/bin:$PATH
@@ -42,6 +45,8 @@ jobs:
     script:
       - rm -rf ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ # Wipe the previous state.
       - rm -rf ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner/pom.xml install
+      - (cd ./sadl3/com.ge.research.sadl.parent/com.ge.research.jena && mvn install)
       - ./sadl3/com.ge.research.sadl.parent/gradlew -p ./sadl3/com.ge.research.sadl.parent/ build installDist --refresh-dependencies # Build the LS.
       - cp -rf ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/ # Copy the LS to the Theia extension.
       - yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension # Build the Theia extension.

@@ -2,8 +2,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ge.research.sadl</groupId>
-	<version>3.2.0-SNAPSHOT</version>
 	<artifactId>com.ge.research.sadl.parent</artifactId>
+	<version>3.2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -17,8 +17,7 @@
 	</properties>
 	<modules>
 		<module>com.ge.research.sadl.xtextgenerator</module>
-		<module>com.ge.research.sadl.reasoner-api</module>
-		<module>com.ge.research.sadl.reasoner-impl</module>
+		<module>com.ge.research.sadl.reasoner</module>
 		<module>com.ge.research.jena</module>
 		<module>com.ge.research.sadl</module>
 		<module>com.ge.research.sadl.externalmodels</module>
