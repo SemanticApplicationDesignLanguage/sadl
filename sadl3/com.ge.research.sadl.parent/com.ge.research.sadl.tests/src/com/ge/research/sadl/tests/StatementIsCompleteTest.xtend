@@ -55,7 +55,6 @@ class StatementIsCompleteTest {
 		'''.parse
 		// Get the EOS rule
 		val EOS = grammarAccess.EOSRule
-
 		EcoreUtil2.getAllContentsOfType(model, SadlStatement).forEach [
 			// Here, `it` is any kind of `SadlStatement`.
 			// We locate the parse tree node from an AST node.
@@ -67,7 +66,12 @@ class StatementIsCompleteTest {
 					val grammarElement = lastChild.grammarElement;
 					if (grammarElement instanceof RuleCall) {
 						if (grammarElement.rule === EOS) {
-							println('SADL statement is complete: ' + node.text)
+							if (node.text.trim.startsWith("Rock is")) {
+								println("This model element should have failed but did not! (" + node.text.trim + ")")
+							}
+							else {
+								println('SADL statement is complete: ' + node.text.trim)								
+							}
 						}
 					}
 				}
