@@ -48,7 +48,7 @@ jobs:
       - mvn -f ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner/pom.xml install
       - mvn -f ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.target/pom.xml install
       - (cd ./sadl3/com.ge.research.sadl.parent/com.ge.research.jena && mvn install)
-      - ./sadl3/com.ge.research.sadl.parent/gradlew -p ./sadl3/com.ge.research.sadl.parent/ build installDist --refresh-dependencies # Build the LS.
+      - ./sadl3/com.ge.research.sadl.parent/gradlew -p ./sadl3/com.ge.research.sadl.parent/ build installDist --refresh-dependencies --no-parallel --max-workers=1 # Build the LS.
       - cp -rf ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/ # Copy the LS to the Theia extension.
       - yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension # Build the Theia extension.
     before_deploy:

@@ -1,3 +1,10 @@
+serviceLoader {
+	serviceInterface 'com.ge.research.sadl.importer.ITabularDataImporter'
+	serviceInterface 'com.ge.research.sadl.reasoner.IReasoner'
+	serviceInterface 'com.ge.research.sadl.reasoner.ITranslator'
+	serviceInterface 'com.hp.hpl.jena.reasoner.rulesys.Builtin'
+}
+
 dependencies {
 	compile project(":com.ge.research.jena")
 	compile project(":com.ge.research.sadl")
