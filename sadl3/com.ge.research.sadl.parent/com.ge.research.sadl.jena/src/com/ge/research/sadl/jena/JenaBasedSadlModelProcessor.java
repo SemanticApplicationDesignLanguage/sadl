@@ -3468,7 +3468,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 				if (objrsrc != null && (!variablesTyped.contains(tp.getSubject()) || !prop.equals(RDF.type))) {
-					createTripleSemanticConstraint(triplePatternClass, subjInst, prop.getURI(), objrsrc, constraints);
+					createTripleSemanticConstraint(triplePatternClass, subjInst, prop, objrsrc, constraints);
 				}
 			}
 			else {
@@ -3480,11 +3480,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	private Individual createTripleSemanticConstraint(OntClass triplePatternClass, Individual subjInst, String predNodeUri,
+	private Individual createTripleSemanticConstraint(OntClass triplePatternClass, Individual subjInst, Property predNode,
 			RDFNode objrsrc, List<Individual> constraints) {
 		Individual tpInst = getTheJenaModel().createIndividual(triplePatternClass);												// create new TriplePattern 
 		tpInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_GP_SUBJECT_PROPERTY_URI), subjInst);
-		tpInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_GP_PREDICATE_PROPERTY_URI), predNodeUri);
+		tpInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_GP_PREDICATE_PROPERTY_URI), predNode);
 		tpInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_GP_OBJECT_PROPERTY_URI), objrsrc);
 		constraints.add(tpInst);
 		return tpInst;
@@ -3494,7 +3494,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// add type info of variable
 		if (!variablesTyped.contains(subj)) {
 			com.hp.hpl.jena.rdf.model.Resource typ = getTheJenaModel().getResource(((VariableNode)subj).getType().toFullyQualifiedString());
-			createTripleSemanticConstraint(triplePatternClass, gpVarSubjInst, RDF.type.getURI(), typ, constraints);
+			createTripleSemanticConstraint(triplePatternClass, gpVarSubjInst, RDF.type, typ, constraints);
 		}
 		variablesTyped.add(subj);
 	}
@@ -9823,13 +9823,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// listInitializer);
 //		}
 		Iterator<SadlExplicitValue> values = listInitializer.getExplicitValues().iterator();
-		addValueToList(null, inst, cls, to, values);
+		addValueToList(inst, cls, to, values);
 	}
 	
-	private Individual addValueToList(Individual lastInst, Individual inst, OntClass cls,
+	/**
+	 * Method to add a value from a SadlExplicitValue Iterator to a SADL typed list
+	 * @param lastInst -- the list to which a value is being added
+	 * @param cls -- the Sadl list class 
+	 * @param type -- the type of each element of the list
+	 * @param valueIterator -- the Iterator providing values to be added
+	 * @return
+	 */
+	private Individual addValueToList(Individual lastInst, OntClass cls,
 			com.hp.hpl.jena.rdf.model.Resource type, Iterator<SadlExplicitValue> valueIterator) {
-		if (inst == null) {
-			inst = getTheJenaModel().createIndividual(cls);
+		if (lastInst == null) {
+			lastInst = getTheJenaModel().createIndividual(cls);
 		}
 		SadlExplicitValue val = valueIterator.next();
 		if (val instanceof SadlResource) {
@@ -9848,7 +9856,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (!match) {
 						addTypeCheckingError("The Instance '" + listInst.toString() + "' doesn't match the List type.", val);
 					}
-					getTheJenaModel().add(inst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI),
+					getTheJenaModel().add(lastInst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI),
 							listInst);
 				} else {
 					addTypeCheckingError("The type of the list could not be converted to a class.", val);
@@ -9862,17 +9870,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			Literal lval;
 			try {
 				lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, type);
-				getTheJenaModel().add(inst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI),
+				getTheJenaModel().add(lastInst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI),
 						lval);
 			} catch (JenaProcessorException e) {
 				addError(e.getMessage(), val);
 			}
 		}
 		if (valueIterator.hasNext()) {
-			Individual rest = addValueToList(inst, null, cls, type, valueIterator);
-			getTheJenaModel().add(inst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI), rest);
+			Individual rest = addValueToList(null, cls, type, valueIterator);
+			getTheJenaModel().add(lastInst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI), rest);
 		}
-		return inst;
+		return lastInst;
 	}
 
 	private void assignInstancePropertyValue(Individual inst, OntClass cls, SadlResource prop, EObject val)
@@ -10099,6 +10107,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (lval != null) {
 						addInstancePropertyValue(inst, oprop, lval, val);
 					}
+				} else if (val instanceof SadlNestedInstance) {
+// TODO missing case must be implemented.	
+					addWarning("Unhandled SadlNestedInstance", val);
+//					Iterator<SadlPropertyInitializer> propinititr = ((SadlNestedInstance) val)
+//							.getPropertyInitializers().iterator();
+//					while (propinititr.hasNext()) {
+//						EObject pval = propinititr.next().getValue();
+//						if (pval instanceof SadlNumberLiteral) {
+//							com.hp.hpl.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
+//							Literal lval = sadlExplicitValueToLiteral((SadlNumberLiteral) pval, effectiveRng);
+//							if (lval != null) {
+//								addInstancePropertyValue(inst, oprop, lval, val);
+//							}
+//						}
+//					}
 				} else {
 					addError("Invalid value (" + val.getClass().getCanonicalName() + ") for data property", val);
 					throw new JenaProcessorException("unhandled value type for data property");
