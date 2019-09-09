@@ -178,7 +178,7 @@ public class OwlToSadlTest {
 		assertEquals(expected, sadlModelContent);
 	}
 
-	@Ignore
+//	@Ignore
 	@Test
 	public void test03() throws Exception {
 		URL owlUrl = ExternalResourceContentHelper.getURL("Shapes/concepts.owl");
@@ -226,7 +226,7 @@ public class OwlToSadlTest {
 		assertEquals(expected, sadlModelContent);
 	}
 	
-	@Ignore("https://github.com/crapo/sadlos2/issues/372")
+//	@Ignore("https://github.com/crapo/sadlos2/issues/372")
 	@Test
 	public void test04() throws Exception {
 		String owlModelContent = ExternalResourceContentHelper.getContent("Shapes/specificshapes.owl");
@@ -239,9 +239,9 @@ public class OwlToSadlTest {
 				"\n" + 
 				"\n" + 
 				"// Class definitions:\n" + 
-				"Circle is a type of concepts:Shape,\n" + 
+				"Circle is a type of Shape,\n" + 
 				"    described by radius with values of type float.\n" + 
-				"Rectangle is a type of concepts:Shape,\n" + 
+				"Rectangle is a type of Shape,\n" + 
 				"    described by height with values of type float,\n" + 
 				"    described by width with values of type float.\n";
 		System.out.print(sadlModelContent);
