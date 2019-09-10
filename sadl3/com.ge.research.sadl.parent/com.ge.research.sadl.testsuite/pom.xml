@@ -1,14 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.ge.research.sadl</groupId>
 		<artifactId>com.ge.research.sadl.parent</artifactId>
 		<version>3.2.0-SNAPSHOT</version>
 	</parent>
-  <artifactId>com.ge.research.sadl.testsuite</artifactId>
-  <name>SADL Test Suite</name>
-  <description>Suite of tests to be executed sequentially with overall statistics</description>
-  <packaging>eclipse-plugin</packaging>
+	<artifactId>com.ge.research.sadl.testsuite</artifactId>
+	<name>SADL Test Suite</name>
+	<description>Suite of tests to be executed sequentially with overall statistics</description>
+	<packaging>eclipse-plugin</packaging>
 
 	<build>
 		<plugins>
@@ -27,9 +28,6 @@
 				</executions>
 				<configuration>
 					<mainClass>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</mainClass>
-					<classpathScope>
-						compile
-					</classpathScope>
 					<arguments>
 						<argument>/${project.basedir}/src/com/ge/research/sadl/testsuite/GenerateTestSuite.mwe2</argument>
 						<argument>-p</argument>
@@ -37,6 +35,7 @@
 						<argument>toBeScanned1=.</argument>
 						<argument>toBeScanned2=.</argument>
 					</arguments>
+					<classpathScope>compile</classpathScope>
 					<includePluginDependencies>true</includePluginDependencies>
 					<cleanupDaemonThreads>false</cleanupDaemonThreads><!-- see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475098#c3 -->
 				</configuration>
@@ -51,12 +50,11 @@
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
 				<artifactId>xtend-maven-plugin</artifactId>
-				<version>${xtextVersion}</version>
 				<dependencies>
 					<dependency>
-					    <groupId>org.eclipse.platform</groupId>
-					    <artifactId>org.eclipse.equinox.common</artifactId>
-					    <version>3.10.0</version>
+						<groupId>org.eclipse.platform</groupId>
+						<artifactId>org.eclipse.equinox.common</artifactId>
+						<version>3.10.0</version>
 					</dependency>
 					<dependency>
 						<groupId>org.eclipse.jdt</groupId>
@@ -79,48 +77,6 @@
 						<version>2.11.0</version>
 					</dependency>
 				</dependencies>
-			</plugin>
-	
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets combine.children="append">
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.testsuite/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.testsuite.tests/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.testsuite.ide/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.testsuite.ui/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.testsuite/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/model/generated/</directory>
-						</fileset>
-					</filesets>
-				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>
