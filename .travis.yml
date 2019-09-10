@@ -10,31 +10,34 @@ branches:
   only:
     - development
     - GH-339 # TODO: remove this!
+    - ji-experimental-changes # TODO: Remove before merging PR
 
 cache:
   directories:
   - $HOME/.m2/repository
   - $HOME/.gradle
 
-env:
-   global:
-    - DISPLAY=:99.0
-
 jobs:
   include:
   - stage: test
     language: java
-    jdk: oraclejdk8
+    jdk: openjdk8
+    services:
+      - xvfb
     before_install: 
       - export M2_HOME=/usr/local/maven
       - export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m -XX:PermSize=512m"
-      - sh -e /etc/init.d/xvfb start - sleep 10
-    script: mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean verify
+    script:
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml verify
 
   - stage: publish-npm
     language: java
-    jdk: oraclejdk8
+    jdk: openjdk8
     node_js: '8'
+    before_install:
+      - export M2_HOME=/usr/local/maven
+      - export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m -XX:PermSize=512m"
     before_script: 
       - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.12.3
       - export PATH=$HOME/.yarn/bin:$PATH
@@ -42,7 +45,10 @@ jobs:
     script:
       - rm -rf ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ # Wipe the previous state.
       - rm -rf ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/
-      - ./sadl3/com.ge.research.sadl.parent/gradlew -p ./sadl3/com.ge.research.sadl.parent/ build installDist --refresh-dependencies # Build the LS.
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner/pom.xml install
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.target/pom.xml install
+      - (cd ./sadl3/com.ge.research.sadl.parent/com.ge.research.jena && mvn install)
+      - ./sadl3/com.ge.research.sadl.parent/gradlew -p ./sadl3/com.ge.research.sadl.parent/ build installDist --refresh-dependencies --no-parallel --max-workers=1 # Build the LS.
       - cp -rf ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/ # Copy the LS to the Theia extension.
       - yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension # Build the Theia extension.
     before_deploy:

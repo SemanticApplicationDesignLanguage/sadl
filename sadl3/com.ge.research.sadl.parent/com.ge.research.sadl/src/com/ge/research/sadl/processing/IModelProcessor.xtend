@@ -19,6 +19,7 @@ package com.ge.research.sadl.processing
 
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context
 import com.ge.research.sadl.sADL.SadlResource
+import com.google.inject.Inject
 import java.io.IOException
 import java.util.List
 import org.eclipse.emf.common.util.URI
@@ -26,6 +27,7 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.preferences.IPreferenceValues
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
 
@@ -109,6 +111,22 @@ interface IModelProcessor {
 	@Data class ProcessorContext {
 		CancelIndicator cancelIndicator
 		IPreferenceValues preferenceValues
+	}
+	
+	/**
+	 * Instead of injecting the {@code IPreferenceValuesProvider} we use this class,
+	 * so downstream grammars can customize the provided {@code IPreferenceValues}
+	 * by rebinding {@code ProcessorContextPreferenceValuesProvider} in the runtime module.
+	 */
+	class ProcessorContextPreferenceValuesProvider {
+		
+		@Inject
+		protected IPreferenceValuesProvider preferenceProvider
+		
+		def IPreferenceValues getPreferenceValues(Resource resource) {
+			return preferenceProvider.getPreferenceValues(resource);
+		}
+		
 	}
 
 }
