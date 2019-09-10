@@ -59,7 +59,6 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
-import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -1114,7 +1113,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 	}
 
-	private GraphPatternElement addImpliedAndExpandedProperties(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected GraphPatternElement addImpliedAndExpandedProperties(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
 		boolean processed = false;
 //		if (gpe.getLeftImpliedPropertyUsed() != null) {
 //			applyLeftImpliedProperty(gpe);
@@ -1137,6 +1136,16 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						GraphPatternElement gpeback = addImpliedAndExpandedProperties((GraphPatternElement)((ProxyNode)arg).getProxyFor());
 						((ProxyNode)arg).setProxyFor(gpeback);
 					}
+				}
+			}
+			else if (gpe instanceof TripleElement) {
+				Node pred = ((TripleElement)gpe).getPredicate();
+				if (pred instanceof NamedNode && ((NamedNode)pred).getImpliedPropertyNode() != null) {
+					TripleElement newTriple = new TripleElement(null, ((TripleElement)gpe).getPredicate(), null);
+					newTriple.setPredicate(((NamedNode)pred).getImpliedPropertyNode());
+					newTriple.setObject(((TripleElement)gpe).getObject());
+					((TripleElement)gpe).setObject(SadlModelProcessor.nodeCheck(newTriple));
+					((NamedNode)pred).setImpliedPropertyNode(null);
 				}
 			}
 		}
