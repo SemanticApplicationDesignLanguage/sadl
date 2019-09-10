@@ -34,6 +34,7 @@ import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
@@ -1268,6 +1269,23 @@ public class SadlUtils {
         } else {
             return sofar;
         }
+    }
+    
+    /**
+     * Method to replace an extension on a file name
+     * @param fn -- the file name
+     * @param oldExt -- the old extension (without the leading "."
+     * @param newExt -- the new extension
+     * @return -- the new file name
+     * @throws InvalidNameException 
+     */
+    public static String replaceFileExtension(String fn, String oldExt, String newExt) throws InvalidNameException {
+		if (fn.endsWith("." + oldExt)) {
+			return fn.substring(0, fn.length() - oldExt.length()) + newExt;
+		}
+		else {
+			throw new InvalidNameException("File name '" + fn + "' does not have extension '" + oldExt + "'");
+		}
     }
 
 }

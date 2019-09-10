@@ -31,6 +31,7 @@ import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.resource.XtextSyntaxDiagnostic;
 
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
@@ -59,8 +60,10 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.NumberLiteral;
+import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.utils.SadlProjectHelper;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 
 
@@ -89,6 +92,16 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			}
 		}
 		return format;
+	}
+	
+	/**
+	 * Method to check the SadlModel AST and determine if it has any syntax errors
+	 * @param model -- the SadlModel
+	 * @return == true if valid syntax else false
+	 */
+	public boolean isAstSyntaxValid(SadlModel model) {
+	    Iterable<XtextSyntaxDiagnostic> syntaxErrors = Iterables.<XtextSyntaxDiagnostic>filter(model.eResource().getErrors(), XtextSyntaxDiagnostic.class);
+	    return !syntaxErrors.iterator().hasNext();
 	}
 	
 //	protected Object translate(BinaryOperation expr) throws InvalidNameException, InvalidTypeException, TranslationException {

@@ -36,15 +36,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.eclipse.xtext.GrammarUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.SADLStandaloneSetup;
-import com.ge.research.sadl.parser.antlr.SADLParser;
-import com.google.inject.Injector;
+import com.hp.hpl.jena.graph.GetTriple;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -2280,7 +2276,7 @@ public class OwlToSadl {
 					if (trimmedNs != null) {
 						if (qNamePrefixes.containsKey(trimmedNs)) {
 							String prefix = qNamePrefixes.get(trimmedNs).trim();
-							if (prefix.length() > 0) {
+							if (prefix.length() > 0 && isAmbiguousName(rsrc)) {
 								return prefix + ":" + checkLocalnameForKeyword(rsrc.getLocalName());
 							}
 							else {
@@ -2349,6 +2345,17 @@ public class OwlToSadl {
 			}
 		}
 		return rsrc.toString();
+	}
+
+	private boolean isAmbiguousName(Resource rsrc) {
+		int cntr = 0;
+		ExtendedIterator<OntModel> smitr = theModel.listSubModels(true);
+		while (smitr.hasNext()) {
+			if (smitr.next().containsResource(rsrc)) {
+				cntr++;
+			}
+		}
+		return (cntr > 1);
 	}
 
 	private String checkLocalnameForKeyword(String localName) {

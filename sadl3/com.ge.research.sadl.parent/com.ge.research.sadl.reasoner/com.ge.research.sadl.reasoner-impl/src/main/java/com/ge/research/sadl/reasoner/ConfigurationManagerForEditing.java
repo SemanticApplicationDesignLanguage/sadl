@@ -1628,7 +1628,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 				RDFWriter rdfw = model.getWriter(format);
 				// NTripleWriter.setProperty always throws UnknownPropertyException; ditto for N3.
 				if (format.startsWith("RDF/XML")) {
-					rdfw.setProperty("xmlbase", toNamespace(modelName)); 
+//					rdfw.setProperty("xmlbase", toNamespace(modelName)); 
+					rdfw.setProperty("xmlbase", modelName); 
 					rdfw.setProperty("relativeURIs", "");
 					//			            rdfw.setProperty("minimalPrefixes", true);
 				}
