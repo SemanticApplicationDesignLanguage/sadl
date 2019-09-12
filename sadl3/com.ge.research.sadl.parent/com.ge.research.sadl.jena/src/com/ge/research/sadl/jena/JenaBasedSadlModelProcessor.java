@@ -545,8 +545,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 			// // Output the OWL file for the ontology model
 			URI lastSeg = fsa.getURI(resource.getURI().lastSegment());
-			String owlFN = lastSeg.trimFileExtension().appendFileExtension(ResourceManager.getOwlFileExtension(format))
-					.lastSegment().toString();
+			String owlFN = getOwlFilename(lastSeg, format);
 			RDFWriter w = getTheJenaModel().getWriter(format);
 			w.setProperty("xmlbase", getModelName());
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -669,6 +668,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		generationInProgress = false;
 		logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
+	}
+
+	protected String getOwlFilename(URI lastSeg, String format) {
+		String owlFN = lastSeg.trimFileExtension().appendFileExtension(ResourceManager.getOwlFileExtension(format))
+				.lastSegment().toString();
+		return owlFN;
 	}
 
 	// akitta: get rid of this hack once
