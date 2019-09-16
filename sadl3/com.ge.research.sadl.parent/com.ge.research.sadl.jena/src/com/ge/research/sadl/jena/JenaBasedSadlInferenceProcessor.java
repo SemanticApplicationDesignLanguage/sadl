@@ -1473,7 +1473,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	}
 
 	protected void setModelFolderPath(String modelFolderPath) {
-		this.modelFolderPath = modelFolderPath.replace('\\', '/');
+		if (modelFolderPath != null) {
+			this.modelFolderPath = modelFolderPath.replace('\\', '/');
+		}
 	}
 
 	protected String getModelName() {
@@ -1579,7 +1581,12 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					else {
 						val = getTheJenaModel().getResource(objNode.getURI());
 					}
-					getTheJenaModel().add(commonSubjectInst, pred, val);
+					if (commonSubject != null && pred != null && val != null) {
+						getTheJenaModel().add(commonSubjectInst, pred, val);
+					}
+					else {
+						System.err.println("Unhandled condition: triple has a null element.");
+					}
 				}
 				else {
 					System.err.println("Unhandled condition: subject isn't expected common subject.");
