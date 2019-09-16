@@ -8,6 +8,8 @@ import org.junit.runner.RunWith
 import org.junit.Assert
 import static org.junit.Assert.*
 import org.junit.Test
+import com.ge.research.sadl.reasoner.ConfigurationManager
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -44,6 +46,14 @@ class SadlJenaOSTest extends AbstractSADLModelProcessorTest {
 					"Rule UnnamedChild:  if rdf(X, rdf:type, sjost:Parent) then thereExists(v0) and rdf(X, sjost:child, v1)."))
 		]
 
+	}
+	
+	@Ignore
+	@Test
+	def void testGetTranslatorInstance() {
+		val cm = new ConfigurationManager
+		val tr = cm.translator
+		print(tr)
 	}
 	
 }
