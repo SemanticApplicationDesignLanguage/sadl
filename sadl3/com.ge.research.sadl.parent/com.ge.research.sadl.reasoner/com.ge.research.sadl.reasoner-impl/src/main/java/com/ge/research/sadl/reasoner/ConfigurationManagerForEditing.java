@@ -265,14 +265,16 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * isConfigurationStale()
 	 */
 	public boolean isConfigurationStale() {
-		String configFilename;
+	String configFilename;
 		try {
-			configFilename = getConfigurationFilename();
-			File configFile = new File(configFilename);
-			if (configFile.exists()) {
-				long curlastmod = configFile.lastModified();
-				if (curlastmod > timeConfigFileLastModifiedAtInitialization) {
-					return true;
+			if (getModelFolder() != null) {	// this will be null for tests
+				configFilename = getConfigurationFilename();
+				File configFile = new File(configFilename);
+				if (configFile.exists()) {
+					long curlastmod = configFile.lastModified();
+					if (curlastmod > timeConfigFileLastModifiedAtInitialization) {
+						return true;
+					}
 				}
 			}
 		} catch (IOException e) {

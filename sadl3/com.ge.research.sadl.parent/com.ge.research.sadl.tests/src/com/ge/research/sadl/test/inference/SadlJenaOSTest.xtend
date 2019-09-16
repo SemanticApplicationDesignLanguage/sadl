@@ -48,7 +48,7 @@ class SadlJenaOSTest extends AbstractSADLModelProcessorTest {
 
 	}
 	
-	@Ignore
+//	@Ignore
 	@Test
 	def void testGetTranslatorInstance() {
 		val cm = new ConfigurationManager

@@ -56,7 +56,8 @@ public interface IReasoner {
 	public int initializeReasoner(String KBIdentifier, String modelName, String repoType) throws ReasonerNotFoundException, ConfigurationException;
 	public int initializeReasoner(URI KBIdentifier, String modelName, List<ConfigurationItem> preferences, String repoType) throws ReasonerNotFoundException, ConfigurationException;
 	public int initializeReasoner(URI KBIdentifier, String modelName, String repoType) throws ReasonerNotFoundException, ConfigurationException;
-		
+	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences) throws ReasonerNotFoundException, ConfigurationException;
+	
 	/**
 	 * Method to find out if an instance of IReasoner has been initialized
 	 * @return-- true if the reasoner has been initialized
