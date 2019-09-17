@@ -659,6 +659,16 @@ public class ConfigurationManager implements IConfigurationManager {
 			}
 		}
 		
+		try {
+			Class<?> serviceClass = this.getClass().getClassLoader().loadClass(name);
+			if (serviceClass != null && clazz.isAssignableFrom(serviceClass)) {
+				Object service = serviceClass.newInstance();
+				return clazz.cast(service);
+			}
+		} catch (ClassNotFoundException e) {
+			// Ignored, we will throw a proper CNFE anyway. 
+		}
+		
 		throw new ClassNotFoundException("Cannot find service class for name: " + name + " for service API " + clazz + ".");
 	}
 
