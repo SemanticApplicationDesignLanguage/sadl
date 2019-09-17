@@ -1350,11 +1350,29 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return results;
 	}
 
+	/**
+	 * Method to get an initialized reasoner to be able to do inference and answer queries. Two
+	 *  different scenarios are supported.
+	 *  1. File-based knowledge bases, in which case there is a model folder path
+	 *  2. In-memory knowledge bases, in which case we have an in-memory OntModel to use 
+	 *     (this is the case in JUnit tests that are not file-based)
+	 * @return -- the reasoner instance
+	 * @throws ConfigurationException
+	 * @throws ReasonerNotFoundException
+	 */
 	private IReasoner getInitializedReasoner() throws ConfigurationException, ReasonerNotFoundException {
 		IReasoner reasoner = getConfigMgr(getOwlFormat()).getReasoner();
 		if (!reasoner.isInitialized()) {
 			reasoner.setConfigurationManager(getConfigMgr(getOwlFormat()));
-			reasoner.initializeReasoner(getModelFolderPath(), getModelName(), getOwlFormat());
+			if (getModelFolderPath() != null) {
+				reasoner.initializeReasoner(getModelFolderPath(), getModelName(), getOwlFormat());
+			}
+			else if (getTheJenaModel() != null) {
+				reasoner.initializeReasoner(getTheJenaModel(), getModelName(), null, null);
+			}
+			else {
+				throw new ConfigurationException("No model folder path, no model, can't initialize a reasoner.");
+			}
 		}
 		return reasoner;
 	}
