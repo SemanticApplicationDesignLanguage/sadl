@@ -9386,10 +9386,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private Individual processSadlInstance(SadlInstance element)
 			throws JenaProcessorException, CircularDefinitionException {
-		// this has two forms:
+		// this has multiple forms:
 		// 1) <name> is a <type> ...
 		// 2) a <type> <name> ....
 		// 3) <name> is a <property> of <instance>
+		// 4) <property> of <instance> is <value>
 		SadlTypeReference type = element.getType();
 		boolean isList = typeRefIsList(type);
 		SadlResource sr = sadlResourceFromSadlInstance(element);
@@ -9397,6 +9398,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String instUri = null;
 		OntConceptType subjType = null;
 		boolean isActuallyClass = false;
+		boolean isActuallyProperty = false;
 		if (sr != null) {
 			instUri = getDeclarationExtensions().getConceptUri(sr);
 			if (instUri == null) {
@@ -9408,6 +9410,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				OntClass actualClass = getOrCreateOntClass(instUri);
 				isActuallyClass = true;
 				inst = actualClass.asIndividual();
+			}
+			else if (isProperty(subjType)) {
+				// this must be of the form "<property> of <subject> is <value>"
+				//	so sr is the property, propertyInitializer.property is the subject, propertyIntitalizer.value is the value
+				isActuallyProperty = true;
 			}
 		}
 		OntClass cls = null;
@@ -9515,19 +9522,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 			}
-			if (inst == null) {
-				if (cls != null) {
-					inst = createIndividual(instUri, cls);
-				} else if (instUri != null) {
-					inst = getTheJenaModel().getIndividual(instUri);
-					if (inst != null) {
-						// instance already exists
+			if (!isActuallyProperty) {
+				if (inst == null) {
+					if (cls != null) {
+						inst = createIndividual(instUri, cls);
+					} else if (instUri != null) {
+						inst = getTheJenaModel().getIndividual(instUri);
+						if (inst != null) {
+							// instance already exists
+						}
+						else {
+							inst = createIndividual(instUri, (OntClass) null);
+						}
+					} else {
+						throw new JenaProcessorException("Can't create an unnamed instance with no class given");
 					}
-					else {
-						inst = createIndividual(instUri, (OntClass) null);
-					}
-				} else {
-					throw new JenaProcessorException("Can't create an unnamed instance with no class given");
 				}
 			}
 		}
@@ -9537,6 +9546,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			SadlPropertyInitializer propinit = itr.next();
 			SadlResource prop = propinit.getProperty();
 			OntConceptType propType = getDeclarationExtensions().getOntConceptType(prop);
+			if (isActuallyProperty) {
+				SadlResource tempHold = prop;
+				prop = sr;
+				sr = tempHold;
+				instUri = getDeclarationExtensions().getConceptUri(sr);
+				inst = getTheJenaModel().getIndividual(instUri);
+				subjType = getDeclarationExtensions().getOntConceptType(sr);
+			}
 			if (subjType != null && subjType.equals(OntConceptType.CLASS)
 					&& !(propType.equals(OntConceptType.ANNOTATION_PROPERTY)) && // only a problem if not an annotation
 																					// property
