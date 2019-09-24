@@ -220,8 +220,10 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 			OntModel model, Object otherStructure, String translationFolder,
 			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException,
 			IOException, URISyntaxException {
-	
-		throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
+		if (otherStructure instanceof List<?> && ((List<?>)otherStructure).size() > 0) {
+			throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
+		}
+		return null;
 	}
 
 	@Override
