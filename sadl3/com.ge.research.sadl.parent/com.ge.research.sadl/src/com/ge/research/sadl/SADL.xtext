@@ -114,10 +114,10 @@ SadlPropertyCondition :
 ;
 
 SadlPropertyInitializer:
-	 ','? ('with'|'has')? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+	 ','? firstConnective=('with'|'has')? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 //	 ','? ('with'|'has')? (property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')) | {SadlPropertyInitializer} ('data' (valueTable=ValueTable | 'located' 'at' location=STRING))?
-	|','? 'is' property=[SadlResource|QNAME] 'of' type=[SadlResource|QNAME]
-	|','? 'of' property=[SadlResource|QNAME] 'is' (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+	|','? firstConnective='is' property=[SadlResource|QNAME] 'of' type=[SadlResource|QNAME]
+	|','? firstConnective='of' property=[SadlResource|QNAME] 'is' (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
 ;
 
 SadlNestedInstance returns SadlInstance:

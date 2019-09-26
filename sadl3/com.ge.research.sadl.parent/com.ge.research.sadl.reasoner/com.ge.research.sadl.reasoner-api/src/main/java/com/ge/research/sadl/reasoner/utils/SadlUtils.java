@@ -325,12 +325,14 @@ public class SadlUtils {
      */
     public static String stripQuotes(String quotedString) {
         if (quotedString != null && !quotedString.isEmpty()) {
-            while (quotedString.length() >= 1 && quotedString.charAt(0) == '\"') {
-                quotedString = quotedString.substring(1);
-            }
-            while (quotedString.length() > 0 && quotedString.charAt(quotedString.length() - 1) == '\"') {
-                quotedString = quotedString.substring(0, quotedString.length() - 1);
-            }
+        	if (quotedString.startsWith("\"") && quotedString.endsWith("\"")) {
+	            while (quotedString.length() >= 1 && quotedString.charAt(0) == '\"') {
+	                quotedString = quotedString.substring(1);
+	            }
+	            while (quotedString.length() > 0 && quotedString.charAt(quotedString.length() - 1) == '\"') {
+	                quotedString = quotedString.substring(0, quotedString.length() - 1);
+	            }
+        	}
         }
         return quotedString;
     }

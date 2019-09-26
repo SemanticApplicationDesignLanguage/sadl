@@ -97,6 +97,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	public int initializeReasoner(String KBIdentifier, String modelName,
 			String repoType) throws ReasonerNotFoundException,
 			ConfigurationException {
+		int succeeded = 1;
 		
 		//System.out.println("KB identifier is: " + KBIdentifier);
 		//System.out.println("Model name: " + modelName);
@@ -145,6 +146,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			succeeded = 0;
 		}
 		sbLoad.append("').\n");
 		sbLoad.append(":- load_rdf_file('");
@@ -162,12 +164,13 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			succeeded = 0;
 		}
 		//SWIPrologInterface.initProlog(KBIdentifier);
 		// to get configuration options
 		//String derval = getStringConfigurationValue(preferences , plImport, null);
 		setInitialized(true);
-		return 0;
+		return succeeded;
 	}
 
 	@Override
@@ -260,8 +263,11 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	@Override
 	public boolean loadInstanceData(String instanceDatafile)
 			throws IOException, ConfigurationException {
-		// TODO Auto-generated method stub
-		return false;
+		StringBuilder sb = new StringBuilder();
+		sb.append(":- load_rdf_file('");
+		sb.append(instanceDatafile);
+		sb.append("').\n");
+		return getPrologServiceInstance().addPlRules(sb.toString());
 	}
 
 	@Override

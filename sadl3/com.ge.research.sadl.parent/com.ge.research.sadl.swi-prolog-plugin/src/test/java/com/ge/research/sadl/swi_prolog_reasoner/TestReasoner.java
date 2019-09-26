@@ -9,6 +9,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
@@ -38,11 +40,14 @@ public class TestReasoner {
 		assertEquals(rsrnr.getReasonerFamily(), "SWI-Prolog-Based");
 	}
 	
-	@Ignore
+//	@Ignore
 	@Test
 	public void testInitializeReasoner() throws ReasonerNotFoundException, ConfigurationException, TripleNotFoundException {
-		IReasoner rsrnr = new SWIPrologReasonerPlugin();
 		String kbIdentifier = kbroot + "/Shapes/OwlModels";
+		IConfigurationManager cm = new ConfigurationManager(kbIdentifier, null);
+		String prologReasonerClassName = "com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin";
+		IReasoner reasoner = cm.getOtherReasoner(prologReasonerClassName);
+		IReasoner rsrnr = new SWIPrologReasonerPlugin();
 		String modName = "http://sadl.org/Shapes/Test";
 		String repoType = null;
 		((SWIPrologReasonerPlugin)rsrnr).setTranslatorPrologFolder(kbroot + "/Prolog");
