@@ -381,18 +381,24 @@ public class ResultSet {
 	
 	/**
 	 * Method to output headers followed by row(s) of data, all comma-separated, but with each line indented the indicated number of spaces
-	 * @param indent
+	 * @param indent -- number of spaces to indent each line of output
 	 * @return
 	 */
 	public String toStringWithIndent(int indent) {
 		return toStringWithIndent(indent, true);
 	}
 
+	/**
+	 * Method that includes control of whether or not to include header in output
+	 * @param indent -- number of spaces to indent each line of output
+	 * @param includeHeader -- include header only if true
+	 * @return
+	 */
 	public String toStringWithIndent(int indent, boolean includeHeader) {
 		StringBuilder sb = new StringBuilder();
 		if (table != null && table[0] != null) {
-			if (table.length > 1 || !includeHeader) {
-				// there is more than 1 row of data
+//			if (table.length > 1 || !includeHeader) {
+				// there is more than 1 row of data OR header is not to be included
 				if (includeHeader && header != null && header.length > 0) {
 					for (int j = 0; j < indent; j++) {
 						sb.append(" ");
@@ -419,30 +425,30 @@ public class ResultSet {
 					}
 					sb.append(System.getProperty("line.separator"));
 				}
-			}
-			else {
-				// there's just one row or header is not to be included
-				for (int j = 0; j < indent; j++) {
-					sb.append(" ");
-				}
-				for (int i = 0; i < table[0].length; i++) {
-					if (i > 0) {
-						sb.append(", ");
-					}
-					if (header != null && i < header.length) {
-						sb.append(quoteAsNeeded(header[i]));
-						sb.append(" = ");
-					}
-					Object val = getResultAt(0,i);
-					if (val instanceof String) {
-						sb.append(val != null ? quoteAsNeeded(val) : val);
-					}
-					else {
-						sb.append(val != null ? val.toString() : val);
-					}
-				}
-				sb.append(System.getProperty("line.separator"));
-			}
+//			}
+//			else {
+//				// there's just one row or header is to be included
+//				for (int j = 0; j < indent; j++) {
+//					sb.append(" ");
+//				}
+//				for (int i = 0; i < table[0].length; i++) {
+//					if (i > 0) {
+//						sb.append(", ");
+//					}
+//					if (header != null && i < header.length) {
+//						sb.append(quoteAsNeeded(header[i]));
+//						sb.append(" = ");
+//					}
+//					Object val = getResultAt(0,i);
+//					if (val instanceof String) {
+//						sb.append(val != null ? quoteAsNeeded(val) : val);
+//					}
+//					else {
+//						sb.append(val != null ? val.toString() : val);
+//					}
+//				}
+//				sb.append(System.getProperty("line.separator"));
+//			}
 		}	
 		return sb.toString();
 	}

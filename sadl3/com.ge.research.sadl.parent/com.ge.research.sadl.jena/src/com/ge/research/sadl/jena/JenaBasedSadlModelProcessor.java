@@ -9545,15 +9545,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		while (itr.hasNext()) {
 			SadlPropertyInitializer propinit = itr.next();
 			SadlResource prop = propinit.getProperty();
-			OntConceptType propType = getDeclarationExtensions().getOntConceptType(prop);
 			if (isActuallyProperty) {
-				SadlResource tempHold = prop;
-				prop = sr;
-				sr = tempHold;
-				instUri = getDeclarationExtensions().getConceptUri(sr);
-				inst = getTheJenaModel().getIndividual(instUri);
-				subjType = getDeclarationExtensions().getOntConceptType(sr);
+				if (propinit.getFirstConnective() != null && propinit.getFirstConnective().equals("of")) {
+					SadlResource subj = prop;
+					// this is of the form "<prop> of <subj> is <value>"
+					//	so sr is the actual property, subj is the subject
+					prop = sr;
+					sr = subj;
+					instUri = getDeclarationExtensions().getConceptUri(sr);
+					inst = getTheJenaModel().getIndividual(instUri);
+					subjType = getDeclarationExtensions().getOntConceptType(sr);
+				}
+				else if (inst == null) {
+					inst = getTheJenaModel().getIndividual(instUri);
+				}
 			}
+			OntConceptType propType = getDeclarationExtensions().getOntConceptType(prop);
 			if (subjType != null && subjType.equals(OntConceptType.CLASS)
 					&& !(propType.equals(OntConceptType.ANNOTATION_PROPERTY)) && // only a problem if not an annotation
 																					// property
@@ -9566,7 +9573,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (val != null) {
 				try {
-					if (getModelValidator() != null) {
+					if (getModelValidator() != null && !propType.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+						// don't type check annotation properties--they have no range (OWL 1)
 						StringBuilder error = new StringBuilder();
 						if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val, error)) {
 							addTypeCheckingError(error.toString(), propinit);
