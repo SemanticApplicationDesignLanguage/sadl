@@ -201,7 +201,25 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	@Override
 	public boolean loadRules(String ruleFileName) throws IOException {
 		// TODO Auto-generated method stub
-		return false;
+		//AG: is this implementation good?
+		SWIPrologServiceInterface pl = getPrologServiceInstance();
+		StringBuffer sbLoad = new StringBuffer();
+
+		
+		sbLoad.append(":- load_rdf_file('");
+		sbLoad.append(ruleFileName);
+		sbLoad.append("').\n");
+		
+		if (sbLoad.length() > 0) {
+			pl.addPlRules(sbLoad.toString());
+		}
+		try {
+			System.out.println(pl.runPlQueryNoArgs(getPlUrl(), "true", true));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
 	}
 
 	@Override
@@ -281,6 +299,9 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	public boolean loadInstanceData(OntModel model)
 			throws ConfigurationException {
 		// TODO Auto-generated method stub
+		
+		
+		
 		return false;
 	}
 
@@ -631,7 +652,8 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		// Step 3: kill existing SWI-Prolog service
 		if (isRunning) {
 			try {
-				Runtime.getRuntime().exec("taskkill /F /IM swipl-win.exe");
+				//Runtime.getRuntime().exec("taskkill /F /IM swipl-win.exe"); //for Windows
+				Runtime.getRuntime().exec("killall swipl"); //for *NIX
 				// must wait a brief period of time or the killed process will respond to the query below
 				while (isRunning) {
 					try {
@@ -676,7 +698,11 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 				if (errorNumber == 0) {
 					try {
 						// Step 4: if query failed for the first time, start Service
-						Runtime.getRuntime().exec("cmd /c start /min " + getPrologCommandLine());
+						//Runtime.getRuntime().exec("cmd /c start /min " + getPrologCommandLine()); //for Windows 
+						//Runtime.getRuntime().exec("/bin/bash " + getPrologCommandLine() + " &"); //for *NIX
+						String command = "/bin/bash " + getPrologCommandLine() + " &";
+						Process proc = Runtime.getRuntime().exec(command); //for *NIX
+						System.out.println(proc.exitValue());
 					} catch (IOException e1) {
 						e1.printStackTrace();
 						return e1.getMessage();
@@ -711,7 +737,8 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		
 		String runServiceFile = getConfigMgr().getModelFolder() + "/" + SWIPrologTranslatorPlugin.SWI_RUN_PROLOG_SERVICE_PL;
 //		String contents = "start /min swipl-win.exe -s " + runServiceFile + "\nexit\n";
-		String contents = "start /min swipl-win.exe --traditional -s " + runServiceFile + "\nexit\n";
+//		String contents = "start /min swipl-win.exe --traditional -s " + runServiceFile + "\nexit\n"; //for Windows
+		String contents = "swipl -s " + runServiceFile + "\n"; // for *NIX
 		SadlUtils su = new SadlUtils();
 		su.stringToFile(bf, contents, false);
 		
