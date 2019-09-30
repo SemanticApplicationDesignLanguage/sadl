@@ -2309,6 +2309,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 										}
 										else {
 											TripleElement newTriple = new TripleElement(secondTriple.getSubject(), secondTriple.getPredicate(), firstTriple.getObject());
+											newTriple.setType(TripleModifierType.Not);
 											patterns.add(newTriple);
 										}
 									}
