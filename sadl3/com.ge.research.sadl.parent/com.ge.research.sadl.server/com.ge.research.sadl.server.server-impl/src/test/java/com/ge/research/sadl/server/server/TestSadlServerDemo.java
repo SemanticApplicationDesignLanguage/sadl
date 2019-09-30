@@ -243,7 +243,7 @@ public class TestSadlServerDemo {
 		assertEquals(rs2.getResultAt(0, 0),120.0);
 	}
 
-//	@Ignore
+	@Ignore
 	@Test
 	public void testSTEM() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, IOException, InvalidNameException, QueryCancelledException, QueryParseException, TemplateException, URISyntaxException {
 		//Path stemKbaseLocation = Paths.get(ClassLoader.getSystemResource("STEM").toURI());
