@@ -800,7 +800,19 @@ public class SadlUtils {
 		        	}
 		        }
 		        else {
-		            errMsg = "Unhandled range " + rnguri;
+		        	Resource rsrc = m.getResource(rnguri);
+		        	if (rsrc != null) {
+		        		Statement typ = rsrc.getProperty(RDF.type);
+		        		if (typ != null) {
+		        			if (typ.getObject().equals(RDFS.Datatype)) {
+		        				TypeMapper.getInstance().getSafeTypeByName(rnguri);
+		        				return getLiteralMatchingDataPropertyRange(m, rnguri, v);
+		        			}
+		        		}
+		        	}
+		        	else {
+		        		errMsg = "Unhandled range " + rnguri;
+		        	}
 		        }
     		}
     		catch (Throwable t) {
