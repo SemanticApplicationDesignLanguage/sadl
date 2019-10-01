@@ -46,11 +46,10 @@ public class TestReasoner {
 		String kbIdentifier = kbroot + "/Shapes/OwlModels";
 		IConfigurationManager cm = new ConfigurationManager(kbIdentifier, null);
 		String prologReasonerClassName = "com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin";
-		IReasoner reasoner = cm.getOtherReasoner(prologReasonerClassName);
-		IReasoner rsrnr = new SWIPrologReasonerPlugin();
+		IReasoner rsrnr = cm.getOtherReasoner(prologReasonerClassName);
 		String modName = "http://sadl.org/Shapes/Test";
 		String repoType = null;
-		((SWIPrologReasonerPlugin)rsrnr).setTranslatorPrologFolder(kbroot + "/Prolog");
+//		((SWIPrologReasonerPlugin)rsrnr).setTranslatorPrologFolder(kbroot + "/Prolog");
 		((SWIPrologReasonerPlugin)rsrnr).setPortNumber("5000");
 		rsrnr.initializeReasoner(kbIdentifier, modName, repoType);
 		ResultSet rs = rsrnr.ask(null, null, null);
