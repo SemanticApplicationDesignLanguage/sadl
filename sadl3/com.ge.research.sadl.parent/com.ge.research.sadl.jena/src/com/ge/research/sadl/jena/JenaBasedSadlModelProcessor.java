@@ -6484,6 +6484,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						addError("Did not expect an indefinite article reference with ordinality in rule conclusion",
 								expr);
 					}
+					else if (!isDefiniteArticle(article) && getRulePart().equals(RulePart.CONCLUSION) && 
+							!isClassificationDeclaration(expr) && !isDeclInThereExists(expr)) {
+						addError("Did not expect an indefinite article reference in rule conclusion",
+								expr);
+					}
 					return typenode;
 				}
 
@@ -6550,6 +6555,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		
 		return typenode;
+	}
+
+	private boolean isClassificationDeclaration(Declaration expr) {
+		if (expr.eContainer() instanceof BinaryOperation && 
+				((BinaryOperation)expr.eContainer()).getOp().equals("is") &&
+				((BinaryOperation)expr.eContainer()).getRight().equals(expr)) {
+			return true;
+		}
+		return false;
 	}
 
 	protected void processListDeclaration(Declaration aExpression, NamedNode aListNode) throws InvalidNameException, TranslationException {

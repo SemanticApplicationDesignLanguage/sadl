@@ -2160,6 +2160,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		int patternsSize = patterns != null ? patterns.size() : 0;
 		Node returnNode = null;
 		Node retiredNode = findMatchingElementInRetiredProxyNodes(be);
+		boolean isNotOfEqual = false;
 		if (isRuleThen && (be.getFuncType().equals(BuiltinType.Equal) || be.getFuncType().equals(BuiltinType.Assign))
 				&& be.getArguments() != null && be.getArguments().size() == 2
 				&& be.getArguments().get(0) instanceof ProxyNode && be.getArguments().get(1) instanceof ProxyNode) {
@@ -2255,6 +2256,21 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 		}
+		else if (getTarget() instanceof Rule && be.getFuncType().equals(BuiltinType.Not) && 
+				be.getArguments().get(0) instanceof ProxyNode && ((ProxyNode)be.getArguments().get(0)).getProxyFor() instanceof BuiltinElement &&
+				((BuiltinElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getFuncType().equals(BuiltinType.Equal)) {
+			BuiltinElement eqb = ((BuiltinElement)((ProxyNode)be.getArguments().get(0)).getProxyFor());
+			Node arg0 = eqb.getArguments().get(0);
+			Node arg1 = eqb.getArguments().get(1);
+			if (arg0 instanceof ProxyNode && ((ProxyNode)arg0).getProxyFor() instanceof TripleElement &&
+					((arg1 instanceof ProxyNode && ((ProxyNode)arg1).getProxyFor() instanceof TripleElement &&
+					((TripleElement)((ProxyNode)arg1).getProxyFor()).getObject() == null)) ||
+					arg1 instanceof NamedNode){
+				// this is of the form: not(is(rdf(s1,p1,v1), rdf(s2,p2,null))) where v1 might also be null
+				// so we want to transform into: rdf(s1,p1,v1), not(rdf(s2,p2,v1))
+				isNotOfEqual = true;
+			}
+		}
 		
 		if (retiredNode != null && retiredNode instanceof ProxyNode) {
 			retiredNode = ((ProxyNode)retiredNode).getReplacementNode();
@@ -2277,10 +2293,29 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					if (argNode == null) {
 						if (realArg instanceof BuiltinElement) {
 							if (be.getFuncType().equals(BuiltinType.Not)) {
-								// don't put in an intermediate variable for negation of a builtin--if needed the language-specific translator will need to do that
-								// the call above to expandProxyNodes might have put the argNode into the patterns; if so remove it
 								if (patterns.get(patterns.size() - 1).equals(realArg)) {
+									// don't put in an intermediate variable for negation of a builtin--if needed the language-specific translator will need to do that
+									// the call above to expandProxyNodes might have put the argNode into the patterns; if so remove it
 									patterns.remove(patterns.size() - 1);
+									if (isNotOfEqual) {
+										TripleElement firstTriple = (TripleElement) patterns.get(patterns.size() - 2);
+										TripleElement secondTriple = (TripleElement) patterns.get(patterns.size() - 1);
+										if (!isRuleThen && !ruleThensContainsTriple(secondTriple)) {
+											if (retiredProxyNodes.containsKey(secondTriple)) {
+												retiredProxyNodes.remove(secondTriple);
+											}
+											secondTriple.setObject(firstTriple.getObject());
+											secondTriple.setType(TripleModifierType.Not);
+										}
+										else {
+											TripleElement newTriple = new TripleElement(secondTriple.getSubject(), secondTriple.getPredicate(), firstTriple.getObject());
+											newTriple.setType(TripleModifierType.Not);
+											patterns.add(newTriple);
+										}
+									}
+								}
+								else if (isNotOfEqual && patterns.get(patterns.size() - 1) instanceof TripleElement) {
+									((TripleElement)patterns.get(patterns.size() - 1)).setType(TripleModifierType.Not);
 								}
 							}
 							else if (((BuiltinElement)realArg).getArguments() != null &&
@@ -2337,11 +2372,58 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			returnNode = be.getArguments() != null ? be.getArguments().get(0) : null;	// this can occur during editing
 		}
-		else {
+		else if (!isNotOfEqual) {
 			removeArgsFromPatterns(patterns, be);
 			patterns.add(be);
 		}
 		return returnNode;
+	}
+
+	private boolean ruleThensContainsTriple(TripleElement triple) {
+		if (getTarget() instanceof Rule) {
+			List<GraphPatternElement> thens = ((Rule)getTarget()).getThens();
+			for (GraphPatternElement then : thens) {
+				if (graphPatternsMatch(then, triple)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean graphPatternsMatch(GraphPatternElement gp, TripleElement tr) {
+		if (gp instanceof TripleElement) {
+			if (((TripleElement)gp).getSubject().equals(tr.getSubject()) &&
+					((TripleElement)gp).getPredicate().equals(tr.getPredicate())) {
+				return true;
+			}
+		}
+		else if (gp instanceof BuiltinElement) {
+			List<Node> args = ((BuiltinElement)gp).getArguments();
+			for (Node arg : args) {
+				if (arg instanceof ProxyNode) {
+					GraphPatternElement argGp = ((ProxyNode)arg).getProxyFor();
+					if (graphPatternsMatch(argGp, tr)) {
+						return true;
+					}
+				}
+			}
+		}
+		else if (gp instanceof Junction) {
+			Object lhs = ((Junction)gp).getLhs();
+			if (lhs instanceof ProxyNode) {
+				if (graphPatternsMatch(((ProxyNode)lhs).getProxyFor(), tr)) {
+					return true;
+				}
+			}
+			Object rhs = ((Junction)gp).getRhs();
+			if (rhs instanceof ProxyNode) {
+				if (graphPatternsMatch(((ProxyNode)rhs).getProxyFor(), tr)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	//Removed implied properties from graph pattern element
