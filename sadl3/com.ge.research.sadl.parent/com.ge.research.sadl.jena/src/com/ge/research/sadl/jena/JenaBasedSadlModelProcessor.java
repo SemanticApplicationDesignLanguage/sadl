@@ -3396,7 +3396,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		OntClass gpVarCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_GP_VARIABLE_CLASS_URI);		// get Variable Class
 		useVariableNodeName = true;
 		String varName = useVariableNodeName ? var.getName() : getNewVar(container);
-		String uniqueInNamespace = getCurrentEquation().getName() + "_" + varName;
+		String uniquifier;
+		if (getCurrentEquation() != null) {
+			uniquifier = getCurrentEquation().getName();
+		}
+		else if (getTarget() instanceof Individual) {
+			uniquifier = ((Individual)getTarget()).getLocalName();
+		}
+		else {
+			uniquifier = "errorFindingUniqueString";
+		}
+		String uniqueInNamespace = uniquifier + "_" + varName;
 		Individual varInstance = getTheJenaModel().createIndividual(createUri(uniqueInNamespace), gpVarCls);
 		com.hp.hpl.jena.rdf.model.Resource typeCls = getTheJenaModel().getOntClass(type.toFullyQualifiedString());
 //		if (typeCls == null) {
@@ -3621,7 +3631,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				for (int i = 0; i < params.size(); i++) {
 					if (i < args.size()) {
 						Node pn = args.get(i);
-						Node prtnode = argtypes.get(i);
+						Node prtnode = null;
+						if (i > argtypes.size() - 1) {
+							addError("Error in argument types", params.get(i));
+						}
+						else {
+							prtnode = argtypes.get(i);
+						}
 						SadlParameterDeclaration param = params.get(i);
 						EObject augtype = param.getAugtype();
 						Object augTypeObj = null;
@@ -9520,7 +9536,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						
 					}
 					try {
+						Object oldtarget = getTarget();
+						setTarget(inst);
 						addColumnDescriptorsToTable(inst, columns, type);
+						setTarget(oldtarget);
 					} catch (TranslationException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
