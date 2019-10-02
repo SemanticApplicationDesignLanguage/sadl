@@ -113,7 +113,7 @@ rdf(v0, rulevars2:var3, v2) and is(v1,v2) and +(v1,v2,v3) then rdf(v0, rulevars2
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule example-1:  if rdf(v0, rdf:type, rulevars2:System) and rdf(v0, rulevars2:var2, v1) and rdf(v0, rulevars2:var3, v2) and rdf(v0, rulevars2:var3, v1) and +(v1,v2,v3) then rdf(v0, rulevars2:var1, v3)."))
+					"Rule example-1:  if rdf(v0, rdf:type, rulevars2:System) and rdf(v0, rulevars2:var2, v1) and rdf(v0, rulevars2:var3, v2) and not(rdf(v0, rulevars2:var3, v1)) and +(v1,v2,v3) then rdf(v0, rulevars2:var1, v3)."))
 		]
 	}
 	
