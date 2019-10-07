@@ -328,6 +328,16 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException;
 
 	/**
+	 * Method to get an OntModel from a serialization of the model as a String
+	 * @param publicUri
+	 * @param serializedGraph
+	 * @param scope
+	 * @param format
+	 * @return
+	 */
+	public abstract OntModel getOntModel(String publicUri, String serializedGraph, Scope scope, String format);
+
+	/**
 	 * Call this method to find a file treating it first as an absolute path and that failing as a project-relative path
 	 * @param fn
 	 * @return

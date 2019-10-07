@@ -24,10 +24,7 @@
 package com.ge.research.sadl.reasoner;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -37,9 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.hp.hpl.jena.datatypes.TypeMapper;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.query.Dataset;
@@ -74,8 +68,8 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
      */
     public SadlJenaModelGetter(IConfigurationManager configMgr, String _tdbFolder) {
     	configurationManager = configMgr;
-    	File tdbFile = new File(_tdbFolder);
-    	if (tdbFile.exists()) {
+    	File tdbFile = _tdbFolder != null ? new File(_tdbFolder) : null;
+    	if (tdbFile != null && tdbFile.exists()) {
     		setFormat(IConfigurationManager.JENA_TDB);	// if the caller doesn't tell us the format
     													// and the TDB folder exists, use it
     	}

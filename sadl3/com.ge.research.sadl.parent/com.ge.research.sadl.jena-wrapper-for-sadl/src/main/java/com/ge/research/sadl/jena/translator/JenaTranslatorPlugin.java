@@ -1595,6 +1595,13 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return q;
 	}
 
+	/**
+	 * Method to convert a query into a Jena parameterized query 
+	 * @param model -- the OntModel against which to expand the query
+	 * @param q -- the SADL query string
+	 * @param values -- the list of values to be used in parameterizing the query
+	 * @return -- the parameterized query string
+	 */
 	public String parameterizeQuery(OntModel model, String q, List<Object> values) throws InvalidNameException {
 		int idx = q.indexOf("?}");
 		int lastIdx = 0;
