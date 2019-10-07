@@ -29,6 +29,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.builder,
  com.ge.research.sadl.ui.contentassist,
+ com.ge.research.sadl.ui.editor.folding,
  com.ge.research.sadl.ui.external,
  com.ge.research.sadl.ui.handlers,
  com.ge.research.sadl.ui.imports,
