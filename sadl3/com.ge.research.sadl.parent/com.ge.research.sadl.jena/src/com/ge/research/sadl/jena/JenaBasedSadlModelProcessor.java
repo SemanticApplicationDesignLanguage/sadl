@@ -3153,8 +3153,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					String unit = unititr.next();
 					unitList.add(getTheJenaModel().createTypedLiteral(unit));
 				}
-				RDFList argInstList = getTheJenaModel().createList(unitList.iterator());
-				ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_SPECIFIED_UNITS_PROPERTY_URI), argInstList);				
+				if (!unitList.isEmpty()) {
+					try {
+						OntClass cls = getOrCreateListSubclass(null, XSD.xstring.getURI(), getCurrentResource(), null);
+						Individual theList = addMembersToSadlList(getTheJenaModel(), null, cls, XSD.xstring, unitList.iterator());
+						if (theList != null) {
+							ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_SPECIFIED_UNITS_PROPERTY_URI), theList);				
+						}
+						else {
+							addError("Failed to create a SADL typed list for units", context);
+						}
+					} catch (JenaProcessorException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 			if (dd.getAugType() != null) {
 				List<GraphPatternElement> gpes = null;
@@ -13649,5 +13662,69 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
             }
             return cnt;
      }
+
+ 	/**
+ 	 * Method to convert an Iterator over a List of values to a SADL Typed List in the provided model
+ 	 * @param lastInst -- the list to which to add members or null to begin a new list
+ 	 * @param cls -- the class of the SADL list
+ 	 * @param type --  the type of the members of the list
+ 	 * @param memberIterator -- Iterator over the values to add
+ 	 * @return -- the list instance
+ 	 * @throws JenaProcessorException
+ 	 * @throws TranslationException
+ 	 */
+ 	protected Individual addMembersToSadlList(OntModel model, Individual lastInst, OntClass cls,
+ 			com.hp.hpl.jena.rdf.model.Resource type, Iterator<?> memberIterator) throws JenaProcessorException, TranslationException {
+ 		if (lastInst == null) {
+ 			lastInst = model.createIndividual(cls);
+ 		}
+ 		Object val = memberIterator.next();
+ 		if (val instanceof Individual) {
+ 			Individual listInst = (Individual) val;
+ 			if (type.canAs(OntClass.class)) {
+ 				ExtendedIterator<com.hp.hpl.jena.rdf.model.Resource> itr = listInst.listRDFTypes(false);
+ 				boolean match = false;
+ 				while (itr.hasNext()) {
+ 					com.hp.hpl.jena.rdf.model.Resource typ = itr.next();
+ 					if (typ.equals(type)) {
+ 						match = true;
+ 					} else {
+ 						try {
+ 							if (typ.canAs(OntClass.class) && SadlUtils.classIsSubclassOf(typ.as(OntClass.class), type.as(OntClass.class), true, null)) {
+ 								match = true;
+ 							}
+ 						} catch (CircularDependencyException e) {
+ 							// TODO Auto-generated catch block
+ 							e.printStackTrace();
+ 						}
+ 					}
+ 					if (match) {
+ 						break;
+ 					}
+ 				}
+ 				if (!match) {
+ 					throw new JenaProcessorException("The Instance '" + listInst.toString() + "' doesn't match the List type.");
+ 				}
+ 				model.add(lastInst, model.getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI),
+ 						listInst);
+ 			} else {
+ 				throw new JenaProcessorException("The type of the list could not be converted to a class.");
+ 			}
+ 		} else {
+ 			Literal lval;
+ 			if (val instanceof Literal) {
+ 				lval = (Literal) val;
+ 			}
+ 			else {
+ 				lval = SadlUtils.getLiteralMatchingDataPropertyRange(model,type.getURI(), val);
+ 			}
+ 			model.add(lastInst, model.getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI), lval);
+ 		}
+ 		if (memberIterator.hasNext()) {
+ 			Individual rest = addMembersToSadlList(model, null, cls, type, memberIterator);
+ 			model.add(lastInst, model.getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI), rest);
+ 		}
+ 		return lastInst;
+ 	}
 
 }
