@@ -10762,6 +10762,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return newCls;
 	}
 
+	/**
+	 * Method to find a SADL List subclass or, if none if found, create a new one.
+	 * If a matching subclass is an anonymous class, it must be in the current model (not an imported model).
+	 * Otherwise create a new subclass in this model.
+	 * @param newName
+	 * @param typeUri
+	 * @param resource
+	 * @param facet
+	 * @return
+	 * @throws JenaProcessorException
+	 */
 	private OntClass getOrCreateListSubclass(String newName, String typeUri, Resource resource, SadlDataTypeFacet facet)
 			throws JenaProcessorException {
 		if (sadlListModel == null) {
@@ -10790,6 +10801,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return scls;
 			}
 			if (newName == null && scls.isAnon()) {
+				// we are matching anonymous classes
+				// to keep looking, the scls must be in the current (base) model
+				if (!getTheJenaModel().getBaseModel().containsResource(scls)) {
+					continue;
+				}
 				String restrictionTypeUri = "";
 				String lengthRestriction = "-1";
 				String lengthMaxRestriction = "-1";
