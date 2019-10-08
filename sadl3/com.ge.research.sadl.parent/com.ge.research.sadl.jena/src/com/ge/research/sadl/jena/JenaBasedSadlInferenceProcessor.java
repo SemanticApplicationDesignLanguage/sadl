@@ -1712,13 +1712,17 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					Object array[][] = new Object[rows.size()][colNames.size()];
 					String[] colNameArray = new String[colNames.size()];
 					colNameArray = colNames.toArray(colNameArray);
-					for(int j=0; j < rows.size(); j++)
+					boolean dataAdded = false;
+					for(int j=0; j < rows.size(); j++) {
 						array[j] = (rows.get(j)).toArray(new Object[colNames.size()]);
-
-					ResultSet rs = new ResultSet(colNameArray, array);
-					ResultSet[] results = new ResultSet[1];
-					results[0] = rs;
-					return results;
+						dataAdded = true;
+					}
+					if (dataAdded) {
+						ResultSet rs = new ResultSet(colNameArray, array);
+						ResultSet[] results = new ResultSet[1];
+						results[0] = rs;
+						return results;
+					}
 				}
 				return null;
 			} catch (ConfigurationException e) {
