@@ -1482,7 +1482,13 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return theJenaModel;
 	}
 
-	protected void setTheJenaModel(OntModel theJenaModel) {
+	/**
+	 * Method to set the OntModel to be used during inference.
+	 * This enables inference over an in-memory model.
+	 * @param theJenaModel
+	 */
+	@Override
+	public void setTheJenaModel(OntModel theJenaModel) {
 		this.theJenaModel = theJenaModel;
 	}
 
@@ -1742,6 +1748,31 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	@Override
 	public boolean isSupported(String fileExtension) {
 		return "sadl".equals(fileExtension);
+	}
+
+	/**
+	 * Method to set the preferences to be used during inference
+	 * @param preferenceMap
+	 */
+	@Override
+	public void setPreferences(Map<String, String> preferenceMap) {
+		this.preferenceMap = preferenceMap;
+	}	
+
+	protected Map<String, String> getPreferences() {
+		return preferenceMap;
+	}
+
+	/**
+	 * Method to get the preference identified by key
+	 * @param key
+	 * @return
+	 */
+	public String getPreference(String key) {
+		if (preferenceMap != null) {
+			return preferenceMap.get(key);
+		}
+		return null;
 	}
 
 }
