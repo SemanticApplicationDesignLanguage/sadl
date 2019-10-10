@@ -172,28 +172,34 @@ public class GeUtils {
     		//   will not be a variable (Note: this is ignoring the actual last argument which is the return variable)
     		throw new BuiltinException(bi, context, "Invalid number of arguments; complete set of triple patterns required.");
     	}
+    	if (numTriples == 0 && args.length == 2) {
+    		// special case
+    		numTriples = 1;
+    	}
 		Node[][] pattern = new Node[numTriples][3];
 		Map<Node, Integer> variableCount = new HashMap<Node,Integer>();
 		Node listVar = null;
 		
 		for (int tripleIdx = 0; tripleIdx < numTriples; tripleIdx++) {
 			for (int inTripleIdx = 0; inTripleIdx < 3; inTripleIdx++) {
-				Node n = getArg((tripleIdx * 3 + inTripleIdx), args, context);
-				if (n.isVariable()) {
-					int cnt = 1;
-					if (variableCount.containsKey(n)) {
-						Integer count = variableCount.get(n);
-						cnt = count.intValue() + 1;
+				if (tripleIdx * 3 + inTripleIdx < args.length) {
+					Node n = getArg((tripleIdx * 3 + inTripleIdx), args, context);
+					if (n.isVariable()) {
+						int cnt = 1;
+						if (variableCount.containsKey(n)) {
+							Integer count = variableCount.get(n);
+							cnt = count.intValue() + 1;
+						}
+						else {
+			   				if (numTriples > 1 && tripleIdx == (numTriples - 1) && inTripleIdx < 2) {
+			   					throw new BuiltinException(bi, context, "For complex patterns (more than one edge), the list variable must be in the object value position.");
+			   				}
+						}
+						variableCount.put(n, new Integer(cnt));
+						listVar = n;
 					}
-					else {
-		   				if (numTriples > 1 && tripleIdx == (numTriples - 1) && inTripleIdx < 2) {
-		   					throw new BuiltinException(bi, context, "For complex patterns (more than one edge), the list variable must be in the object value position.");
-		   				}
-					}
-					variableCount.put(n, new Integer(cnt));
-					listVar = n;
+					pattern[tripleIdx][inTripleIdx] = n;
 				}
-				pattern[tripleIdx][inTripleIdx] = n;
 			}
 		}
 		
@@ -228,7 +234,7 @@ public class GeUtils {
 		
 		subjects = createNodeArray(subj, varValues);
 		predicates = createNodeArray(pred, varValues);
-		objects = createNodeArray(obj, varValues);
+		objects = obj != null ? createNodeArray(obj, varValues) : null;
 		
 		// if there are variables in the match pattern, one and only one of these should be null; if there are no variables none will be null
 		int numSubjects = (subjects == null) ? 1 : subjects.length;
@@ -313,7 +319,7 @@ public class GeUtils {
 				    		else if (pred.isVariable() && predicates == null) {
 				    			varValues = addToArray(varValues, pred, nodes);
 				    		}
-				    		else if (obj.isVariable() && objects == null) {
+				    		else if (obj == null || (obj.isVariable() && objects == null)) {
 				    			varValues = addToArray(varValues, obj, nodes);
 				    		}
 			            }
@@ -369,7 +375,7 @@ public class GeUtils {
 					}
 				}
 			}
-			if (obj.isVariable() && objects != null) {
+			if (obj != null && obj.isVariable() && objects != null) {
 				for (int i = objects.length - 1; i >= 0; i--) {
 					boolean matches = false;
 					for (int j = 0; j < successfulTriples.size(); j++) {
