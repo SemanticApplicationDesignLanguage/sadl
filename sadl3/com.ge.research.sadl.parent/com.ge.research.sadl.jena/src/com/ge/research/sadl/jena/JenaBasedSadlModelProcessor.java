@@ -1918,6 +1918,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					tci = getModelValidator().getType(getDeclarationExtensions().getDeclaration(sr));
 				}
 			} else if (EcoreUtil2.getContainerOfType(sr, QueryStatement.class) == null
+					&& EcoreUtil2.getContainerOfType(sr, SelectExpression.class)== null 
 					&& EcoreUtil2.getContainerOfType(sr, RuleStatement.class) == null) {
 				addError("Variable '" + var.getName() + "' is not defined", sr);
 			}
