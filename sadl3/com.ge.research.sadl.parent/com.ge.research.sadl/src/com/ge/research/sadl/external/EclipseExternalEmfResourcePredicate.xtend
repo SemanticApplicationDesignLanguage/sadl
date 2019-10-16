@@ -37,6 +37,7 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 	 * TODO: this should not be here. Move this to the downstream grammar.
 	 */
 	static val EXTRACTED_MODELS = 'ExtractedModels';
+	static val CG_MODELS = 'ComputationalGraphModels';
 
 	override apply(URI it) {
 		Preconditions.checkArgument(platformResource, '''Implementation error. Expected a `file` URI. Was: «it»''');
@@ -57,6 +58,13 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 		if (extractedModelFolder !== null && extractedModelFolder.accessible) {
 			// The current file is an external file and is inside the `ExtractedModels` folder.
 			if (extractedModelFolder.getFullPath().isPrefixOf(file.getFullPath())) {
+				return true;
+			}
+		}
+		val cgModelsFolder = project.findMember(com.ge.research.sadl.external.EclipseExternalEmfResourcePredicate.CG_MODELS);
+		if (cgModelsFolder !== null && cgModelsFolder.accessible) {
+			// The current file is an external file and is inside the `ExtractedModels` folder.
+			if (cgModelsFolder.getFullPath().isPrefixOf(file.getFullPath())) {
 				return true;
 			}
 		}
