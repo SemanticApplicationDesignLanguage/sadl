@@ -2894,8 +2894,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * @param eqinst -- The OWL model Individual representing the equation
 	 * @param paramInstances -- the DataDescriptor instances created for the arguments
 	 * @param retInstances -- the DataDescriptor instances created for the return values
+	 * @throws JenaProcessorException 
+	 * @throws TranslationException 
 	 */
-	private void addEquationPropertiesToJenaModel(SadlResource nm, Equation eq, Individual eqinst, List<Individual> paramInstances, List<Individual> retInstances) {
+	private void addEquationPropertiesToJenaModel(SadlResource nm, Equation eq, Individual eqinst, List<Individual> paramInstances, List<Individual> retInstances) throws JenaProcessorException, TranslationException {
 		// add the expression, if any
 		String expr = eq.toString();
 		if (expr != null && expr.length() > 0) {
@@ -2919,12 +2921,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addError("Model doesn't contain Equation metamodel. Do you need to update the SadlImplicitModel?", nm);
 		}
 		else {
+			OntClass lsttyp = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_DATA_DESCRIPTOR_CLASS_URI);
 			if (paramInstances != null && paramInstances.size() > 0) {
-				RDFList argInstList = getTheJenaModel().createList(paramInstances.iterator());
+				OntClass cls = getOrCreateListSubclass(null, lsttyp.getURI(), getCurrentResource(), null);
+				Individual argInstList = addMembersToSadlList(getTheJenaModel(), null, cls, lsttyp, paramInstances.iterator());
+//				RDFList argInstList = getTheJenaModel().createList(paramInstances.iterator());
 				eqinst.addProperty(argsProp, argInstList);
 			}
 			if (retInstances != null && retInstances.size() > 0) {
-				RDFList retTypeList = getTheJenaModel().createList(retInstances.iterator());
+				OntClass cls = getOrCreateListSubclass(null, lsttyp.getURI(), getCurrentResource(), null);
+				Individual retTypeList = addMembersToSadlList(getTheJenaModel(), null, cls,  lsttyp, retInstances.iterator());
+//				RDFList retTypeList = getTheJenaModel().createList(retInstances.iterator());
 				eqinst.addProperty(returnTypesProp, retTypeList);
 			}
 		}
@@ -3089,7 +3096,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private Individual equationToOwl(SadlResource nm, Individual eqinst, Equation eq, List<DataDescriptor> retDataDescriptors,
-			List<DataDescriptor> paramDataDescriptors) throws TranslationException {
+			List<DataDescriptor> paramDataDescriptors) throws TranslationException, JenaProcessorException {
 		List<Individual> paramInstances = new ArrayList<Individual>();
 		if (paramDataDescriptors != null) {
 			for (DataDescriptor pdd : paramDataDescriptors) {
