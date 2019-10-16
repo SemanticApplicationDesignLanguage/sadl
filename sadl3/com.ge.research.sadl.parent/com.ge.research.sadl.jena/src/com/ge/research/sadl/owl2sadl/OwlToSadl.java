@@ -111,6 +111,8 @@ public class OwlToSadl {
 	private List<OntResource> resourcesOutput = new ArrayList<OntResource>();
 	
 	private HashMap<String, OntResource> restrictions = null;
+	
+	private boolean neverUsePrefixes = false;
 
 	//	replaced with getSadlKeywords to get straight from grammar
 //	// copied from com.ge.research.sadl.parser.antlr.internal.InternalSadlParser in com.ge.research.sadl project.
@@ -1590,7 +1592,7 @@ public class OwlToSadl {
 	
 	private String individualNameAndAnnotations(ModelConcepts concepts, Individual inst) {
 		StringBuilder sb = new StringBuilder();
-		if (!inst.getNameSpace().equals(baseUri+'#')) {
+		if (!isNeverUsePrefixes() && !inst.getNameSpace().equals(baseUri+'#')) {
 			if (qNamePrefixes.containsKey(inst.getNameSpace())) {
 				String prefix = qNamePrefixes.get(inst.getNameSpace());
 				sb.append(checkLocalnameForKeyword(inst.getLocalName()));
@@ -2254,7 +2256,7 @@ public class OwlToSadl {
 
 	private String uriToSadlString(ModelConcepts concepts, Resource rsrc) {
 		if (rsrc.isURIResource()) {
-			if (rsrc.getNameSpace().equals(baseUri + "#")) {
+			if (rsrc.getNameSpace().equals(baseUri + "#") || isNeverUsePrefixes()) {
 				return checkLocalnameForKeyword(rsrc.getLocalName());
 			}
 			else {
@@ -3702,5 +3704,13 @@ public class OwlToSadl {
 
 	private void setConcepts(ModelConcepts concepts) {
 		this.concepts = concepts;
+	}
+
+	public boolean isNeverUsePrefixes() {
+		return neverUsePrefixes;
+	}
+
+	public void setNeverUsePrefixes(boolean neverUsePrefixes) {
+		this.neverUsePrefixes = neverUsePrefixes;
 	}
 }
