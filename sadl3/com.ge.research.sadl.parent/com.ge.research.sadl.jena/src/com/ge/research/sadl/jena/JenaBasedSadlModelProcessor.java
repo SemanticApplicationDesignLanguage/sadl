@@ -7890,8 +7890,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			bi.addArgument((Node) ((Object[])eobj)[0]);
 			Junction jct = new Junction();
 			jct.setJunctionName("and");
-			jct.setLhs(bi);
-			jct.setRhs(((Object[])eobj)[1]);
+			jct.setLhs(SadlModelProcessor.nodeCheck(bi));
+			jct.setRhs(SadlModelProcessor.nodeCheck(((Object[])eobj)[1]));
 			return jct;
 		} else if (eobj == null) {
 			addError("Unary operator '" + op + "' has no argument. Perhaps parentheses are needed.", expr);
