@@ -150,7 +150,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		}
 		sbLoad.append("').\n");
 		sbLoad.append(":- load_rdf_file('");
-		sbLoad.append(owlFile);
+		sbLoad.append(fixWindowsPath(owlFile));
 		sbLoad.append("').\n");
 		
 		StringBuffer sbUnload = new StringBuffer();
@@ -210,7 +210,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 
 		
 		sbLoad.append(":- load_rdf_file('");
-		sbLoad.append(ruleFileName);
+		sbLoad.append(fixWindowsPath(ruleFileName));
 		sbLoad.append("').\n");
 		
 		if (sbLoad.length() > 0) {
@@ -283,7 +283,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			throws IOException, ConfigurationException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(":- load_rdf_file('");
-		sb.append(instanceDatafile);
+		sb.append(fixWindowsPath(instanceDatafile));
 		sb.append("').\n");
 		return getPrologServiceInstance().addPlRules(sb.toString());
 	}
@@ -914,8 +914,8 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			for (int i = 0; i < files.size(); i++) {
 				File f = new File(new SadlUtils().fileUrlToFileName(files.get(i)));
 				if (f.exists()) {
-					getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "unload_rdf_file('" + f.getCanonicalPath().replace('\\', '/') + "')", true);
-					getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "load_rdf_file('" + f.getCanonicalPath().replace('\\', '/') + "')", true);
+					getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "unload_rdf_file('" + fixWindowsPath(f.getCanonicalPath()) + "')", true);
+					getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "load_rdf_file('" + fixWindowsPath(f.getCanonicalPath()) + "')", true);
 				}
 				else {
 					throw new TranslationException("OWL file '" + f.getCanonicalPath() + "' does not exist, can't be loaded.");
@@ -923,6 +923,10 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			}
 		}
 		return files;
+	}
+	
+	private String fixWindowsPath(String path) {
+		return path.replace('\\', '/');
 	}
 
 	private IConfigurationManager getConfigMgr() {
