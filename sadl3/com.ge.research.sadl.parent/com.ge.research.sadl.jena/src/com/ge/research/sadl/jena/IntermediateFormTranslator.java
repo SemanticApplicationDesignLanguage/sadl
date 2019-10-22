@@ -1115,14 +1115,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 
 	protected GraphPatternElement addImpliedAndExpandedProperties(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
 		boolean processed = false;
-//		if (gpe.getLeftImpliedPropertyUsed() != null) {
-//			applyLeftImpliedProperty(gpe);
-//			processed = true;
-//		}
-//		else if (gpe.getRightImpliedPropertyUsed() != null) {
-//			applyRightImpliedProperty(gpe);
-//			processed = true;
-//		}
 		if (gpe.getExpandedPropertiesToBeUsed() != null) {
 			gpe = applyExpandedProperties(gpe);
 			processed = true;
@@ -1146,6 +1138,22 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					newTriple.setObject(((TripleElement)gpe).getObject());
 					((TripleElement)gpe).setObject(SadlModelProcessor.nodeCheck(newTriple));
 					((NamedNode)pred).setImpliedPropertyNode(null);
+				}
+			}
+			else if (gpe instanceof Junction) {
+				Object lhs = ((Junction) gpe).getLhs();
+				if (lhs instanceof ProxyNode) {
+					((Junction)gpe).setLhs(SadlModelProcessor.nodeCheck(addImpliedAndExpandedProperties(((ProxyNode)lhs).getProxyFor())));
+				}
+				else {
+					throw new TranslationException("Junction must contain only ProxyNode as left and right.");
+				}
+				Object rhs = ((Junction) gpe).getRhs();
+				if (rhs instanceof ProxyNode) {
+					((Junction)gpe).setRhs(SadlModelProcessor.nodeCheck(addImpliedAndExpandedProperties(((ProxyNode)rhs).getProxyFor())));
+				}
+				else {
+					throw new TranslationException("Junction must contain only ProxyNode as left and right.");
 				}
 			}
 		}
