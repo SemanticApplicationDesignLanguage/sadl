@@ -77,6 +77,14 @@ class SadlImportProcessorProvider extends AbstractSadlProcessorProvider<ISadlImp
 					return processor.onImport(owlContent);
 				}
 			}
+			
+			override onImport(String owlContent, String modelURI) {
+				val itr = allProcessors.iterator;
+				while (itr.hasNext()) {
+					val processor = itr.next;
+					return processor.onImport(owlContent, modelURI);
+				}
+			}
 
 		};
 	}
