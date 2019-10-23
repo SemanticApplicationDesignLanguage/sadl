@@ -169,6 +169,18 @@ public interface ITabularDataImporter {
 			throws ConfigurationException, IOException, InvalidNameException, ReasonerNotFoundException;
 
 	/**
+	 * Method to return the import model namespace (ending with "#")
+	 * @return
+	 */
+	String getModelNamespace();
+	
+	/**
+	 * Method to return the import model name (without ending "#")
+	 * @return
+	 */
+	String getModelName();
+
+	/**
 	 * Return the OWL model as an in-memory model structure.
 	 * @return
 	 * @throws ConfigurationException

@@ -1014,7 +1014,12 @@ public class CsvImporter implements ITabularDataImporter {
 	private void prepareNewModel(int arraypos) throws ConfigurationException {
 		getModel(arraypos).setNsPrefixes(getImportModel().getNsPrefixMap());
 		Ontology ontology = null;
-		getModel(arraypos).setNsPrefix("", getModelNamespace());
+		if (importModelPrefix != null) {
+			getModel(arraypos).setNsPrefix(importModelPrefix, getModelNamespace());
+		}
+		else {
+			getModel(arraypos).setNsPrefix("", getModelNamespace());
+		}
 		ontology = getModel(arraypos).createOntology(importModelNS);
 		ontology.addComment("This ontology was created from a CSV data source.", "en");
 		
@@ -1861,17 +1866,19 @@ public class CsvImporter implements ITabularDataImporter {
 		String uri = ns + ln;
 		ConceptName cn = getSadlUtils().getConceptByUri(getModel(modelArrayPosition), uri);
 		if (cn != null && !cn.getType().equals(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL)) {
-			String prefix = getConfigMgr().getGlobalPrefix(stripNamespaceDelimiter(ns));
-			if (prefix == null) {
-				prefix = getModel(modelArrayPosition).getNsURIPrefix(ns);
-			if (prefix == null) {
-					prefix = getModel(modelArrayPosition).getNsURIPrefix(stripNamespaceDelimiter(ns));
+			if (cn.getPrefix() == null) {
+				String prefix = getConfigMgr().getGlobalPrefix(stripNamespaceDelimiter(ns));
+				if (prefix == null) {
+					prefix = getModel(modelArrayPosition).getNsURIPrefix(ns);
+				if (prefix == null) {
+						prefix = getModel(modelArrayPosition).getNsURIPrefix(stripNamespaceDelimiter(ns));
+					}
 				}
+				if (prefix != null) {
+					getModel(modelArrayPosition).setNsPrefix(prefix, ns);
+				}
+				cn.setPrefix(prefix);
 			}
-			if (prefix != null) {
-				getModel(modelArrayPosition).setNsPrefix(prefix, ns);
-			}
-			cn.setPrefix(prefix);
 			return cn;
 		}
 		return null;
@@ -3135,9 +3142,23 @@ public class CsvImporter implements ITabularDataImporter {
 		return transValue;
 	}
 
-	private String getModelNamespace() {
+	@Override
+	public String getModelNamespace() {
 		return toNamespace(importModelNS);
 	}
+	
+	@Override
+	public String getModelName() {
+		return stripSeparator(importModelNS);
+	}
+
+	public String stripSeparator(String ns) {
+		if (ns.endsWith("#")) {
+			return ns.substring(ns.length() - 1);
+		}
+		return ns;
+	}
+
 
 	private String toNamespace(String uri) {
 		if (!uri.endsWith("#")) {
