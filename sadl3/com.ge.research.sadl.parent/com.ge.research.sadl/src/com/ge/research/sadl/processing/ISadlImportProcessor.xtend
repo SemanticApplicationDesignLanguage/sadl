@@ -38,4 +38,9 @@ interface ISadlImportProcessor {
 	 */
 	def Object[] onImport(String owlContent)
 	
+	/**
+	 * Same outputs as above but single OWL model content as a String input
+	 */
+	def Object[] onImport(String owlContent, String modelURI)
+	
 }

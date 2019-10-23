@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -40,7 +41,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.external.XMLHelper;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.google.common.base.Optional;
 import com.hp.hpl.jena.graph.GetTriple;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -452,6 +455,15 @@ public class OwlToSadl {
         theModel.read(new ByteArrayInputStream(owlContent.getBytes()), null);
 	}
 	
+	public OwlToSadl(String owlContent, String modelUri) {
+		setBaseUri(modelUri);
+		OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM);
+		setSpec(spec);
+		theModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM); //_RDFS_INF);
+		theModel.getDocumentManager().setProcessImports(false);
+        theModel.read(new ByteArrayInputStream(owlContent.getBytes()), null);
+	}
+
 	// This is a hack
 	public static List<String> getSadlKeywords() {
 		return Arrays.asList("select",
@@ -1227,7 +1239,20 @@ public class OwlToSadl {
 				setBaseUri(uri);
 			}
 			else {
-				throw new OwlImportException("Namespace of model to import cannot be identified");
+				try {
+					Writer writer = new StringWriter();
+					theModel.write(writer, "RDF/XML");
+					Optional<String> xmlbaseuri = new XMLHelper().tryReadBaseUri(writer.toString());
+					if (xmlbaseuri.isPresent()) {
+						uri = xmlbaseuri.get();
+					}
+				}
+				catch (Exception e) {
+					throw new OwlImportException(e.getMessage(), e);
+				}
+				if (uri == null) {
+					throw new OwlImportException("Namespace of model to import cannot be identified");
+				}
 			}
 		}
 		if (getBaseUri() == null) {

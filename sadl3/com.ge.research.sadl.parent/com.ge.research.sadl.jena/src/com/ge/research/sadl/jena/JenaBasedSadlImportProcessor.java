@@ -107,6 +107,23 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 		return retval;
 	}
 
+	@Override
+	public Object[] onImport(String owlContent, String modelUri) {
+		try {
+			OwlToSadl owlToSadl = new OwlToSadl(owlContent, modelUri);
+			setResultingDataSource(owlToSadl.getSadlModel());
+
+		} catch (Exception e1) {
+	        if (getResultingDataSource() == null) {
+	            getErrors().add(e1.toString());
+	        }
+		}
+		Object[] retval = new Object[2];
+		retval[0] = getResultingDataSource();
+		retval[1] = getErrors();
+		return retval;
+	}
+
 	public List<String> getErrors() {
 		return errors;
 	}
