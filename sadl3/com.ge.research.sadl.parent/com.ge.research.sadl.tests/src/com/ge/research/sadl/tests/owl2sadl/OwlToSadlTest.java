@@ -46,7 +46,7 @@ public class OwlToSadlTest {
 				"    >3.0</Shapes:radius>\n" + 
 				"  </Shapes:Circle>\n" + 
 				"</rdf:RDF>\n";
-		OwlToSadl o2s = new OwlToSadl(owlModelContent);
+		OwlToSadl o2s = new OwlToSadl(owlModelContent, "http://sadl.org/Shapes.sadl");
 		o2s.setVerboseMode(true);
 		String sadlModelContent = o2s.getSadlModel();
 		String expected = "uri \"http://sadl.org/Shapes.sadl\" alias Shapes\n" + 
@@ -153,7 +153,7 @@ public class OwlToSadlTest {
 				"    >3.0</Shapes:radius>\n" + 
 				"  </Shapes:Circle>\n" + 
 				"</rdf:RDF>\n";
-		OwlToSadl o2s = new OwlToSadl(owlModelContent);
+		OwlToSadl o2s = new OwlToSadl(owlModelContent, "http://sadl.org/Shapes.sadl");
 		String sadlModelContent = o2s.getSadlModel();
 		String expected = "uri \"http://sadl.org/Shapes.sadl\" alias Shapes\n" + 
 				"    (note \"This ontology is a simple representation of 2D shapes.\").\n" + 
@@ -183,7 +183,7 @@ public class OwlToSadlTest {
 	public void test03() throws Exception {
 		URL owlUrl = ExternalResourceContentHelper.getURL("Shapes/concepts.owl");
 //		URL pfUrl = ExternalResourceContentHelper.getURL("Shapes/ont-policy.rdf");
-		OwlToSadl o2s = new OwlToSadl(owlUrl); //, pfUrl.toString());
+		OwlToSadl o2s = new OwlToSadl(owlUrl, "http://sadl.org/concepts.sadl"); //, pfUrl.toString());
 		String sadlModelContent = o2s.getSadlModel();
 		String expected = "uri \"http://sadl.org/concepts.sadl\" alias concepts\n" + 
 				"    (note \"This ontology was created from a SADL file 'concepts.sadl' and should not be directly edited.\")\n" + 
@@ -230,12 +230,12 @@ public class OwlToSadlTest {
 	@Test
 	public void test04() throws Exception {
 		String owlModelContent = ExternalResourceContentHelper.getContent("Shapes/specificshapes.owl");
-		OwlToSadl o2s = new OwlToSadl(owlModelContent);
+		OwlToSadl o2s = new OwlToSadl(owlModelContent, "http://sadl.org/specificshapes.sadl");
 		String sadlModelContent = o2s.getSadlModel();
 		String expected = "uri \"http://sadl.org/specificshapes.sadl\" alias specificshapes\n" + 
 				"    (note \"This ontology was created from a SADL file 'specificshapes.sadl' and should not be directly edited.\").\n" + 
 				"\n" + 
-				"import \"http://sadl.org/concepts.sadl\".\n" + 
+				"import \"http://sadl.org/concepts.sadl\" as concepts.\n" + 
 				"\n" + 
 				"\n" + 
 				"// Class definitions:\n" + 

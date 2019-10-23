@@ -134,6 +134,8 @@ public class OwlToSadl {
 
 	private List<String> propertiesProcessed = new ArrayList<String>();	// properties already completely processed
 	
+	private List<Statement> statementsProcessed = new ArrayList<Statement>();
+
 	private boolean verboseMode = false;
 	private StringBuilder verboseModeStringBuilder = null;
 	
@@ -425,6 +427,17 @@ public class OwlToSadl {
         theModel.read(modelUrl);
 	}
 	
+	public OwlToSadl(URL owlFileUrl, String modelUri) throws IOException {
+		setBaseUri(modelUri);
+		String modelUrl = owlFileUrl.toString();
+		validateOntologyName(modelUrl);
+		OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM);
+		setSpec(spec);
+		theModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM); //_RDFS_INF);
+		theModel.getDocumentManager().setProcessImports(false);
+        theModel.read(modelUrl);
+	}
+
 	/**
 	 * Constructor taking an OWL File to be converted to SADL.
 	 * 
@@ -1169,22 +1182,22 @@ public class OwlToSadl {
 		}
 		
 		if (isVerboseMode() || !getConcepts().getStatements().isEmpty()) {
-			sadlModel.append("\n\n// Other statements:\n");
+			getConcepts().getStatements().removeAll(statementsProcessed);
+			StringBuilder otherSB = new StringBuilder();
 			Iterator<Statement> stmtitr = getConcepts().getStatements().iterator();
-			List<Statement> processed = new ArrayList<Statement>();
 			while (stmtitr.hasNext()) {
 				Statement s = stmtitr.next();
 				String stmtstr = statementToString(s);
 				if (stmtstr != null) {
-					sadlModel.append(stmtstr);
-					processed.add(s);
+					otherSB.append(stmtstr);
+					statementsProcessed.add(s);
 				}
 			}
-			getConcepts().getStatements().removeAll(processed);
+			getConcepts().getStatements().removeAll(statementsProcessed);
 			stmtitr = getConcepts().getStatements().iterator();
 			while (stmtitr.hasNext()) {
 				Statement s = stmtitr.next();
-				Iterator<Statement> pitr = processed.iterator();
+				Iterator<Statement> pitr = statementsProcessed.iterator();
 				boolean alreadyDone = false;
 				while (pitr.hasNext()) {
 					if (pitr.next().getObject().equals(s.getSubject())) {
@@ -1194,10 +1207,15 @@ public class OwlToSadl {
 				}if (!alreadyDone) {
 					String stmtstr = blankNodeSubjectStatementToString(s);
 					if (stmtstr != null) {
-						sadlModel.append(stmtstr);
+						otherSB.append(stmtstr);
 					}
 				}
 			}
+			if (otherSB.length() > 0) {
+				sadlModel.append("\n\n// Other statements:\n");
+				sadlModel.append(otherSB.toString());
+			}
+
 		}
 		
 		if (isVerboseMode() && verboseModeStringBuilder.length() > 0) {
@@ -1820,6 +1838,7 @@ public class OwlToSadl {
 			sb.append(uriToSadlString(concepts, s.getPredicate()));
 			sb.append(" ");
 			sb.append(rdfNodeToSadlString(concepts, s.getObject(), false));
+			statementsProcessed.add(s);
 			cntr++;
 		}
 	}
