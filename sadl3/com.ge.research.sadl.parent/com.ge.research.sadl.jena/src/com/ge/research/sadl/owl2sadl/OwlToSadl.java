@@ -1867,7 +1867,7 @@ public class OwlToSadl {
 		sb.append(" ");
 		RDFNode obj = s.getObject();
 		if (obj.isAnon()) {
-			sb.append(blankNodeToString(obj.asResource()));
+			sb.append(blankNodeToString(obj.asResource(), true));
 		}
 		else {
 			sb.append(rdfNodeToString(obj, 0));
@@ -1882,11 +1882,12 @@ public class OwlToSadl {
 		}
 		StringBuilder sb = new StringBuilder();
 		Resource bnodeSubj = s.getSubject();
-		sb.append(blankNodeToString(bnodeSubj));
+		sb.append(blankNodeToString(bnodeSubj, false));
+		sb.append(".\n");
 		return sb.toString();
 	}
 
-	private String blankNodeToString(Resource bnodeSubj) throws OwlImportException {
+	private String blankNodeToString(Resource bnodeSubj, boolean embedded) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		if (bnodeSubj.canAs(Individual.class)) {
 			return individualToSadl(getConcepts(), bnodeSubj.as(Individual.class), true);
@@ -1896,10 +1897,18 @@ public class OwlToSadl {
 		if (stmtitr.hasNext()) {
 			RDFNode typ = stmtitr.nextStatement().getObject();
 			if (typ.canAs(OntClass.class)) {
-				sb.append("(a ");
+				if (embedded) {
+					sb.append("(");
+					sb.append("a ");
+				}
+				else {
+					sb.append("A ");
+				}
 				sb.append(ontClassToString(typ.as(OntClass.class), null));
 				addResourceProperties(sb, getConcepts(), bnodeSubj, true);
-				sb.append(")");
+				if (embedded) {
+					sb.append(")");
+				}
 			}
 		}
 		return sb.toString();

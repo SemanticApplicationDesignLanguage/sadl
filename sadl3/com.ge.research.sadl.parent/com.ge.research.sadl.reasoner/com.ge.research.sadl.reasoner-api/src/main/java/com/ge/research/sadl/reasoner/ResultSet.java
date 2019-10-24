@@ -540,6 +540,10 @@ public class ResultSet {
 		return (val != null) ? val.toString() : null;
 	}
 
+	/**
+	 * Method to turn display of namespaces in serialization of the ResultSet on or off
+	 * @param _showNamespaces -- true to display namespaces, false to not display
+	 */
 	public void setShowNamespaces(boolean _showNamespaces) {
 		showNamespaces = _showNamespaces;
 	}
@@ -548,21 +552,35 @@ public class ResultSet {
 		return showNamespaces;
 	}
 
+	/**
+	 * Method to remove the named column from the ResultSet
+	 * @param columnName
+	 * @return
+	 */
 	public ResultSet deleteResultSetColumn(String columnName) {
+		int colPosition = getColumnPosition(columnName);
+		return deleteResultSetColumn(colPosition);
+	}
+	
+	/**
+	 * Method to remove the column at the specified position (0-based) from the ResultSet
+	 * @param columnPosition
+	 * @return
+	 */
+	public ResultSet deleteResultSetColumn(int columnPosition) {
 		//Object[][] table = rs.getData();
 		Object[][] newTable = new Object[table.length][];
 		ResultSet res;
 		
 		int rowLength = getColumnCount();
-		int colPosition = getColumnPosition(columnName);
-		if (colPosition < 0) {//the column is not in the resultset
-			res = new ResultSet(header,table);
+		if (columnPosition < 0 || columnPosition > rowLength) {//the column is not in the resultset
+			throw new IndexOutOfBoundsException("The specfied columm (" + columnPosition + ") is not found in the ResultSet");
 		}
 		else {
 			for (int i=0; i<table.length; i++) {
 				int j=0;
 				Object[] row = new Object[rowLength-1]; 
-				for(; j<colPosition; j++) {
+				for(; j<columnPosition; j++) {
 					row[j] = table[i][j];
 				}
 				for(; j<rowLength-1; j++) {
@@ -572,7 +590,7 @@ public class ResultSet {
 			}
 			String[] newColNames = new String[rowLength-1];
 			int i=0;
-			for(; i<colPosition; i++) {
+			for(; i<columnPosition; i++) {
 					newColNames[i] = header[i];
 			}
 			for(; i<rowLength-1; i++) {
@@ -583,6 +601,11 @@ public class ResultSet {
 		return res;
 	}
 
+	/**
+	 * Method to find the position of a named column in the ResultSet
+	 * @param columnName
+	 * @return
+	 */
 	public int getColumnPosition(String columnName) {
 		//String[] cnames = rs.getColumnNames();
 		int pos=-1;
