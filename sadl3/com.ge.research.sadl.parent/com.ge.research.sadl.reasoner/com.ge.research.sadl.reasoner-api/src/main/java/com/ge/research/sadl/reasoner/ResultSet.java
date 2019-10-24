@@ -548,4 +548,51 @@ public class ResultSet {
 		return showNamespaces;
 	}
 
+	public ResultSet deleteResultSetColumn(String columnName) {
+		//Object[][] table = rs.getData();
+		Object[][] newTable = new Object[table.length][];
+		ResultSet res;
+		
+		int rowLength = getColumnCount();
+		int colPosition = getColumnPosition(columnName);
+		if (colPosition < 0) {//the column is not in the resultset
+			res = new ResultSet(header,table);
+		}
+		else {
+			for (int i=0; i<table.length; i++) {
+				int j=0;
+				Object[] row = new Object[rowLength-1]; 
+				for(; j<colPosition; j++) {
+					row[j] = table[i][j];
+				}
+				for(; j<rowLength-1; j++) {
+					row[j] = table[i][j+1];
+				}
+				newTable[i] = row.clone();
+			}
+			String[] newColNames = new String[rowLength-1];
+			int i=0;
+			for(; i<colPosition; i++) {
+					newColNames[i] = header[i];
+			}
+			for(; i<rowLength-1; i++) {
+				newColNames[i] = header[i+1];
+			}
+			res = new ResultSet(newColNames, newTable);
+		}
+		return res;
+	}
+
+	public int getColumnPosition(String columnName) {
+		//String[] cnames = rs.getColumnNames();
+		int pos=-1;
+		for(int i=0; i<header.length; i++) {
+			if(header[i].equals(columnName)) {
+				pos = i;
+				break;
+			}
+		}
+		return pos;
+	}
+	
 }

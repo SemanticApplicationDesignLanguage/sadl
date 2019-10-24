@@ -159,7 +159,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			pl.addPlRules(sbLoad.toString());
 		}
 		try {
-			System.out.println(pl.runPlQueryNoArgs(url, "true", true));
+			//System.out.println(pl.runPlQueryNoArgs(url, "true", true));
 			pl.clearPlRules();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -717,7 +717,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 				return e.getMessage();
 			}
 			errorNumber++;
-			if (errorNumber > 1000) {
+			if (errorNumber > 2000) {
 				return "Failed to prepare service after 1000 iterations.";
 			}
 		}
