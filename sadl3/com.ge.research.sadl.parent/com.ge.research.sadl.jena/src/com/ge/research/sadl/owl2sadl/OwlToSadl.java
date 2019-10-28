@@ -2444,7 +2444,14 @@ public class OwlToSadl {
 	private String uriToSadlString(ModelConcepts concepts, Resource rsrc) {
 		if (rsrc.isURIResource()) {
 			if (rsrc.getNameSpace().equals(getBaseUri() + "#") || isNeverUsePrefixes()) {
-				return checkLocalnameForKeyword(rsrc.getLocalName());
+				String ln = rsrc.getLocalName();
+				if (allTokens.contains(ln)) {
+					if (rsrc.getNameSpace().equals(XSD.getURI())) {
+						// don't escape a localname if it is a keyword in the XSD types.
+						return ln;
+					}
+				}
+				return checkLocalnameForKeyword(ln);
 			}
 			else {
 				if (rsrc.getNameSpace().equals(XSD.getURI())) {
