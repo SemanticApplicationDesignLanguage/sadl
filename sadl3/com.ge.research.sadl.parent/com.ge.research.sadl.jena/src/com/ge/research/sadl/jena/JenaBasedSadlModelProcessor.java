@@ -1586,7 +1586,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private void addImportToJenaModel(String modelName, String importUri, String importPrefix, Model importedOntModel) {
 		getTheJenaModel().getDocumentManager().addModel(importUri, importedOntModel, true);
-		Ontology modelOntology = getTheJenaModel().createOntology(modelName);
+		Ontology modelOntology = getTheJenaModel().getOntology(modelName);
+		if (modelOntology == null) {
+			modelOntology = getTheJenaModel().createOntology(modelName);
+		}
 		if (importPrefix == null) {
 			try {
 				importPrefix = getConfigMgr(getCurrentResource(), getOwlModelFormat(getProcessorContext()))

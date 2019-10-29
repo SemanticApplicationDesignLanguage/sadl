@@ -1,7 +1,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>com.ge.research.sadl.swi-prolog-plugin</artifactId>
+	<parent>
+		<groupId>com.ge.research.sadl</groupId>
+		<artifactId>com.ge.research.sadl.parent</artifactId>
+		<version>3.2.0-SNAPSHOT</version>
+	</parent>
+	<packaging>eclipse-plugin</packaging>
+    <artifactId>com.ge.research.sadl.swi-prolog-plugin</artifactId>
 	<name>SWI-Prolog Reasoner/Translator Plugin for SADL</name>
+
+	<!-- Define where to deploy this project's artifacts -->
+	<distributionManagement>
+		<repository>
+			<id>swcoealppcr01</id>
+			<name>swcoealppcr01-releases</name>
+			<url>https://devcloud.swcoe.ge.com/artifactory/CYNZT</url>
+		</repository>
+	</distributionManagement>
 
 	<dependencies>
 	  	<dependency>
@@ -53,14 +68,6 @@
 <!-- 			<version>3.1.4-alpha</version> -->
 <!-- 		</dependency> -->
 	</dependencies>
-
-	<!-- Define where to deploy this project's artifacts -->
-	<distributionManagement>
-		<repository>
-			<id>grc-deploy</id>
-			<url>http://cdscilweb.crd.ge.com:8081/nexus/content/repositories/releases</url>
-		</repository>
-	</distributionManagement>
 
 	<build>
 		<defaultGoal>install</defaultGoal>
@@ -150,10 +157,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<parent>
-		<groupId>com.ge.research.sadl</groupId>
-		<artifactId>com.ge.research.sadl.parent</artifactId>
-		<version>3.2.0-SNAPSHOT</version>
-	</parent>
-	<packaging>eclipse-plugin</packaging>
 </project>
