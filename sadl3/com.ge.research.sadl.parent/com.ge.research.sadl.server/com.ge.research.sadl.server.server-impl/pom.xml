@@ -1,4 +1,4 @@
-<!-- 
+<!--
 /************************************************************************
  * Copyright 2007-2015 - General Electric Company, All Rights Reserved
  *
@@ -9,9 +9,9 @@
  * capture additional domain knowledge. The SADL-IDE (integrated
  * development environment) is a set of Eclipse plug-ins that
  * support the editing and testing of semantic models using the
- * SADL language. 
- * 
- * The SADL Knowledge Server is a set of Java classes implementing 
+ * SADL language.
+ *
+ * The SADL Knowledge Server is a set of Java classes implementing
  * a service interface for deploying ontology-based knowledge bases
  * for use in a client-server environment.
  *
@@ -22,7 +22,7 @@
  ***********************************************************************/
 
 /***********************************************************************
- * $Last revised by: crapo $ 
+ * $Last revised by: crapo $
  * $Revision: 1.1 $ Last modified on   $Date: 2013/08/09 14:06:51 $
  ***********************************************************************/
   -->
@@ -31,93 +31,44 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.ge.research.sadl</groupId>
-    <artifactId>server</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <artifactId>com.ge.research.sadl.server</artifactId>
+    <version>3.2.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>sadlserver-impl</artifactId>
   <packaging>jar</packaging>
   <name>SadlServer Implementation</name>
   <description>Implementation classes for SadlServer</description>
-  <dependencyManagement>
-  	<dependencies>
-	  	<dependency>
-	  		<groupId>com.ge.research.sadl</groupId>
-	  		<artifactId>sadlserver-api</artifactId>
-	  		<version>${project.version}</version>
-	  		<type>jar</type>
-	  	</dependency>
-	  	<dependency>
-	  		<groupId>com.ge.research.sadl</groupId>
-	  		<artifactId>reasoner-api</artifactId>
-	  		<version>${project.version}</version>
-	  	</dependency>
-	  	<dependency>
-	  		<groupId>com.ge.research.sadl</groupId>
-	  		<artifactId>reasoner-impl</artifactId>
-	  		<version>${project.version}</version>
-	  	</dependency>
-<!-- 	  	<dependency> -->
-<!-- 	  		<groupId>com.ge.research.sadl</groupId> -->
-<!-- 	  		<artifactId>prolog-for-sadl</artifactId> -->
-<!-- 	  		<version>${project.version}</version> -->
-<!-- 	  	</dependency> -->
-	  	<dependency>
-	  	  	<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>swi-prolog-plugin</artifactId>
-  			<version>${project.version}</version>
-	  	</dependency>
-		<dependency>
-			<groupId>net.sf.opencsv</groupId>
-			<artifactId>opencsv</artifactId>
-			<version>2.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-server</artifactId>
-			<version>8.1.6.v20120903</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>RELEASE</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-	      <groupId>junit</groupId>
-	      <artifactId>junit</artifactId>
-	      <version>4.11</version>
-	      <scope>test</scope>
-	    </dependency>
-  	</dependencies>
-  </dependencyManagement>
   <dependencies>
 	<dependency>
 		<groupId>org.eclipse.jetty</groupId>
 		<artifactId>jetty-server</artifactId>
+		<version>8.1.6.v20120903</version>
 		<scope>test</scope>
 	</dependency>
      <dependency>
        <groupId>junit</groupId>
        <artifactId>junit</artifactId>
+	   <version>4.12</version>
        <scope>test</scope>
      </dependency>
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>sadlserver-api</artifactId>
-  		<type>jar</type>
+  		<version>${project.version}</version>
   	</dependency>
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>reasoner-api</artifactId>
+	  	<version>${project.version}</version>
   	</dependency>
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>reasoner-impl</artifactId>
+	  	<version>${project.version}</version>
   	</dependency>
   </dependencies>
-  
+
 	<!-- Define where to deploy this project's artifacts -->
 	<distributionManagement>
 		<repository>
@@ -126,7 +77,7 @@
 			<url>https://devcloud.swcoe.ge.com/artifactory/CYNZT</url>
 		</repository>
 	</distributionManagement>
-   
+
     <build>
         <plugins>
             <plugin>
@@ -136,7 +87,6 @@
                 <configuration>
                      <source>1.8</source>
                      <target>1.8</target>
-					<encoding>ISO-8859-1</encoding>
                 </configuration>
             </plugin>
 			<plugin>
@@ -147,22 +97,6 @@
 					<workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
 				</configuration>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.4.0</version>
-                <configuration>
-                    <instructions>
-                        <Import-Package>
-                        	com.ge.research.sadl.reasoner,
-                        	com.ge.research.sadl.server
-                        </Import-Package>
-						<Export-Package>
-                            com.ge.research.sadl.server.impl
-						</Export-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -180,7 +114,7 @@
         </plugins>
     </build>
 
-  
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>

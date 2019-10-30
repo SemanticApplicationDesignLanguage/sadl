@@ -69,9 +69,27 @@ public class Min extends TypedBaseBuiltin {
         Object minVal = null;
         Node min = null;
         boolean allLongs = true;
-        if (length >= 3) {
-	        for (int i = 0; i < length; i++) {
-	        	Node n1 = getArg(i, args, context);
+        Node[] nodes = null;
+        if (GeUtils.isGraphPatternInput(this, args, length, context)) {
+        	nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
+        }
+        else if (length >= 3) {
+        	nodes = new Node[length];
+        	for (int i = 0; i < length; i++) {
+        		nodes[i] = getArg(i, args, context);
+        	}
+        }
+        else {
+            Node n1 = getArg(0, args, context);
+            if (n1 == null || n1.equals(RDF.Nodes.nil)) {
+                return false;
+            } else {
+            	minVal = minOfList(n1, context);
+             }
+        }
+        if (nodes != null) {
+	        for (int i = 0; i < nodes.length; i++) {
+	        	Node n1 = nodes[i]; //getArg(i, args, context);
 	        	if (n1.isLiteral()) {
 	        		Object v1 = n1.getLiteralValue();
 	        		if (v1 instanceof Number) {
@@ -115,14 +133,7 @@ public class Min extends TypedBaseBuiltin {
 	        	}
 	        }	// end for
         }
-        else {
-            Node n1 = getArg(0, args, context);
-            if (n1 == null || n1.equals(RDF.Nodes.nil)) {
-                return false;
-            } else {
-            	minVal = minOfList(n1, context);
-             }
-        }
+
         if (minVal == null) {
         	return false;
         }

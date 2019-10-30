@@ -72,7 +72,16 @@ public class NoValue extends BaseBuiltin {
      * the current environment
      */
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
-    	if (length >= 3) {
+        if (GeUtils.isGraphPatternInput(this, args, length, context)) {
+        	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, false, context);
+        	if (nodes == null || nodes.length == 0) {
+        		return true;
+        	}
+        	else {
+        		return false;
+        	}
+        }
+        else if (length >= 3) {
     		Node n3 = getArg(2, args, context);
     		if (n3 != null && n3.isURI()) {
     			if (Utils.isOntProperty(context, n3)) {

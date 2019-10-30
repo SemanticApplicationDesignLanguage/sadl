@@ -30,6 +30,7 @@ import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
 import com.ge.research.sadl.ui.editor.SadlProblemAnnotationHover
+import com.ge.research.sadl.ui.editor.folding.PatchedDefaultFoldingStructureProvider
 import com.ge.research.sadl.ui.generator.SadlShouldGenerate
 import com.ge.research.sadl.ui.hover.SadlEObjectHoverProvider
 import com.ge.research.sadl.ui.markers.EclipseMarkerSeverityMapper
@@ -52,6 +53,8 @@ import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttribute
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.contentassist.AbstractJavaBasedContentProposalProvider.ReferenceProposalCreator
 import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
+import org.eclipse.xtext.ui.editor.folding.DefaultFoldingStructureProvider
+import org.eclipse.xtext.ui.editor.folding.IFoldingStructureProvider
 import org.eclipse.xtext.ui.editor.hover.IEObjectHoverProvider
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
@@ -144,13 +147,21 @@ class SADLUiModule extends AbstractSADLUiModule {
 	def Class<? extends IdeCrossrefProposalProvider> bindIdeCrossrefProposalProvider() {
 		return SadlIdeCrossrefProposalProvider;
 	}
-	
+
 	def Class<? extends IOntologyContextProvider> bindIOntologyContextProvider() {
 		return SadlOntologyContextProvider;
 	}
 
 	def Class<? extends ContentAssistContextFactory> bindContentAssistContextFactory() {
 		return SadlContentAssistContextFactory;
+	}
+
+	def Class<? extends IFoldingStructureProvider> bindIFoldingStructureProvider() {
+		return PatchedDefaultFoldingStructureProvider;
+	}
+
+	def Class<? extends DefaultFoldingStructureProvider> bindDefaultFoldingStructureProvider() {
+		return PatchedDefaultFoldingStructureProvider;
 	}
 
 }

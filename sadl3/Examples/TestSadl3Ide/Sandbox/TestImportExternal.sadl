@@ -1,0 +1,4 @@
+ uri "http://sadl.org/TestImportExternal.sadl" alias TestImportExternal.
+ 
+ import "http://research.ge.com/Acuity/aulo.owl".
+ 

@@ -725,7 +725,7 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
 	    		if (this.destFileType.equalsIgnoreCase(".sadl")) {
 					OwlToSadl ots;
 					try {
-						ots = new OwlToSadl(csvImporter.getOwlModel());
+						ots = new OwlToSadl(csvImporter.getOwlModel(), csvImporter.getModelName());
 						String sadlmodel = ots.getSadlModel();
 						// convert string to InputStream
 						contentStream = new ByteArrayInputStream(sadlmodel.getBytes());
@@ -792,7 +792,7 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
             else {
                	long numTriples = csvImporter.processImport();
                	if (numTriples > 0) {
-               		if (!kbformat.equals(finalFormat)) {
+               		if (kbformat != null && !kbformat.equals(finalFormat)) {
                     	if (finalFormat.equals(IConfigurationManager.JENA_TDB)) {
                     		File fout = new File(owlOutputFile);
                     		Dataset ds = TDBFactory.createDataset(jenaTDBFolder);
@@ -819,8 +819,9 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
                		}
                	}
         		
-
-	            csvImporter.saveSadlProjectOwlFileMapping(namespace, owlOutputFile, null);
+               	if (owlOutputFile != null) {
+               		csvImporter.saveSadlProjectOwlFileMapping(namespace, owlOutputFile, null);
+               	}
             }
         } catch (CoreException e) {
             errorTable.add(e.getStatus());

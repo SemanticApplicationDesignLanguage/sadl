@@ -1,4 +1,4 @@
-<!-- 
+<!--
 /************************************************************************
  * Copyright 2007-2015 - General Electric Company, All Rights Reserved
  *
@@ -9,9 +9,9 @@
  * capture additional domain knowledge. The SADL-IDE (integrated
  * development environment) is a set of Eclipse plug-ins that
  * support the editing and testing of semantic models using the
- * SADL language. 
- * 
- * The SADL Knowledge Server is a set of Java classes implementing 
+ * SADL language.
+ *
+ * The SADL Knowledge Server is a set of Java classes implementing
  * a service interface for deploying ontology-based knowledge bases
  * for use in a client-server environment.
  *
@@ -22,7 +22,7 @@
  ***********************************************************************/
 
 /***********************************************************************
- * $Last revised by: crapo $ 
+ * $Last revised by: crapo $
  * $Revision: 1.1 $ Last modified on   $Date: 2013/08/09 14:06:51 $
  ***********************************************************************/
  -->
@@ -35,44 +35,28 @@
   <name>SadlServer API</name>
   <parent>
     <groupId>com.ge.research.sadl</groupId>
-    <artifactId>server</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <artifactId>com.ge.research.sadl.server</artifactId>
+    <version>3.2.1-SNAPSHOT</version>
   </parent>
 
-  <dependencyManagement>
-  	<dependencies>
-  		<dependency>
-  			<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>reasoner-api</artifactId>
-  			<version>${project.version}</version>
-  		</dependency>
-  		<dependency>
-  			<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>reasoner-impl</artifactId>
-  			<version>${project.version}</version>
-  		</dependency>
-  		<dependency>
-  			<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId>
-  			<version>${project.version}</version>
-  		</dependency>
-  	</dependencies>
-  </dependencyManagement>
   <dependencies>
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>reasoner-impl</artifactId>
+		<version>${project.version}</version>
   	</dependency>
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId>
+		<version>${project.version}</version>
   	</dependency>
   	<dependency>
   		<groupId>com.ge.research.sadl</groupId>
   		<artifactId>reasoner-api</artifactId>
-  		</dependency>
+		<version>${project.version}</version>
+	</dependency>
   </dependencies>
-  
+
 	<!-- Define where to deploy this project's artifacts -->
 	<distributionManagement>
 		<repository>
@@ -81,7 +65,7 @@
 			<url>https://devcloud.swcoe.ge.com/artifactory/CYNZT</url>
 		</repository>
 	</distributionManagement>
-   
+
        <build>
         <plugins>
             <plugin>
@@ -133,5 +117,4 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-  <version>3.2.0-SNAPSHOT</version>
-</project>
+  </project>

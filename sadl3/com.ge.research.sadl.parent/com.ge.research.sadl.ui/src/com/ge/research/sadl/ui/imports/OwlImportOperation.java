@@ -596,7 +596,7 @@ public class OwlImportOperation extends WorkspaceModifyOperation {
         	Resource res = resSet.createResource(URI.createFileURI(ffop.getCanonicalPath()));
         	ISadlImportProcessor processor = processorProvider.getProcessor(resSet);
         	Object[] retvals = processor.onImport(res, projectPath);
-        	if (retvals[0] != null) {
+        	if (retvals != null && retvals[0] != null) {
         		if (retvals[0] instanceof String) {
         			newContent = (String) retvals[0];
         			if (newContent.length() <= 20) {

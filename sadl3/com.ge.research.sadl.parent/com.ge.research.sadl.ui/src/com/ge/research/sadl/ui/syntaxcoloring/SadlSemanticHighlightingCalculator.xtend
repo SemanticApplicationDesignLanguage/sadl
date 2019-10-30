@@ -30,6 +30,7 @@ import com.ge.research.sadl.sADL.SadlPropertyInitializer
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.scoping.TestScopeProvider
+import com.ge.research.sadl.utils.SadlASTUtils
 import com.google.inject.Inject
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
@@ -37,12 +38,16 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl
 import org.eclipse.xtext.ide.editor.syntaxcoloring.IHighlightedPositionAcceptor
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
+import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
+import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
-import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.ui.resource.ProjectByResourceProvider
-import com.ge.research.sadl.utils.SadlASTUtils
+import org.eclipse.xtext.util.CancelIndicator
+
+import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import com.ge.research.sadl.external.ExternalResourceAdapter
 
 class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalculator {
 	@Inject package DeclarationExtensions declarationExtensions
@@ -141,7 +146,7 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 	
 	def private String getHighlightingId(SadlResource rn) {
 		val type = try {
-			declarationExtensions.getOntConceptType(rn)
+			declarationExtensions.getOntConceptType(rn.tryGetSadlResourceFromScope)
 		} catch (CircularDefinitionException e) {
 			e.definitionType
 		}
@@ -184,4 +189,39 @@ class SadlSemanticHighlightingCalculator implements ISemanticHighlightingCalcula
 			}
 		}
 	}
+
+	/**
+	 * Method to map the argument SADL resource to its declaration via the scope
+	 * provider. If we do not get the definition but use the SADL resource from the
+	 * AST as-is, we can get a false negative answer from the
+	 * {@link DeclarationExtensions#isExternal(SadlResource) isExternal} call and
+	 * cannot retrieve the correct {@link ExternalResourceAdapter#getType concept
+	 * type} for externals.
+	 */
+	protected def SadlResource tryGetSadlResourceFromScope(SadlResource toMap) {
+		if (toMap === null) {
+			return null
+		}
+		val resource = toMap.eResource
+		if (resource instanceof XtextResource) {
+			val name = declarationExtensions.getConcreteName(toMap)
+			if (name === null) {
+				return toMap
+			}
+			val scopeProvider = resource.resourceServiceProvider.get(IScopeProvider)
+			val scope = scopeProvider.getScope(toMap, SADL_RESOURCE__NAME)
+			val description = scope.getSingleElement(QualifiedName.create(name))
+			if (description === null) {
+				return toMap
+			}
+			val mapped = description.EObjectOrProxy
+			if (mapped instanceof SadlResource) {
+				if (!mapped.eIsProxy) {
+					return mapped
+				}
+			}
+		}
+		return toMap
+	}
+
 }

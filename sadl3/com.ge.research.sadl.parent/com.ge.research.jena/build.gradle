@@ -20,7 +20,6 @@ dependencies {
 	compile files("lib/pojava.jar")
 	compile files("lib/reasoner-api.jar")
 	compile files("lib/reasoner-impl.jar")
-	compile files("lib/serviceloader-maven-plugin.jar")
 	compile files("lib/slf4j-api.jar")
 	compile files("lib/slf4j-log4j12.jar")
 	compile files("lib/stax-api.jar")

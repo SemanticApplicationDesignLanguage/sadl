@@ -1202,6 +1202,26 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 	}
 
 	@Test
+	def void testEquationUnitLists() {
+		'''
+			uri "http://sadl.org/equations".
+			Length is a type of UnittedQuantity.
+			
+			Equation foo(int ^a (Length {ft,m}), int b (Length {ft,m})) returns int (Length {ft,m}) : ^a + b.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			for (issue:issues) {
+				println(issue.message)
+			}
+			val eqs =processor.equations
+			assertEquals(1, eqs.size)
+			for(eq:eqs) {
+//				processor.compareTranslations("decimal PI_Controller(decimal K1,decimal K2,decimal Error): +((*(K1,Error)),(/((*(K2,(^(Error,3)))),(builtinfunctions:abs(Error)))))",eq.toString)
+				println(eq.toString)
+				jenaModel.write(System.out, "N3")
+			}
+		]
+	}
+	@Test
 	def void testListModel() {
 		'''
 			uri "http://sadl.org/sadllistmodel" alias sadllist.

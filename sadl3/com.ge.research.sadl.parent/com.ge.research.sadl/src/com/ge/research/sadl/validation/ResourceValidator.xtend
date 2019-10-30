@@ -19,13 +19,13 @@ package com.ge.research.sadl.validation
 
 import com.ge.research.sadl.processing.IModelProcessor
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
+import com.ge.research.sadl.processing.IModelProcessor.ProcessorContextPreferenceValuesProvider
 import com.ge.research.sadl.processing.IModelProcessorProvider
 import com.ge.research.sadl.processing.ValidationAcceptor
 import com.ge.research.sadl.processing.ValidationAcceptorImpl
 import com.google.inject.Inject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtend.lib.annotations.Data
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.service.OperationCanceledError
 import org.eclipse.xtext.util.CancelIndicator
@@ -43,7 +43,7 @@ class ResourceValidator extends ResourceValidatorImpl {
 	public static val CACHED_ISSUES_KEY = 'issues';
 
 	@Inject IModelProcessorProvider processorProvider
-	@Inject IPreferenceValuesProvider preferenceProvider
+	@Inject ProcessorContextPreferenceValuesProvider processorContextPreferenceValuesProvider
 
 	override validate(Resource resource, CheckMode mode, CancelIndicator mon) throws OperationCanceledError {
 		if (resource instanceof XtextResource) {
@@ -60,7 +60,8 @@ class ResourceValidator extends ResourceValidatorImpl {
 		super.validate(resource, mode, monitor, acceptor);
 		val processor = processorProvider.getProcessor(resource);
 		val delegateAcceptor = new ValidationAcceptorImpl(acceptor);
-		val context = new ProcessorContext(monitor, preferenceProvider.getPreferenceValues(resource));
+		val preferenceValues = processorContextPreferenceValuesProvider.getPreferenceValues(resource);
+		val context = new ProcessorContext(monitor, preferenceValues);
 		processor.doValidate(resource, delegateAcceptor, mode, context);
 	}
 	

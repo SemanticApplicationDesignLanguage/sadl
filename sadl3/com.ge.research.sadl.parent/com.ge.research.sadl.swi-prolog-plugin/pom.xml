@@ -1,7 +1,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>com.ge.research.sadl.swi-prolog-plugin</artifactId>
+	<parent>
+		<groupId>com.ge.research.sadl</groupId>
+		<artifactId>com.ge.research.sadl.parent</artifactId>
+		<version>3.2.1-SNAPSHOT</version>
+	</parent>
+	<packaging>eclipse-plugin</packaging>
+    <artifactId>com.ge.research.sadl.swi-prolog-plugin</artifactId>
 	<name>SWI-Prolog Reasoner/Translator Plugin for SADL</name>
+
+	<!-- Define where to deploy this project's artifacts -->
+	<distributionManagement>
+		<repository>
+			<id>swcoealppcr01</id>
+			<name>swcoealppcr01-releases</name>
+			<url>https://devcloud.swcoe.ge.com/artifactory/CYNZT</url>
+		</repository>
+	</distributionManagement>
 
 	<dependencies>
 	  	<dependency>
@@ -29,10 +44,12 @@
 		  <dependency>
 			<groupId>com.ge.research.sadl</groupId>
 			<artifactId>reasoner-api</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		  <dependency>
 			<groupId>com.ge.research.sadl</groupId>
 			<artifactId>reasoner-impl</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -50,20 +67,7 @@
 <!-- 			<artifactId>jpl</artifactId> -->
 <!-- 			<version>3.1.4-alpha</version> -->
 <!-- 		</dependency> -->
-		<dependency>
-			<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
-			<artifactId>serviceloader-maven-plugin</artifactId>
-			<version>1.0.2</version>
-		</dependency>
 	</dependencies>
-
-	<!-- Define where to deploy this project's artifacts -->
-	<distributionManagement>
-		<repository>
-			<id>grc-deploy</id>
-			<url>http://cdscilweb.crd.ge.com:8081/nexus/content/repositories/releases</url>
-		</repository>
-	</distributionManagement>
 
 	<build>
 		<defaultGoal>install</defaultGoal>
@@ -71,17 +75,15 @@
 			<plugin>
 				<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
 				<artifactId>serviceloader-maven-plugin</artifactId>
-				<version>1.0.2</version>
+				<version>1.1.0</version>
 				<configuration>
 					<services>
 						<param>com.ge.research.sadl.reasoner.IReasoner</param>
 						<param>com.ge.research.sadl.reasoner.ITranslator</param>
-						<param>com.hp.hpl.jena.reasoner.rulesys.Builtin</param>
 					</services>
 				</configuration>
 				<executions>
 					<execution>
-						<phase>compile</phase>
 						<goals>
 							<goal>generate</goal>
 						</goals>
@@ -154,42 +156,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											eu.somatik.serviceloader-maven-plugin
-										</groupId>
-										<artifactId>
-											serviceloader-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0-SNAPSHOT,)
-										</versionRange>
-										<goals>
-											<goal>generate</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 	<dependencyManagement>
 		<dependencies>
@@ -205,10 +171,4 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	<parent>
-		<groupId>com.ge.research.sadl</groupId>
-		<artifactId>com.ge.research.sadl.parent</artifactId>
-		<version>3.2.1-SNAPSHOT</version>
-	</parent>
-	<packaging>eclipse-plugin</packaging>
 </project>

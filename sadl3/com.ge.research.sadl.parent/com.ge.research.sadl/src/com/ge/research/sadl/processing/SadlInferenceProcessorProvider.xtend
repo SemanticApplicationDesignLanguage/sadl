@@ -30,6 +30,7 @@ import com.google.inject.Inject
 import com.google.inject.Injector
 import java.util.Map
 import org.eclipse.emf.ecore.resource.Resource
+import com.hp.hpl.jena.ontology.OntModel
 
 /**
  * Provides {@code SADL} inferences.
@@ -58,6 +59,14 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 
 		override isSupported(String fileExtension) {
 			return false;
+		}
+		
+		override setTheJenaModel(OntModel theJenaModel) {
+			throw new UnsupportedOperationException("TODO: auto-generated method stub")
+		}
+		
+		override setPreferences(Map<String, String> preferenceMap) {
+			throw new UnsupportedOperationException("TODO: auto-generated method stub")
 		}
 
 	}

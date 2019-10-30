@@ -220,8 +220,10 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 			OntModel model, Object otherStructure, String translationFolder,
 			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException,
 			IOException, URISyntaxException {
-	
-		throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
+		if (otherStructure instanceof List<?> && ((List<?>)otherStructure).size() > 0) {
+			throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
+		}
+		return null;
 	}
 
 	@Override
@@ -1251,7 +1253,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		return null;
 	}
 	
-	private String builtinTypeToString(BuiltinElement bin) throws TranslationException {
+	public String builtinTypeToString(BuiltinElement bin) throws TranslationException {
 		BuiltinType ftype = bin.getFuncType();
 		String builtinName = null;
 		if (ftype.equals(BuiltinType.Divide)) {
@@ -1774,6 +1776,12 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 
 	@Override
 	public String parameterizeQuery(OntModel model, String queryStr, List<Object> values) throws InvalidNameException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getBuiltinClassName(String builtinName) {
 		// TODO Auto-generated method stub
 		return null;
 	}

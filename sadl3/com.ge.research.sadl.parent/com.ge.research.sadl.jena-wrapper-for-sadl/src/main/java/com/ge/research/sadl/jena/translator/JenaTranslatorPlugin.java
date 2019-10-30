@@ -1171,13 +1171,14 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 	}
 
-	private Object builtinTypeToString(BuiltinElement bin) throws TranslationException {
+	public String builtinTypeToString(BuiltinElement bin) throws TranslationException {
 		BuiltinType ftype = bin.getFuncType();
 		if (ftype.equals(BuiltinType.Divide)) {
 //			return "quotient";
 			bin.setFuncName("quotient");
 		}
-		else if (ftype.equals(BuiltinType.Equal)) {
+		else 
+			if (ftype.equals(BuiltinType.Equal)) {
 //			return "equal";
 			bin.setFuncName("equal");
 		}
@@ -1260,8 +1261,60 @@ public class JenaTranslatorPlugin implements ITranslator {
 				logger.error("Something went wrong finding/loading Builtin '" + builtinName + "'");
 				addError("Unable to resolve built-in '" + builtinName + "'");
 			}
+			else {
+				String uri = bltin.getURI();
+				bin.setFuncUri(uri);
+			}
 		}
 		return builtinName;
+	}
+	
+	@Override
+	public String getBuiltinClassName(String builtinName) {
+		String className = null;
+		// if not see if it is one already registered
+		Builtin bltin = BuiltinRegistry.theRegistry.getImplementation(builtinName);
+		if (bltin != null) {
+			className = bltin.getURI();
+		}
+		else {
+			int cnt = 0;
+			// is it known to the ConfigurationManager?
+			String[] categories = new String[2];
+			try {
+				categories[0] = configurationMgr.getReasoner().getReasonerFamily();
+				categories[1] = IConfigurationManager.BuiltinCategory;
+				List<ConfigurationItem> knownBuiltins = configurationMgr.getConfiguration(categories, false);
+				for (int i = 0; knownBuiltins != null && i < knownBuiltins.size(); i++) {
+					ConfigurationItem item = knownBuiltins.get(i);
+					Object itemName = item.getNamedValue("name");
+					if (itemName != null && itemName instanceof String && ((String)itemName).equals(builtinName)) {
+						className = (String) item.getNamedValue("class");
+						break;
+					}
+				}
+			} catch (ConfigurationException e) {
+				// this is ok--new ones won't be found
+	//			e.printStackTrace();
+	//			logger.error("Unable to find Builtin '" + builtinName + "' in current configuration: " + e.getLocalizedMessage());
+			}
+			if (className == null) {
+				// Use ServiceLoader to find an implementation of Builtin that has this name
+				ServiceLoader<Builtin> serviceLoader = ServiceLoader.load(Builtin.class);
+				if( serviceLoader != null ){
+					logger.debug("ServiceLoader is OK");
+					for( Iterator<Builtin> itr = serviceLoader.iterator(); itr.hasNext() ; ){
+						bltin = itr.next();
+						cnt++;
+						if (bltin.getName().equals(builtinName)) {
+							className = bltin.getClass().getCanonicalName();
+							break;
+						}
+					}
+				}
+			}
+		}
+		return className;
 	}
 	
 	private boolean findOrAddBuiltin(String builtinName) {
@@ -1542,6 +1595,13 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return q;
 	}
 
+	/**
+	 * Method to convert a query into a Jena parameterized query 
+	 * @param model -- the OntModel against which to expand the query
+	 * @param q -- the SADL query string
+	 * @param values -- the list of values to be used in parameterizing the query
+	 * @return -- the parameterized query string
+	 */
 	public String parameterizeQuery(OntModel model, String q, List<Object> values) throws InvalidNameException {
 		int idx = q.indexOf("?}");
 		int lastIdx = 0;

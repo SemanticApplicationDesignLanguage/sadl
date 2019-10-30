@@ -27,14 +27,14 @@
 
 package com.ge.research.sadl.server.server;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.activation.DataSource;
-import junit.framework.TestCase;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
@@ -54,7 +54,7 @@ import com.ge.research.sadl.server.ISadlServerPE;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
 
-public class TestSadlServerDemo extends TestCase {
+public class TestSadlServerDemo {
 
 	private String kbaseRoot;
 	private String modelFolder;
@@ -82,7 +82,6 @@ public class TestSadlServerDemo extends TestCase {
 	
 	@Before
 	public void setUp() throws Exception {
-		super.setUp();
 		kbaseRoot = ClassLoader.getSystemResource("DataModels").getFile();
 //		modelFolder = ClassLoader.getSystemResource("DataModels/Advise2").getFile();
 //		modelFolder = ClassLoader.getSystemResource("DataModels/ShapesSadlServerTest/OwlModels").getFile();
@@ -114,24 +113,24 @@ public class TestSadlServerDemo extends TestCase {
 		assertNotNull(sv);
 		System.out.println("Server version: " + sv);
 		
-//		// select a service model--this is necessary to enable creation of a reasoner--and then get the reasoner version
-//		assertNotNull(srvr.selectServiceModel(serverSideScenario));
-//		String rv = srvr.getReasonerVersion();
-//		assertNotNull(rv);
-//		System.out.println("Reasoner version: " + rv);
-//		
-//		// get the version of the ontology (model) specified in the named service
-//		String modelName = srvr.getModelName();
-//		String vqry = srvr.prepareQuery("select ?ver where {<" + modelName + "> <owl:versionInfo> + ?ver}");
-//		ResultSet rs = srvr.query(vqry);
-//		assertNotNull(rs);
-//		System.out.println("Server-side scenario ontology (" + modelName + ") version: " + rs.getResultAt(0, 0));
-//		
-//		// get the names of all imported models and their versions
-//		String ivqry = srvr.prepareQuery("select ?impont ?impver where {<" + modelName + "> <owl:imports>+ ?impont . ?impont <owl:versionInfo> ?impver}");
-//		rs = srvr.query(ivqry);
-//		assertNotNull(rs);
-//		System.out.println("Imported ontologies and versions: " + rs.toStringWithIndent(5));
+		// select a service model--this is necessary to enable creation of a reasoner--and then get the reasoner version
+		assertNotNull(srvr.selectServiceModel(serverSideScenario));
+		String rv = srvr.getReasonerVersion();
+		assertNotNull(rv);
+		System.out.println("Reasoner version: " + rv);
+		
+		// get the version of the ontology (model) specified in the named service
+		String modelName = srvr.getModelName();
+		String vqry = srvr.prepareQuery("select ?ver where {<" + modelName + "> <owl:versionInfo> + ?ver}");
+		ResultSet rs = srvr.query(vqry);
+		assertNotNull(rs);
+		System.out.println("Server-side scenario ontology (" + modelName + ") version: " + rs.getResultAt(0, 0));
+		
+		// get the names of all imported models and their versions
+		String ivqry = srvr.prepareQuery("select ?impont ?impver where {<" + modelName + "> <owl:imports>+ ?impont . ?impont <owl:versionInfo> ?impver}");
+		rs = srvr.query(ivqry);
+		assertNotNull(rs);
+		System.out.println("Imported ontologies and versions: " + rs.toStringWithIndent(5));
 	}
 
 	@Test

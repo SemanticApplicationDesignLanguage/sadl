@@ -5,9 +5,9 @@
     xmlns:owl="http://www.w3.org/2002/07/owl#"
     xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
     xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:sadllistmodel="http://sadl.org/sadllistmodel"
-    xmlns:j.0="http://sadl.org/sadlbasemodel#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
   xml:base="http://sadl.org/UsingListExpression.sadl">
   <owl:Ontology rdf:about="">
@@ -34,15 +34,69 @@
     <rdfs:subClassOf rdf:resource="sadllistmodel#List"/>
   </owl:Class>
   <j.0:Equation rdf:ID="firstElement">
-    <j.0:expression rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Person firstElement(PersonList List people): elementAt(people,0)</j.0:expression>
+    <j.0:returnTypes rdf:parseType="Collection">
+      <j.0:DataDescriptor>
+        <j.0:dataType>http://sadl.org/UsingListExpression.sadl#Person</j.0:dataType>
+      </j.0:DataDescriptor>
+    </j.0:returnTypes>
+    <j.0:arguments rdf:parseType="Collection">
+      <j.0:DataDescriptor>
+        <j.0:dataType>http://sadl.org/UsingListExpression.sadl#PersonList</j.0:dataType>
+        <j.0:descriptorName>people</j.0:descriptorName>
+      </j.0:DataDescriptor>
+    </j.0:arguments>
+    <j.0:expression>
+      <j.0:Script>
+        <j.0:language rdf:resource="sadlimplicitmodel#Text"/>
+        <j.0:script rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Person firstElement(PersonList List people): elementAt(people,0)</j.0:script>
+      </j.0:Script>
+    </j.0:expression>
   </j.0:Equation>
   <j.0:Equation rdf:ID="lastElement">
-    <j.0:expression rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >Person lastElement(PersonList List people): elementAt(people,-(length(people),1))</j.0:expression>
+    <j.0:returnTypes rdf:parseType="Collection">
+      <j.0:DataDescriptor>
+        <j.0:dataType>http://sadl.org/UsingListExpression.sadl#Person</j.0:dataType>
+      </j.0:DataDescriptor>
+    </j.0:returnTypes>
+    <j.0:arguments rdf:parseType="Collection">
+      <j.0:DataDescriptor>
+        <j.0:dataType>http://sadl.org/UsingListExpression.sadl#PersonList</j.0:dataType>
+        <j.0:descriptorName>people</j.0:descriptorName>
+      </j.0:DataDescriptor>
+    </j.0:arguments>
+    <j.0:expression>
+      <j.0:Script>
+        <j.0:language rdf:resource="sadlimplicitmodel#Text"/>
+        <j.0:script rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Person lastElement(PersonList List people): elementAt(people,-(length(people),1))</j.0:script>
+      </j.0:Script>
+    </j.0:expression>
   </j.0:Equation>
   <j.0:ExternalEquation rdf:ID="elementAt">
     <j.0:externalURI rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
     ></j.0:externalURI>
+    <j.0:returnTypes rdf:parseType="Collection">
+      <j.0:DataDescriptor>
+        <j.0:dataType>http://sadl.org/UsingListExpression.sadl#Person</j.0:dataType>
+      </j.0:DataDescriptor>
+    </j.0:returnTypes>
+    <j.0:arguments rdf:parseType="Collection">
+      <j.0:DataDescriptor>
+        <j.0:dataType>http://sadl.org/UsingListExpression.sadl#PersonList</j.0:dataType>
+        <j.0:descriptorName>lst</j.0:descriptorName>
+      </j.0:DataDescriptor>
+      <j.0:DataDescriptor>
+        <j.0:dataType>http://www.w3.org/2001/XMLSchema#int</j.0:dataType>
+        <j.0:descriptorName>idx</j.0:descriptorName>
+      </j.0:DataDescriptor>
+    </j.0:arguments>
+    <j.0:expression>
+      <j.0:Script>
+        <j.0:language rdf:resource="sadlimplicitmodel#Text"/>
+        <j.0:script rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >Person elementAt(PersonList List lst,int idx): uri("")</j.0:script>
+      </j.0:Script>
+    </j.0:expression>
   </j.0:ExternalEquation>
 </rdf:RDF>

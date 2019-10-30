@@ -1,0 +1,30 @@
+ uri "http://sadl.org/TestGraphPatternBuiltins.sadl" alias tgpb.
+ 
+ Student is a class described by test with values of type Test.
+ Test is a class described by score with values of type int.
+ averageScore describes Student with a single value of type float.
+ minScore describes Student with a single value of type int.
+ maxScore describes Student with a single value of type int.
+ prodOfScores describes Student with a single value of type long.
+ sumOfScores describes Student with a single value of type int.
+ 
+ Rule avgRule: if s is a Student then averageScore of s is average(s, test, t, t, score).
+ Rule minRule: if s is a Student then minScore of s is min(s, test, t, t, score).
+ Rule maxRule: if s is a Student then maxScore of s is max(s, test, t, t, score).
+ Rule prodRule: if s is a Student then prodOfScores of s is product(s, test, t, t, score).
+ Rule sumRule: if s is a Student then sumOfScores of s is sum(s, test, t, t, score).
+ 
+ George is a Student 
+ 	with test (a Test with score 20),
+ 	with test (a Test with score 30),
+ 	with test (a Test with score 40),
+ 	with test (a Test with score 50),
+ 	with test (a Test with score 60).
+ 	
+// Ask: select s p v where s has p v.
+ Test: averageScore of George is 40.
+ Test: minScore of George is 20.
+ Test: maxScore of George is 60.
+ Test: prodOfScores of George is 72000000.
+ Test: sumOfScores of George is 200.
+ 

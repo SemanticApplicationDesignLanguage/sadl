@@ -196,7 +196,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 							writeAccumulator.append(((ResultSet)scr.getResults()).toStringWithIndent(indent));
 							writeAccumulator.append("\n");
 						}
-						else {
+						else if (scr.getResults() != null) {
 							writeAccumulator.append(scr.getResults().toString());
 							writeAccumulator.append("\n");
 						}						
@@ -235,6 +235,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 						String prjDir = modelFolderFile.getParent();
 						String filepath = prjDir + File.separator + ofn;
 						of = new File(filepath);
+						of.getParentFile().mkdirs();
 					}
 					getConfigMgr(getOwlFormat()).getSadlUtils().stringToFile(of, writeAccumulator.toString(), false);
 					writeInEffect = null;
@@ -722,7 +723,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					if (rs != null && (rcnt = rs.getRowCount()) > 0) {
 						// see if we can get a match on the literal
 						if (triple.getModifierType().equals(
-								TripleModifierType.None)) {
+								TripleModifierType.None) ||
+								triple.getModifierType().equals(TripleModifierType.Assignment)) {
 							OntProperty oprop = getTheJenaModel().getOntProperty(
 									predicate);
 							if (!(on instanceof ValueTableNode) && oprop != null && oprop.isDatatypeProperty()) {
@@ -1348,11 +1350,29 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return results;
 	}
 
+	/**
+	 * Method to get an initialized reasoner to be able to do inference and answer queries. Two
+	 *  different scenarios are supported.
+	 *  1. File-based knowledge bases, in which case there is a model folder path
+	 *  2. In-memory knowledge bases, in which case we have an in-memory OntModel to use 
+	 *     (this is the case in JUnit tests that are not file-based)
+	 * @return -- the reasoner instance
+	 * @throws ConfigurationException
+	 * @throws ReasonerNotFoundException
+	 */
 	private IReasoner getInitializedReasoner() throws ConfigurationException, ReasonerNotFoundException {
 		IReasoner reasoner = getConfigMgr(getOwlFormat()).getReasoner();
 		if (!reasoner.isInitialized()) {
 			reasoner.setConfigurationManager(getConfigMgr(getOwlFormat()));
-			reasoner.initializeReasoner(getModelFolderPath(), getModelName(), getOwlFormat());
+			if (getModelFolderPath() != null) {
+				reasoner.initializeReasoner(getModelFolderPath(), getModelName(), getOwlFormat());
+			}
+			else if (getTheJenaModel() != null) {
+				reasoner.initializeReasoner(getTheJenaModel(), getModelName(), null, null);
+			}
+			else {
+				throw new ConfigurationException("No model folder path, no model, can't initialize a reasoner.");
+			}
 		}
 		return reasoner;
 	}
@@ -1462,7 +1482,13 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return theJenaModel;
 	}
 
-	protected void setTheJenaModel(OntModel theJenaModel) {
+	/**
+	 * Method to set the OntModel to be used during inference.
+	 * This enables inference over an in-memory model.
+	 * @param theJenaModel
+	 */
+	@Override
+	public void setTheJenaModel(OntModel theJenaModel) {
 		this.theJenaModel = theJenaModel;
 	}
 
@@ -1471,7 +1497,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	}
 
 	protected void setModelFolderPath(String modelFolderPath) {
-		this.modelFolderPath = modelFolderPath.replace('\\', '/');
+		if (modelFolderPath != null) {
+			this.modelFolderPath = modelFolderPath.replace('\\', '/');
+		}
 	}
 
 	protected String getModelName() {
@@ -1577,7 +1605,12 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					else {
 						val = getTheJenaModel().getResource(objNode.getURI());
 					}
-					getTheJenaModel().add(commonSubjectInst, pred, val);
+					if (commonSubject != null && pred != null && val != null) {
+						getTheJenaModel().add(commonSubjectInst, pred, val);
+					}
+					else {
+						System.err.println("Unhandled condition: triple has a null element.");
+					}
 				}
 				else {
 					System.err.println("Unhandled condition: subject isn't expected common subject.");
@@ -1685,13 +1718,17 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					Object array[][] = new Object[rows.size()][colNames.size()];
 					String[] colNameArray = new String[colNames.size()];
 					colNameArray = colNames.toArray(colNameArray);
-					for(int j=0; j < rows.size(); j++)
+					boolean dataAdded = false;
+					for(int j=0; j < rows.size(); j++) {
 						array[j] = (rows.get(j)).toArray(new Object[colNames.size()]);
-
-					ResultSet rs = new ResultSet(colNameArray, array);
-					ResultSet[] results = new ResultSet[1];
-					results[0] = rs;
-					return results;
+						dataAdded = true;
+					}
+					if (dataAdded) {
+						ResultSet rs = new ResultSet(colNameArray, array);
+						ResultSet[] results = new ResultSet[1];
+						results[0] = rs;
+						return results;
+					}
 				}
 				return null;
 			} catch (ConfigurationException e) {
@@ -1711,6 +1748,31 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	@Override
 	public boolean isSupported(String fileExtension) {
 		return "sadl".equals(fileExtension);
+	}
+
+	/**
+	 * Method to set the preferences to be used during inference
+	 * @param preferenceMap
+	 */
+	@Override
+	public void setPreferences(Map<String, String> preferenceMap) {
+		this.preferenceMap = preferenceMap;
+	}	
+
+	protected Map<String, String> getPreferences() {
+		return preferenceMap;
+	}
+
+	/**
+	 * Method to get the preference identified by key
+	 * @param key
+	 * @return
+	 */
+	public String getPreference(String key) {
+		if (preferenceMap != null) {
+			return preferenceMap.get(key);
+		}
+		return null;
 	}
 
 }

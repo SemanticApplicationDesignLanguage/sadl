@@ -18,9 +18,9 @@ Require-Bundle: com.ge.research.sadl.testsuite,
  org.eclipse.xtext.builder,
  org.eclipse.xtend.lib;resolution:=optional,
  org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
- com.ge.research.jena;bundle-version="3.2.0",
- com.ge.research.sadl;bundle-version="3.2.0",
- com.ge.research.sadl.ui;bundle-version="3.2.0"
+ com.ge.research.jena,
+ com.ge.research.sadl,
+ com.ge.research.sadl.ui
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.testsuite.ui.internal,

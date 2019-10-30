@@ -82,7 +82,6 @@ SADL also includes POJava licensed under Apache License V2.0.
       <import plugin="org.eclipse.xtext.common.types"/>
       <import plugin="org.antlr.runtime"/>
       <import plugin="org.eclipse.xtext.xbase.lib" version="2.14.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.builder"/>
       <import plugin="org.eclipse.xtext.util"/>
       <import plugin="org.eclipse.xtend.lib" version="2.14.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.emf.common"/>
@@ -92,8 +91,9 @@ SADL also includes POJava licensed under Apache License V2.0.
       <import plugin="org.eclipse.core.net"/>
       <import plugin="org.eclipse.xtext.ide"/>
       <import plugin="org.eclipse.xtext.xbase.ide"/>
-      <import plugin="com.ge.research.sadl.jena-wrapper-for-sadl" version="3.2.0" match="greaterOrEqual"/>
+      <import plugin="com.ge.research.sadl.jena-wrapper-for-sadl" version="3.2.1" match="greaterOrEqual"/>
       <import plugin="org.apache.xerces"/>
+      <import plugin="org.eclipse.xtext.builder"/>
       <import plugin="org.eclipse.xtext.ui"/>
       <import plugin="org.eclipse.ui.console"/>
       <import plugin="org.eclipse.ui.editors"/>
@@ -108,20 +108,20 @@ SADL also includes POJava licensed under Apache License V2.0.
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.eclipse.ui.navigator"/>
       <import plugin="org.eclipse.ui.navigator.resources"/>
       <import plugin="org.eclipse.ui.intro"/>
       <import plugin="org.eclipse.ui.intro.universal"/>
       <import plugin="org.eclipse.jface"/>
-      <import plugin="org.eclipse.ui.workbench"/>
       <import plugin="org.junit" version="4.12.0" match="greaterOrEqual"/>
       <import plugin="org.hamcrest.core" version="1.3.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.equinox.common" version="3.5.0" match="greaterOrEqual"/>
-      <import plugin="com.ge.research.sadl" version="3.2.0" match="greaterOrEqual"/>
-      <import plugin="com.ge.research.jena" version="3.2.0" match="greaterOrEqual"/>
+      <import plugin="com.ge.research.sadl" version="3.2.1" match="greaterOrEqual"/>
+      <import plugin="com.ge.research.jena" version="3.2.1" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.editors" version="3.5.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui.ide" version="3.5.0" match="greaterOrEqual"/>
-      <import plugin="com.ge.research.sadl.ui" version="3.2.0" match="greaterOrEqual"/>
+      <import plugin="com.ge.research.sadl.ui" version="3.2.1" match="greaterOrEqual"/>
       <import plugin="org.apache.commons.logging"/>
    </requires>
 
@@ -322,6 +322,13 @@ SADL also includes POJava licensed under Apache License V2.0.
 
    <plugin
          id="com.ge.research.sadl.testsuite.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.ge.research.sadl.swi-prolog-plugin"
          download-size="0"
          install-size="0"
          version="0.0.0"

@@ -72,7 +72,8 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 				owlToSadl = new OwlToSadl(ffop); //sfop,policyFileName);
 			}
 			catch (Exception e) {
-				
+//				e.printStackTrace();
+				throw e;
 			}
 			setResultingDataSource(owlToSadl.getSadlModel());
 		} catch (Exception e1) {
@@ -94,6 +95,23 @@ public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 	public Object[] onImport(String owlContent) {
 		try {
 			OwlToSadl owlToSadl = new OwlToSadl(owlContent);
+			setResultingDataSource(owlToSadl.getSadlModel());
+
+		} catch (Exception e1) {
+	        if (getResultingDataSource() == null) {
+	            getErrors().add(e1.toString());
+	        }
+		}
+		Object[] retval = new Object[2];
+		retval[0] = getResultingDataSource();
+		retval[1] = getErrors();
+		return retval;
+	}
+
+	@Override
+	public Object[] onImport(String owlContent, String modelUri) {
+		try {
+			OwlToSadl owlToSadl = new OwlToSadl(owlContent, modelUri);
 			setResultingDataSource(owlToSadl.getSadlModel());
 
 		} catch (Exception e1) {

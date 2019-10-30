@@ -88,9 +88,16 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	}
 
 	@Override
+	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences)
+			throws ReasonerNotFoundException, ConfigurationException {
+		throw new ConfigurationException("This method of initializing the reasoner is not supported by " + this.getClass().getCanonicalName() + ".");
+	}
+
+	@Override
 	public int initializeReasoner(String KBIdentifier, String modelName,
 			String repoType) throws ReasonerNotFoundException,
 			ConfigurationException {
+		int succeeded = 1;
 		
 		//System.out.println("KB identifier is: " + KBIdentifier);
 		//System.out.println("Model name: " + modelName);
@@ -139,10 +146,11 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			succeeded = 0;
 		}
 		sbLoad.append("').\n");
 		sbLoad.append(":- load_rdf_file('");
-		sbLoad.append(owlFile);
+		sbLoad.append(fixWindowsPath(owlFile));
 		sbLoad.append("').\n");
 		
 		StringBuffer sbUnload = new StringBuffer();
@@ -151,17 +159,18 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			pl.addPlRules(sbLoad.toString());
 		}
 		try {
-			System.out.println(pl.runPlQueryNoArgs(url, "true", true));
+			//System.out.println(pl.runPlQueryNoArgs(url, "true", true));
 			pl.clearPlRules();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			succeeded = 0;
 		}
 		//SWIPrologInterface.initProlog(KBIdentifier);
 		// to get configuration options
 		//String derval = getStringConfigurationValue(preferences , plImport, null);
 		setInitialized(true);
-		return 0;
+		return succeeded;
 	}
 
 	@Override
@@ -195,7 +204,25 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	@Override
 	public boolean loadRules(String ruleFileName) throws IOException {
 		// TODO Auto-generated method stub
-		return false;
+		//AG: is this implementation good?
+		SWIPrologServiceInterface pl = getPrologServiceInstance();
+		StringBuffer sbLoad = new StringBuffer();
+
+		
+		sbLoad.append(":- load_rdf_file('");
+		sbLoad.append(fixWindowsPath(ruleFileName));
+		sbLoad.append("').\n");
+		
+		if (sbLoad.length() > 0) {
+			pl.addPlRules(sbLoad.toString());
+		}
+		try {
+			System.out.println(pl.runPlQueryNoArgs(getPlUrl(), "true", true));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
 	}
 
 	@Override
@@ -254,8 +281,11 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	@Override
 	public boolean loadInstanceData(String instanceDatafile)
 			throws IOException, ConfigurationException {
-		// TODO Auto-generated method stub
-		return false;
+		StringBuilder sb = new StringBuilder();
+		sb.append(":- load_rdf_file('");
+		sb.append(fixWindowsPath(instanceDatafile));
+		sb.append("').\n");
+		return getPrologServiceInstance().addPlRules(sb.toString());
 	}
 
 	@Override
@@ -275,6 +305,9 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	public boolean loadInstanceData(OntModel model)
 			throws ConfigurationException {
 		// TODO Auto-generated method stub
+		
+		
+		
 		return false;
 	}
 
@@ -625,7 +658,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		// Step 3: kill existing SWI-Prolog service
 		if (isRunning) {
 			try {
-				Runtime.getRuntime().exec("taskkill /F /IM swipl-win.exe");
+				killPrologService();
 				// must wait a brief period of time or the killed process will respond to the query below
 				while (isRunning) {
 					try {
@@ -670,7 +703,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 				if (errorNumber == 0) {
 					try {
 						// Step 4: if query failed for the first time, start Service
-						Runtime.getRuntime().exec("cmd /c start /min " + getPrologCommandLine());
+						startPrologService();
 					} catch (IOException e1) {
 						e1.printStackTrace();
 						return e1.getMessage();
@@ -684,17 +717,72 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 				return e.getMessage();
 			}
 			errorNumber++;
-			if (errorNumber > 1000) {
+			if (errorNumber > 2000) {
 				return "Failed to prepare service after 1000 iterations.";
 			}
 		}
 		return null;
 	}
 	
+	private void startPrologService() throws IOException, TranslationException {
+		// TODO Auto-generated method stub
+		if ( isWindows() ) {
+			Runtime.getRuntime().exec("cmd /c start /min " + getPrologCommandLine());
+		} else if ( isMac() ) {
+			String runServiceFile = getConfigMgr().getModelFolder() + "/" + SWIPrologTranslatorPlugin.SWI_RUN_PROLOG_SERVICE_PL;
+			getPrologCommandLine(); //don't need the command, but it creates the temp folder.
+			String command = "/usr/local/bin/swipl -f " +  runServiceFile; 
+			//Process proc = 
+			Runtime.getRuntime().exec(command); //for *NIX
+		} else if ( isUnix() ) {
+			String runServiceFile = getConfigMgr().getModelFolder() + "/" + SWIPrologTranslatorPlugin.SWI_RUN_PROLOG_SERVICE_PL;
+			getPrologCommandLine(); //don't need the command, but it creates the temp folder.
+			String command = "/usr/local/bin/swipl -f " +  runServiceFile; 
+			Runtime.getRuntime().exec(command); //for *NIX
+		} else {
+			throw new IOException("Unknown OS " + getOSIdent() + ", can't kill prolog service");
+		}
+	}
+
+	private void killPrologService() throws IOException {
+		// TODO Auto-generated method stub
+		if ( isWindows() ) {
+			Runtime.getRuntime().exec("taskkill /F /IM swipl-win.exe"); //for Windows
+		} else if  (isUnix() || isMac() ) {
+			Runtime.getRuntime().exec("killall swipl"); //for *NIX
+		} else {
+			throw new IOException("Unknown OS " + getOSIdent() + ", can't kill prolog service");
+		}
+	}
+
+	private static String getOSIdent() {
+		return System.getProperty("os.name").toLowerCase();
+		
+	}
+	
+	public static boolean isWindows() {
+
+		return (getOSIdent().indexOf("win") >= 0);
+
+	}
+
+	public static boolean isMac() {
+
+		return (getOSIdent().indexOf("mac") >= 0);
+
+	}
+
+	public static boolean isUnix() {
+
+		return (getOSIdent().indexOf("nix") >= 0 || getOSIdent().indexOf("nux") >= 0 || getOSIdent().indexOf("aix") > 0 );
+		
+	}
+	
+	
 	public String getPrologCommandLine() throws TranslationException, IOException {
 		String batchFile = getTranslatorPrologFolder() + "/run-prolog-service.bat";
 		
-		// write the file
+		// write the file 
 		File bf = new File(batchFile);
 		if (bf.exists() && !bf.canWrite()) {
 			throw new TranslationException("Can't create batch file '" + batchFile + "'; not writable.");
@@ -704,10 +792,11 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		}
 		
 		String runServiceFile = getConfigMgr().getModelFolder() + "/" + SWIPrologTranslatorPlugin.SWI_RUN_PROLOG_SERVICE_PL;
-//		String contents = "start /min swipl-win.exe -s " + runServiceFile + "\nexit\n";
-		String contents = "start /min swipl-win.exe --traditional -s " + runServiceFile + "\nexit\n";
+		String contents = "start /min swipl-win.exe -s " + runServiceFile + "\nexit\n"; // --traditional causes problems with some libraries
+//		String contents = "start /min swipl-win.exe --traditional -s " + runServiceFile + "\nexit\n"; //
 		SadlUtils su = new SadlUtils();
 		su.stringToFile(bf, contents, false);
+		//bf.setExecutable(true);
 		
 		// create temp folder for SWI-Prolog service
 		String plConfigFile = getTranslatorPrologFolder() + "/prolog-service-config/prolog-service-config.pl";
@@ -825,8 +914,8 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			for (int i = 0; i < files.size(); i++) {
 				File f = new File(new SadlUtils().fileUrlToFileName(files.get(i)));
 				if (f.exists()) {
-					getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "unload_rdf_file('" + f.getCanonicalPath().replace('\\', '/') + "')", true);
-					getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "load_rdf_file('" + f.getCanonicalPath().replace('\\', '/') + "')", true);
+					getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "unload_rdf_file('" + fixWindowsPath(f.getCanonicalPath()) + "')", true);
+					getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "load_rdf_file('" + fixWindowsPath(f.getCanonicalPath()) + "')", true);
 				}
 				else {
 					throw new TranslationException("OWL file '" + f.getCanonicalPath() + "' does not exist, can't be loaded.");
@@ -834,6 +923,10 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			}
 		}
 		return files;
+	}
+	
+	private String fixWindowsPath(String path) {
+		return path.replace('\\', '/');
 	}
 
 	private IConfigurationManager getConfigMgr() {

@@ -107,7 +107,7 @@ public class List extends BaseBuiltin {
        	}
        	else {
        		// this is not a SPARQL "select..."; generation of the list is from expressed edges
-	       	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, context);
+	       	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
 	        if (nodes == null || nodes.length == 0) {
 	        	logger.debug("list returning empty list, no matches found");
 	        	return env.bind(args[length - 1], RDF.Nodes.nil);

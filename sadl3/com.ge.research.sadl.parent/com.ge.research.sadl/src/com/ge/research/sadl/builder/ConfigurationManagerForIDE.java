@@ -46,6 +46,7 @@ import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider;
+import org.eclipse.xtext.util.StringInputStream;
 
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
@@ -57,6 +58,7 @@ import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.SADLPackage;
@@ -68,6 +70,7 @@ import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Ontology;
 import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
@@ -823,6 +826,19 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return theModel;
 	}
 
+	@Override
+	public OntModel getOntModel(String publicUri, String serializedGraph, Scope scope, String format) {
+		Model m = ModelFactory.createDefaultModel()
+		        .read(new StringInputStream(serializedGraph), null, format);
+    	if (m instanceof OntModel) {
+    		return (OntModel)m;
+    	}
+    	else {
+    		getOntModelSpec(null).setImportModelGetter(new SadlJenaModelGetter(this, null));
+     		return ModelFactory.createOntologyModel(getOntModelSpec(null), m);
+    	}
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -1022,5 +1038,5 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		}
 		return null;
 	}
-	
+
 }

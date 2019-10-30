@@ -114,6 +114,32 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 
+	// https://github.com/crapo/sadlos2/issues/376
+	@Test
+	def void testExternalEquationStatement_GH_376() {
+		'''
+		uri "http://sadl.org/SemanticConstraintsExample.sadl" alias SemanticConstraintsExample.
+		
+		Circle is a class described by radius with values of type float.
+		
+		Equation areaBetweenConcentricCircles(float [largerRadius], float [smallerRadius] (<largerRadius> > <smallerRadius>)) returns float :
+			return PI*(<largerRadius>^2 - <smallerRadius>^2).
+		
+		External areaBetweenConcentricCircles2(float [largerRadius], float [smallerRadius] (<largerRadius> > <smallerRadius>)) returns float :
+			"uri".
+		
+		Air is a class, described by altitude with values of type UnittedQuantity,
+			described by temperature with values of type UnittedQuantity.
+		
+		External troposphereTemperature(UnittedQuantity [alt] (altitude of some Air and unit of <alt> is "ft" and ^value of <alt> <= 36152))
+			returns UnittedQuantity (temperature of the Air): "uri".
+		
+		Equation stratosphereTemperature(UnittedQuantity [alt] (altitude of some Air and unit of <alt> is "ft" and
+			^value of <alt> > 36152 and ^value of <alt> <= 82345))
+				returns UnittedQuantity (temperature of the Air) : return (a UnittedQuantity with ^value 389.98, with unit "F").
+		'''.assertLinking[sadl]
+	}
+
 	// https://github.com/crapo/sadlos2/issues/67
 	@Test
 	def void testLinkingPrecedence_01() {

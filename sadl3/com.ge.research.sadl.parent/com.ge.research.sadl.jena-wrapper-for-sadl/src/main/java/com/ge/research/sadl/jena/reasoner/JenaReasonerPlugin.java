@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
@@ -579,6 +581,81 @@ public class JenaReasonerPlugin extends Reasoner{
 		return 0;
 	}
 
+
+	@Override
+	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences)
+			throws ReasonerNotFoundException, ConfigurationException {
+		if (!(kbase instanceof OntModel)) {
+			throw new ConfigurationException("The kbase Object passed into JenaReasonerPlugin must be a Jena OntModel.");
+		}
+		this.preferences = preferences;
+		setModelName(modelName);
+		if (timingInfo == null) {
+			timingInfo = new ArrayList<ReasonerTiming>();
+		}
+		else {
+			timingInfo.clear();
+		}
+		schemaModel = (OntModel)kbase;		
+		
+		long t2 = System.currentTimeMillis();
+		
+		this.ruleFilesLoaded = new ArrayList<String>();
+		this.ruleList = new ArrayList<Rule>();
+
+		if (rules != null) {
+			loadRulesFromString(rules);
+		}
+		modelSpec = getModelSpec(preferences);	// get this for later use when creating InfModel
+
+		reasoner = new GenericRuleReasoner(ruleList);
+		reasoner.setDerivationLogging(derivationLogging);
+		logger.debug("JenaReasonerPluging.initialize, size of ruleList from reasoner = "+reasoner.getRules().size());
+		reasoner.setMode(getRuleMode(preferences));
+		long t3 = System.currentTimeMillis();
+		if (collectTimingInfo) {
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_MODEL, "load ontology model", t2 - tboxLoadTime));
+			int numRules = ruleList.size();
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "load model " + numRules + " rules", t3 - t2));
+		}
+
+		long t4;
+		if (collectTimingInfo) {
+			t4 = System.currentTimeMillis();
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "bind schema to reasoner", t4 - t3));			
+		}
+		boolean transitiveClosure = getBooleanConfigurationValue(preferences, pTransitiveClosureCaching, false);
+		reasoner.setTransitiveClosureCaching(transitiveClosure);
+		reasoner.setOWLTranslation(getBooleanConfigurationValue(preferences, pOWLTranslation, false));
+		if (getBooleanConfigurationValue(preferences, pUseLuceneIndexer, false)) {
+			luceneIndexerClass = getStringConfigurationValue(preferences, pLuceneIndexerClass, "com.ge.research.sadl.jena.reasoner.LuceneModelIndexerImpl");
+		}
+		
+		String strTimeOut = getStringConfigurationValue(preferences, pTimeOut, "-1");
+		try {
+			queryTimeout = Long.parseLong(strTimeOut.trim());
+		}
+		catch (NumberFormatException e) {
+			String msg = "Invalid timeout value '" + strTimeOut + "'";
+			logger.error(msg); addError(new ModelError(msg, ErrorType.ERROR));
+
+		}
+		initialized = true;
+		
+		return 1;
+	}
+	
+	private boolean loadRulesFromString(String rulesStr) {
+		Reader ruleReader = new StringReader(rulesStr);
+		BufferedReader br = new BufferedReader(ruleReader);
+		List<Rule> rules = Rule.parseRules(Rule.rulesParserFromReader(br));
+		if (rules != null) {
+			ruleList.addAll(rules);
+			newInputFlag = true;
+			return true;
+		}
+		return false;
+	}
 
 	public boolean loadRules(String ruleFileName) throws IOException {
 		if (ruleFileName != null) {
@@ -2906,6 +2983,9 @@ public class JenaReasonerPlugin extends Reasoner{
 		return new String[]{"addOne(decimal)decimal", 
 							"bound(string)boolean", 
 							"countLiteralValues(string,string)int", 
+							"difference(decimal, decimal)decimal",
+							"ge(decimal,decimal)boolean",
+							"le(decimal,decimal)boolean",
 							"isBNode(string)boolean", 
 							"isDType(string)boolean", 
 							"isLiteral(string)boolean",

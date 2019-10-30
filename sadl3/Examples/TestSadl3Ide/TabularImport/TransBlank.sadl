@@ -1,0 +1,4 @@
+ uri "http://sadl.org/TransBlank.sadl" alias tbm.
+ 
+ Thingy is a class described by bdprop with values of type boolean.
+ 

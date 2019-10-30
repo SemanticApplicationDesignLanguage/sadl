@@ -30,5 +30,34 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+		    <groupId>com.ge.research.sadl</groupId>
+		    <artifactId>com.ge.research.sadl</artifactId>
+		    <version>${project.version}</version>
+		    <type>eclipse-plugin</type>
+		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
+				<artifactId>serviceloader-maven-plugin</artifactId>
+				<version>1.1.0</version>
+				<configuration>
+					<services>
+						<param>com.ge.research.sadl.processing.IModelProcessor</param>
+						<param>com.ge.research.sadl.processing.ISadlImportProcessor</param>
+						<param>com.ge.research.sadl.processing.ISadlInferenceProcessor</param>
+					</services>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

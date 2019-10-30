@@ -18,6 +18,8 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
+import java.util.Arrays;
+
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.reasoner.rulesys.BindingEnvironment;
 import com.hp.hpl.jena.reasoner.rulesys.BuiltinException;
@@ -63,7 +65,12 @@ public class Average extends BaseBuiltin {
         checkArgs(length, context);
         BindingEnvironment env = context.getEnv();
         double avg = 0;
-        if (length >= 3) {
+        if (GeUtils.isGraphPatternInput(this, args, length, context)) {
+        	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
+        	java.util.List<Node> nodeLst = Arrays.asList(nodes);
+        	avg = averageOfList(nodeLst, context);
+        }
+        else if (length >= 3) {
         	double sum = 0;
 	        for (int i = 0; i < length; i++) {
 	        	Node n1 = getArg(i, args, context);
@@ -99,7 +106,11 @@ public class Average extends BaseBuiltin {
 
     private double averageOfList(Node lst, RuleContext context) {
     	java.util.List<Node> l = Util.convertList(lst, context);
-    	int cnt = 0;
+    	return averageOfList(l, context);
+    }
+
+	private double averageOfList(java.util.List<Node> l, RuleContext context) {
+		int cnt = 0;
     	double sum = 0;
     	for (int i = 0; l != null && i < l.size(); i++) {
     		Node elt = (Node) l.get(i);
@@ -121,6 +132,6 @@ public class Average extends BaseBuiltin {
     		throw new BuiltinException(this, context, "Can't average an empty List!");
     	}
         return sum / cnt;
-    }
+	}
 
 }

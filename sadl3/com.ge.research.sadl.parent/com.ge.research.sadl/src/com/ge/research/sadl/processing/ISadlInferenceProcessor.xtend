@@ -29,6 +29,7 @@ import com.ge.research.sadl.reasoner.TranslationException
 import java.util.Map
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
+import com.hp.hpl.jena.ontology.OntModel
 
 /**
  * Generic hook for 3rd party processors to participate in the processing of SADL resources
@@ -82,4 +83,18 @@ interface ISadlInferenceProcessor {
 	 * {@code "sadl"} and <b>not</b> {@code .sadl}.
 	 */
 	def boolean isSupported( /*nullable*/ String fileExtension);
+	
+	/**
+	 * Method to set the OntModel to be used during inference.
+	 * This enables inference over an in-memory model.
+	 * @param theJenaModel
+	 */
+	def void setTheJenaModel(OntModel theJenaModel)
+	
+		/**
+	 * Method to set the preferences to be used during inference
+	 * @param preferenceMap
+	 */
+	def void setPreferences(Map<String, String> preferenceMap)
+	
 }

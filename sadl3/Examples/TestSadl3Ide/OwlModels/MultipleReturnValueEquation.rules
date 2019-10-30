@@ -2,4 +2,4 @@
 #  Created from SADL model 'http://sadl.org/MultipleReturnValueEquation.sadl'
 
 
-[UseIt: testMrveq(4, 3.14, ?x, ?y) -> print('Great!!'^^http://www.w3.org/2001/XMLSchema#string, ?x, ?y)]
+[UseIt: testMrveq(4, 3.14, ?y) -> print('Great!!'^^http://www.w3.org/2001/XMLSchema#string, ?x, ?y)]

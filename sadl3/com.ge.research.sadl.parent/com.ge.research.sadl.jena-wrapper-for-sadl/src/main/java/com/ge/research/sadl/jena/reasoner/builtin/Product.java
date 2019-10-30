@@ -20,6 +20,9 @@ package com.ge.research.sadl.jena.reasoner.builtin;
 
 import com.hp.hpl.jena.reasoner.rulesys.*;
 import com.hp.hpl.jena.vocabulary.RDF;
+
+import java.util.Arrays;
+
 import com.hp.hpl.jena.graph.*;
 
 /**
@@ -36,10 +39,6 @@ public class Product extends com.hp.hpl.jena.reasoner.rulesys.builtins.Product {
         return argLength;
     }
     
-    private void setArgLength(int len) {
-    	argLength = len;
-    }
-
     /**
      * This method is invoked when the builtin is called in a rule body.
      * @param args the array of argument values for the builtin, this is an array 
@@ -51,12 +50,32 @@ public class Product extends com.hp.hpl.jena.reasoner.rulesys.builtins.Product {
      * the current environment
      */
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
-    	if (length == 3) {
-    		// this is just the normal case implemented by HP Labs (standard Jena)
-    		return super.bodyCall(args, length, context);
-    	}
         checkArgs(length, context);
         BindingEnvironment env = context.getEnv();
+    	if (GeUtils.isGraphPatternInput(this, args, length, context)) {
+        	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
+        	Number nProd = new Long(1);
+        	nProd = multiplyList(nProd, Arrays.asList(nodes), context);
+        	Node prod = null;
+        	if (nProd instanceof Float || nProd instanceof Double) {
+        		prod = Util.makeDoubleNode(nProd.doubleValue());
+        	}
+        	else {
+        		prod = Util.makeLongNode(nProd.longValue());
+        	}
+//        	System.out.println("builtin product assigning value: " + sum);
+        	return env.bind(args[length - 1], prod);
+        }
+        else if (length == 3) {
+    		// this is just the normal case implemented by HP Labs (standard Jena)
+    		if (getArg(0, args, context).isURI()) {
+    			throw new BuiltinException(this, context, "First argument to product is a URI: " + getArg(0, args, context).getURI());
+    		}
+    		if (getArg(1, args, context).isURI()) {
+    			throw new BuiltinException(this, context, "Second argument to product is a URI: " + getArg(1, args, context).getURI());
+    		}
+     		return super.bodyCall(args, length, context);
+    	}
         Node n1 = getArg(0, args, context);
         Node n2 = getArg(1, args, context);
         if (n1.isVariable()) {
@@ -81,6 +100,9 @@ public class Product extends com.hp.hpl.jena.reasoner.rulesys.builtins.Product {
         }
         else {
 //        	System.out.println("builtin product called with first arg list: " + Utils.listToString(Util.convertList(n1, context)));
+            if (!args[length - 1].isVariable()) {
+            	return false;
+            }
             if (n1 == null || n1.equals(RDF.Nodes.nil)) {
                 return false;
             } else {
@@ -103,6 +125,10 @@ public class Product extends com.hp.hpl.jena.reasoner.rulesys.builtins.Product {
     
     private Number multiplyList(Number prod, Node lst, RuleContext context) {
     	java.util.List<Node> l = Util.convertList(lst, context);
+        return multiplyList(prod, l, context);
+    }
+    
+    private Number multiplyList(Number prod, java.util.List<Node> l, RuleContext context) {
     	for (int i = 0; l != null && i < l.size(); i++) {
     		Node elt = (Node) l.get(i);
             if (elt != null && elt.isLiteral()) {
@@ -129,7 +155,7 @@ public class Product extends com.hp.hpl.jena.reasoner.rulesys.builtins.Product {
            		throw new BuiltinException(this, context, "Element of list input to product not a Literal: " + elt.toString());
             }
     	}
-        return prod;
+    	return prod;
     }
     
 }

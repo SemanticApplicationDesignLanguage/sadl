@@ -17,6 +17,7 @@
 				<version>1.4.0</version>
 				<executions>
 					<execution>
+						<?m2e ignore?>
 						<id>mwe2Launcher</id>
 						<phase>generate-sources</phase>
 						<goals>
@@ -26,9 +27,6 @@
 				</executions>
 				<configuration>
 					<mainClass>org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher</mainClass>
-					<classpathScope>
-						compile
-					</classpathScope>
 					<arguments>
 						<argument>/${project.basedir}/src/com/ge/research/sadl/importer/GenerateTemplate.mwe2</argument>
 						<argument>-p</argument>
@@ -36,6 +34,7 @@
 						<argument>toBeScanned1=.</argument>
 						<argument>toBeScanned2=.</argument>
 					</arguments>
+					<classpathScope>compile</classpathScope>
 					<includePluginDependencies>true</includePluginDependencies>
 					<cleanupDaemonThreads>false</cleanupDaemonThreads><!-- see https://bugs.eclipse.org/bugs/show_bug.cgi?id=475098#c3 -->
 				</configuration>
@@ -50,12 +49,11 @@
 			<plugin>
 				<groupId>org.eclipse.xtend</groupId>
 				<artifactId>xtend-maven-plugin</artifactId>
-				<version>${xtextVersion}</version>
 				<dependencies>
 					<dependency>
-					    <groupId>org.eclipse.platform</groupId>
-					    <artifactId>org.eclipse.equinox.common</artifactId>
-					    <version>3.10.0</version>
+						<groupId>org.eclipse.platform</groupId>
+						<artifactId>org.eclipse.equinox.common</artifactId>
+						<version>3.10.0</version>
 					</dependency>
 					<dependency>
 						<groupId>org.eclipse.jdt</groupId>
@@ -79,82 +77,6 @@
 					</dependency>
 				</dependencies>
 			</plugin>
-	
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<configuration>
-					<filesets combine.children="append">
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.importer/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.importer.tests/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.importer.ide/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.importer.ui/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../com.ge.research.sadl.importer/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/model/generated/</directory>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											exec-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.2.1,)
-										</versionRange>
-										<goals>
-											<goal>java</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
 	</build>
 </project>

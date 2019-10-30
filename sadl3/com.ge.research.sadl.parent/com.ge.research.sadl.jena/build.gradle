@@ -1,3 +1,9 @@
+serviceLoader {
+	serviceInterface 'com.ge.research.sadl.processing.IModelProcessor'
+	serviceInterface 'com.ge.research.sadl.processing.ISadlImportProcessor'
+	serviceInterface 'com.ge.research.sadl.processing.ISadlInferenceProcessor'
+}
+
 dependencies {
 	compile project(":com.ge.research.jena")
 	compile project(":com.ge.research.sadl")

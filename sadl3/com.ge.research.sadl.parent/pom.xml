@@ -2,8 +2,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ge.research.sadl</groupId>
-	<version>3.2.1-SNAPSHOT</version>
 	<artifactId>com.ge.research.sadl.parent</artifactId>
+	<version>3.2.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
@@ -17,8 +17,7 @@
 	</properties>
 	<modules>
 		<module>com.ge.research.sadl.xtextgenerator</module>
-		<module>com.ge.research.sadl.reasoner-api</module>
-		<module>com.ge.research.sadl.reasoner-impl</module>
+		<module>com.ge.research.sadl.reasoner</module>
 		<module>com.ge.research.jena</module>
 		<module>com.ge.research.sadl</module>
 		<module>com.ge.research.sadl.externalmodels</module>
@@ -45,9 +44,10 @@
 		<module>com.ge.research.sadl.feature</module>
 		<module>com.ge.research.sadl.perspective</module>
 		<module>com.ge.research.sadl.update</module>
+		<module>com.ge.research.sadl.server</module>
 	</modules>
 	<build>
-		<finalName>${project.groupId}-${sadlOsgiVersion}.${maven.build.timestamp}</finalName>
+		<finalName>${project.artifactId}-${sadlOsgiVersion}.${maven.build.timestamp}</finalName>
 		<plugins>
 			<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
@@ -161,12 +161,23 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>3.1.0</version>
 					<configuration>
 						<filesets>
 							<fileset>
-								<directory>${basedir}/xtend-gen</directory>
-								<directory>${basedir}/xtend-gen</directory>
+								<directory>${basedir}</directory>
+								<includes>
+									<include>plugin.xml_gen</include>
+								</includes>
+							</fileset>
+							<fileset>
+								<directory>model/generated</directory>
+							</fileset>
+							<fileset>
+								<directory>src-gen</directory>
+							</fileset>
+							<fileset>
+								<directory>xtend-gen</directory>
 							</fileset>
 						</filesets>
 					</configuration>

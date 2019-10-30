@@ -1,0 +1,39 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:sadlmetricsmodel="http://com.ge.research.sadl/sadlmetricsmodel#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://com.ge.research.sadl/sadlmetricsmodel">
+  <owl:Ontology rdf:about="">
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'sadlmetricsmodel.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Information">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Marker"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Error">
+    <rdfs:subClassOf rdf:resource="#Marker"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Warning">
+    <rdfs:subClassOf rdf:resource="#Marker"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="markerType">
+    <rdfs:range rdf:resource="#MarkerType"/>
+    <rdfs:domain rdf:resource="#Marker"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="marker">
+    <rdfs:range rdf:resource="#Marker"/>
+  </owl:ObjectProperty>
+  <sadlmetricsmodel:MarkerType rdf:ID="TypeCheckFailure"/>
+  <sadlmetricsmodel:MarkerType rdf:ID="CircularImport"/>
+  <sadlmetricsmodel:MarkerType rdf:ID="NestedEquation"/>
+  <sadlmetricsmodel:MarkerType rdf:ID="RangeRedefinition"/>
+  <sadlmetricsmodel:MarkerType rdf:ID="UnclassifiedFailure"/>
+  <sadlmetricsmodel:MarkerType rdf:ID="InvalidTableFormat"/>
+  <sadlmetricsmodel:MarkerType rdf:ID="CircularDefinition"/>
+  <sadlmetricsmodel:MarkerType rdf:ID="InvalidExpression"/>
+  <sadlmetricsmodel:MarkerType rdf:ID="DomainRedefinition"/>
+  <sadlmetricsmodel:MarkerType rdf:ID="DuplicateName"/>
+</rdf:RDF>

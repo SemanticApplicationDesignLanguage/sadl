@@ -1,67 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>com.ge.research.sadl</groupId>
-  <artifactId>server</artifactId>
-  <version>3.2.0-SNAPSHOT</version>
+  <artifactId>com.ge.research.sadl.server</artifactId>
+  <version>3.2.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>SADL Knowledge Services</name>
   <description>Supporting software for knowledge capture and delivery</description>
-  
+
   <modules>
-  	<module>
-  		com.ge.research.sadl.server.server-api
-  	</module>
-  	<module>
-  		com.ge.research.sadl.server.server-impl
-  	</module>
-<!--   	<module> -->
-<!--   		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.jena-wrapper-for-sadl -->
-<!--   	</module> -->
-<!--   	<module> -->
-<!--   		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-api -->
-<!--   	</module> -->
-<!--   	<module> -->
-<!--   		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner-impl -->
-<!--   	</module> -->
-<!--   	<module> -->
-<!--   		../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin -->
-<!--   	</module> -->
+      <module>com.ge.research.sadl.server.server-api</module>
+      <module>com.ge.research.sadl.server.server-impl</module>
   </modules>
-  <dependencyManagement>
-  	<dependencies>
-  		<dependency>
-  			<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>reasoner-api</artifactId>
- 	  		<version>${project.version}</version>
-  		</dependency>
-  		<dependency>
-  			<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>reasoner-impl</artifactId>
-	  		<version>${project.version}</version>
-  		</dependency>
-  		<dependency>
-  			<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>jena-wrapper-for-sadl</artifactId>
- 	  		<version>${project.version}</version>
-  		</dependency>
-<!--   		<dependency> -->
-<!--   			<groupId>com.ge.research.sadl</groupId> -->
-<!--   			<artifactId>prolog-for-sadl</artifactId> -->
-<!-- 	  		<version>${project.version}</version> -->
-<!--   		</dependency> -->
-  		<dependency>
-  			<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>swi-prolog-plugin</artifactId>
-	  		<version>${project.version}</version>
-  		</dependency>
-  		<dependency>
-  			<groupId>com.ge.research.sadl</groupId>
-  			<artifactId>
-  				com.ge.research.sadl.swi-prolog-plugin
-  			</artifactId>
-  			<version>3.2.0-SNAPSHOT</version>
-  			<type>eclipse-plugin</type>
-  		</dependency>
-  	</dependencies>
-  </dependencyManagement>
+
 </project>
