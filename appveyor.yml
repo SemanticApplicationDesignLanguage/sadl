@@ -3,7 +3,6 @@ shallow_clone: true
 branches:
   only:
   - development
-  - ji-experimental-changes # TODO: Remove before merging PR
 
 platform:
   - x64
