@@ -616,16 +616,17 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	}
 
 	private String getService() {
+		// 10/31/2019: modified to be compatible with SWI-Prolog Verson 8
 		StringBuilder sb = new StringBuilder("% script to start Prolog service\n");
 		sb.append(":- module(query, [ server/1]).\n\n");
 
-		sb.append(":- use_module(library(http/httpd)).\n");
-		sb.append(":- use_module(library(http/thread_httpd)).\n");
-		sb.append(":- use_module(library(http/http_dispatch)).\n");
-		sb.append(":- use_module(library(http/http_parameters)).\n");
-		sb.append(":- use_module(library(http/http_mime_plugin)).\n");
+		sb.append(":- use_module(library(http/http_server)).\n");
+//		sb.append(":- use_module(library(http/thread_httpd)).\n");
+//		sb.append(":- use_module(library(http/http_dispatch)).\n");
+//		sb.append(":- use_module(library(http/http_parameters)).\n");
+//		sb.append(":- use_module(library(http/http_mime_plugin)).\n");
 		sb.append(":- use_module(library(http/http_client)).\n");
-		sb.append(":- use_module(library(http/html_write)).\n");
+//		sb.append(":- use_module(library(http/html_write)).\n");
 		sb.append(":- use_module(library(lists)).\n");
 		sb.append(":- use_module(library(http/js_write)).\n");
 		sb.append(":- use_module(library(sgml)).\n");
