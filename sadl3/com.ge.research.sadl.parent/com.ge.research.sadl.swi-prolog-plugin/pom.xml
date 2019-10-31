@@ -157,18 +157,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.ge.research.sadl</groupId>
-				<artifactId>reasoner-api</artifactId>
-	  		<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.ge.research.sadl</groupId>
-				<artifactId>reasoner-impl</artifactId>
-	  		<version>${project.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 </project>
