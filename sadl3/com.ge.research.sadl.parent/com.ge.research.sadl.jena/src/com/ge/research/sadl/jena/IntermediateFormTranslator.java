@@ -1866,7 +1866,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 		}
-		else if (obj == null) {
+		else if (obj == null && returnNode == null) {
+			// if the subject was null, so returnNode is not null, don't create a variable for object and return that as
+			//	it will mess up what's up the stack
 			returnNode = retiredNode != null ? retiredNode : getVariableNode(subj, te.getPredicate(), obj, false);
 			te.setObject(returnNode);
 			if (!patterns.contains(te)) {
