@@ -360,6 +360,14 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract OntModel loadOntModel(String owlFilename);
 
 	/**
+	 * Call this method to load an OWL file with the option of loading imports and return the resulting Jena OntModel
+	 * @param owlFilename
+	 * @param loadImports
+	 * @return Jena OntModel
+	 */
+	public abstract OntModel loadOntModel(String owlFilename, boolean loadImports);
+
+	/**
 	 * Method to persist a private key/value pair at the project scope
 	 * @param key
 	 * @param value

@@ -117,7 +117,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	private ResourceDescriptionsProvider resourceDescriptionsProvider;
 	
 	// TODO: Do not use directly
-	public ConfigurationManagerForIDE(String modelFolderPathname, String _repoType) throws ConfigurationException {
+	public ConfigurationManagerForIDE(String modelFolderPathname, String _repoType) throws ConfigurationException {	
 		super(modelFolderPathname, _repoType);
 		// if there is no mapping file create one
 		File mf = new File(modelFolderPathname + File.separator + ONT_POLICY_RDF);
@@ -1003,13 +1003,45 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return ontModel;
 	}
 
-	public OntModel initOntModel(InputStream is, String format) {
+	@Override
+	public OntModel loadOntModel(String owlFilename, boolean loadImports) {
+		try {
+			FileInputStream is = new FileInputStream(new File(owlFilename));
+			return initOntModel(is, getOwlFormatFromFile(owlFilename), loadImports);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-		ontModel.getDocumentManager().setProcessImports(false);
-		ontModel.read(is, null, format);
+		boolean savePI = ontModel.getDocumentManager().getProcessImports();
+		ontModel.getDocumentManager().setProcessImports(loadImports);
+		try {
+			ontModel.read(owlFilename, getOwlFormatFromFile(owlFilename));
+		}
+		finally {
+			ontModel.getDocumentManager().setProcessImports(savePI);
+		}
 		return ontModel;
 	}
 
+	public OntModel initOntModel(InputStream is, String format) {
+		return initOntModel(is, format, false);
+	}
+
+
+	public OntModel initOntModel(InputStream is, String format, boolean loadImports) {
+		getOntModelSpec(null).setDocumentManager(getJenaDocumentMgr());
+		OntModel ontModel = ModelFactory.createOntologyModel(getOntModelSpec(null));
+		boolean savePI = ontModel.getDocumentManager().getProcessImports();
+		ontModel.getDocumentManager().setProcessImports(loadImports);
+		try {
+			ontModel.read(is, null, format);
+		}
+		finally {
+			ontModel.getDocumentManager().setProcessImports(savePI);
+		}
+		return ontModel;
+	}
 
 	private String getOwlFormatFromFile(String owlFilename) {
 		if (owlFilename.endsWith(".owl")) return "RDF/XML";
