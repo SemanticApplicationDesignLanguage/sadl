@@ -2392,9 +2392,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private boolean ruleThensContainsTriple(TripleElement triple) {
 		if (getTarget() instanceof Rule) {
 			List<GraphPatternElement> thens = ((Rule)getTarget()).getThens();
-			for (GraphPatternElement then : thens) {
-				if (graphPatternsMatch(then, triple)) {
-					return true;
+			if (thens != null) {
+				for (GraphPatternElement then : thens) {
+					if (graphPatternsMatch(then, triple)) {
+						return true;
+					}
 				}
 			}
 		}
