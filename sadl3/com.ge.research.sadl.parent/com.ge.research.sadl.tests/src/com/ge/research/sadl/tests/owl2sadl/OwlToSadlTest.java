@@ -248,4 +248,51 @@ public class OwlToSadlTest {
 		assertEquals(expected, sadlModelContent);
 	}
 	
+	@Test
+	public void test05() throws Exception {
+		String owlModelContent = "<rdf:RDF\r\n" + 
+				"    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" + 
+				"    xmlns:IntersectionClass=\"http://sadl.org/IntersectionClass.sadl#\"\r\n" + 
+				"    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel\"\r\n" + 
+				"    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\r\n" + 
+				"    xmlns:sadlimplicitmodel=\"http://sadl.org/sadlimplicitmodel\"\r\n" + 
+				"    xmlns:builtinfunctions=\"http://sadl.org/builtinfunctions\"\r\n" + 
+				"    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\r\n" + 
+				"    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\r\n" + 
+				"  xml:base=\"http://sadl.org/IntersectionClass.sadl\">\r\n" + 
+				"  <owl:Ontology rdf:about=\"\">\r\n" + 
+				"    <owl:imports rdf:resource=\"builtinfunctions\"/>\r\n" + 
+				"    <owl:imports rdf:resource=\"sadlimplicitmodel\"/>\r\n" + 
+				"    <owl:imports rdf:resource=\"sadlbasemodel\"/>\r\n" + 
+				"    <rdfs:comment xml:lang=\"en\">This ontology was created from a SADL file 'IntersectionClass.sadl' and should not be directly edited.</rdfs:comment>\r\n" + 
+				"  </owl:Ontology>\r\n" + 
+				"  <owl:Class rdf:ID=\"Refreshment\"/>\r\n" + 
+				"  <owl:Class rdf:ID=\"Nourishment\"/>\r\n" + 
+				"  <owl:Class rdf:ID=\"GoodChoice\">\r\n" + 
+				"    <rdfs:subClassOf>\r\n" + 
+				"      <owl:Class>\r\n" + 
+				"        <owl:intersectionOf rdf:parseType=\"Collection\">\r\n" + 
+				"          <owl:Class rdf:about=\"#Nourishment\"/>\r\n" + 
+				"          <owl:Class rdf:about=\"#Refreshment\"/>\r\n" + 
+				"        </owl:intersectionOf>\r\n" + 
+				"      </owl:Class>\r\n" + 
+				"    </rdfs:subClassOf>\r\n" + 
+				"  </owl:Class>\r\n" + 
+				"</rdf:RDF>";
+		OwlToSadl o2s = new OwlToSadl(owlModelContent, "http://sadl.org/IntersectionClass.sadl");
+//		o2s.setVerboseMode(true);
+		String sadlModelContent = o2s.getSadlModel();
+		String expected = "uri \"http://sadl.org/IntersectionClass.sadl\" alias IntersectionClass\n" + 
+				"    (note \"This ontology was created from a SADL file 'IntersectionClass.sadl' and should not be directly edited.\").\n" + 
+				"\n" + 
+				"\n" + 
+				"\n" + 
+				"// Class definitions:\n" + 
+				"GoodChoice is a type of {Nourishment and Refreshment}.\n" + 
+				"Nourishment is a class.\n" + 
+				"Refreshment is a class.\n" + 
+				"";
+		System.out.print(sadlModelContent);
+		assertEquals(expected, sadlModelContent);
+	}
 }

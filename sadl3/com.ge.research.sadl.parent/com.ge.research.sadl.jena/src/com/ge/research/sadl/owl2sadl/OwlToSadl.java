@@ -831,7 +831,7 @@ public class OwlToSadl {
 			Iterator<Statement> impitr = theModel.listStatements(theModel.getResource(getBaseUri()), OWL.imports, (RDFNode)null);
 			while (impitr.hasNext()) {
 				String impuri = impitr.next().getObject().toString();
-				System.out.println(impuri);
+				logger.debug("Import: " + impuri);
 			}
 			ExtendedIterator<OntResource> iitr = ont.listImports();
 			int prefixCntr = 0;
@@ -1336,13 +1336,13 @@ public class OwlToSadl {
 		}
 	}
 
-	private void addRdfProperty(ModelConcepts concepts, StringBuilder sb, Property prop) {
+	private void addRdfProperty(ModelConcepts concepts, StringBuilder sb, Property prop) throws OwlImportException {
 		sb.append(rdfPropertyToSadl(concepts, prop));
 		
 	}
 
 	private void addSuperPropertiesWithoutRange(ModelConcepts concepts,
-			StringBuilder sb, OntResource prop) {
+			StringBuilder sb, OntResource prop) throws OwlImportException {
 		if (!hasRange(prop)) {
 			String thisPropString;
 			if (prop.isObjectProperty() || concepts.getPseudoObjProperties().contains(prop)) {
@@ -1464,7 +1464,7 @@ public class OwlToSadl {
 	}
 
 	private Object datatypeToSadl(ModelConcepts concepts,
-			OntResource rsrc) {
+			OntResource rsrc) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		if (rsrc.isURIResource()) {
 			// is there an equivalent class?
@@ -1700,7 +1700,7 @@ public class OwlToSadl {
 		return trLst;
 	}
 	
-	private String individualNameAndAnnotations(ModelConcepts concepts, Individual inst) {
+	private String individualNameAndAnnotations(ModelConcepts concepts, Individual inst) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		if (!isNeverUsePrefixes() && !inst.getNameSpace().equals(getBaseUri()+'#')) {
 			if (qNamePrefixes.containsKey(inst.getNameSpace())) {
@@ -1736,29 +1736,102 @@ public class OwlToSadl {
 		return sb.toString();
 	}
 
-	private String listToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) {
+	private String listToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) throws OwlImportException {
 		Individual rest = inst;
 		StringBuilder sb = new StringBuilder("[");
 		int cntr = 0;
 		while (rest != null) {
-			RDFNode first = rest.getProperty(RDF.first).getObject();
-			if (cntr++ > 0) sb.append(",");
-			sb.append(rdfNodeToSadlString(concepts, first, true));
-			Statement rststmt = rest.getProperty(RDF.rest);
-			if (rststmt != null) {
-				RDFNode rstobj = rststmt.getObject();
-				if (rstobj != null && !rstobj.equals(RDF.nil) && rstobj.canAs(Individual.class)) {
-					rest = rstobj.as(Individual.class);
+			Statement fstmt = rest.getProperty(RDF.first);
+			if (fstmt != null) {
+				RDFNode first = fstmt.getObject();
+				if (cntr++ > 0) sb.append(",");
+				sb.append(rdfNodeToSadlString(concepts, first, true));
+				Statement rststmt = rest.getProperty(RDF.rest);
+				if (rststmt != null) {
+					RDFNode rstobj = rststmt.getObject();
+					if (rstobj != null && !rstobj.equals(RDF.nil) && rstobj.canAs(Individual.class)) {
+						rest = rstobj.as(Individual.class);
+					}
+					else {
+						rest = null;
+					}
 				}
-				else {
-					rest = null;
-				}
+			}
+			else {
+				rest = null;
 			}
 		}
 		sb.append("]");
 		return sb.toString();
 	}
 	
+	private String sadlListToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) throws OwlImportException {
+		Individual rest = inst;
+		StringBuilder sb = new StringBuilder("[");
+		int cntr = 0;
+		while (rest != null) {
+			RDFNode first = getSadlFirstPropertyValue(rest); //rest.getProperty(getSadlListFirstProperty()).getObject();
+			if (cntr++ > 0) sb.append(",");
+			sb.append(rdfNodeToSadlString(concepts, first, true));
+			RDFNode rstobj = getSadlRestPropertyValue(rest);
+//			Statement rststmt = rest.getProperty(getSadlListRestProperty());
+//			if (rststmt != null) {
+//				RDFNode rstobj = rststmt.getObject();
+				if (rstobj != null && rstobj.canAs(Individual.class)) {
+					rest = rstobj.as(Individual.class);
+				}
+				else {
+					rest = null;
+				}
+//				statementsProcessed.add(rststmt);
+//			}
+//			else {
+//				rest = null;
+//			}
+		}
+		sb.append("]");
+		return sb.toString();
+	}	
+	
+	/**
+	 * Method to determine if an Individual is a SADL typed list
+	 * @param lstInst -- the instance that might be of type SADL typed list
+	 * @return -- true if a SADL List else false
+	 */
+	private boolean isaSadlList(Individual lstInst) {
+		StmtIterator pitr = lstInst.listProperties();
+		while (pitr.hasNext()) {
+			if (pitr.nextStatement().getPredicate().getURI().equals(SADL_LIST_MODEL_URI + "#first")) {
+				return  true;
+			}
+		}
+		return false;
+	}
+
+	private RDFNode getSadlRestPropertyValue(Individual lstInst) {
+		StmtIterator pitr = lstInst.listProperties();
+		while (pitr.hasNext()) {
+			Statement nxtStmt = pitr.nextStatement();
+			if (nxtStmt.getPredicate().getURI().equals(SADL_LIST_MODEL_URI + "#rest")) {
+				statementsProcessed.add(nxtStmt);
+				return nxtStmt.getObject();
+			}
+		}
+		return null;
+	}
+
+	private RDFNode getSadlFirstPropertyValue(Individual lstInst) {
+		StmtIterator pitr = lstInst.listProperties();
+		while (pitr.hasNext()) {
+			Statement nxtStmt = pitr.nextStatement();
+			if (nxtStmt.getPredicate().getURI().equals(SADL_LIST_MODEL_URI + "#first")) {
+				statementsProcessed.add(nxtStmt);
+				return nxtStmt.getObject();
+			}
+		}
+		return null;
+	}
+
 	public String individualToSadl(String instUri, boolean embeddedBNode) throws OwlImportException {
 		Individual inst = theModel.getIndividual(instUri);
 		if (inst != null) {
@@ -1767,7 +1840,7 @@ public class OwlToSadl {
 		return null;
 	}
 
-	private String individualToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) {
+	private String individualToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		boolean bnode = false;
 		if (inst.isURIResource()) {
@@ -1795,8 +1868,8 @@ public class OwlToSadl {
 						sb.append("{");
 					}
 				}
-				if (itercnt++ > 0 && eitr.hasNext()) {
-					sb.append(" or ");
+				if (itercnt++ > 0) {
+					sb.append(" and ");
 				}
 				sb.append(uriToSadlString(concepts, cls));
 			}
@@ -1818,7 +1891,7 @@ public class OwlToSadl {
 	}
 
 	private void addResourceProperties(StringBuilder sb, ModelConcepts concepts, Resource inst,
-			boolean embeddedBNode) {
+			boolean embeddedBNode) throws OwlImportException {
 		StmtIterator insitr = inst.listProperties();
 		int cntr = 0;
 		while (insitr.hasNext()) {
@@ -1915,7 +1988,7 @@ public class OwlToSadl {
 	}
 
 	private String annotationsToSadl(ModelConcepts concepts,
-			AnnotationProperty ann) {
+			AnnotationProperty ann) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(uriToSadlString(concepts, ann));
 		addNotesAndAliases(sb, ann);
@@ -1931,7 +2004,7 @@ public class OwlToSadl {
 		return null;
 	}
 	
-	private String rdfPropertyToSadl(ModelConcepts concepts, Property prop) {
+	private String rdfPropertyToSadl(ModelConcepts concepts, Property prop) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(uriToSadlString(concepts, prop));
 		sb.append(" is a property.\n");
@@ -1946,7 +2019,7 @@ public class OwlToSadl {
 		return null;
 	}
 	
-	private String dtPropertyToSadl(ModelConcepts concepts, OntResource prop) {
+	private String dtPropertyToSadl(ModelConcepts concepts, OntResource prop) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		boolean useTranslation = true;
 		sb.append(uriToSadlString(concepts, prop));
@@ -1977,7 +2050,7 @@ public class OwlToSadl {
 		return null;
 	}
 
-	private String objPropertyToSadl(ModelConcepts concepts, OntResource prop) {
+	private String objPropertyToSadl(ModelConcepts concepts, OntResource prop) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		boolean useTranslation = true;
 		sb.append(uriToSadlString(concepts, prop));
@@ -2005,7 +2078,7 @@ public class OwlToSadl {
 		return null;
 	}
 	
-	private String classToSadl(ModelConcepts concepts, OntClass cls) {
+	private String classToSadl(ModelConcepts concepts, OntClass cls) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(uriToSadlString(concepts, cls));
 		addNotesAndAliases(sb, cls);
@@ -2160,7 +2233,7 @@ public class OwlToSadl {
 		return newList;
 	}
 
-	private void addNotesAndAliases(StringBuilder sb, Resource rsrc) {
+	private void addNotesAndAliases(StringBuilder sb, Resource rsrc) throws OwlImportException {
 		StmtIterator sitr = rsrc.listProperties(RDFS.label);
 		if (sitr.hasNext()) {
 //			addNewLineIfNotAtEndOfBuffer(sb);
@@ -2191,7 +2264,7 @@ public class OwlToSadl {
 		}
 	}
 
-	private String restrictionToString(ModelConcepts concepts, OntClass restrictedClass, Restriction res) {
+	private String restrictionToString(ModelConcepts concepts, OntClass restrictedClass, Restriction res) throws OwlImportException {
 		if (res.isURIResource()) {
 			return uriToSadlString(concepts, res);
 		}
@@ -2294,7 +2367,7 @@ public class OwlToSadl {
 	}
 
 	private boolean propertyToSadl(StringBuilder sb, ModelConcepts concepts,
-			OntResource prop) {
+			OntResource prop) throws OwlImportException {
 		boolean retVal = true;
 		String key = null;
 		OntProperty ontprop = prop.asProperty();
@@ -2348,7 +2421,7 @@ public class OwlToSadl {
 	}
 
 	private String generateSadlRangeStatement(ModelConcepts concepts, Property prop, StringBuilder sb,
-			String key) {
+			String key) throws OwlImportException {
 //		ExtendedIterator<? extends OntResource> reitr = ontprop.listRange();
 		StmtIterator reitr = theModel.listStatements(prop, RDFS.range, (RDFNode)null);
 		List<Resource> rngList = new ArrayList<Resource>();
@@ -2397,7 +2470,7 @@ public class OwlToSadl {
 		return false;
 	}
 
-	private String rdfNodeToSadlString(ModelConcepts concepts, RDFNode object, boolean forceQuotes) {
+	private String rdfNodeToSadlString(ModelConcepts concepts, RDFNode object, boolean forceQuotes) throws OwlImportException {
 		if (object.isURIResource()) {
 			return uriToSadlString(concepts, object.asResource());
 		}
@@ -2434,6 +2507,9 @@ public class OwlToSadl {
 			if (object.as(Individual.class).getProperty(RDF.first) != null) {
 				return listToSadl(concepts, object.as(Individual.class), true);
 			}
+			else if (isaSadlList(object.as(Individual.class))) { 
+				return sadlListToSadl(concepts, object.as(Individual.class), true);
+			}
 			return individualToSadl(concepts, object.as(Individual.class), true);
 		}
 		else {
@@ -2441,7 +2517,7 @@ public class OwlToSadl {
 		}
 	}
 
-	private String uriToSadlString(ModelConcepts concepts, Resource rsrc) {
+	private String uriToSadlString(ModelConcepts concepts, Resource rsrc) throws OwlImportException {
 		if (rsrc.isURIResource()) {
 			if (rsrc.getNameSpace().equals(getBaseUri() + "#") || isNeverUsePrefixes()) {
 				String ln = rsrc.getLocalName();
@@ -3460,6 +3536,16 @@ public class OwlToSadl {
 			return resourceToString(cls, false);
 		}
 		else {
+			ExtendedIterator<Resource> titr = cls.listRDFTypes(true);
+			System.err.println("Anon class types:");
+			while (titr.hasNext()) {
+				System.err.println(titr.next().toString());
+			}
+			StmtIterator pitr = cls.listProperties();
+			System.err.println("Anon class properties:");
+			while (pitr.hasNext()) {
+				System.err.println(pitr.nextStatement().toString());
+			}
 			logger.debug("Anon class; returning string equivalent--this shouldn't happen.");
 			return cls.toString();
 		}
@@ -3547,10 +3633,13 @@ public class OwlToSadl {
 			ln = rsrc.getLocalName();
 		}
 		String prefix = null;
-		if (prefix == null) {
-			prefix = theModel.getNsURIPrefix(ns);
+		if (!sameNs(ns, getBaseUri())) {
+			// don't include NS if in the base model.
+			if (prefix == null) {
+				prefix = theModel.getNsURIPrefix(ns);
+			}
+			prefix = sadlizePrefix(prefix);
 		}
-		prefix = sadlizePrefix(prefix);
 		if (allTokens.contains(ln)) {
 			ln = "^" + ln;
 		}
@@ -3711,6 +3800,10 @@ public class OwlToSadl {
 				uri.equals("http://www.w3.org/2002/07/owl#") ||
 				uri.startsWith("http://purl.org/dc/elements/1.1") ||
 				uri.startsWith("http://www.w3.org/2001/XMLSchema#") ||
+				nm.equals(SADL_BASE_MODEL_URI) ||
+				nm.equals(SADL_BUILTIN_FUNCTIONS_URI) ||
+				nm.equals(SADL_IMPLICIT_MODEL_URI) ||
+				nm.equals(SADL_LIST_MODEL_URI) ||
 				uri.equals("")) {
 			return true;
 		}
