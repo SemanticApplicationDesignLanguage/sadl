@@ -1134,10 +1134,15 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				Node pred = ((TripleElement)gpe).getPredicate();
 				if (pred instanceof NamedNode && ((NamedNode)pred).getImpliedPropertyNode() != null) {
 					TripleElement newTriple = new TripleElement(null, ((TripleElement)gpe).getPredicate(), null);
+					newTriple.setSourceType(TripleSourceType.ImpliedPropertyTriple);
 					newTriple.setPredicate(((NamedNode)pred).getImpliedPropertyNode());
 					newTriple.setObject(((TripleElement)gpe).getObject());
 					((TripleElement)gpe).setObject(SadlModelProcessor.nodeCheck(newTriple));
 					((NamedNode)pred).setImpliedPropertyNode(null);
+					if (((TripleElement)gpe).getModifierType().equals(TripleModifierType.Not)) {
+						newTriple.setType(TripleModifierType.Not);
+						((TripleElement)gpe).setType(TripleModifierType.None);
+					}
 				}
 			}
 			else if (gpe instanceof Junction) {
@@ -1273,15 +1278,18 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					arg0 = SadlModelProcessor.nodeCheck(newTriple);
 				}
 				TripleElement newTriple1 = new TripleElement(arg0, ep, null);
+				newTriple1.setSourceType(TripleSourceType.ExpandedPropertyTriple);
 				arg0 = SadlModelProcessor.nodeCheck(newTriple1);
 				((BuiltinElement)workingGpe).getArguments().set(0, arg0);			
 
 				Node arg1 = ((BuiltinElement)workingGpe).getArguments().get(1);
 				if (arg1 instanceof NamedNode && getModelProcessor().isProperty(((NamedNode)arg1))) {
 					TripleElement newTriple = singlePropertyToTriple((NamedNode)arg1);
+					newTriple.setSourceType(TripleSourceType.ExpandedPropertyTriple);
 					arg1 = SadlModelProcessor.nodeCheck(newTriple);
 				}
 				TripleElement newTriple2 = new TripleElement(arg1, ep, null);
+				newTriple2.setSourceType(TripleSourceType.ExpandedPropertyTriple);
 				arg1 = SadlModelProcessor.nodeCheck(newTriple2);
 				((BuiltinElement)workingGpe).getArguments().set(1, arg1);	
 				
@@ -1382,6 +1390,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					Node obj = gpe.getObject();
 					if (subj instanceof VariableNode && ((VariableNode)subj).isCRulesVariable() && ((VariableNode)subj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) subj)) {
 						TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
+						newTypeTriple.setSourceType(TripleSourceType.ITC);
 						gpes.add(i++, newTypeTriple);
 						addCruleVariableToTypeOutput((VariableNode) subj);
 						if (!isRuleThen) {
@@ -1390,6 +1399,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 					if (obj instanceof VariableNode && ((VariableNode)obj).isCRulesVariable() && ((VariableNode)obj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) obj)) {
 						TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
+						newTypeTriple.setSourceType(TripleSourceType.ITC);
 						gpes.add(++i, newTypeTriple);
 						addCruleVariableToTypeOutput((VariableNode) obj);
 						if (!isRuleThen) {
@@ -1858,11 +1868,18 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			te.setObject(obj);
 			if (!patterns.contains(te)) {
-				if (getTarget() instanceof Rule) {
+				int indexOfInterest = Math.max(0, initialPatternLength - 1);
+				boolean placeBefore = !(getTarget() instanceof Rule);
+				if (indexOfInterest >= 0 && indexOfInterest < patterns.size() &&
+						patterns.get(indexOfInterest) instanceof TripleElement &&
+						((TripleElement)patterns.get(indexOfInterest)).getSourceType().equals(TripleSourceType.ImpliedPropertyTriple) ) {
+					placeBefore = true;
+				}
+				if (!placeBefore) {
 					patterns.add(te);
 				}
 				else {
-					patterns.add(Math.max(0, initialPatternLength - 1), te);
+					patterns.add(indexOfInterest, te);
 				}
 			}
 		}
@@ -2278,6 +2295,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					arg1 instanceof NamedNode){
 				// this is of the form: not(is(rdf(s1,p1,v1), rdf(s2,p2,null))) where v1 might also be null
 				// so we want to transform into: rdf(s1,p1,v1), not(rdf(s2,p2,v1))
+				// or it is of the form: not(is(..., <NamedNode>)
+				// so we want to transform into: !=(..., <NamedNode>)
+				// see below
 				isNotOfEqual = true;
 			}
 		}
@@ -2308,19 +2328,29 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 									// the call above to expandProxyNodes might have put the argNode into the patterns; if so remove it
 									patterns.remove(patterns.size() - 1);
 									if (isNotOfEqual) {
-										TripleElement firstTriple = (TripleElement) patterns.get(patterns.size() - 2);
-										TripleElement secondTriple = (TripleElement) patterns.get(patterns.size() - 1);
-										if (!isRuleThen && !ruleThensContainsTriple(secondTriple)) {
-											if (retiredProxyNodes.containsKey(secondTriple)) {
-												retiredProxyNodes.remove(secondTriple);
+										if (patterns.size() >= 2 && patterns.get(patterns.size() -1) instanceof TripleElement && patterns.get(patterns.size() - 2) instanceof TripleElement) {
+											// this is of the form: not(is(rdf(s1,p1,v1), rdf(s2,p2,null))) where v1 might also be null
+											// so we want to transform into: rdf(s1,p1,v1), not(rdf(s2,p2,v1))
+											TripleElement firstTriple = (TripleElement) patterns.get(patterns.size() - 2);
+											TripleElement secondTriple = (TripleElement) patterns.get(patterns.size() - 1);
+											if (!isRuleThen && !ruleThensContainsTriple(secondTriple)) {
+												if (retiredProxyNodes.containsKey(secondTriple)) {
+													retiredProxyNodes.remove(secondTriple);
+												}
+												secondTriple.setObject(firstTriple.getObject());
+												secondTriple.setType(TripleModifierType.Not);
 											}
-											secondTriple.setObject(firstTriple.getObject());
-											secondTriple.setType(TripleModifierType.Not);
+											else {
+												TripleElement newTriple = new TripleElement(secondTriple.getSubject(), secondTriple.getPredicate(), firstTriple.getObject());
+												newTriple.setType(TripleModifierType.Not);
+												patterns.add(newTriple);
+											}
 										}
 										else {
-											TripleElement newTriple = new TripleElement(secondTriple.getSubject(), secondTriple.getPredicate(), firstTriple.getObject());
-											newTriple.setType(TripleModifierType.Not);
-											patterns.add(newTriple);
+											// this is of the form: not(is(..., <NamedNode>)
+											// so we want to transform into: !=(..., <NamedNode>)
+											((BuiltinElement) realArg).setFuncName("notEqual");
+											patterns.add((GraphPatternElement) realArg);
 										}
 									}
 								}
@@ -2386,7 +2416,104 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			removeArgsFromPatterns(patterns, be);
 			patterns.add(be);
 		}
+		patterns = moveTriplesOutOfBuiltin(patterns, be, isRuleThen);
 		return returnNode;
+	}
+
+	/**
+	 * Method to move triples out of a builtin so that the arguments of the builtin do not have missing triples
+	 * that should be before the builtin inside the arguments, e.g.,
+	 * ">(height, 8000)"
+	 * becomes
+	 * ">(and(rdf(PathFinding2:Mountaineer, climbs, Mountain), and(rdf(Mountain, summit, Summit), and(rdf(Summit, PathFinding2:height, v0), rdf(v0, value, null)))),8000)"
+	 * but should be
+	 * "and(rdf(PathFinding2:Mountaineer, climbs, Mountain), and(rdf(Mountain, summit, Summit), and(rdf(Summit, PathFinding2:height, v0), >(rdf(v0, value, null),8000))))"
+	 * @param patterns
+	 * @param be
+	 * @return
+	 * @throws TranslationException 
+	 * @throws InvalidTypeException 
+	 * @throws InvalidNameException 
+	 */
+	private List<GraphPatternElement> moveTriplesOutOfBuiltin(List<GraphPatternElement> patterns, BuiltinElement be, boolean isRuleThen) throws TranslationException, InvalidNameException, InvalidTypeException {
+		int beIndex = patterns.indexOf(be);
+		List<Node> args = be.getArguments();
+		if (args != null) {
+			for (int i = 0; i < args.size(); i++) {
+				Node arg = args.get(i);
+				List<GraphPatternElement> gpes = null;
+				if (arg instanceof ProxyNode) {
+					if (((ProxyNode)arg).getProxyFor() instanceof Junction) {
+						gpes = junctionToList((Junction)((ProxyNode)arg).getProxyFor());
+					}
+					else {
+						gpes = new ArrayList<GraphPatternElement>();
+						gpes.add(((ProxyNode) arg).getProxyFor());
+					}
+				}
+				if (gpes != null) {
+					List<TripleElement> toBeRemoved = null;
+					for (int j = 0; j < gpes.size(); j++) {
+						GraphPatternElement gpe = gpes.get(j);
+						if (gpe instanceof BuiltinElement) {
+							// do nothing?
+						}
+						else if (gpe instanceof TripleElement && ((TripleElement)gpe).getSourceType() != null && ((TripleElement)gpe).getSourceType().equals(TripleSourceType.MissingPropertyTriple)) {
+							if (toBeRemoved == null) {
+								toBeRemoved = new ArrayList<TripleElement>();
+							}
+							toBeRemoved.add((TripleElement)gpe);
+						}
+						else if (j < gpes.size() - 1 && gpes.get(j + 1) instanceof TripleElement && 
+								((TripleElement)gpes.get(j + 1)).getSourceType() != null && 
+								(((TripleElement)gpes.get(j + 1)).getSourceType().equals(TripleSourceType.ImpliedPropertyTriple) ||
+										((TripleElement)gpes.get(j + 1)).getSourceType().equals(TripleSourceType.ExpandedPropertyTriple))) {
+							if (toBeRemoved == null) {
+								toBeRemoved = new ArrayList<TripleElement>();
+							}
+							toBeRemoved.add((TripleElement)gpe);
+						}
+					}
+					if (toBeRemoved != null) {
+						for (int k = toBeRemoved.size() - 1; k >= 0; k--) {
+							TripleElement toRemove = toBeRemoved.get(k);
+							gpes.remove(toRemove);
+							patterns.add(beIndex, toRemove);
+						}
+					}
+					GraphPatternElement newProxyFor;
+					if (gpes.size() > 1) {
+						newProxyFor = listToAnd(gpes).get(0);
+					}
+					else {
+						newProxyFor = gpes.get(0);
+					}
+					if (newProxyFor instanceof TripleElement) {
+						ArrayList<GraphPatternElement> newPatterns = new ArrayList<GraphPatternElement>();
+						Map<GraphPatternElement, ProxyNode> remember = retiredProxyNodes;
+						retiredProxyNodes = new HashMap<GraphPatternElement, ProxyNode>();
+						Object obj = expandProxyNodes(newPatterns, (TripleElement)newProxyFor, isRuleThen);
+						if (!retiredProxyNodes.isEmpty()) {
+							remember.putAll(retiredProxyNodes);
+						}
+						retiredProxyNodes = remember;
+						if (obj instanceof Node) {
+							args.set(i, SadlModelProcessor.nodeCheck(obj));
+							int newBeIndex = patterns.indexOf(be);
+							if (newBeIndex < 0) {
+								newBeIndex = 0;
+							}
+							patterns.add(newBeIndex, newProxyFor);
+							newProxyFor = null;
+						}
+					}
+					if (newProxyFor != null) {
+						((ProxyNode)arg).setProxyFor(newProxyFor);
+					}
+				}
+			}
+		}
+		return patterns;
 	}
 
 	private boolean ruleThensContainsTriple(TripleElement triple) {

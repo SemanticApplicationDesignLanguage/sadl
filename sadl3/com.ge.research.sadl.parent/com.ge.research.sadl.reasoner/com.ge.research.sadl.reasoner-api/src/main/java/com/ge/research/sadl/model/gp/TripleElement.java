@@ -35,7 +35,18 @@ public class TripleElement extends GraphPatternElement {
 	public enum TripleModifierType {None, Not, Only, NotOnly, Assignment}	// special kinds of triples
 	private TripleModifierType modifierType = TripleModifierType.None;		// default
 
-	public enum TripleSourceType {SPV, PSnewV, PSV, VPS, ITC, SCofC}	// type of source
+	public enum TripleSourceType {
+			SPV, 	// Subject Predicate Value
+			PSnewV, // Predicate of Subject is new Value ?? no long used? (referenced but not set 11/7/2019 awc)
+			PSV, 	// Predicate of Subject is Value (used in JBSMP but when there is no value --should be PSnewV?)
+			VPS, 	// Value is Predicate of Subject, not used
+			ITC, 	// Instance Type Class, used
+			SCofC,	// ?? not used
+			// new as of 2019
+			ImpliedPropertyTriple,	// triple generated to add an implied property
+			ExpandedPropertyTriple,	// triple generated to add an expanded properpty
+			MissingPropertyTriple	// triple generated to replace a named node with the pattern(s) to complete the graph path
+			}	// type of source
 	private TripleSourceType sourceType;	// what was the source of this TripleElement?
 	
 	
