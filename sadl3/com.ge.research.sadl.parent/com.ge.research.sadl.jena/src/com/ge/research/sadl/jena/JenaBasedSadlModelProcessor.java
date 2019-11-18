@@ -13754,4 +13754,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
  		return lastInst;
  	}
 
+	protected void markVariableDefinionTriplesAsDefinition(VariableNode var, Object defn) {
+		if (defn instanceof TripleElement) {
+			if (((TripleElement)defn).getSubject().equals(var)) {
+				((TripleElement)defn).setSourceType(TripleSourceType.VariableDefinition);
+			}
+		}
+		else if (defn instanceof Junction) {
+			markVariableDefinionTriplesAsDefinition(var, ((ProxyNode)((Junction)defn).getLhs()).getProxyFor());
+			markVariableDefinionTriplesAsDefinition(var, ((ProxyNode)((Junction)defn).getRhs()).getProxyFor());
+		}
+		else if (defn instanceof List<?>) {
+			for (Object dfn : (List<?>)defn) {
+				markVariableDefinionTriplesAsDefinition(var, dfn);
+			}
+		}
+	}
 }

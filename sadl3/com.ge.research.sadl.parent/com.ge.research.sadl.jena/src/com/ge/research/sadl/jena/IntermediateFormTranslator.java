@@ -145,6 +145,23 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
     private JenaBasedSadlModelProcessor modelProcessor = null;
     
 	private List<VariableNode> cruleVariablesTypeOutput = null;		// list of crule variables that have had type statements output (only do so once)
+	
+	public enum UnNestingType {ReturnObjectMoveBefore, ReturnObjectMoveAfter, ReturnSubjectMoveAfter, None}
+	// This enum identifies strategy for the unnesting of a nested TripleElement:
+	// 1. ReturnObjectMoveBefore
+	//   a. There is a nested triple as an argument to a containing BuiltinElement; the nested 
+	//		triple will be moved *before* the container and replaced in the container by the
+	//      *object* of the triple
+	//   b. There is a nested triple as the subject of a containing TripleElement; the nested
+	//      triple will be moved *before* the container and replaced in the container by the 
+	//      *object* of the triple
+	// 2. ReturnObjectMoveAfter
+	//   a. This is a variable definition so we want the object returned but the definition should
+	//  	come after the identification of the definition
+	// 3. ReturnSubjectMoveAfter
+	//   a. There is a nested triple as the object of a containing TripleElement; the nested
+	//      triple will be moved *after* the container and replaced in the container by the 
+	//      *subject* of the triple
 
 	/**
      * The constructor takes a ModelManager argument
@@ -1576,10 +1593,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * This Map keeps track of the ProxyNodes that have been retired by GraphPatternElements, allowing the retired
 	 * ProxyNode and its associated variable to be reused when that GraphPatternElement is revisited in another ProxyNode.
 	 */
-	private Map<GraphPatternElement, ProxyNode> retiredProxyNodes = new HashMap<GraphPatternElement, ProxyNode>();
+	protected Map<GraphPatternElement, ProxyNode> retiredProxyNodes = new HashMap<GraphPatternElement, ProxyNode>();
 	
 	/**
-	 * Top-level method for expanding ProxyNodes
+	 * Top-level method for expanding ProxyNodes. Takes input (pattern) as an Object as
+	 * it be instances of different types. Handling is separated by whether a List or not.  
 	 * 
 	 * @param pattern
 	 * @param clearPreviousRetired TODO
@@ -1594,12 +1612,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		List<GraphPatternElement> patterns = new ArrayList<GraphPatternElement>();
 		if (pattern instanceof List<?>) {
+			// input is a list so process one at a time
 			for (int i = 0; i < ((List<?>)pattern).size(); i++) {
-				expandProxyNodes(patterns, ((List<?>)pattern).get(i), isRuleThen);
+				expandProxyNodes(patterns, ((List<?>)pattern).get(i), isRuleThen, UnNestingType.None);
 			}
 		}
 		else {
-			Object result = expandProxyNodes(patterns, pattern, isRuleThen);
+			// input is NOT a list so only one thing to process
+			Object result = expandProxyNodes(patterns, pattern, isRuleThen, UnNestingType.None);
 			if (patterns.size() == 0) {
 				return result;
 			}
@@ -1661,21 +1681,23 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	/**
-	 * Second-level method for expanding ProxyNodes--this one has a list of the results passed in as an argument
-	 * @param patterns
-	 * @param pattern
-	 * @param isRuleThen 
+	 * Second-level method for expanding ProxyNodes--this one has a list of inputs passed in as an argument (empty on first call)
+	 * and a specific input (pattern) to process.
+	 * @param patterns -- the complete list of inputs
+	 * @param pattern -- the specific input now being processed
+	 * @param isRuleThen -- true if this set of inputs if for a rule conclusion
+	 * @param container -- the container of pattern, if known
 	 * @return
 	 * @throws InvalidNameException
 	 * @throws InvalidTypeException
 	 * @throws TranslationException
 	 */
-	protected Object expandProxyNodes(List<GraphPatternElement> patterns, Object pattern, boolean isRuleThen) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Object expandProxyNodes(List<GraphPatternElement> patterns, Object pattern, boolean isRuleThen, UnNestingType strategy) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (pattern instanceof ProxyNode) {
-			return expandProxyNodes(patterns, ((ProxyNode)pattern).getProxyFor(), isRuleThen);
+			return expandProxyNodes(patterns, ((ProxyNode)pattern).getProxyFor(), isRuleThen, strategy);
 		}
 		if (pattern instanceof TripleElement) {
-			return expandProxyNodes(patterns,(TripleElement)pattern, isRuleThen);
+			return expandProxyNodes(patterns,(TripleElement)pattern, isRuleThen, strategy);
 		}
 		else if (pattern instanceof BuiltinElement) {
 			return expandProxyNodes(patterns, (BuiltinElement)pattern, isRuleThen);
@@ -1704,7 +1726,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				((Junction)pattern).setLhs(SadlModelProcessor.nodeCheck(lhsbe));
 			}
 			else {
-				expandProxyNodes(lhsPatterns, lhs, isRuleThen);
+				expandProxyNodes(lhsPatterns, lhs, isRuleThen, UnNestingType.None);
 				if (lhsPatterns.size() == 1) {
 					((Junction)pattern).setLhs(SadlModelProcessor.nodeCheck(lhsPatterns.get(0)));
 				}
@@ -1726,7 +1748,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				((Junction)pattern).setRhs(retval);
 			}
 			else {
-				retval = expandProxyNodes(rhsPatterns, rhs, isRuleThen);
+				retval = expandProxyNodes(rhsPatterns, rhs, isRuleThen, UnNestingType.None);
 				if (rhsPatterns.size() == 1) {
 					((Junction)pattern).setRhs(SadlModelProcessor.nodeCheck(rhsPatterns.get(0)));
 				}
@@ -1749,15 +1771,20 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * If a triple has a null, fill it with a variable (search the patterns list first to avoid duplicates), 
 	 *  add the triple to the patterns list, and return the variable. The variable also replaces the proxy node 
 	 *  that contained this triple.
+	 *  Note that if the triple has both a null subject and a null object, then we must know the container type
+	 *  to know which replacement to return. Contained in a BuiltinElement, return the object variable as that becomes the 
+	 *  builtin argument and the triple moves before. Contained in a TripleElement, return the subject variable as that
+	 *  becomes the object of the containing triple and this triple comes after.
 	 * @param patterns
 	 * @param te
-	 * @param expType
+	 * @param isRuleThen
+	 * @param container
 	 * @return
 	 * @throws InvalidNameException
 	 * @throws InvalidTypeException
 	 * @throws TranslationException
 	 */
-	protected Object expandProxyNodes(List<GraphPatternElement> patterns, TripleElement te, boolean isRuleThen) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected Object expandProxyNodes(List<GraphPatternElement> patterns, TripleElement te, boolean isRuleThen, UnNestingType strategy) throws InvalidNameException, InvalidTypeException, TranslationException {
 		Node returnNode = null;
 		Node retiredNode = findMatchingElementInRetiredProxyNodes(te);
 		if (retiredNode != null && retiredNode instanceof ProxyNode) {
@@ -1777,7 +1804,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			else {
 				Object realSubj = ((ProxyNode)subj).getProxyFor();
-				Object subjNode = expandProxyNodes(patterns, realSubj, isRuleThen);
+				Object subjNode = expandProxyNodes(patterns, realSubj, isRuleThen, UnNestingType.ReturnObjectMoveBefore);
 				if (subjNode == null && realSubj instanceof TripleElement) {
 					if (((TripleElement)realSubj).getObject() instanceof VariableNode) {
 						subjNode = ((TripleElement)realSubj).getObject();
@@ -1806,6 +1833,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		Node obj = te.getObject();
 		if (obj instanceof ProxyNode) {
+			UnNestingType unt = null;
 			int initialPatternLength = patterns == null ? 0 : patterns.size();
 			if (retiredNode != null) {
 				obj = returnNode = retiredNode;
@@ -1824,7 +1852,25 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					rememberedPatterns = patterns;
 					patterns = new ArrayList<GraphPatternElement>();
 				}
-				Object objNode = expandProxyNodes(patterns, realObj, isRuleThen);
+///* works for test_08: */				Object objNode = expandProxyNodes(patterns, realObj, isRuleThen, UnNestingType.ReturnSubjectMoveAfter);
+///* works for test_19: */				Object objNode = expandProxyNodes(patterns, realObj, isRuleThen, UnNestingType.ReturnObjectMoveBefore); // UnNestingType.ReturnSubjectMoveAfter);
+				Object objNode;
+				if (realObj instanceof TripleElement && te.getSourceType() != null && te.getSourceType().equals(TripleSourceType.VariableDefinition)) {
+					unt = UnNestingType.ReturnObjectMoveAfter;
+				}
+				else {
+					unt = UnNestingType.ReturnSubjectMoveAfter;
+				}
+				objNode = expandProxyNodes(patterns, realObj, isRuleThen, unt);
+
+				// Do a check, maybe a better approach than passing in UnNestingType and passing back subj or obj... awc 11/18/2019
+				if (te.getPredicate() instanceof NamedNode && ((NamedNode)te.getPredicate()).getLocalizedType() != null && 
+						realObj instanceof TripleElement && ((TripleElement)realObj).getPredicate() instanceof NamedNode &&
+						((NamedNode)((TripleElement)realObj).getPredicate()).getLocalizedType() != null &&
+								((NamedNode)te.getPredicate()).getLocalizedType().equals(((NamedNode)((TripleElement)realObj).getPredicate()).getLocalizedType())) {
+					objNode = ((TripleElement)realObj).getObject();
+					unt = UnNestingType.ReturnObjectMoveBefore;
+				}
 				if (objNode == null && ((ProxyNode)obj).getReplacementNode() != null) {
 					// This can happen because the proxy node gets processed but not returned
 					objNode = ((ProxyNode)obj).getReplacementNode();
@@ -1870,7 +1916,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			if (!patterns.contains(te)) {
 				int indexOfInterest = Math.max(0, initialPatternLength - 1);
 				boolean placeBefore = !(getTarget() instanceof Rule);
-				if (indexOfInterest >= 0 && indexOfInterest < patterns.size() &&
+				if (unt.equals(UnNestingType.ReturnObjectMoveBefore) || 
+						indexOfInterest >= 0 && indexOfInterest < patterns.size() &&
 						patterns.get(indexOfInterest) instanceof TripleElement &&
 						((TripleElement)patterns.get(indexOfInterest)).getSourceType().equals(TripleSourceType.ImpliedPropertyTriple) ) {
 					placeBefore = true;
@@ -1883,13 +1930,31 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 		}
-		else if (obj == null && returnNode == null) {
-			// if the subject was null, so returnNode is not null, don't create a variable for object and return that as
-			//	it will mess up what's up the stack
-			returnNode = retiredNode != null ? retiredNode : getVariableNode(subj, te.getPredicate(), obj, false);
-			te.setObject(returnNode);
-			if (!patterns.contains(te)) {
-				patterns.add(te);
+		else if (obj == null) {
+			if (returnNode == null) {
+				// if the subject was null, so returnNode is not null, don't create a variable for object and return that as
+				//	it will mess up what's up the stack
+				returnNode = retiredNode != null ? retiredNode : getVariableNode(subj, te.getPredicate(), obj, false);
+				te.setObject(returnNode);
+				if (!patterns.contains(te)) {
+					patterns.add(te);
+				}
+			}
+			else {
+				// deal with a remaining null object in the triple
+				VariableNode v = getVariableNode(te.getSubject(), 
+						te.getPredicate(), null, false);
+				if (v != null) {
+					te.setObject(v);
+					returnNode = v;
+				}
+			}
+			if (strategy.equals(UnNestingType.ReturnSubjectMoveAfter)) {
+				returnNode = te.getSubject();
+			}
+			else if (strategy.equals(UnNestingType.ReturnObjectMoveBefore) ||
+					strategy.equals(UnNestingType.ReturnObjectMoveAfter)) {
+				returnNode = te.getObject();
 			}
 		}
 
@@ -1899,7 +1964,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			if (!patterns.contains(te)) {
 				patterns.add(te);
 			}
-			Object nextResult = expandProxyNodes(patterns, nextGpe, isRuleThen);
+			Object nextResult = expandProxyNodes(patterns, nextGpe, isRuleThen, strategy);
 			// TODO we don't need to do anything with this, right?
 		}
 	
@@ -2084,12 +2149,24 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						return var;
 					}
 				}
+				else if (lhs instanceof ProxyNode && ((ProxyNode)lhs).getProxyFor() instanceof GraphPatternElement) {
+					VariableNode var = findVariableInTargetForReuse((GraphPatternElement)((ProxyNode)lhs).getProxyFor(), subject, predicate, object);
+					if (var != null) {
+						return var;
+					}
+				}
 				Object rhs = ((Junction)gpe).getRhs();
 				if (rhs instanceof GraphPatternElement) {
 					VariableNode var = findVariableInTargetForReuse((GraphPatternElement)rhs, subject, predicate, object);
 					if (var != null) {
 						return var;
 					}
+				}
+				else if (rhs instanceof ProxyNode && ((ProxyNode)rhs).getProxyFor() instanceof GraphPatternElement) {
+					VariableNode var = findVariableInTargetForReuse((GraphPatternElement)((ProxyNode)rhs).getProxyFor(), subject, predicate, object);
+					if (var != null) {
+						return var;
+					}					
 				}
 			}
 			gpe = gpe.getNext();
@@ -2175,7 +2252,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	/**
-	 * Method to handle BuiltinElements--if the 
+	 * Method to handle BuiltinElements. Some builtins around triples will go away as the information moves to a modifier on the triple 
 	 * @param patterns
 	 * @param be
 	 * @return
@@ -2210,7 +2287,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 			List<GraphPatternElement> moveToIfts = new ArrayList<GraphPatternElement>();
-			Object finalIfsVar = expandProxyNodes(moveToIfts, realArgForIfs, false);
+			Object finalIfsVar = expandProxyNodes(moveToIfts, realArgForIfs, false, UnNestingType.ReturnObjectMoveBefore);
 			if (finalIfsVar == null && realArgForIfs instanceof BuiltinElement) {
 				Node newNode = getVariableNode((BuiltinElement)realArgForIfs);
 				((BuiltinElement)realArgForIfs).addArgument(newNode);
@@ -2219,7 +2296,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				retiredProxyNodes.put((GraphPatternElement) realArgForIfs, arg1PN);
 			}
 			if (realArgForThen instanceof TripleElement && ((TripleElement)realArgForThen).getObject() == null) {
-				Object finalThensVar = expandProxyNodes(patterns, realArgForThen, isRuleThen);
+				Object finalThensVar = expandProxyNodes(patterns, realArgForThen, isRuleThen, UnNestingType.ReturnObjectMoveBefore);
 				((TripleElement)realArgForThen).setObject(SadlModelProcessor.nodeCheck(finalIfsVar));
 				if (!patterns.contains((TripleElement)realArgForThen)) {
 					patterns.add((TripleElement)realArgForThen);
@@ -2261,11 +2338,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					Object realArg2 = ((ProxyNode)be.getArguments().get(1)).getProxyFor();
 					if (realArg2 instanceof BuiltinElement) {
 						((BuiltinElement)realArg2).addArgument(be.getArguments().get(0)); // the variable goes to return from arg 2 builtin and this builtin goes away
-						return expandProxyNodes(patterns, realArg2, isRuleThen);
+						return expandProxyNodes(patterns, realArg2, isRuleThen, UnNestingType.ReturnObjectMoveBefore);
 					}
 					else if (realArg2 instanceof TripleElement && ((TripleElement)realArg2).getObject() == null) {
 						((TripleElement)realArg2).setObject(be.getArguments().get(0));  // the variable goes to the object of the arg 2 triple and this builtin  goes away
-						return expandProxyNodes(patterns, realArg2, isRuleThen);
+						return expandProxyNodes(patterns, realArg2, isRuleThen, UnNestingType.ReturnObjectMoveBefore);
 					}
 				}
 				else if ((be.getArguments().get(1) instanceof Literal || be.getArguments().get(1) instanceof ConstantNode || 
@@ -2319,7 +2396,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 				else {
 					Object realArg = ((ProxyNode)arg).getProxyFor();
-					Object argNode = expandProxyNodes(patterns, realArg, isRuleThen);
+					Object argNode = expandProxyNodes(patterns, realArg, isRuleThen, UnNestingType.ReturnObjectMoveBefore);
 					if (argNode == null) {
 						if (realArg instanceof BuiltinElement) {
 							if (be.getFuncType().equals(BuiltinType.Not)) {
@@ -2389,9 +2466,17 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							throw new TranslationException("Unexpected real argument");
 						}
 					}
-					else {
+					else {		// argNode is not null, but still make sure we don't have a remaining null object in a triple
 						((ProxyNode)arg).setReplacementNode(SadlModelProcessor.nodeCheck(argNode));
 						if (realArg instanceof GraphPatternElement) {
+							if (realArg instanceof TripleElement && ((TripleElement)realArg).getObject() == null) {
+								VariableNode v = getVariableNode(((TripleElement)realArg).getSubject(), 
+										((TripleElement)realArg).getPredicate(), null, false);
+								if (v != null) {
+									((TripleElement) realArg).setObject(v);
+									argNode = v;
+								}
+							}
 							retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
 						}
 						else {
@@ -2421,13 +2506,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	/**
-	 * Method to move triples out of a builtin so that the arguments of the builtin do not have missing triples
-	 * that should be before the builtin inside the arguments, e.g.,
+	 * Method to move triples out of a builtin that should be before the builtin, e.g.,
 	 * ">(height, 8000)"
 	 * becomes
-	 * ">(and(rdf(PathFinding2:Mountaineer, climbs, Mountain), and(rdf(Mountain, summit, Summit), and(rdf(Summit, PathFinding2:height, v0), rdf(v0, value, null)))),8000)"
+	 * ">(and(rdf(PathFinding2:Mountaineer, climbs, Mountain), and(rdf(Mountain, summit, Summit), and(rdf(Summit, PathFinding2:height, v0), rdf(v0, value, v1)))),8000)"
 	 * but should be
-	 * "and(rdf(PathFinding2:Mountaineer, climbs, Mountain), and(rdf(Mountain, summit, Summit), and(rdf(Summit, PathFinding2:height, v0), >(rdf(v0, value, null),8000))))"
+	 * "and(rdf(PathFinding2:Mountaineer, climbs, Mountain), and(rdf(Mountain, summit, Summit), and(rdf(Summit, PathFinding2:height, v0), and(rdf(v0, value, v1), >(v1,8000)))))"
 	 * @param patterns
 	 * @param be
 	 * @return
@@ -2458,16 +2542,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						if (gpe instanceof BuiltinElement) {
 							// do nothing?
 						}
-						else if (gpe instanceof TripleElement && ((TripleElement)gpe).getSourceType() != null && ((TripleElement)gpe).getSourceType().equals(TripleSourceType.MissingPropertyTriple)) {
-							if (toBeRemoved == null) {
-								toBeRemoved = new ArrayList<TripleElement>();
-							}
-							toBeRemoved.add((TripleElement)gpe);
-						}
-						else if (j < gpes.size() - 1 && gpes.get(j + 1) instanceof TripleElement && 
-								((TripleElement)gpes.get(j + 1)).getSourceType() != null && 
-								(((TripleElement)gpes.get(j + 1)).getSourceType().equals(TripleSourceType.ImpliedPropertyTriple) ||
-										((TripleElement)gpes.get(j + 1)).getSourceType().equals(TripleSourceType.ExpandedPropertyTriple))) {
+						else if (gpe instanceof TripleElement && ((TripleElement)gpe).getSubject() != null && ((TripleElement)gpe).getObject() != null) {
 							if (toBeRemoved == null) {
 								toBeRemoved = new ArrayList<TripleElement>();
 							}
@@ -2481,33 +2556,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							patterns.add(beIndex, toRemove);
 						}
 					}
-					GraphPatternElement newProxyFor;
-					if (gpes.size() > 1) {
-						newProxyFor = listToAnd(gpes).get(0);
-					}
-					else {
-						newProxyFor = gpes.get(0);
+					GraphPatternElement newProxyFor = null;
+					if (toBeRemoved != null) {
+						newProxyFor = toBeRemoved.get(toBeRemoved.size() - 1);
 					}
 					if (newProxyFor instanceof TripleElement) {
-						ArrayList<GraphPatternElement> newPatterns = new ArrayList<GraphPatternElement>();
-						Map<GraphPatternElement, ProxyNode> remember = retiredProxyNodes;
-						retiredProxyNodes = new HashMap<GraphPatternElement, ProxyNode>();
-						Object obj = expandProxyNodes(newPatterns, (TripleElement)newProxyFor, isRuleThen);
-						if (!retiredProxyNodes.isEmpty()) {
-							remember.putAll(retiredProxyNodes);
-						}
-						retiredProxyNodes = remember;
-						if (obj instanceof Node) {
-							args.set(i, SadlModelProcessor.nodeCheck(obj));
-							int newBeIndex = patterns.indexOf(be);
-							if (newBeIndex < 0) {
-								newBeIndex = 0;
-							}
-							patterns.add(newBeIndex, newProxyFor);
-							newProxyFor = null;
-						}
+						args.set(i, ((TripleElement) newProxyFor).getObject());
 					}
-					if (newProxyFor != null) {
+					else if (newProxyFor != null) {
 						((ProxyNode)arg).setProxyFor(newProxyFor);
 					}
 				}

@@ -45,7 +45,8 @@ public class TripleElement extends GraphPatternElement {
 			// new as of 2019
 			ImpliedPropertyTriple,	// triple generated to add an implied property
 			ExpandedPropertyTriple,	// triple generated to add an expanded properpty
-			MissingPropertyTriple	// triple generated to replace a named node with the pattern(s) to complete the graph path
+			MissingPropertyTriple,	// triple generated to replace a named node with the pattern(s) to complete the graph path
+			VariableDefinition		// triple is part of the definition of subject variable
 			}	// type of source
 	private TripleSourceType sourceType;	// what was the source of this TripleElement?
 	
