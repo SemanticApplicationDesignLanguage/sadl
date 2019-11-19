@@ -4974,6 +4974,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						((TripleElement) pattern).setType(getTripleModifierType(optype));
 					}
 				} else if (pattern instanceof TripleElement && ((TripleElement) pattern).getObject() == null
+						&& ((TripleElement) pattern).getSourceType() != null
 						&& (((TripleElement) pattern).getSourceType().equals(TripleSourceType.PSnewV)
 								|| ((TripleElement) pattern).getSourceType().equals(TripleSourceType.PSV))) {
 					if (isModifiedTripleViaBuitin(robj)) {
@@ -5048,6 +5049,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					((Test) getEncapsulatingTarget()).setRhs(assignedNode);
 					((Test) getEncapsulatingTarget()).setCompName(optype);
 				} else if (getTarget() instanceof Rule && pattern instanceof TripleElement
+						&& ((TripleElement) pattern).getSourceType() != null
 						&& ((TripleElement) pattern).getSourceType().equals(TripleSourceType.ITC)
 						&& ((TripleElement) pattern).getSubject() instanceof VariableNode
 						&& assignedNode instanceof VariableNode) {
@@ -6264,6 +6266,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private boolean hasCommonVariableSubject(Object robj) {
 		if (robj instanceof TripleElement && (((TripleElement) robj).getSubject() instanceof VariableNode
+				&& ((TripleElement) robj).getSourceType() != null
 				&& (((TripleElement) robj).getSourceType().equals(TripleSourceType.SPV))
 				|| ((TripleElement) robj).getSourceType().equals(TripleSourceType.ITC))) {
 			VariableNode subjvar = (VariableNode) ((TripleElement) robj).getSubject();

@@ -296,6 +296,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private boolean hasCommonVariableSubject(Object robj) {
 		if (robj instanceof TripleElement && 
 				(((TripleElement)robj).getSubject() instanceof VariableNode && 
+						((TripleElement)robj).getSourceType() != null &&
 						(((TripleElement)robj).getSourceType().equals(TripleSourceType.SPV)) ||
 						((TripleElement)robj).getSourceType().equals(TripleSourceType.ITC))) {
 			VariableNode subjvar = (VariableNode) ((TripleElement)robj).getSubject();
@@ -1919,6 +1920,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				if (unt.equals(UnNestingType.ReturnObjectMoveBefore) || 
 						indexOfInterest >= 0 && indexOfInterest < patterns.size() &&
 						patterns.get(indexOfInterest) instanceof TripleElement &&
+						((TripleElement)patterns.get(indexOfInterest)).getSourceType() != null &&
 						((TripleElement)patterns.get(indexOfInterest)).getSourceType().equals(TripleSourceType.ImpliedPropertyTriple) ) {
 					placeBefore = true;
 				}
