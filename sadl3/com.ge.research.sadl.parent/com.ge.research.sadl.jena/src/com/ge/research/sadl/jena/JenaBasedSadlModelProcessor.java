@@ -10023,12 +10023,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// EList<SadlExplicitValue> vals = ((SadlValueList)val).getExplicitValues();
 					// convert to SADL Typed List
 					try {
-						String typstr = getModelValidator().getType(val).getTypeCheckType().getURI();
-						OntClass lstcls = getOrCreateListSubclass(null, typstr, prop.eResource(), null);
-						Individual lval = getTheJenaModel().createIndividual(lstcls);
-						addListValues(lval, lstcls, (SadlValueList) val);
-						addInstancePropertyValue(inst, oprop, lval, val);
-						RDFNode nv = inst.getPropertyValue(oprop);
+						TypeCheckInfo vtct = getModelValidator().getType(val);
+						if (vtct != null) {
+							String typstr = vtct.getTypeCheckType().getURI();
+							OntClass lstcls = getOrCreateListSubclass(null, typstr, prop.eResource(), null);
+							Individual lval = getTheJenaModel().createIndividual(lstcls);
+							addListValues(lval, lstcls, (SadlValueList) val);
+							addInstancePropertyValue(inst, oprop, lval, val);
+							RDFNode nv = inst.getPropertyValue(oprop);
+						}
 					} catch (InvalidNameException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
