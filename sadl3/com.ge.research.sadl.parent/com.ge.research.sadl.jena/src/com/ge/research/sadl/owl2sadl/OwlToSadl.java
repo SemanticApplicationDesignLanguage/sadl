@@ -41,10 +41,18 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.external.XMLHelper;
-import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.processing.SparqlQueries;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.QueryCancelledException;
+import com.ge.research.sadl.reasoner.QueryParseException;
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.google.common.base.Optional;
-import com.hp.hpl.jena.graph.GetTriple;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
@@ -1832,6 +1840,13 @@ public class OwlToSadl {
 		return null;
 	}
 
+	/**
+	 * Method to convert an Individual, identifed by instUri, to a SADL statement
+	 * @param instUri
+	 * @param embeddedBNode
+	 * @return
+	 * @throws OwlImportException
+	 */
 	public String individualToSadl(String instUri, boolean embeddedBNode) throws OwlImportException {
 		Individual inst = theModel.getIndividual(instUri);
 		if (inst != null) {
@@ -1839,7 +1854,147 @@ public class OwlToSadl {
 		}
 		return null;
 	}
+	
+	/**
+	 * Method to convert an equation, identified by eqUri, to one or more SADL statements
+	 * @param eqUri
+	 * @param embeddedBNode
+	 * @param configMgr
+	 * @return
+	 */
+	public String[] equationToSadl(String eqUri, boolean embeddedBNode, IConfigurationManagerForIDE configMgr) {
+		Individual inst = theModel.getIndividual(eqUri);
+		if (inst != null) {
+			String[] returnvals = new String[2];
+			StringBuilder sb = new StringBuilder();
+			ExtendedIterator<Resource> titr = inst.listRDFTypes(true);
+			while (titr.hasNext()) {
+				Resource typ = titr.next();
+				if (typ.isURIResource() && typ.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI)) {
+					sb.append("External ");
+				}
+				else {
+					sb.append("^Equation ");
+				}
+			}
+			sb.append(inst.getLocalName());
+			sb.append("(");
+			
+			try {
+				IReasoner reasoner = configMgr.getReasoner();
+				if (!reasoner.isInitialized()) {
+					reasoner.initializeReasoner(theModel, getBaseUri(), null, null);
+				}
+				List<Object> params = Arrays.asList(new NamedNode(eqUri));
+				String pq = reasoner.parameterizeQuery(SparqlQueries.ARGUMENTS_QUERY, params);
+				pq = reasoner.prepareQuery(pq);
+				com.ge.research.sadl.reasoner.ResultSet rs = reasoner.ask(pq);	// ?argname ?argtype
+				if (rs != null) {
+					rs.setShowNamespaces(false);
+					for (int r = 0; r < rs.getRowCount(); r++) {
+						if (r > 0) sb.append(", ");
+						sb.append(rs.getResultAt(r, 1));
+						sb.append(" ");
+						sb.append(rs.getResultAt(r, 0));
+					}
+				}
+				sb.append(") returns ");
+				
+				pq = reasoner.parameterizeQuery(SparqlQueries.RETURN_TYPES_QUERY, params);
+				pq = reasoner.prepareQuery(pq);
+				rs = reasoner.ask(pq);	// ?retname ?rettype
+				if (rs != null) {
+					rs.setShowNamespaces(false);
+					for (int r = 0; r < rs.getRowCount(); r++) {
+						sb.append(rs.getResultAt(r, 1));
+					}
+				}
+				sb.append(": ");
+				RDFNode exturi = inst.getPropertyValue(theModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNALURL_PROPERTY_URI));
+				if (exturi != null) {
+					sb.append("\"");
+					sb.append(exturi.asLiteral().getValue().toString());
+					sb.append("\".");
+				}
+				returnvals[0] = sb.toString();
+				
+				sb.setLength(0);
+				RDFNode expr = inst.getPropertyValue(theModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXPRESSTION_PROPERTY_URI));
+				if (expr != null && expr.isResource()) {
+					StmtIterator stmtitr = expr.asResource().listProperties(theModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_SCRIPT_PROPERTY_URI));
+					if (stmtitr.hasNext()) {
+						sb.append(inst.getLocalName());
+						int cntr = 0;
+						while (stmtitr.hasNext()) {
+							if (cntr++ > 0) sb.append(", ");
+							sb.append(" has expression (a Script ");
+							Statement stmt = stmtitr.nextStatement();
+							RDFNode scrpt = stmt.getObject();
+							if (scrpt != null && scrpt.isLiteral()) {
+								String scrptStr = scrpt.asLiteral().getValue().toString();
+								Statement stmt2 = expr.asResource().getProperty(theModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_LANGUAGE_PROPERTY_URI));
+								if (stmt2 != null) {
+									RDFNode lang = stmt2.getObject();
+									if (lang.isURIResource()) {
+										String langStr = lang.asResource().getLocalName();
+										if (langStr != null) {
+											sb.append("with language ");
+											sb.append(langStr);
+											sb.append(", ");
+										}
+										if (scrptStr != null) {
+											sb.append("with script ");
+											sb.append("\"");
+											sb.append(escapeDoubleQuotes(scrptStr));
+											sb.append("\"");
+										}
+									}
+								}
+							}
+							sb.append(")");
+						}
+						sb.append(".");
+						returnvals[1] = sb.toString();
+					}
+				}
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidNameException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (QueryParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (QueryCancelledException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ReasonerNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			NodeIterator nitr = inst.listPropertyValues(theModel.getOntProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI));
+			while (nitr.hasNext()) {
+				RDFNode arg = nitr.next();
+				if (arg.isResource()) {
+					System.out.println(arg.toString());
+				}
+			}
+			return returnvals;
+		}
+		
+		return null;
+	}
 
+	/**
+	 * Method to replace each double quote (") with an escaped double quote (\")
+	 * @param strIn -- input string
+	 * @return -- output string
+	 */
+	private String escapeDoubleQuotes(String strIn) {
+		return strIn.replace("\"", "\\\"");
+	}
+	
 	private String individualToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		boolean bnode = false;
