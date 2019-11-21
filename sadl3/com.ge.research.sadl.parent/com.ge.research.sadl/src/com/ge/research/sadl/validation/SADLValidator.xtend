@@ -66,6 +66,8 @@ class SADLValidator extends AbstractSADLValidator {
 	public static final String MISSING_MODEL_ALIAS = "MISSING_MODEL_ALIAS"
 	public static final String INVALID_MODEL_FILENAME = "INVALID_MODEL_FILENAME"
 	public static final String UNBOUND_VARIABLE_IN_RULE_HEAD = "UNBOUND_VARIABLE_IN_RULE_HEAD"
+	public static final String DUPLICATE_QUERY_NAME = "DUPLICATE_QUERY_NAME"
+	public static final String EMPTY_QUERY_BODY = "EMPTY_QUERY_BODY"
 	public static final String DUPLICATE_RULE_NAME = "DUPLICATE_RULE_NAME"
 	public static final String UNRESOLVED_SADL_RESOURCE = "UNRESOLVED_SADL_RESOURCE"
 	public static final String INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION = "INVALID_COMMA_SEPARATED_ABREVIATED_EXPRESSION"
@@ -220,10 +222,21 @@ class SADLValidator extends AbstractSADLValidator {
 	
 	@Check
 	def checkQueryStatement(QueryStatement query) {
-		// make sure rule name is unique
-		if (query.name !== null && otherNames.contains(query.name)) {
-			var errMsg = "The name '" + query.name + "' in this namespace is already used."
-			error(errMsg, RULE_STATEMENT__NAME, DUPLICATE_RULE_NAME)
+		// make sure query name is unique
+		if (query.name !== null) {
+			val thisName = declarationExtensions.getConcreteName(query.name)
+			if (otherNames.contains(thisName)) {
+				var errMsg = "The name '" + query.name + "' in this namespace is already used."
+				error(errMsg, QUERY_STATEMENT__NAME, DUPLICATE_QUERY_NAME)
+			}
+			else {
+				otherNames.add(thisName)
+			}
+		}
+		// make sure there's a body
+		if (query.expr === null && query.srname === null) {
+			var errMsg = "The body of the query cannot be empty."
+			error(errMsg, QUERY_STATEMENT__EXPR, EMPTY_QUERY_BODY)
 		}
 	}
 	

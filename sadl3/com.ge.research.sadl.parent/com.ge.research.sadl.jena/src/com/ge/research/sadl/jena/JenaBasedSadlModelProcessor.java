@@ -2248,6 +2248,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public Query processStatement(QueryStatement element) throws JenaProcessorException, InvalidNameException,
 			InvalidTypeException, TranslationException, CircularDefinitionException {
 		Expression qexpr = element.getExpr();
+		if (qexpr == null) {
+			qexpr = element.getSrname();
+		}
 		SadlResource elementName = element.getName();
 		EList<NamedStructureAnnotation> annotations = element.getAnnotations();
 		boolean isGraph = element.getStart().equals("Graph");
@@ -2450,6 +2453,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					query.addPattern(triplesToAdd.get(i));
 				}
 			}
+		}
+		else {
+			addError("Query has no body", expr);
 		}
 		return query;
 	}

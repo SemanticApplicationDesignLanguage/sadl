@@ -52,7 +52,7 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 		
 		Ask Q1: area.
 		
-		Ask Q1.
+		Ask: Q1.
 		
 		// Ask: x is a ^Rule.
 		
@@ -86,7 +86,7 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 		
 		Ask Q1: area.
 		
-		Ask Q1.
+		Ask: Q1.
 		
 		Ask: select s,ar where s area ar order by s.
 		
@@ -177,6 +177,7 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 			// TODO do something with the SADL commands after running the inferencer.
 			var idx = 0
 			for (scr:it) {
+				assertNotNull(scr);
 				println(scr.toString)
 				if (idx == 2) {
 				    assertEqualsIgnoreEOL(grd1.get(idx++), scr.toString)	// this will fail sometimes unless results are ordered					
