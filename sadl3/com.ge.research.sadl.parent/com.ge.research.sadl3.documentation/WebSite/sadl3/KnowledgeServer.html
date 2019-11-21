@@ -6,7 +6,7 @@ a:link	     { color: #0066cc; }a:link.header    { text-decoration: none; color: 
 </style>
 <h1>Knowledge Server</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/04/2018<!--webbot bot="Timestamp" endspan i-checksum="12558" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/21/2019<!--webbot bot="Timestamp" endspan i-checksum="12530" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 <h2>Introduction</h2>
 <p>Traditionally knowledge has been captured in some kind of knowledge 
@@ -140,6 +140,27 @@ triples to a session's knowledge base.</p>
 &nbsp;&nbsp;&nbsp; boolean status = srvr.sendCsvData(fdsrc, true, &quot;<a href="file:///c:/kbases/mykbase/mytemplate.tmpl">file:///c:/kbases/mykbase/mytemplate.tmpl</a>&quot;);</i></p>
 <p>In this case the 3rd argument could be an URL or it could be the actual 
 template as a String.</p>
+<h2>Retrieving Information from the Service</h2>
+<p>There are two basic methods provided for retrieving information from a 
+KnowledgeServer model, whether the information is assertions (input data) or 
+inferences. </p>
+<h3>Ask</h3>
+<p>The &quot;ask&quot; method takes a triple pattern, subject, predicate, object, as input 
+arguments and returns a ResultSet containing all model data matching the 
+pattern. Any combination of the three arguments can be null, which creates an 
+unbound variable in that position of the triple pattern. The number of columns 
+in the returned ResultSet is the same as the number of null arguments. If all 
+arguments are non-null, the return will be true if the triple exists in the 
+kbase else false.</p>
+<h3>Query</h3>
+<p>The &quot;query&quot; method takes a SPARQL query string as an input argument and 
+returns a ResultSet containing all model data satisfying the query conditions.
+</p>
+<p>Note that if the query string is a parameterized query, meaning that it has 
+one or more standalone question marks (just a &quot;?&quot; without a variable name, e.g., 
+not &quot;?x&quot;), then a call should be made to the method &quot;parameterizeQuery(String 
+queryStr, List&lt;Object&gt; values)&quot; to process the parameterized query and return 
+the resulting query string for use in the call to the &quot;query&quot; method.</p>
 <h2>ISadlServerPE: Modifying and Saving Models to the Knowledge Base</h2>
 <p>The extended services of ISadlServerPE allow both changes to existing model 
 files in the knowledge base and the addition of new model files. Consider the 
