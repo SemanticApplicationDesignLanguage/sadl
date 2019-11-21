@@ -2252,6 +2252,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		EList<NamedStructureAnnotation> annotations = element.getAnnotations();
 		boolean isGraph = element.getStart().equals("Graph");
 		Query query = processQueryExpression(element, qexpr, elementName, annotations, isGraph);
+		if (element.getParameterizedValues() != null) {
+			EList<Expression> pvs = element.getParameterizedValues().getExplicitValues();
+			if (pvs != null) {
+				List<Object> pvobjs = new ArrayList<Object>();
+				for (Expression pv : pvs) {
+					Object pvobj = processExpression(pv);
+					if (pvobj != null) {
+						pvobjs.add(pvobj);
+					}
+				}
+				query.setParameterizedValues(pvobjs);
+			}
+		}
 		return query;
 	}
 
