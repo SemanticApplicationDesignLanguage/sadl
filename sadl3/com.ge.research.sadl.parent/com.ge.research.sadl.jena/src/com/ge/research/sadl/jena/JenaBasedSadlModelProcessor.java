@@ -2454,7 +2454,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
-		else {
+		else if (expr == null) {
 			addError("Query has no body", expr);
 		}
 		return query;

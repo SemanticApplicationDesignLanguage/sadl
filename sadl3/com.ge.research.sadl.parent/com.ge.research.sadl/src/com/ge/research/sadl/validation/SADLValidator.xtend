@@ -226,7 +226,7 @@ class SADLValidator extends AbstractSADLValidator {
 		if (query.name !== null) {
 			val thisName = declarationExtensions.getConcreteName(query.name)
 			if (otherNames.contains(thisName)) {
-				var errMsg = "The name '" + query.name + "' in this namespace is already used."
+				var errMsg = "The name '" + thisName + "' in this namespace is already used."
 				error(errMsg, QUERY_STATEMENT__NAME, DUPLICATE_QUERY_NAME)
 			}
 			else {
