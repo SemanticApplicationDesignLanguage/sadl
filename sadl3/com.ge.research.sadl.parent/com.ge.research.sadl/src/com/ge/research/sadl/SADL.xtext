@@ -114,16 +114,10 @@ SadlPropertyCondition :
 ;
 
 SadlPropertyInitializer:
-	 ','? firstConnective=('with'|'has')? property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
+	 ','? firstConnective=('with'|'has')? property=[SadlResource|QNAME] value=SadlExplicitValue
 //	 ','? ('with'|'has')? (property=[SadlResource|QNAME] (value=SadlExplicitValue | '(' value=SadlNestedInstance')')) | {SadlPropertyInitializer} ('data' (valueTable=ValueTable | 'located' 'at' location=STRING))?
 	|','? firstConnective='is' property=[SadlResource|QNAME] 'of' type=[SadlResource|QNAME]
-	|','? firstConnective='of' property=[SadlResource|QNAME] 'is' (value=SadlExplicitValue | '(' value=SadlNestedInstance')')
-;
-
-SadlNestedInstance returns SadlInstance:
-{SadlNestedInstance} (
-		instance=SadlResource 'is' article=AnArticle type=SadlTypeReference propertyInitializers+=SadlPropertyInitializer*
-	|	article=AnArticle type=SadlTypeReference instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*)
+	|','? firstConnective='of' property=[SadlResource|QNAME] 'is' value=SadlExplicitValue
 ;
 
 SadlResource:
@@ -202,7 +196,7 @@ SadlAllValuesCondition :
 	'only' ('has'|'with') 'values' 'of' 'type' type=SadlPrimaryTypeReference facet=SadlDataTypeFacet?;
 
 SadlHasValueCondition :
-	'always' ('has'|'with') 'value' (restriction=SadlExplicitValue | '(' restriction=SadlNestedInstance ')');
+	'always' ('has'|'with') 'value' restriction=SadlExplicitValue;
 
 SadlCardinalityCondition :
 	('has'|'with') 
@@ -220,12 +214,19 @@ SadlExplicitValue:
 ;
 	
 SadlExplicitValueLiteral:
-		SadlResource		// e.g., George
+        SadlResource		// e.g., George
+    |   '(' SadlNestedInstance ')'
 	|	{SadlNumberLiteral} literalNumber=AnyNumber (-> unit=UNIT)?
     |   {SadlStringLiteral} literalString=STRING
     |   {SadlBooleanLiteral} (truethy?='true'|'false')
     |   SadlValueList
 	|	{SadlConstantLiteral} term=('PI'|'e'|'known')
+;
+
+SadlNestedInstance returns SadlInstance:
+{SadlNestedInstance} (
+		instance=SadlResource 'is' article=AnArticle type=SadlTypeReference propertyInitializers+=SadlPropertyInitializer*
+	|	article=AnArticle type=SadlTypeReference instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*)
 ;
 
 UNIT: STRING | ID;
