@@ -383,10 +383,10 @@ public class JenaReasonerPlugin extends Reasoner{
 			e1.printStackTrace();
 		}	
 		
-		if (logger.isDebugEnabled()) {
-			logger.debug("schemaModel '" + getModelName() + "' with  tbox '" + tbox + "' loaded");
-			dumpModelToLogger(schemaModel);
-		}
+//		if (logger.isDebugEnabled()) {
+//			logger.debug("schemaModel '" + getModelName() + "' with  tbox '" + tbox + "' loaded");
+//			dumpModelToLogger(schemaModel);
+//		}
 		loadImports();
 
 		logger.debug("JenaReasonerPlugin.initializeReasoner, imports size = " + (imports == null ? 0 : imports.size()));

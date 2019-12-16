@@ -65,6 +65,9 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.TestStatement;
+import com.hp.hpl.jena.ontology.DatatypeProperty;
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.UnionClass;
@@ -132,6 +135,8 @@ import com.hp.hpl.jena.vocabulary.RDFS;
  */
 public class IntermediateFormTranslator implements I_IntermediateFormTranslator {
     protected static final Logger logger = LoggerFactory.getLogger(IntermediateFormTranslator.class);
+
+    protected Map<Resource, NamedNode> resourceToNamedNodeMap = new HashMap<Resource, NamedNode>();
     private int vNum = 0;	// used to create unique variables
     private List<IFTranslationError> errors = null;
     private Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
@@ -241,6 +246,22 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Method to determine if a BuiltinElement should generate a DirectedPath
+	 * @param bi
+	 * @return
+	 */
+	public boolean isPathGeneratingBuiltinElement(BuiltinElement bi) {
+		if (bi.getFuncName().equals("lastElement") ||
+				bi.getFuncName().equals("firstElement") ||
+				bi.getFuncName().equals("elementBefore") ||
+				bi.getFuncName().equals("elementAfter") ||
+				bi.getFuncName().equals("elementInList")) {
+			return true;
+		}
+		return false;
 	}
 
 	private TripleElement getProxyWithNullSubject(TripleElement pattern) {
@@ -3452,6 +3473,110 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	public void reset() {
 		// nothing needed in this class
 	}
+
+	@Override
+	public NamedNode getAnchoringNode(Object semanticConstruct) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * Method to obtain a Jena Resource from a NamedNode while caching
+	 * the NamedNode in a Map so that it can be retrieved by Resource. This is
+	 * needed because it is difficult or impossible to retrieve all of the 
+	 * information in the original NamedNode from the Jena OntModel Resource.
+	 * @param theNode
+	 * @return
+	 */
+	public Resource getResourceFromNamedNode(NamedNode theNode) {
+		Resource rsrc = null;
+		if(theNode == null) {
+			return null;
+		}
+		if (getModelProcessor().isProperty(theNode)) {
+			rsrc = getTheJenaModel().getProperty(theNode.toFullyQualifiedString());
+		}
+		else {
+			rsrc = getTheJenaModel().getResource(theNode.toFullyQualifiedString());
+		}
+		if (!resourceToNamedNodeMap.containsKey(rsrc) ) {
+			resourceToNamedNodeMap.put(rsrc, theNode);
+		}
+		return rsrc;
+	}
+
+	/**
+	 * Method to obtain a Jena Property from a NamedNode while caching
+	 * the NamedNode in a Map so that it can be retrieved by Properpty. This is
+	 * needed because it is difficult or impossible to retrieve all of the 
+	 * information in the original NamedNode from the Jena OntModel Property.
+	 * @param theNode
+	 * @return
+	 */
+	public Property getPropertyFromNamedNode(NamedNode theNode) throws TranslationException {
+		Property prop = getTheJenaModel().getProperty(theNode.toFullyQualifiedString());
+		if (!resourceToNamedNodeMap.containsKey(prop)) {
+			resourceToNamedNodeMap.put(prop, theNode);
+		}
+		return prop;
+	}
+
+	/**
+	 * Method to retrieve a NamedNode from the cache by Jena Resource
+	 * @param rsrc
+	 * @return
+	 * @throws TranslationException
+	 */
+	public NamedNode getNamedNodeFromResourceMap(Resource rsrc) throws TranslationException {
+		if (resourceToNamedNodeMap.containsKey(rsrc)) {
+			return resourceToNamedNodeMap.get(rsrc);
+		}
+		// some Resources will have come directly from the Ontology as missing patterns are identified
+		return jenaResourceToNamedNode(rsrc);
+	}
+
+	/**
+	 * Method to retrieve a NamedNode that corresponds to a Jena Resource.
+	 * Note that this will not necessarily return the one from which the Resource was identified.
+	 * @param un
+	 * @return
+	 * @throws TranslationException 
+	 */
+	public NamedNode jenaResourceToNamedNode(com.hp.hpl.jena.rdf.model.Resource un) throws TranslationException {
+		NamedNode nn = null;
+		if (un != null) {
+			if (un.isURIResource()) {
+				NodeType ntype = null;
+				if (un instanceof Property) {
+					if (un.canAs(DatatypeProperty.class)) {
+						ntype = NodeType.DataTypeProperty; 
+					}
+					else if (un.canAs(ObjectProperty.class)) {
+						ntype = NodeType.ObjectProperty;
+					}
+					else {
+						ntype = NodeType.PropertyNode;
+					}
+				}
+				else if (un.canAs(Individual.class)&& !un.canAs(OntClass.class)) {
+					ntype = NodeType.InstanceNode;
+				}
+				else if (un.canAs(OntClass.class)) {
+					ntype = NodeType.ClassNode;
+				}
+				String uri = un.getURI();
+				if (uri != null) {
+					nn = new NamedNode(uri, ntype);
+				}
+			}
+			else {
+				if (getModelProcessor().isTypedListSubclass(un)) {
+					nn = getModelProcessor().getTypedListType(un);
+				}
+			}
+		}
+		return nn;
+	} 
 
 
 }	

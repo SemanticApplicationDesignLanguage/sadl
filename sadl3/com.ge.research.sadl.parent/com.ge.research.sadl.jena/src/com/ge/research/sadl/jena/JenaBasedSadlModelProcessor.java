@@ -9619,6 +9619,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
+		if (inst != null && sr != null && sr.getAnnotations() != null) {
+			addAnnotationsToResource(inst, sr.getAnnotations());
+		}
 
 		Iterator<SadlPropertyInitializer> itr = element.getPropertyInitializers().iterator();
 		while (itr.hasNext()) {

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
+import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
@@ -95,7 +96,18 @@ public interface I_IntermediateFormTranslator {
 	 */
 	void setEncapsulatingTarget(Object _encapsulatingTarget);
 
+	/**
+	 * Method to obtain the target semantic construct for translation
+	 * @return
+	 */
 	Object getTarget();
+	
+	/**
+	 * Method to identify if there is an anchoring node for identifying missing patterns
+	 * @param semanticConstruct
+	 * @return
+	 */
+	abstract NamedNode getAnchoringNode(Object semanticConstruct);
 	
 	/**
 	 * Method to determine if a GraphPatternElement can only be in the conclusions of the target
