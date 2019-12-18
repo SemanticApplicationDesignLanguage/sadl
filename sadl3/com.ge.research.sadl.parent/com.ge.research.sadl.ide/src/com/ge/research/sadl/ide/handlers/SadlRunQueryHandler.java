@@ -28,7 +28,9 @@ import org.eclipse.xtext.resource.XtextResource;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ModelError;
@@ -49,6 +51,13 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 	
 	public void run(Path path, Supplier<XtextResource> resourceSupplier, String query) {
 		run(path, resourceSupplier, query, getPreferences(resourceSupplier.get()));
+	}
+	
+	public void runEER(Path path, Supplier<ExternalEmfResource> resourceSupplier, String query) {
+		ExternalEmfResource eer = resourceSupplier.get();
+		// what needs to happen to an ExternalEmfResource before it can be queried?
+		// any way to get preferences here?
+		run(path, null, query, null);
 	}
 
 	public void run(Path path, Supplier<XtextResource> resourceSupplier, String query, Map<String, String> properties) {
@@ -110,7 +119,13 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 				IReasoner reasoner = configMgr.getReasoner();
 				if (!reasoner.isInitialized()) {
 					reasoner.setConfigurationManager(configMgr);
-					String modelName = configMgr.getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName));
+					String modelName;
+					try {
+						modelName = configMgr.getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName));
+					}
+					catch (ConfigurationException e) {
+						modelName = configMgr.getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(path.toString()));
+					}
 					reasoner.initializeReasoner(modelFolderUri, modelName, format);
 				}
 				if (reasoner != null) {	
@@ -203,7 +218,7 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 //			}
 		
 		} catch (Exception e) {
-			
+			console.error(e.getMessage());
 		}
 	}
 

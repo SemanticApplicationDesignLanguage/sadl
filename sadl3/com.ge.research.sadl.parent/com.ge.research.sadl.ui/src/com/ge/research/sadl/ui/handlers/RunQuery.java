@@ -24,6 +24,7 @@ import org.eclipse.xtext.resource.XtextResource;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.ide.handlers.SadlRunQueryHandler;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -114,12 +115,28 @@ public class RunQuery extends SadlActionHandler {
 				final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
 				IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
 				final XtextResource resource = getXtextResource(project, trgtFile);
-				Supplier<XtextResource> resourceSupplier = () -> resource;
-				final IProject currentProject = project;
-				final IFile targetFile = trgtFile;
-				SadlRunQueryHandler delegate = handlerProvider.get();
-				delegate.setGraphVisualizerHandler(new SadlEclipseGraphVisualizerHandler(RunQuery.this, currentProject, targetFile));
-				delegate.run(trgtFile.getLocation().toFile().toPath(), resourceSupplier, getQuery(configMgr));
+				if (resource == null) {
+					final ExternalEmfResource extRsrc = getExternalEmfResource(project, trgtFile);
+					if (extRsrc == null) {
+						console.error("Query target '" + trgtFile.getName() + "' is not an XtextResource and is not an ExternalEmfResource.\n");
+					}
+					else {
+						Supplier<ExternalEmfResource> resourceSupplier = () -> extRsrc;
+						final IProject currentProject = project;
+						final IFile targetFile = trgtFile;
+						SadlRunQueryHandler delegate = handlerProvider.get();
+						delegate.setGraphVisualizerHandler(new SadlEclipseGraphVisualizerHandler(RunQuery.this, currentProject, targetFile));
+						delegate.runEER(trgtFile.getLocation().toFile().toPath(), resourceSupplier, getQuery(configMgr));
+					}
+				}
+				else {
+					Supplier<XtextResource> resourceSupplier = () -> resource;
+					final IProject currentProject = project;
+					final IFile targetFile = trgtFile;
+					SadlRunQueryHandler delegate = handlerProvider.get();
+					delegate.setGraphVisualizerHandler(new SadlEclipseGraphVisualizerHandler(RunQuery.this, currentProject, targetFile));
+					delegate.run(trgtFile.getLocation().toFile().toPath(), resourceSupplier, getQuery(configMgr));
+				}
 			}
 			else {
 				throw new TranslationException("Please select a target for querying");

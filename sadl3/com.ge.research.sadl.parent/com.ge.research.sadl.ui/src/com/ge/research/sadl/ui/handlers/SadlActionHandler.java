@@ -58,6 +58,7 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
+import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.ide.handlers.SadlGraphVisualizerHandler;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
@@ -389,6 +390,22 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	    	if (res != null) {
 	    		if (res instanceof XtextResource) {
 	    			return (XtextResource) res;
+	    		}
+	    	}
+		}
+		else {
+			throw new ExecutionException("Unable to obtain a resource set for the target file '" + trgtFile.getName() + "'");
+		}
+		return null;
+	}
+	
+	protected ExternalEmfResource getExternalEmfResource(IProject project, IFile trgtFile) throws ExecutionException {
+		ResourceSet resourceSet = resourceSetProvider.get(project);
+		if (resourceSet != null) {
+	    	Resource res = resourceSet.getResource(URI.createPlatformResourceURI(trgtFile.getFullPath().toString(), true), true);
+	    	if (res != null) {
+	    		if (res instanceof ExternalEmfResource) {
+	    			return (ExternalEmfResource) res;
 	    		}
 	    	}
 		}
