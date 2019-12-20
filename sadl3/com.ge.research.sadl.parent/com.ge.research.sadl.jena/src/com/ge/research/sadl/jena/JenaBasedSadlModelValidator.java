@@ -3269,6 +3269,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					if (qnmDecl.eContainer() instanceof SadlInstance) {
 						SadlTypeReference typeref = ((SadlInstance)qnmDecl.eContainer()).getType();
 						if (typeref != null) {
+							if (typeref instanceof SadlSimpleTypeReference &&
+									((SadlSimpleTypeReference)typeref).getType().equals(sr)) {
+								getModelProcessor().addTypeCheckingError("Invalid type", typeref);
+								return null;
+							}
 							return getType(typeref);
 						}
 						else {

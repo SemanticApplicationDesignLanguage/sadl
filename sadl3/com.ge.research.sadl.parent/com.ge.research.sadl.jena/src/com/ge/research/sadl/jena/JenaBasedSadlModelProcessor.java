@@ -9593,6 +9593,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					setHostEObject(null);
 				}
 				else {
+					if (type instanceof SadlSimpleTypeReference) {
+						SadlResource typeSR = ((SadlSimpleTypeReference)type).getType();
+						if (typeSR.equals(sr)) {
+							// being declared an instance of itself
+							addError(getDeclarationExtensions().getConcreteName(sr) + " can't be an instance of itself.", sr);
+							return null;
+						}
+					}
 					OntResource or = sadlTypeReferenceToOntResource(type);
 					if (or != null && or.canAs(OntClass.class)) {
 						cls = or.asClass();
