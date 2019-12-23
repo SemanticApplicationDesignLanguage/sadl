@@ -36,6 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.TypeCheckInfo;
+import com.ge.research.sadl.jena.missingpatterns.DirectedPath;
+import com.ge.research.sadl.jena.missingpatterns.MultiplePathsFoundException;
+import com.ge.research.sadl.jena.missingpatterns.PathFinder;
+import com.ge.research.sadl.jena.missingpatterns.PathFindingException;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.gp.BuiltinElement;
@@ -59,6 +63,7 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
+import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -140,6 +145,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
     private int vNum = 0;	// used to create unique variables
     private List<IFTranslationError> errors = null;
     private Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
+	private Map<Resource, List<TripleElement>> missingTriplesByResource;
+	private List<NamedNode> namedNodesToCleanOfMissingPatternsWhenCooked = null;
+	private Map<String, Boolean> addMissingTriplePatternsReturnValueByReqName;
     private Object encapsulatingTarget = null;	// when a query is in a test
     private GraphPatternElement firstOfPhrase = null;
     
@@ -3394,8 +3402,24 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	
 	public Rule cook(Rule rule) {
 		try {
-			rule = addImpliedAndExpandedProperties(rule);
-//			rule = addMissingTriplePatterns(rule);
+			if (!rule.isMissingPatternsAdded()) {
+				addMissingTriplePatterns(getTheJenaModel(), rule);
+			}
+			List<GraphPatternElement> givens = rule.getGivens();
+			if (givens != null) {
+				expandMissingPatterns(givens);
+				addImpliedAndExpandedProperties(givens);
+			}
+			List<GraphPatternElement> ifts = rule.getIfs();
+			if (ifts != null) {
+				expandMissingPatterns(ifts);
+				addImpliedAndExpandedProperties(ifts);
+			}
+			List<GraphPatternElement> thens = rule.getThens();
+			if (thens != null) {
+				expandMissingPatterns(thens);
+				addImpliedAndExpandedProperties(thens);
+			}
 		} catch (Exception e) {
 			addError(new IFTranslationError("Translation to Intermediate Form encountered error (" + e.toString() + ")while 'cooking' IntermediateForm."));
 			e.printStackTrace();
@@ -3403,8 +3427,664 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return rule;
 	}
 
+	/**
+	 * Method to expand the missing patterns in a set of GraphPatternElements
+	 * @param gpes
+	 * @throws InvalidNameException
+	 * @throws InvalidTypeException
+	 * @throws TranslationException
+	 */
+	protected void expandMissingPatterns(List<GraphPatternElement> gpes) throws InvalidNameException, InvalidTypeException, TranslationException {
+		if (gpes != null) {
+			for (int i = gpes.size() - 1; i >= 0; i--) {
+				List<GraphPatternElement> expansion = null;
+				GraphPatternElement gpe = gpes.get(i);
+				if (gpe instanceof Junction) {
+					expansion = expandMissingPatterns(gpes, i, (Junction)gpe);
+				}
+				else if (gpe instanceof TripleElement) {
+					expansion = expandMissingPatterns(gpes, i, (TripleElement)gpe);
+				}
+				else if (gpe instanceof BuiltinElement) {
+					expansion = expandMissingPatterns(gpes, i, (BuiltinElement)gpe);
+				}
+				if (expansion != null) {
+					for (int j = 0; j < expansion.size(); j++) {
+						if (j == 0) {
+							gpes.set(i, expansion.get(j));
+						}
+						else {
+							gpes.add(i + 1, expansion.get(j));
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Method to expand the missing patterns in a particular GraphPatternElement in the context of the set of GraphPatternElements
+	 * @param gpes
+	 * @param gpesIdx
+	 * @param gpe
+	 * @return
+	 * @throws InvalidNameException
+	 * @throws InvalidTypeException
+	 * @throws TranslationException
+	 */
+	private List<GraphPatternElement> expandMissingPatterns(List<GraphPatternElement> gpes, int gpesIdx, GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
+		List<GraphPatternElement> results = null;
+		if (gpe instanceof BuiltinElement) {
+			List<Node> args = ((BuiltinElement)gpe).getArguments();
+			if (args != null) {
+				for (int i = 0; i < args.size(); i++) {
+					Node arg = args.get(i);
+					ProxyNode replacement = expandMissingPatterns(gpes, gpesIdx, arg);
+					if(replacement != null) {
+						args.set(i, replacement);
+					}
+				}
+				if (((BuiltinElement)gpe).getFuncType().equals(BuiltinType.Not)) {
+					if (args.size() == 1) {
+						// this should always be true
+						if (args.get(0) instanceof ProxyNode && ((ProxyNode)args.get(0)).getProxyFor() instanceof TripleElement) {
+							((TripleElement)((ProxyNode)args.get(0)).getProxyFor()).setType(TripleModifierType.Not);
+							replaceGraphPatternElement(gpes, gpe, ((ProxyNode)args.get(0)).getProxyFor());
+						}
+					}
+				}
+			}
+		}
+		else if (gpe instanceof TripleElement) {
+			Node subj = ((TripleElement) gpe).getSubject();
+			if (subj instanceof NamedNode) {
+				if (getMissingTripleByResource(getResourceFromNamedNode(((NamedNode)subj))) != null) {
+					List<TripleElement> mps = getMissingTripleByResource(getResourceFromNamedNode(((NamedNode)subj)));
+					((NamedNode)subj).setMissingPatterns(null);
+					results = new ArrayList<GraphPatternElement>();
+					results.addAll(mps);
+					results.add(gpe);
+				}
+			}
+			else if (subj instanceof ProxyNode) {
+				expandMissingPatterns(gpes, gpesIdx, subj);
+			}
+			Node pred = ((TripleElement) gpe).getPredicate();
+			if (pred instanceof NamedNode) {
+				if (getMissingTripleByResource(getPropertyFromNamedNode(((NamedNode)pred))) != null) {
+					List<TripleElement> mps = getMissingTripleByResource(getPropertyFromNamedNode(((NamedNode)pred)));
+					if (((NamedNode)pred).getMissingPatterns() == null) {
+						((NamedNode)pred).setMissingPatterns(mps);
+					}
+					if (results == null) {
+						results = new ArrayList<GraphPatternElement>();
+					}
+					results.addAll(mps);
+					results.add(gpe);
+				}
+			}
+		}
+		else if (gpe instanceof Junction) {
+			 Object lhs = ((Junction)gpe).getLhs();
+			 Object rhs = ((Junction)gpe).getRhs();
+			 if (lhs instanceof Node) {
+				 expandMissingPatterns(gpes, gpesIdx, (Node)lhs);
+			 }
+			 if (rhs instanceof Node) {
+				 expandMissingPatterns(gpes, gpesIdx, (Node)rhs);
+			 }
+		}
+		return results;
+	}
+	
+	/**
+	 * Method to expand the missing patterns associated with a particular Node in a particular GraphPatternElement in the context of a set of GraphPatternElements
+	 * @param gpes
+	 * @param gpesIdx
+	 * @param arg
+	 * @return
+	 * @throws InvalidNameException
+	 * @throws InvalidTypeException
+	 * @throws TranslationException
+	 */
+	protected ProxyNode expandMissingPatterns(List<GraphPatternElement> gpes, int gpesIdx, Node arg) throws InvalidNameException, InvalidTypeException, TranslationException {
+		ProxyNode replacement = null;
+		if (arg instanceof ProxyNode) {
+			List<GraphPatternElement> results = expandMissingPatterns(gpes, gpesIdx, (GraphPatternElement)((ProxyNode)arg).getProxyFor());
+			if (results != null) {
+				((ProxyNode)arg).setProxyFor(listToAnd(results).get(0));
+			}
+			if (((ProxyNode)arg).getProxyFor() instanceof BuiltinElement) {
+				BuiltinElement be = (BuiltinElement) ((ProxyNode)arg).getProxyFor();
+				if (be.getFuncType().equals(BuiltinType.Equal) || be.getFuncType().equals(BuiltinType.Assign)) {
+					List<Node> args = be.getArguments();
+					if (args.size() == 2) {
+						// this should always be true
+						if (args.get(0) instanceof ProxyNode && ((ProxyNode)args.get(0)).getProxyFor() instanceof TripleElement && 
+								((TripleElement)((ProxyNode)args.get(0)).getProxyFor()).getObject() == null && 
+								args.get(1) instanceof NamedNode) {
+							((TripleElement)((ProxyNode)args.get(0)).getProxyFor()).setObject(SadlModelProcessor.nodeCheck(args.get(1)));
+							((ProxyNode)arg).setProxyFor(((ProxyNode)args.get(0)).getProxyFor());
+							if (be.getFuncType().equals(BuiltinType.Assign)) {
+								((TripleElement)((ProxyNode)args.get(0)).getProxyFor()).setType(TripleModifierType.Assignment);
+							}
+						}
+					}
+				}
+			}
+		}
+		else if (arg instanceof NamedNode) {
+			if (((NamedNode)arg).getMissingTripleReplacement() != null) {
+				replacement = ((NamedNode)arg).getMissingTripleReplacement();
+				// As the replacement triple is being added explicitly to the graph patterns, remove it from the node
+				((NamedNode)arg).setMissingTripleReplacement(null);
+				Object pf = replacement.getProxyFor();
+				if (pf instanceof GraphPatternElement) {
+					List<GraphPatternElement> results = expandMissingPatterns(gpes, gpesIdx, (GraphPatternElement)pf);
+					if (results != null) {
+						replacement.setProxyFor(listToAnd(results).get(0));
+					}
+				}
+			}
+			if (getMissingTripleByResource(getPropertyFromNamedNode(((NamedNode)arg))) != null) {
+				List<TripleElement> mps = getMissingTripleByResource(getPropertyFromNamedNode(((NamedNode)arg)));
+				if (((NamedNode)arg).getMissingPatterns() == null) {
+					((NamedNode)arg).setMissingPatterns(mps);
+				}
+				List<GraphPatternElement> retgpes = new ArrayList<GraphPatternElement>();
+				retgpes.addAll(mps);
+				if (replacement != null) {
+					retgpes.add((GraphPatternElement) replacement.getProxyFor());
+					replacement.setProxyFor(listToAnd(retgpes).get(0));
+				}
+				else {
+					replacement = (ProxyNode) SadlModelProcessor.nodeCheck(retgpes.size() == 1 ? retgpes.get(0) : listToAnd(retgpes).get(0));
+				}
+				((NamedNode)arg).setMissingPatterns(null);
+			}
+		}
+		return replacement;
+	}
+	
+	private boolean replaceGraphPatternElement(List<GraphPatternElement> gpes, GraphPatternElement gpe,
+			GraphPatternElement newGpe) throws TranslationException {
+		for (int i = 0; i < gpes.size(); i++) {
+			GraphPatternElement thisGpe = gpes.get(i);	
+			if (thisGpe.equals(gpe)) {
+				int idx = gpes.indexOf(gpe);
+				gpes.set(idx, newGpe);
+				return true;
+			}
+			else if (thisGpe instanceof Junction) {
+				Object lhs = ((Junction)thisGpe).getLhs();
+				Object rhs = ((Junction)thisGpe).getRhs();
+				if (!(lhs instanceof Node)) {
+					throw new TranslationException("LHS of Junction should be a Node");
+				}
+				if (!(rhs instanceof Node)) {
+					throw new TranslationException("RHS of Junction should be a Node");
+				}
+				if (replaceGraphPatternElement((ProxyNode)lhs, gpe, newGpe)) {
+					return true;
+				}
+				if (replaceGraphPatternElement((ProxyNode)rhs, gpe, newGpe)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+
+	private boolean replaceGraphPatternElement(ProxyNode pn, GraphPatternElement gpe, GraphPatternElement newGpe) {
+		if (pn.getProxyFor().equals(gpe)) {
+			pn.setProxyFor(newGpe);
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Method to take an ontology model and a requirement and find and add any missing triples to the
+	 * conditions, the conclusions, and the variable definitions, using any local restrictions in the
+	 * context or the requirement and the ontology to inform the search
+	 * @param model -- the ontology model
+	 * @param req -- the rquirement
+	 * @return -- true if successful else false (false includes if it has already been done for this requirement
+	 * @throws CircularDependencyException
+	 * @throws InvalidTypeException
+	 * @throws TranslationException
+	 * @throws InvalidNameException
+	 * @throws MultiplePathsFoundException 
+	 * @throws PathFindingException 
+	 */
+	public boolean addMissingTriplePatterns(OntModel model, Rule rule) throws CircularDependencyException, InvalidTypeException, TranslationException, InvalidNameException, PathFindingException, MultiplePathsFoundException {
+		if (!rule.isMissingPatternsAdded()) {
+			PathFinder pf = findReplacementTriplesAndPotentialMissingPaths(model, rule);
+			Map<Resource, Map<Resource, DirectedPath>> solns = pf.getSolutions();
+			if (solns != null) {
+				Iterator<com.hp.hpl.jena.rdf.model.Resource> ksitr = solns.keySet().iterator();
+				while (ksitr.hasNext()) {
+					Resource key = ksitr.next();
+					Map<Resource, DirectedPath> soln = solns.get(key);
+					Iterator<Resource> ksitr2 = soln.keySet().iterator();
+					while (ksitr2.hasNext()) {
+						try {
+							assignMissingPattern(pf, key, soln.get(ksitr2.next()));
+						} catch (CloneNotSupportedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+				applyMissingPatternsToAllOccurrencesOfNamedNode(rule);
+//				rule.getContext().setMissingPatternsAddedToVariables(true);
+			}
+			rule.setMissingPatternsAdded(true);
+			setPreviousAddMissingTriplePatternsReturnValue(rule, true);
+			return true;
+		}
+		return getPreviousAddMissingTriplePatternsReturnValue(rule);
+	}
+	
+	/**
+	 * Method to get the returned value of a previous call to addMissingTriplePatterns for a given CtxRequirement
+	 * @param rule
+	 * @return
+	 */
+	protected boolean getPreviousAddMissingTriplePatternsReturnValue(Rule rule) {
+		if (addMissingTriplePatternsReturnValueByReqName != null && 
+				addMissingTriplePatternsReturnValueByReqName.containsKey(rule.getUri())) {
+			return addMissingTriplePatternsReturnValueByReqName.get(rule.getUri());
+		}
+		return false;
+	}
+	
+	/**
+	 * Method to set the returned value of a call to addMissingTriplePatterns for a given CtxRequirement
+	 * @param rule
+	 * @param retVal
+	 */
+	protected void setPreviousAddMissingTriplePatternsReturnValue(Rule rule, boolean retVal) {
+		if (addMissingTriplePatternsReturnValueByReqName == null) {
+			addMissingTriplePatternsReturnValueByReqName = new HashMap<String, Boolean>();
+		}
+		addMissingTriplePatternsReturnValueByReqName.put(rule.getUri(), retVal);
+	}
+
+	/**
+	 * Method to add the requisite missing patterns to all occurrences of a NamedNode.
+	 * @param req
+	 * @throws TranslationException
+	 */
+	private void applyMissingPatternsToAllOccurrencesOfNamedNode(Rule rule) throws TranslationException {
+//		if (!rule.getContext().isMissingPatternsAddedToVariables() && rule.getContext().getCtxElements() != null) {
+//			applyMissingPatternsToGraphPatternElements(rule.getContext().getCtxElements());
+//			Map<String, RequirementVariable> ctxVarMap = rule.getContext().getVariables();
+//			if (ctxVarMap != null) {
+//				Iterator<String> varitr = ctxVarMap.keySet().iterator();
+//				while (varitr.hasNext()) {
+//					RequirementVariable var = ctxVarMap.get(varitr.next());
+//					if (var.getDefinitions() != null) {
+//						List<Node> defns = var.getDefinitions();
+//						for (Node defn : defns) {
+//							if (defn instanceof ProxyNode && ((ProxyNode)defn).getProxyFor() instanceof GraphPatternElement) {
+//								applyMissingPatternsToGraphPatternElement((GraphPatternElement) ((ProxyNode)defn).getProxyFor());
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//		if (rule.getVariables() != null) {
+//			Map<String, RequirementVariable> varMap = rule.getVariables();
+//			Iterator<String> varitr = varMap.keySet().iterator();
+//			while (varitr.hasNext()) {
+//				RequirementVariable var = varMap.get(varitr.next());
+//				if (var.getDefinitions() != null) {
+//					List<Node> defns = var.getDefinitions();
+//					for (Node defn : defns) {
+//						if (defn instanceof ProxyNode && ((ProxyNode)defn).getProxyFor() instanceof GraphPatternElement) {
+//							applyMissingPatternsToGraphPatternElement((GraphPatternElement) ((ProxyNode)defn).getProxyFor());
+//						}
+//					}
+//				}
+//			}
+//		}
+		applyMissingPatternsToGraphPatternElements(rule.getGivens());
+		applyMissingPatternsToGraphPatternElements(rule.getIfs());
+		applyMissingPatternsToGraphPatternElements(rule.getThens());
+	}
+
+	/**
+	 * Method to apply missing patterns to a list of GraphPatternElements
+	 * @param gpes
+	 * @throws TranslationException
+	 */
+	private void applyMissingPatternsToGraphPatternElements(List<GraphPatternElement> gpes) throws TranslationException {
+		if(gpes == null) {
+			return;
+		}
+		for (GraphPatternElement gpe : gpes) {
+			applyMissingPatternsToGraphPatternElement(gpe);
+		}
+	}
+
+	/**
+	 * Method to apply missing patterns to a single GraphPatternElement
+	 * @param gpe
+	 * @throws TranslationException
+	 */
+	protected void applyMissingPatternsToGraphPatternElement(GraphPatternElement gpe) throws TranslationException {
+		if (gpe instanceof BuiltinElement) {
+			for (Node arg : ((BuiltinElement)gpe).getArguments()) {
+				applyMissingPatternsToNode(gpe, arg);
+			}
+		}
+		else if (gpe instanceof TripleElement) {
+			applyMissingPatternsToNode(gpe, ((TripleElement)gpe).getSubject());
+			applyMissingPatternsToNode(gpe, ((TripleElement)gpe).getPredicate());
+			applyMissingPatternsToNode(gpe, ((TripleElement)gpe).getObject());
+		}
+		else if (gpe instanceof Junction) {
+			Object lhs = ((Junction)gpe).getLhs();
+			if (lhs instanceof Node) {
+				applyMissingPatternsToNode(gpe, (Node)lhs);
+			}
+			Object rhs = ((Junction)gpe).getRhs();
+			if (rhs instanceof Node) {
+				applyMissingPatternsToNode(gpe, (Node) rhs);
+			}
+		}
+		
+	}
+
+	/**
+	 * Method to apply missing patterns to a single Node in the context of a GraphPatternElement
+	 * @param gpe
+	 * @param node
+	 * @throws TranslationException
+	 */
+	private void applyMissingPatternsToNode(GraphPatternElement gpe, Node node) throws TranslationException {
+		if (node instanceof VariableNode) {
+			List<Node> defns = ((VariableNode)node).getDefinitions();
+			if (defns != null) {
+				for (Node defn : defns) {
+					if (defn instanceof ProxyNode && ((ProxyNode)defn).getProxyFor() instanceof GraphPatternElement) {
+						applyMissingPatternsToVariableDefinition(node, (GraphPatternElement) ((ProxyNode)defn).getProxyFor());
+					}
+					else {
+						continue;
+					}
+				}
+			}
+		}
+		else if (node instanceof NamedNode) {
+			if (((NamedNode)node).getMissingPatterns() == null) {
+				List<TripleElement> mtrs = null;
+				if (((NamedNode)node).getMissingTripleReplacement() != null) {
+					Node effectiveNode = ((TripleElement)((NamedNode)node).getMissingTripleReplacement().getProxyFor()).getSubject();
+					mtrs = getMissingTripleByResource(getResourceFromNamedNode((NamedNode)effectiveNode));
+				}
+				else {
+					mtrs = getMissingTripleByResource(getResourceFromNamedNode((NamedNode)node));					
+				}
+				if (mtrs != null) {
+					for (TripleElement tr : mtrs) {
+						if (gpe == null || !tr.equals(gpe)) {
+							((NamedNode)node).addMissingPattern(tr);
+							addNamedNodeToCleanOfMissingPatternsWhenCooked((NamedNode)node);
+						}
+					}
+				}
+			}
+			else {
+				int i = 0;	// should these be removed?
+			}
+		}
+		else if (node instanceof ProxyNode) {
+			applyMissingPatternsToGraphPatternElement((GraphPatternElement) ((ProxyNode)node).getProxyFor());
+		}
+		checkMissingTripleSubjectObjectAlignment(node);
+	}
+
+	/**
+	 * Method to retrieve registered missing patterns by the Resource of the NamedNode to which they apply
+	 * @param rsrc
+	 * @return
+	 */
+	protected List<TripleElement> getMissingTripleByResource(Resource rsrc) {
+		if (missingTriplesByResource != null) {
+			return missingTriplesByResource.get(rsrc);
+		}
+		return null;
+	}
+
+	/**
+	 * Method to apply missing patterns to a VariableNode's GraphPatternElement definition
+	 * @param node
+	 * @param defn
+	 * @throws TranslationException
+	 */
+	protected void applyMissingPatternsToVariableDefinition(Node node, GraphPatternElement defn) throws TranslationException {
+		if (defn instanceof BuiltinElement) {
+			for (Node arg : ((BuiltinElement)defn).getArguments()) {
+				if (!node.equals(arg)) {
+					applyMissingPatternsToVariableDefinition(node, arg);
+				}
+			}
+		}
+		else if (defn instanceof TripleElement) {
+			if (!node.equals(((TripleElement)defn).getSubject())) {
+				applyMissingPatternsToVariableDefinition(node, ((TripleElement)defn).getSubject());
+			}
+			if (!node.equals(((TripleElement)defn).getPredicate())) {
+				applyMissingPatternsToVariableDefinition(node, ((TripleElement)defn).getPredicate());
+			}
+			if (!node.equals(((TripleElement)defn).getObject())) {
+				applyMissingPatternsToVariableDefinition(node, ((TripleElement)defn).getObject());
+			}
+		}
+		else if (defn instanceof Junction) {
+			Object lhs = ((Junction)defn).getLhs();
+			if (lhs instanceof Node && !node.equals(lhs)) {
+				applyMissingPatternsToVariableDefinition(node, (Node) lhs);
+			}
+			Object rhs = ((Junction)defn).getRhs();
+			if (rhs instanceof Node && !node.equals(rhs)) {
+				applyMissingPatternsToVariableDefinition(node, (Node) rhs);
+			}
+		}
+	}
+	
+	/**
+	 * Method to apply missing patterns to a VariableNode's Node definition
+	 * @param node
+	 * @param defnPart
+	 * @throws TranslationException
+	 */
+	private void applyMissingPatternsToVariableDefinition(Node node, Node defnPart) throws TranslationException {
+		if (defnPart instanceof ProxyNode) {
+			applyMissingPatternsToVariableDefinition(node, (GraphPatternElement) ((ProxyNode)defnPart).getProxyFor());
+		}
+		else {
+			applyMissingPatternsToNode(null, defnPart);
+		}
+	}
+
 	protected OntModel getTheJenaModel() {
 		return theJenaModel;
+	}
+
+	/**
+	 * Entry method for recursive calls to assignMissingPattern_Recursive
+	 * @param pf 
+	 * @param directedPath
+	 * @throws InvalidNameException
+	 * @throws InvalidTypeException
+	 * @throws TranslationException
+	 * @throws CloneNotSupportedException 
+	 */
+	protected void assignMissingPattern(PathFinder pf, Resource key, DirectedPath directedPath) throws InvalidNameException, InvalidTypeException, TranslationException, CloneNotSupportedException {
+		DirectedPath lastPath = directedPath.getLastDirectedPathInChain();
+		if (lastPath.getObject() != null) {
+			NamedNode theNode = getNamedNodeFromResourceMap((Resource) lastPath.getObject());
+			List<Node> theReplacements = pf.getReplacements(theNode);
+			if (theReplacements != null) {
+				for (Node aReplacement : theReplacements) {
+					if (aReplacement instanceof NamedNode) {
+						assignMissingPatternsToNamedNode(pf, (NamedNode) aReplacement, directedPath);
+						checkMissingTripleSubjectObjectAlignment(aReplacement);
+					}
+				}
+			}
+			else {
+				assignMissingPatternsToNamedNode(pf, theNode, directedPath);
+				checkMissingTripleSubjectObjectAlignment(theNode);
+			}
+		}
+	}
+	
+	/**
+	 * Method to check that missing triples are properly ordered
+	 * @param node
+	 */
+	protected void checkMissingTripleSubjectObjectAlignment(Node node) {
+		if (node instanceof NamedNode) {
+			NamedNode nn = (NamedNode) node;
+			List<TripleElement> mps = nn.getMissingPatterns();
+			if (mps != null) {
+				Node lastObj = null;
+				TripleElement lastTr = null;
+				for (TripleElement tr : mps) {
+					Node thisSubj = tr.getSubject();
+					if (lastObj != null && !thisSubj.equals(lastObj) ) {
+						System.err.println("Missing triple object-subject mismatch: " + lastTr.toString() + " --> " + tr.toString());
+					}
+					lastObj = tr.getObject();
+					lastTr = tr;
+				}
+				ProxyNode mtr = nn.getMissingTripleReplacement();
+				if (mtr != null) {
+					GraphPatternElement mtrgpe = (GraphPatternElement) mtr.getProxyFor();
+					if (mtrgpe instanceof TripleElement) {
+						Node thisSubj = ((TripleElement)mtrgpe).getSubject();
+						if (lastObj != null && !thisSubj.equals(lastObj) ) {
+							System.err.println("Missing triple object-subject mismatch: " + lastTr.toString() + " --> " + mtrgpe.toString());
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Method to remove missing triples from all NamedNodes to which they have been added
+	 * after cooking is completed.
+	 */
+	protected void cleanMissingPatternsFromNamedNodes() {
+		List<NamedNode> nntc = getNamedNodesToCleanOfMissingPatternsWhenCooked();
+		if (nntc != null) {
+			for (NamedNode nn : nntc) {
+				nn.setMissingTripleReplacement(null);
+				nn.setMissingPatterns(null);
+			}
+		}
+	}
+
+	/**
+	 * Method to assign a missing pattern, expressed as a DirectedPath, to a NamedNode 
+	 * @param pf
+	 * @param nnAttachTo
+	 * @param directedPath
+	 * @throws TranslationException
+	 * @throws CloneNotSupportedException
+	 */
+	private void assignMissingPatternsToNamedNode(PathFinder pf, NamedNode nnAttachTo, DirectedPath directedPath) throws TranslationException, CloneNotSupportedException {
+		com.hp.hpl.jena.rdf.model.Resource un = directedPath.getSubject();
+		NamedNode unn = (NamedNode) getNamedNodeFromResourceMap(un).clone();
+		unn.setMissingPatterns(null);
+		com.hp.hpl.jena.rdf.model.Resource ln = directedPath.getObject();
+		NamedNode lnn = (NamedNode) getNamedNodeFromResourceMap(ln).clone();
+		lnn.setMissingPatterns(null);
+		Object prop = directedPath.getConnection();
+		NamedNode pnn;
+		if (prop instanceof Property) {
+			pnn = getNamedNodeFromResourceMap((Property)prop);
+			if (directedPath.getExistingGraphPattern() != null) {
+				GraphPatternElement container = directedPath.getExistingGraphPattern();
+				nnAttachTo.addMissingPattern((TripleElement) container);
+				addNamedNodeToCleanOfMissingPatternsWhenCooked(nnAttachTo);
+				registerMissingPatternByResource(getResourceFromNamedNode(nnAttachTo), (TripleElement)container);
+			}
+			else if (!pnn.getURI().equals(RDFS.subClassOf.getURI())){
+				// subClassOf triples are not explicitly included in the missing triples (not ever? not when they are both root nodes....)
+				TripleElement newtr = new TripleElement(unn, pnn, lnn);
+				newtr.setSourceType(TripleSourceType.MissingPropertyTriple);
+				nnAttachTo.addMissingPattern(newtr);
+				addNamedNodeToCleanOfMissingPatternsWhenCooked(nnAttachTo);
+				registerMissingPatternByResource(getResourceFromNamedNode(nnAttachTo), newtr);
+				if (directedPath.getNext() != null) {
+					for (DirectedPath lowerDp : directedPath.getNext()) {
+						assignMissingPatternsToNamedNode(pf, nnAttachTo, lowerDp);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Method to register missing patterns by the Resource of the NamedNode to which they apply
+	 * @param resourceFromNamedNode
+	 * @param tr
+	 */
+	protected void registerMissingPatternByResource(Resource resourceFromNamedNode, TripleElement tr) {
+		if (missingTriplesByResource == null) {
+			List<TripleElement> trs = new ArrayList<TripleElement>();
+			trs.add(tr);
+			missingTriplesByResource = new HashMap<Resource, List<TripleElement>>();
+			missingTriplesByResource.put(resourceFromNamedNode, trs);
+		}
+		else if (missingTriplesByResource.containsKey(resourceFromNamedNode)) {
+			List<TripleElement> lst = missingTriplesByResource.get(resourceFromNamedNode);
+			lst.add(tr);
+		}
+		else {
+			List<TripleElement> trs = new ArrayList<TripleElement>();
+			trs.add(tr);
+			missingTriplesByResource.put(resourceFromNamedNode, trs);
+		}
+	}
+	
+	/**
+	 * Method to find the replacement TripleElements (for properties not in a property chain)
+	 * and a set of possible missing paths in a CtxRequirement.
+	 * Note: this method is public for testing purposes only. It should not be called directly otherwise.
+	 * To add replacement triples and missing triples to a CtxRequirement, call addMissingTriplePatterns.
+	 * @param model -- the ontology model
+	 * @param rule -- the Rule
+	 * @return -- a map of InvertedTreePathSteps keyed by Jena ontology resource
+	 * @throws MultiplePathsFoundException 
+	 * @throws PathFindingException 
+	 * @throws TranslationException 
+	 * @throws InvalidTypeException 
+	 * @throws CircularDependencyException 
+	 * @throws InvalidNameException 
+	 */
+	public PathFinder findReplacementTriplesAndPotentialMissingPaths(OntModel model,
+			Rule rule) throws CircularDependencyException, InvalidTypeException, TranslationException, PathFindingException, MultiplePathsFoundException, InvalidNameException {
+		PathFinder thePathFinder = null;
+//		logger.debug("Entering findReplacementTriplesAndPotentialMissingPaths\nContext: {}.\n{}\n\n{}\n{}", 
+//				rule.getContext().getSourceContextText(), rule.getSourceText(), rule.getContext().toDescriptiveString(), rule.toDescriptiveString());
+//		resetForNewRequirement();
+//		if (rule.getType().equals(CtxRequirement.Type.TABLE) || rule.getType().equals(CtxRequirement.Type.ONLY_WHEN)) {
+//			throw new TranslationException("Requirement is of type " + rule.getType() + ", which has derived ruleuirements. Please call findMissingGraphPatterns for each such derived requirement.");
+//		}
+		if (!rule.isMissingPatternsAdded()) {
+			thePathFinder = new PathFinder(this, model);
+			thePathFinder.findMissingGraphPatterns(rule);
+		}
+		return thePathFinder;
 	}
 
 	protected void setTheJenaModel(OntModel theJenaModel) {
@@ -3578,5 +4258,60 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return nn;
 	} 
 
+	/**
+	 * Method to get the NamedNodes that have missing patterns so they can be removed when 
+	 * requirement is fully cooked.
+	 * 
+	 * @return
+	 */
+	protected List<NamedNode> getNamedNodesToCleanOfMissingPatternsWhenCooked() {
+		return namedNodesToCleanOfMissingPatternsWhenCooked;
+	}
+
+	/**
+	 * Method to record that a NamedNode has missing patterns so they can be removed when
+	 * requirement if fully cooked. 
+	 * @param namedNodeToClean
+	 */
+	protected void addNamedNodeToCleanOfMissingPatternsWhenCooked(NamedNode namedNodeToClean) {
+		if (namedNodesToCleanOfMissingPatternsWhenCooked == null) {
+			namedNodesToCleanOfMissingPatternsWhenCooked = new ArrayList<NamedNode>();
+		}
+		namedNodesToCleanOfMissingPatternsWhenCooked.add(namedNodeToClean);
+	}
+
+	/** Method to determine if a list operation needs an argument added
+	 * 
+	 * @param bi
+	 * @return
+	 */
+	public boolean returnVariableArgumentNeeded(BuiltinElement bi) {
+		if (bi.getFuncName().equals("lastElement")) {
+			if (bi.getArguments().size() < 2) {
+				return true;
+			}
+		}
+		else if (bi.getFuncName().equals("firstElement")) {
+			if (bi.getArguments().size() < 2) {
+				return true;
+			}
+		}
+		else if (bi.getFuncName().equals("elementBefore")) {
+			if (bi.getArguments().size() < 3) {
+				return true;
+			}
+		}
+		else if (bi.getFuncName().equals("elementAfter")) {
+			if (bi.getArguments().size() < 3) {
+				return true;
+			}
+		}
+		else if (bi.getFuncName().equals("elementInList")) {
+			if (bi.getArguments().size() < 3) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 }	

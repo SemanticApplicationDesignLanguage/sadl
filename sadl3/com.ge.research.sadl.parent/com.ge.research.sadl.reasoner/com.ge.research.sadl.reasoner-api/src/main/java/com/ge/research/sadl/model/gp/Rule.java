@@ -35,6 +35,7 @@ public class Rule {
 	private List<GraphPatternElement> thens = null;
 	private List<VariableNode> ruleVariables = null;
 	private int stage = 1;	// default
+	private boolean missingPatternsAdded = false;
 	
 	public Rule(String name) {
 		setRuleName(name);
@@ -312,6 +313,30 @@ public class Rule {
 		} else if (!thens.equals(other.thens))
 			return false;
 		return true;
+	}
+	
+	/**
+	 * Method to find out if missing patterns (if needed) have been added to this Rule
+	 * @return
+	 */
+	public boolean isMissingPatternsAdded() {
+		return missingPatternsAdded;
+	}
+
+	/**
+	 * Method to set flag that missing patterns have been added (if needed) to this Rule
+	 * @param missingPatternsAdded
+	 */
+	public void setMissingPatternsAdded(boolean missingPatternsAdded) {
+		this.missingPatternsAdded = missingPatternsAdded;
+	}
+	
+	/**
+	 * Get CtxRequrement's URI
+	 * @return
+	 */
+	public String getUri() {
+		return getRuleNamespace() + getRuleName();
 	}
 	
 }
