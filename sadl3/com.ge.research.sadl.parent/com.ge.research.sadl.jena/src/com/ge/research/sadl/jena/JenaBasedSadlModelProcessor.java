@@ -9673,8 +9673,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					String propUri = getDeclarationExtensions().getConceptUri(prop);
 					if (propUri != null) {
 						if (!propUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI)) {
-							addTypeCheckingError(SadlErrorMessages.PROPERTY_WITHOUT_RANGE
-									.get(getDeclarationExtensions().getConcreteName(prop)), propinit);
+							String msg = "";
+							if (e.getPropID() != null) {
+								msg = e.getPropID() + " ";
+							}
+							msg += SadlErrorMessages.PROPERTY_WITHOUT_RANGE
+									.get(getDeclarationExtensions().getConcreteName(prop));
+							addTypeCheckingError(msg, propinit);
 						}
 					}
 				} catch (Exception e) {
