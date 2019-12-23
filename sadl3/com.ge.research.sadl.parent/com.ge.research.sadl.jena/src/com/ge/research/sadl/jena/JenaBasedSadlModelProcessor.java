@@ -9593,6 +9593,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					setHostEObject(null);
 				}
 				else {
+					if (type instanceof SadlSimpleTypeReference) {
+						SadlResource typeSR = ((SadlSimpleTypeReference)type).getType();
+						if (typeSR.equals(sr)) {
+							// being declared an instance of itself
+							addError(getDeclarationExtensions().getConcreteName(sr) + " can't be an instance of itself.", sr);
+							return null;
+						}
+					}
 					OntResource or = sadlTypeReferenceToOntResource(type);
 					if (or != null && or.canAs(OntClass.class)) {
 						cls = or.asClass();
@@ -9668,8 +9676,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					String propUri = getDeclarationExtensions().getConceptUri(prop);
 					if (propUri != null) {
 						if (!propUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI)) {
-							addTypeCheckingError(SadlErrorMessages.PROPERTY_WITHOUT_RANGE
-									.get(getDeclarationExtensions().getConcreteName(prop)), propinit);
+							String msg = "";
+							if (e.getPropID() != null) {
+								msg = e.getPropID() + " ";
+							}
+							msg += SadlErrorMessages.PROPERTY_WITHOUT_RANGE
+									.get(getDeclarationExtensions().getConcreteName(prop));
+							addTypeCheckingError(msg, propinit);
 						}
 					}
 				} catch (Exception e) {

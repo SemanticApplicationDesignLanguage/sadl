@@ -3268,9 +3268,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (qnmDecl != null) {
 					if (qnmDecl.eContainer() instanceof SadlInstance) {
 						SadlTypeReference typeref = ((SadlInstance)qnmDecl.eContainer()).getType();
-						// need to avoid loops here
-						if (typeref != null && 
-								!(typeref instanceof SadlSimpleTypeReference && ((SadlSimpleTypeReference)typeref).getType().equals(sr))) {
+						if (typeref != null) {
+							if (typeref instanceof SadlSimpleTypeReference &&
+									((SadlSimpleTypeReference)typeref).getType().equals(sr)) {
+								throw new PropertyWithoutRangeException("Invalid concept '" + declarationExtensions.getConcreteName(sr) + "'.");
+							}
 							return getType(typeref);
 						}
 						else {

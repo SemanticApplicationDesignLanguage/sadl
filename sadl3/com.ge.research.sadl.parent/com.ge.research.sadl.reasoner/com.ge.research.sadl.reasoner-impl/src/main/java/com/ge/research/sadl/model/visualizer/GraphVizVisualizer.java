@@ -218,8 +218,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			String slbl;			// name of start of directed edge
 			Object s;
 			//If this is a single node to be graphed
-			if(row[0] != null && row[1] == null && row[2] == null){
-				//is a single node
+			if(row[0] != null && row[2] == null){
+				//treat as a single node
 				if (row[0].equals(OWL.Nothing.getURI())) {
 					s = OWL.Nothing;
 					slbl = OWL.Nothing.getLocalName() + nothingCount;
