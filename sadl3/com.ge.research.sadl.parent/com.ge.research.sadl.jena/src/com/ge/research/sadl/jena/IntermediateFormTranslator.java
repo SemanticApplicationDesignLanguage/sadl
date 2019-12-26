@@ -19,6 +19,7 @@
  package com.ge.research.sadl.jena;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -3402,24 +3403,73 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	
 	public Rule cook(Rule rule) {
 		try {
+			// find and add missing pattern triples
 			if (!rule.isMissingPatternsAdded()) {
 				addMissingTriplePatterns(getTheJenaModel(), rule);
 			}
+			
+			// expand missing patterns and add implied and expanded properties
 			List<GraphPatternElement> givens = rule.getGivens();
 			if (givens != null) {
 				expandMissingPatterns(givens);
 				addImpliedAndExpandedProperties(givens);
 			}
-			List<GraphPatternElement> ifts = rule.getIfs();
-			if (ifts != null) {
-				expandMissingPatterns(ifts);
-				addImpliedAndExpandedProperties(ifts);
+			List<GraphPatternElement> ifs = rule.getIfs();
+			if (ifs != null) {
+				expandMissingPatterns(ifs);
+				addImpliedAndExpandedProperties(ifs);
 			}
 			List<GraphPatternElement> thens = rule.getThens();
 			if (thens != null) {
 				expandMissingPatterns(thens);
 				addImpliedAndExpandedProperties(thens);
 			}
+			
+			// expand proxy nodes
+			Object results = null;
+			givens = rule.getGivens();
+			ifs = rule.getIfs();
+			rule.setGivens(null);
+			rule.setIfs(null);
+			if (givens != null) {
+				results = expandProxyNodes(givens, false, true);
+			}
+			if (results instanceof List<?>) {
+				if (((List<?>)results).size() > 1) {
+					results = listToAnd((List<GraphPatternElement>)results);
+				}
+				rule.setIfs((List<GraphPatternElement>)results);
+			}			
+			if (ifs != null) {
+				results = expandProxyNodes(ifs, false, false);
+			}
+			else {
+				results = null;
+			}
+			if (results instanceof List<?>) {
+				if (((List<GraphPatternElement>)results).size() == 1 && ((List<GraphPatternElement>)results).get(0) instanceof Junction &&
+						((Junction)((List<GraphPatternElement>)results).get(0)).getJunctionType().equals(JunctionType.Conj)) {	// can't do this if an OR
+					results = junctionToList((Junction)((List<GraphPatternElement>)results).get(0));
+				}
+				if (rule.getIfs() == null) {
+					rule.setIfs((List<GraphPatternElement>)results);
+				}
+				else {
+					rule.getIfs().addAll((List<GraphPatternElement>) results);
+				}
+			}
+			thens = rule.getThens();
+			if (thens != null) {
+				// this is necessary for special handling of assignments in conclusions using superclass rule capability
+				results = expandProxyNodes(thens, true, false);	// first true arg means that the value to be assigned to a triple
+				if (((List<GraphPatternElement>)results).size() == 1 && ((List<GraphPatternElement>)results).get(0) instanceof Junction) {
+					results = junctionToList((Junction)((List<GraphPatternElement>)results).get(0));
+				}
+				rule.setThens((List<GraphPatternElement>)results);
+			}
+			// now post-process
+			postProcessRule(rule, null);
+			
 		} catch (Exception e) {
 			addError(new IFTranslationError("Translation to Intermediate Form encountered error (" + e.toString() + ")while 'cooking' IntermediateForm."));
 			e.printStackTrace();
@@ -3678,7 +3728,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 				}
 				applyMissingPatternsToAllOccurrencesOfNamedNode(rule);
-//				rule.getContext().setMissingPatternsAddedToVariables(true);
 			}
 			rule.setMissingPatternsAdded(true);
 			setPreviousAddMissingTriplePatternsReturnValue(rule, true);
@@ -4074,12 +4123,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	public PathFinder findReplacementTriplesAndPotentialMissingPaths(OntModel model,
 			Rule rule) throws CircularDependencyException, InvalidTypeException, TranslationException, PathFindingException, MultiplePathsFoundException, InvalidNameException {
 		PathFinder thePathFinder = null;
-//		logger.debug("Entering findReplacementTriplesAndPotentialMissingPaths\nContext: {}.\n{}\n\n{}\n{}", 
-//				rule.getContext().getSourceContextText(), rule.getSourceText(), rule.getContext().toDescriptiveString(), rule.toDescriptiveString());
-//		resetForNewRequirement();
-//		if (rule.getType().equals(CtxRequirement.Type.TABLE) || rule.getType().equals(CtxRequirement.Type.ONLY_WHEN)) {
-//			throw new TranslationException("Requirement is of type " + rule.getType() + ", which has derived ruleuirements. Please call findMissingGraphPatterns for each such derived requirement.");
-//		}
+		logger.debug("Entering findReplacementTriplesAndPotentialMissingPaths\n{}\n", 
+				rule.toDescriptiveString());
+		resetForNewStructure();
 		if (!rule.isMissingPatternsAdded()) {
 			thePathFinder = new PathFinder(this, model);
 			thePathFinder.findMissingGraphPatterns(rule);
@@ -4147,11 +4193,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			return null;
 		}
 		return null;
-	}
-
-	@Override
-	public void reset() {
-		// nothing needed in this class
 	}
 
 	@Override
@@ -4312,6 +4353,22 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Initialization method; make sure nothing is left over from a previous requirement
+	 */
+	protected void resetForNewStructure() {
+		resourceToNamedNodeMap.clear();
+		retiredProxyNodes.clear();
+	}
+	
+	@Override
+	public void reset() {
+		resetForNewStructure();
+		if (addMissingTriplePatternsReturnValueByReqName != null) {
+			addMissingTriplePatternsReturnValueByReqName.clear();
+		}
 	}
 
 }	
