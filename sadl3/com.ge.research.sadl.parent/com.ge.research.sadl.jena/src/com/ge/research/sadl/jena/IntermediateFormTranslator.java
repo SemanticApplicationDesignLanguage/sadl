@@ -3468,12 +3468,113 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			// now post-process
 			postProcessRule(rule, null);
+			replaceClassesWithVariables(rule);
 			
 		} catch (Exception e) {
 			addError(new IFTranslationError("Translation to Intermediate Form encountered error (" + e.toString() + ")while 'cooking' IntermediateForm."));
 			e.printStackTrace();
 		} 
 		return rule;
+	}
+
+	private void replaceClassesWithVariables(Rule rule) {
+		List<VariableNode> variables = rule.getRuleVariables();
+		replaceClassesWithVariables(variables, rule.getGivens());
+		replaceClassesWithVariables(variables,rule.getIfs());
+		replaceClassesWithVariables(variables,rule.getThens());
+	}
+
+	private void replaceClassesWithVariables(List<VariableNode> variables, List<GraphPatternElement> gpes) {
+		if (gpes != null) {
+			for (GraphPatternElement gpe : gpes) {
+				replaceClassesWithVariables(variables, gpe);
+			}
+		}
+	}
+
+	private void replaceClassesWithVariables(List<VariableNode> variables, GraphPatternElement gpe) {
+		if (gpe instanceof TripleElement) {
+			replaceClassesWithVariables(variables, (TripleElement)gpe);
+		}
+		else if (gpe instanceof BuiltinElement) {
+			replaceClassesWithVariables(variables, (BuiltinElement)gpe);
+		}
+	}
+
+	/**
+	 * Method to replace a class argument to a BuiltinElement with the first variable of the same type (class)
+	 * @param variables
+	 * @param be
+	 */
+	private void replaceClassesWithVariables(List<VariableNode> variables, BuiltinElement be) {
+		List<Node> args = be.getArguments();
+		int idx = 0;
+		for (Node arg : args) {
+			if (arg instanceof ProxyNode) {
+				replaceClassesWithVariables(variables, ((ProxyNode)arg).getProxyFor());
+			}
+			else if (arg instanceof NamedNode && (((NamedNode)arg).getNodeType().equals(NodeType.ClassNode) ||
+					((NamedNode)arg).getNodeType().equals(NodeType.ClassListNode))) {
+				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)arg);
+				if (matchingVar == null) {
+					matchingVar = new VariableNode(getNewVar());
+//					matchingVar.setNamespace(((NamedNode) node).getNamespace());
+//					matchingVar.setNodeType(((NamedNode)node).getNodeType());
+//					matchingVar.setPrefix(((NamedNode)node).getPrefix());
+				}
+				args.set(idx, matchingVar);
+			}
+			idx++;
+		}
+		
+	}
+
+	/**
+	 * Method to replace class subject and object in a TripleElement with the first variable of the same type (class)
+	 * @param variables
+	 * @param tr
+	 */
+	private void replaceClassesWithVariables(List<VariableNode> variables, TripleElement tr) {
+		if (tr.getSubject() instanceof NamedNode) {
+			if (((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassNode) ||
+					((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassListNode)) {
+				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getSubject());
+				if (matchingVar == null) {
+					matchingVar = new VariableNode(getNewVar());
+//					matchingVar.setNamespace(((NamedNode) node).getNamespace());
+//					matchingVar.setNodeType(((NamedNode)node).getNodeType());
+//					matchingVar.setPrefix(((NamedNode)node).getPrefix());
+				}
+				tr.setSubject(matchingVar);
+			}
+		}
+		if (tr.getObject() instanceof NamedNode) {
+			if (((NamedNode)tr.getObject()).getNodeType().equals(NodeType.ClassNode) ||
+					((NamedNode)tr.getObject()).getNodeType().equals(NodeType.ClassListNode)) {
+				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getObject());
+				if (matchingVar != null && tr.getSubject().equals(matchingVar)) {
+					// this is the definition of an existing variable
+					return;
+				}
+				if (matchingVar == null) {
+					matchingVar = new VariableNode(getNewVar());
+//					matchingVar.setNamespace(((NamedNode) node).getNamespace());
+//					matchingVar.setNodeType(((NamedNode)node).getNodeType());
+//					matchingVar.setPrefix(((NamedNode)node).getPrefix());
+				}
+				tr.setObject(matchingVar);
+			}
+		}
+	}
+
+	private VariableNode findVariableOfRightType(List<VariableNode> variables, NamedNode subject) {
+		String classUri = subject.getURI();
+		for (VariableNode v : variables) {
+			if (v.getType().getURI().equals(classUri)) {
+				return v;
+			}
+		}
+		return null;
 	}
 
 	/**
