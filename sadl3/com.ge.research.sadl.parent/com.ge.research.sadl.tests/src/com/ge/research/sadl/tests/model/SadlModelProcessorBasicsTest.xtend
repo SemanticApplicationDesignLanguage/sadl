@@ -154,18 +154,21 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			 
 			MyCircle is a Circle with radius 3.
 			 
-			Rule AreaOfCircle:
+			Rule AreaOfCircle (comment "ho, ho"):
 			 	if c is a Circle
 			 	then area of c is radius of c ^ 2 * PI.
 			 	
-			AreaOfCircle has comment "ho".
+«««			AreaOfCircle has comment "ho".
 			 	
 			Ask: area. 	
 			
 «««			Ask: x is a ^Rule.
 		'''.assertValidatesTo[ jenaModel, rules, cmds, issues, processor |
 				assertNotNull(jenaModel)
-				jenaModel.write(System.out)
+				val rinst = jenaModel.getIndividual("http://sadl.org/Shapes.sadl#AreaOfCircle")
+				val annp = jenaModel.getAnnotationProperty("http://sadl.org/Shapes.sadl#comment")
+				val annv = rinst.getPropertyValue(annp);
+				assertTrue(annv.asLiteral.value == "ho, ho")
 				assertTrue(issues.size == 0)
 			]
 	}

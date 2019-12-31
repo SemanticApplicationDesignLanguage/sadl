@@ -2904,6 +2904,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		Individual eqinst = getTheJenaModel().createIndividual(getDeclarationExtensions().getConceptUri(nm),
 				getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI));
+		// Add annotations, if any
+		EList<NamedStructureAnnotation> annotations = element.getAnnotations();
+		if (annotations != null && annotations.size() > 0) {
+			addNamedStructureAnnotations(eqinst, annotations);
+		}
 		Equation eq = createEquation(element, eqinst, nm, rtype, params, bdy, retVal, whrExpr);
 		addEquation(element.eResource(), eq, nm);
 		setHostEObject(null);
@@ -3604,6 +3609,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Expression whrExpr = element.getWhere();
 		Individual eqinst = getTheJenaModel().createIndividual(getDeclarationExtensions().getConceptUri(nm),
 				getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI));
+		// Add annotations, if any
+		EList<NamedStructureAnnotation> annotations = element.getAnnotations();
+		if (annotations != null && annotations.size() > 0) {
+			addNamedStructureAnnotations(eqinst, annotations);
+		}
 		Equation eq = createExternalEquation(element, eqinst, nm, uri, rtype, params, location, whrExpr);
 		addEquation(element.eResource(), eq, nm);
 		if (eqinst != null) {
