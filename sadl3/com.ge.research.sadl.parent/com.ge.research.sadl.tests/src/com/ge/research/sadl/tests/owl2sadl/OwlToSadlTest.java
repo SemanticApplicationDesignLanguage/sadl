@@ -7,6 +7,8 @@ import java.net.URL;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.ge.research.sadl.owl2sadl.OwlImportException;
 import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.tests.external.ExternalResourceContentHelper;
 
@@ -294,5 +296,85 @@ public class OwlToSadlTest {
 				"";
 		System.out.print(sadlModelContent);
 		assertEquals(expected, sadlModelContent);
+	}
+	
+	@Test
+	public void test06() throws OwlImportException {
+		String owlModelContent = 
+				"<rdf:RDF\r\n" + 
+				"    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" + 
+				"    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel\"\r\n" + 
+				"    xmlns:dfa=\"http://sadl.org/derivedFromAnnotation.sadl#\"\r\n" + 
+				"    xmlns:j.0=\"http://sadl.org/sadllistmodel#\"\r\n" + 
+				"    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\r\n" + 
+				"    xmlns:sadlimplicitmodel=\"http://sadl.org/sadlimplicitmodel\"\r\n" + 
+				"    xmlns:builtinfunctions=\"http://sadl.org/builtinfunctions\"\r\n" + 
+				"    xmlns:j.1=\"http://sadl.org/sadlimplicitmodel#\"\r\n" + 
+				"    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\r\n" + 
+				"    xmlns:sadllistmodel=\"http://sadl.org/sadllistmodel\"\r\n" + 
+				"    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\r\n" + 
+				"  xml:base=\"http://sadl.org/derivedFromAnnotation.sadl\">\r\n" + 
+				"  <owl:Ontology rdf:about=\"\">\r\n" + 
+				"    <owl:imports rdf:resource=\"sadllistmodel\"/>\r\n" + 
+				"    <owl:imports rdf:resource=\"builtinfunctions\"/>\r\n" + 
+				"    <owl:imports rdf:resource=\"sadlimplicitmodel\"/>\r\n" + 
+				"    <owl:imports rdf:resource=\"sadlbasemodel\"/>\r\n" + 
+				"    <rdfs:comment xml:lang=\"en\">This ontology was created from a SADL file 'derivedFromAnnotation.sadl' and should not be directly edited.</rdfs:comment>\r\n" + 
+				"  </owl:Ontology>\r\n" + 
+				"  <owl:Class rdf:nodeID=\"A0\">\r\n" + 
+				"    <rdfs:subClassOf>\r\n" + 
+				"      <owl:Restriction>\r\n" + 
+				"        <owl:allValuesFrom rdf:nodeID=\"A0\"/>\r\n" + 
+				"        <owl:onProperty rdf:resource=\"sadllistmodel#rest\"/>\r\n" + 
+				"      </owl:Restriction>\r\n" + 
+				"    </rdfs:subClassOf>\r\n" + 
+				"    <rdfs:subClassOf>\r\n" + 
+				"      <owl:Restriction>\r\n" + 
+				"        <owl:allValuesFrom rdf:resource=\"sadlimplicitmodel#DataDescriptor\"/>\r\n" + 
+				"        <owl:onProperty rdf:resource=\"sadllistmodel#first\"/>\r\n" + 
+				"      </owl:Restriction>\r\n" + 
+				"    </rdfs:subClassOf>\r\n" + 
+				"    <rdfs:subClassOf rdf:resource=\"sadllistmodel#List\"/>\r\n" + 
+				"  </owl:Class>\r\n" + 
+				"  <j.1:ExternalEquation rdf:ID=\"eq2\">\r\n" + 
+				"    <j.1:externalURI rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\"\r\n" + 
+				"    >uri22</j.1:externalURI>\r\n" + 
+				"    <j.1:returnTypes rdf:parseType=\"Resource\">\r\n" + 
+				"      <j.0:first>\r\n" + 
+				"        <j.1:DataDescriptor>\r\n" + 
+				"          <j.1:dataType>http://www.w3.org/2001/XMLSchema#float</j.1:dataType>\r\n" + 
+				"        </j.1:DataDescriptor>\r\n" + 
+				"      </j.0:first>\r\n" + 
+				"      <rdf:type rdf:nodeID=\"A0\"/>\r\n" + 
+				"    </j.1:returnTypes>\r\n" + 
+				"    <j.1:derivedFrom>\r\n" + 
+				"      <j.1:ExternalEquation rdf:ID=\"eq1\">\r\n" + 
+				"        <j.1:externalURI rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\"\r\n" + 
+				"        >uri12</j.1:externalURI>\r\n" + 
+				"        <j.1:returnTypes rdf:parseType=\"Resource\">\r\n" + 
+				"          <j.0:first>\r\n" + 
+				"            <j.1:DataDescriptor>\r\n" + 
+				"              <j.1:dataType>http://www.w3.org/2001/XMLSchema#float</j.1:dataType>\r\n" + 
+				"            </j.1:DataDescriptor>\r\n" + 
+				"          </j.0:first>\r\n" + 
+				"          <rdf:type rdf:nodeID=\"A0\"/>\r\n" + 
+				"        </j.1:returnTypes>\r\n" + 
+				"      </j.1:ExternalEquation>\r\n" + 
+				"    </j.1:derivedFrom>\r\n" + 
+				"  </j.1:ExternalEquation>\r\n" + 
+				"</rdf:RDF>\r\n";
+		OwlToSadl o2s = new OwlToSadl(owlModelContent, "http://sadl.org/derivedFromAnnotation.sadl");
+//		o2s.setVerboseMode(true);
+		String sadlModelContent = o2s.getSadlModel();
+		String expected = "uri \"http://sadl.org/derivedFromAnnotation.sadl\" alias dfa\n" + 
+				"    (note \"This ontology was created from a SADL file 'derivedFromAnnotation.sadl' and should not be directly edited.\").\n" + 
+				"\n" + 
+				"\n" + 
+				"\n" + 
+				"// Individuals:\n" + 
+				"External eq1() returns float: \"uri12\".\n" + 
+				"External eq2 (derivedFrom eq1) () returns float: \"uri22\".";
+		System.out.print(sadlModelContent);
+		assertEquals(expected.trim(), sadlModelContent.trim());
 	}
 }

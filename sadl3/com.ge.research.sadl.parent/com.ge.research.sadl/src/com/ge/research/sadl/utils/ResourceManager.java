@@ -18,7 +18,9 @@
 package com.ge.research.sadl.utils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -35,6 +37,7 @@ import org.eclipse.emf.common.util.URI;
 import org.osgi.framework.Bundle;
 
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.google.common.base.Predicate;
 
 public class ResourceManager {
@@ -247,13 +250,53 @@ public class ResourceManager {
 		return null;
 	}
 
-	public static String sadlFileNameOfOwlAltUrl(String string, boolean b) {
-		// TODO Auto-generated method stub
-		return null;
+	public static String sadlFileNameOfOwlAltUrl(String owlAltUrl, boolean errorIfNotExists) throws MalformedURLException, FileNotFoundException {
+    	SadlUtils su = new SadlUtils();
+    	File owlfile = new File(su.fileUrlToFileName(owlAltUrl));
+    	if (errorIfNotExists && !owlfile.exists()) {
+    		throw new FileNotFoundException(owlfile.getPath());
+    	}
+    	// TODO: Check that the URI is actually SADL derived
+		String fn = owlfile.getName();
+		int extLength = (fn.length() - fn.indexOf('.')) - 1;
+    	return owlfile.getName().substring(0, fn.length() - extLength) + "sadl";
 	}
 
-	public static String findSadlFileInProject(String parent, String sadlFileName) {
-		// TODO Auto-generated method stub
+	/**
+	 * This method can be used to find a SADL file in a specified directory. The
+	 * desire is that the SADL files can be moved around to various folders
+	 * as a project is organized without breaking import references.
+	 *
+	 * @param fileString
+	 * @return
+	 * @throws MalformedURLException 
+	 */
+	public static String findSadlFilesInDir(String prjDir, String fileString) throws MalformedURLException {
+	   	SadlUtils su = new SadlUtils();
+	   	fileString = su.fileUrlToFileName(fileString);
+		String foundFile = findFile(prjDir, fileString);
+		return foundFile;
+	}
+
+	private static String findFile(String folder, String file) {
+		String ffn = folder + File.separator + file;
+		File fl = new File(ffn);
+		if (fl.exists()) {
+			return ffn;
+		}
+		File fldfile = new File(folder);
+		if (fldfile.exists() && fldfile.isDirectory()) {
+			File[] files = fldfile.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				File felement = files[i];
+				if (felement.isDirectory()) {
+					String nextlvlfile = findFile(felement.getAbsolutePath(), file);
+					if (nextlvlfile != null) {
+						return nextlvlfile;
+					}
+				}
+			}
+		}
 		return null;
 	}
 

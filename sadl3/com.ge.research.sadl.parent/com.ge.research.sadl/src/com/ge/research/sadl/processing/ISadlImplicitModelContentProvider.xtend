@@ -160,6 +160,8 @@ interface ISadlImplicitModelContentProvider {
 			
 			^Rule is a class.
 			NamedQuery is a class.
+			derivedFrom (note "for use with named structures (Equations, NamedQueries, ...), where it has special SADL syntax") 
+				is a type of annotation.
 		''';
 
 		override getContent() {
