@@ -47,6 +47,8 @@ import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SparqlQueries;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
@@ -488,190 +490,190 @@ public class OwlToSadl {
 	// This is a hack
 	public static List<String> getSadlKeywords() {
 		return Arrays.asList("select",
-"Test:",
-"construct",
-"type",
-"disjoint",
-"symmetrical",
-"property",
-"Stage",
-"if",
-"transitive",
-"order",
-"element",
-"!",
-"using",
-"in",
-"%",
-"double",
-"byte",
-"(",
-")",
-"index",
-"is",
-"*",
-"then",
-"+",
-",",
-"anyURI",
-"version",
-"-",
-"an",
-".",
-"/",
-"as",
-"contains",
-"at",
-"Graph",
-"seventh",
-"unique",
-"returns",
-":",
-"must",
-"Rule",
-"!=",
-"<",
-"=",
-">",
-"dateTime",
-"A",
-"other",
-"be",
-"E",
-"top-level",
-"another",
-"least",
-"An",
-"long",
-"matching",
-"The",
-"sixth",
-"default",
-"same",
-"known",
-"are",
-"does",
-"by",
-"Ask",
-"where",
-"[",
-"after",
-"relationship",
-"]",
-"table",
-"^",
-"annotation",
-"a",
-"contain",
-"e",
-"one",
-"uri",
-"gMonth",
-"...",
-"describes",
-"the",
-"single",
-"asc",
-"sublist",
-"ask",
-"Model",
-"located",
-"fifth",
-"exists",
-"{",
-"to",
-"fourth",
-"}",
-"None",
-"return",
-"first",
-"||",
-"date",
-"<=",
-"data",
-"before",
-"subject",
-"anySimpleType",
-"integer",
-"Update",
-"float",
-"second",
-"gYear",
-"negativeInteger",
-"only",
-"Explain:",
-"unsignedByte",
-"List",
-"from",
-"gDay",
-"has",
-"described",
-"--",
-"always",
-"==",
-"=>",
-"given",
-"last",
-"level",
-"count",
-"most",
-"base64Binary",
-"Print:",
-"Write:",
-"External",
-"true",
-"decimal",
-"desc",
-">=",
-"&&",
-"note",
-"some",
-"Expr:",
-"tenth",
-"import",
-"string",
-"instances",
-"classes",
-"values",
-"for",
-"insert",
-"distinct",
-"nonNegativeInteger",
-"delete",
-"duration",
-"can",
-"not",
-"and",
-"hexBinary",
-"of",
-"alias",
-"class",
-"value",
-"gMonthDay",
-"inverse",
-"types",
-"or",
-"length",
-"false",
-"eighth",
-"Equation",
-"exactly",
-"any",
-"int",
-"nonPositiveInteger",
-"with",
-"boolean",
-"third",
-"Read:",
-"there",
-"positiveInteger",
-"ninth",
-"unsignedInt",
-"PI",
-"Deductions",
-"time",
-"gYearMonth");
-	}
+				"Test:",
+				"construct",
+				"type",
+				"disjoint",
+				"symmetrical",
+				"property",
+				"Stage",
+				"if",
+				"transitive",
+				"order",
+				"element",
+				"!",
+				"using",
+				"in",
+				"%",
+				"double",
+				"byte",
+				"(",
+				")",
+				"index",
+				"is",
+				"*",
+				"then",
+				"+",
+				",",
+				"anyURI",
+				"version",
+				"-",
+				"an",
+				".",
+				"/",
+				"as",
+				"contains",
+				"at",
+				"Graph",
+				"seventh",
+				"unique",
+				"returns",
+				":",
+				"must",
+				"Rule",
+				"!=",
+				"<",
+				"=",
+				">",
+				"dateTime",
+				"A",
+				"other",
+				"be",
+				"E",
+				"top-level",
+				"another",
+				"least",
+				"An",
+				"long",
+				"matching",
+				"The",
+				"sixth",
+				"see",
+				"default",
+				"same",
+				"known",
+				"are",
+				"does",
+				"by",
+				"Ask",
+				"where",
+				"[",
+				"after",
+				"relationship",
+				"]",
+				"table",
+				"^",
+				"annotation",
+				"a",
+				"contain",
+				"e",
+				"one",
+				"uri",
+				"gMonth",
+				"...",
+				"describes",
+				"the",
+				"single",
+				"asc",
+				"sublist",
+				"ask",
+				"Model",
+				"located",
+				"fifth",
+				"exists",
+				"{",
+				"to",
+				"fourth",
+				"}",
+				"None",
+				"return",
+				"first",
+				"||",
+				"date",
+				"<=",
+				"data",
+				"before",
+				"subject",
+				"anySimpleType",
+				"integer",
+				"Update",
+				"float",
+				"second",
+				"gYear",
+				"negativeInteger",
+				"only",
+				"Explain:",
+				"unsignedByte",
+				"List",
+				"from",
+				"gDay",
+				"has",
+				"described",
+				"--",
+				"always",
+				"==",
+				"=>",
+				"given",
+				"last",
+				"level",
+				"count",
+				"most",
+				"base64Binary",
+				"Print:",
+				"Write:",
+				"External",
+				"true",
+				"decimal",
+				"desc",
+				">=",
+				"&&",
+				"note",
+				"some",
+				"Expr:",
+				"tenth",
+				"import",
+				"string",
+				"instances",
+				"classes",
+				"values",
+				"for",
+				"insert",
+				"distinct",
+				"nonNegativeInteger",
+				"delete",
+				"duration",
+				"can",
+				"not",
+				"and",
+				"hexBinary",
+				"of",
+				"alias",
+				"class",
+				"value",
+				"gMonthDay",
+				"inverse",
+				"types",
+				"or",
+				"length",
+				"false",
+				"eighth",
+				"Equation",
+				"exactly",
+				"any",
+				"int",
+				"nonPositiveInteger",
+				"with",
+				"boolean",
+				"third",
+				"Read:",
+				"there",
+				"positiveInteger",
+				"ninth",
+				"unsignedInt",
+				"PI",
+				"Deductions",
+				"time",
+				"gYearMonth");	}
 	
 	/**
 	 * Save the SADL model to the specified file
@@ -1309,6 +1311,8 @@ public class OwlToSadl {
 
 	private ModelConcepts concepts;
 
+	private IConfigurationManager configMgr = null;
+
 	private String stripNamespaceDelimiter(String ns) {
 		if (ns.endsWith("#")) {
 			ns = ns.substring(0, ns.length() - 1);
@@ -1333,11 +1337,13 @@ public class OwlToSadl {
 	}
 
 	private void addEndOfStatement(StringBuilder sb, int numLineFeeds) {
-		if (sb.length() > 1 && Character.isDigit(sb.charAt(sb.length() - 1))) {
-			sb.append(" .");
-		}
-		else {
-			sb.append(".");
+		if (!sb.toString().trim().endsWith(".")) {
+			if (sb.length() > 1 && Character.isDigit(sb.charAt(sb.length() - 1))) {
+				sb.append(" .");
+			}
+			else {
+				sb.append(".");
+			}
 		}
 		for (int i = 0; i < numLineFeeds; i++) {
 			sb.append("\n");
@@ -1519,7 +1525,7 @@ public class OwlToSadl {
 			}
 			else {
 				sb.append(uriToSadlString(concepts, rsrc));
-				addNotesAndAliases(sb, rsrc);
+				addRdfsAnnotations(sb, rsrc);
 				sb.append(" is a type of ");
 				if (union != null && union.size() > 0) {
 					sb.append("{");
@@ -1740,7 +1746,7 @@ public class OwlToSadl {
 		else {
 			sb.append(uriToSadlString(concepts, inst));
 		}
-		addNotesAndAliases(sb, inst);
+		addRdfsAnnotations(sb, inst);
 		return sb.toString();
 	}
 
@@ -1859,14 +1865,15 @@ public class OwlToSadl {
 	 * Method to convert an equation, identified by eqUri, to one or more SADL statements
 	 * @param eqUri
 	 * @param embeddedBNode
-	 * @param configMgr
+	 * @param iConfigurationManager
 	 * @return
 	 */
-	public String[] equationToSadl(String eqUri, boolean embeddedBNode, IConfigurationManagerForIDE configMgr) {
+	public String[] equationToSadl(String eqUri, boolean embeddedBNode, IConfigurationManager iConfigurationManager) {
 		Individual inst = theModel.getIndividual(eqUri);
 		if (inst != null) {
-			String[] returnvals = new String[2];
+			String[] returnvals = null;
 			StringBuilder sb = new StringBuilder();
+			StringBuilder sb2 = null;
 			ExtendedIterator<Resource> titr = inst.listRDFTypes(true);
 			while (titr.hasNext()) {
 				Resource typ = titr.next();
@@ -1878,10 +1885,29 @@ public class OwlToSadl {
 				}
 			}
 			sb.append(inst.getLocalName());
+			Resource dfr = theModel.getResource(SadlConstants.SADL_IMPLICIT_MODEL_DERIVEDFROM_PROPERTY_URI);
+			if (dfr != null && dfr.canAs(Property.class)) {
+				StmtIterator stmtitr = theModel.listStatements(inst, dfr.as(Property.class), (RDFNode)null);
+				if (stmtitr.hasNext()) {
+					sb.append(" (");
+					int cnt = 0;
+					do {
+						RDFNode dfn = stmtitr.nextStatement().getObject();
+						if (dfn.isURIResource()) {
+							if (cnt++ > 0) {
+								sb.append(", ");
+							}
+							sb.append("derivedFrom ");
+							sb.append(dfn.asResource().getLocalName());
+						}
+					} while (stmtitr.hasNext());
+					sb.append(") ");
+				}				
+			}
 			sb.append("(");
 			
 			try {
-				IReasoner reasoner = configMgr.getReasoner();
+				IReasoner reasoner = iConfigurationManager.getReasoner();
 				if (!reasoner.isInitialized()) {
 					reasoner.initializeReasoner(theModel, getBaseUri(), null, null);
 				}
@@ -1916,18 +1942,17 @@ public class OwlToSadl {
 					sb.append(exturi.asLiteral().getValue().toString());
 					sb.append("\".");
 				}
-				returnvals[0] = sb.toString();
 				
-				sb.setLength(0);
 				RDFNode expr = inst.getPropertyValue(theModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXPRESSTION_PROPERTY_URI));
 				if (expr != null && expr.isResource()) {
+					sb2 = new StringBuilder();
 					StmtIterator stmtitr = expr.asResource().listProperties(theModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_SCRIPT_PROPERTY_URI));
 					if (stmtitr.hasNext()) {
-						sb.append(inst.getLocalName());
+						sb2.append(inst.getLocalName());
 						int cntr = 0;
 						while (stmtitr.hasNext()) {
-							if (cntr++ > 0) sb.append(", ");
-							sb.append(" has expression (a Script ");
+							if (cntr++ > 0) sb2.append(", ");
+							sb2.append(" has expression (a Script ");
 							Statement stmt = stmtitr.nextStatement();
 							RDFNode scrpt = stmt.getObject();
 							if (scrpt != null && scrpt.isLiteral()) {
@@ -1938,24 +1963,32 @@ public class OwlToSadl {
 									if (lang.isURIResource()) {
 										String langStr = lang.asResource().getLocalName();
 										if (langStr != null) {
-											sb.append("with language ");
-											sb.append(langStr);
-											sb.append(", ");
+											sb2.append("with language ");
+											sb2.append(langStr);
+											sb2.append(", ");
 										}
 										if (scrptStr != null) {
-											sb.append("with script ");
-											sb.append("\"");
-											sb.append(escapeDoubleQuotes(scrptStr));
-											sb.append("\"");
+											sb2.append("with script ");
+											sb2.append("\"");
+											sb2.append(escapeDoubleQuotes(scrptStr));
+											sb2.append("\"");
 										}
 									}
 								}
 							}
-							sb.append(")");
+							sb2.append(")");
 						}
-						sb.append(".");
-						returnvals[1] = sb.toString();
+						sb2.append(".");
 					}
+				}
+				if (sb2 != null) {
+					returnvals = new String[2];
+					returnvals[0] = sb.toString();
+					returnvals[1] = sb2.toString();
+				}
+				else {
+					returnvals = new String[1];
+					returnvals[0] = sb.toString();
 				}
 			} catch (ConfigurationException e) {
 				// TODO Auto-generated catch block
@@ -1998,51 +2031,86 @@ public class OwlToSadl {
 	private String individualToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		boolean bnode = false;
+		boolean isEquation = false;
 		if (inst.isURIResource()) {
-			sb.append(individualNameAndAnnotations(concepts, inst));
-			if (isNewLineAtEndOfBuffer(sb)) {
-				sb.append("    ");
+			isEquation = isEquationType(inst);
+			if (isEquation) {
+				String[] sds = equationToSadl(inst.getURI(), false, getConfigurationManager());
+				for (String sd : sds) {
+					sb.append(sd);
+					addEndOfStatement(sb, 1);
+				}
 			}
-			sb.append(" is a ");
+			else {
+				sb.append(individualNameAndAnnotations(concepts, inst));
+				if (isNewLineAtEndOfBuffer(sb)) {
+					sb.append("    ");
+				}
+				sb.append(" is a ");
+			}
 		}
 		else {
 			sb.append("(a ");
 			bnode = true;
 		}
-		ExtendedIterator<OntClass> eitr = inst.listOntClasses(true);
-		int itercnt = 0;
-		boolean intersectionClass = false;
-		while (eitr.hasNext()) {
-			try {
-				OntClass cls = eitr.next();
-				if (itercnt == 0) {
-					if (eitr.hasNext()) {
-						intersectionClass = true;
+		if (!isEquation) {
+			ExtendedIterator<OntClass> eitr = inst.listOntClasses(true);
+			int itercnt = 0;
+			boolean intersectionClass = false;
+			while (eitr.hasNext()) {
+				try {
+					OntClass cls = eitr.next();
+					if (itercnt == 0) {
+						if (eitr.hasNext()) {
+							intersectionClass = true;
+						}
+						if (intersectionClass) {
+							sb.append("{");
+						}
 					}
-					if (intersectionClass) {
-						sb.append("{");
+					if (itercnt++ > 0) {
+						sb.append(" and ");
 					}
+					sb.append(uriToSadlString(concepts, cls));
 				}
-				if (itercnt++ > 0) {
-					sb.append(" and ");
+				catch (Exception e){
+					System.err.println(e.getMessage());
 				}
-				sb.append(uriToSadlString(concepts, cls));
 			}
-			catch (Exception e){
-				System.err.println(e.getMessage());
+			if (intersectionClass) {
+				sb.append("}");
 			}
-		}
-		if (intersectionClass) {
-			sb.append("}");
-		}
-		addResourceProperties(sb, concepts, inst, embeddedBNode);
-		if (bnode) {
-			sb.append(")");
-		}
-		else {
-			addEndOfStatement(sb, 1);
+			addResourceProperties(sb, concepts, inst, embeddedBNode);
+			if (bnode) {
+				sb.append(")");
+			}
+			else {
+				addEndOfStatement(sb, 1);
+			}
 		}
 		return sb.toString();
+	}
+
+	private IConfigurationManager getConfigurationManager() throws OwlImportException {
+		if (configMgr == null) {
+			try {
+				configMgr = ConfigurationManagerFactory.getConfigurationManager(IConfigurationManager.dummyModelFolderPath, null);
+			} catch (ConfigurationException e) {
+				throw new OwlImportException(e.getMessage(), e);
+			}
+		}
+		return configMgr;
+	}
+
+	private boolean isEquationType(Individual inst) {
+		Resource rdfType = inst.getRDFType(true);
+		if (rdfType != null) {
+			if (rdfType.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI) ||
+					rdfType.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void addResourceProperties(StringBuilder sb, ModelConcepts concepts, Resource inst,
@@ -2051,7 +2119,8 @@ public class OwlToSadl {
 		int cntr = 0;
 		while (insitr.hasNext()) {
 			Statement s = insitr.next();
-			if (s.getPredicate().equals(RDF.type) || s.getPredicate().equals(RDFS.label) || s.getPredicate().equals(RDFS.comment)) {
+			if (s.getPredicate().equals(RDF.type) || s.getPredicate().equals(RDFS.label) || 
+					s.getPredicate().equals(RDFS.comment) || s.getPredicate().equals(RDFS.seeAlso)) {
 				continue;
 			}
 			if (embeddedBNode) {
@@ -2146,7 +2215,7 @@ public class OwlToSadl {
 			AnnotationProperty ann) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(uriToSadlString(concepts, ann));
-		addNotesAndAliases(sb, ann);
+		addRdfsAnnotations(sb, ann);
 		sb.append(" is a type of annotation.\n");
 		return sb.toString();
 	}
@@ -2178,7 +2247,7 @@ public class OwlToSadl {
 		StringBuilder sb = new StringBuilder();
 		boolean useTranslation = true;
 		sb.append(uriToSadlString(concepts, prop));
-		addNotesAndAliases(sb, prop);
+		addRdfsAnnotations(sb, prop);
 		if (prop.canAs(DatatypeProperty.class)) {
 			useTranslation = propertyToSadl(sb, concepts, prop);
 		}
@@ -2209,7 +2278,7 @@ public class OwlToSadl {
 		StringBuilder sb = new StringBuilder();
 		boolean useTranslation = true;
 		sb.append(uriToSadlString(concepts, prop));
-		addNotesAndAliases(sb, prop);
+		addRdfsAnnotations(sb, prop);
 		if (prop.canAs(ObjectProperty.class)) {
 			useTranslation = propertyToSadl(sb, concepts, prop);
 		}
@@ -2236,7 +2305,7 @@ public class OwlToSadl {
 	private String classToSadl(ModelConcepts concepts, OntClass cls) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(uriToSadlString(concepts, cls));
-		addNotesAndAliases(sb, cls);
+		addRdfsAnnotations(sb, cls);
 		List<Resource> supers = new ArrayList<Resource>();
 		List<OntClass> mappedRestrictions = new ArrayList<OntClass>();
 //		ExtendedIterator<OntClass> eitr = ((OntClass)cls.as(OntClass.class)).listSuperClasses(true);
@@ -2322,7 +2391,7 @@ public class OwlToSadl {
 			sb.append("    described by ");
 			sb.append(uriToSadlString(concepts, p));
 			if (!concepts.getCompleted().contains(p)) {
-				addNotesAndAliases(sb, p);
+				addRdfsAnnotations(sb, p);
 			}
 			key = generateSadlRangeStatement(concepts, p, sb, key);
 //
@@ -2388,7 +2457,7 @@ public class OwlToSadl {
 		return newList;
 	}
 
-	private void addNotesAndAliases(StringBuilder sb, Resource rsrc) throws OwlImportException {
+	private void addRdfsAnnotations(StringBuilder sb, Resource rsrc) throws OwlImportException {
 		StmtIterator sitr = rsrc.listProperties(RDFS.label);
 		if (sitr.hasNext()) {
 //			addNewLineIfNotAtEndOfBuffer(sb);
@@ -2414,6 +2483,20 @@ public class OwlToSadl {
 					sb.append(", ");
 				}
 				sb.append(rdfNodeToSadlString(null, note, true));
+			}
+			sb.append(")\n    ");
+		}
+		sitr = rsrc.listProperties(RDFS.seeAlso);
+		if (sitr.hasNext()) {
+			addNewLineIfNotAtEndOfBuffer(sb);
+			sb.append("    (see ");
+			int cntr = 0; 
+			while (sitr.hasNext()) {
+				RDFNode seeAlso = sitr.nextStatement().getObject();
+				if (cntr++ > 0) {
+					sb.append(", ");
+				}
+				sb.append(rdfNodeToSadlString(null, seeAlso, true));
 			}
 			sb.append(")\n    ");
 		}
@@ -2869,8 +2952,15 @@ public class OwlToSadl {
 		}
 		else if (type.equals(OWL.Restriction)) {
 			try {
-				if (ontRsrc.canAs(Restriction.class) && ontRsrc.as(Restriction.class).getOnProperty().equals(RDFS.Resource)) {
-					return false;
+				if (ontRsrc.canAs(Restriction.class)) {
+					Restriction restr = ontRsrc.as(Restriction.class);
+					StmtIterator stmtitr = theModel.listStatements(restr, OWL.onProperty, (RDFNode)null);
+					if (stmtitr.hasNext()) {
+						RDFNode objnode = stmtitr.nextStatement().getObject();
+						if (objnode.isResource() && objnode.asResource().equals(RDFS.Resource)) {
+							return false;
+						}
+					}
 				}
 			}
 			catch (Throwable t) {
@@ -3830,7 +3920,21 @@ public class OwlToSadl {
 					}
 					ln += ")";
 				}
-			}
+
+				sitr = rsrc.listProperties(RDFS.seeAlso);
+				if (sitr.hasNext()) {
+					ln += " (see ";
+					int cntr = 0;
+					while (sitr.hasNext()) {
+						Statement stmt = sitr.nextStatement();
+						if (cntr++ > 0) {
+							ln += ", ";
+						}
+						ln += "\"" + stmt.getObject().asResource().getURI() + "\"";
+					}
+					ln += ")";
+				}
+}
 		}
 		return ln;
 	}

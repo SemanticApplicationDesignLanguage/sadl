@@ -320,7 +320,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
     			if (s.getPredicate().getLocalName().equals("altURL")) {
     				String sadlFileName = ResourceManager.sadlFileNameOfOwlAltUrl(s.getObject().toString(), true);
     				File owlfile = new File(fileUrlToFileName(s.getObject().toString()));
-    				String sadlfile = ResourceManager.findSadlFileInProject(owlfile.getParentFile().getParent(), sadlFileName);
+    				String sadlfile = ResourceManager.findSadlFilesInDir(owlfile.getParentFile().getParent(), sadlFileName);
     				if (sadlfile != null) {
     					String stmtFileName = owlfile.getName();
     					String altvFileName = new File(fileUrlToFileName(altv.toString())).getName();

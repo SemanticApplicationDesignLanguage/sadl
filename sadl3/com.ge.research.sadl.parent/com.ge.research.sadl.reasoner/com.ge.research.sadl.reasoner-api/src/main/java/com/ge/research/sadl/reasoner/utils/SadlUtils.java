@@ -300,10 +300,64 @@ public class SadlUtils {
 		catch (Exception e) {
 			System.err.println("Exception writing file '" + aFile.getAbsolutePath() + "'");
 			e.printStackTrace();
-			throw e;
+			throw new IOException(e.getMessage(), e);
 		}
 	}
 
+	/**
+	 * Change the contents of text file by appending content to any
+	 * existing text.
+	 *
+	 * This implementation throws all exceptions to the caller.
+	 *
+	 * @param aFile is an existing file which can be written to.
+	 * @param contents is the string to be appended
+	 * @param writeProtect if true write protect the file
+	 * 
+	 * @throws IOException if problem encountered during write.
+	 */
+	public void appendStringToFile(File aFile, String contents, boolean writeProtect) throws IOException {
+		if (aFile == null) {
+			throw new IllegalArgumentException("File should not be null.");
+		}
+		if (aFile.exists() && !aFile.isFile()) {
+			throw new IllegalArgumentException("Should not be a directory: " + aFile);
+		}
+		try {
+			if (!aFile.exists()) {
+				aFile.createNewFile();
+			}
+			if (!aFile.canWrite()) {
+				throw new IllegalArgumentException("File cannot be written: " + aFile);
+			}
+	
+			//declared here only to make visible to finally clause; generic reference
+			Writer output = null;
+			try {
+				//use buffering
+				//FileWriter always assumes default encoding is OK!
+				output = new BufferedWriter( new FileWriter(aFile, true) );
+				output.write( contents );
+			}
+			finally {
+				//flush and close both "output" and its underlying FileWriter
+				if (output != null) output.close();
+			}
+			if (writeProtect) {
+				try {
+					aFile.setReadOnly();
+				}
+				catch (SecurityException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		catch (Exception e) {
+			System.err.println("Exception writing file '" + aFile.getAbsolutePath() + "'");
+			e.printStackTrace();
+			throw new IOException(e.getMessage(), e);
+		}		
+	}
 
 	public String getExternalModelRootFromUrlFilename(File editorFile) {
 		if (editorFile != null) {

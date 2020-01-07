@@ -65,8 +65,10 @@ import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
+import org.eclipse.xtext.nodemodel.SyntaxErrorMessage;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.resource.XtextSyntaxDiagnostic;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
 import org.eclipse.xtext.service.OperationCanceledError;
@@ -231,6 +233,7 @@ import com.ge.research.sadl.utils.SadlASTUtils;
 import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.inject.Injector;
 import com.hp.hpl.jena.datatypes.RDFDatatype;
 import com.hp.hpl.jena.datatypes.TypeMapper;
@@ -271,6 +274,7 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.reasoner.TriplePattern;
 import com.hp.hpl.jena.sparql.JenaTransactionException;
+import com.hp.hpl.jena.sparql.util.NodeUtils;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
@@ -296,7 +300,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	// protected ISadlServer kServer = null;
 
 	public enum AnnType {
-		ALIAS, NOTE
+		ALIAS, NOTE, SEE
 	}
 
 	private static List<String> sadlTokens = null;
@@ -1136,6 +1140,40 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		initializeAllImpliedPropertyClasses();
 		initializeAllExpandedPropertyClasses();
 
+	    boolean validAST = isAstSyntaxValid(model);	
+	    if (!validAST) {
+		    Iterable<XtextSyntaxDiagnostic> syntaxErrors = Iterables.<XtextSyntaxDiagnostic>filter(model.eResource().getErrors(), XtextSyntaxDiagnostic.class);
+		    for (XtextSyntaxDiagnostic synErr : syntaxErrors) {
+		    	String code = synErr.getCode();
+		    	String msg = synErr.getMessage();
+		    	String[] data = synErr.getData();
+		    	int offset = synErr.getOffset();
+		    	int len = synErr.getLength();
+		    	int i = 0;
+		    }
+			List<SadlModelElement> elements = model.getElements();
+			if (elements != null) {
+				Iterator<SadlModelElement> elitr = elements.iterator();
+				while (elitr.hasNext()) {
+					SadlModelElement element = elitr.next();
+					TreeIterator<EObject> allcontents = element.eAllContents();
+					while (allcontents.hasNext()) {
+						EObject obj = allcontents.next();
+						ICompositeNode node = NodeModelUtils.findActualNodeFor(obj);
+						if (node != null) {
+							String txt = node.getText();
+							if (node.getSyntaxErrorMessage() != null) {
+								SyntaxErrorMessage synErr = node.getSyntaxErrorMessage();
+								if (synErr != null) {
+									System.err.println(synErr.getMessage());
+								}
+							}
+						}
+					}
+				}
+			}
+	    }
+
 		// process rest of parse tree
 		List<SadlModelElement> elements = model.getElements();
 		if (elements != null) {
@@ -1532,10 +1570,39 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					modelOntology.addLabel(annContent, "en");
 				} else if (anntype.equalsIgnoreCase(AnnType.NOTE.toString())) {
 					modelOntology.addComment(annContent, "en");
+				} else if (anntype.equalsIgnoreCase(AnnType.SEE.toString())) {
+					if (validURI(annContent)) {
+						modelOntology.addSeeAlso(getTheJenaModel().getResource(annContent));
+					}
+					else {
+						addWarning("A 'see' annotation must refer to a valid URI.", ann);
+					}
 				}
 			}
 		}
 	}
+
+	/**
+	 * Method to make sure that the URI has at least rudimentary parts.
+	 * @param s
+	 * @return
+	 */
+    private boolean validURI(String s) {
+    	try {
+    		java.net.URI uri = new java.net.URI(s);
+    		String sch = uri.getScheme();
+    		if (sch == null) {
+    			return false;
+    		}
+    		String hst = uri.getHost();
+    		if (hst == null) {
+    			return false;
+    		}
+    	} catch (Exception e) {
+    		return false;
+    	}
+    	return true;
+    }
 
 	private String cleanTextForUTF8(String aContent) {
 		aContent = aContent.replaceAll("[^\\x00-\\x7F]", "");
@@ -3614,7 +3681,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (annotations != null && annotations.size() > 0) {
 			addNamedStructureAnnotations(eqinst, annotations);
 		}
-		Equation eq = createExternalEquation(element, eqinst, nm, uri, rtype, params, location, whrExpr);
+		Equation eq = createExternalEquation(element, eqinst, nm, eqinst.getURI(), uri, rtype, params, location, whrExpr);
 		addEquation(element.eResource(), eq, nm);
 		if (eqinst != null) {
 			DatatypeProperty dtp = getTheJenaModel().getDatatypeProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNALURL_PROPERTY_URI);
@@ -3634,13 +3701,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		setHostEObject(null);
 	}
 
-	protected Equation createExternalEquation(ExternalEquationStatement element, Individual eqinst, SadlResource nm, String uri, EList<SadlReturnDeclaration> rtype,
+	protected Equation createExternalEquation(ExternalEquationStatement element, Individual eqinst, SadlResource nm, String internalUri, String externalUri, EList<SadlReturnDeclaration> rtype,
 			EList<SadlParameterDeclaration> params, String location, Expression whrExpr)
 			throws JenaProcessorException, TranslationException, InvalidNameException, InvalidTypeException {
 		Equation eq = new Equation(getDeclarationExtensions().getConcreteName(nm));
 		eq.setNamespace(getDeclarationExtensions().getConceptNamespace(nm));
 		eq.setExternal(true);
-		eq.setUri(uri);
+		eq.setExternalUri(externalUri);
+		eq.setUri(internalUri);
 		if (location != null) {
 			eq.setLocation(location);
 		}
@@ -10025,6 +10093,42 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addError(e.getMessage(), prop);
 		}
 		String propuri = getDeclarationExtensions().getConceptUri(prop);
+		if (propuri == null) {
+			ICompositeNode node = NodeModelUtils.findActualNodeFor(prop);
+			if (node == null) {
+				EObject contr = prop != null ? prop.eContainer() : null;
+				if (contr == null && val != null) {
+					contr = val.eContainer();
+				}
+				while (node == null && contr != null) {
+					node = NodeModelUtils.findActualNodeFor(contr);
+				}
+				if (node != null) {
+					String txt = node.getText();
+					String preTxt = null;
+					if (contr instanceof SadlPropertyInitializer) {
+						preTxt = ((SadlPropertyInitializer)contr).getFirstConnective();
+					}
+					if (preTxt != null && txt.trim().startsWith(preTxt.trim())) {
+						txt = txt.trim().substring(preTxt.trim().length()).trim();
+					}
+					if (txt != null) {
+						Literal lit = getTheJenaModel().createLiteral( txt, "en" );  	// this is how the literals are created in JenaBasedSadlModelProcessor; 
+						StmtIterator stmtitr = getTheJenaModel().listStatements(null, RDFS.label, lit);
+						while (stmtitr.hasNext()) {
+							com.hp.hpl.jena.rdf.model.Resource replacement = stmtitr.nextStatement().getSubject();
+							addWarning("Consider replacing '" + txt + "' with '" + replacement.getLocalName() + "'", contr);
+						}
+					}
+			    	String psrc = getSourceText(prop);
+			    	String vsrc = getSourceText(val);
+					if (node.getSyntaxErrorMessage() != null) {
+						SyntaxErrorMessage synErr = node.getSyntaxErrorMessage();
+						int i = 0;
+					}
+				}
+			}
+		}
 		if (type.equals(OntConceptType.CLASS_PROPERTY)) {
 			OntProperty oprop = getTheJenaModel().getOntProperty(propuri);
 			if (oprop == null) {
@@ -10407,7 +10511,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	private SadlResource sadlResourceFromSadlInstance(SadlInstance element) throws JenaProcessorException {
+	protected SadlResource sadlResourceFromSadlInstance(SadlInstance element) throws JenaProcessorException {
 		SadlResource sr = element.getNameOrRef();
 		if (sr == null) {
 			sr = element.getInstance();

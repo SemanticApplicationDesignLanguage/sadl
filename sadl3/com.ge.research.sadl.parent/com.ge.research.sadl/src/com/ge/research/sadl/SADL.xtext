@@ -27,7 +27,7 @@ SadlModel :
     elements+=SadlModelElement*;
     
 SadlAnnotation :
-	','? '(' type=('alias'|'note') contents+=STRING (',' contents+=STRING)* ')'
+	','? '(' type=('alias'|'note'|'see') contents+=STRING (',' contents+=STRING)* ')'
 ;
 
 SadlImport :

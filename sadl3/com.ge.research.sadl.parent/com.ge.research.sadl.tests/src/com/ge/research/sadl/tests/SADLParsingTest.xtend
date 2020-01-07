@@ -518,6 +518,23 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 	}
 	
 	@Test
+	def void testSeeAlso() {
+		val model =
+		'''
+			 uri "http://sadl.org/rdfsseealso.sadl" alias rdfsseealso.
+			 
+			 Rock (see "http://sadl.org/SaveTarget.sadl2b") is a class.
+		'''.sadl.contents.head as SadlModel
+		
+		Assert.assertEquals(1, model.elements.size)
+		Assert.assertTrue(model.elements.get(0) instanceof SadlClassOrPropertyDeclaration)
+		val scpd = (model.elements.get(0) as SadlClassOrPropertyDeclaration)
+		val ann0 = scpd.classOrProperty.get(0).annotations.get(0)
+		Assert.assertTrue(ann0.type.equals("see"))
+		Assert.assertEquals(ann0.contents.get(0),"http://sadl.org/SaveTarget.sadl2b")
+	}
+	
+	@Test
 	def void testQueryAsExpression() {
 		val model = '''
 			uri "http://com.ge.research.sadl/NotEqualRule2". 

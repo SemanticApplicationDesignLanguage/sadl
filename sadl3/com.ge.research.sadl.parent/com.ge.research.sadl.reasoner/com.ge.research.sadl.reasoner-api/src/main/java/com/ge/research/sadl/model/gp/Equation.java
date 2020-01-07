@@ -36,7 +36,8 @@ public class Equation {
 	private List<VariableNode> equationVariables = null;
 	private List<GraphPatternElement> wheres = null;
 	private List<Node> returnNodes = null;
-	private String uri = null;
+	private String uri = null;			// identity in the current model
+	private String externalUri = null;	// external identity if given (External equation)
 	private String location = null;
 	
 	public Equation( String nm) {
@@ -141,7 +142,7 @@ public class Equation {
 		sb.append(": ");
 		if (isExternal()) {
 			 sb.append("uri(\"");
-			 sb.append(getUri());
+			 sb.append(getExternalUri());
 			 sb.append("\")");
 			 if (getLocation() != null) {
 				 sb.append(" location(\"");
@@ -202,7 +203,7 @@ public class Equation {
 		sb.append(": ");
 		if (isExternal()) {
 			 sb.append("uri(\"");
-			 sb.append(getUri());
+			 sb.append(getExternalUri());
 			 sb.append("\")");
 			 if (getLocation() != null) {
 				 sb.append(" location(\"");
@@ -264,7 +265,7 @@ public class Equation {
 		sb.append(": ");
 		if (isExternal()) {
 			 sb.append("uri(\"");
-			 sb.append(getUri());
+			 sb.append(getExternalUri());
 			 sb.append("\")");
 			 if (getLocation() != null) {
 				 sb.append(" location(\"");
@@ -308,6 +309,9 @@ public class Equation {
 	}
 
 	public String getUri() {
+		if (uri == null && namespace != null && name != null) {
+			return namespace + name;
+		}
 		return uri;
 	}
 
@@ -419,5 +423,13 @@ public class Equation {
 			returnNodes = new ArrayList<Node>();
 		}
 		returnNodes.add(retNode);
+	}
+
+	public String getExternalUri() {
+		return externalUri;
+	}
+
+	public void setExternalUri(String externalUri) {
+		this.externalUri = externalUri;
 	}
 }
