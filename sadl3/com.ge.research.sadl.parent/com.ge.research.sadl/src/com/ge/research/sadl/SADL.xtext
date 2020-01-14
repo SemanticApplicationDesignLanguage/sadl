@@ -27,7 +27,7 @@ SadlModel :
     elements+=SadlModelElement*;
     
 SadlAnnotation :
-	','? '(' type=('alias'|'note') contents+=STRING (',' contents+=STRING)* ')'
+	','? '(' type=('alias'|'note'|'see') contents+=STRING (',' contents+=STRING)* ')'
 ;
 
 SadlImport :
@@ -65,7 +65,7 @@ ExternalEquationStatement:
 ;
 
 fragment EquationSignature returns AbstractSadlEquation:
-	name=SadlResource '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' (returnType+=SadlReturnDeclaration (',' returnType+=SadlReturnDeclaration)*) ':'
+	name=SadlResource (annotations+=NamedStructureAnnotation)* '(' (parameter+=SadlParameterDeclaration (',' parameter+=SadlParameterDeclaration)* )?')' 'returns' (returnType+=SadlReturnDeclaration (',' returnType+=SadlReturnDeclaration)*) ':'
 ;
 
 SadlParameterDeclaration:

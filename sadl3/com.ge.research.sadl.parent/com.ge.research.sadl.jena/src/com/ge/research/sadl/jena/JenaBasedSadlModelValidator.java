@@ -5514,7 +5514,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (val == null && isInQuery(pred)) {
 			return true;	// this is OK
 		}
-		TypeCheckInfo valType = getType(val);
+		TypeCheckInfo valType;
+		if (predType.getTypeCheckType() instanceof NamedNode &&
+				(((NamedNode)predType.getTypeCheckType()).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI) ||
+						((NamedNode)predType.getTypeCheckType()).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI))) {
+			valType = new TypeCheckInfo(new ConceptName(((NamedNode)predType.getTypeCheckType()).getURI()));
+			valType.setTypeCheckType(predType.getTypeCheckType());
+		}
+		else {
+			valType = getType(val);
+		}
 		List<String> operations = Arrays.asList("is");
 		if (declarationExtensions.getOntConceptType(pred).equals(OntConceptType.DATATYPE_PROPERTY)) {
 			if (predType.getCompoundTypes() != null) {

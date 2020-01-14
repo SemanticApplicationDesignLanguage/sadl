@@ -56,6 +56,10 @@ public interface IConfigurationManager {
 	public static final String dmyOrderDMY = "dmy";
 	public static final String dmyOrderMDY = "mdy";
 	
+	public static final String dummyModelFolderPath = "http://sadl.org";
+
+
+	
 	/*
 	 * From the Jena OntModel.java file:
 	 * <p>The language in which to write the model is specified by the

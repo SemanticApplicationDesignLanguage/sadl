@@ -203,12 +203,14 @@ public class ConfigurationManager implements IConfigurationManager {
 				logger.warn("Model folder '" + modelFolderPathname + "' has no ont-policy.rdf file.");
 			} 
 		}
-		else if (getModelFolderUrl() != null) {
+		else if (getModelFolderUrl() != null && !getModelFolderUrl().toString().equals(dummyModelFolderPath)) {
 			logger.debug("creating new mapping model for '" + getModelFolderUrl() + "'");
 			setMappingModel(ModelFactory.createDefaultModel()) ;
 			getMappingModel().read(getModelFolderUrl() + "/" + ONT_POLICY_RDF);
 		}
-		setJenaDocumentMgr(new OntDocumentManager(getMappingModel()));
+		if (getMappingModel() != null) {
+			setJenaDocumentMgr(new OntDocumentManager(getMappingModel()));
+		}
 	}
 	
 	/**
@@ -282,7 +284,7 @@ public class ConfigurationManager implements IConfigurationManager {
 				throw new ConfigurationException("Failed to load configuration file", e);
 			}
 		}
-		else if (getModelFolderUrl() != null) {
+		else if (getModelFolderUrl() != null && !getModelFolderUrl().toString().equals(dummyModelFolderPath)) {
 			getConfigModel().read(getModelFolderUrl() + "/" + CONFIG_FILENAME);
 		}
 	}
