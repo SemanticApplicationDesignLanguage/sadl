@@ -1587,7 +1587,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * @param s
 	 * @return
 	 */
-    private boolean validURI(String s) {
+    protected boolean validURI(String s) {
     	try {
     		java.net.URI uri = new java.net.URI(s);
     		String sch = uri.getScheme();
@@ -1602,6 +1602,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
     		return false;
     	}
     	return true;
+    }
+    
+    protected String getUriScheme(String s) throws URISyntaxException {
+		java.net.URI uri = new java.net.URI(s);
+		return uri.getScheme();
     }
 
 	private String cleanTextForUTF8(String aContent) {
