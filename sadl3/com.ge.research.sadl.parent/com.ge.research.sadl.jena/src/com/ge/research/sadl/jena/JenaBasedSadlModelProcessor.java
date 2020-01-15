@@ -3931,7 +3931,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		getIfTranslator().setTarget(rule);
 		getIfTranslator().setStartingVariableNumber(getVariableNumber());
 		try {
-			rule = getIfTranslator().postProcessRule(rule, element);
+//			rule = getIfTranslator().postProcessRule(rule, element);
+			rule = getIfTranslator().cook(rule);
 		}
 		catch (Exception e) {
 			addError("Fatal error post-processing rule. " + e.getMessage(), element);

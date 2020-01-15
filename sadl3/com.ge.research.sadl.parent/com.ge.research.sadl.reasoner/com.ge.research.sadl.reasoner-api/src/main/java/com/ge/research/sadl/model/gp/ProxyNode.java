@@ -29,6 +29,74 @@ public class ProxyNode extends Node {
 		setProxyFor(_proxyObj);
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		GraphPatternElement gpe = getProxyFor();
+		try {
+			return new ProxyNode(newCopyOfGraphPatternElement(gpe));
+		} catch (InvalidTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * Method to create a new, independent copy of a GraphPatternElement
+	 * @param gpe
+	 * @return
+	 * @throws CloneNotSupportedException 
+	 */
+	private GraphPatternElement newCopyOfGraphPatternElement(GraphPatternElement gpe) throws CloneNotSupportedException {
+		GraphPatternElement newGPE = null;
+		if (gpe instanceof TripleElement) {
+			newGPE = new TripleElement(((TripleElement)gpe).getSubject(), ((TripleElement)gpe).getPredicate(), ((TripleElement)gpe).getObject());
+		}
+		else if (gpe instanceof BuiltinElement) {
+			BuiltinElement oldBE = (BuiltinElement)gpe;
+			BuiltinElement newBE = new BuiltinElement();
+			newBE.setFuncName(oldBE.getFuncName());
+			newBE.setFuncUri(oldBE.getFuncUri());
+			newBE.setFuncPrefix(oldBE.getFuncPrefix());
+			newBE.setArgumentTypes(oldBE.getArgumentTypes());
+			newBE.setReturnTypes(oldBE.getReturnTypes());
+			newBE.setContext(oldBE.getContext());
+			for (Node arg : oldBE.getArguments()) {
+				if (arg instanceof ProxyNode) {
+					newBE.addArgument((Node) ((ProxyNode)arg).clone());
+				}
+				else {
+					newBE.addArgument(arg);
+				}
+			}
+			newGPE = newBE;
+		}
+		else if (gpe instanceof Junction) {
+			Junction oldJ = (Junction) gpe;
+			Junction newJ = new Junction();
+			newJ.setContext(oldJ.getContext());
+			newJ.setJunctionName(oldJ.getJunctionName());
+			if (oldJ.getLhs() instanceof ProxyNode) {
+				newJ.setLhs(((ProxyNode)oldJ.getLhs()).clone());
+			}
+			else {
+				newJ.setLhs(oldJ.getLhs());
+			}
+			if (oldJ.getRhs() instanceof ProxyNode) {
+				newJ.setRhs(((ProxyNode)oldJ.getRhs()).clone());
+			}
+			else {
+				newJ.setRhs(oldJ.getRhs());
+			}
+			newGPE = newJ;
+		}
+		return newGPE;
+	}
+	
 	/**
 	 * Set the GraphPatternElement for which this ProxyNode is proxy
 	 * @param _proxyObj

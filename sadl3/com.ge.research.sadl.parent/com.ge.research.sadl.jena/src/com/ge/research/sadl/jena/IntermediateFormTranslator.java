@@ -3410,16 +3410,19 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			// expand missing patterns and add implied and expanded properties
 			List<GraphPatternElement> givens = rule.getGivens();
 			if (givens != null) {
+				removeUnnecessaryIsAroundTriple(givens);
 				expandMissingPatterns(givens);
 				addImpliedAndExpandedProperties(givens);
 			}
 			List<GraphPatternElement> ifs = rule.getIfs();
 			if (ifs != null) {
+				removeUnnecessaryIsAroundTriple(ifs);
 				expandMissingPatterns(ifs);
 				addImpliedAndExpandedProperties(ifs);
 			}
 			List<GraphPatternElement> thens = rule.getThens();
 			if (thens != null) {
+				removeUnnecessaryIsAroundTriple(thens);
 				expandMissingPatterns(thens);
 				addImpliedAndExpandedProperties(thens);
 			}
@@ -3477,27 +3480,48 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return rule;
 	}
 
-	private void replaceClassesWithVariables(Rule rule) {
+	private void replaceClassesWithVariables(Rule rule) throws TranslationException {
 		List<VariableNode> variables = rule.getRuleVariables();
-		replaceClassesWithVariables(variables, rule.getGivens());
-		replaceClassesWithVariables(variables,rule.getIfs());
-		replaceClassesWithVariables(variables,rule.getThens());
-	}
-
-	private void replaceClassesWithVariables(List<VariableNode> variables, List<GraphPatternElement> gpes) {
-		if (gpes != null) {
-			for (GraphPatternElement gpe : gpes) {
-				replaceClassesWithVariables(variables, gpe);
+		boolean newVarList = false;
+		if (variables == null) {
+			variables = new ArrayList<VariableNode>();
+			newVarList = true;
+		}
+		replaceClassesWithVariables(variables, rule.getGivens(), true);
+		replaceClassesWithVariables(variables,rule.getIfs(), true);
+		replaceClassesWithVariables(variables,rule.getThens(), true);
+		if (newVarList && variables.size() > 0) {
+			for (VariableNode var : variables) {
+				rule.addRuleVariable(var);
+			}
+			newVarList = false;
+		}
+		replaceClassesWithVariables(variables, rule.getGivens(), false);
+		replaceClassesWithVariables(variables,rule.getIfs(), false);
+		replaceClassesWithVariables(variables,rule.getThens(), false);
+		if (newVarList && variables.size() > 0) {
+			for (VariableNode var : variables) {
+				rule.addRuleVariable(var);
 			}
 		}
 	}
 
-	private void replaceClassesWithVariables(List<VariableNode> variables, GraphPatternElement gpe) {
+	private void replaceClassesWithVariables(List<VariableNode> variables, 
+			List<GraphPatternElement> gpes, boolean useOnlyClassesWithContext) throws TranslationException {
+		if (gpes != null) {
+			for (GraphPatternElement gpe : gpes) {
+				replaceClassesWithVariables(variables, gpe, useOnlyClassesWithContext);
+			}
+		}
+	}
+
+	private void replaceClassesWithVariables(List<VariableNode> variables, 
+			GraphPatternElement gpe, boolean useOnlyClassesWithContext) throws TranslationException {
 		if (gpe instanceof TripleElement) {
-			replaceClassesWithVariables(variables, (TripleElement)gpe);
+			replaceClassesWithVariables(variables, (TripleElement)gpe, useOnlyClassesWithContext);
 		}
 		else if (gpe instanceof BuiltinElement) {
-			replaceClassesWithVariables(variables, (BuiltinElement)gpe);
+			replaceClassesWithVariables(variables, (BuiltinElement)gpe, useOnlyClassesWithContext);
 		}
 	}
 
@@ -3505,22 +3529,26 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * Method to replace a class argument to a BuiltinElement with the first variable of the same type (class)
 	 * @param variables
 	 * @param be
+	 * @throws TranslationException 
 	 */
-	private void replaceClassesWithVariables(List<VariableNode> variables, BuiltinElement be) {
+	private void replaceClassesWithVariables(List<VariableNode> variables, 
+			BuiltinElement be, boolean useOnlyClassesWithContext) throws TranslationException {
 		List<Node> args = be.getArguments();
 		int idx = 0;
 		for (Node arg : args) {
 			if (arg instanceof ProxyNode) {
-				replaceClassesWithVariables(variables, ((ProxyNode)arg).getProxyFor());
+				replaceClassesWithVariables(variables, ((ProxyNode)arg).getProxyFor(), useOnlyClassesWithContext);
 			}
-			else if (arg instanceof NamedNode && (((NamedNode)arg).getNodeType().equals(NodeType.ClassNode) ||
+			else if (arg instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)arg).getContext() != null) &&
+					(((NamedNode)arg).getNodeType().equals(NodeType.ClassNode) ||
 					((NamedNode)arg).getNodeType().equals(NodeType.ClassListNode))) {
-				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)arg);
+				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)arg, !useOnlyClassesWithContext);
 				if (matchingVar == null) {
 					matchingVar = new VariableNode(getNewVar());
-//					matchingVar.setNamespace(((NamedNode) node).getNamespace());
-//					matchingVar.setNodeType(((NamedNode)node).getNodeType());
-//					matchingVar.setPrefix(((NamedNode)node).getPrefix());
+					matchingVar.setNamespace(getModelProcessor().getModelNamespace());
+					matchingVar.setPrefix(getModelProcessor().getModelAlias());
+					matchingVar.setType(arg);
+					variables.add(matchingVar);
 				}
 				args.set(idx, matchingVar);
 			}
@@ -3533,17 +3561,20 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * Method to replace class subject and object in a TripleElement with the first variable of the same type (class)
 	 * @param variables
 	 * @param tr
+	 * @throws TranslationException 
 	 */
-	private void replaceClassesWithVariables(List<VariableNode> variables, TripleElement tr) {
-		if (tr.getSubject() instanceof NamedNode) {
+	private void replaceClassesWithVariables(List<VariableNode> variables, 
+			TripleElement tr, boolean useOnlyClassesWithContext) throws TranslationException {
+		if (tr.getSubject() instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)tr.getSubject()).getContext() != null)) {
 			if (((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassNode) ||
 					((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassListNode)) {
-				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getSubject());
+				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getSubject(), !useOnlyClassesWithContext);
 				if (matchingVar == null) {
 					matchingVar = new VariableNode(getNewVar());
-//					matchingVar.setNamespace(((NamedNode) node).getNamespace());
-//					matchingVar.setNodeType(((NamedNode)node).getNodeType());
-//					matchingVar.setPrefix(((NamedNode)node).getPrefix());
+					matchingVar.setNamespace(getModelProcessor().getModelNamespace());
+					matchingVar.setPrefix(getModelProcessor().getModelAlias());
+					matchingVar.setType(((NamedNode)tr.getSubject()));
+					variables.add(matchingVar);
 				}
 				tr.setSubject(matchingVar);
 			}
@@ -3551,28 +3582,48 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (tr.getObject() instanceof NamedNode) {
 			if (((NamedNode)tr.getObject()).getNodeType().equals(NodeType.ClassNode) ||
 					((NamedNode)tr.getObject()).getNodeType().equals(NodeType.ClassListNode)) {
-				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getObject());
+				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getObject(), !useOnlyClassesWithContext);
 				if (matchingVar != null && tr.getSubject().equals(matchingVar)) {
 					// this is the definition of an existing variable
 					return;
 				}
 				if (matchingVar == null) {
 					matchingVar = new VariableNode(getNewVar());
-//					matchingVar.setNamespace(((NamedNode) node).getNamespace());
-//					matchingVar.setNodeType(((NamedNode)node).getNodeType());
-//					matchingVar.setPrefix(((NamedNode)node).getPrefix());
+					matchingVar.setNamespace(getModelProcessor().getModelNamespace());
+					matchingVar.setPrefix(getModelProcessor().getModelAlias());
+					matchingVar.setType(((NamedNode)tr.getObject()));
+					variables.add(matchingVar);
 				}
 				tr.setObject(matchingVar);
 			}
 		}
 	}
 
-	private VariableNode findVariableOfRightType(List<VariableNode> variables, NamedNode subject) {
+	private VariableNode findVariableOfRightType(List<VariableNode> variables, 
+			NamedNode subject, boolean matchOnSubclasses) {
 		String classUri = subject.getURI();
-		for (VariableNode v : variables) {
-			if (v.getType().getURI().equals(classUri)) {
-				return v;
+		if (variables != null) {
+			for (VariableNode v : variables) {
+				if (v.getType().getURI().equals(classUri)) {
+					return v;
+				}
 			}
+			if (matchOnSubclasses) {
+				for (VariableNode v : variables) {
+					OntClass cls = getTheJenaModel().getOntClass(classUri);
+					if (cls != null) {
+						ExtendedIterator<OntClass> scitr = cls.listSubClasses();
+						while (scitr.hasNext()) {
+							OntClass sc = scitr.next();
+							if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
+								scitr.close();
+								return v;
+							}
+						}
+					}
+				}
+			}
+
 		}
 		return null;
 	}
@@ -4469,6 +4520,55 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (addMissingTriplePatternsReturnValueByReqName != null) {
 			addMissingTriplePatternsReturnValueByReqName.clear();
 		}
+	}
+
+	/**
+	 * Method to remove an unnecessary BuiltinElement of type "is" (comparison or assignment) which has a
+	 * TripleElement with null object on the left and a concrete value on the right that cana be moved into
+	 * the TripleElement as object.
+	 * @param gpes
+	 */
+	protected void removeUnnecessaryIsAroundTriple(List<GraphPatternElement> gpes) {
+		for (int i = gpes.size() - 1; i >= 0; i--) {
+			GraphPatternElement gpe = gpes.get(i);
+			TripleElement resultingTriple = removeUnnecessaryIsAroundTriple(gpe);
+			if (resultingTriple != null) {
+				gpes.set(i, resultingTriple);
+			}
+		}
+		
+	}
+
+	/**
+	 * Method to do the detailed work of removing an unnecessary "is" built-in 
+	 * @param gpe
+	 * @return
+	 */
+	private TripleElement removeUnnecessaryIsAroundTriple(GraphPatternElement gpe) {
+		if (gpe instanceof BuiltinElement) {
+			BuiltinElement be = (BuiltinElement) gpe;
+			if (be.getFuncType().equals(BuiltinType.Equal) || be.getFuncType().equals(BuiltinType.Assign)) {
+				if ((be.getArguments().get(1) instanceof Literal || be.getArguments().get(1) instanceof ConstantNode || 
+						(be.getArguments().get(1) instanceof NamedNode && ((NamedNode)be.getArguments().get(1)).getNodeType().equals(NodeType.InstanceNode))) &&
+						be.getArguments().get(0) instanceof ProxyNode && ((ProxyNode)be.getArguments().get(0)).getProxyFor() instanceof TripleElement && 
+						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null) {
+					((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(be.getArguments().get(1));
+					return (TripleElement) ((ProxyNode)be.getArguments().get(0)).getProxyFor();
+				}
+			}
+			else if (be.getArguments() != null && be.getArguments().size() > 0) {
+				for (int i = 0; i < be.getArguments().size(); i++) {
+					Node arg = be.getArguments().get(i);
+					if (arg instanceof ProxyNode && ((ProxyNode)arg).getProxyFor() instanceof BuiltinElement) {
+						TripleElement resultingTriple = removeUnnecessaryIsAroundTriple((GraphPatternElement)((ProxyNode)arg).getProxyFor());
+						if (resultingTriple != null) {
+							((ProxyNode)arg).setProxyFor(resultingTriple);
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 }	

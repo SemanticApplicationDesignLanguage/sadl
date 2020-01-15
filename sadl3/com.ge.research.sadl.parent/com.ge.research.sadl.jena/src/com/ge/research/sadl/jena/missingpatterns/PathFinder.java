@@ -447,7 +447,7 @@ public class PathFinder {
 				
 				//Subject is property
 				if (((TripleElement)gpe).getSubject() instanceof NamedNode && isProperty(((TripleElement)gpe).getSubject())) {
-					DirectedPath replacement = addNodeAndContainerToBeInvestiaged(subj, gpe, PatternType.Replacement);
+					DirectedPath replacement = addNodeAndContainerToBeInvestigated(subj, gpe, PatternType.Replacement);
 					if (replacement != null) {
 						fillInUpper(replacement);
 						if (!inContext && replacement.getSubject() != null && !roots.contains(replacement.getSubject())) {
@@ -489,7 +489,7 @@ public class PathFinder {
 					Node arg = args.get(i);
 					Resource rsrc = preProcess(variablesUsed, knownPaths, roots, arg, inContext, PartOfSpeech.Argument);
 					if (arg instanceof NamedNode && isProperty(arg)) {
-						DirectedPath replacement = addNodeAndContainerToBeInvestiaged(rsrc, gpe, PatternType.Replacement);
+						DirectedPath replacement = addNodeAndContainerToBeInvestigated(rsrc, gpe, PatternType.Replacement);
 						if (replacement != null) {
 							fillInUpper(replacement);
 							if (!inContext && replacement.getSubject() != null && !roots.contains(replacement.getSubject())) {
@@ -1437,7 +1437,7 @@ public class PathFinder {
 	 * @return
 	 * @throws TranslationException
 	 */
-	protected DirectedPath addNodeAndContainerToBeInvestiaged(Resource subject, GraphPatternElement container, PatternType patternType) throws TranslationException {
+	protected DirectedPath addNodeAndContainerToBeInvestigated(Resource subject, GraphPatternElement container, PatternType patternType) throws TranslationException {
 		NamedNode node = getIftranslator().getNamedNodeFromResourceMap(subject);
 		if (nodesToInvestigateWithContext == null) {
 			nodesToInvestigateWithContext = new HashMap<NamedNode, List<GraphPatternElement>>();
