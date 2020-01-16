@@ -946,6 +946,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 			JunctionType jtype = ((Junction)gpe).getJunctionType();
 			if (jtype.equals(JunctionType.Conj)) {
 				Object lhs = ((Junction)gpe).getLhs();
+				if (lhs instanceof ProxyNode) {
+					lhs = ((ProxyNode)lhs).getProxyFor();
+				}
 				if (lhs instanceof List<?>) {
 					sb.append(graphPatternElementsToJenaRuleString((List<GraphPatternElement>)lhs, rulePart));
 				}
@@ -956,6 +959,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 					throw new TranslationException("Unexpected junction lhs type: " + lhs.getClass());
 				}
 				Object rhs = ((Junction)gpe).getRhs();
+				if (rhs instanceof ProxyNode) {
+					rhs = ((ProxyNode)rhs).getProxyFor();
+				}
 				if (rhs instanceof List<?>) {
 					sb.append(", ");
 					sb.append(graphPatternElementsToJenaRuleString((List<GraphPatternElement>)rhs, rulePart));
@@ -1413,6 +1419,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 			}
 			if (node instanceof RDFTypeNode) {
 //				registerPrefix("rdf", "");	I don't think these need an explicit prefix awc 11/23/2010
+				registerPrefix("rdf", RDF.getURI());
 				if (target.equals(TranslationTarget.QUERY_TRIPLE) || target.equals(TranslationTarget.QUERY_FILTER)) {
 					return "<rdf:type>";
 				}
@@ -1427,10 +1434,10 @@ public class JenaTranslatorPlugin implements ITranslator {
 					if (prefix != null) {
 						registerPrefix(prefix, ((NamedNode)node).getNamespace());
 					}
-					else {
-						// this must be the default namespace
-						((NamedNode)node).setPrefix("");
-					} 
+//					else {
+//						// this must be the default namespace		// awc 1/16/2020: this is demonstrably false
+//						((NamedNode)node).setPrefix("");
+//					} 
 					nts = ((NamedNode)node).getNamespace() + ((NamedNode)node).getName();
 				}
 				else {
