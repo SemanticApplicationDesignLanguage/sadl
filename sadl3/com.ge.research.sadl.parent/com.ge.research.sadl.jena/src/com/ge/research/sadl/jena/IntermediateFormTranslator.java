@@ -66,6 +66,7 @@ import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.Expression;
@@ -81,6 +82,7 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /**
@@ -3404,7 +3406,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		try {
 			// find and add missing pattern triples
 			if (!rule.isMissingPatternsAdded()) {
-				addMissingTriplePatterns(getTheJenaModel(), rule);
+				try {
+					addMissingTriplePatterns(getTheJenaModel(), rule);
+				}
+				catch (TranslationException e) {
+					addError(new IFTranslationError(e.getMessage()));
+				}
 			}
 			
 			// expand missing patterns and add implied and expanded properties
@@ -3474,8 +3481,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			replaceClassesWithVariables(rule);
 			
 		} catch (Exception e) {
-			addError(new IFTranslationError("Translation to Intermediate Form encountered error (" + e.toString() + ")while 'cooking' IntermediateForm."));
-			e.printStackTrace();
+			addError(new IFTranslationError("Translation to Intermediate Form encountered error (" + e.toString() + ") while 'cooking' IntermediateForm.", null, ErrorType.WARNING));
+//			e.printStackTrace();
 		} 
 		return rule;
 	}
@@ -3565,6 +3572,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 */
 	private void replaceClassesWithVariables(List<VariableNode> variables, 
 			TripleElement tr, boolean useOnlyClassesWithContext) throws TranslationException {
+		if (tr.getPredicate().getURI().equals(RDF.type.getURI()) || tr.getPredicate().getURI().equals(RDFS.subClassOf.getURI())) {
+			return;
+		}
 		if (tr.getSubject() instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)tr.getSubject()).getContext() != null)) {
 			if (((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassNode) ||
 					((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassListNode)) {
@@ -3604,14 +3614,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		String classUri = subject.getURI();
 		if (variables != null) {
 			for (VariableNode v : variables) {
-				if (v.getType().getURI().equals(classUri)) {
+				if (v.getType() != null && v.getType().getURI().equals(classUri)) {
 					return v;
 				}
 			}
 			if (matchOnSubclasses) {
 				for (VariableNode v : variables) {
 					OntClass cls = getTheJenaModel().getOntClass(classUri);
-					if (cls != null) {
+					if (cls != null && v.getType() != null) {
 						ExtendedIterator<OntClass> scitr = cls.listSubClasses();
 						while (scitr.hasNext()) {
 							OntClass sc = scitr.next();
