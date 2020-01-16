@@ -453,7 +453,9 @@ public class PathFinder {
 						if (!inContext && replacement.getSubject() != null && !roots.contains(replacement.getSubject())) {
 							roots.add(replacement.getSubject());
 						}
-						knownPaths.add(replacement);
+						if (!knownPaths.contains(replacement)) {
+							knownPaths.add(replacement);
+						}
 						((NamedNode) ((TripleElement)gpe).getSubject()).setMissingTripleReplacement(createReplacementTriple(replacement));
 						addMissingTripleReplacement((NamedNode) ((TripleElement)gpe).getSubject(), replacement);
 					}
@@ -480,7 +482,9 @@ public class PathFinder {
 				List<DirectedPath> dps = getDirectedPathFromGPE(gpe);
 				for (DirectedPath dp : dps) {
 					dp.setPathSource(DirectedPathSource.LocalRestriction);
-					knownPaths.add(dp);
+					if (!knownPaths.contains(dp)) {
+						knownPaths.add(dp);
+					}
 				}
 			}
 			List<Node> args = ((BuiltinElement)gpe).getArguments();
@@ -495,7 +499,9 @@ public class PathFinder {
 							if (!inContext && replacement.getSubject() != null && !roots.contains(replacement.getSubject())) {
 								roots.add(replacement.getSubject());
 							}
-							knownPaths.add(replacement);
+							if (!knownPaths.contains(replacement)) {
+								knownPaths.add(replacement);
+							}
 							((NamedNode) arg).setMissingTripleReplacement(createReplacementTriple(replacement));
 							addMissingTripleReplacement((NamedNode) arg, replacement);
 						}
@@ -1005,7 +1011,8 @@ public class PathFinder {
 								NamedNode nn = nnitr.next();
 								if (nn.getMissingTripleReplacement() != null) {
 									GraphPatternElement gpe = nn.getMissingTripleReplacement().getProxyFor();
-									if (gpe instanceof TripleElement && ((TripleElement)gpe).getSubject().equals(getIftranslator().getNamedNodeFromResourceMap(root))) {
+									if (gpe instanceof TripleElement && ((TripleElement)gpe).getSubject() != null && 
+											((TripleElement)gpe).getSubject().equals(getIftranslator().getNamedNodeFromResourceMap(root))) {
 										((TripleElement)gpe).setSubject(getIftranslator().getNamedNodeFromResourceMap(sprcls));
 									}
 								}
