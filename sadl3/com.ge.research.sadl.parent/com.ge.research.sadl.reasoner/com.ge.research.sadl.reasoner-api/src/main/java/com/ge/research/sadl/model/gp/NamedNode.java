@@ -21,9 +21,6 @@ package com.ge.research.sadl.model.gp;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
-import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
-
 /**
  * Class to capture a named concept (SadlResource) in the SADL grammar
  * @author 200005201
@@ -36,6 +33,9 @@ public class NamedNode extends Node {
 		FunctionNode, VariableNode}
 
 	// editor object for marker addition to editor
+	//	Note: if the NamedNode is created from an actual declaration, it should have a context.
+	//		if it is created by missing pattern detection, then it will not have a context and is subject to replacement by
+	//		a typed variable.
 	private Object context;
 
 	private Node mLocalizedType = null;

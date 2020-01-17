@@ -452,6 +452,11 @@ public class ExecuteCommand implements IApplication {
                             sadlPreferences.put(
                                     SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.getId(),
                                     sadlValue);
+                        } else if (sadlLabel.equals(
+                                "FindAndExpandMissingPatternsInTranslation")) {
+                            sadlPreferences.put(
+                                    SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS.getId(),
+                                    sadlValue);
                         } else if (sadlLabel.equals("TypeCheckingWarningOnly")) {
                             sadlPreferences.put(
                                     SadlPreferences.TYPE_CHECKING_WARNING_ONLY.getId(), sadlValue);

@@ -37,6 +37,7 @@ import static com.ge.research.sadl.preferences.SadlPreferences.N_TRIPLE_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.OWL_MODEL_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.PREFIXES_ONLY_AS_NEEDED;
 import static com.ge.research.sadl.preferences.SadlPreferences.P_USE_ARTICLES_IN_VALIDATION;
+import static com.ge.research.sadl.preferences.SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS;
 import static com.ge.research.sadl.preferences.SadlPreferences.RDF_XML_ABBREV_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.RDF_XML_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.SADL_BASE_URI;
@@ -196,6 +197,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		// Translation Settings
 		Composite translationSettings = createSettingsGroup(getFieldEditorParent(), SWT.NONE, "Translation Settings");
 		addField(new BooleanFieldEditorExt(P_USE_ARTICLES_IN_VALIDATION.getId(), "Use indefinite and definite articles in validation and translation", translationSettings));
+		addField(new BooleanFieldEditorExt(FIND_AND_EXPAND_MISSING_PATTERNS.getId(), "Find and expand missing patterns in translation", translationSettings));
 		addField(new BooleanFieldEditorExt(IGNORE_UNITTEDQUANTITIES.getId(), "Ignore Unitted Quantities (treat as numeric only) during translation", translationSettings));
 		addField(new BooleanFieldEditorExt(CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(), "Translate multiple-class domain or range as union class (owl:unionOf)", translationSettings));
 

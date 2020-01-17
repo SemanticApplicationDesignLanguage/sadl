@@ -456,6 +456,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		this.useArticlesInValidation = useArticlesInValidation;
 	}
 	
+	private void setExpandMissingPatternsInValidation(boolean expandMissingPatternsInValidation) {
+		this.expandMissingPatternsInValidation = expandMissingPatternsInValidation;	
+	}
+	
 	public void setTypeUnsupportedDownstream(boolean useTypeUnsupportedDownstreamWarnings) {
 		this.typeUnsupportedDownstreamWarnings = useTypeUnsupportedDownstreamWarnings;
 	}
@@ -842,6 +846,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected boolean ignoreUnittedQuantities;
 
 	private boolean useArticlesInValidation;
+	
+	private boolean expandMissingPatternsInValidation;
 
 	protected boolean domainAndRangeAsUnionClasses = true;
 
@@ -1234,6 +1240,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (useArticles != null) {
 			setUseArticlesInValidation(Boolean.parseBoolean(useArticles));
 		}
+		setExpandMissingPatternsInValidation(false);
+		String expandMissingPatterns = context.getPreferenceValues().getPreference(SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS);
+		if (expandMissingPatterns != null) {
+			setExpandMissingPatternsInValidation(Boolean.parseBoolean(expandMissingPatterns));
+		}
+		
 		domainAndRangeAsUnionClasses = true;
 		String domainAndRangeAsUnionClassesStr = context.getPreferenceValues()
 				.getPreference(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES);
@@ -3808,7 +3820,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (cn == null) {
 			return null;
 		}
-		return conceptNameToNamedNode(cn);
+		NamedNode nn = conceptNameToNamedNode(cn);
+		nn.setContext(rtype);
+		return nn;
 	}
 
 	public NamedNode conceptNameToNamedNode(ConceptName cn) throws TranslationException, InvalidNameException {
@@ -3921,8 +3935,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		getIfTranslator().setTarget(rule);
 		getIfTranslator().setStartingVariableNumber(getVariableNumber());
 		try {
-//			rule = getIfTranslator().postProcessRule(rule, element);
-			rule = getIfTranslator().cook(rule);
+			if (isExpandMissingPatternsInValidation()) {
+				rule = getIfTranslator().cook(rule);				
+			}
+			else {
+				rule = getIfTranslator().postProcessRule(rule, element);
+			}
 		}
 		catch (Exception e) {
 			addError("Fatal error post-processing rule. " + e.getMessage(), element);
@@ -4672,7 +4690,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				while (typeitr.hasNext()) {
 					com.hp.hpl.jena.rdf.model.Resource typ = typeitr.next();
 					if (typ.isURIResource()) {
-						typesOfType.add(validateNamedNode(new NamedNode(typ.getURI(), NodeType.ClassNode)));
+						NamedNode nn = new NamedNode(typ.getURI(), NodeType.ClassNode);
+						typesOfType.add(validateNamedNode(nn));
 					}
 				}
 			}
@@ -6060,6 +6079,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				if (pseudoObj != null) {
 					NamedNode poNode = new NamedNode(pseudoObj);
+					poNode.setContext(pf);
 					poNode.setNodeType(NodeType.DataTypeNode);
 					checkTripleRange(subjeo, predeo, (EObject) null, expr, subjNode, predNode, pred, pnodetype, poNode,
 							poNode.isList());
@@ -7171,6 +7191,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else if (cnstval.equals("a type")) {
 				trSubj = processExpression(subject);
 				trPred = new NamedNode(RDFS.subClassOf.getURI());  // new RDFTypeNode();
+				((NamedNode)trPred).setContext(predicate);
 				((NamedNode)trPred).setNodeType(NodeType.ObjectProperty);
 				return new TripleElement((Node)null, (Node)trPred, (Node)trSubj);
 			} else {
@@ -7602,6 +7623,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return vn;
 		} else if (nm != null) {
 			NamedNode n = new NamedNode(createUri(ns, nm), ontConceptTypeToNodeType(type));
+			n.setContext(expr);
 			n.setNamespace(ns);
 			n.setPrefix(prfx);
 			try {
@@ -13684,6 +13706,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	public boolean isUseArticlesInValidation() {
 		return useArticlesInValidation;
+	}
+
+	public boolean isExpandMissingPatternsInValidation() {
+		return expandMissingPatternsInValidation;
 	}
 
 	enum SIDE {LEFT, RIGHT};

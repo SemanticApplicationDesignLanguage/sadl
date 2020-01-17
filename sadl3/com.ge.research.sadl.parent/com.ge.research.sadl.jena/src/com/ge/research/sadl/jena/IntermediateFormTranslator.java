@@ -3478,7 +3478,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			// now post-process
 			postProcessRule(rule, null);
-			replaceClassesWithVariables(rule);
+//			replaceClassesWithVariables(rule);
 			
 		} catch (Exception e) {
 			addError(new IFTranslationError("Translation to Intermediate Form encountered error (" + e.toString() + ") while 'cooking' IntermediateForm.", null, ErrorType.WARNING));
@@ -3546,7 +3546,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			if (arg instanceof ProxyNode) {
 				replaceClassesWithVariables(variables, ((ProxyNode)arg).getProxyFor(), useOnlyClassesWithContext);
 			}
-			else if (arg instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)arg).getContext() != null) &&
+			else if (arg instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)arg).getContext() == null) &&
 					(((NamedNode)arg).getNodeType().equals(NodeType.ClassNode) ||
 					((NamedNode)arg).getNodeType().equals(NodeType.ClassListNode))) {
 				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)arg, !useOnlyClassesWithContext);
@@ -3572,7 +3572,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 */
 	private void replaceClassesWithVariables(List<VariableNode> variables, 
 			TripleElement tr, boolean useOnlyClassesWithContext) throws TranslationException {
-		if (tr.getPredicate().getURI().equals(RDF.type.getURI()) || tr.getPredicate().getURI().equals(RDFS.subClassOf.getURI())) {
+		if (tr.getPredicate().getURI().equals(RDF.type.getURI()) || 
+				tr.getPredicate().getURI().equals(RDFS.subClassOf.getURI())) {
 			return;
 		}
 		if (tr.getSubject() instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)tr.getSubject()).getContext() != null)) {
