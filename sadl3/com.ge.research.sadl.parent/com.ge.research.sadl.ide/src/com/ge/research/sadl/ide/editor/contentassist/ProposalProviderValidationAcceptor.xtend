@@ -48,7 +48,7 @@ class ProposalProviderValidationAcceptor implements ValidationAcceptor, Predicat
 		];
 	}
 
-	override add(String message, EObject context, Severity severity) {
+	override add(String message, EObject context, Severity severity, String issueCode, String... issueData) {
 		issues.get(severity).put(context, message);
 	}
 

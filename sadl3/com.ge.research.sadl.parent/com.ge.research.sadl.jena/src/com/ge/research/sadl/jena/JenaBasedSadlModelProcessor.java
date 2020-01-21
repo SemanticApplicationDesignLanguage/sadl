@@ -9426,8 +9426,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 	
 	public void addError(String msg, EObject context) {
+		addError(msg, context, null);
+	}
+
+	public void addError(String msg, EObject context, String issueCode, String... issueData) {
 		if (getIssueAcceptor() != null) {
-			getIssueAcceptor().addError(msg, context);
+			getIssueAcceptor().add(msg, context, Severity.ERROR, issueCode, issueData);
 			if (isSyntheticUri(null, getCurrentResource())) {
 				if (getMetricsProcessor() != null) {
 					getMetricsProcessor().addMarker(null, MetricsProcessor.ERROR_MARKER_URI,
@@ -9440,8 +9444,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	public void addWarning(String msg, EObject context) {
+		addWarning(msg, context, null);
+	}
+
+	public void addWarning(String msg, EObject context, String issueCode, String... issueData) {
 		if (getIssueAcceptor() != null) {
-			getIssueAcceptor().addWarning(msg, context);
+			getIssueAcceptor().add(msg, context, Severity.WARNING, issueCode, issueData);
 			if (isSyntheticUri(null, getCurrentResource())) {
 				if (getMetricsProcessor() != null) {
 					getMetricsProcessor().addMarker(null, MetricsProcessor.WARNING_MARKER_URI,
@@ -9454,8 +9462,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	public void addInfo(String msg, EObject context) {
+		addInfo(msg, context, null);
+	}
+
+	public void addInfo(String msg, EObject context, String issueCode, String... issueData) {
 		if (getIssueAcceptor() != null) {
-			getIssueAcceptor().addInfo(msg, context);
+			getIssueAcceptor().add(msg, context, Severity.INFO, issueCode, issueData);
 			if (isSyntheticUri(null, getCurrentResource())) {
 				if (getMetricsProcessor() != null) {
 					getMetricsProcessor().addMarker(null, MetricsProcessor.INFO_MARKER_URI,
@@ -10122,7 +10134,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						StmtIterator stmtitr = getTheJenaModel().listStatements(null, RDFS.label, lit);
 						while (stmtitr.hasNext()) {
 							com.hp.hpl.jena.rdf.model.Resource replacement = stmtitr.nextStatement().getSubject();
-							addWarning("Consider replacing '" + txt + "' with '" + replacement.getLocalName() + "'", contr);
+							addWarning("Consider replacing '" + txt + "' with '" + replacement.getLocalName() + "'", contr, "REPLACE_ALIAS", replacement.getLocalName());
 						}
 					}
 			    	String psrc = getSourceText(prop);

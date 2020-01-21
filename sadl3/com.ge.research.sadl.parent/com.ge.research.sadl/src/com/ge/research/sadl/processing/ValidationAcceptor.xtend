@@ -28,31 +28,34 @@ import static org.eclipse.xtext.diagnostics.Severity.*
  * @author akos.kitta
  */
 interface ValidationAcceptor {
-	
+
 	/**
 	 * Shared NOOP validation acceptor.
 	 */
 	val NOOP = new ValidationAcceptor() {
-		
-		@Override
-		override add(String message, EObject context, Severity severity) {
+
+		override add(String message, EObject context, Severity severity, String issueCode, String... issueData) {
 			// NOOP
 		}
-		
+
 	}
-	
+
 	def void addInfo(String message, EObject context) {
-		add(message, context, INFO)
+		add(message, context, INFO, null)
 	}
-	
+
 	def void addError(String message, EObject context) {
-		add(message, context, ERROR)
+		add(message, context, ERROR, null)
 	}
-	
+
 	def void addWarning(String message, EObject context) {
-		add(message, context, WARNING)
+		add(message, context, WARNING, null)
 	}
-	
-	def void add(String message, EObject context, Severity severity);
-	
+
+	def void add(String message, EObject context, Severity severity) {
+		add(message, context, severity, null);
+	}
+
+	def void add(String message, EObject context, Severity severity, /* nullable */ String issueCode, String... issueData);
+
 }

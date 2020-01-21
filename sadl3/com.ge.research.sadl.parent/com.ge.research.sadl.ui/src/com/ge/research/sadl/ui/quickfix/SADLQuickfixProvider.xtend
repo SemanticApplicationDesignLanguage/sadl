@@ -64,6 +64,21 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 	
 	@Inject
 	IURIEditorOpener editorOpener;
+	
+	@Fix("REPLACE_ALIAS")
+	def void replaceAlias(Issue issue, IssueResolutionAcceptor acceptor) {
+		val data = issue.data
+		if (data !== null && data.size === 1) {
+			val replacement = data.get(0)
+			if (!replacement.nullOrEmpty) {
+				val label = "Change to '" + replacement + "'"
+				acceptor.accept(issue, label, label, null, [ context |
+					val xtextDocument = context.xtextDocument
+					xtextDocument.replace(issue.offset, issue.length, replacement)
+				])
+			}
+		}
+	}
 
 	@Fix(AmbiguousNameErrorEObjectDescription.AMBIGUOUS_NAME_ISSUE_CODE)
 	def fixAmbigupusNames(Issue issue, IssueResolutionAcceptor acceptor) {
