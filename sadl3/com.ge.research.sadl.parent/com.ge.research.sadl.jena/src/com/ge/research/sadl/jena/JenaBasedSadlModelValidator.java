@@ -3064,31 +3064,73 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				getModelProcessor().addTypeCheckingError("Number of arguments does not match function declaration", expression);
 			}
 		}
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < args.size(); i++) {
-			Expression arg = args.get(i);
-			SadlParameterDeclaration param = null;
-			if (variableNumArgs) {
-				param = (i >= minNumArgs && minNumArgs > 0) ? params.get(minNumArgs - 1) : params.get(i);
-			}
-			else if (i < params.size()) {
-				param = params.get(i);
-			}
-			if (param != null) {
-				if (param.getEllipsis() == null) {
-					validateBinaryOperationByParts(expression, arg, param.getType(), "argument", sb, false);
-					if (sb.length() > 0) {
-						getModelProcessor().addTypeCheckingError(sb.toString(), expression);
-					}
+		// if this is a built-in with graph pattern arguments then don't check type except range of final property
+		if (!isGraphPatternArguments(args)) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < args.size(); i++) {
+				Expression arg = args.get(i);
+				SadlParameterDeclaration param = null;
+				if (variableNumArgs) {
+					param = (i >= minNumArgs && minNumArgs > 0) ? params.get(minNumArgs - 1) : params.get(i);
 				}
-				else {
-					// don't try to typecheck if it's an ellipsis
-					break;
+				else if (i < params.size()) {
+					param = params.get(i);
+				}
+				if (param != null) {
+					if (param.getEllipsis() == null) {
+						validateBinaryOperationByParts(expression, arg, param.getType(), "argument", sb, false);
+						if (sb.length() > 0) {
+							getModelProcessor().addTypeCheckingError(sb.toString(), expression);
+						}
+					}
+					else {
+						// don't try to typecheck if it's an ellipsis
+						break;
+					}
 				}
 			}
 		}
 	}
 	
+	/**
+	 * Method to examine the arguments of a built-in and determine if they match a graph pattern type built-in
+	 * @param args
+	 * @return
+	 */
+    public boolean isGraphPatternArguments(EList<Expression> args) {
+    	for (Expression n : args) {
+    		// See GeUtils.isGraphPatternInput for how this kind of built-in is tested during Jena Rule Engine processing.
+    		// In that method this test is for an argument that is neither a URI node nor a rule variable node
+    		if (!(n instanceof Name)) {
+    			return false;
+    		}
+    	}
+    	// verify--the 2nd and then every 3rd arg is a property
+    	for (int i = 1; i < args.size(); i = i + 3) {
+    		Expression n = args.get(i);
+    		boolean isProp;
+			try {
+				isProp = isProperty(declarationExtensions.getOntConceptType(((Name)n).getName()));
+			} catch (CircularDefinitionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+    		if (!isProp) {
+     			return false;
+    		}
+    	}
+    	return true;
+    }
+
+	protected static boolean isProperty(OntConceptType oct) {
+		if (oct.equals(OntConceptType.CLASS_PROPERTY) || oct.equals(OntConceptType.DATATYPE_PROPERTY)
+				|| oct.equals(OntConceptType.RDF_PROPERTY)) {
+			return true;
+		}
+		return false;
+	}
+
 	private TypeCheckInfo getFunctionType(SadlResource fsr) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if(fsr.eContainer() instanceof EquationStatement){
 			EquationStatement es = (EquationStatement) fsr.eContainer();

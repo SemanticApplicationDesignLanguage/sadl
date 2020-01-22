@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.ge.research.sadl.jena.IntermediateFormTranslator;
+import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
 import com.ge.research.sadl.jena.missingpatterns.DirectedPath.DirectedPathSource;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -17,11 +18,14 @@ import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.hp.hpl.jena.graph.Node_URI;
+import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
@@ -34,9 +38,14 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.reasoner.rulesys.Builtin;
+import com.hp.hpl.jena.reasoner.rulesys.Node_RuleVariable;
+import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
+import com.hp.hpl.jena.util.iterator.ClosableIterator;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.OWL2;
+import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
 /*
@@ -487,23 +496,27 @@ public class PathFinder {
 					}
 				}
 			}
+			
 			List<Node> args = ((BuiltinElement)gpe).getArguments();
 			if (args != null) {
-				for (int i = 0; i < args.size(); i++) {
-					Node arg = args.get(i);
-					Resource rsrc = preProcess(variablesUsed, knownPaths, roots, arg, inContext, PartOfSpeech.Argument);
-					if (arg instanceof NamedNode && isProperty(arg)) {
-						DirectedPath replacement = addNodeAndContainerToBeInvestigated(rsrc, gpe, PatternType.Replacement);
-						if (replacement != null) {
-							fillInUpper(replacement);
-							if (!inContext && replacement.getSubject() != null && !roots.contains(replacement.getSubject())) {
-								roots.add(replacement.getSubject());
+				// check to see if this built-in contains a set of graph patterns; if so do not process its arguments.
+				if (!isGraphPatternArguments(args)) {			
+					for (int i = 0; i < args.size(); i++) {
+						Node arg = args.get(i);
+						Resource rsrc = preProcess(variablesUsed, knownPaths, roots, arg, inContext, PartOfSpeech.Argument);
+						if (arg instanceof NamedNode && isProperty(arg)) {
+							DirectedPath replacement = addNodeAndContainerToBeInvestigated(rsrc, gpe, PatternType.Replacement);
+							if (replacement != null) {
+								fillInUpper(replacement);
+								if (!inContext && replacement.getSubject() != null && !roots.contains(replacement.getSubject())) {
+									roots.add(replacement.getSubject());
+								}
+								if (!knownPaths.contains(replacement)) {
+									knownPaths.add(replacement);
+								}
+								((NamedNode) arg).setMissingTripleReplacement(createReplacementTriple(replacement));
+								addMissingTripleReplacement((NamedNode) arg, replacement);
 							}
-							if (!knownPaths.contains(replacement)) {
-								knownPaths.add(replacement);
-							}
-							((NamedNode) arg).setMissingTripleReplacement(createReplacementTriple(replacement));
-							addMissingTripleReplacement((NamedNode) arg, replacement);
 						}
 					}
 				}
@@ -516,6 +529,39 @@ public class PathFinder {
 		return result;
 	}
 	
+	/**
+	 * Method to examine the arguments of a built-in and determine if they match a graph pattern type built-in
+	 * @param args
+	 * @return
+	 */
+    public boolean isGraphPatternArguments(List<Node> args) {
+    	for (Node n : args) {
+    		// See GeUtils.isGraphPatternInput for how this kind of built-in is tested during Jena Rule Engine processing.
+    		// In that method this test is for an argument that is neither a URI node nor a rule variable node
+    		if (!(n instanceof NamedNode) && !(n instanceof VariableNode)) {
+    			return false;
+    		}
+    	}
+    	// verify--the 2nd and then every 3rd arg is a property
+    	for (int i = 1; i < args.size(); i = i + 3) {
+    		Node n = args.get(i);
+    		boolean isProp = (n instanceof NamedNode) && isProperty(((NamedNode)n).getNodeType());
+    		if (!isProp) {
+     			return false;
+    		}
+    	}
+    	return true;
+    }
+
+
+	protected static boolean isProperty(NodeType oct) {
+		if (oct.equals(NodeType.ObjectProperty) || oct.equals(NodeType.DataTypeProperty)
+				|| oct.equals(NodeType.PropertyNode)) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Method to validate a DirectedPath by trying to fill in blank subject and/or object
 	 * @param dp

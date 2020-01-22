@@ -456,10 +456,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		this.useArticlesInValidation = useArticlesInValidation;
 	}
 	
-	private void setExpandMissingPatternsInValidation(boolean expandMissingPatternsInValidation) {
+	public boolean isUseArticlesInValidation() {
+		return useArticlesInValidation;
+	}
+
+	public void setExpandMissingPatternsInValidation(boolean expandMissingPatternsInValidation) {
 		this.expandMissingPatternsInValidation = expandMissingPatternsInValidation;	
 	}
 	
+	public boolean isExpandMissingPatternsInValidation() {
+		return expandMissingPatternsInValidation;
+	}
+
 	public void setTypeUnsupportedDownstream(boolean useTypeUnsupportedDownstreamWarnings) {
 		this.typeUnsupportedDownstreamWarnings = useTypeUnsupportedDownstreamWarnings;
 	}
@@ -11509,6 +11517,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throws JenaProcessorException {
 		SadlDataType pt = sadlTypeRef.getPrimitiveType();
 		String typeStr = pt.getLiteral();
+		com.hp.hpl.jena.rdf.model.Resource onDatatype = primitiveDataTypeLocalnameToJenaResource(typeStr);
+		return onDatatype;
+	}
+
+	public static com.hp.hpl.jena.rdf.model.Resource primitiveDataTypeLocalnameToJenaResource(String typeStr)
+			throws JenaProcessorException {
 		com.hp.hpl.jena.rdf.model.Resource onDatatype;
 		if (typeStr.equals(XSD.xstring.getLocalName()))
 			onDatatype = XSD.xstring;
@@ -13702,14 +13716,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			locloc = str.indexOf("location(");
 		}
 		return str;
-	}
-
-	public boolean isUseArticlesInValidation() {
-		return useArticlesInValidation;
-	}
-
-	public boolean isExpandMissingPatternsInValidation() {
-		return expandMissingPatternsInValidation;
 	}
 
 	enum SIDE {LEFT, RIGHT};

@@ -126,6 +126,18 @@ public class VariableNode extends NamedNode {
 		}
 		this.type = type;
 	}
+	
+	/**
+	 * Change the type of the VariableNode
+	 * @param type
+	 * @throws TranslationException 
+	 */
+	public void changeType(Node type) throws TranslationException {
+		if (this.type == null) {
+			throw new TranslationException("Cannot change the type of the variable to '" + type.toFullyQualifiedString() + "' as it has no type assigned");
+		}
+		this.type = type;
+	}
 
 	/**
 	 * Get the definition(s) of the VariableNode

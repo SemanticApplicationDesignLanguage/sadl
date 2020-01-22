@@ -3477,8 +3477,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				rule.setThens((List<GraphPatternElement>)results);
 			}
 			// now post-process
+			replaceClassesWithVariables(rule);
 			postProcessRule(rule, null);
-//			replaceClassesWithVariables(rule);
 			
 		} catch (Exception e) {
 			addError(new IFTranslationError("Translation to Intermediate Form encountered error (" + e.toString() + ") while 'cooking' IntermediateForm.", null, ErrorType.WARNING));
@@ -3494,18 +3494,18 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			variables = new ArrayList<VariableNode>();
 			newVarList = true;
 		}
-		replaceClassesWithVariables(variables, rule.getGivens(), true);
-		replaceClassesWithVariables(variables,rule.getIfs(), true);
-		replaceClassesWithVariables(variables,rule.getThens(), true);
+		replaceClassesWithVariables(variables, rule.getGivens(), false);
+		replaceClassesWithVariables(variables,rule.getIfs(), false);
+		replaceClassesWithVariables(variables,rule.getThens(), false);
 		if (newVarList && variables.size() > 0) {
 			for (VariableNode var : variables) {
 				rule.addRuleVariable(var);
 			}
 			newVarList = false;
 		}
-		replaceClassesWithVariables(variables, rule.getGivens(), false);
-		replaceClassesWithVariables(variables,rule.getIfs(), false);
-		replaceClassesWithVariables(variables,rule.getThens(), false);
+		replaceClassesWithVariables(variables, rule.getGivens(), true);
+		replaceClassesWithVariables(variables,rule.getIfs(), true);
+		replaceClassesWithVariables(variables,rule.getThens(), true);
 		if (newVarList && variables.size() > 0) {
 			for (VariableNode var : variables) {
 				rule.addRuleVariable(var);
@@ -3571,48 +3571,68 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @throws TranslationException 
 	 */
 	private void replaceClassesWithVariables(List<VariableNode> variables, 
-			TripleElement tr, boolean useOnlyClassesWithContext) throws TranslationException {
+			TripleElement tr, boolean matchOnSubclasses) throws TranslationException {
 		if (tr.getPredicate().getURI().equals(RDF.type.getURI()) || 
 				tr.getPredicate().getURI().equals(RDFS.subClassOf.getURI())) {
 			return;
 		}
-		if (tr.getSubject() instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)tr.getSubject()).getContext() != null)) {
+		if (tr.getSubject() instanceof NamedNode && ((NamedNode)tr.getSubject()).getContext() == null) {
 			if (((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassNode) ||
 					((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassListNode)) {
-				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getSubject(), !useOnlyClassesWithContext);
-				if (matchingVar == null) {
-					matchingVar = new VariableNode(getNewVar());
-					matchingVar.setNamespace(getModelProcessor().getModelNamespace());
-					matchingVar.setPrefix(getModelProcessor().getModelAlias());
-					matchingVar.setType(((NamedNode)tr.getSubject()));
-					variables.add(matchingVar);
+				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getSubject(), matchOnSubclasses);
+				if (matchingVar == null && matchOnSubclasses) {
+					// see if there is already a variable of a superclass that can be revised to be this class and used
+					VariableNode superclassVar = findSuperclassVariable(variables, (NamedNode)tr.getSubject(), matchOnSubclasses);
+					if (superclassVar != null) {
+						superclassVar.changeType((NamedNode)tr.getSubject());
+						matchingVar = superclassVar;
+					}
+					else {
+						matchingVar = new VariableNode(getNewVar());
+						matchingVar.setNamespace(getModelProcessor().getModelNamespace());
+						matchingVar.setPrefix(getModelProcessor().getModelAlias());
+						matchingVar.setType(((NamedNode)tr.getSubject()));
+						variables.add(matchingVar);
+					}
 				}
-				tr.setSubject(matchingVar);
+				if (matchingVar != null) {
+					tr.setSubject(matchingVar);
+				}
 			}
 		}
 		if (tr.getObject() instanceof NamedNode) {
 			if (((NamedNode)tr.getObject()).getNodeType().equals(NodeType.ClassNode) ||
 					((NamedNode)tr.getObject()).getNodeType().equals(NodeType.ClassListNode)) {
-				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getObject(), !useOnlyClassesWithContext);
+				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getObject(), matchOnSubclasses);
 				if (matchingVar != null && tr.getSubject().equals(matchingVar)) {
 					// this is the definition of an existing variable
 					return;
 				}
-				if (matchingVar == null) {
-					matchingVar = new VariableNode(getNewVar());
-					matchingVar.setNamespace(getModelProcessor().getModelNamespace());
-					matchingVar.setPrefix(getModelProcessor().getModelAlias());
-					matchingVar.setType(((NamedNode)tr.getObject()));
-					variables.add(matchingVar);
+				if (matchingVar == null && matchOnSubclasses) {
+					// see if there is already a variable of a superclass that can be revised to be this class and used
+					VariableNode superclassVar = findSuperclassVariable(variables, (NamedNode)tr.getObject(), matchOnSubclasses);
+					if (superclassVar != null) {
+						superclassVar.changeType((NamedNode)tr.getSubject());
+						matchingVar = superclassVar;
+					}
+					else {
+						matchingVar = new VariableNode(getNewVar());
+						matchingVar.setNamespace(getModelProcessor().getModelNamespace());
+						matchingVar.setPrefix(getModelProcessor().getModelAlias());
+						matchingVar.setType(((NamedNode)tr.getObject()));
+						variables.add(matchingVar);
+					}
 				}
-				tr.setObject(matchingVar);
+				if (matchingVar != null) {
+					tr.setObject(matchingVar);
+				}
 			}
 		}
 	}
 
 	private VariableNode findVariableOfRightType(List<VariableNode> variables, 
-			NamedNode subject, boolean matchOnSubclasses) {
-		String classUri = subject.getURI();
+			NamedNode nn, boolean matchOnSubclasses) {
+		String classUri = nn.getURI();
 		if (variables != null) {
 			for (VariableNode v : variables) {
 				if (v.getType() != null && v.getType().getURI().equals(classUri)) {
@@ -3635,6 +3655,27 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 
+		}
+		return null;
+	}
+
+	private VariableNode findSuperclassVariable(List<VariableNode> variables, NamedNode nn,
+			boolean matchOnSubclasses) {
+		String classUri = nn.getURI();
+		if (variables != null) {
+			for (VariableNode v : variables) {
+				OntClass cls = getTheJenaModel().getOntClass(classUri);
+				if (cls != null && v.getType() != null) {
+					ExtendedIterator<OntClass> scitr = cls.listSuperClasses();
+					while (scitr.hasNext()) {
+						OntClass sc = scitr.next();
+						if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
+							scitr.close();
+							return v;
+						}
+					}
+				}
+			}
 		}
 		return null;
 	}
