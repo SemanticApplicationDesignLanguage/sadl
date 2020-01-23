@@ -51,16 +51,21 @@ class ValidationAcceptorImpl implements ValidationAcceptorExt {
 	}
 
 	def void addError(String message, EObject context, EStructuralFeature feature) {
-		add(message, context, ERROR, feature);
+		add(message, context, ERROR, feature, null);
 	}
 
 	def void addWarning(String message, EObject context, EStructuralFeature feature) {
-		add(message, context, WARNING, feature);
+		add(message, context, WARNING, feature, null);
 	}
 
 	def void addInfo(String message, EObject context, EStructuralFeature feature) {
-		add(message, context, INFO, feature);
+		add(message, context, INFO, feature, null);
 	}
+
+	override add(String message, EObject context, Severity severity, String issueCode, String... issueData) {
+		add(message, context, severity, null, issueCode, issueData);
+	}
+
 
 	override int getErrorCount() {
 		return ERROR.issueCount;
@@ -96,13 +101,15 @@ class ValidationAcceptorImpl implements ValidationAcceptorExt {
 		return #[errorCount, warningCount, infoCount]
 	}
 
-	private def newDiagnosti(String message, EObject context, Severity severity, EStructuralFeature feature) {
+	private def newDiagnosti(String message, EObject context, Severity severity, EStructuralFeature feature,
+		/* nullable */ String issueCode, String... issueData) {
+
 		return new FeatureBasedDiagnostic(DIAGNOSTIC_MAPPING.get(severity), message, context, feature,
-			INSIGNIFICANT_INDEX, NORMAL, ISSUE_CODE);
+			INSIGNIFICANT_INDEX, NORMAL, issueCode ?: ISSUE_CODE, issueData);
 	}
 
-	private def add(String message, EObject context, Severity severity, EStructuralFeature feature) {
-		val diagnostic = newDiagnosti(message, context, severity, feature);
+	private def add(String message, EObject context, Severity severity, EStructuralFeature feature, /* nullable */ String issueCode, String... issueData) {
+		val diagnostic = newDiagnosti(message, context, severity, feature, issueCode, issueData);
 		converter.convertValidatorDiagnostic(diagnostic, acceptor);
 		counter.increment(severity);
 	}
