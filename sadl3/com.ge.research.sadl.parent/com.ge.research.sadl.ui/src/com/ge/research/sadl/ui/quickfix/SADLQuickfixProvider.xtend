@@ -68,13 +68,16 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 	@Fix("REPLACE_ALIAS")
 	def void replaceAlias(Issue issue, IssueResolutionAcceptor acceptor) {
 		val data = issue.data
-		if (data !== null && data.size === 1) {
-			val replacement = data.get(0)
-			if (!replacement.nullOrEmpty) {
-				val label = "Change to '" + replacement + "'"
+		if (data !== null && data.size === 2) {
+			// 0th item is what to fix
+			// 1st item is the fix
+			val alias = data.get(0);
+			val fix = data.get(1)
+			if (!alias.nullOrEmpty && !fix.nullOrEmpty) {
+				val label = "Replace '" + alias + "' alias with '" + fix + "' resource name"
 				acceptor.accept(issue, label, label, null, [ context |
 					val xtextDocument = context.xtextDocument
-					xtextDocument.replace(issue.offset, issue.length, replacement)
+					xtextDocument.replace(issue.offset, issue.length, fix)
 				])
 			}
 		}
