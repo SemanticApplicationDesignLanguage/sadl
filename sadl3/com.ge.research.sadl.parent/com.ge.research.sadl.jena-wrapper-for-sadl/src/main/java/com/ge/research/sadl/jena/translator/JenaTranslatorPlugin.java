@@ -909,8 +909,8 @@ public class JenaTranslatorPlugin implements ITranslator {
  * add the right-hand variable as an additional argument and ignore the assignment.
  */
 				List<Node> lReturnTypeNodes = ((BuiltinElement)gpe).getReturnTypes();
-				if (lReturnTypeNodes.size() > 1 || 
-						(lReturnTypeNodes.size() > 0 && !lReturnTypeNodes.get(0).getURI().equals(XSD.xboolean.getURI()))) {
+				if (lReturnTypeNodes != null && (lReturnTypeNodes.size() > 1 || 
+						(lReturnTypeNodes.size() > 0 && !lReturnTypeNodes.get(0).getURI().equals(XSD.xboolean.getURI())))) {
 					((BuiltinElement)gpe).setExpectedArgCount(((BuiltinElement)gpe).getExpectedArgCount() + lReturnTypeNodes.size());
 				}else {
 					sb.append("assign(");

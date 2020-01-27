@@ -2393,7 +2393,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 		}
-		else if (getTarget() instanceof Rule && be.getFuncType().equals(BuiltinType.Not) && 
+		else if (getTarget() instanceof Rule && be.getFuncType().equals(BuiltinType.Not) && be.getArguments() != null && 
 				be.getArguments().get(0) instanceof ProxyNode && ((ProxyNode)be.getArguments().get(0)).getProxyFor() instanceof BuiltinElement &&
 				((BuiltinElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getFuncType().equals(BuiltinType.Equal)) {
 			BuiltinElement eqb = ((BuiltinElement)((ProxyNode)be.getArguments().get(0)).getProxyFor());
@@ -3542,26 +3542,27 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			BuiltinElement be, boolean useOnlyClassesWithContext) throws TranslationException {
 		List<Node> args = be.getArguments();
 		int idx = 0;
-		for (Node arg : args) {
-			if (arg instanceof ProxyNode) {
-				replaceClassesWithVariables(variables, ((ProxyNode)arg).getProxyFor(), useOnlyClassesWithContext);
-			}
-			else if (arg instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)arg).getContext() == null) &&
-					(((NamedNode)arg).getNodeType().equals(NodeType.ClassNode) ||
-					((NamedNode)arg).getNodeType().equals(NodeType.ClassListNode))) {
-				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)arg, !useOnlyClassesWithContext);
-				if (matchingVar == null) {
-					matchingVar = new VariableNode(getNewVar());
-					matchingVar.setNamespace(getModelProcessor().getModelNamespace());
-					matchingVar.setPrefix(getModelProcessor().getModelAlias());
-					matchingVar.setType(arg);
-					variables.add(matchingVar);
+		if (args != null) {
+			for (Node arg : args) {
+				if (arg instanceof ProxyNode) {
+					replaceClassesWithVariables(variables, ((ProxyNode)arg).getProxyFor(), useOnlyClassesWithContext);
 				}
-				args.set(idx, matchingVar);
+				else if (arg instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)arg).getContext() == null) &&
+						(((NamedNode)arg).getNodeType().equals(NodeType.ClassNode) ||
+						((NamedNode)arg).getNodeType().equals(NodeType.ClassListNode))) {
+					VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)arg, !useOnlyClassesWithContext);
+					if (matchingVar == null) {
+						matchingVar = new VariableNode(getNewVar());
+						matchingVar.setNamespace(getModelProcessor().getModelNamespace());
+						matchingVar.setPrefix(getModelProcessor().getModelAlias());
+						matchingVar.setType(arg);
+						variables.add(matchingVar);
+					}
+					args.set(idx, matchingVar);
+				}
+				idx++;
 			}
-			idx++;
 		}
-		
 	}
 
 	/**

@@ -10384,7 +10384,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				} else if (val instanceof SadlExplicitValue) {
 					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, oprop.getRange());
-					if (lval != null) {
+					if (inst != null && lval != null) {
 						addInstancePropertyValue(inst, oprop, lval, val);
 					}
 				} else if (val instanceof SadlNestedInstance) {
