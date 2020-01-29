@@ -3509,6 +3509,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (newVarList && variables.size() > 0) {
 			for (VariableNode var : variables) {
 				rule.addRuleVariable(var);
+				rule.getIfs().add(0, new TripleElement(var, new RDFTypeNode(), var.getType()));
 			}
 		}
 	}

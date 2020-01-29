@@ -7694,7 +7694,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private List<GraphPatternElement> processSubjHasProp(Expression subj, SadlResource pred, Expression obj,
 			List<GraphPatternElement> shpTriples, Expression expr)
-			throws InvalidNameException, InvalidTypeException, TranslationException {
+					throws InvalidNameException, InvalidTypeException, TranslationException {
 		// Create a triple for this SubjHasProp and put it in the list (only has
 		// predicate at this point)
 		Object predObj = processExpression(pred);
@@ -7725,21 +7725,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			boolean subjectFound = false;
 			if (subj instanceof SubjHasProp) {
 				int preCallListSize = shpTriples.size();
-				shpTriples = processSubjHasProp(((SubjHasProp) subj).getLeft(), ((SubjHasProp) subj).getProp(),
-						((SubjHasProp) subj).getRight(), shpTriples, subj);
-				// must get subject of current triple; should be the subject of the first triple
-				// added by call on previous line
-				if (shpTriples.size() > preCallListSize) {
-					if (shpTriples.get(preCallListSize) instanceof TripleElement) {
-						TripleElement informingTriple = (TripleElement) shpTriples.get(preCallListSize);
-						tr.setSubject(informingTriple.getSubject());
-						if (informingTriple.getPredicate() == null && informingTriple.getObject() == null) {
-							shpTriples.set(preCallListSize, tr);
+				if (isUnitExpression((SubjHasProp)subj)) {
+					SubjHasProp shp = (SubjHasProp) subj;
+					if (shp.getProp() instanceof SadlResource) {
+						String unit = declarationExtensions.getConcreteName(shp.getProp());
+						Object lobj = processExpression(shp.getLeft());
+						if (lobj instanceof Object[]) {
+							for (int i = 0; i < ((Object[])lobj).length; i++) {
+								Object o = ((Object[])lobj)[i];
+								if (o instanceof GraphPatternElement) {
+									if (o instanceof TripleElement && ((TripleElement)o).getObject() instanceof com.ge.research.sadl.model.gp.Literal && 
+											((com.ge.research.sadl.model.gp.Literal)((TripleElement)o).getObject()).getValue() instanceof Number) {
+										((com.ge.research.sadl.model.gp.Literal)((TripleElement)o).getObject()).setUnits(unit);
+									}
+									shpTriples.add((GraphPatternElement) o);
+								}
+							}
 						}
-						else {
-							shpTriples.add(tr);
+					}
+//					Object shpue = processSubjHasPropUnitExpression(shp);
+//					System.out.println(shpue);
+				}
+				else {
+					shpTriples = processSubjHasProp(((SubjHasProp) subj).getLeft(), ((SubjHasProp) subj).getProp(),
+							((SubjHasProp) subj).getRight(), shpTriples, subj);
+					// must get subject of current triple; should be the subject of the first triple
+					// added by call on previous line
+					if (shpTriples.size() > preCallListSize) {
+						if (shpTriples.get(preCallListSize) instanceof TripleElement) {
+							TripleElement informingTriple = (TripleElement) shpTriples.get(preCallListSize);
+							tr.setSubject(informingTriple.getSubject());
+							if (informingTriple.getPredicate() == null && informingTriple.getObject() == null) {
+								shpTriples.set(preCallListSize, tr);
+							} else {
+								shpTriples.add(tr);
+							}
+							subjectFound = true;
 						}
-						subjectFound = true;
 					}
 				}
 			} else {
@@ -7760,10 +7782,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					subjectFound = true;
 				}
 			}
-//			if (!subjectFound) {
-//				throw new TranslationException(
-//						"Unhandled SubjHasProp subject type: " + subj.getClass().getCanonicalName());
-//			}
+			// if (!subjectFound) {
+			// throw new TranslationException(
+			// "Unhandled SubjHasProp subject type: " + subj.getClass().getCanonicalName());
+			// }
 		}
 		if (tr.getObject() == null) {
 			boolean objectFound = false;
@@ -7833,6 +7855,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			e.printStackTrace();
 		}
 		return shpTriples;
+	}
+
+	private boolean isUnitExpression(SubjHasProp shp) {
+		if (shp.getRight() == null) {
+			if (shp.getLeft() instanceof NumberLiteral) {
+				return true;
+			}
+			if (shp.getLeft() instanceof SubjHasProp && ((SubjHasProp)shp.getLeft()).getRight() instanceof NumberLiteral) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected Junction compoundTypeCheckTypeToNode(TypeCheckInfo dtci, EObject expr)

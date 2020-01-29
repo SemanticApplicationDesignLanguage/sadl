@@ -30,6 +30,7 @@ import java.util.Map
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import com.hp.hpl.jena.ontology.OntModel
+import java.util.List
 
 /**
  * Generic hook for 3rd party processors to participate in the processing of SADL resources
@@ -62,6 +63,12 @@ interface ISadlInferenceProcessor {
 	 * returns an array of ResultSet, one for each query triple pattern
 	 */
 	def Object[] insertTriplesAndQuery(Resource resource, TripleElement[] triples) throws SadlInferenceException;
+
+	/**
+	 * Call to insert a List of complete triples into model and query using incomplete triples
+	 * returns an array of ResultSet, one for each query triple pattern
+	 */
+	def Object[] insertTriplesAndQuery(Resource resource, List<TripleElement[]> triples) throws SadlInferenceException;
 
 	/**
 	 * {@code true} if the resource can be processed with the current processor.

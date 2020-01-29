@@ -1764,6 +1764,13 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	}
 
 	@Override
+	public Object[] insertTriplesAndQuery(Resource resource, List<TripleElement[]> triples)
+			throws SadlInferenceException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public boolean isSupported(String fileExtension) {
 		return "sadl".equals(fileExtension);
 	}

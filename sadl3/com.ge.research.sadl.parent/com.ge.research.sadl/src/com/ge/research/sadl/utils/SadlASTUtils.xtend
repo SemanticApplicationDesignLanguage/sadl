@@ -97,7 +97,8 @@ class SadlASTUtils {
 		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
 			val container = eContainer as SubjHasProp;
 			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null &&
-				!container.inQueryStatement && !container.inEquationStatement;
+			container.left instanceof NumberLiteral // && declarationExtensions.getConceptUri(container.prop.name) === null
+//				!container.inQueryStatement && !container.inEquationStatement;
 		}
 		return false;
 	}

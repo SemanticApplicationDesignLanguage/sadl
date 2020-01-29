@@ -31,6 +31,7 @@ import com.google.inject.Injector
 import java.util.Map
 import org.eclipse.emf.ecore.resource.Resource
 import com.hp.hpl.jena.ontology.OntModel
+import java.util.List
 
 /**
  * Provides {@code SADL} inferences.
@@ -57,6 +58,10 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 			return newArrayOfSize(0);
 		}
 
+		override insertTriplesAndQuery(Resource resource, List<TripleElement[]> triples) throws SadlInferenceException {
+			return newArrayOfSize(0);
+		}
+
 		override isSupported(String fileExtension) {
 			return false;
 		}
@@ -68,7 +73,7 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 		override setPreferences(Map<String, String> preferenceMap) {
 			throw new UnsupportedOperationException("TODO: auto-generated method stub")
 		}
-
+		
 	}
 
 	@Inject
