@@ -7725,43 +7725,42 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			boolean subjectFound = false;
 			if (subj instanceof SubjHasProp) {
 				int preCallListSize = shpTriples.size();
-				if (isUnitExpression((SubjHasProp)subj)) {
-					SubjHasProp shp = (SubjHasProp) subj;
-					if (shp.getProp() instanceof SadlResource) {
-						String unit = declarationExtensions.getConcreteName(shp.getProp());
-						Object lobj = processExpression(shp.getLeft());
-						if (lobj instanceof Object[]) {
-							for (int i = 0; i < ((Object[])lobj).length; i++) {
-								Object o = ((Object[])lobj)[i];
-								if (o instanceof GraphPatternElement) {
-									if (o instanceof TripleElement && ((TripleElement)o).getObject() instanceof com.ge.research.sadl.model.gp.Literal && 
-											((com.ge.research.sadl.model.gp.Literal)((TripleElement)o).getObject()).getValue() instanceof Number) {
-										((com.ge.research.sadl.model.gp.Literal)((TripleElement)o).getObject()).setUnits(unit);
-									}
-									shpTriples.add((GraphPatternElement) o);
+				shpTriples = processSubjHasProp(((SubjHasProp) subj).getLeft(), ((SubjHasProp) subj).getProp(),
+						((SubjHasProp) subj).getRight(), shpTriples, subj);
+				// must get subject of current triple; should be the subject of the first triple
+				// added by call on previous line
+				if (shpTriples.size() > preCallListSize) {
+					int lastIdx = shpTriples.size() - 1;
+					if (shpTriples.get(lastIdx) instanceof TripleElement) {
+						TripleElement informingTriple = (TripleElement) shpTriples.get(lastIdx);
+						// If the current SubjHasProp has right null and prop type is variable (not really a SadlResource)
+						//	and obj of the informingTriple is a Number literal and ?? 
+						//	then the prop is a unit to be placed on the Number literal and the informingTriple is the only triple
+						// 	to come out of this processing step
+						try {
+							Node on = informingTriple.getObject();
+							if (obj == null && ((SubjHasProp) subj).getRight() instanceof NumberLiteral &&
+									on instanceof com.ge.research.sadl.model.gp.Literal && 
+									pred instanceof SadlResource &&
+									declarationExtensions.getOntConceptType(pred).equals(OntConceptType.VARIABLE)) {
+								String unit = declarationExtensions.getConcreteName(pred);
+								((com.ge.research.sadl.model.gp.Literal)on).setUnits(unit);
+								tr = informingTriple;
+							}
+							else {
+								tr.setSubject(informingTriple.getSubject());
+								if (informingTriple.getPredicate() == null && informingTriple.getObject() == null) {
+									shpTriples.set(preCallListSize, tr);
+								} else {
+									shpTriples.add(tr);
 								}
+
 							}
+						} catch (CircularDefinitionException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-					}
-//					Object shpue = processSubjHasPropUnitExpression(shp);
-//					System.out.println(shpue);
-				}
-				else {
-					shpTriples = processSubjHasProp(((SubjHasProp) subj).getLeft(), ((SubjHasProp) subj).getProp(),
-							((SubjHasProp) subj).getRight(), shpTriples, subj);
-					// must get subject of current triple; should be the subject of the first triple
-					// added by call on previous line
-					if (shpTriples.size() > preCallListSize) {
-						if (shpTriples.get(preCallListSize) instanceof TripleElement) {
-							TripleElement informingTriple = (TripleElement) shpTriples.get(preCallListSize);
-							tr.setSubject(informingTriple.getSubject());
-							if (informingTriple.getPredicate() == null && informingTriple.getObject() == null) {
-								shpTriples.set(preCallListSize, tr);
-							} else {
-								shpTriples.add(tr);
-							}
-							subjectFound = true;
-						}
+						subjectFound = true;
 					}
 				}
 			} else {
@@ -7855,18 +7854,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			e.printStackTrace();
 		}
 		return shpTriples;
-	}
-
-	private boolean isUnitExpression(SubjHasProp shp) {
-		if (shp.getRight() == null) {
-			if (shp.getLeft() instanceof NumberLiteral) {
-				return true;
-			}
-			if (shp.getLeft() instanceof SubjHasProp && ((SubjHasProp)shp.getLeft()).getRight() instanceof NumberLiteral) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	protected Junction compoundTypeCheckTypeToNode(TypeCheckInfo dtci, EObject expr)
