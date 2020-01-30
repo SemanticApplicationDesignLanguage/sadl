@@ -5939,7 +5939,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						TypeCheckInfo ptci = getModelValidator().getTypeInfoFromRange(
 								namedNodeToConceptName((NamedNode) predNode),
 								getTheJenaModel().getProperty(((NamedNode) predNode).toFullyQualifiedString()), predeo);
-						TypeCheckInfo otci = getModelValidator().getType(objeo);
+						TypeCheckInfo otci = null;
+						if (obj instanceof com.ge.research.sadl.model.gp.Literal && 
+								((com.ge.research.sadl.model.gp.Literal)obj).getUnits() != null) {
+							if (ptci.getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+								return;
+							}
+						}
+						if (otci == null) {
+							otci = getModelValidator().getType(objeo);
+						}
 						List<String> operations = new ArrayList<String>(1);
 						operations.add("is");
 						if (getModelValidator().compareTypesUsingImpliedPropertiesRecursively(operations, predeo, objeo,
@@ -7684,7 +7693,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		SadlResource pred = expr.getProp();
 		Expression obj = expr.getRight();
 		List<GraphPatternElement> shpTriples = new ArrayList<GraphPatternElement>();
-		shpTriples = processSubjHasProp(subj, pred, obj, shpTriples, expr);
+		shpTriples = processSubjHasProp(subj, pred, obj, null, shpTriples, expr);
 
 		if (shpTriples.size() > 0 && shpTriples.get(0) instanceof TripleElement) {
 			return combineRest(((TripleElement) shpTriples.get(0)).getSubject(), shpTriples);
@@ -7693,7 +7702,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private List<GraphPatternElement> processSubjHasProp(Expression subj, SadlResource pred, Expression obj,
-			List<GraphPatternElement> shpTriples, Expression expr)
+			String objUnit, List<GraphPatternElement> shpTriples, Expression expr)
 					throws InvalidNameException, InvalidTypeException, TranslationException {
 		// Create a triple for this SubjHasProp and put it in the list (only has
 		// predicate at this point)
@@ -7724,43 +7733,39 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (tr.getSubject() == null) {
 			boolean subjectFound = false;
 			if (subj instanceof SubjHasProp) {
+				boolean thisSubjHasPropIsUnitsOnly = false;
+				String unit = null;
+				try {
+					// If the current SubjHasProp has right (obj) null and prop type is variable (not really a SadlResource)
+					//	and obj of the informingTriple is a Number literal
+					//	then the prop is a unit to be placed on the Number literal 
+					if (obj == null && ((SubjHasProp) subj).getRight() instanceof NumberLiteral &&
+							pred instanceof SadlResource &&
+							declarationExtensions.getOntConceptType(pred).equals(OntConceptType.VARIABLE)) {
+						thisSubjHasPropIsUnitsOnly = true;
+						unit = declarationExtensions.getConcreteName(pred);
+					}
+				} catch (CircularDefinitionException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				int preCallListSize = shpTriples.size();
 				shpTriples = processSubjHasProp(((SubjHasProp) subj).getLeft(), ((SubjHasProp) subj).getProp(),
-						((SubjHasProp) subj).getRight(), shpTriples, subj);
+						((SubjHasProp) subj).getRight(), unit, shpTriples, subj);
 				// must get subject of current triple; should be the subject of the first triple
 				// added by call on previous line
 				if (shpTriples.size() > preCallListSize) {
-					int lastIdx = shpTriples.size() - 1;
-					if (shpTriples.get(lastIdx) instanceof TripleElement) {
-						TripleElement lastTriple = (TripleElement) shpTriples.get(lastIdx);
-						// If the current SubjHasProp has right null and prop type is variable (not really a SadlResource)
-						//	and obj of the informingTriple is a Number literal and ?? 
-						//	then the prop is a unit to be placed on the Number literal and the informingTriple is the only triple
-						// 	to come out of this processing step
-						try {
-							Node on = lastTriple.getObject();
-							if (obj == null && ((SubjHasProp) subj).getRight() instanceof NumberLiteral &&
-									on instanceof com.ge.research.sadl.model.gp.Literal && 
-									pred instanceof SadlResource &&
-									declarationExtensions.getOntConceptType(pred).equals(OntConceptType.VARIABLE)) {
-								String unit = declarationExtensions.getConcreteName(pred);
-								((com.ge.research.sadl.model.gp.Literal)on).setUnits(unit);
-								tr = lastTriple;
-							}
-							else {
-								if (shpTriples.get(preCallListSize) instanceof TripleElement) {
-									TripleElement informingTriple = (TripleElement) shpTriples.get(preCallListSize);
-									tr.setSubject(informingTriple.getSubject());
-									if (informingTriple.getPredicate() == null && informingTriple.getObject() == null) {
-										shpTriples.set(preCallListSize, tr);
-									} else {
-										shpTriples.add(tr);
-									}
-								}
-							}
-						} catch (CircularDefinitionException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+					if (shpTriples.get(preCallListSize) instanceof TripleElement) {
+						TripleElement informingTriple = (TripleElement) shpTriples.get(preCallListSize);
+						tr.setSubject(informingTriple.getSubject());
+						if (informingTriple.getPredicate() == null && informingTriple.getObject() == null) {
+							shpTriples.set(preCallListSize, tr);
+						}
+						else if (thisSubjHasPropIsUnitsOnly) {
+							tr = (TripleElement) shpTriples.get(shpTriples.size() - 1);	// the last element of list
+						}
+						else {
+							shpTriples.add(tr);
 						}
 						subjectFound = true;
 					}
@@ -7791,9 +7796,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (tr.getObject() == null) {
 			boolean objectFound = false;
 			if (obj instanceof SubjHasProp) {
+				// TODO could this be a unit only?
 				int preCallListSize = shpTriples.size();
 				shpTriples = processSubjHasProp(((SubjHasProp) obj).getLeft(), ((SubjHasProp) obj).getProp(),
-						((SubjHasProp) obj).getRight(), shpTriples, obj);
+						((SubjHasProp) obj).getRight(), null, shpTriples, obj);
 				// must get object of current triple; should be the subject of the first triple
 				// added by call on previous line
 				if (shpTriples.size() > preCallListSize) {
@@ -7831,6 +7837,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else {
 				Object objObj = processExpression(obj);
 				if (objObj instanceof Node) {
+					if (objUnit != null) {
+						if (objObj instanceof com.ge.research.sadl.model.gp.Literal) {
+							((com.ge.research.sadl.model.gp.Literal)objObj).setUnits(objUnit);
+						}
+						else {
+							addWarning("Trying to set units of a non-numeric value", obj);
+						}
+					}
 					tr.setObject((Node) objObj);
 					objectFound = true;
 				} else if (objObj instanceof BuiltinElement
