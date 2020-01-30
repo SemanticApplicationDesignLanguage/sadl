@@ -3578,7 +3578,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				tr.getPredicate().getURI().equals(RDFS.subClassOf.getURI())) {
 			return;
 		}
-		if (tr.getSubject() instanceof NamedNode && ((NamedNode)tr.getSubject()).getContext() == null) {
+		if (tr.getSubject() instanceof NamedNode) {  // && ((NamedNode)tr.getSubject()).getContext() == null) {
 			if (((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassNode) ||
 					((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassListNode)) {
 				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getSubject(), matchOnSubclasses);
