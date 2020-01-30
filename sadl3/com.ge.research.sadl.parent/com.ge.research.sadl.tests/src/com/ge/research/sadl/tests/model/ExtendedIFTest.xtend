@@ -29,6 +29,7 @@ import static org.junit.Assert.*
 import static extension com.ge.research.sadl.tests.SadlTestAssertions.*
 import com.ge.research.sadl.model.gp.Rule
 import org.junit.Ignore
+import com.ge.research.sadl.model.gp.GraphPatternElement
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -401,6 +402,118 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
  		]
 	}
 	
+	@Test
+	def void testUnits_11() {
+		val grnd = newArrayList(
+"and(rdf(v0 (a variable of type stblt:AircraftEngine), stblt:thrust, 25000 \"lb\"),and(rdf(v0 (a variable of type stblt:AircraftEngine), stblt:weight, 3500 \"lb\"),rdf(v0 (a variable of type stblt:AircraftEngine), stblt:sfc, 1.5)))"			
+		)
+		'''
+			 uri "http://sadl.org/Suitability.sadl" alias stblt.
+			 
+			 Resource is a class.
+			 Equipment is a type of Resource.
+			 part describes Equipment with values of type Equipment.
+			 {Aircraft, AircraftEngine} are types of Equipment.
+			 part of Aircraft has at least 1 value of type AircraftEngine.
+			 altitude describes Aircraft with values of type UnittedQuantity.
+			 
+			 thrust describes AircraftEngine with values of type UnittedQuantity.
+			 weight describes Equipment with values of type UnittedQuantity.
+			 speed describes Aircraft with values of type UnittedQuantity.
+			 sfc describes AircraftEngine with values of type float.
+			  
+			 Mission is a class, described by requires with values of type Resource.
+			 suitable describes Resource with values of type Mission.
+			 
+			// MissionX is a Mission, requires (an Aircraft with speed 1.0 mach, with altitude between 25000 ft and 260000 ft, with part
+			// 	(an AircraftEngine with thrust at least 25000 lb, with weight 3500 lb, with at most sfc 1.5 )
+			// ).
+			 
+			 MissionX is a Mission, requires (an Aircraft with speed 1.0 mach, with altitude 25000 ft, with part
+			 	(an AircraftEngine with thrust 25000 lb, with weight 3500 lb, with sfc 1.5 )
+			 ).
+			
+			 F100 is a type of AircraftEngine.
+			 CF6 is a type of AircraftEngine.
+		'''.sadl
+		
+		'''
+			uri "http://sadl.org/testunits" alias tu.
+			import "http://sadl.org/Suitability.sadl".
+			Expr: an AircraftEngine with thrust 25000 lb, with weight 3500 lb, with sfc 1.5.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			issues.assertHasNoIssues;
+			val forTest = processor.getIntermediateFormResults()
+			var idx = 0;
+			for (tr : forTest) {
+				if (tr instanceof GraphPatternElement) {
+					assertEquals(grnd.get(idx++), (tr as GraphPatternElement).toDescriptiveString)
+				}
+				else {
+					fail("intermediate form result should have been a GraphPatternElement")
+				}
+			}
+		]
+	}
+
+	@Test
+	def void testUnits_12() {
+		val grnd = newArrayList(
+"and(rdf(v0 (a variable of type stblt:Mission), stblt:requires, v1 (a variable of type stblt:Aircraft)),and(rdf(v1 (a variable of type stblt:Aircraft), stblt:speed, 1.0 \"mach\"),and(rdf(v1 (a variable of type stblt:Aircraft), stblt:altitude, 25000 \"ft\"),and(rdf(v1 (a variable of type stblt:Aircraft), stblt:part, v2 (a variable of type stblt:AircraftEngine)),and(rdf(v2 (a variable of type stblt:AircraftEngine), stblt:thrust, 25000 \"lb\"),and(rdf(v2 (a variable of type stblt:AircraftEngine), stblt:weight, 3500 \"lb\"),rdf(v2 (a variable of type stblt:AircraftEngine), stblt:sfc, 1.5)))))))"			
+		)
+		'''
+			 uri "http://sadl.org/Suitability.sadl" alias stblt.
+			 
+			 Resource is a class.
+			 Equipment is a type of Resource.
+			 part describes Equipment with values of type Equipment.
+			 {Aircraft, AircraftEngine} are types of Equipment.
+			 part of Aircraft has at least 1 value of type AircraftEngine.
+			 altitude describes Aircraft with values of type UnittedQuantity.
+			 
+			 thrust describes AircraftEngine with values of type UnittedQuantity.
+			 weight describes Equipment with values of type UnittedQuantity.
+			 speed describes Aircraft with values of type UnittedQuantity.
+			 sfc describes AircraftEngine with values of type float.
+			  
+			 Mission is a class, described by requires with values of type Resource.
+			 suitable describes Resource with values of type Mission.
+			 
+			// MissionX is a Mission, requires (an Aircraft with speed 1.0 mach, with altitude between 25000 ft and 260000 ft, with part
+			// 	(an AircraftEngine with thrust at least 25000 lb, with weight 3500 lb, with at most sfc 1.5 )
+			// ).
+			 
+			 MissionX is a Mission, requires (an Aircraft with speed 1.0 mach, with altitude 25000 ft, with part
+			 	(an AircraftEngine with thrust 25000 lb, with weight 3500 lb, with sfc 1.5 )
+			 ).
+			
+			 F100 is a type of AircraftEngine.
+			 CF6 is a type of AircraftEngine.
+		'''.sadl
+		
+		'''
+			uri "http://sadl.org/testunits" alias tu.
+			import "http://sadl.org/Suitability.sadl".
+			Expr: a Mission, requires (an Aircraft with speed 1.0 mach, with altitude 25000 ft, with part
+			 	(an AircraftEngine with thrust 25000 lb, with weight 3500 lb, with sfc 1.5 )).
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			issues.assertHasNoIssues;
+			val forTest = processor.getIntermediateFormResults()
+			var idx = 0;
+			for (tr : forTest) {
+				if (tr instanceof GraphPatternElement) {
+					assertEquals(grnd.get(idx++), (tr as GraphPatternElement).toDescriptiveString)
+//					println((tr as GraphPatternElement).toDescriptiveString)
+				}
+				else {
+					fail("intermediate form result should have been a GraphPatternElement")
+				}
+			}
+		]
+	}
+
 	@Test
 	def void testListLength_01() {
 		'''
