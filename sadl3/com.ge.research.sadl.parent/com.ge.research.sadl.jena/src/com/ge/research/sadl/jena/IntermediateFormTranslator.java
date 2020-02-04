@@ -3704,7 +3704,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	private NamedNode findInstanceOfRightType(Map<NamedNode, NamedNode> classInstanceMap, NamedNode arg) {
-		// TODO Auto-generated method stub
+		if (classInstanceMap != null && classInstanceMap.containsKey(arg)) {
+			return classInstanceMap.get(arg);
+		}
 		return null;
 	}
 
