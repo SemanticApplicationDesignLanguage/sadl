@@ -3477,6 +3477,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				rule.setThens((List<GraphPatternElement>)results);
 			}
 			// now post-process
+			replaceClassesWithInstances(rule);
 			replaceClassesWithVariables(rule);
 			postProcessRule(rule, null);
 			
@@ -3487,50 +3488,191 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return rule;
 	}
 
-	private void replaceClassesWithVariables(Rule rule) throws TranslationException {
-		List<VariableNode> variables = rule.getRuleVariables();
-		boolean newVarList = false;
-		if (variables == null) {
-			variables = new ArrayList<VariableNode>();
-			newVarList = true;
-		}
-		replaceClassesWithVariables(variables, rule.getGivens(), false);
-		replaceClassesWithVariables(variables,rule.getIfs(), false);
-		replaceClassesWithVariables(variables,rule.getThens(), false);
-		if (newVarList && variables.size() > 0) {
-			for (VariableNode var : variables) {
-				rule.addRuleVariable(var);
-			}
-			newVarList = false;
-		}
-		replaceClassesWithVariables(variables, rule.getGivens(), true);
-		replaceClassesWithVariables(variables,rule.getIfs(), true);
-		replaceClassesWithVariables(variables,rule.getThens(), true);
-		if (newVarList && variables.size() > 0) {
-			for (VariableNode var : variables) {
-				rule.addRuleVariable(var);
-				rule.getIfs().add(0, new TripleElement(var, new RDFTypeNode(), var.getType()));
-			}
-		}
+	private Map<NamedNode, NamedNode> findInstances(Rule rule) throws TranslationException {
+		Map<NamedNode,NamedNode> classInstanceMap = findInstances(null, rule.getGivens());
+		classInstanceMap = findInstances(classInstanceMap, rule.getIfs());
+		classInstanceMap = findInstances(classInstanceMap, rule.getThens());
+		return classInstanceMap;
 	}
 
-	private void replaceClassesWithVariables(List<VariableNode> variables, 
-			List<GraphPatternElement> gpes, boolean useOnlyClassesWithContext) throws TranslationException {
+	private Map<NamedNode, NamedNode> findInstances(Map<NamedNode, NamedNode> classInstanceMap, List<GraphPatternElement> gpes) throws TranslationException {
 		if (gpes != null) {
 			for (GraphPatternElement gpe : gpes) {
-				replaceClassesWithVariables(variables, gpe, useOnlyClassesWithContext);
+				classInstanceMap = findInstances(classInstanceMap, gpe);
+			}
+		}
+		return classInstanceMap;
+	}
+
+	private Map<NamedNode, NamedNode> findInstances(Map<NamedNode, NamedNode> classInstanceMap,
+			GraphPatternElement gpe) throws TranslationException {
+		if (gpe instanceof BuiltinElement) {
+			List<Node> args = ((BuiltinElement)gpe).getArguments();
+			for (Node n : args) {
+				if (n instanceof NamedNode && ((NamedNode)n).getNodeType().equals(NodeType.InstanceNode)) {
+					Node type = ((NamedNode)n).getLocalizedType();
+					if (type instanceof NamedNode && ((NamedNode)type).getNodeType().equals(NodeType.ClassNode)) {
+						if (classInstanceMap == null) classInstanceMap = new HashMap<NamedNode, NamedNode>();
+						if (classInstanceMap.containsKey(type)) {
+							throw new TranslationException("Multiple instances could match class '" + type.getName() + "'");
+						}
+						classInstanceMap.put((NamedNode)type, (NamedNode)n);
+					}
+				}
+				else if (n instanceof ProxyNode) {
+					classInstanceMap = findInstances(classInstanceMap, ((ProxyNode)n).getProxyFor());
+				}
+			}
+		}
+		else if (gpe instanceof TripleElement) {
+			Node subj = ((TripleElement)gpe).getSubject();
+			if ( subj instanceof NamedNode && ((NamedNode)subj).getNodeType().equals(NodeType.InstanceNode)) {
+				Node type = ((NamedNode)subj).getLocalizedType();
+				if (type instanceof NamedNode && ((NamedNode)type).getNodeType().equals(NodeType.ClassNode)) {
+					if (classInstanceMap == null) classInstanceMap = new HashMap<NamedNode, NamedNode>();
+					if (classInstanceMap.containsKey(type)) {
+						throw new TranslationException("Multiple instances could match class '" + type.getName() + "'");
+					}
+					classInstanceMap.put((NamedNode)type, (NamedNode)subj);
+				}
+			}
+			else if (subj instanceof ProxyNode) {
+				classInstanceMap = findInstances(classInstanceMap, ((ProxyNode)subj).getProxyFor());
+			}
+			Node obj = ((TripleElement)gpe).getObject();
+			if ( obj instanceof NamedNode && ((NamedNode)obj).getNodeType().equals(NodeType.InstanceNode)) {
+				Node type = ((NamedNode)obj).getLocalizedType();
+				if (type instanceof NamedNode && ((NamedNode)type).getNodeType().equals(NodeType.ClassNode)) {
+					if (classInstanceMap == null) classInstanceMap = new HashMap<NamedNode, NamedNode>();
+					if (classInstanceMap.containsKey(type)) {
+						throw new TranslationException("Multiple instances could match class '" + type.getName() + "'");
+					}
+					classInstanceMap.put((NamedNode)type, (NamedNode)obj);
+				}
+			}
+			else if (obj instanceof ProxyNode) {
+				classInstanceMap = findInstances(classInstanceMap, ((ProxyNode)obj).getProxyFor());
+			}
+		}
+		return classInstanceMap;
+	}
+
+	private void replaceClassesWithInstances(Rule rule) throws TranslationException {
+		Map<NamedNode,NamedNode> classInstanceMap = findInstances(rule);
+		replaceClassesWithInstances(classInstanceMap, rule.getGivens(), false);
+		replaceClassesWithInstances(classInstanceMap,rule.getIfs(), false);
+		replaceClassesWithInstances(classInstanceMap,rule.getThens(), false);
+	}
+
+	private void replaceClassesWithVariables(Rule rule) throws TranslationException {
+		List<VariableNode> variables = rule.getRuleVariables();
+		boolean newVarCreated = false;
+		if (variables == null) {
+			variables = new ArrayList<VariableNode>();
+			newVarCreated = true;
+		}
+		if (replaceClassesWithVariables(variables, rule.getGivens(), false)) {
+			newVarCreated = true;
+		}
+		if (replaceClassesWithVariables(variables,rule.getIfs(), false)) {
+			newVarCreated = true;
+		}
+		if (replaceClassesWithVariables(variables,rule.getThens(), false)) {
+			newVarCreated = true;
+		}
+		if (newVarCreated && variables.size() > 0) {
+			for (VariableNode var : variables) {
+				rule.addRuleVariable(var);
+			}
+			newVarCreated = false;
+		}
+		if (replaceClassesWithVariables(variables, rule.getGivens(), true)) {
+			newVarCreated = true;
+		}
+		if (replaceClassesWithVariables(variables,rule.getIfs(), true)) {
+			newVarCreated = true;
+		}
+		if (replaceClassesWithVariables(variables,rule.getThens(), true)) {
+			newVarCreated = true;
+		}
+		if (newVarCreated && variables.size() > 0) {
+			for (VariableNode var : variables) {	
+				rule.addRuleVariable(var);
+				int insertionIdx = varTypedInRuleIfs(rule, var);
+				if (insertionIdx >= 0) {
+					rule.getIfs().add(insertionIdx, new TripleElement(var, new RDFTypeNode(), var.getType()));
+				}
 			}
 		}
 	}
 
-	private void replaceClassesWithVariables(List<VariableNode> variables, 
-			GraphPatternElement gpe, boolean useOnlyClassesWithContext) throws TranslationException {
+	/**
+	 * Method to determine if this variable already has a type triple
+	 * @param rule
+	 * @param var
+	 * @return
+	 */
+	private int varTypedInRuleIfs(Rule rule, VariableNode var) {
+		int firstUsed = 0;	// default is to put at beginning
+		List<GraphPatternElement> ifs = rule.getIfs();
+		for (GraphPatternElement gpe : ifs) {
+			if (gpe instanceof TripleElement) {
+				if (((TripleElement)gpe).getSubject().equals(var) || ((TripleElement)gpe).getObject().equals(var)) {
+					if (firstUsed == 0) {
+						// don't set it if it is already set to a first use
+						firstUsed = ifs.indexOf(gpe);
+					}
+				}
+				if (((TripleElement)gpe).getPredicate() instanceof RDFTypeNode &&
+						((TripleElement)gpe).getSubject().equals(var)) {
+					return -1;	// don't put it in at all
+				}
+			}
+		}
+		return firstUsed;
+	}
+
+	private void replaceClassesWithInstances(Map<NamedNode, NamedNode> classInstanceMap,
+			List<GraphPatternElement> gpes, boolean b) throws TranslationException {
+		if (gpes != null) {
+			for (GraphPatternElement gpe : gpes) {
+				replaceClassesWithInstances(classInstanceMap, gpe);
+			}
+		}
+	}
+
+	private boolean replaceClassesWithVariables(List<VariableNode> variables, 
+			List<GraphPatternElement> gpes, boolean useOnlyClassesWithContext) throws TranslationException {
+		boolean newVarCreated = false;
+		if (gpes != null) {
+			for (GraphPatternElement gpe : gpes) {
+				if (replaceClassesWithVariables(variables, gpe, useOnlyClassesWithContext)) {
+					newVarCreated = true;
+				}
+			}
+		}
+		return newVarCreated;
+	}
+
+	private void replaceClassesWithInstances(Map<NamedNode, NamedNode> classInstanceMap,
+			GraphPatternElement gpe) throws TranslationException {
 		if (gpe instanceof TripleElement) {
-			replaceClassesWithVariables(variables, (TripleElement)gpe, useOnlyClassesWithContext);
+			replaceClassesWithInstances(classInstanceMap, (TripleElement)gpe);
 		}
 		else if (gpe instanceof BuiltinElement) {
-			replaceClassesWithVariables(variables, (BuiltinElement)gpe, useOnlyClassesWithContext);
+			replaceClassesWithInstances(classInstanceMap, (BuiltinElement)gpe);
 		}
+	}
+
+	private boolean replaceClassesWithVariables(List<VariableNode> variables, 
+			GraphPatternElement gpe, boolean useOnlyClassesWithContext) throws TranslationException {
+		if (gpe instanceof TripleElement) {
+			return replaceClassesWithVariables(variables, (TripleElement)gpe, useOnlyClassesWithContext);
+		}
+		else if (gpe instanceof BuiltinElement) {
+			return replaceClassesWithVariables(variables, (BuiltinElement)gpe, useOnlyClassesWithContext);
+		}
+		return false;
 	}
 
 	/**
@@ -3539,14 +3681,79 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param be
 	 * @throws TranslationException 
 	 */
-	private void replaceClassesWithVariables(List<VariableNode> variables, 
-			BuiltinElement be, boolean useOnlyClassesWithContext) throws TranslationException {
+	private void replaceClassesWithInstances(Map<NamedNode, NamedNode> classInstanceMap, 
+			BuiltinElement be) throws TranslationException {
 		List<Node> args = be.getArguments();
 		int idx = 0;
 		if (args != null) {
 			for (Node arg : args) {
 				if (arg instanceof ProxyNode) {
-					replaceClassesWithVariables(variables, ((ProxyNode)arg).getProxyFor(), useOnlyClassesWithContext);
+					replaceClassesWithInstances(classInstanceMap, ((ProxyNode)arg).getProxyFor());
+				}
+				else if (arg instanceof NamedNode && 
+						(((NamedNode)arg).getNodeType().equals(NodeType.ClassNode) ||
+						((NamedNode)arg).getNodeType().equals(NodeType.ClassListNode))) {
+					NamedNode matchingInst = findInstanceOfRightType(classInstanceMap, (NamedNode)arg);
+					if (matchingInst != null) {
+						args.set(idx, matchingInst);
+					}
+				}
+				idx++;
+			}
+		}
+	}
+
+	private NamedNode findInstanceOfRightType(Map<NamedNode, NamedNode> classInstanceMap, NamedNode arg) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * Method to replace class subject and object in a TripleElement with the first variable of the same type (class)
+	 * @param variables
+	 * @param tr
+	 * @throws TranslationException 
+	 */
+	private void replaceClassesWithInstances(Map<NamedNode, NamedNode> classInstanceMap, 
+			TripleElement tr) throws TranslationException {
+		if (tr.getPredicate().getURI().equals(RDF.type.getURI()) || 
+				tr.getPredicate().getURI().equals(RDFS.subClassOf.getURI())) {
+			return;
+		}
+		if (tr.getSubject() instanceof NamedNode) {  // && ((NamedNode)tr.getSubject()).getContext() == null) {
+			if (((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassNode) ||
+					((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassListNode)) {
+				NamedNode matchingInst = findInstanceOfRightType(classInstanceMap, (NamedNode)tr.getSubject());
+				if (matchingInst != null) {
+					tr.setSubject(matchingInst);
+				}
+			}
+		}
+		if (tr.getObject() instanceof NamedNode) {
+			if (((NamedNode)tr.getObject()).getNodeType().equals(NodeType.ClassNode) ||
+					((NamedNode)tr.getObject()).getNodeType().equals(NodeType.ClassListNode)) {
+				NamedNode matchingInst = findInstanceOfRightType(classInstanceMap, (NamedNode)tr.getObject());
+				if (matchingInst != null) {
+					tr.setObject(matchingInst);
+				}
+			}
+		}
+	}
+	/**
+	 * Method to replace a class argument to a BuiltinElement with the first variable of the same type (class)
+	 * @param variables
+	 * @param be
+	 * @throws TranslationException 
+	 */
+	private boolean replaceClassesWithVariables(List<VariableNode> variables, 
+			BuiltinElement be, boolean useOnlyClassesWithContext) throws TranslationException {
+		boolean newVarCreated = false;
+		List<Node> args = be.getArguments();
+		int idx = 0;
+		if (args != null) {
+			for (Node arg : args) {
+				if (arg instanceof ProxyNode) {
+					newVarCreated = replaceClassesWithVariables(variables, ((ProxyNode)arg).getProxyFor(), useOnlyClassesWithContext);
 				}
 				else if (arg instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)arg).getContext() == null) &&
 						(((NamedNode)arg).getNodeType().equals(NodeType.ClassNode) ||
@@ -3558,12 +3765,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						matchingVar.setPrefix(getModelProcessor().getModelAlias());
 						matchingVar.setType(arg);
 						variables.add(matchingVar);
+						newVarCreated = true;
 					}
 					args.set(idx, matchingVar);
 				}
 				idx++;
 			}
 		}
+		return newVarCreated;
 	}
 
 	/**
@@ -3572,11 +3781,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param tr
 	 * @throws TranslationException 
 	 */
-	private void replaceClassesWithVariables(List<VariableNode> variables, 
+	private boolean replaceClassesWithVariables(List<VariableNode> variables, 
 			TripleElement tr, boolean matchOnSubclasses) throws TranslationException {
+		boolean newVarCreated = false;
 		if (tr.getPredicate().getURI().equals(RDF.type.getURI()) || 
 				tr.getPredicate().getURI().equals(RDFS.subClassOf.getURI())) {
-			return;
+			return newVarCreated;
 		}
 		if (tr.getSubject() instanceof NamedNode) {  // && ((NamedNode)tr.getSubject()).getContext() == null) {
 			if (((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassNode) ||
@@ -3595,6 +3805,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						matchingVar.setPrefix(getModelProcessor().getModelAlias());
 						matchingVar.setType(((NamedNode)tr.getSubject()));
 						variables.add(matchingVar);
+						newVarCreated = true;
 					}
 				}
 				if (matchingVar != null) {
@@ -3608,7 +3819,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getObject(), matchOnSubclasses);
 				if (matchingVar != null && tr.getSubject().equals(matchingVar)) {
 					// this is the definition of an existing variable
-					return;
+					return newVarCreated;
 				}
 				if (matchingVar == null && matchOnSubclasses) {
 					// see if there is already a variable of a superclass that can be revised to be this class and used
@@ -3630,6 +3841,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 		}
+		return newVarCreated;
 	}
 
 	private VariableNode findVariableOfRightType(List<VariableNode> variables, 
@@ -3663,23 +3875,36 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 
 	private VariableNode findSuperclassVariable(List<VariableNode> variables, NamedNode nn,
 			boolean matchOnSubclasses) {
+		// Note: this model is not an inferred model so transitive closure over class hierarchy cannot be assumed
 		String classUri = nn.getURI();
 		if (variables != null) {
 			for (VariableNode v : variables) {
 				OntClass cls = getTheJenaModel().getOntClass(classUri);
 				if (cls != null && v.getType() != null) {
-					ExtendedIterator<OntClass> scitr = cls.listSuperClasses();
-					while (scitr.hasNext()) {
-						OntClass sc = scitr.next();
-						if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
-							scitr.close();
-							return v;
-						}
+					if (findSuperclassVariable(v, cls)) {
+						return v;
 					}
 				}
 			}
 		}
 		return null;
+	}
+
+	private boolean findSuperclassVariable(VariableNode v, OntClass cls) {
+		ExtendedIterator<OntClass> scitr = cls.listSuperClasses(true);
+		while (scitr.hasNext()) {
+			OntClass sc = scitr.next();
+			if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
+				scitr.close();
+				return true;
+			}
+			else {
+				if (findSuperclassVariable(v, sc)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
