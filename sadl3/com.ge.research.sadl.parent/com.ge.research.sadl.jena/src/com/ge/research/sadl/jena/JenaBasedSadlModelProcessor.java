@@ -3637,11 +3637,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private void addGpVariableTypeTriples(VariableNode subj, Individual gpVarSubjInst, List<Individual> constraints, OntClass triplePatternClass) {
 		// add type info of variable
-		if (!variablesTyped.contains(subj)) {
-			com.hp.hpl.jena.rdf.model.Resource typ = getTheJenaModel().getResource(((VariableNode)subj).getType().toFullyQualifiedString());
-			createTripleSemanticConstraint(triplePatternClass, gpVarSubjInst, RDF.type, typ, constraints);
+		if (subj != null) {
+			if (!variablesTyped.contains(subj) && subj.getType() != null) {
+				com.hp.hpl.jena.rdf.model.Resource typ = getTheJenaModel().getResource(subj.getType().toFullyQualifiedString());
+				createTripleSemanticConstraint(triplePatternClass, gpVarSubjInst, RDF.type, typ, constraints);
+				variablesTyped.add(subj);
+			}
 		}
-		variablesTyped.add(subj);
 	}
 
 	private boolean gpVariableExists(VariableNode obj) {
