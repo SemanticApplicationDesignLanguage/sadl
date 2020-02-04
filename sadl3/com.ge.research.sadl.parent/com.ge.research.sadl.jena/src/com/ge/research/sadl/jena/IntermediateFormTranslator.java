@@ -1438,18 +1438,22 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					Node subj = gpe.getSubject();
 					Node obj = gpe.getObject();
 					if (subj instanceof VariableNode && ((VariableNode)subj).isCRulesVariable() && ((VariableNode)subj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) subj)) {
-						TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
-						newTypeTriple.setSourceType(TripleSourceType.ITC);
-						gpes.add(i++, newTypeTriple);
+						if (!updateVariableTypeTriple(subj, ((VariableNode)subj).getType(), gpes)) {
+							TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
+							newTypeTriple.setSourceType(TripleSourceType.ITC);
+							gpes.add(i++, newTypeTriple);
+						}
 						addCruleVariableToTypeOutput((VariableNode) subj);
 						if (!isRuleThen) {
 							i = addNotEqualsBuiltinsForNewCruleVariable(gpes, i, (VariableNode) subj);
 						}
 					}
 					if (obj instanceof VariableNode && ((VariableNode)obj).isCRulesVariable() && ((VariableNode)obj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) obj)) {
-						TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
-						newTypeTriple.setSourceType(TripleSourceType.ITC);
-						gpes.add(++i, newTypeTriple);
+						if (!updateVariableTypeTriple(obj, ((VariableNode)obj).getType(), gpes)) {
+							TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
+							newTypeTriple.setSourceType(TripleSourceType.ITC);
+							gpes.add(i++, newTypeTriple);
+						}
 						addCruleVariableToTypeOutput((VariableNode) obj);
 						if (!isRuleThen) {
 							i = addNotEqualsBuiltinsForNewCruleVariable(gpes, i, (VariableNode) obj);
@@ -1462,6 +1466,18 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 		}
 		return gpes;
+	}
+
+	private boolean updateVariableTypeTriple(Node subj, Node type, List<GraphPatternElement> gpes) {
+		for (GraphPatternElement gpe : gpes) {
+			if (gpe instanceof TripleElement && ((TripleElement)gpe).getPredicate() instanceof RDFTypeNode) {
+				if (((TripleElement)gpe).getSubject().equals(subj)) {
+					((TripleElement)gpe).setObject(type);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private List<GraphPatternElement> flattenRuleJunctions(List<GraphPatternElement> lst) {
@@ -3704,8 +3720,36 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	private NamedNode findInstanceOfRightType(Map<NamedNode, NamedNode> classInstanceMap, NamedNode arg) {
-		if (classInstanceMap != null && classInstanceMap.containsKey(arg)) {
-			return classInstanceMap.get(arg);
+		if (classInstanceMap != null) {
+			if (classInstanceMap.containsKey(arg)) {
+				return classInstanceMap.get(arg);
+			}
+			NamedNode msc = findMatchingSubclass(classInstanceMap, arg);	
+			return msc;
+		}
+		return null;
+	}
+
+	private NamedNode findMatchingSubclass(Map<NamedNode, NamedNode> classInstanceMap, NamedNode arg) {
+		OntClass cls = getTheJenaModel().getOntClass(arg.getURI());
+		if (cls != null) {
+			ExtendedIterator<OntClass> scitr = cls.listSubClasses(true);
+			while (scitr.hasNext()) {
+				OntClass sc = scitr.next();
+				NamedNode scnn = new NamedNode(sc.getURI());
+				scnn.setNodeType(NodeType.ClassNode);
+				if (classInstanceMap.containsKey(scnn)) {
+					scitr.close();
+					return classInstanceMap.get(scnn);
+				}
+				else {
+					NamedNode other = findMatchingSubclass(classInstanceMap, scnn);
+					if (other != null) {
+						scitr.close();
+						return other;
+					}
+				}
+			}
 		}
 		return null;
 	}
