@@ -66,6 +66,12 @@ interface ISadlInferenceProcessor {
 	def Object[] insertTriplesAndQuery(Resource resource, TripleElement[] triples) throws SadlInferenceException;
 
 	/**
+	 * Call to insert a List of complete triples into model and query using incomplete triples
+	 * returns an array of ResultSet, one for each query triple pattern
+	 */
+	def Object[] insertTriplesAndQuery(Resource resource, List<TripleElement[]> triples) throws SadlInferenceException;
+
+	/**
 	 * Call to insert a List of Rules that may be used to infer desired results. 
 	 * Rules contain conditions (givens, normally empty, and ifs) and conclusions (thens). The
 	 * Rule also has a list of variables used in the rules and their type.

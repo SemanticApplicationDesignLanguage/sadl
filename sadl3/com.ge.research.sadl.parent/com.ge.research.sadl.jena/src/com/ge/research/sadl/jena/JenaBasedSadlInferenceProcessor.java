@@ -1765,6 +1765,13 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	}
 
 	@Override
+	public Object[] insertTriplesAndQuery(Resource resource, List<TripleElement[]> triples)
+			throws SadlInferenceException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public Object[] insertRulesAndQuery(Resource resource, List<Rule> rules) throws SadlInferenceException {
 		// TODO Auto-generated method stub
 		return null;
