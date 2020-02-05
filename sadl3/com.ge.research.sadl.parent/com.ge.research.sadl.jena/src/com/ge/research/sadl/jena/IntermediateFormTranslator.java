@@ -1438,7 +1438,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					Node subj = gpe.getSubject();
 					Node obj = gpe.getObject();
 					if (subj instanceof VariableNode && ((VariableNode)subj).isCRulesVariable() && ((VariableNode)subj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) subj)) {
-						if (!updateVariableTypeTriple(subj, ((VariableNode)subj).getType(), gpes)) {
+						if (!updateVariableTypeTriple((VariableNode) subj, ((VariableNode)subj).getType(), gpes)) {
 							TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
 							newTypeTriple.setSourceType(TripleSourceType.ITC);
 							gpes.add(i++, newTypeTriple);
@@ -1449,7 +1449,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						}
 					}
 					if (obj instanceof VariableNode && ((VariableNode)obj).isCRulesVariable() && ((VariableNode)obj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) obj)) {
-						if (!updateVariableTypeTriple(obj, ((VariableNode)obj).getType(), gpes)) {
+						if (!updateVariableTypeTriple((VariableNode) obj, ((VariableNode)obj).getType(), gpes)) {
 							TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
 							newTypeTriple.setSourceType(TripleSourceType.ITC);
 							gpes.add(i++, newTypeTriple);
@@ -1468,13 +1468,37 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return gpes;
 	}
 
-	private boolean updateVariableTypeTriple(Node subj, Node type, List<GraphPatternElement> gpes) {
+	private boolean updateVariableTypeTriple(VariableNode var, Node type, List<GraphPatternElement> gpes) {
 		for (GraphPatternElement gpe : gpes) {
 			if (gpe instanceof TripleElement && ((TripleElement)gpe).getPredicate() instanceof RDFTypeNode) {
-				if (((TripleElement)gpe).getSubject().equals(subj)) {
-					((TripleElement)gpe).setObject(type);
+				if (((TripleElement)gpe).getSubject().equals(var)) {
+					// don't broaden the type
+					if (!classNodeIsSubclass(((TripleElement)gpe).getObject(), type)) {
+						((TripleElement)gpe).setObject(type);
+					}
 					return true;
 				}
+			}
+		}
+		return false;
+	}
+
+	private boolean classNodeIsSubclass(Node type, Node type2) {
+		if (type.equals(type2)) {
+			return true;
+		}
+		if (type instanceof NamedNode && type2 instanceof NamedNode && 
+				((NamedNode)type).getNodeType().equals(NodeType.ClassNode) &&
+				((NamedNode)type2).getNodeType().equals(NodeType.ClassNode)) {
+			OntClass cls1 = getTheJenaModel().getOntClass(type.getURI());
+			OntClass cls2 = getTheJenaModel().getOntClass(type2.getURI());
+			try {
+				if (SadlUtils.classIsSubclassOf(cls1, cls2, true, null)) {
+					return true;
+				}
+			} catch (CircularDependencyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		return false;
