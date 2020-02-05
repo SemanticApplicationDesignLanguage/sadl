@@ -56,6 +56,7 @@ import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Read;
+import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.model.gp.StartWrite;
 import com.ge.research.sadl.model.gp.Test;
@@ -1764,8 +1765,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	}
 
 	@Override
-	public Object[] insertTriplesAndQuery(Resource resource, List<TripleElement[]> triples)
-			throws SadlInferenceException {
+	public Object[] insertRulesAndQuery(Resource resource, List<Rule> rules) throws SadlInferenceException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1799,5 +1799,4 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		}
 		return null;
 	}
-
 }
