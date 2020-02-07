@@ -43,7 +43,7 @@ interface SadlResourceCommentProvider {
 class Default implements SadlResourceCommentProvider {
 
 	override getComment(SadlResource it) {
-		return it.annotations.filter[type == 'note'].map[contents].flatten;
+		return it.annotations.filter[annotations.type == 'note'].map[annotations.contents].flatten;
 	}
 
 }

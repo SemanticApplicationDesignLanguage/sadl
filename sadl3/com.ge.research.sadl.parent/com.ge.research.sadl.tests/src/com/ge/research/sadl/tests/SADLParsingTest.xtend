@@ -530,8 +530,8 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 		Assert.assertTrue(model.elements.get(0) instanceof SadlClassOrPropertyDeclaration)
 		val scpd = (model.elements.get(0) as SadlClassOrPropertyDeclaration)
 		val ann0 = scpd.classOrProperty.get(0).annotations.get(0)
-		Assert.assertTrue(ann0.type.equals("see"))
-		Assert.assertEquals(ann0.contents.get(0),"http://sadl.org/SaveTarget.sadl2b")
+		Assert.assertTrue(ann0.annotations.type.equals("see"))
+		Assert.assertEquals(ann0.annotations.contents.get(0),"http://sadl.org/SaveTarget.sadl2b")
 	}
 	
 	@Test

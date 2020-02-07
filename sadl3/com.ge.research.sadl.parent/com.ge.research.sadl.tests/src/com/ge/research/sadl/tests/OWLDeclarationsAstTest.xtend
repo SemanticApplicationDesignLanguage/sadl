@@ -47,11 +47,11 @@ class OWLDeclarationsAstTest extends AbstractSADLParsingTest {
 		'''
 		uri "http://sadl.org/Tests/ModelName" alias mn version "1" (note "This is an rdfs:label") (alias "Model Name").		
 		'''.assertAST [
-			assertEquals("note",annotations.head.type)
-			assertEquals("This is an rdfs:label",annotations.head.contents.head)
+			assertEquals("note",annotations.head.annotations.type)
+			assertEquals("This is an rdfs:label",annotations.head.annotations.contents.head)
 			
-			assertEquals("alias",annotations.get(1).type)
-			assertEquals("Model Name",annotations.get(1).contents.head)
+			assertEquals("alias",annotations.get(1).annotations.type)
+			assertEquals("Model Name",annotations.get(1).annotations.contents.head)
 		]
 	}
 	

@@ -166,6 +166,7 @@ import com.ge.research.sadl.sADL.RuleStatement;
 import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.sADL.SadlAllValuesCondition;
 import com.ge.research.sadl.sADL.SadlAnnotation;
+import com.ge.research.sadl.sADL.SadlAnnotationContent;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf;
 import com.ge.research.sadl.sADL.SadlCardinalityCondition;
@@ -1570,8 +1571,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Iterator<SadlAnnotation> iter = anns.iterator();
 		while (iter.hasNext()) {
 			SadlAnnotation ann = iter.next();
-			String anntype = ann.getType();
-			EList<String> annContents = ann.getContents();
+			SadlAnnotationContent sadlAnnContent = ann.getAnnotations();
+			String anntype = sadlAnnContent.getType();
+			EList<String> annContents = sadlAnnContent.getContents();
 			Iterator<String> anniter = annContents.iterator();
 			while (anniter.hasNext()) {  
 				String annContent = anniter.next();
@@ -10184,7 +10186,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					node = NodeModelUtils.findActualNodeFor(contr);
 				}
 				if (node != null) {
-					String txt = node.getText();
+					String txt = node.getText().trim();
+					if (txt.startsWith(",")) {
+						txt = txt.substring(1).trim();
+					}
 					String preTxt = null;
 					if (contr instanceof SadlPropertyInitializer) {
 						preTxt = ((SadlPropertyInitializer)contr).getFirstConnective();
