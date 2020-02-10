@@ -829,7 +829,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	@Override
 	public OntModel getOntModel(String publicUri, String serializedGraph, Scope scope, String format) {
 		Model m = ModelFactory.createDefaultModel()
-		        .read(new StringInputStream(serializedGraph), null, format);
+		        .read(new StringInputStream(serializedGraph), publicUri, format);
     	if (m instanceof OntModel) {
     		return (OntModel)m;
     	}
