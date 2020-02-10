@@ -10195,7 +10195,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						StmtIterator stmtitr = getTheJenaModel().listStatements(null, RDFS.label, lit);
 						while (stmtitr.hasNext()) {
 							com.hp.hpl.jena.rdf.model.Resource replacement = stmtitr.nextStatement().getSubject();
-							addWarning("Consider replacing '" + txt + "' with '" + replacement.getLocalName() + "'", contr, "REPLACE_ALIAS", replacement.getLocalName());
+							String[] data = new String[] { txt, replacement.getLocalName() };
+							addWarning("Consider replacing '" + txt + "' with '" + replacement.getLocalName() + "'", contr, "REPLACE_ALIAS", data);
 						}
 					}
 			    	String psrc = getSourceText(prop);
