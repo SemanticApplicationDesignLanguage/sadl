@@ -1566,7 +1566,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				sadlBaseModel);
 	}
 
-	protected void addAnnotationsToResource(OntResource modelOntology, EList<SadlAnnotation> anns) {
+	protected void addAnnotationsToResource(OntResource resource, EList<SadlAnnotation> anns) {
 		Iterator<SadlAnnotation> iter = anns.iterator();
 		while (iter.hasNext()) {
 			SadlAnnotation ann = iter.next();
@@ -1577,12 +1577,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				String annContent = anniter.next();
 				annContent = cleanTextForUTF8(annContent);	
 				if (anntype.equalsIgnoreCase(AnnType.ALIAS.toString())) {
-					modelOntology.addLabel(annContent, "en");
+					resource.addLabel(annContent, "en");
 				} else if (anntype.equalsIgnoreCase(AnnType.NOTE.toString())) {
-					modelOntology.addComment(annContent, "en");
+					resource.addComment(annContent, "en");
 				} else if (anntype.equalsIgnoreCase(AnnType.SEE.toString())) {
 					if (validURI(annContent)) {
-						modelOntology.addSeeAlso(getTheJenaModel().getResource(annContent));
+						resource.addSeeAlso(getTheJenaModel().getResource(annContent));
 					}
 					else {
 						addWarning("A 'see' annotation must refer to a valid URI.", ann);
@@ -1604,9 +1604,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
     		if (sch == null) {
     			return false;
     		}
-    		String hst = uri.getHost();
-    		if (hst == null) {
-    			return false;
+    		if (!sch.equals("file")) {
+    			String hst = uri.getHost();
+        		if (hst == null) {
+        			return false;
+        		}
     		}
     	} catch (Exception e) {
     		return false;
