@@ -975,7 +975,9 @@ public class OwlToSadl {
 			}
 			else {
 				if (shouldResourceBeOutput(mprop, false, false, true)) {
-					getConcepts().addRdfProperty(mprop);
+					if (isPropertyInThisNamespace(mprop)) {
+						getConcepts().addRdfProperty(mprop);
+					}
 				}
 			}
 			RDFNode obj = s.getObject();
@@ -2054,14 +2056,14 @@ public class OwlToSadl {
 			bnode = true;
 		}
 		if (!isEquation) {
-			ExtendedIterator<OntClass> eitr = inst.listOntClasses(true);
+			StmtIterator stmtitr = theBaseModel.listStatements(inst, RDF.type, (RDFNode)null);
 			int itercnt = 0;
 			boolean intersectionClass = false;
-			while (eitr.hasNext()) {
-				try {
-					OntClass cls = eitr.next();
+			while (stmtitr.hasNext()) {
+				RDFNode type = stmtitr.nextStatement().getObject();
+				if (type.isResource()) {
 					if (itercnt == 0) {
-						if (eitr.hasNext()) {
+						if (stmtitr.hasNext()) {
 							intersectionClass = true;
 						}
 						if (intersectionClass) {
@@ -2071,12 +2073,32 @@ public class OwlToSadl {
 					if (itercnt++ > 0) {
 						sb.append(" and ");
 					}
-					sb.append(uriToSadlString(concepts, cls));
-				}
-				catch (Exception e){
-					System.err.println(e.getMessage());
+					sb.append(uriToSadlString(concepts, type.asResource()));
 				}
 			}
+//			ExtendedIterator<OntClass> eitr = inst.listOntClasses(true);
+//			int itercnt = 0;
+//			boolean intersectionClass = false;
+//			while (eitr.hasNext()) {
+//				try {
+//					OntClass cls = eitr.next();
+//					if (itercnt == 0) {
+//						if (eitr.hasNext()) {
+//							intersectionClass = true;
+//						}
+//						if (intersectionClass) {
+//							sb.append("{");
+//						}
+//					}
+//					if (itercnt++ > 0) {
+//						sb.append(" and ");
+//					}
+//					sb.append(uriToSadlString(concepts, cls));
+//				}
+//				catch (Exception e){
+//					System.err.println(e.getMessage());
+//				}
+//			}
 			if (intersectionClass) {
 				sb.append("}");
 			}
@@ -2891,11 +2913,15 @@ public class OwlToSadl {
 			}
 		}
 		else if (type.equals(OWL.ObjectProperty)) {
-			concepts.addObjProperty(ontRsrc.asObjectProperty());
+			if (isPropertyInThisNamespace(ontRsrc.asObjectProperty())) {
+				concepts.addObjProperty(ontRsrc.asObjectProperty());
+			}
 			return true;
 		}
 		else if (type.equals(OWL.DatatypeProperty)) {
-			concepts.addDtProperty(ontRsrc.asDatatypeProperty());
+			if (isPropertyInThisNamespace(ontRsrc.asObjectProperty())) {
+				concepts.addDtProperty(ontRsrc.asDatatypeProperty());
+			}
 			return true;
 		}
 		else if (type.equals(RDF.Property)) {
@@ -2911,11 +2937,15 @@ public class OwlToSadl {
 //					return true;
 //				}
 //			}
-			concepts.addRdfProperty(ontRsrc.asProperty());
-			return true;
+			if (isPropertyInThisNamespace(ontRsrc.asProperty())) {
+				concepts.addRdfProperty(ontRsrc.asProperty());
+				return true;
+			}
 		}
 		else if (type.equals(OWL.AnnotationProperty)) {
-			concepts.addAnnProperty(ontRsrc.asAnnotationProperty());
+			if (isPropertyInThisNamespace(ontRsrc.asObjectProperty())) {
+				concepts.addAnnProperty(ontRsrc.asAnnotationProperty());
+			}
 			return true;
 		}
 		else if (type.equals(OWL.Ontology)) {
@@ -3107,6 +3137,17 @@ public class OwlToSadl {
 				concepts.addInstance(inst);
 				return true;
 			}
+		}
+		return false;
+	}
+
+	private boolean isPropertyInThisNamespace(Property mprop) {
+		String ns = mprop.getNameSpace();
+		if (ns.endsWith("#")) {
+			ns = ns.substring(0, ns.length() - 1);
+		}
+		if (mprop.isURIResource() && ns.equals(getBaseUri())) {
+			return true;
 		}
 		return false;
 	}
