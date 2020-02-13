@@ -1,0 +1,27 @@
+image:
+  file: .gitpod.dockerfile
+ports:
+  - port: 3000
+github:
+  prebuilds:
+    branches: true
+tasks:
+  - init: |
+      yes '' | sdk install java 8.0.242-open
+      sdk default java 8.0.242-open
+      mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean
+      mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml -Dmaven.test.skip=true verify
+      yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/
+    command: |
+      gp sync-done init
+      yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension watch
+  - command: |
+      gp sync-await init
+      yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/browser-app watch
+    name: Watch browser-app
+    openMode: split-right
+  - command: |
+      gp sync-await init
+      yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/browser-app start ../sadl-extension/example-projects
+    name: Start browser-app
+    openMode: tab-after

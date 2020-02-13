@@ -7,7 +7,7 @@
     "theia-extension"
   ],
   "files": [
-    "bin",
+    "languageserver",
     "lib",
     "src",
     "example-projects"
@@ -20,17 +20,20 @@
     "@theia/navigator": "next",
     "@theia/monaco": "next",
     "@theia/output": "next",
-    "valid-filename": "latest"
+    "valid-filename": "^3.1.0"
   },
   "devDependencies": {
-    "rimraf": "latest",
-    "typescript": "latest"
+    "rimraf": "^3.0.2",
+    "typescript": "~3.5.3",
+    "cpr": "^3.0.1"
   },
   "scripts": {
-    "prepare": "yarn run clean && yarn run build",
+    "prepare": "yarn run clean && yarn run build && yarn install:languageserver",
     "clean": "rimraf lib",
     "build": "tsc",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "install:languageserver": "rimraf -rf languageserver && yarn copy:languageserver",
+    "copy:languageserver": "cpr ../../com.ge.research.sadl.ide/target/languageserver ./languageserver -o"
   },
   "theiaExtensions": [
     {

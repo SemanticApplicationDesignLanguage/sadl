@@ -121,12 +121,6 @@ class SadlIdeIncrementalBuilder extends IncrementalBuilder {
 			]
 		}
 
-		protected def BuildContext getContext() {
-			val field = InternalStatefulIncrementalBuilder.getDeclaredField('context');
-			field.setAccessible(true);
-			return field.get(this) as BuildContext;
-		}
-
 	}
 
 }

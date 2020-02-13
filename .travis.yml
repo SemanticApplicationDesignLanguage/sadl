@@ -1,10 +1,5 @@
-sudo: required
-
 git:
   depth: 1
-
-os:
-  - linux
 
 branches:
   only:
@@ -15,52 +10,49 @@ cache:
   - $HOME/.m2/repository
   - $HOME/.gradle
 
+os: linux
+language: generic
+
 jobs:
   include:
-  - stage: test
+  - stage: "Java build [Maven]"
     language: java
     jdk: openjdk8
     services:
       - xvfb
-    before_install: 
+    before_script: 
       - export M2_HOME=/usr/local/maven
       - export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m -XX:PermSize=512m"
     script:
       - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean
       - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml verify
 
-  - stage: publish-npm
+  - stage: "Theia build [yarn]"
     language: java
     jdk: openjdk8
-    node_js: '8'
-    before_install:
+    node_js: '10'
+    before_script:
       - export M2_HOME=/usr/local/maven
       - export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m -XX:PermSize=512m"
-    before_script: 
-      - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.12.3
+      - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.21.1
       - export PATH=$HOME/.yarn/bin:$PATH
-      - sudo apt-get -y install jq
+      - nvm install 10.15.3
+      - nvm use 10.15.3
     script:
-      - rm -rf ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ # Wipe the previous state.
-      - rm -rf ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/
-      - mvn -f ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.reasoner/pom.xml install
-      - mvn -f ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.target/pom.xml install
-      - (cd ./sadl3/com.ge.research.sadl.parent/com.ge.research.jena && mvn install)
-      - ./sadl3/com.ge.research.sadl.parent/gradlew -p ./sadl3/com.ge.research.sadl.parent/ build installDist --refresh-dependencies --no-parallel --max-workers=1 # Build the LS.
-      - cp -rf ./sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/ # Copy the LS to the Theia extension.
-      - yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension # Build the Theia extension.
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml -Dmaven.test.skip=true verify
+      - yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension
     before_deploy:
       - printf "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n" >> ~/.npmrc
     deploy:
       provider: script
-      script:
-        - yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension run publish:next
+      script: yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension run publish:next
       on:
         all_branches: true
-        condition: $TRAVIS_BRANCH =~ ^development|GH-339$
+        condition: $TRAVIS_BRANCH =~ ^(development)$
       skip_cleanup: true
 
-  - stage: publish-docker
+  - stage: "Publish [docker]"
     language: generic
     services:
       - docker
@@ -68,6 +60,9 @@ jobs:
       - sudo apt-get update
       - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
       - sudo apt-get -y install jq
+      - npm install --global node-gyp@6.0.1
+      - npm config set node_gyp "`npm prefix -g`/lib/node_modules/node-gyp/bin/node-gyp.js"
+      - echo "npm config get node_gyp -> `npm config get node_gyp`"
     script:
       - cp -rf sadl3/com.ge.research.sadl.parent/theia-sadl-extension/yarn.lock sadl3/com.ge.research.sadl.parent/theia-sadl-extension/browser-app/yarn.lock # Reuse the yarn.lock file.
       - NEXT_VERSION=`npm view sadl-extension@next version` # Get the next version that we want to include in the image.
@@ -80,9 +75,8 @@ jobs:
       - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
     deploy:
       provider: script
-      script:
-        - docker push theiaide/sadl
+      script: docker push theiaide/sadl
       on:
         all_branches: true
-        condition: $TRAVIS_BRANCH =~ ^development|GH-339$
+        condition: $TRAVIS_BRANCH =~ ^(development)$
       skip_cleanup: true

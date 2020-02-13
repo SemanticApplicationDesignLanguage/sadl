@@ -14,3 +14,5 @@ plugin.xml_gen
 .settings/
 */model/generated/
 reasoner-impl-test.log
+ImplicitModel
+OwlModels

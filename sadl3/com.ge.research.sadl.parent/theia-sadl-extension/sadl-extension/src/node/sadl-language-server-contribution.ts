@@ -24,7 +24,7 @@ import { isWindows } from '@theia/core/lib/common/os';
 import { BaseLanguageServerContribution, IConnection } from '@theia/languages/lib/node';
 
 const EXECUTABLE_NAME = isWindows ? 'sadl-language-server.bat' : 'sadl-language-server';
-const EXECUTABLE_PATH = resolve(join(__dirname, '..', '..', 'bin', 'sadl-language-server', 'bin', EXECUTABLE_NAME));
+const EXECUTABLE_PATH = resolve(join(__dirname, '..', '..', 'languageserver', 'bin', EXECUTABLE_NAME));
 
 @injectable()
 export class SadlLanguageServerContribution extends BaseLanguageServerContribution {
@@ -32,7 +32,7 @@ export class SadlLanguageServerContribution extends BaseLanguageServerContributi
     readonly id = 'sadl';
     readonly name = 'SADL';
 
-    start(clientConnection: IConnection): void {
+    async start(clientConnection: IConnection): Promise<void> {
         let socketPort = this.port;
         if (socketPort) {
             const socket = new Socket();
@@ -41,7 +41,7 @@ export class SadlLanguageServerContribution extends BaseLanguageServerContributi
             socket.connect(socketPort);
         } else {
             const args: string[] = [];
-            const serverConnection = this.createProcessStreamConnection(EXECUTABLE_PATH, args);
+            const serverConnection = await this.createProcessStreamConnectionAsync(EXECUTABLE_PATH, args);
             this.forward(clientConnection, serverConnection);
         }
     }

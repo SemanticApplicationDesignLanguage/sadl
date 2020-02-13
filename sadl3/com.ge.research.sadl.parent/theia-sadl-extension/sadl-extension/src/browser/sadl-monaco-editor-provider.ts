@@ -22,7 +22,6 @@ import { ThemeService } from '@theia/core/lib/browser/theming';
 import { MonacoEditor } from '@theia/monaco/lib/browser/monaco-editor';
 import { MessageService } from '@theia/core/lib/common/message-service';
 import { MonacoWorkspace } from '@theia/monaco/lib/browser/monaco-workspace';
-import { QuickOpenService } from '@theia/core/lib/browser/quick-open/quick-open-service';
 import { EditorPreferences } from '@theia/editor/lib/browser/editor-preferences';
 import { MonacoEditorModel } from '@theia/monaco/lib/browser/monaco-editor-model';
 import { MonacoEditorService } from '@theia/monaco/lib/browser/monaco-editor-service';
@@ -35,25 +34,28 @@ import { MonacoDiffNavigatorFactory } from '@theia/monaco/lib/browser/monaco-dif
 import { MonacoCommandServiceFactory } from '@theia/monaco/lib/browser/monaco-command-service';
 import { MonacoToProtocolConverter, ProtocolToMonacoConverter } from 'monaco-languageclient';
 import { FileSystemExt } from '../common/filesystem-ext';
+import { ApplicationServer } from '@theia/core/lib/common/application-protocol';
 
 @injectable()
 export class SadlMonacoEditorProvider extends MonacoEditorProvider {
 
     constructor(
-        @inject(MonacoEditorService) protected readonly editorService: MonacoEditorService,
-        @inject(MonacoTextModelService) protected readonly monacoModelResolver: MonacoTextModelService,
+        @inject(MonacoEditorService) protected readonly codeEditorService: MonacoEditorService,
+        @inject(MonacoTextModelService) protected readonly textModelService: MonacoTextModelService,
         @inject(MonacoContextMenuService) protected readonly contextMenuService: MonacoContextMenuService,
         @inject(MonacoToProtocolConverter) protected readonly m2p: MonacoToProtocolConverter,
         @inject(ProtocolToMonacoConverter) protected readonly p2m: ProtocolToMonacoConverter,
         @inject(MonacoWorkspace) protected readonly workspace: MonacoWorkspace,
         @inject(MonacoCommandServiceFactory) protected readonly commandServiceFactory: MonacoCommandServiceFactory,
         @inject(EditorPreferences) protected readonly editorPreferences: EditorPreferences,
-        @inject(QuickOpenService) protected readonly quickOpenService: MonacoQuickOpenService,
+        @inject(MonacoQuickOpenService) protected readonly quickOpenService: MonacoQuickOpenService,
         @inject(MonacoDiffNavigatorFactory) protected readonly diffNavigatorFactory: MonacoDiffNavigatorFactory,
-        @inject(MessageService) protected readonly messageService: MessageService,
-        @inject(FileSystemExt) protected readonly fileSystemExt: FileSystemExt
+        @inject(ApplicationServer) protected readonly applicationServer: ApplicationServer,
+        @inject(monaco.contextKeyService.ContextKeyService) protected readonly contextKeyService: monaco.contextKeyService.ContextKeyService,
+        @inject(FileSystemExt) protected readonly fileSystemExt: FileSystemExt,
+        @inject(MessageService) protected readonly messageService: MessageService
     ) {
-        super(editorService, monacoModelResolver, contextMenuService, m2p, p2m, workspace, commandServiceFactory, editorPreferences, quickOpenService, diffNavigatorFactory);
+        super(codeEditorService, textModelService, contextMenuService, m2p, p2m, workspace, commandServiceFactory, editorPreferences, quickOpenService, diffNavigatorFactory, applicationServer, contextKeyService);
         const changeTheme = (editorTheme: string | undefined) => {
             const monacoTheme = this.extensionThemeFor(editorTheme || 'vs');
             monaco.editor.setTheme(monacoTheme);

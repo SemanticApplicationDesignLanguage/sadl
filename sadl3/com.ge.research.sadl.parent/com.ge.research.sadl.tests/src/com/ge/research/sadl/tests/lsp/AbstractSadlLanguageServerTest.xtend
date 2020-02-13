@@ -18,6 +18,7 @@
 package com.ge.research.sadl.tests.lsp
 
 import org.eclipse.emf.common.EMFPlugin
+import org.eclipse.lsp4j.services.LanguageClientExtensions
 import org.eclipse.xtext.resource.IResourceServiceProvider
 import org.eclipse.xtext.testing.AbstractLanguageServerTest
 import org.eclipse.xtext.util.Modules2
@@ -52,5 +53,10 @@ class AbstractSadlLanguageServerTest extends AbstractLanguageServerTest {
 			bind(IResourceServiceProvider.Registry).toProvider(SadlIdeTestIResourceServiceProviderRegistry)
 		]);
 	}
-	
+
+	override protected getLanguageClientClass() {
+		return LanguageClientExtensions;
+	}
+
+
 }
