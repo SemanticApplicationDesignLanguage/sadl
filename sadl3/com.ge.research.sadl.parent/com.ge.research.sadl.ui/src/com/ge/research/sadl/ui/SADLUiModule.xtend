@@ -37,6 +37,7 @@ import com.ge.research.sadl.ui.markers.EclipseMarkerSeverityMapper
 import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
+import com.ge.research.sadl.ui.quickfix.SadlQuickAssistProcessor
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
@@ -59,6 +60,7 @@ import org.eclipse.xtext.ui.editor.hover.IEObjectHoverProvider
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
+import org.eclipse.xtext.ui.editor.quickfix.XtextQuickAssistProcessor
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 
 import static com.google.inject.Scopes.SINGLETON
@@ -162,6 +164,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	def Class<? extends DefaultFoldingStructureProvider> bindDefaultFoldingStructureProvider() {
 		return PatchedDefaultFoldingStructureProvider;
+	}
+
+	def Class<? extends XtextQuickAssistProcessor> bindXtextQuickAssistProcessor() {
+		return SadlQuickAssistProcessor;
 	}
 
 }
