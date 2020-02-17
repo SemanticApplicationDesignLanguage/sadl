@@ -112,6 +112,13 @@ public interface IJenaBasedModelProcessor {
 	 * @return
 	 */
 	public NamedNode validateNamedNode(NamedNode namedNode);
+	
+	/**
+	 * Method to make sure that the URI has at least rudimentary parts.
+	 * @param uri
+	 * @return -- true if valid else false
+	 */
+	public boolean validURI(String uri);
 
 	/**
 	 * Method to convert a NamedNode to a ConceptName

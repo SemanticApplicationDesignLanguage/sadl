@@ -1597,7 +1597,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * @param s
 	 * @return
 	 */
-    protected boolean validURI(String s) {
+    public boolean validURI(String s) {
     	try {
     		java.net.URI uri = new java.net.URI(s);
     		String sch = uri.getScheme();
