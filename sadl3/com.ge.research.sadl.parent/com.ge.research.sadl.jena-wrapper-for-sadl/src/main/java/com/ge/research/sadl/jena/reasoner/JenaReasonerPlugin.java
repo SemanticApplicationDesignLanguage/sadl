@@ -1144,7 +1144,8 @@ public class JenaReasonerPlugin extends Reasoner{
 	//					index = larqBuilder.getIndex();
 	//				}
 	//			}
-				if (askQuery.startsWith("delete") || askQuery.startsWith("insert")) {
+//				if (askQuery.startsWith("delete") || askQuery.startsWith("insert")) {
+				if (isDeleteOrInsert(askQuery)) {
 					UpdateRequest urequest = UpdateFactory.create(askQuery);
 					if (infDataset != null) {
 						UpdateAction.execute(urequest, infDataset);
@@ -1254,6 +1255,29 @@ public class JenaReasonerPlugin extends Reasoner{
 		}
 //		}
 		return rs;
+	}
+
+	/**
+	 * Method to determine if the SPARQL query is an insert or a delete (an update) query.
+	 * Note that it is public to facilitate JUnit testing.
+	 * @param queryStr
+	 * @return
+	 */
+	public boolean isDeleteOrInsert(String queryStr) {
+		try {
+			Query query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
+			if (query.getQueryType() == Query.QueryTypeUnknown) {
+				// not an ask or a select or a construct or a describe--assume it's a delete or an insert (new version of Jena is problably more specific)
+				return true;
+			}
+		}
+		catch (Exception e) {
+			if (e.getMessage().toLowerCase().contains("insert") || 
+					e.getMessage().toLowerCase().contains("delete")) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected ResultSet convertFromJenaResultSetToReasonerResultSet(com.hp.hpl.jena.query.ResultSet results) {
