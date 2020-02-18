@@ -559,7 +559,12 @@ public class ResultSet {
 	 */
 	public ResultSet deleteResultSetColumn(String columnName) {
 		int colPosition = getColumnPosition(columnName);
-		return deleteResultSetColumn(colPosition);
+		if (colPosition < 0) {
+			return this;
+		}
+		else {
+			return deleteResultSetColumn(colPosition);
+		}
 	}
 	
 	/**
