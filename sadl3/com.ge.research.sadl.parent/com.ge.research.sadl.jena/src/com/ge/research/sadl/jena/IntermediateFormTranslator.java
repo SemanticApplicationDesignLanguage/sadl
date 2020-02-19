@@ -3924,21 +3924,45 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 			if (matchOnSubclasses) {
+				OntClass cls = getTheJenaModel().getOntClass(classUri);
+				VariableNode subclassV = findVariableOfRIghtTypeInSubclass(cls, variables);
+				if (subclassV != null) {
+					return subclassV;
+				}
+//				for (VariableNode v : variables) {
+//					OntClass cls = getTheJenaModel().getOntClass(classUri);
+//					if (cls != null && v.getType() != null) {
+//						ExtendedIterator<OntClass> scitr = cls.listSubClasses();
+//						while (scitr.hasNext()) {
+//							OntClass sc = scitr.next();
+//							if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
+//								scitr.close();
+//								return v;
+//							}
+//						}
+//					}
+//				}
+			}
+		}
+		return null;
+	}
+	
+	private VariableNode findVariableOfRIghtTypeInSubclass(OntClass cls, List<VariableNode> variables) {
+		if (cls != null) {
+			ExtendedIterator<OntClass> scitr = cls.listSubClasses();
+			while (scitr.hasNext()) {
+				OntClass sc = scitr.next();
 				for (VariableNode v : variables) {
-					OntClass cls = getTheJenaModel().getOntClass(classUri);
-					if (cls != null && v.getType() != null) {
-						ExtendedIterator<OntClass> scitr = cls.listSubClasses();
-						while (scitr.hasNext()) {
-							OntClass sc = scitr.next();
-							if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
-								scitr.close();
-								return v;
-							}
-						}
+					if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
+						scitr.close();
+						return v;
 					}
 				}
-			}
-
+				VariableNode lowerV = findVariableOfRIghtTypeInSubclass(sc, variables);
+				if (lowerV != null) {
+					return lowerV;
+				}
+			}	
 		}
 		return null;
 	}
