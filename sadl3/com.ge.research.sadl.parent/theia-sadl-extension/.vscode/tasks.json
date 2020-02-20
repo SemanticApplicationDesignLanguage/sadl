@@ -1,0 +1,59 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Web SADL - Start Browser Example",
+      "type": "shell",
+      "command": "yarn --cwd ./browser-app start",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      }
+    },
+    {
+      "label": "Web SADL - Start Browser Example [Socket LS]",
+      "type": "shell",
+      "command": "yarn --cwd ./browser-app start:debug",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": true
+      }
+    },
+    {
+      "label": "Web SADL - Watch Theia Extension",
+      "type": "shell",
+      "command": "yarn --cwd ./sadl-extension watch",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": false
+      }
+    },
+    {
+      "label": "Web SADL - Watch Browser Example",
+      "type": "shell",
+      "command": "yarn --cwd ./browser-app watch",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "clear": false
+      }
+    },
+    {
+      "label": "Web SADL - Watch All",
+      "type": "shell",
+      "dependsOn": [
+        "Web SADL - Watch Theia Extension",
+        "Web SADL - Watch Browser Example"
+      ]
+    }
+  ]
+}

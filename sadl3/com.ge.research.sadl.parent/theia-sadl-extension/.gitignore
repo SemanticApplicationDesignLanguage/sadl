@@ -5,3 +5,4 @@ lib
 *-app/*
 !*-app/package.json
 !*-app/Dockerfile
+sadl-language-server.zip

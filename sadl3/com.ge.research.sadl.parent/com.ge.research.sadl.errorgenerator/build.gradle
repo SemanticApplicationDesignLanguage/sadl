@@ -1,8 +1,0 @@
-dependencies {
-	compile "org.eclipse.xtext:org.eclipse.xtext:$versions.xtext"	
-}
-
-[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
-
-eclipseClasspath.enabled=false
-cleanEclipseClasspath.enabled=false
