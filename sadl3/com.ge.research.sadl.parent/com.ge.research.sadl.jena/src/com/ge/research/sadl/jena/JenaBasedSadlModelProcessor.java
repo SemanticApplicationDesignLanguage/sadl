@@ -4099,7 +4099,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				ValueTable vtbl = ((ValueTable) expr).getValueTable();
 				return processExpression(vtbl);
 			}
-			return null;
+			List<List<Node>> tbl = new ArrayList<List<Node>>();
+			for (ValueRow vr : rows) {
+				EList<Expression> rowValues = vr.getExplicitValues();
+				List<Node> rowObjects = new ArrayList<Node>();
+				for (Expression val : rowValues) {
+					Object valObj = processExpression(val);
+					rowObjects.add(nodeCheck(valObj));
+				}
+				tbl.add(rowObjects);
+			}
+			ValueTableNode vtn = new ValueTableNode();
+			vtn.setRows(tbl);
+			return vtn;
 		}
 		else {
 			EList<Expression> rowvals = row.getExplicitValues();
