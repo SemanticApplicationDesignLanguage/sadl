@@ -2943,7 +2943,7 @@ public class OwlToSadl {
 			}
 		}
 		else if (type.equals(OWL.AnnotationProperty)) {
-			if (isPropertyInThisNamespace(ontRsrc.asObjectProperty())) {
+			if (isPropertyInThisNamespace(ontRsrc.asAnnotationProperty())) {
 				concepts.addAnnProperty(ontRsrc.asAnnotationProperty());
 			}
 			return true;
