@@ -100,7 +100,9 @@ class XMLHelper {
 		val children = node.childNodes;
 		(0 .. children.length).forEach [ index |
 			val childNode = children.item(index);
-			visitNode(childNode, level + 1, acceptor);
+			if (childNode !== null) {
+				visitNode(childNode, level + 1, acceptor);
+			}
 		]
 	}
 
