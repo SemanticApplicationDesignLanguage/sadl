@@ -2919,7 +2919,7 @@ public class OwlToSadl {
 			return true;
 		}
 		else if (type.equals(OWL.DatatypeProperty)) {
-			if (isPropertyInThisNamespace(ontRsrc.asObjectProperty())) {
+			if (isPropertyInThisNamespace(ontRsrc.asDatatypeProperty())) {
 				concepts.addDtProperty(ontRsrc.asDatatypeProperty());
 			}
 			return true;

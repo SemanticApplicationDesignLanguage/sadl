@@ -61,6 +61,7 @@ class SadlImportManagerProviderTest {
 	@Inject Provider<JenaBasedSadlImportProcessor> impProcessorProvider
 	@Inject IPreferenceValuesProvider preferenceProvider
 	
+	@Ignore
 	@Test def void testDatatypeImports1() {
 		'''
 			<rdf:RDF
