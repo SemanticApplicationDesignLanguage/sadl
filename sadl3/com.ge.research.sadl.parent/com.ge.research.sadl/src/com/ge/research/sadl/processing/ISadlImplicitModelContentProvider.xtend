@@ -118,7 +118,8 @@ interface ISadlImplicitModelContentProvider {
 			dataType of DataDescriptor has at most 1 value.
 			descriptorVariable of DataDescriptor has at most 1 value.
 			
-			Language is a class, must be one of {Java, Python, Python-TF, Text, OtherLanguage}.
+			Language is a class.
+			{Java, Python, Text, OtherLanguage} are instances of Language.
 			Script is a class, described by language with a single value of type Language,
 				described by script with a single value of type string.
 			^Equation is a class,
