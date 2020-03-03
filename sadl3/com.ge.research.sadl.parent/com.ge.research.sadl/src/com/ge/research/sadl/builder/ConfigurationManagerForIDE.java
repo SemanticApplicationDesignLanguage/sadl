@@ -1071,4 +1071,51 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return null;
 	}
 
+	public void cleanNonExisting(List<String> sources) {
+		try {
+			String prjname = new File(getProjectFolderPath()).getName();
+			List<Statement> toBeRemoved = new ArrayList<Statement>();
+			Model mm = getMappingModel();
+			StmtIterator apitr = mm.listStatements(null, altUrlProp, (RDFNode)null);
+			while (apitr.hasNext()) {
+				Statement stmt = apitr.nextStatement();
+				RDFNode altUrl = stmt.getObject();
+				if (altUrl.isURIResource()) {
+					String altUrlUrl = altUrl.asResource().getURI();
+					int prjloc = altUrlUrl.lastIndexOf(prjname);
+					if (prjloc > 0) {
+						prjloc = prjloc + prjname.length() + 1;
+						altUrlUrl = getProjectFolderPath() + altUrlUrl.substring(prjloc);
+					}
+					try {
+						String fn = (new SadlUtils()).fileUrlToFileName(altUrlUrl);
+						File fnf = new File(fn);
+						if (!fnf.exists()) {
+							StmtIterator cbitr = mm.listStatements(stmt.getSubject(), createdBy, (RDFNode)null);
+							while (cbitr.hasNext()) {
+								String cbstr = cbitr.nextStatement().getObject().toString();
+								if (sources.contains(cbstr)) {
+									StmtIterator delitr = mm.listStatements(stmt.getSubject(), null, (RDFNode)null);
+									while (delitr.hasNext()) {
+										toBeRemoved.add(delitr.nextStatement());
+									}
+								}
+							}
+						}
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			if (toBeRemoved.size() > 0 ) {
+				mm.remove(toBeRemoved);
+				setMappingChanged(true);
+				super.saveOntPolicyFile();
+			}
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
 }
