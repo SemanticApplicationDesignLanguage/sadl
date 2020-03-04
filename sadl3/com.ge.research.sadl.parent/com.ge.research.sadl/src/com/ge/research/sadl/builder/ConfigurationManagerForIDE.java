@@ -1071,6 +1071,10 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return null;
 	}
 
+	/**
+	 * Method to remove all non-existent mappings with specified sources
+	 * @param sources -- the sources to be removed if non-existent
+	 */
 	public void cleanNonExisting(List<String> sources) {
 		try {
 			String prjname = new File(getProjectFolderPath()).getName();
