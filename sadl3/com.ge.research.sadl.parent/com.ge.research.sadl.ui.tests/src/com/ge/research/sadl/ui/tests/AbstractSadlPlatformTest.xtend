@@ -44,6 +44,7 @@ import org.eclipse.core.runtime.Path
 import org.eclipse.core.runtime.Platform
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.jface.preference.IPreferenceStore
 import org.eclipse.ui.actions.WorkspaceModifyOperation
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtext.diagnostics.Severity
@@ -116,7 +117,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 
 	@Before
 	def void before() {
-		OutputStreamStrategy.STD.use; // To redirect error to the Eclipse console.
+		OutputStreamStrategy.STD.use; // To redirect the errors to the Eclipse (dev) console.
 		deleteProjects();
 		modifiedPreferences.clear();
 		beforeProjectCreation();
@@ -140,7 +141,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 		addBuilder(project, XtextProjectHelper.BUILDER_ID);
 		waitForBuild;
 		configurePreferences();
-		// This is used to trigger the implicit model creation before the tests. 
+		// This is used to trigger the implicit model creation before the tests.
 		val file = createFile('Dummy.sadl', 'uri "http://sadl.org/Dummy.sadl."');
 		fullBuild();
 		file.delete(true, monitor);
@@ -175,7 +176,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	protected def void deleteProjects() {
 		projects.forEach[
 			try {
-				delete(true, monitor);				
+				delete(true, monitor);
 			} catch (Exception e) {
 				println('''Error while trying to delete test project: «it».''');
 				e.printStackTrace;
@@ -202,9 +203,19 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	 * Resets any modified preferences to the default.
 	 */
 	protected def void resetPreferences() {
-		modifiedPreferences.forEach [
-			access.getWritablePreferenceStore(project).setToDefault(it);
-		];
+		val itr = modifiedPreferences.iterator;
+		while (itr.hasNext) {
+			val key = itr.next;
+			resetPreference(key, access.getWritablePreferenceStore(project));
+			itr.remove;
+		}
+	}
+
+	/**
+	 * Resets and individual preference value in the given store.
+	 */
+	protected def void resetPreference(String preferenceKey, IPreferenceStore store) {
+		store.setToDefault(preferenceKey);
 	}
 
 	/**
@@ -308,12 +319,15 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	 */
 	protected def updatePreferences(Iterable<PreferenceKey> keys) {
 		if (!keys.nullOrEmpty) {
-			val store = access.getWritablePreferenceStore(project);
 			keys.forEach [
-				store.setValue(id, defaultValue);
+				getPreferenceStore(id).setValue(id, defaultValue);
 				modifiedPreferences.add(id);
 			];
 		}
+	}
+
+	protected def IPreferenceStore getPreferenceStore(String preferenceKey) {
+		access.getWritablePreferenceStore(project)
 	}
 
 	/**
