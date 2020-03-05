@@ -2,6 +2,7 @@ package com.ge.research.sadl.jena;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
@@ -128,5 +129,12 @@ public interface IJenaBasedModelProcessor {
 	 * @throws TranslationException 
 	 */
 	public ConceptName namedNodeToConceptName(NamedNode pred) throws TranslationException, InvalidNameException;
+
+	/**
+	 * Method to get the relevant preferences as a Map
+	 * @param resource
+	 * @return
+	 */
+	Map<String, String> getPreferences(Resource resource);
 
 }

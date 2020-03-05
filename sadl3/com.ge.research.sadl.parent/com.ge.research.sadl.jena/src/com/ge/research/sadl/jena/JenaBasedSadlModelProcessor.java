@@ -65,6 +65,8 @@ import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.nodemodel.ICompositeNode;
 import org.eclipse.xtext.nodemodel.SyntaxErrorMessage;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.preferences.IPreferenceValues;
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextSyntaxDiagnostic;
 import org.eclipse.xtext.scoping.IScope;
@@ -851,13 +853,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private String translatorClassName = null;
 
 	//------------PEFERENCES ---------------
-	protected boolean ignoreUnittedQuantities;
+	private boolean ignoreUnittedQuantities;
 
 	private boolean useArticlesInValidation;
 	
 	private boolean expandMissingPatternsInValidation;
 
-	protected boolean domainAndRangeAsUnionClasses = true;
+	private boolean domainAndRangeAsUnionClasses = true;
 
 	private boolean typeCheckingWarningsOnly;
 	
@@ -878,6 +880,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private Map<EObject, VariableNode> variablesInDefinition = null;
 
 	private EObject setDefaultEObject;
+
+	protected Map<String, String> modelProcessorPreferenceMap;
 
 	public static void refreshResource(Resource newRsrc) {
 		try {
@@ -1232,41 +1236,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	@Override
 	public void initializePreferences(ProcessorContext context) {
-		setTypeCheckingWarningsOnly(true);
-		String typechecking = context.getPreferenceValues().getPreference(SadlPreferences.TYPE_CHECKING_WARNING_ONLY);
-		if (typechecking != null) {
-			setTypeCheckingWarningsOnly(Boolean.parseBoolean(typechecking));
-		}
-		ignoreUnittedQuantities = true;
-		String ignoreUnits = context.getPreferenceValues().getPreference(SadlPreferences.IGNORE_UNITTEDQUANTITIES);
-		if (ignoreUnits != null) {
-			ignoreUnittedQuantities = Boolean.parseBoolean(ignoreUnits);
-		}
-
-		setUseArticlesInValidation(false);
-		String useArticles = context.getPreferenceValues().getPreference(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION);
-		if (useArticles != null) {
-			setUseArticlesInValidation(Boolean.parseBoolean(useArticles));
-		}
-		setExpandMissingPatternsInValidation(false);
-		String expandMissingPatterns = context.getPreferenceValues().getPreference(SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS);
-		if (expandMissingPatterns != null) {
-			setExpandMissingPatternsInValidation(Boolean.parseBoolean(expandMissingPatterns));
-		}
-		
-		domainAndRangeAsUnionClasses = true;
-		String domainAndRangeAsUnionClassesStr = context.getPreferenceValues()
-				.getPreference(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES);
-		if (domainAndRangeAsUnionClassesStr != null) {
-			domainAndRangeAsUnionClasses = Boolean.parseBoolean(domainAndRangeAsUnionClassesStr);
-		}
-		setTypeCheckingRangeRequired(true);
-		String typeCheckingRangeRequiredStr = context.getPreferenceValues()
-				.getPreference(SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED);
-		if (typeCheckingRangeRequiredStr != null) {
-			setTypeCheckingRangeRequired(Boolean.parseBoolean(typeCheckingRangeRequiredStr));
-		}
-		
+		getPreferences(currentResource);
 	}
 
 	protected void processModelElement(SadlModelElement element) {
@@ -7426,7 +7396,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
 		if(predNode instanceof NamedNode && lTci != null) {
-			if(ignoreUnittedQuantities && lTci.getTypeCheckType() != null && lTci.getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+			if(isIgnoreUnittedQuantities() && lTci.getTypeCheckType() != null && lTci.getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 				((NamedNode) predNode).setLocalizedType(validateNamedNode(new NamedNode(XSD.decimal.getURI(),NodeType.DataTypeNode)));
 			}else {
 				((NamedNode) predNode).setLocalizedType(lTci.getTypeCheckType());
@@ -7677,7 +7647,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		Expression valexpr = expr.getLeft();
 		Object valarg = processExpression(valexpr);
-		if (ignoreUnittedQuantities) {
+		if (isIgnoreUnittedQuantities()) {
 			return valarg;
 		}
 		String unit = SadlASTUtils.getUnitAsString(expr);
@@ -8148,7 +8118,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Expression value = expr.getLeft();
 		Object valobj = null;
 		valobj = processExpression(value);
-		if (ignoreUnittedQuantities) {
+		if (isIgnoreUnittedQuantities()) {
 			return valobj;
 		}
 		if (valobj instanceof com.ge.research.sadl.model.gp.Literal) {
@@ -9247,7 +9217,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// value and make the property an owl:DatatypeProperty
 		// TODO this should probably work for any declared subclass of UnittedQuantity
 		// and associated value restriction?
-		if (ignoreUnittedQuantities && rngResource != null && rngResource.isURIResource()
+		if (isIgnoreUnittedQuantities() && rngResource != null && rngResource.isURIResource()
 				&& rngResource.canAs(OntClass.class)
 				&& rngResource.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 			com.hp.hpl.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
@@ -9309,7 +9279,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (inModelStmtItr.hasNext()) {
 				rangeInThisModel = true;
 			}
-			if (domainAndRangeAsUnionClasses) {
+			if (isDomainAndRangeAsUnionClasses()) {
 				// in this case we want to create a union class if necessary
 				if (rangeInThisModel) {
 					// this model (as opposed to imports) already has a range specified
@@ -9372,7 +9342,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} // end if existing range in any model, this or imports
 		if (rngNode != null) {
 			if (rngResource != null) {
-				if (!domainAndRangeAsUnionClasses && rngResource instanceof UnionClass) {
+				if (!isDomainAndRangeAsUnionClasses() && rngResource instanceof UnionClass) {
 					List<com.hp.hpl.jena.rdf.model.Resource> uclsmembers = getUnionClassMemebers(
 							(UnionClass) rngResource);
 					for (int i = 0; i < uclsmembers.size(); i++) {
@@ -10233,7 +10203,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					Individual instval = processSadlInstance((SadlInstance) val);
 					OntClass uQCls = getTheJenaModel()
 							.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
-					if (uQCls != null && instval.hasRDFType(uQCls) && ignoreUnittedQuantities) {
+					if (uQCls != null && instval.hasRDFType(uQCls) && isIgnoreUnittedQuantities()) {
 						if (val instanceof SadlNestedInstance) {
 							Iterator<SadlPropertyInitializer> propinititr = ((SadlNestedInstance) val)
 									.getPropertyInitializers().iterator();
@@ -10306,7 +10276,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				} else if (val instanceof SadlExplicitValue) {
 					OntResource rng = oprop.getRange();
 					if (val instanceof SadlNumberLiteral && ((SadlNumberLiteral) val).getUnit() != null) {
-						if (!ignoreUnittedQuantities) {
+						if (!isIgnoreUnittedQuantities()) {
 							String unit = ((SadlNumberLiteral) val).getUnit();
 							if (rng != null) {
 								if (rng.canAs(OntClass.class)
@@ -10704,7 +10674,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return;
 			}
 			
-			if(ignoreUnittedQuantities) {
+			if(isIgnoreUnittedQuantities()) {
 				if(lRange.isURIResource()) {
 					if(lRange.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && 
 							(aRangeNode.canAs(OntResource.class) && aRangeNode.as(OntResource.class).getURI().equals(XSD.decimal.getURI()))) {
@@ -10837,7 +10807,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (inModelStmtItr.hasNext()) {
 				domainInThisModel = true;
 			}
-			if (domainAndRangeAsUnionClasses) {
+			if (isDomainAndRangeAsUnionClasses()) {
 				// in this case we want to create a union class if necessary
 				if (domainInThisModel) {
 					// this model (as opposed to imports) already has a domain specified
@@ -10895,7 +10865,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		} // end if existing domain in any model, this or imports
 		if (cls != null) {
-			if (!domainAndRangeAsUnionClasses && cls instanceof UnionClass) {
+			if (!isDomainAndRangeAsUnionClasses() && cls instanceof UnionClass) {
 				List<com.hp.hpl.jena.rdf.model.Resource> uclsmembers = getUnionClassMemebers((UnionClass) cls);
 				for (int i = 0; i < uclsmembers.size(); i++) {
 					getTheJenaModel().add(prop, RDFS.domain, uclsmembers.get(i));
@@ -13326,7 +13296,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return true;
 		}
 		//If Unitted Quantities are ignored then they are also considered a numeric type
-		if(this.ignoreUnittedQuantities && uri.equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+		if(this.isIgnoreUnittedQuantities() && uri.equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 			return true;
 		}
 		return false;
@@ -14018,5 +13988,78 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				markVariableDefinionTriplesAsDefinition(var, dfn);
 			}
 		}
+	}
+
+	@Override
+	public Map<String, String> getPreferences(Resource resource) {
+		if (modelProcessorPreferenceMap != null) {
+			return modelProcessorPreferenceMap;
+		}
+		IPreferenceValuesProvider pvp = ((XtextResource)resource).getResourceServiceProvider().get(IPreferenceValuesProvider.class);
+		IPreferenceValues preferenceValues = pvp.getPreferenceValues(resource);
+		if (preferenceValues != null) {
+			modelProcessorPreferenceMap = new HashMap<String, String>();
+			String typechecking = preferenceValues.getPreference(SadlPreferences.TYPE_CHECKING_WARNING_ONLY);
+			if (typechecking == null) {
+				typechecking = "true";
+			}
+			setTypeCheckingWarningsOnly(Boolean.parseBoolean(typechecking));
+			modelProcessorPreferenceMap.put(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.getId(), typechecking);
+
+			String ignoreUnits = preferenceValues.getPreference(SadlPreferences.IGNORE_UNITTEDQUANTITIES);
+			if (ignoreUnits == null) {
+				ignoreUnits = "true";
+			}
+			setIgnoreUnittedQuantities(Boolean.parseBoolean(ignoreUnits));
+			modelProcessorPreferenceMap.put(SadlPreferences.IGNORE_UNITTEDQUANTITIES.getId(), ignoreUnits);
+	
+			setUseArticlesInValidation(false);
+			String useArticles = preferenceValues.getPreference(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION);
+			if (useArticles == null) {
+				useArticles = "false";
+			}
+			setUseArticlesInValidation(Boolean.parseBoolean(useArticles));
+			modelProcessorPreferenceMap.put(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.getId(), useArticles);
+
+			String expandMissingPatterns = preferenceValues.getPreference(SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS);
+			if (expandMissingPatterns == null) {
+				expandMissingPatterns = "false";
+			}
+			setExpandMissingPatternsInValidation(Boolean.parseBoolean(expandMissingPatterns));
+			modelProcessorPreferenceMap.put(SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS.getId(), expandMissingPatterns);
+			
+			String domainAndRangeAsUnionClassesStr = preferenceValues
+					.getPreference(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES);
+			if (domainAndRangeAsUnionClassesStr == null) {
+				domainAndRangeAsUnionClassesStr = "true";
+			}
+			setDomainAndRangeAsUnionClasses(Boolean.parseBoolean(domainAndRangeAsUnionClassesStr));
+			modelProcessorPreferenceMap.put(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(), domainAndRangeAsUnionClassesStr);
+
+			String typeCheckingRangeRequiredStr = preferenceValues
+					.getPreference(SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED);
+			if (typeCheckingRangeRequiredStr == null) {
+				typeCheckingRangeRequiredStr = "true";
+			}
+			setTypeCheckingRangeRequired(Boolean.parseBoolean(typeCheckingRangeRequiredStr));
+			modelProcessorPreferenceMap.put(SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED.getId(), typeCheckingRangeRequiredStr);
+		}
+		return modelProcessorPreferenceMap;
+	}
+
+	protected boolean isIgnoreUnittedQuantities() {
+		return ignoreUnittedQuantities;
+	}
+
+	protected void setIgnoreUnittedQuantities(boolean ignoreUnittedQuantities) {
+		this.ignoreUnittedQuantities = ignoreUnittedQuantities;
+	}
+
+	protected boolean isDomainAndRangeAsUnionClasses() {
+		return domainAndRangeAsUnionClasses;
+	}
+
+	protected void setDomainAndRangeAsUnionClasses(boolean domainAndRangeAsUnionClasses) {
+		this.domainAndRangeAsUnionClasses = domainAndRangeAsUnionClasses;
 	}
 }
