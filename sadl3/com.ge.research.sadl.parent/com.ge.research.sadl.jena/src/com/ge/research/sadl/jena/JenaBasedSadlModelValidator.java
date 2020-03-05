@@ -1377,7 +1377,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				value = ((NumberLiteral)expression).getValue();
 			}
 			else {	// SadlNumberLiteral
-				if (((SadlNumberLiteral)expression).getUnit() != null && !getModelProcessor().ignoreUnittedQuantities) {
+				if (((SadlNumberLiteral)expression).getUnit() != null && !getModelProcessor().isIgnoreUnittedQuantities()) {
 					return getUnittedQuantityTypeCheckInfo(expression, ((SadlNumberLiteral)expression).getUnit());
 				}
 				String strval = ((SadlNumberLiteral)expression).getLiteralNumber().toPlainString();
@@ -1590,7 +1590,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			SadlTypeReference typ = expression.getType();
 			if (typ != null && typ instanceof SadlSimpleTypeReference) {
 				inst = ((SadlSimpleTypeReference)typ).getType();
-				if (declarationExtensions.getConceptUri(inst).equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().ignoreUnittedQuantities) {
+				if (declarationExtensions.getConceptUri(inst).equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().isIgnoreUnittedQuantities()) {
 					if (expression instanceof SadlNestedInstance) {
 						Iterator<SadlPropertyInitializer> pinititr = ((SadlNestedInstance)expression).getPropertyInitializers().iterator();
 						while (pinititr.hasNext()) {
@@ -3237,7 +3237,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if(conceptType.equals(OntConceptType.CLASS) || conceptType.equals(OntConceptType.DATATYPE)){
 			NamedNode tctype = createNamedNode(conceptUri, conceptType);
 			ConceptName conceptName = getModelProcessor().namedNodeToConceptName(tctype);
-			if (conceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().ignoreUnittedQuantities) {
+			if (conceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().isIgnoreUnittedQuantities()) {
 				if (expression instanceof SadlClassOrPropertyDeclaration) {
 					Iterator<SadlProperty> spitr = ((SadlClassOrPropertyDeclaration)expression).getDescribedBy().iterator();
 					while (spitr.hasNext()) {
@@ -3427,7 +3427,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			SadlResource declsr = declarationExtensions.getDeclaration(sr);
 			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(conceptUri, NodeType.ClassListNode));
 			ConceptName conceptName = getModelProcessor().namedNodeToConceptName(tctype);
-			if (conceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().ignoreUnittedQuantities) {
+			if (conceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().isIgnoreUnittedQuantities()) {
 				if (expression instanceof SadlClassOrPropertyDeclaration) {
 					Iterator<SadlProperty> spitr = ((SadlClassOrPropertyDeclaration)expression).getDescribedBy().iterator();
 					while (spitr.hasNext()) {
