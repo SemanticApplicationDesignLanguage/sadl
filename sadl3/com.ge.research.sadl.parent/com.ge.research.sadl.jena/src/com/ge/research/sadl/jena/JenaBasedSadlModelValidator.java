@@ -12,7 +12,9 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.slf4j.Logger;
@@ -153,6 +155,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected Object lastSuperCallExpression = null;
 	private Map<EObject,Boolean> mEObjectsValidated = null; 
 	private String variableSeekingType = null;
+	private Map<URI, TypeCheckInfo> typeCache = new HashMap<>();
 
    	public enum ExplicitValueType {RESTRICTION, VALUE}
    	
@@ -822,10 +825,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					OntClass loc = theJenaModel.getOntClass(ltct.toFullyQualifiedString());
 					OntClass roc = theJenaModel.getOntClass(rtct.toFullyQualifiedString());
 					try {
-						if (SadlUtils.classIsSubclassOf(roc, loc, true, null)) {
+						if (modelProcessor.classIsSubclassOfCached(roc, loc, true, null)) {
 							type = ltct;
 						}
-						else if (SadlUtils.classIsSubclassOf(loc, roc, true, null)) {
+						else if (modelProcessor.classIsSubclassOfCached(loc, roc, true, null)) {
 							type = rtct;
 						}
 					} catch (CircularDependencyException e) {
@@ -1489,11 +1492,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								!svltci.getTypeCheckType().equals(rttci.getTypeCheckType()) ) {
 							OntClass svtype = theJenaModel.getOntClass(svltci.getTypeCheckType().getURI());
 							OntClass rttype = theJenaModel.getOntClass(rttci.getTypeCheckType().getURI());
-							if (SadlUtils.classIsSubclassOf(svtype, rttype, true, null)) {
+							if (modelProcessor.classIsSubclassOfCached(svtype, rttype, true, null)) {
 								// svtype is a subclass of rttype
 								svltci.setTypeCheckType(new NamedNode(rttype.getURI()));
 							}
-							else if (SadlUtils.classIsSubclassOf(rttype, svtype, true, null)) {
+							else if (modelProcessor.classIsSubclassOfCached(rttype, svtype, true, null)) {
 								// rttype is a subclass of svtype
 								// this is OK; svltci already has the broader class
 							}
@@ -1889,11 +1892,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									if (consideredTct instanceof NamedNode) {
 										OntClass consideredOr = theJenaModel.getOntClass(((NamedNode)consideredTct).toFullyQualifiedString());
 										if (consideredOr != null) {
-											if (SadlUtils.classIsSubclassOf(newOr, consideredOr, true, null)) {
+											if (modelProcessor.classIsSubclassOfCached(newOr, consideredOr, true, null)) {
 												if (toEliminate == null) toEliminate = new ArrayList<TypeCheckInfo>();
 												toEliminate.add(newTci);
 											}
-											else if (SadlUtils.classIsSubclassOf(consideredOr, newOr, true, null)) {
+											else if (modelProcessor.classIsSubclassOfCached(consideredOr, newOr, true, null)) {
 												if (toEliminate == null) toEliminate = new ArrayList<TypeCheckInfo>();
 												toEliminate.add(considered.get(j));
 											}
@@ -2715,19 +2718,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									 * However, sometimes the range R2 isn't really a range but rather a local restriction, and in this case D1 may not be a subclass of R2,
 									 *    but it will then be the case that 
 									 */
-									if (SadlUtils.classIsSubclassOf(subj, dmn.as(OntClass.class), true, null))
+									if (modelProcessor.classIsSubclassOfCached(subj, dmn.as(OntClass.class), true, null))
 									{
 										domainMatched = true;
 										break;
 									}
 									else if (subjType.getTypeToExprRelationship() != null && subjType.getTypeToExprRelationship().equals(RESTRICTED_TO)) {
 //										if (SadlUtils.classIsSubclassOf(subj, dmn.as(OntClass.class), true, null)) {
-										if (SadlUtils.classIsSubclassOf(dmn.as(OntClass.class), subj, true, null)) {
+										if (modelProcessor.classIsSubclassOfCached(dmn.as(OntClass.class), subj, true, null)) {
 											domainMatched = true;
 											break;
 										}
 									}
-									else if (SadlUtils.classIsSubclassOf(dmn.as(OntClass.class), subj, true, null)) {
+									else if (modelProcessor.classIsSubclassOfCached(dmn.as(OntClass.class), subj, true, null)) {
 										// this could match but isn't guaranteed to do so; generate a warning
 										possibleMatch = true;
 									}
@@ -3211,6 +3214,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 	
 	protected TypeCheckInfo getType(SadlResource sr) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
+		if (sr != null) {
+			URI uri = EcoreUtil.getURI(sr);
+			TypeCheckInfo type = typeCache.get(uri);
+			if (type != null) {
+				return type;
+			}
+			type = getType(sr, sr);
+			typeCache.put(uri, type);
+			return type;
+		}
 		return getType(sr, sr);
 	}
 	
@@ -4908,14 +4921,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								getModelProcessor().addTypeCheckingError("Concept '" + rightConceptName.getUri() + "' not found", rightExpression);
 							}
 							if (subcls != null && supercls != null) {
-								if (SadlUtils.classIsSubclassOf(subcls, supercls, true, null)) {
+								if (modelProcessor.classIsSubclassOfCached(subcls, supercls, true, null)) {
 									if (getModelProcessor().isAssignment(leftExpression.eContainer())) {
 										String wmsg = createSuperClassOnRightWarning(leftExpression.eContainer(), leftTypeCheckInfo, rightTypeCheckInfo, operations.get(0));
 										getModelProcessor().addWarning(wmsg, leftExpression.eContainer());
 									}
 									return true;
 								}
-								if (SadlUtils.classIsSubclassOf(supercls.as(OntClass.class), subcls, true, null)) {
+								if (modelProcessor.classIsSubclassOfCached(supercls.as(OntClass.class), subcls, true, null)) {
 									return true;
 								}
 							}
@@ -5417,7 +5430,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					for (int i = 0; i < uclsMembers.size(); i++) {
 						OntResource member = uclsMembers.get(i);
 						try {
-							if (SadlUtils.classIsSubclassOf(subj.as(OntClass.class), member, true, null)) {
+							if (modelProcessor.classIsSubclassOfCached(subj.as(OntClass.class), member, true, null)) {
 								return true;
 							}
 						} catch (CircularDependencyException e) {
@@ -5443,7 +5456,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				if (subj.canAs(OntClass.class)){
 					try {
-						if ( SadlUtils.classIsSubclassOf(subj.as(OntClass.class), obj.as(OntResource.class),true, null)) {
+						if (modelProcessor.classIsSubclassOfCached(subj.as(OntClass.class), obj.as(OntResource.class),true, null)) {
 							return true;
 						}
 //						if (obj.canAs(OntClass.class) &&  SadlUtils.classIsSuperClassOf(obj.as(OntClass.class), subj.as(OntClass.class))) {
@@ -5792,7 +5805,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				while (institr.hasNext()) {
 					Resource typ = institr.next();
 					if (rng.canAs(OntClass.class)) {
-						if (SadlUtils.classIsSubclassOf(typ.as(OntClass.class), rng.asResource().as(OntClass.class), true, null)) {
+						if (modelProcessor.classIsSubclassOfCached(typ.as(OntClass.class), rng.asResource().as(OntClass.class), true, null)) {
 							institr.close();
 							rngitr.close();
 							return true;
@@ -5801,7 +5814,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			else if (obj != null && obj.canAs(OntClass.class) && rng.isResource() && rng.asResource().canAs(OntClass.class)) {
-				if (SadlUtils.classIsSubclassOf(obj.as(OntClass.class), rng.asResource().as(OntClass.class), true, null)) {
+				if (modelProcessor.classIsSubclassOfCached(obj.as(OntClass.class), rng.asResource().as(OntClass.class), true, null)) {
 					rngitr.close();
 					return true;
 				}

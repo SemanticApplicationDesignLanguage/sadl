@@ -44,6 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -229,6 +230,7 @@ import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
@@ -382,6 +384,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 																		// translator output? default false
 
 	private DeclarationExtensions declarationExtensions;
+
+	private Map<String, List<ConceptName>> impliedPropoertiesCache = new HashMap<>();
+	private Map<String, Boolean> classIsSubclassOfCache = new HashMap<>();
+
+	protected boolean classIsSubclassOfCached(OntClass subcls, OntResource cls, boolean rootCall, List<OntResource> previousClasses) throws CircularDependencyException {
+		String key = new StringBuilder()
+				.append(subcls == null ? "null" : subcls.getURI())
+				.append("-")
+				.append(cls == null ? "null" : cls.getURI())
+				.append("-")
+				.append(rootCall)
+				.append("-")
+				.append(previousClasses == null ? "null" : String.join(",", previousClasses.stream().map(OntResource::getURI).collect(Collectors.toList())))
+				.toString();
+		Boolean result = classIsSubclassOfCache.get(key);
+		if (result == null) {
+			result = SadlUtils.classIsSubclassOf(subcls, cls, rootCall, previousClasses);
+			classIsSubclassOfCache.put(key, result);
+		}
+		return result;
+	}
 
 	public class DataDescriptor {
 		private Node name = null;
@@ -1022,6 +1045,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public void onValidate(Resource resource, ValidationAcceptor issueAcceptor, CheckMode mode,
 			ProcessorContext context) {
 
+		Stopwatch stopwatch = Stopwatch.createStarted();
 		logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
 		if (mode.shouldCheck(CheckType.EXPENSIVE)) {
 			// do expensive validation, i.e. those that should only be done when 'validate'
@@ -1195,7 +1219,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				processModelElement(element);
 			}
 		}
-		logger.debug("onValidate completed for Resource '" + resource.getURI() + "'");
 		if (getSadlCommands() != null && getSadlCommands().size() > 0) {
 			OntModelProvider.attach(model.eResource(), getTheJenaModel(), getModelName(), getModelAlias(),
 					getSadlCommands());
@@ -1232,6 +1255,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				e.printStackTrace();
 			}
 		}
+		logger.debug("onValidate completed for resource '" + resource.getURI() + "' [took " + stopwatch + "]");
 	}
 
 	@Override
@@ -4786,7 +4810,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		OntResource newCls = getTheJenaModel().getOntResource(((NamedNode) subcls).toFullyQualifiedString());
 		if (curCls != null && newCls != null && curCls.canAs(OntClass.class) && newCls.canAs(OntClass.class)) {
 			try {
-				if (SadlUtils.classIsSubclassOf(newCls.as(OntClass.class), curCls.as(OntClass.class), true, null)) {
+				if (classIsSubclassOfCached(newCls.as(OntClass.class), curCls.as(OntClass.class), true, null)) {
 					return true; // OK if subclass
 				}
 			} catch (CircularDependencyException e) {
@@ -4991,10 +5015,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					OntResource suprclass = theJenaModel.getOntResource(SadlConstants.SADL_IMPLICIT_MODEL_EVENT_URI);
 					if(subclassl != null && subclassr != null) {
 						try {
-							if (SadlUtils.classIsSubclassOf(subclassl, suprclass, true, null) && SadlUtils.classIsSubclassOf(subclassr,suprclass,true,null)) {
+							if (classIsSubclassOfCached(subclassl, suprclass, true, null) && classIsSubclassOfCached(subclassr,suprclass,true,null)) {
 
 								try {
-									if (SadlUtils.classIsSubclassOf(subclassr,suprclass,true,null)){
+									if (classIsSubclassOfCached(subclassr,suprclass,true,null)){
 										if(isConjunction(op)){
 											
 											eventConj.add(tr);
@@ -5383,7 +5407,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (!oldType.equals(restrictionType)) {
 					OntResource oldRsrc = getTheJenaModel().getOntResource(((NamedNode)oldType).getURI());
 					OntClass newRsrc = getTheJenaModel().getOntClass(restrictionType.getURI());
-					if (oldRsrc != null && newRsrc != null && !SadlUtils.classIsSubclassOf(newRsrc, oldRsrc, true, null)) {
+					if (oldRsrc != null && newRsrc != null && !classIsSubclassOfCached(newRsrc, oldRsrc, true, null)) {
 						if (!(getTarget() instanceof Rule) || !getRulePart().equals(RulePart.CONCLUSION)) {
 							// this is not consistent	this is OK to have in a rule conclusion--it is concluding, not conditioning
 							addTypeCheckingError("Restriction on variable type must be a subclass of type from definition.", expr);
@@ -9460,7 +9484,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throws JenaProcessorException {
 		// this is changing the range of a property defined in a different model
 		try {
-			if (SadlUtils.classIsSubclassOf((OntClass) rangeCls, existingRange, true, null)) {
+			if (classIsSubclassOfCached((OntClass) rangeCls, existingRange, true, null)) {
 				return true;
 			}
 		} catch (CircularDependencyException e) {
@@ -12294,12 +12318,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					try {
 						if (or.isURIResource()) {
 							OntClass oc = m.getOntClass(or.getURI());
-							if (SadlUtils.classIsSubclassOf(oc, cls, true, null)) {
+							if (classIsSubclassOfCached(oc, cls, true, null)) {
 								eitr.close();
 								return true;
 							}
 						} else if (or.canAs(OntClass.class)) {
-							if (SadlUtils.classIsSubclassOf(or.as(OntClass.class), cls, true, null)) {
+							if (classIsSubclassOfCached(or.as(OntClass.class), cls, true, null)) {
 								eitr.close();
 								return true;
 							}
@@ -12961,11 +12985,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addError("Can't get implied properties of a non-class entity. Perhaps this can't be used before it is declared?", getDefaultEObject());
 			return null;
 		}
+		List<ConceptName> cached = impliedPropoertiesCache.get(cls.getURI());
+		if (cached != null) {
+			return cached;
+		}
 		List<OntResource> allImplPropClasses = getAllImpliedPropertyClasses();
 		if (allImplPropClasses != null) {
 			for (OntResource ipcls : allImplPropClasses) {
 				try {
-					if (SadlUtils.classIsSubclassOf(cls.as(OntClass.class), ipcls, true, null)) {
+					if (classIsSubclassOfCached(cls.as(OntClass.class), ipcls, true, null)) {
 						StmtIterator sitr = getTheJenaModel().listStatements(ipcls,
 								getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI),
 								(RDFNode) null);
@@ -12990,6 +13018,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
+		impliedPropoertiesCache.put(cls.getURI(), retlst);
 		return retlst;
 	}
 
@@ -13936,7 +13965,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
  						match = true;
  					} else {
  						try {
- 							if (typ.canAs(OntClass.class) && SadlUtils.classIsSubclassOf(typ.as(OntClass.class), type.as(OntClass.class), true, null)) {
+ 							if (typ.canAs(OntClass.class) && classIsSubclassOfCached(typ.as(OntClass.class), type.as(OntClass.class), true, null)) {
  								match = true;
  							}
  						} catch (CircularDependencyException e) {
