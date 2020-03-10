@@ -35,6 +35,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1105,6 +1106,89 @@ public class JenaReasonerPlugin extends Reasoner{
 		}
 	}
 
+	public String askJson(String askQuery) throws QueryCancelledException, QueryParseException {
+		boolean cancelled = false;
+		String resJsonStr = null;
+		try {
+			startTrace();
+			QueryExecution qexec = null;		
+			com.hp.hpl.jena.query.ResultSet results = null;		
+			prepareInfModel();
+			try {
+				String qstr = handleNamedQueryByName(askQuery);
+				if (qstr != null) {
+					askQuery = qstr;
+				}
+			} catch (InvalidNameException e1) {
+				throw new QueryParseException(e1.getMessage());
+			}
+			try {
+				long t1 = System.currentTimeMillis();
+				if (isDeleteOrInsert(askQuery)) {
+					UpdateRequest urequest = UpdateFactory.create(askQuery);
+					if (infDataset != null) {
+						UpdateAction.execute(urequest, infDataset);
+					}
+					else {
+						UpdateAction.execute(urequest, this.infModel);
+					}
+				}
+				else {
+					if (infDataset != null) {
+						qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ),infDataset);
+					}
+					else {
+						qexec = QueryExecutionFactory.create(QueryFactory.create(askQuery, Syntax.syntaxARQ), this.infModel);
+					}
+					if (askQuery.trim().substring(0, 3).equals("ask")) {	
+						boolean askResult = qexec.execAsk();
+						String[] columnName = new String[1];
+						columnName[0] = "ask";
+						Object array[][] = new Object[1][1];
+						array[0][0] = askResult;
+						resJsonStr = "{\"" + columnName + "\": \"" + askResult + "\"}";
+					}
+					else if (askQuery.trim().substring(0, 9).equals("construct")) {
+					}
+					else {
+						results = qexec.execSelect();
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						com.hp.hpl.jena.query.ResultSetFormatter.outputAsJSON(baos, results);
+						resJsonStr = new String(baos.toByteArray(), Charset.defaultCharset()).replace(System.getProperty("line.separator"), "\n");
+					}
+					if (collectTimingInfo) {
+						long t2 = System.currentTimeMillis();
+						timingInfo.add(new ReasonerTiming(TIMING_EXECUTE_QUERY, "execute query (" + askQuery + ")", t2 - t1));
+					}
+				}
+			}
+			catch (com.hp.hpl.jena.query.QueryCancelledException e) {
+				resJsonStr = null;
+				cancelled = true;
+				throw new QueryCancelledException("Query timed out (" + queryTimeout + " seconds): '" + askQuery + "'\n");
+			}
+			catch (InferenceCanceledException e) {
+				resJsonStr = null;
+				throw e;
+			}
+			catch (Exception e) {
+				resJsonStr = null;
+				e.printStackTrace();
+				logger.error("query failed with Exception: " + e.getMessage());
+				throw new QueryParseException("Query '" + askQuery + "' failed: " + e.getLocalizedMessage(), e);
+			}
+			finally { if (!cancelled && qexec != null) qexec.close();	}
+			endTrace();
+		} catch (ConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		finally {
+		}
+		return resJsonStr;
+	}
+	
+	
 	public ResultSet ask(String askQuery) throws QueryParseException, QueryCancelledException {
 		boolean cancelled = false;
 		ResultSet rs = null;
