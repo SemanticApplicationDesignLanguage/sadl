@@ -339,9 +339,13 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		
 	}
 
+	public String askJson(String askQuery) {
+		//TODO: returns results in Json string format.
+		return null;
+	}
+	
 	@Override
-	public ResultSet ask(String askQuery) throws QueryParseException,
-			QueryCancelledException {
+	public ResultSet ask(String askQuery) throws QueryParseException,QueryCancelledException {
 		if (askQuery != null) {
 			String[] querySplit = askQuery.split("\\s+");
 			List<String> vars = new ArrayList<String>();
