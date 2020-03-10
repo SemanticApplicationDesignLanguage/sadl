@@ -906,6 +906,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected Map<String, String> modelProcessorPreferenceMap;
 
+	private List<Class> allowedVariableContainers;
+
 	public static void refreshResource(Resource newRsrc) {
 		try {
 			URI uri = newRsrc.getURI();
@@ -1951,6 +1953,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		SadlResource decl = getDeclarationExtensions().getDeclaration(sr);
 		EObject defnContainer = decl.eContainer();
+		if (isInAllowedVariableContainer(defnContainer)) {
+			return var;
+		}
 		try {
 			TypeCheckInfo tci = null;
 			if (defnContainer instanceof BinaryOperation) {
@@ -2022,6 +2027,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addTypeCheckingError("Property does not have a range", defnContainer);
 		}
 		return var;
+	}
+
+	private boolean isInAllowedVariableContainer(EObject defnContainer) {
+		if (getAllowedVariableContainers() != null) {
+			if (getAllowedVariableContainers().contains(defnContainer.getClass())) {
+				return true;
+			}
+			else if (defnContainer.eContainer() != null){
+				return isInAllowedVariableContainer(defnContainer.eContainer());
+			}
+		}
+		return false;
 	}
 
 	private boolean isContainedBy(EObject eobj, Class cls) {
@@ -14090,5 +14107,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected void setDomainAndRangeAsUnionClasses(boolean domainAndRangeAsUnionClasses) {
 		this.domainAndRangeAsUnionClasses = domainAndRangeAsUnionClasses;
+	}
+
+	protected List<Class> getAllowedVariableContainers() {
+		return allowedVariableContainers;
+	}
+
+	protected void addVariableAllowedInContainerType(Class<? extends EObject> class1) {
+		if (getAllowedVariableContainers() == null) {
+			setAllowedVariableContainers(new ArrayList<Class>());
+		}
+		getAllowedVariableContainers().add(class1);
+	}
+
+	protected void setAllowedVariableContainers(List<Class> allowedVariableContainers) {
+		this.allowedVariableContainers = allowedVariableContainers;
 	}
 }
