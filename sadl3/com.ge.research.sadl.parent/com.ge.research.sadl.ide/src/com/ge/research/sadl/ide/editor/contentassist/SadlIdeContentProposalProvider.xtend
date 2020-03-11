@@ -46,6 +46,7 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.Assignment
 import org.eclipse.xtext.CrossReference
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.EnumRule
 import org.eclipse.xtext.GrammarUtil
 import org.eclipse.xtext.Keyword
 import org.eclipse.xtext.RuleCall
@@ -59,7 +60,9 @@ import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
+import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 /**
  * Generic content proposal provider for the {@code SADL} language.
@@ -166,6 +169,7 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 
 	@Inject protected DeclarationExtensions declarationExtensions;
 	@Inject protected extension ProposalProviderFilterProvider;
+	@Inject protected extension IOntologyContextProvider;
 
 	val PropertyRangeKeywords = newArrayList('string', 'boolean', 'decimal', 'int', 'long', 'float', 'double',
 		'duration', 'dateTime', 'time', 'date', 'gYearMonth', 'gYear', 'gMonthDay', 'gDay', 'gMonth', 'hexBinary',
@@ -358,6 +362,22 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 	}
 
 	protected def boolean includeKeyword(Keyword keyword, ContentAssistContext context) {
+		val enumRule = EcoreUtil2.getContainerOfType(keyword, EnumRule);
+		// https://github.com/crapo/sadlos2/issues/406
+		if (enumRule !== null) {
+			val ontologyContext = context.ontologyContext.orNull;
+			if (ontologyContext !== null) {
+				val grammarContextId = ontologyContext.grammarContextId.orNull;
+				val contextClass = ontologyContext.contextClass.orNull;
+				// Primitive datatype can be included only in ranges
+				if (grammarContextId == SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE && contextClass === SADL_RANGE_RESTRICTION) {
+					return true;
+				}
+				// Primitive datatype cannot be a domain of any property
+				return false;
+			}
+		}
+
 		var model = context.currentModel
 		if (model === null) {
 			model = context.previousModel
