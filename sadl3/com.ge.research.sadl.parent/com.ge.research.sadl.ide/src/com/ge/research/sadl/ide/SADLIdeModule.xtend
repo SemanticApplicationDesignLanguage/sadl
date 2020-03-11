@@ -22,6 +22,7 @@ import com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex.JFlexBasedIntern
 import com.ge.research.sadl.ide.editor.coloring.SadlColoringService
 import com.ge.research.sadl.ide.editor.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlContentAssistContextFactory
+import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalPriorities
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeCrossrefProposalProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlOntologyContextProvider
@@ -38,6 +39,7 @@ import com.ge.research.sadl.utils.SadlConsole
 import com.google.inject.Binder
 import com.google.inject.name.Names
 import org.eclipse.xtext.ide.LexerIdeBindings
+import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalPriorities
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.IdeCrossrefProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
@@ -95,13 +97,17 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 	def Class<? extends ContentAssistContextFactory> bindContentAssistContextFactory() {
 		return SadlContentAssistContextFactory;
 	}
-	
+
 	def Class<? extends DocumentationUtils> bindDocumentationUtils() {
 		return Markdown;
 	}
-	
+
 	def Class<? extends GlobalScopeProviderFilterProvider> bindGlobalScopeProviderFilterProvider() {
 		return SadlIdeGlobalScopeProviderFilterProvider;
+	}
+
+	def Class<? extends IdeContentProposalPriorities> bindIdeContentProposalPriorities() {
+		return SadlIdeContentProposalPriorities;
 	}
 
 }

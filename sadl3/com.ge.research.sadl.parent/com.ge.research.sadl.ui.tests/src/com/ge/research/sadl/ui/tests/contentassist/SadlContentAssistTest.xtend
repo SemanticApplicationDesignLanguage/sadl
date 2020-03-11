@@ -266,7 +266,28 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 
 	@Test
 	def void checkCA_30_CanProposeIsAForClassOrPropertyDeclaration() {
+		// https://github.com/crapo/sadlos2/issues/406#issuecomment-597610402
 		newBuilder('''uri "http://myUri". Foo is ''').assertProposal('a');
+	}
+
+	@Test
+	def void checkCA_30_CanProposeSadlResourcesOnTopLevel() {
+		val builder = newBuilder('''
+			uri "http://sadl.org/x.sadl".
+			Artefact is a class.
+			part describes Artefact with values of type Artefact.
+			Aircraft is a type of Artefact.
+			Engine is a type of Artefact.
+			
+		''');
+		builder.assertProposal('Artefact');
+		builder.assertProposal('part');
+		builder.assertProposal('Aircraft');
+		builder.assertProposal('Engine');
+		// And we have the keywords too.
+		builder.assertProposal('Ask');
+		builder.assertProposal('Equation');
+		// etc.
 	}
 
 }
