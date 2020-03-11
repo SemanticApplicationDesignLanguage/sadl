@@ -78,6 +78,9 @@ class ProposalProviderFilterProvider {
 		val acceptor = new ProposalProviderValidationAcceptor;
 		val ontologyContext = ontologyContextProvider.getOntologyContext(context, processor, acceptor).orNull;
 		if (ontologyContext === null) {
+			if (context.currentModel === context.previousModel && context.currentModel instanceof SadlModel) {
+				return [true]; // Any SADL resource is OK if we are at top level in the model.
+			}
 			return [false]
 		}
 

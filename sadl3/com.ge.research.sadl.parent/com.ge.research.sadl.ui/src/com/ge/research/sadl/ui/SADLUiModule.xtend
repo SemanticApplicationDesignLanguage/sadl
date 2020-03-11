@@ -22,6 +22,7 @@ package com.ge.research.sadl.ui
 
 import com.ge.research.sadl.ide.editor.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlContentAssistContextFactory
+import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalPriorities
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeCrossrefProposalProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlOntologyContextProvider
@@ -47,6 +48,7 @@ import com.google.inject.Provider
 import com.google.inject.name.Names
 import org.eclipse.ui.plugin.AbstractUIPlugin
 import org.eclipse.xtext.generator.IShouldGenerate
+import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalPriorities
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.IdeCrossrefProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
@@ -148,6 +150,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	def Class<? extends IdeCrossrefProposalProvider> bindIdeCrossrefProposalProvider() {
 		return SadlIdeCrossrefProposalProvider;
+	}
+
+	def Class<? extends IdeContentProposalPriorities> bindIdeContentProposalPriorities() {
+		return SadlIdeContentProposalPriorities;
 	}
 
 	def Class<? extends IOntologyContextProvider> bindIOntologyContextProvider() {
