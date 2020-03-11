@@ -18,12 +18,15 @@
 package com.ge.research.sadl.ide.editor.contentassist
 
 import com.ge.research.sadl.processing.IModelProcessor
+import com.ge.research.sadl.processing.IModelProcessorProvider
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context
 import com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder
 import com.ge.research.sadl.processing.OntModelProvider
 import com.ge.research.sadl.processing.ValidationAcceptor
+import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.PropOfSubject
+import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration
 import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlModel
@@ -33,6 +36,7 @@ import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SubjHasProp
 import com.google.common.base.Optional
+import com.google.inject.Inject
 import com.google.inject.Singleton
 import com.hp.hpl.jena.ontology.OntModel
 import java.util.List
@@ -44,8 +48,6 @@ import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.createWithoutSubject
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
-import com.ge.research.sadl.sADL.BinaryOperation
-import com.ge.research.sadl.sADL.QueryStatement
 
 /**
  * Singleton service ontology context provider service for SADL.
@@ -56,6 +58,20 @@ import com.ge.research.sadl.sADL.QueryStatement
 class SadlOntologyContextProvider implements IOntologyContextProvider {
 
 	static val LOGGER = LoggerFactory.getLogger(SadlOntologyContextProvider);
+
+	@Inject
+	IOntologyContextProvider ontologyContextProvider;
+
+	@Inject
+	IModelProcessorProvider modelProcessorProvider;
+
+	override Optional<Context> getOntologyContext(ContentAssistContext context) {
+		val resource = context.currentModel.eResource;
+		val processor = modelProcessorProvider.getProcessor(resource);
+		val acceptor = new ProposalProviderValidationAcceptor;
+		val ontologyContext = ontologyContextProvider.getOntologyContext(context, processor, acceptor).orNull;
+		return Optional.fromNullable(ontologyContext);
+	}
 
 	override Optional<Context> getOntologyContext(ContentAssistContext it, IModelProcessor processor) {
 		return getOntologyContext(it, processor, ValidationAcceptor.NOOP);
