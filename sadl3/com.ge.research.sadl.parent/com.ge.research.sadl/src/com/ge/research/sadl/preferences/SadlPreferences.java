@@ -57,7 +57,7 @@ public class SadlPreferences {
 	public static final PreferenceKey METRICS_QUERY_FILENAME = new PreferenceKey("metricsQueryFilename", "");
 	public static final PreferenceKey GRAPH_IMPLICIT_ELEMENTS = new PreferenceKey("graphImplicitElements", String.valueOf(false));
 	public static final PreferenceKey GRAPH_IMPLICIT_ELEMENT_INSTANCES = new PreferenceKey("graphImplicitElementInstances", String.valueOf(false));
-	
+	public static final PreferenceKey CONTENT_ASSIST__FILTER_IMPLICIT_MODEL = new PreferenceKey("contentAssist__filterImplicitModel", String.valueOf(false));
 	// Don't forget to add new property to the list below
 	
 	private static final PreferenceKey[] allKeys = {
@@ -93,7 +93,8 @@ public class SadlPreferences {
 			GENERATE_METRICS_REPORT_ON_CLEAN_BUILD,
 			METRICS_QUERY_FILENAME, 
 			GRAPH_IMPLICIT_ELEMENTS,
-			GRAPH_IMPLICIT_ELEMENT_INSTANCES
+			GRAPH_IMPLICIT_ELEMENT_INSTANCES,
+			CONTENT_ASSIST__FILTER_IMPLICIT_MODEL
 	};
 	
 	public static final List<PreferenceKey> preferences() {
