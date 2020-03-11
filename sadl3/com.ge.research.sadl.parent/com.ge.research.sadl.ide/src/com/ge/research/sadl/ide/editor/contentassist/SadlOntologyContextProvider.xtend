@@ -108,7 +108,7 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 				}
 			} else if (key == SADLPROPERTYINITIALIZER_PROPERTY) {
 				val initializer = currentModel.propertyInitializer;
-				if (initializer !== null) {
+				if (initializer !== null && initializer.eContainer instanceof SadlInstance) {
 					val instance = initializer.eContainer as SadlInstance;
 					val type = instance.type;
 					if (type instanceof SadlSimpleTypeReference) {
