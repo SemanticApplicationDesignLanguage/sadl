@@ -264,4 +264,9 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposal('double');
 	}
 
+	@Test
+	def void checkCA_30_CanProposeIsAForClassOrPropertyDeclaration() {
+		newBuilder('''uri "http://myUri". Foo is ''').assertProposal('a');
+	}
+
 }
