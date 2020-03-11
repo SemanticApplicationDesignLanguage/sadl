@@ -69,7 +69,7 @@ import com.google.inject.Inject;
 
 public abstract class SadlModelProcessor implements IModelProcessor {
     private static final Logger logger = Logger.getLogger(SadlModelProcessor.class);
-    private Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
+    private Object target = null;	// the instance of Rule, Query, Equation, External, or Test into which we are trying to put the translation
     private List<IFTranslationError> errors = null;
     private Object encapsulatingTarget = null;	// when a query is in a test
     public enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
