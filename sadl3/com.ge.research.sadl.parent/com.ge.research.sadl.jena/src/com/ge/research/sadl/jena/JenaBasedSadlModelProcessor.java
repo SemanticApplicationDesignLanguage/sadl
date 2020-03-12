@@ -2031,10 +2031,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private boolean isInAllowedVariableContainer(EObject defnContainer) {
 		if (getAllowedVariableContainers() != null) {
-			if (getAllowedVariableContainers().contains(defnContainer.getClass())) {
-				return true;
+			for (Class allowed : getAllowedVariableContainers()) {
+				String nm1 = allowed.getCanonicalName();
+				String nm2 = defnContainer.getClass().getCanonicalName();
+				if (nm1.equals(nm2)) {
+					return true;
+				}
+				for (Class incls : defnContainer.getClass().getInterfaces()) {
+					if (incls.equals(allowed)) {
+						return true;
+					}
+				}
 			}
-			else if (defnContainer.eContainer() != null){
+			if (defnContainer.eContainer() != null){
 				return isInAllowedVariableContainer(defnContainer.eContainer());
 			}
 		}
@@ -6422,10 +6431,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private boolean hasCommonVariableSubject(Object robj) {
-		if (robj instanceof TripleElement && (((TripleElement) robj).getSubject() instanceof VariableNode
+		if (robj instanceof TripleElement && 
+				((TripleElement) robj).getSubject() instanceof VariableNode
 				&& ((TripleElement) robj).getSourceType() != null
-				&& (((TripleElement) robj).getSourceType().equals(TripleSourceType.SPV))
-				|| ((TripleElement) robj).getSourceType().equals(TripleSourceType.ITC))) {
+				&& ((((TripleElement) robj).getSourceType().equals(TripleSourceType.SPV))
+						|| ((TripleElement) robj).getSourceType().equals(TripleSourceType.ITC))) {
 			VariableNode subjvar = (VariableNode) ((TripleElement) robj).getSubject();
 			Object trel = robj;
 			while (trel != null && trel instanceof TripleElement) {
@@ -7331,6 +7341,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (trSubj instanceof Node) {
 				subjNode = (Node) trSubj;
+				if (trSubj instanceof NamedNode && isProperty(((NamedNode)subjNode).getNodeType())) {
+					// this needs another TripleElement
+					trSubj = new TripleElement(null, (Node) trSubj, null);
+					subjNode = nodeCheck(trSubj);
+				}
 			} else if (trSubj instanceof GraphPatternElement) {
 				subjNode = new ProxyNode((GraphPatternElement) trSubj);
 			}
@@ -11954,6 +11969,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (type != null && typersrc == null) {
 				addError("The type could not be resolved", type);
+			}
+			else if (cardinality == null) {
+				// this is probably an incomplete statement, 
+				addError("Invalid cardinality", cond);
 			}
 			else if (cardinality.equals("one")) {
 				// this is interpreted as a someValuesFrom restriction

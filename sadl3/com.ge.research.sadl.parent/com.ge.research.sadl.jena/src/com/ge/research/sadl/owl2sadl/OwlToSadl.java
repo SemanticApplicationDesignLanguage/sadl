@@ -944,7 +944,7 @@ public class OwlToSadl {
 			if (isVerboseMode()) {
 				verboseModeStringBuilder.append("// Processed statement: ");
 				verboseModeStringBuilder.append(s.toString());
-				verboseModeStringBuilder.append("\n");
+				verboseModeStringBuilder.append(System.lineSeparator());
 			}
 			Resource subj = s.getSubject();
 			OntResource ontSubj = theModel.getOntResource(subj);
@@ -954,7 +954,7 @@ public class OwlToSadl {
 					if (isVerboseMode()) {
 						verboseModeStringBuilder.append("//     subject resource not added to processing list: \": ");
 						verboseModeStringBuilder.append(ontSubj.toString());
-						verboseModeStringBuilder.append("\n");
+						verboseModeStringBuilder.append(System.lineSeparator());
 					}
 				}
 			}
@@ -968,7 +968,7 @@ public class OwlToSadl {
 						if (isVerboseMode()) {
 							verboseModeStringBuilder.append("//     predicate resource not added to processing list: \": ");
 							verboseModeStringBuilder.append(ontProp.toString());
-							verboseModeStringBuilder.append("\n");
+							verboseModeStringBuilder.append(System.lineSeparator());
 						}
 					}
 				}
@@ -989,7 +989,7 @@ public class OwlToSadl {
 						if (isVerboseMode()) {
 							verboseModeStringBuilder.append("//     object resource not added to processing list: \": ");
 							verboseModeStringBuilder.append(ontObj.toString());
-							verboseModeStringBuilder.append("\n");
+							verboseModeStringBuilder.append(System.lineSeparator());
 						}
 					}
 				}
@@ -1013,7 +1013,7 @@ public class OwlToSadl {
 			while (erritr.hasNext()) {
 				sadlModel.append("// ");
 				sadlModel.append(erritr.next());
-				sadlModel.append("\n");
+				sadlModel.append(System.lineSeparator());
 			}
 		}
 		else if (isVerboseMode()) {
@@ -1026,7 +1026,7 @@ public class OwlToSadl {
 			while (erritr.hasNext()) {
 				sadlModel.append("// ");
 				sadlModel.append(erritr.next());
-				sadlModel.append("\n");
+				sadlModel.append(System.lineSeparator());
 			}
 		}
 		else if (isVerboseMode()) {
@@ -1039,7 +1039,7 @@ public class OwlToSadl {
 			while (erritr.hasNext()) {
 				sadlModel.append("// ");
 				sadlModel.append(erritr.next());
-				sadlModel.append("\n");
+				sadlModel.append(System.lineSeparator());
 			}
 		}
 		else if (isVerboseMode()) {
@@ -1056,7 +1056,7 @@ public class OwlToSadl {
 				Ontology onti = onts.get(i);
 				sadlModel.append("//    ");
 				sadlModel.append(onti.toString());
-				sadlModel.append("\n");
+				sadlModel.append(System.lineSeparator());
 			}
 		}
 		
@@ -1181,7 +1181,7 @@ public class OwlToSadl {
 					if (subj.canAs(Ontology.class) || subj.equals(OWL.Ontology)) {
 						sadlModel.append("// restriction on Ontology not supported in SADL: \n    // ");
 						sadlModel.append(restrictionToString(getConcepts(), null, res));
-						sadlModel.append("\n");
+						sadlModel.append(System.lineSeparator());
 						invalid = true;
 						break;
 					}
@@ -1348,7 +1348,7 @@ public class OwlToSadl {
 			}
 		}
 		for (int i = 0; i < numLineFeeds; i++) {
-			sb.append("\n");
+			sb.append(System.lineSeparator());
 		}
 	}
 
@@ -1566,7 +1566,7 @@ public class OwlToSadl {
 		else {
 			sb.append("// anonymous rdfs:Datatype encountered: ");
 			sb.append(rsrc.toString());
-			sb.append("\n");
+			sb.append(System.lineSeparator());
 		}
 		return sb.toString();
 	}
@@ -2360,18 +2360,28 @@ public class OwlToSadl {
 		if (supers.size() > 0) {
 			sb.append(" is a type of ");			
 			if (supers.size() > 1) {
-				sb.append("{");
+				List<String> typeStrings = new ArrayList<String>();
 				Iterator<Resource> spIter = supers.iterator();
-				int itercnt = 0;
 				while (spIter.hasNext()) {
+					Resource spcls = spIter.next();
+					String spStr = uriToSadlString(concepts, spcls);
+					if (!typeStrings.contains(spStr)) {
+						typeStrings.add(spStr);
+					}
+				}
+				if (typeStrings.size() > 1) {
+					sb.append("{");
+				}
+				int itercnt = 0;
+				for (String typeStr : typeStrings) {
 					if (itercnt++ > 0) {
 						sb.append(" and ");
 					}
-					Resource spcls = spIter.next();
-					String spStr = uriToSadlString(concepts, spcls);
-					sb.append(spStr);
+					sb.append(typeStr);
 				}
-				sb.append("}");
+				if (typeStrings.size() > 1) {
+					sb.append("}");
+				}
 			}
 			else {
 				sb.append(uriToSadlString(concepts, supers.get(0)));
@@ -2448,6 +2458,29 @@ public class OwlToSadl {
 					concepts.addErrorMessage(t.getMessage());
 				}
 				sb.append(restrictionToString(concepts, cls, res));
+				addEndOfStatement(sb, 1);
+			}
+		}
+		if (mappedRestrictions != null) {
+			for (OntClass res : mappedRestrictions) {
+				if (res.isRestriction()) {
+					try {
+						OntProperty op = res.asRestriction().getOnProperty();
+						if (!concepts.getCompleted().contains(op)) {
+							if (op.isObjectProperty()) {
+								sb.append(objPropertyToSadl(concepts, op));
+							}
+							else {
+								sb.append(dtPropertyToSadl(concepts, op));
+							}
+							concepts.addCompleted(op);
+						}
+					}
+					catch (Throwable t) {
+						concepts.addErrorMessage(t.getMessage());
+					}
+				}
+				sb.append(restrictionToString(concepts, cls, res.asRestriction()));
 				addEndOfStatement(sb, 1);
 			}
 		}
@@ -3191,7 +3224,7 @@ public class OwlToSadl {
 
 	private void addNewLineIfNotAtEndOfBuffer(StringBuilder sb) {
 		if (!isNewLineAtEndOfBuffer(sb)) {
-			sb.append("\n");
+			sb.append(System.lineSeparator());
 		}
 		
 	}

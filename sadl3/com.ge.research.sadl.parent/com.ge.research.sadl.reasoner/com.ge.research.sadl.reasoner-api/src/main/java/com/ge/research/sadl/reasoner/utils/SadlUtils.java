@@ -240,7 +240,9 @@ public class SadlUtils {
 			result = new String(buffer);
 		} finally {
 			try {
-				in.close();
+				if (in != null) {
+					in.close();
+				}
 			} catch (IOException e) { /* ignore it */
 			}
 		}
