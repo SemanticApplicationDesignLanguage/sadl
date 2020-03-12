@@ -59,6 +59,7 @@ import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
+import org.eclipse.xtext.util.TextRegion
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
@@ -114,6 +115,9 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 			case grammarAccess.sadlImportAccess.importedResourceAssignment_1: {
 				ctx.completeImports(acceptor);
 			}
+			case grammarAccess.sadlCardinalityConditionAccess.cardinalityAssignment_2: {
+				ctx.completeCardinalityAssigment(acceptor);
+			}
 			default: {
 				super._createProposals(assignment, ctx, acceptor);
 			}
@@ -162,6 +166,20 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 	protected def completeImports(ContentAssistContext ctx, IIdeContentProposalAcceptor it) {
 		val crossRef = grammarAccess.sadlImportAccess.importedResourceAssignment_1.terminal as CrossReference;
 		_createProposals(crossRef, ctx, it);
+	}
+
+	protected def completeCardinalityAssigment(ContentAssistContext ctx, IIdeContentProposalAcceptor acceptor) {
+		#['one', 2, 3, 4, 5].forEach [
+			val entry = proposalCreator.createProposal('''«it»''', ctx);
+			acceptor.accept(entry, proposalPriorities.getDefaultPriority(entry));
+		]
+		val proposal = 'CARDINALITY'
+		val entry = proposalCreator.createProposal(proposal, ctx) [
+			editPositions += new TextRegion(ctx.offset, proposal.length);
+			kind = ContentAssistEntry.KIND_VALUE;
+			description = 'Cardinality number'
+		]
+		acceptor.accept(entry, 100)
 	}
 
 	protected static val SUPPORTED_FILE_EXTENSION = #{'sadl', 'n3', 'owl', 'ntriple', 'nt'};

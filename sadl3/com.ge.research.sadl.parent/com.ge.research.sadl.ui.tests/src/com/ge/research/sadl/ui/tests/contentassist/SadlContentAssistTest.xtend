@@ -271,14 +271,13 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 
 	@Test
-	def void checkCA_30_CanProposeSadlResourcesOnTopLevel() {
+	def void checkCA_31_CanProposeSadlResourcesOnTopLevel() {
 		val builder = newBuilder('''
 			uri "http://sadl.org/x.sadl".
 			Artefact is a class.
 			part describes Artefact with values of type Artefact.
 			Aircraft is a type of Artefact.
 			Engine is a type of Artefact.
-			
 		''');
 		builder.assertProposal('Artefact');
 		builder.assertProposal('part');
@@ -288,6 +287,21 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposal('Ask');
 		builder.assertProposal('Equation');
 		// etc.
+	}
+
+	@Test
+	def void checkCA_32_CanProposeCardinalityValue() {
+		val builder = newBuilder('''
+			uri "http://sadl.org/x.sadl".
+			Artefact is a class.
+			part describes Artefact with values of type Artefact.
+			Aircraft is a type of Artefact.
+			Engine is a type of Artefact.
+			part of Aircraft has at least 
+		''');
+		builder.assertProposal('one');
+		builder.assertProposal('2');
+		builder.assertProposal('CARDINALITY');
 	}
 
 }
