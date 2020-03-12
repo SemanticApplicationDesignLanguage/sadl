@@ -2352,7 +2352,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				subjtype = getType(subject);
 				NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(RDFS.subClassOf.getURI(), NodeType.ClassNode));
 				ConceptName rdfType = getModelProcessor().namedNodeToConceptName(tctype);
-				subjtype.setExpressionType(rdfType);
+				if (subjtype != null) {
+					subjtype.setExpressionType(rdfType);
+				}
 //				return new TypeCheckInfo(rdfType, tctype, this, expression);
 				return subjtype;
 			}
@@ -5324,6 +5326,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 						else {
 							subj = ontModel.getOntResource(declarationExtensions.getConceptUri((SadlResource)subject));
+							if (subj == null) {
+								Resource test = ontModel.getResource(declarationExtensions.getConceptUri((SadlResource) subject));
+								if (test != null) {
+									if (test.canAs(OntResource.class)) {
+										subj = test.as(OntResource.class);
+									}
+								}
+							}
 							if (subj != null) {
 								if (preduri == null) {
 									getModelProcessor().addTypeCheckingError("Unable to resolve name", predicate);
