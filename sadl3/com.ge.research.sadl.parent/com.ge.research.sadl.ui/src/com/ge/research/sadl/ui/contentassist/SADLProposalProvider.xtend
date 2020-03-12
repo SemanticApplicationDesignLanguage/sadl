@@ -28,11 +28,11 @@ import org.eclipse.xtext.ide.editor.contentassist.ContentAssistEntry
 import org.eclipse.xtext.ide.editor.contentassist.IIdeContentProposalAcceptor
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.ui.editor.contentassist.AbstractContentProposalProvider.NullSafeCompletionProposalAcceptor
+import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 import org.eclipse.xtext.ui.editor.contentassist.UiToIdeContentProposalProvider
 import org.eclipse.xtext.util.TextRegion
-import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist
@@ -41,7 +41,7 @@ import org.eclipse.xtext.ui.editor.contentassist.ConfigurableCompletionProposal
 class SADLProposalProvider extends AbstractSADLProposalProvider {
 
 	@Inject
-	SADLUiToIdeContentProposalProvider delegate;
+	UiToIdeContentProposalProvider delegate;
 
 	override createProposals(ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 		delegate.createProposals(context, acceptor);
@@ -64,7 +64,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 					entries.size < maxProposals
 				}
 			}
-			ideProvider.createProposals(#[context.getIdeContext], ideAcceptor)
+			ideProvider.createProposals(#[context.getIdeContext(builderProvider.get)], ideAcceptor)
 			val uiAcceptor = new NullSafeCompletionProposalAcceptor(acceptor)
 
 			entries.forEach [ p, idx |
@@ -83,8 +83,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			}
 		}
 
-		private def org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext getIdeContext(ContentAssistContext c) {
-			val builder = builderProvider.get()
+		static def org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext getIdeContext(ContentAssistContext c, Builder builder) {
 			val replaceRegion = c.replaceRegion
 			builder
 				.setPrefix(c.prefix)
@@ -103,7 +102,7 @@ class SADLProposalProvider extends AbstractSADLProposalProvider {
 			}
 			return builder.toContext()
 		}
-		
+
 	}
 
 }
