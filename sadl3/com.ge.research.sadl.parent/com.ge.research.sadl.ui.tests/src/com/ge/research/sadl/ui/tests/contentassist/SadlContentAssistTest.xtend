@@ -304,4 +304,20 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposal('CARDINALITY');
 	}
 
+	@Test
+	def void checkCA_33_AlwaysRunContextWithPrefix() {
+		// https://github.com/crapo/sadlos2/issues/406#issuecomment-597622176
+		val builder = newBuilder('''
+			uri "http://sadl.org/x.sadl".
+			Artefact is a class.
+			Aircraft is a type of Artefact.
+			W_IsSomethingWithW is a class.
+			IsSomethingWithoutW is a class.
+			MyAircraft is an Aircraft w
+		''');
+		builder.assertProposal('W_IsSomethingWithW');
+		builder.assertProposal('with');
+		builder.assertProposalIsNot('IsSomethingWithoutW');
+	}
+
 }

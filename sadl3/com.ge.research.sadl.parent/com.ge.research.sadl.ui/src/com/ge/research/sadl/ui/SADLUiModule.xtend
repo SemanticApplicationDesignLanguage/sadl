@@ -158,7 +158,7 @@ class SADLUiModule extends AbstractSADLUiModule {
 		return SadlIdeContentProposalPriorities;
 	}
 
-	def Class<? extends UiToIdeContentProposalProvider> bibndUiToIdeContentProposalProvider() {
+	def Class<? extends UiToIdeContentProposalProvider> bindUiToIdeContentProposalProvider() {
 		return SADLUiToIdeContentProposalProvider;
 	}
 

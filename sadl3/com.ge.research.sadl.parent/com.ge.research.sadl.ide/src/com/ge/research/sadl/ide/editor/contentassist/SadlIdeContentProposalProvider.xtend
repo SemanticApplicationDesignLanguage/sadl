@@ -17,7 +17,6 @@
  ***********************************************************************/
 package com.ge.research.sadl.ide.editor.contentassist
 
-import static com.ge.research.sadl.preferences.SadlPreferences.*
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.processing.OntModelProvider
@@ -58,15 +57,15 @@ import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalCreator
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalPriorities
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.naming.QualifiedName
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.util.TextRegion
 
+import static com.ge.research.sadl.preferences.SadlPreferences.*
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
-import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 
 /**
  * Generic content proposal provider for the {@code SADL} language.
