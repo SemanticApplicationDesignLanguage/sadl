@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.ide.editor.contentassist
 
+import static com.ge.research.sadl.preferences.SadlPreferences.*
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.processing.OntModelProvider
@@ -64,6 +65,8 @@ import org.eclipse.xtext.util.TextRegion
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 
 /**
  * Generic content proposal provider for the {@code SADL} language.
@@ -87,6 +90,9 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 
 	@Inject
 	IdeContentProposalPriorities proposalPriorities;
+	
+	@Inject
+	IPreferenceValuesProvider preferenceValuesProvider;
 
 	override protected _createProposals(RuleCall ruleCall, ContentAssistContext ctx,
 		IIdeContentProposalAcceptor acceptor) {
@@ -134,7 +140,31 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 					KNOWN_FILE_EXTENSION.contains(EObjectURI?.fileExtension) && !imports.contains(name.toString);
 			];
 		}
-		return lookupCrossReference(reference, ctx);
+		return Predicates.and(#[
+			ctx.implicitModelFilter,
+			lookupCrossReference(reference, ctx)
+		]);
+	}
+
+	private def Predicate<IEObjectDescription> getImplicitModelFilter(ContentAssistContext context) {
+		return if (context.currentModel.shouldFilterBuiltIns)
+			[
+				EObjectURI.trimFragment.lastSegment != SADL_IMPLICIT_MODEL_FILENAME
+			]
+		else
+			Predicates.alwaysTrue
+	}
+
+	private def boolean shouldFilterBuiltIns(EObject model) {
+		if (model === null || model.eIsProxy || model.eResource === null) {
+			return false;
+		}
+		val values = preferenceValuesProvider.getPreferenceValues(model.eResource);
+		val preference = values.getPreference(CONTENT_ASSIST__FILTER_IMPLICIT_MODEL);
+		if (preference !== null) {
+			return Boolean.parseBoolean(preference);
+		}
+		return false;
 	}
 
 	// Creates a proposal for an EOS terminal.  Xtext can't guess (at

@@ -35,12 +35,9 @@ import com.google.inject.Singleton
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext
-import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.resource.IEObjectDescription
 
-import static com.ge.research.sadl.preferences.SadlPreferences.*
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
-import static com.ge.research.sadl.processing.SadlConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
@@ -64,9 +61,6 @@ class ProposalProviderFilterProvider {
 
 	@Inject
 	IModelProcessorProvider modelProcessorProvider;
-
-	@Inject
-	IPreferenceValuesProvider preferenceValuesProvider;
 
 	def Predicate<IEObjectDescription> getCrossReferenceFilter(ContentAssistContext context) {
 		if (context === null || context.currentModel === null || context.currentModel.eResource === null) {
@@ -185,7 +179,7 @@ class ProposalProviderFilterProvider {
 	private def Predicate<IEObjectDescription> createPrimaryTypeRefFilter(EObject currentModel) {
 		val model = currentModel.getContainerOfType(SadlModel);
 		if (model !== null) {
-			val importedResourceUris = model.allImportedResourceUris;
+			val importedResourceUris = importHelper.getAllImportedResourceUris(model)
 			return [
 				val declaration = EObjectOrProxy?.eContainer;
 				return if (declaration instanceof SadlClassOrPropertyDeclaration) {
@@ -197,26 +191,6 @@ class ProposalProviderFilterProvider {
 			];
 		}
 		return [false];
-	}
-
-	private def boolean shouldFilterBuiltIns(EObject model) {
-		if (model === null || model.eIsProxy || model.eResource === null) {
-			return false;
-		}
-		val values = preferenceValuesProvider.getPreferenceValues(model.eResource);
-		val preference = values.getPreference(CONTENT_ASSIST__FILTER_IMPLICIT_MODEL);
-		if (preference !== null) {
-			return Boolean.parseBoolean(preference);
-		}
-		return false;
-	}
-
-	private def Iterable<String> getAllImportedResourceUris(SadlModel model) {
-		val importedResourceUris = importHelper.getAllImportedResourceUris(model);
-		if (shouldFilterBuiltIns(model)) {
-			return importedResourceUris.filter[it != SADL_IMPLICIT_MODEL_URI];
-		}
-		return importedResourceUris;
 	}
 
 }
