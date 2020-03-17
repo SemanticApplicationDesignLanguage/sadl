@@ -14,6 +14,7 @@ import java.util.Objects;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EObjectContainmentEList;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
@@ -83,6 +84,8 @@ import com.ge.research.sadl.sADL.SadlPrimitiveDataType;
 import com.ge.research.sadl.sADL.SadlProperty;
 import com.ge.research.sadl.sADL.SadlPropertyCondition;
 import com.ge.research.sadl.sADL.SadlPropertyInitializer;
+import com.ge.research.sadl.sADL.SadlPropertyRestriction;
+import com.ge.research.sadl.sADL.SadlRangeRestriction;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.sADL.SadlReturnDeclaration;
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference;
@@ -1344,7 +1347,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	protected TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
+	public TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
 		boolean forceValidation = false;
 		if (expressionsTypeCheckCache != null && expressionsTypeCheckCache.containsKey(expression) && !forceValidation) {
 			return expressionsTypeCheckCache.get(expression);
@@ -3161,11 +3164,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return tci;
 		}
 		else {
-			if (returnType.get(0).getUnknown() == null) {
+			if (!returnType.isEmpty() && returnType.get(0).getUnknown() == null) {
 				return getType(returnType.get(0).getType());
 			}
 			else {
-                throw new DontTypeCheckException("External or Equation does not specify a return type.");
+//                throw new DontTypeCheckException("External or Equation does not specify a return type.");
+				// equations can now not have return types awc 3/16/2020
+				return null;
 			}
 		}
 	}
@@ -3578,7 +3583,39 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			return tci;
 		}
-		else {
+		if (expression != null && expression.eContainer() instanceof SadlProperty && 
+				((SadlProperty)expression.eContainer()).getRestrictions() != null) {
+			for ( SadlPropertyRestriction rstr : ((SadlProperty)expression.eContainer()).getRestrictions()) {
+				if (rstr instanceof SadlRangeRestriction) {
+					try {
+						TypeCheckInfo tci = getType(((SadlRangeRestriction)rstr).getRange());
+						if (tci != null) {
+							return tci;
+						}
+						// TODO Auto-generated catch block
+					} catch (URISyntaxException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ConfigurationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (PropertyWithoutRangeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (CircularDefinitionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		{
 			// no range on this property, check super properties
 			StmtIterator sitr2 = theJenaModel.listStatements(property, RDFS.subPropertyOf, (RDFNode)null);
 			while (sitr2.hasNext()) {
