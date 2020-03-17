@@ -908,6 +908,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private List<Class> allowedVariableContainers;
 
+	private List<EObject> undefinedEObjects = new ArrayList<EObject>();;
+
 	public static void refreshResource(Resource newRsrc) {
 		try {
 			URI uri = newRsrc.getURI();
@@ -7306,6 +7308,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Object rest = null;
 		if (subject != null) {
 			trSubj = processExpression(subject);
+			if (trSubj == null) {
+				tryToAddUndefinedEObject(subject);
+			}
 			if (trSubj instanceof Object[] && ((Object[]) trSubj).length == 2) {
 				rest = ((Object[]) trSubj)[1];
 				trSubj = ((Object[]) trSubj)[0];
@@ -7320,6 +7325,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		boolean isPreviousPredicate = false;
 		if (predicate != null) {
 			trPred = processExpression(predicate);
+			if (trPred == null) {
+				tryToAddUndefinedEObject(predicate);
+			}
 
 			// Check for cardinality of property on this particular class hierarchy
 			if (constantBuiltinName == null) {
@@ -7448,6 +7456,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			
 			return combineRest(bi, rest);
 		}
+	}
+
+	private void tryToAddUndefinedEObject(EObject eobj) {
+//		if (eobj instanceof SadlResource) {
+			addUndefinedEObject(eobj);
+//		}
+//		else if (eobj instanceof Declaration && ((Declaration)eobj).getType() instanceof SadlSimpleTypeReference) {
+//			addUndefinedEObject(((Declaration)eobj).getType());
+//		}
+	}
+
+	protected void addUndefinedEObject(EObject eobj) {
+		if (!undefinedEObjects.contains(eobj)) {
+			undefinedEObjects .add(eobj);
+		}
+	}
+
+	protected List<EObject> getUndefinedEObjects() {
+		return undefinedEObjects;
+	}
+	
+	protected void clearUndefinedEObjects() {
+		undefinedEObjects.clear();
 	}
 
 	protected void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
