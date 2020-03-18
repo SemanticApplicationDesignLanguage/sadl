@@ -43,4 +43,6 @@ interface IOntologyContextProvider {
 	def Optional<Context> getOntologyContext(ContentAssistContext it, IModelProcessor processor,
 		ValidationAcceptor acceptor)
 
+	def Optional<Context> getOntologyContext(ContentAssistContext it)
+
 }
