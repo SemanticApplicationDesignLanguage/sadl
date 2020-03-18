@@ -42,6 +42,11 @@ public class ResultSet {
 		table = new Object[data.length][data[0].length];
 		insertData(data);		
 	}
+
+	public ResultSet(String[] columnNames){		
+		header = new String[columnNames.length];		
+		setColumnNames(columnNames);
+	}
 	
 	public ResultSet(String[] columnNames, Object[][] data){		
 		header = new String[columnNames.length];		
@@ -85,7 +90,11 @@ public class ResultSet {
 	}
 	
 	public int getRowCount(){
-		return table.length;
+		if(table != null) {
+			return table.length;			
+		}
+		else
+			return 0;
 	}
 	
 	public int getColumnCount(){
