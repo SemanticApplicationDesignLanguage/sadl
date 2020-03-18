@@ -158,7 +158,7 @@ public class NamedNode extends Node {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (getURI().equals(other.getURI())) {
+		if (getURI() != null && other.getURI() != null && getURI().equals(other.getURI())) {
 			return true;	// by definition, in the Semantic Web, same URI same Resource
 		}
 		if (nodeType != other.nodeType)

@@ -906,6 +906,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected Map<String, String> modelProcessorPreferenceMap;
 
+	private List<Class> allowedVariableContainers;
+
+	private List<EObject> undefinedEObjects = new ArrayList<EObject>();;
+
 	public static void refreshResource(Resource newRsrc) {
 		try {
 			URI uri = newRsrc.getURI();
@@ -1951,6 +1955,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		SadlResource decl = getDeclarationExtensions().getDeclaration(sr);
 		EObject defnContainer = decl.eContainer();
+		if (isInAllowedVariableContainer(defnContainer)) {
+			return var;
+		}
 		try {
 			TypeCheckInfo tci = null;
 			if (defnContainer instanceof BinaryOperation) {
@@ -2022,6 +2029,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addTypeCheckingError("Property does not have a range", defnContainer);
 		}
 		return var;
+	}
+
+	private boolean isInAllowedVariableContainer(EObject defnContainer) {
+		if (getAllowedVariableContainers() != null) {
+			for (Class allowed : getAllowedVariableContainers()) {
+				String nm1 = allowed.getCanonicalName();
+				String nm2 = defnContainer.getClass().getCanonicalName();
+				if (nm1.equals(nm2)) {
+					return true;
+				}
+				for (Class incls : defnContainer.getClass().getInterfaces()) {
+					if (incls.equals(allowed)) {
+						return true;
+					}
+				}
+			}
+			if (defnContainer.eContainer() != null){
+				return isInAllowedVariableContainer(defnContainer.eContainer());
+			}
+		}
+		return false;
 	}
 
 	private boolean isContainedBy(EObject eobj, Class cls) {
@@ -6405,10 +6433,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private boolean hasCommonVariableSubject(Object robj) {
-		if (robj instanceof TripleElement && (((TripleElement) robj).getSubject() instanceof VariableNode
+		if (robj instanceof TripleElement && 
+				((TripleElement) robj).getSubject() instanceof VariableNode
 				&& ((TripleElement) robj).getSourceType() != null
-				&& (((TripleElement) robj).getSourceType().equals(TripleSourceType.SPV))
-				|| ((TripleElement) robj).getSourceType().equals(TripleSourceType.ITC))) {
+				&& ((((TripleElement) robj).getSourceType().equals(TripleSourceType.SPV))
+						|| ((TripleElement) robj).getSourceType().equals(TripleSourceType.ITC))) {
 			VariableNode subjvar = (VariableNode) ((TripleElement) robj).getSubject();
 			Object trel = robj;
 			while (trel != null && trel instanceof TripleElement) {
@@ -7279,6 +7308,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Object rest = null;
 		if (subject != null) {
 			trSubj = processExpression(subject);
+			if (trSubj == null) {
+				tryToAddUndefinedEObject(subject);
+			}
 			if (trSubj instanceof Object[] && ((Object[]) trSubj).length == 2) {
 				rest = ((Object[]) trSubj)[1];
 				trSubj = ((Object[]) trSubj)[0];
@@ -7293,6 +7325,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		boolean isPreviousPredicate = false;
 		if (predicate != null) {
 			trPred = processExpression(predicate);
+			if (trPred == null) {
+				tryToAddUndefinedEObject(predicate);
+			}
 
 			// Check for cardinality of property on this particular class hierarchy
 			if (constantBuiltinName == null) {
@@ -7314,6 +7349,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (trSubj instanceof Node) {
 				subjNode = (Node) trSubj;
+				if (trSubj instanceof NamedNode && isProperty(((NamedNode)subjNode).getNodeType())) {
+					// this needs another TripleElement
+					trSubj = new TripleElement(null, (Node) trSubj, null);
+					subjNode = nodeCheck(trSubj);
+				}
 			} else if (trSubj instanceof GraphPatternElement) {
 				subjNode = new ProxyNode((GraphPatternElement) trSubj);
 			}
@@ -7416,6 +7456,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			
 			return combineRest(bi, rest);
 		}
+	}
+
+	private void tryToAddUndefinedEObject(EObject eobj) {
+//		if (eobj instanceof SadlResource) {
+			addUndefinedEObject(eobj);
+//		}
+//		else if (eobj instanceof Declaration && ((Declaration)eobj).getType() instanceof SadlSimpleTypeReference) {
+//			addUndefinedEObject(((Declaration)eobj).getType());
+//		}
+	}
+
+	protected void addUndefinedEObject(EObject eobj) {
+		if (!undefinedEObjects.contains(eobj)) {
+			undefinedEObjects .add(eobj);
+		}
+	}
+
+	protected List<EObject> getUndefinedEObjects() {
+		return undefinedEObjects;
+	}
+	
+	protected void clearUndefinedEObjects() {
+		undefinedEObjects.clear();
 	}
 
 	protected void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
@@ -11938,6 +12001,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (type != null && typersrc == null) {
 				addError("The type could not be resolved", type);
 			}
+			else if (cardinality == null) {
+				// this is probably an incomplete statement, 
+				addError("Invalid cardinality", cond);
+			}
 			else if (cardinality.equals("one")) {
 				// this is interpreted as a someValuesFrom restriction
 				if (type == null) {
@@ -14090,5 +14157,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected void setDomainAndRangeAsUnionClasses(boolean domainAndRangeAsUnionClasses) {
 		this.domainAndRangeAsUnionClasses = domainAndRangeAsUnionClasses;
+	}
+
+	protected List<Class> getAllowedVariableContainers() {
+		return allowedVariableContainers;
+	}
+
+	protected void addVariableAllowedInContainerType(Class<? extends EObject> class1) {
+		if (getAllowedVariableContainers() == null) {
+			setAllowedVariableContainers(new ArrayList<Class>());
+		}
+		getAllowedVariableContainers().add(class1);
+	}
+
+	protected void setAllowedVariableContainers(List<Class> allowedVariableContainers) {
+		this.allowedVariableContainers = allowedVariableContainers;
 	}
 }
