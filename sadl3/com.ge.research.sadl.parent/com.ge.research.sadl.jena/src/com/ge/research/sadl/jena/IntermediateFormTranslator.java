@@ -3657,14 +3657,15 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		List<GraphPatternElement> ifs = rule.getIfs();
 		for (GraphPatternElement gpe : ifs) {
 			if (gpe instanceof TripleElement) {
-				if (((TripleElement)gpe).getSubject().equals(var) || ((TripleElement)gpe).getObject().equals(var)) {
+				if ((((TripleElement)gpe).getSubject() != null && ((TripleElement)gpe).getSubject().equals(var)) || 
+						(((TripleElement)gpe).getObject() != null && ((TripleElement)gpe).getObject().equals(var))) {
 					if (firstUsed == 0) {
 						// don't set it if it is already set to a first use
 						firstUsed = ifs.indexOf(gpe);
 					}
 				}
 				if (((TripleElement)gpe).getPredicate() instanceof RDFTypeNode &&
-						((TripleElement)gpe).getSubject().equals(var)) {
+						((TripleElement)gpe).getSubject() != null && ((TripleElement)gpe).getSubject().equals(var)) {
 					return -1;	// don't put it in at all
 				}
 			}
