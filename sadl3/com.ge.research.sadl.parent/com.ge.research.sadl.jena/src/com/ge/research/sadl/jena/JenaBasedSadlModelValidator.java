@@ -3588,9 +3588,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			for ( SadlPropertyRestriction rstr : ((SadlProperty)expression.eContainer()).getRestrictions()) {
 				if (rstr instanceof SadlRangeRestriction) {
 					try {
-						TypeCheckInfo tci = getType(((SadlRangeRestriction)rstr).getRange());
-						if (tci != null) {
-							return tci;
+						if (((SadlRangeRestriction)rstr).getRange() != null) {
+							TypeCheckInfo tci = getType(((SadlRangeRestriction)rstr).getRange());
+							if (tci != null) {
+								return tci;
+							}
 						}
 						// TODO Auto-generated catch block
 					} catch (URISyntaxException e) {
