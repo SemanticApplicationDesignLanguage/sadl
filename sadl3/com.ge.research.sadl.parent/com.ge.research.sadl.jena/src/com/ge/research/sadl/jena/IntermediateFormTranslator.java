@@ -2423,8 +2423,29 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						be.getArguments().get(1) instanceof VariableNode) && 
 						be.getArguments().get(0) instanceof ProxyNode && 
 						((ProxyNode)be.getArguments().get(0)).getProxyFor() instanceof TripleElement &&
-						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null) {
-					((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(be.getArguments().get(1));
+						(((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null ||
+								(((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() instanceof ProxyNode &&
+										((ProxyNode)((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject()).getProxyFor() instanceof TripleElement &&
+										((TripleElement)((ProxyNode)((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject()).getProxyFor()).getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI) &&
+										((TripleElement)((ProxyNode)((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject()).getProxyFor()).getSubject() == null &&
+										((TripleElement)((ProxyNode)((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject()).getProxyFor()).getObject() == null			
+										))) {
+					if (objectShouldBeUnittedQuantity((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor())) {
+						// make sure we have the right triples for UnittedQuantity
+						if (((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null) {
+							// don't have triple for value of UnittedQuantity
+							TripleElement valueTriple = new TripleElement(null, new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI), be.getArguments().get(1));
+							((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(new ProxyNode(valueTriple));
+						}
+						else {
+							// have triple for value of UnittedQuantity
+							TripleElement valueTriple = (TripleElement) ((ProxyNode) ((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject()).getProxyFor();
+							valueTriple.setObject(be.getArguments().get(1));
+						}
+					}
+					else {
+						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(be.getArguments().get(1));
+					}
 					patterns.add(((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()));
 					if (be.getFuncName().equals("assign")) {
 						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setType(TripleModifierType.Assignment);
@@ -2576,6 +2597,44 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		patterns = moveTriplesOutOfBuiltin(patterns, be, isRuleThen);
 		return returnNode;
+	}
+
+	private boolean objectShouldBeUnittedQuantity(TripleElement tr) {
+		OntClass propRange = getPropertyRange(tr.getPredicate());
+		if (propRange != null) {
+			if (propRange.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+				return true;
+			}
+			OntClass unittedQuantitySubclass = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+			try {
+				if (SadlUtils.classIsSubclassOf(propRange, unittedQuantitySubclass, true, null)) {
+					return true;
+				}
+			} catch (CircularDependencyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+
+	private OntClass getPropertyRange(Node pred) {
+		Property prop = getTheJenaModel().getProperty(pred.getURI());
+		StmtIterator rngItr = getTheJenaModel().listStatements(prop.asResource(), RDFS.range, (RDFNode)null);
+		OntClass unittedQuantitySubclass = null;
+		if (rngItr.hasNext()) {
+			RDFNode rng = rngItr.nextStatement().getObject();
+			if (!rngItr.hasNext()) {
+				if (rng.isURIResource() && rng.canAs(OntClass.class)) {
+					unittedQuantitySubclass = rng.as(OntClass.class);
+				}
+			}
+			if (unittedQuantitySubclass == null) {
+				// apparently has more than 1 range, use UnittedQuantity
+				unittedQuantitySubclass = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+			}
+		}
+		return unittedQuantitySubclass;
 	}
 
 	/**
