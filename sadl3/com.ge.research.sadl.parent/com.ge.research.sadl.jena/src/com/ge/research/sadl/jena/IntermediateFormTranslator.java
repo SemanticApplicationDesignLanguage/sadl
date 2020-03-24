@@ -2433,9 +2433,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					if (objectShouldBeUnittedQuantity((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor())) {
 						// make sure we have the right triples for UnittedQuantity
 						if (((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null) {
-							// don't have triple for value of UnittedQuantity
-							TripleElement valueTriple = new TripleElement(null, new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI), be.getArguments().get(1));
-							((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(new ProxyNode(valueTriple));
+							if (be.getArguments().get(1) instanceof VariableNode) {
+								((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(be.getArguments().get(1));
+							}
+							else if (be.getArguments().get(1) instanceof Literal) {
+								// don't have triple for value of UnittedQuantity
+								TripleElement valueTriple = new TripleElement(null, new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI), be.getArguments().get(1));
+								((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(new ProxyNode(valueTriple));
+							}
 						}
 						else {
 							// have triple for value of UnittedQuantity

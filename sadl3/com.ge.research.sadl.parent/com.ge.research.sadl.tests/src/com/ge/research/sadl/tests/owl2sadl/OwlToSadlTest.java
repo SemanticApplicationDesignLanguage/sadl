@@ -377,4 +377,12 @@ public class OwlToSadlTest {
 		System.out.print(sadlModelContent);
 		assertEquals(expected.trim(), sadlModelContent.trim());
 	}
+	
+	private void assertEquals(Object expected, Object actual) {
+		String s1 = expected.toString().replace("\r", "");
+		s1 = s1.replace("\n", "");
+		String s2 = actual.toString().replace("\r", "");
+		s2 = s2.replace("\n", "");
+		org.junit.Assert.assertEquals(s1, s2);	
+	}
 }
