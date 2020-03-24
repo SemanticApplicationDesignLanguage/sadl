@@ -3113,6 +3113,8 @@ public class JenaReasonerPlugin extends Reasoner{
 							"regex(string,string)string", 
 							"strConcat(string,string)string", 
 							"uriConcat(string,string)string",
+							"pow(decimal,decimal)decimal",
+							"sqrt(decimal)decimal",
 							"unbound(string)string"};
 	}
 	
