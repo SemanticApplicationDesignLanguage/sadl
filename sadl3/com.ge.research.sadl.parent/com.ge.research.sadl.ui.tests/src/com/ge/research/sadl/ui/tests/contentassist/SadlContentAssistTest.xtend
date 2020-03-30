@@ -17,6 +17,9 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.tests.contentassist
 
+import com.ge.research.sadl.preferences.SadlPreferences
+import org.eclipse.xtext.preferences.PreferenceKey
+import org.junit.Ignore
 import org.junit.Test
 
 /**
@@ -28,8 +31,8 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 
 	/** Primitive primary type reference. */
 	@Test
-	def void checkCA_01_PrimaryType_Positive() {
-		newBuilder('''uri "http://myUri". Foo is a class. myFoo is a ''').assertProposal('integer');
+	def void checkCA_01_PrimaryType_Negative() {
+		newBuilder('''uri "http://myUri". Foo is a class. myFoo is a ''').assertProposalIsNot('integer');
 	}
 
 	/** Primary type reference. */
@@ -100,7 +103,8 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	/** Subject of property in test statement. */
 	@Test
 	def void checkCA_11_SubjectOfProperty_Negative() {
-		newBuilder('''uri "http://myUri". import "http://circle". import "http://rectangle". Test: width of ''').
+		// Instead of importing `Shape`, `Circle`, and `Rectangle`, this model defines them in place: https://github.com/crapo/sadlos2/issues/407
+		newBuilder('''uri "http://myUri". Shape is a class described by area with values of type float. Rectangle is a type of Shape, described by height with values of type float, described by width with values of type float. Circle is a type of Shape described by radius with values of type float. Test: width of ''').
 			assertProposalIsNot('Circle');
 	}
 
@@ -232,6 +236,90 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 					   Shape is a class described by area with values of type float.
 					   MyShape is a Sh''').assertProposal('Shape');
 	}
-	
-	
+
+	@Test
+	def void checkCA_26_ImplicitModelIsNotFiltered() {
+		newBuilder('''uri "http://myUri". Foo is a class. myFoo describes ''').assertProposal('ScientificConcept');
+	}
+
+	@Test
+	def void checkCA_27_ImplicitModelCanBeFiltered() {
+		val key = new PreferenceKey(SadlPreferences.CONTENT_ASSIST__FILTER_IMPLICIT_MODEL.id, Boolean.TRUE.toString);
+		updatePreference(key);
+		newBuilder('''uri "http://myUri". Foo is a class. myFoo describes ''').assertProposalIsNot('ScientificConcept');
+	}
+
+	@Test
+	def void checkCA_28_NoPrimitivesAtdDomainOfAnyProperty() {
+		// https://github.com/crapo/sadlos2/issues/406
+		val builder = newBuilder('''uri "http://myUri". Engine is a class. engine describes ''');
+		builder.assertProposalIsNot('double');
+		builder.assertProposal('Engine');
+	}
+
+	@Test
+	def void checkCA_29_PrimitivesInRanges() {
+		// https://github.com/crapo/sadlos2/issues/406
+		val builder = newBuilder('''uri "http://myUri". Aircraft is a class. engine describes Aircraft with values of type ''');
+		builder.assertProposal('Aircraft');
+		builder.assertProposal('double');
+	}
+
+	@Test
+	def void checkCA_30_CanProposeIsAForClassOrPropertyDeclaration() {
+		// https://github.com/crapo/sadlos2/issues/406#issuecomment-597610402
+		newBuilder('''uri "http://myUri". Foo is ''').assertProposal('a');
+	}
+
+	@Test
+	def void checkCA_31_CanProposeSadlResourcesOnTopLevel() {
+		val builder = newBuilder('''
+			uri "http://sadl.org/x.sadl".
+			Artefact is a class.
+			part describes Artefact with values of type Artefact.
+			Aircraft is a type of Artefact.
+			Engine is a type of Artefact.
+		''');
+		builder.assertProposal('Artefact');
+		builder.assertProposal('part');
+		builder.assertProposal('Aircraft');
+		builder.assertProposal('Engine');
+		// And we have the keywords too.
+		builder.assertProposal('Ask');
+		builder.assertProposal('Equation');
+		// etc.
+	}
+
+	@Test
+	def void checkCA_32_CanProposeCardinalityValue() {
+		val builder = newBuilder('''
+			uri "http://sadl.org/x.sadl".
+			Artefact is a class.
+			part describes Artefact with values of type Artefact.
+			Aircraft is a type of Artefact.
+			Engine is a type of Artefact.
+			part of Aircraft has at least 
+		''');
+		builder.assertProposal('one');
+		builder.assertProposal('2');
+		builder.assertProposal('CARDINALITY');
+	}
+
+	@Ignore('This works correctly from Eclipse-IDE, not from the test :( we have one less CA context, most likely the setup in parent class incomplete.')
+	@Test
+	def void checkCA_33_AlwaysRunContextWithPrefixWhenFilteringCrossRefs() {
+		// https://github.com/crapo/sadlos2/issues/406#issuecomment-597622176
+		val builder = newBuilder('''
+			uri "http://sadl.org/y.sadl".
+			Artefact is a class.
+			Aircraft is a type of Artefact.
+			W_IsSomethingWithW is a class.
+			IsSomethingWithoutW is a class.
+			MyAircraft is an Aircraft w
+		''');
+		builder.assertProposal('W_IsSomethingWithW');
+		builder.assertProposal('with');
+		builder.assertProposalIsNot('IsSomethingWithoutW');
+	}
+
 }

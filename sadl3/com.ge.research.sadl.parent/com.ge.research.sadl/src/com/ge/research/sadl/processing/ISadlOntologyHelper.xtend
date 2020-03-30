@@ -199,7 +199,7 @@ interface ISadlOntologyHelper {
 			return builder;
 		}
 
-		new(EObject subject, IModelProcessor processor) {
+		new(SadlResource subject, IModelProcessor processor) {
 			this();
 			Preconditions.checkNotNull(subject, 'subject');
 			Preconditions.checkArgument(subject instanceof SadlResource,

@@ -19,10 +19,12 @@ package com.ge.research.sadl.ui.preferences;
 
 import static com.ge.research.sadl.preferences.SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES;
 import static com.ge.research.sadl.preferences.SadlPreferences.CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN;
+import static com.ge.research.sadl.preferences.SadlPreferences.CONTENT_ASSIST__FILTER_IMPLICIT_MODEL;
 import static com.ge.research.sadl.preferences.SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES;
 import static com.ge.research.sadl.preferences.SadlPreferences.DEEP_VALIDATION_OFF;
 import static com.ge.research.sadl.preferences.SadlPreferences.DMY_ORDER_DMY;
 import static com.ge.research.sadl.preferences.SadlPreferences.DMY_ORDER_MDY;
+import static com.ge.research.sadl.preferences.SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS;
 import static com.ge.research.sadl.preferences.SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD;
 import static com.ge.research.sadl.preferences.SadlPreferences.GRAPH_IMPLICIT_ELEMENTS;
 import static com.ge.research.sadl.preferences.SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES;
@@ -37,7 +39,6 @@ import static com.ge.research.sadl.preferences.SadlPreferences.N_TRIPLE_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.OWL_MODEL_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.PREFIXES_ONLY_AS_NEEDED;
 import static com.ge.research.sadl.preferences.SadlPreferences.P_USE_ARTICLES_IN_VALIDATION;
-import static com.ge.research.sadl.preferences.SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS;
 import static com.ge.research.sadl.preferences.SadlPreferences.RDF_XML_ABBREV_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.RDF_XML_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.SADL_BASE_URI;
@@ -206,6 +207,10 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		addField(new BooleanFieldEditorExt(CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN.getId(), "Check for cardinality of property on specific domain", typeCheckSettings));
 		addField(new BooleanFieldEditorExt(TYPE_CHECKING_RANGE_REQUIRED.getId(), "Property range specification required", typeCheckSettings));
 		addField(new BooleanFieldEditorExt(TYPE_CHECKING_WARNING_ONLY.getId(), "Type checking issues as warning only", typeCheckSettings));
+		
+		// Content Assist Settings
+		Composite contentAssistSettings = createSettingsGroup(getFieldEditorParent(), SWT.NONE, "Content Assist Settings");
+		addField(new BooleanFieldEditorExt(CONTENT_ASSIST__FILTER_IMPLICIT_MODEL.getId(), "Filter SADL implicit model", contentAssistSettings));
 	}
 
 	@Override
