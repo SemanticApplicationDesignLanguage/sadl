@@ -2166,7 +2166,10 @@ public class OwlToSadl {
 		if (s.getSubject().isAnon()) {
 			return null;	// wait and see if this is the object of a statement
 		}
-		if (ignoreNamespace(s.getPredicate(), false)) {
+		if (stripNamespaceDelimiter(s.getSubject().getNameSpace()).equals(getBaseUri())) {
+			return null;	// the model cannot be a subject
+		}
+		if (!s.getPredicate().equals(RDF.type) && ignoreNamespace(s.getPredicate(), false)) {
 			return null;
 		}
 		StringBuilder sb = new StringBuilder();
@@ -2181,12 +2184,20 @@ public class OwlToSadl {
 			sb.append(uriToSadlString(getConcepts(), subj));
 		}
 
-		sb.append(" has ");
-		sb.append(uriToSadlString(getConcepts(), s.getPredicate()));
-		sb.append(" ");
+		if (s.getPredicate().equals(RDF.type)) {
+			sb.append(" is a ");
+		}
+		else {
+			sb.append(" has ");
+			sb.append(uriToSadlString(getConcepts(), s.getPredicate()));
+			sb.append(" ");
+		}
 		RDFNode obj = s.getObject();
 		if (obj.isAnon()) {
 			sb.append(blankNodeToString(obj.asResource(), true));
+		}
+		else if (obj.isResource() && obj.asResource().equals(OWL.Ontology)) {
+			return null;	// the object can't be owl:Ontology
 		}
 		else {
 			sb.append(rdfNodeToString(obj, 0));
