@@ -7380,6 +7380,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				returnTriple = new TripleElement(subjNode, predNode, null);
 				returnTriple.setSourceType(TripleSourceType.PSV);
+				returnTriple.setContext(expr);
 				if (constantBuiltinName == null) {
 					return combineRest(returnTriple, rest);
 				}
