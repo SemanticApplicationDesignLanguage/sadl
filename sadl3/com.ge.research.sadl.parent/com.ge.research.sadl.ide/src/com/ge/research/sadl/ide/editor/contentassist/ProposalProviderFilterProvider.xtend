@@ -58,7 +58,7 @@ class ProposalProviderFilterProvider {
 
 	@Inject
 	ISadlOntologyHelper ontologyHelper;
-	
+
 	@Inject
 	IModelProcessorProvider modelProcessorProvider;
 
@@ -72,6 +72,9 @@ class ProposalProviderFilterProvider {
 		val acceptor = new ProposalProviderValidationAcceptor;
 		val ontologyContext = ontologyContextProvider.getOntologyContext(context, processor, acceptor).orNull;
 		if (ontologyContext === null) {
+			if (context.currentModel === context.previousModel && context.currentModel instanceof SadlModel) {
+				return [true]; // Any SADL resource is OK if we are at top level in the model.
+			}
 			return [false]
 		}
 
@@ -176,7 +179,7 @@ class ProposalProviderFilterProvider {
 	private def Predicate<IEObjectDescription> createPrimaryTypeRefFilter(EObject currentModel) {
 		val model = currentModel.getContainerOfType(SadlModel);
 		if (model !== null) {
-			val importedResourceUris = importHelper.getAllImportedResourceUris(model);
+			val importedResourceUris = importHelper.getAllImportedResourceUris(model)
 			return [
 				val declaration = EObjectOrProxy?.eContainer;
 				return if (declaration instanceof SadlClassOrPropertyDeclaration) {

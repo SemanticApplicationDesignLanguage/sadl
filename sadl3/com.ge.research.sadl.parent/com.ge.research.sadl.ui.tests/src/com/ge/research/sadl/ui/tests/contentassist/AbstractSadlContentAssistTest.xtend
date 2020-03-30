@@ -34,12 +34,14 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal
 import org.eclipse.swt.widgets.Shell
 import org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext.Builder
+import org.eclipse.xtext.preferences.PreferenceKey
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.ui.XtextProjectHelper
 import org.eclipse.xtext.ui.editor.XtextSourceViewerConfiguration
 import org.eclipse.xtext.ui.editor.contentassist.XtextContentAssistProcessor
+import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
 import org.eclipse.xtext.ui.testing.ContentAssistProcessorTestBuilder
 import org.eclipse.xtext.ui.testing.util.ResourceLoadHelper
@@ -47,8 +49,8 @@ import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.util.TextRegion
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
+import org.junit.After
 import org.junit.AfterClass
-import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Rule
@@ -70,12 +72,13 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 
 	protected static val PROJECT_NAME = 'testProject'
 
-	static val RESOURCES = ImmutableMap.builder.put('Bar.sadl', '''uri "http://barUri". Bar is a class.''').put(
-		'NotVisible.sadl', '''uri "http://notVisibleUri". NotVisible is a class.''').put('Shape.sadl', '''uri "http://shape". 
-			Shape is a class described by area with values of type float.''').put('Circle.sadl', '''uri "http://circle". import "http://shape". 
-			Circle is a type of Shape described by radius with values of type float.''').put('Rectangle.sadl', '''uri "http://rectangle". import "http://shape". 
-			Rectangle is a type of Shape, described by height with values of type float, described by width with values of type float.''').
-		build
+	static val RESOURCES = ImmutableMap.builder
+		.put('Bar.sadl', '''uri "http://barUri". Bar is a class.''')
+		.put('NotVisible.sadl', '''uri "http://notVisibleUri". NotVisible is a class.''')
+		.put('Shape.sadl', '''uri "http://shape". Shape is a class described by area with values of type float.''')
+		.put('Circle.sadl', '''uri "http://circle". import "http://shape". Circle is a type of Shape described by radius with values of type float.''')
+		.put('Rectangle.sadl', '''uri "http://rectangle". import "http://shape". Rectangle is a type of Shape, described by height with values of type float, described by width with values of type float.''')
+		.build
 
 	@Rule
 	public val name = new TestName();
@@ -85,6 +88,11 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 
 	@Inject
 	Injector injector;
+
+	@Inject
+	IPreferenceStoreAccess access;
+
+	val modifiedPreferences = <String>newHashSet();
 
 	@BeforeClass
 	static def void assertRunningPlatform() {
@@ -103,6 +111,7 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 		addNature(project, XtextProjectHelper.NATURE_ID);
 		addBuilder(project, XtextProjectHelper.BUILDER_ID);
 		RESOURCES.forEach[fileName, content|createFile('''«PROJECT_NAME»«SEPARATOR»«fileName»''', content)];
+		fullBuild;
 		waitForBuild;
 	}
 
@@ -116,6 +125,23 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 	@Before
 	def void before() {
 		OutputStreamStrategy.STD.use;
+	}
+
+	@After
+	def void after() {
+		resetPreferences();
+	}
+
+	protected def void resetPreferences() {
+		modifiedPreferences.forEach [
+			access.getWritablePreferenceStore(project).setToDefault(it);
+		];
+	}
+
+	protected def updatePreference(PreferenceKey it) {
+		val store = access.getWritablePreferenceStore(project);
+		store.setValue(id, defaultValue);
+		modifiedPreferences.add(id);
 	}
 
 	override getResourceFor(InputStream stream) {
@@ -135,12 +161,17 @@ abstract class AbstractSadlContentAssistTest extends AbstractLinkingTest impleme
 		return resource;
 	}
 
-	protected static def assertProposalIsNot(ContentAssistProcessorTestBuilder builder, String missing) {
+	protected static def ContentAssistProcessorTestBuilder.ProposalTester assertProposalIsNot(
+		ContentAssistProcessorTestBuilder builder, String missing) {
+
 		try {
 			builder.assertProposal(missing)
-			Assert.fail('''The proposal '«missing»' expected to be not present. But it was.''');
+			throw new RuntimeException('''The proposal '«missing»' expected to be not present. But it was.''');
 		} catch (AssertionError e) {
 			// Tricky, but this is the correct way since we have negated the assertion.	
+			if (!e.message.startsWith('''No such proposal: «missing»''')) {
+				throw e;
+			}
 		}
 	}
 

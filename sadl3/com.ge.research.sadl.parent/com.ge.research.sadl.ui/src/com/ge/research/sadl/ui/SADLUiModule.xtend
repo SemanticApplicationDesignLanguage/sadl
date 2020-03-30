@@ -22,10 +22,12 @@ package com.ge.research.sadl.ui
 
 import com.ge.research.sadl.ide.editor.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlContentAssistContextFactory
+import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalPriorities
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeCrossrefProposalProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlOntologyContextProvider
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
+import com.ge.research.sadl.ui.contentassist.SADLProposalProvider.SADLUiToIdeContentProposalProvider
 import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService
@@ -47,12 +49,14 @@ import com.google.inject.Provider
 import com.google.inject.name.Names
 import org.eclipse.ui.plugin.AbstractUIPlugin
 import org.eclipse.xtext.generator.IShouldGenerate
+import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalPriorities
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.IdeCrossrefProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
 import org.eclipse.xtext.ide.editor.syntaxcoloring.AbstractAntlrTokenToAttributeIdMapper
 import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ui.editor.contentassist.AbstractJavaBasedContentProposalProvider.ReferenceProposalCreator
+import org.eclipse.xtext.ui.editor.contentassist.UiToIdeContentProposalProvider
 import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
 import org.eclipse.xtext.ui.editor.folding.DefaultFoldingStructureProvider
 import org.eclipse.xtext.ui.editor.folding.IFoldingStructureProvider
@@ -148,6 +152,14 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	def Class<? extends IdeCrossrefProposalProvider> bindIdeCrossrefProposalProvider() {
 		return SadlIdeCrossrefProposalProvider;
+	}
+
+	def Class<? extends IdeContentProposalPriorities> bindIdeContentProposalPriorities() {
+		return SadlIdeContentProposalPriorities;
+	}
+
+	def Class<? extends UiToIdeContentProposalProvider> bindUiToIdeContentProposalProvider() {
+		return SADLUiToIdeContentProposalProvider;
 	}
 
 	def Class<? extends IOntologyContextProvider> bindIOntologyContextProvider() {

@@ -54,13 +54,13 @@ class SadlCompletionTest extends AbstractSadlLanguageServerTest {
 			model = '''uri «BASE_URI» ''';
 			column = model.length;
 			expectedCompletionItems = '''
-				.
-				 (. - End of Sentence) -> .
-				 [[0, 35] .. [0, 35]]
 				alias  -> alias  [[0, 35] .. [0, 35]]
 				version  -> version  [[0, 35] .. [0, 35]]
 				(  -> (  [[0, 35] .. [0, 35]]
 				,  -> ,  [[0, 35] .. [0, 35]]
+				.
+				 (. - End of Sentence) -> .
+				 [[0, 35] .. [0, 35]]
 			''';
 		];
 	}

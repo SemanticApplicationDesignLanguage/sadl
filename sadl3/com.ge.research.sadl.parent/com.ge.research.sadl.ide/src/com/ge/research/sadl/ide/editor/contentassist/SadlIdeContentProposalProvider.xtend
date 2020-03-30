@@ -46,6 +46,7 @@ import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.Assignment
 import org.eclipse.xtext.CrossReference
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.EnumRule
 import org.eclipse.xtext.GrammarUtil
 import org.eclipse.xtext.Keyword
 import org.eclipse.xtext.RuleCall
@@ -56,10 +57,15 @@ import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalCreator
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalPriorities
 import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.naming.QualifiedName
+import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
+import org.eclipse.xtext.util.TextRegion
 
+import static com.ge.research.sadl.preferences.SadlPreferences.*
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
+import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 /**
  * Generic content proposal provider for the {@code SADL} language.
@@ -83,6 +89,9 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 
 	@Inject
 	IdeContentProposalPriorities proposalPriorities;
+	
+	@Inject
+	IPreferenceValuesProvider preferenceValuesProvider;
 
 	override protected _createProposals(RuleCall ruleCall, ContentAssistContext ctx,
 		IIdeContentProposalAcceptor acceptor) {
@@ -111,6 +120,9 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 			case grammarAccess.sadlImportAccess.importedResourceAssignment_1: {
 				ctx.completeImports(acceptor);
 			}
+			case grammarAccess.sadlCardinalityConditionAccess.cardinalityAssignment_2: {
+				ctx.completeCardinalityAssigment(acceptor);
+			}
 			default: {
 				super._createProposals(assignment, ctx, acceptor);
 			}
@@ -127,7 +139,31 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 					KNOWN_FILE_EXTENSION.contains(EObjectURI?.fileExtension) && !imports.contains(name.toString);
 			];
 		}
-		return lookupCrossReference(reference, ctx);
+		return Predicates.and(#[
+			ctx.implicitModelFilter,
+			lookupCrossReference(reference, ctx)
+		]);
+	}
+
+	private def Predicate<IEObjectDescription> getImplicitModelFilter(ContentAssistContext context) {
+		return if (context.currentModel.shouldFilterBuiltIns)
+			[
+				EObjectURI.trimFragment.lastSegment != SADL_IMPLICIT_MODEL_FILENAME
+			]
+		else
+			Predicates.alwaysTrue
+	}
+
+	private def boolean shouldFilterBuiltIns(EObject model) {
+		if (model === null || model.eIsProxy || model.eResource === null) {
+			return false;
+		}
+		val values = preferenceValuesProvider.getPreferenceValues(model.eResource);
+		val preference = values.getPreference(CONTENT_ASSIST__FILTER_IMPLICIT_MODEL);
+		if (preference !== null) {
+			return Boolean.parseBoolean(preference);
+		}
+		return false;
 	}
 
 	// Creates a proposal for an EOS terminal.  Xtext can't guess (at
@@ -161,11 +197,26 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 		_createProposals(crossRef, ctx, it);
 	}
 
+	protected def completeCardinalityAssigment(ContentAssistContext ctx, IIdeContentProposalAcceptor acceptor) {
+		#['one', 2, 3, 4, 5].forEach [
+			val entry = proposalCreator.createProposal('''«it»''', ctx);
+			acceptor.accept(entry, proposalPriorities.getDefaultPriority(entry));
+		]
+		val proposal = 'CARDINALITY'
+		val entry = proposalCreator.createProposal(proposal, ctx) [
+			editPositions += new TextRegion(ctx.offset, proposal.length);
+			kind = ContentAssistEntry.KIND_VALUE;
+			description = 'Cardinality number'
+		]
+		acceptor.accept(entry, 100)
+	}
+
 	protected static val SUPPORTED_FILE_EXTENSION = #{'sadl', 'n3', 'owl', 'ntriple', 'nt'};
 	protected static val BUILTIN_FILES = #{'SadlImplicitModel.sadl', 'SadlBuiltinFunctions.sadl'};
 
 	@Inject protected DeclarationExtensions declarationExtensions;
 	@Inject protected extension ProposalProviderFilterProvider;
+	@Inject protected extension IOntologyContextProvider;
 
 	val PropertyRangeKeywords = newArrayList('string', 'boolean', 'decimal', 'int', 'long', 'float', 'double',
 		'duration', 'dateTime', 'time', 'date', 'gYearMonth', 'gYear', 'gMonthDay', 'gDay', 'gMonth', 'hexBinary',
@@ -358,6 +409,22 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 	}
 
 	protected def boolean includeKeyword(Keyword keyword, ContentAssistContext context) {
+		val enumRule = EcoreUtil2.getContainerOfType(keyword, EnumRule);
+		// https://github.com/crapo/sadlos2/issues/406
+		if (enumRule !== null) {
+			val ontologyContext = context.ontologyContext.orNull;
+			if (ontologyContext !== null) {
+				val grammarContextId = ontologyContext.grammarContextId.orNull;
+				val contextClass = ontologyContext.contextClass.orNull;
+				// Primitive datatype can be included only in ranges
+				if (grammarContextId == SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE && contextClass === SADL_RANGE_RESTRICTION) {
+					return true;
+				}
+				// Primitive datatype cannot be a domain of any property
+				return false;
+			}
+		}
+
 		var model = context.currentModel
 		if (model === null) {
 			model = context.previousModel

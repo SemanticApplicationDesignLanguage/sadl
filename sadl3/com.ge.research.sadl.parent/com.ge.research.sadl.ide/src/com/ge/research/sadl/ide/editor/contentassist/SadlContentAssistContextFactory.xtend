@@ -20,6 +20,8 @@ package com.ge.research.sadl.ide.editor.contentassist
 import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableList.Builder
 import com.google.common.collect.Iterables
+import com.google.inject.Inject
+import com.google.inject.Provider
 import org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
 
@@ -41,7 +43,10 @@ import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFact
  * @author akos.kitta
  */
 class SadlContentAssistContextFactory extends ContentAssistContextFactory {
-	
+
+	@Inject
+	Provider<org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext.Builder> builderProvider;
+
 	override protected ContentAssistContext[] doCreateContexts(int offset) {
 		val contexts = super.doCreateContexts(offset);
 		if (datatypeNode != lastCompleteNode || completionOffset === lastCompleteNode.offset) {
@@ -50,8 +55,44 @@ class SadlContentAssistContextFactory extends ContentAssistContextFactory {
 			val Builder<ContentAssistContext> builder = ImmutableList.builder();
 			builder.add(contextBuilders.map[apply]);
 			builder.add(contexts);
-			return Iterables.toArray(builder.build(), ContentAssistContext);
+			return Iterables.toArray(builder.build(), ContentAssistContext).adjustContextsWithoutPrefix;
+		}
+		return contexts.adjustContextsWithoutPrefix;
+	}
+
+	/**
+	 * If there is a single, common non-empty prefix, all context will have the same prefix.
+	 */
+	private def ContentAssistContext[] adjustContextsWithoutPrefix(ContentAssistContext[] contexts) {
+		val commonNonEmptyPrefixes = contexts.map[prefix].filter[!nullOrEmpty].toSet;
+		if (commonNonEmptyPrefixes.length === 1) {
+			val adjustedContexts = newArrayList;
+			for (var i = 0; i < contexts.length; i++) {
+				val it = contexts.get(i);
+				if (prefix.nullOrEmpty) {
+					val builder = builderProvider.get;
+					builder.setPrefix(commonNonEmptyPrefixes.head)
+					builder.setSelectedText(selectedText)
+					builder.setRootModel(rootModel)
+					builder.setRootNode(rootNode)
+					builder.setCurrentModel(currentModel)
+					builder.setPreviousModel(previousModel)
+					builder.setCurrentNode(currentNode)
+					builder.setLastCompleteNode(lastCompleteNode)
+					builder.setOffset(offset)
+					builder.setReplaceRegion(replaceRegion)
+					builder.setResource(resource)
+					for (grammarElement : firstSetGrammarElements) {
+						builder.accept(grammarElement)
+					}
+					adjustedContexts.add(builder.apply)
+				} else {
+					adjustedContexts.add(it);
+				}
+			}
+			return adjustedContexts;
 		}
 		return contexts;
 	}
+
 }
