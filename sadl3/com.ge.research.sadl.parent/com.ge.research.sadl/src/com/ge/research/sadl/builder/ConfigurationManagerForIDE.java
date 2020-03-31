@@ -1071,6 +1071,33 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return null;
 	}
 
+	@Override
+	public void addPrivateKeyMapValueByResource(String key, org.eclipse.emf.ecore.resource.Resource rsrc,
+			Object value) {
+		Object map = getPrivateKeyValuePair(key);
+		if (value != null && map == null) {
+			map = new HashMap<Resource,Object>();
+			addPrivateKeyValuePair(key, map);
+		}
+		if (map instanceof Map<?,?>) {
+			if (value != null) {
+				((Map<org.eclipse.emf.ecore.resource.Resource,Object>)map).put(rsrc, value);
+			}
+			else {
+				((Map<org.eclipse.emf.ecore.resource.Resource,Object>)map).remove(rsrc);
+			}
+		}
+	}
+
+	@Override
+	public Object getPrivateKeyMapValueByResource(String key, org.eclipse.emf.ecore.resource.Resource rsrc) {
+		Object map = getPrivateKeyValuePair(key);
+		if (map != null && map instanceof Map<?,?>) {
+			return (((Map<org.eclipse.emf.ecore.resource.Resource,Object>)map).get(rsrc));
+		}
+		return null;
+	}
+
 	/**
 	 * Method to remove all non-existent mappings with specified sources
 	 * @param sources -- the sources to be removed if non-existent
@@ -1122,4 +1149,5 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			e1.printStackTrace();
 		}
 	}
+
 }
