@@ -1418,7 +1418,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					for (Node n: ((BuiltinElement)premise).getArguments()) {
 						if (n instanceof VariableNode && ((VariableNode)n).isCRulesVariable() && ((VariableNode)n).getType() != null && !isCruleVariableInTypeOutput((VariableNode) n)) {
 							TripleElement newTypeTriple = new TripleElement(n, new RDFTypeNode(), ((VariableNode)n).getType());
-							gpes.add(++i, newTypeTriple);
+							if (isRuleThen && !((BuiltinElement)premise).getFuncName().equals("thereExists")) {
+								((Rule) getTarget()).getIfs().add(0, newTypeTriple);
+							}
+							else {
+								gpes.add(++i, newTypeTriple);
+							}
 							addCruleVariableToTypeOutput((VariableNode) n);
 							if (!isRuleThen) {
 								try {
@@ -1441,7 +1446,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						if (!updateVariableTypeTriple((VariableNode) subj, ((VariableNode)subj).getType(), gpes)) {
 							TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
 							newTypeTriple.setSourceType(TripleSourceType.ITC);
-							gpes.add(i++, newTypeTriple);
+							if (isRuleThen && getTarget() instanceof Rule) {
+								((Rule) getTarget()).getIfs().add(0, newTypeTriple);
+							}
+							else {
+								gpes.add(i++, newTypeTriple);
+							}
 						}
 						addCruleVariableToTypeOutput((VariableNode) subj);
 						if (!isRuleThen) {
@@ -1452,7 +1462,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						if (!updateVariableTypeTriple((VariableNode) obj, ((VariableNode)obj).getType(), gpes)) {
 							TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
 							newTypeTriple.setSourceType(TripleSourceType.ITC);
-							gpes.add(i++, newTypeTriple);
+							if (isRuleThen) {
+								((Rule) getTarget()).getIfs().add(0, newTypeTriple);
+							}
+							else {
+								gpes.add(i++, newTypeTriple);
+							}
 						}
 						addCruleVariableToTypeOutput((VariableNode) obj);
 						if (!isRuleThen) {
@@ -1602,6 +1617,16 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			rule.getIfs().add(tgpe);			
 		}
 		else {
+//			if (tgpe instanceof TripleElement) {
+//				if (((TripleElement)tgpe).getPredicate() instanceof RDFTypeNode && 
+//					((TripleElement)tgpe).getSubject() instanceof VariableNode) {
+//					if (isCruleVariableInTypeOutput((VariableNode) ((TripleElement)tgpe).getSubject())) {
+//						results.remove(tgpe);
+//						rule.getIfs().add(0, tgpe);
+//					}
+//				}
+//			}
+//			else 
 			if (tgpe instanceof Junction) {
 				int idx = results.indexOf(tgpe);
 				GraphPatternElement newtgpe = moveEmbeddedFromJunction(rule, (Junction)tgpe);
