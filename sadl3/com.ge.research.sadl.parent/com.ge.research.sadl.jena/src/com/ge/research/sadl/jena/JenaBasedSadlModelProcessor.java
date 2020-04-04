@@ -13050,7 +13050,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (!cls.isURIResource())
 			return null; // impliedProperties can only be given to a named class
 		if (!cls.canAs(OntClass.class)) {
-			addError("Can't get implied properties of a non-class entity. Perhaps this can't be used before it is declared?", getDefaultEObject());
+			addTypeCheckingError("Can't get implied properties of a non-class entity. Perhaps this can't be used before it is declared?", getDefaultEObject());
 			return null;
 		}
 		List<ConceptName> cached = impliedPropoertiesCache.get(cls.getURI());
