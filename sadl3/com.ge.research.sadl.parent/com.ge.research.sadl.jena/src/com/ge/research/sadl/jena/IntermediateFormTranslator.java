@@ -1171,6 +1171,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (!processed) {
 			if (gpe instanceof BuiltinElement) {
 				List<Node> args = ((BuiltinElement)gpe).getArguments();
+				if (args.size() == 2 && ((BuiltinElement)gpe).getFuncType().equals(BuiltinType.Equal) &&
+						args.get(1) instanceof VariableNode &&
+						args.get(0) instanceof ProxyNode && 
+						((ProxyNode)args.get(0)).getProxyFor() instanceof TripleElement &&
+						((TripleElement)((ProxyNode)args.get(0)).getProxyFor()).getObject() == null) {
+					// this needs to be collapsed to a single triple, which will happen later, so don't do anything
+					return gpe;
+				}
 				for (int i = 0; args != null && i < args.size(); i++ ) {
 					Node arg = args.get(i);
 					if (arg instanceof ProxyNode) {
@@ -1206,7 +1214,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				if (rhs instanceof ProxyNode) {
 					((Junction)gpe).setRhs(SadlModelProcessor.nodeCheck(addImpliedAndExpandedProperties(((ProxyNode)rhs).getProxyFor())));
 				}
-				else {
+				else if (rhs instanceof NamedNode && ((NamedNode)rhs).getNodeType().equals(NodeType.FunctionNode)) {
+					// let it go--it should eventually be a BuiltinElement.
+				}
+				else if (rhs != null){
 					throw new TranslationException("Junction must contain only ProxyNode as left and right.");
 				}
 			}
