@@ -1171,19 +1171,21 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (!processed) {
 			if (gpe instanceof BuiltinElement) {
 				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				if (args.size() == 2 && ((BuiltinElement)gpe).getFuncType().equals(BuiltinType.Equal) &&
-						args.get(1) instanceof VariableNode &&
-						args.get(0) instanceof ProxyNode && 
-						((ProxyNode)args.get(0)).getProxyFor() instanceof TripleElement &&
-						((TripleElement)((ProxyNode)args.get(0)).getProxyFor()).getObject() == null) {
-					// this needs to be collapsed to a single triple, which will happen later, so don't do anything
-					return gpe;
-				}
-				for (int i = 0; args != null && i < args.size(); i++ ) {
-					Node arg = args.get(i);
-					if (arg instanceof ProxyNode) {
-						GraphPatternElement gpeback = addImpliedAndExpandedProperties((GraphPatternElement)((ProxyNode)arg).getProxyFor());
-						((ProxyNode)arg).setProxyFor(gpeback);
+				if (args != null) {
+					if (args.size() == 2 && ((BuiltinElement)gpe).getFuncType().equals(BuiltinType.Equal) &&
+							args.get(1) instanceof VariableNode &&
+							args.get(0) instanceof ProxyNode && 
+							((ProxyNode)args.get(0)).getProxyFor() instanceof TripleElement &&
+							((TripleElement)((ProxyNode)args.get(0)).getProxyFor()).getObject() == null) {
+						// this needs to be collapsed to a single triple, which will happen later, so don't do anything
+						return gpe;
+					}
+					for (int i = 0; args != null && i < args.size(); i++ ) {
+						Node arg = args.get(i);
+						if (arg instanceof ProxyNode) {
+							GraphPatternElement gpeback = addImpliedAndExpandedProperties((GraphPatternElement)((ProxyNode)arg).getProxyFor());
+							((ProxyNode)arg).setProxyFor(gpeback);
+						}
 					}
 				}
 			}
@@ -2349,6 +2351,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							if ((te.getSubject() == null || te.getSubject().equals(((TripleElement)gpe).getSubject()))
 									&& (te.getPredicate() == null || te.getPredicate().equals(((TripleElement)gpe).getPredicate()))
 									&& (te.getObject() == null || te.getObject().equals(((TripleElement)gpe).getObject()))) {
+								if (te.getObject() == null && te.getSubject() == null) {
+									// this is too broad for some cases
+									continue;
+								}
 								ProxyNode pn = retiredProxyNodes.get(gpe);
 								return pn.getReplacementNode();
 							}
