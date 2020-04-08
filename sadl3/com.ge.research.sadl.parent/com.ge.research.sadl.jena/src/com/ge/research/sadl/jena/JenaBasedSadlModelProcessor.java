@@ -6670,6 +6670,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (typenode == null) {
 			// this is malformed
 			addError("Invalid declaration", expr);
+			addUndefinedEObject(type);
 			return null;
 		}
 		if (article != null && isInstance(typenode)) {
