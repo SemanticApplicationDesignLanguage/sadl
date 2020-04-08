@@ -4509,8 +4509,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (DontTypeCheckException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				if (!e.getMessage().startsWith("OK")) {
+					e.printStackTrace();
+				}
 			} catch (CircularDefinitionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
