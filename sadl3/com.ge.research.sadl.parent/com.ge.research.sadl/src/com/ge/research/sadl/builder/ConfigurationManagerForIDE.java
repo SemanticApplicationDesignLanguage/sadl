@@ -1093,6 +1093,15 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	public Object getPrivateKeyMapValueByResource(String key, org.eclipse.emf.ecore.resource.Resource rsrc) {
 		Object map = getPrivateKeyValuePair(key);
 		if (map != null && map instanceof Map<?,?>) {
+			Iterator<?> keyitr = ((Map<?,?>)map).keySet().iterator();
+			while (keyitr.hasNext()) {
+				Object ikey = keyitr.next();
+				if (ikey instanceof org.eclipse.emf.ecore.resource.Resource && 
+						((org.eclipse.emf.ecore.resource.Resource)ikey).getURI().equals(rsrc.getURI())) {
+					Object mval = ((Map<?,?>)map).get(ikey);
+					return mval;
+				}
+			}
 			return (((Map<org.eclipse.emf.ecore.resource.Resource,Object>)map).get(rsrc));
 		}
 		return null;
