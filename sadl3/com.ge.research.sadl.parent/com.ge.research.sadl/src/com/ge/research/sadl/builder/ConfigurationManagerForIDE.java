@@ -1072,7 +1072,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	}
 
 	@Override
-	public void addPrivateKeyMapValueByResource(String key, org.eclipse.emf.ecore.resource.Resource rsrc,
+	public synchronized void addPrivateKeyMapValueByResource(String key, org.eclipse.emf.ecore.resource.Resource rsrc,
 			Object value) {
 		Object map = getPrivateKeyValuePair(key);
 		if (value != null && map == null) {
@@ -1090,7 +1090,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	}
 
 	@Override
-	public Object getPrivateKeyMapValueByResource(String key, org.eclipse.emf.ecore.resource.Resource rsrc) {
+	public synchronized Object getPrivateKeyMapValueByResource(String key, org.eclipse.emf.ecore.resource.Resource rsrc) {
 		Object map = getPrivateKeyValuePair(key);
 		if (map != null && map instanceof Map<?,?>) {
 			Iterator<?> keyitr = ((Map<?,?>)map).keySet().iterator();
