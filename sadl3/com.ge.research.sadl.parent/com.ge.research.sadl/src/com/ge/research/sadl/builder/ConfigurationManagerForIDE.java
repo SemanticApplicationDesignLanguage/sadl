@@ -1091,22 +1091,28 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 
 	@Override
 	public Object getPrivateKeyMapValueByResource(String key, org.eclipse.emf.ecore.resource.Resource rsrc) {
-		Object map = getPrivateKeyValuePair(key);
-		if (map != null && map instanceof Map<?,?>) {
-			Iterator<?> keyitr = ((Map<?,?>)map).keySet().iterator();
-			while (keyitr.hasNext()) {
-				Object ikey = keyitr.next();
-				if (ikey instanceof org.eclipse.emf.ecore.resource.Resource && 
-						((org.eclipse.emf.ecore.resource.Resource)ikey).getURI().equals(rsrc.getURI())) {
-					Object mval = ((Map<?,?>)map).get(ikey);
-					return mval;
+		if (rsrc != null) {
+			Object map = getPrivateKeyValuePair(key);
+			if (map != null && map instanceof Map<?,?>) {
+				Iterator<?> keyitr = ((Map<?,?>)map).keySet().iterator();
+				while (keyitr.hasNext()) {
+					Object ikey = keyitr.next();
+					if (ikey instanceof org.eclipse.emf.ecore.resource.Resource) {
+						URI rs = ((org.eclipse.emf.ecore.resource.Resource)ikey).getURI();
+						if (rs != null) {
+							if(rs.equals(rsrc.getURI())) {	
+								Object mval = ((Map<?,?>)map).get(ikey);
+								return mval;
+							}
+						}
+					}
 				}
+				return (((Map<org.eclipse.emf.ecore.resource.Resource,Object>)map).get(rsrc));
 			}
-			return (((Map<org.eclipse.emf.ecore.resource.Resource,Object>)map).get(rsrc));
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Method to remove all non-existent mappings with specified sources
 	 * @param sources -- the sources to be removed if non-existent
