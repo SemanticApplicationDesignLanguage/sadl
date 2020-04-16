@@ -40,6 +40,7 @@ Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.outline,
  com.ge.research.sadl.ui.preferences,
  com.ge.research.sadl.ui.quickfix,
+ com.ge.research.sadl.ui.refactoring,
  com.ge.research.sadl.ui.syntaxcoloring,
  com.ge.research.sadl.ui.visualize
 Import-Package: com.ge.research.sadl.errorgenerator.generator,
