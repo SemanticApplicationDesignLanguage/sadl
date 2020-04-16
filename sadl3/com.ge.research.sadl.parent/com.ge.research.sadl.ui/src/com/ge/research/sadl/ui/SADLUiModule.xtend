@@ -40,6 +40,8 @@ import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
 import com.ge.research.sadl.ui.quickfix.SadlQuickAssistProcessor
+import com.ge.research.sadl.ui.refactoring.SadlReferenceUpdater
+import com.ge.research.sadl.ui.refactoring.SadlResourceRenameStrategy
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
@@ -66,6 +68,7 @@ import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
 import org.eclipse.xtext.ui.editor.quickfix.XtextQuickAssistProcessor
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
+import org.eclipse.xtext.ui.refactoring.IRenameStrategy
 
 import static com.google.inject.Scopes.SINGLETON
 
@@ -180,6 +183,14 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	def Class<? extends XtextQuickAssistProcessor> bindXtextQuickAssistProcessor() {
 		return SadlQuickAssistProcessor;
+	}
+
+	override Class<? extends IRenameStrategy> bindIRenameStrategy() {
+		return SadlResourceRenameStrategy;
+	}
+
+	override bindIReferenceUpdater() {
+		return SadlReferenceUpdater;
 	}
 
 }
