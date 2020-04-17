@@ -95,6 +95,8 @@ import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
+import com.ge.research.sadl.model.SadlIntersectionClass;
+import com.ge.research.sadl.model.SadlUnionClass;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.ConstantNode;
@@ -3318,6 +3320,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					semTypeInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_SEM_TYPE_PROPERTY_URI), getTheJenaModel().getResource(((NamedNode)dd.getAugType()).getURI()));
 					ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_AUGMENTED_TYPE_PROPERTY_URI), semTypeInst);
 				}
+				else if (dd.getAugType() instanceof SadlUnionClass) {
+					addWarning("Union of classes as augmented type not currently supported", context);
+				}
+				else if (dd.getAugType() instanceof SadlIntersectionClass) {
+					addWarning("Intersection of classes as augmented type not currently supported", context);
+				}
 				else if (dd.getAugType() instanceof Object[]) {
 					gpes = new ArrayList<GraphPatternElement>();
 					for (int i = 0; i < ((Object[])dd.getAugType()).length; i++) {
@@ -5330,6 +5338,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 
 		if (op.equals("and") || op.equals("or")) {
+			boolean simpleUnionOrIntersection = true;
+			if (!(robj instanceof NamedNode) && !(robj instanceof ConceptIdentifier)) {
+				simpleUnionOrIntersection = false;
+			}
+			else if (!(lobj instanceof NamedNode) && !(lobj instanceof ConceptIdentifier)) {
+				simpleUnionOrIntersection = false;
+			}
+			else if (robj instanceof NamedNode && !((NamedNode)robj).getNodeType().equals(NodeType.ClassNode) &&
+					!((NamedNode)robj).getNodeType().equals(NodeType.VariableNode)) {
+				simpleUnionOrIntersection = false;
+			}
+			else if (lobj instanceof NamedNode && !((NamedNode)lobj).getNodeType().equals(NodeType.ClassNode) &&
+					!((NamedNode)lobj).getNodeType().equals(NodeType.VariableNode)) {
+				simpleUnionOrIntersection = false;
+			}
+			if (simpleUnionOrIntersection) {
+				// this is a special case--union or intersection class
+				ConceptIdentifier ci;
+				List<ConceptIdentifier> args = new ArrayList<ConceptIdentifier>();
+				if (lobj instanceof NamedNode) {
+					lobj = new ConceptName(((NamedNode)lobj).getURI());
+					((ConceptName)lobj).setType(ConceptType.ONTCLASS);
+				}
+				args.add((ConceptIdentifier) lobj);
+				if (robj instanceof NamedNode) {
+					robj = new ConceptName(((NamedNode)robj).getURI());
+					((ConceptName)robj).setType(ConceptType.ONTCLASS);
+				}
+				args.add((ConceptIdentifier) robj);
+				if (op.equals("or")) {
+					ci = new SadlUnionClass(args);
+				}
+				else {
+					ci = new SadlIntersectionClass(args);
+				}
+				return ci;
+			}
 			Junction jct = new Junction();
 			jct.setJunctionName(op);
 
