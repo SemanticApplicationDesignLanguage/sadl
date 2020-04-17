@@ -1108,7 +1108,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Method to remove all non-existent mappings with specified sources
 	 * @param sources -- the sources to be removed if non-existent
