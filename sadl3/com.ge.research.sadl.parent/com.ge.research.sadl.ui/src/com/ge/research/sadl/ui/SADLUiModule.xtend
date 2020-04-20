@@ -41,6 +41,7 @@ import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
 import com.ge.research.sadl.ui.quickfix.SadlQuickAssistProcessor
 import com.ge.research.sadl.ui.refactoring.SadlReferenceUpdater
+import com.ge.research.sadl.ui.refactoring.SadlRenameContextFactory
 import com.ge.research.sadl.ui.refactoring.SadlResourceRenameStrategy
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
@@ -69,6 +70,7 @@ import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
 import org.eclipse.xtext.ui.editor.quickfix.XtextQuickAssistProcessor
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 import org.eclipse.xtext.ui.refactoring.IRenameStrategy
+import org.eclipse.xtext.ui.refactoring.ui.IRenameContextFactory
 
 import static com.google.inject.Scopes.SINGLETON
 
@@ -191,6 +193,10 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	override bindIReferenceUpdater() {
 		return SadlReferenceUpdater;
+	}
+
+	def Class<? extends IRenameContextFactory> bindIRenameContextFactory() {
+		return SadlRenameContextFactory;
 	}
 
 }

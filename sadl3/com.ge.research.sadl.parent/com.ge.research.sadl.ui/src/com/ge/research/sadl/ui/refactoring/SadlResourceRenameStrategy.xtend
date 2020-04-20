@@ -1,19 +1,16 @@
 package com.ge.research.sadl.ui.refactoring
 
+import com.ge.research.sadl.external.ExternalEmfResourceExtension
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.model.DeclarationExtensions.NewNameAdapter
-import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlResource
 import com.google.inject.Inject
-import java.util.Collection
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.ltk.core.refactoring.RefactoringStatus
-import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.resource.ILocationInFileProvider
-import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.xtext.ui.refactoring.IRefactoringUpdateAcceptor
 import org.eclipse.xtext.ui.refactoring.impl.DefaultRenameStrategy
 import org.eclipse.xtext.ui.refactoring.impl.DefaultRenameStrategyProvider
@@ -21,7 +18,7 @@ import org.eclipse.xtext.ui.refactoring.impl.RefactoringException
 import org.eclipse.xtext.ui.refactoring.ui.IRenameElementContext
 import org.eclipse.xtext.util.ITextRegion
 
-import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import static com.ge.research.sadl.processing.SadlConstants.*
 
 class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IInitializable {
 
@@ -35,7 +32,7 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 	extension ILocationInFileProvider
 
 	@Inject
-	extension IScopeProvider
+	extension ExternalEmfResourceExtension
 
 	@Inject
 	DefaultRenameStrategy delegate
@@ -49,7 +46,7 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 		if (targetElement instanceof SadlResource) {
 			shouldUseDelegate = false
 			val declaration = targetElement.declaration
-			if (declaration === null) {
+			if (declaration === null || declaration.isBuiltIn || declaration.isExternal) {
 				return false
 			}
 			declarationUri = EcoreUtil.getURI(declaration)
@@ -109,19 +106,17 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 		return status
 	}
 
-	private def Collection<IEObjectDescription> collectAllVisibleSadlResources(EObject it) {
+	private def boolean isBuiltIn(EObject it) {
 		if (it === null || eIsProxy) {
-			return emptySet
+			return false
 		}
 		val resource = eResource
 		if (resource === null) {
-			return emptySet
+			return false
 		}
-		val model = resource.contents.head
-		if (!(model instanceof SadlModel)) {
-			return emptySet
-		}
-		return model.getScope(SADL_RESOURCE__NAME).allElements.filter[SADL_RESOURCE.isSuperTypeOf(EClass)].toSet
+		return #[SADL_IMPLICIT_MODEL_FILENAME, SADL_BUILTIN_FUNCTIONS_FILENAME].exists [
+			resource.URI.toString.endsWith(it)
+		]
 	}
 
 }
