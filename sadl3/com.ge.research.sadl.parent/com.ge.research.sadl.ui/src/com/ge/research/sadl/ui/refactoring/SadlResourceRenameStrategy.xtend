@@ -64,7 +64,7 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 		if (shouldUseDelegate) {
 			delegate.applyDeclarationChange(newName, resourceSet)
 		} else {
-			val toRename = resourceSet.getEObject(declarationUri, false)
+			val toRename = resourceSet.getEObject(declarationUri, true)
 			if (!(toRename instanceof SadlResource)) {
 				throw new RefactoringException('''Expected a SADL resource for URI '«declarationUri»'. Was «toRename»''')
 			}
@@ -80,7 +80,7 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 		} else {
 			// Nothing! The declaration of the SADL resource references itself.
 			// We do not have to make the original replace edit here, the default reference updater will make sure
-			// we update everything.
+			// we update everything, including the "name" of the declaration.
 		}
 	}
 
@@ -92,7 +92,7 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 		if (shouldUseDelegate) {
 			delegate.revertDeclarationChange(resourceSet)
 		} else {
-			val toRename = resourceSet.getEObject(declarationUri, false)
+			val toRename = resourceSet.getEObject(declarationUri, true)
 			if (!(toRename instanceof SadlResource)) {
 				throw new RefactoringException('''Expected a SADL resource for URI '«declarationUri»'. Was «toRename»''')
 			}
