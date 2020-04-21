@@ -35,6 +35,9 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 	extension ExternalEmfResourceExtension
 
 	@Inject
+	extension com.ge.research.sadl.ui.refactoring.SadlResourceRenameStrategy.IDValueConverter
+
+	@Inject
 	DefaultRenameStrategy delegate
 
 	String originalName
@@ -68,7 +71,8 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 			if (toRename === null || toRename.eIsProxy) {
 				throw new RefactoringException('''«toRename» was a proxy.''')
 			}
-			new NewNameAdapter(newName).attachToEmfObject(toRename)
+			val escaped = newName.mustEscape ? '''^«newName»''' : newName
+			new NewNameAdapter(escaped).attachToEmfObject(toRename)
 		}
 	}
 
@@ -123,6 +127,17 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 		return #[SADL_IMPLICIT_MODEL_FILENAME, SADL_BUILTIN_FUNCTIONS_FILENAME].exists [
 			resource.URI.toString.endsWith(it)
 		]
+	}
+
+	/**
+	 * to have visible `mustEscape`
+	 */
+	static class IDValueConverter extends org.eclipse.xtext.conversion.impl.IDValueConverter {
+		
+		override mustEscape(String value) {
+			super.mustEscape(value)
+		}
+		
 	}
 
 }

@@ -48,8 +48,7 @@ class SadlReferenceUpdater extends DefaultReferenceUpdater {
 					if (newTargetElement instanceof SadlResource) {
 						val adapter = NewNameAdapter.findInEmfObject(newTargetElement)
 						if (adapter !== null && !adapter.name.nullOrEmpty) {
-							val qname = qualifiedNameConverter.toQualifiedName(adapter.name);
-							newReferenceText = qualifiedNameConverter.toString(qname);
+							newReferenceText = adapter.name
 						}
 					}
 					if (newReferenceText === null) {
