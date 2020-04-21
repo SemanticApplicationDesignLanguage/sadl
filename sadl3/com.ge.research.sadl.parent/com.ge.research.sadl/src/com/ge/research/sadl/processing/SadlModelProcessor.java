@@ -57,6 +57,7 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.refactoring.RefactoringHelper;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.NumberLiteral;
@@ -81,6 +82,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     @Inject
     protected SadlProjectHelper projectHelper;
     
+	@Inject
+	protected RefactoringHelper refactoringHelper;
+
 	public abstract Object processExpression(EObject expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 	public static String getOwlModelFormat(ProcessorContext context) {
