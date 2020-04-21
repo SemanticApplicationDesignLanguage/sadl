@@ -46,7 +46,7 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 		if (targetElement instanceof SadlResource) {
 			shouldUseDelegate = false
 			val declaration = targetElement.declaration
-			if (declaration === null || declaration.isBuiltIn || declaration.isExternal) {
+			if (declaration === null || declaration.isBuiltIn || _externalEmfResourceExtension.isExternal(declaration)) {
 				return false
 			}
 			declarationUri = EcoreUtil.getURI(declaration)
@@ -64,6 +64,9 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 			val toRename = resourceSet.getEObject(declarationUri, true)
 			if (!(toRename instanceof SadlResource)) {
 				throw new RefactoringException('''Expected a SADL resource for URI '«declarationUri»'. Was «toRename»''')
+			}
+			if (toRename === null || toRename.eIsProxy) {
+				throw new RefactoringException('''«toRename» was a proxy.''')
 			}
 			new NewNameAdapter(newName).attachToEmfObject(toRename)
 		}
@@ -92,6 +95,9 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 			val toRename = resourceSet.getEObject(declarationUri, true)
 			if (!(toRename instanceof SadlResource)) {
 				throw new RefactoringException('''Expected a SADL resource for URI '«declarationUri»'. Was «toRename»''')
+			}
+			if (toRename === null || toRename.eIsProxy) {
+				throw new RefactoringException('''«toRename» was a proxy.''')
 			}
 			NewNameAdapter.removeFromEmfObject(toRename)
 		}
