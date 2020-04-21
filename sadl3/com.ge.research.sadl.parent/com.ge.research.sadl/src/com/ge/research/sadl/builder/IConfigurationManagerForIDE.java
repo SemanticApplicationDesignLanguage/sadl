@@ -383,12 +383,12 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract Object getPrivateKeyValuePair(String key);
 
 	/**
-	 * Method to retrieve a private key value from a Map using Resource as Map key
+	 * Method to retrieve a private key value from a Map using Resource URI as Map key
 	 * @param key
 	 * @param rsrc
 	 * @param value
 	 */
-	public abstract void addPrivateKeyMapValueByResource(String key, Resource rsrc, Object value);
+	public abstract void addPrivateKeyMapValueByResource(String key, URI rsrcUri, Object value);
 	
 	/**
 	 * Method to persist a private key value in a Map using Resource as Map key
@@ -396,5 +396,5 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @param rsrc
 	 * @return
 	 */
-	public abstract Object getPrivateKeyMapValueByResource(String key, Resource rsrc);
+	public abstract Object getPrivateKeyMapValueByResource(String key, URI rsrcUri);
 }
