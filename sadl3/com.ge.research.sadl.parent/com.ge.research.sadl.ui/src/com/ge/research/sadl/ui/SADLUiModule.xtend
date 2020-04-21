@@ -27,6 +27,7 @@ import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalProvi
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeCrossrefProposalProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlOntologyContextProvider
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
+import com.ge.research.sadl.refactoring.RefactoringHelper
 import com.ge.research.sadl.ui.contentassist.SADLProposalProvider.SADLUiToIdeContentProposalProvider
 import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
@@ -36,12 +37,16 @@ import com.ge.research.sadl.ui.editor.folding.PatchedDefaultFoldingStructureProv
 import com.ge.research.sadl.ui.generator.SadlShouldGenerate
 import com.ge.research.sadl.ui.hover.SadlEObjectHoverProvider
 import com.ge.research.sadl.ui.markers.EclipseMarkerSeverityMapper
+import com.ge.research.sadl.ui.outline.NoopOutlineRefreshJob
 import com.ge.research.sadl.ui.preferences.SadlPreferenceStoreAccess
 import com.ge.research.sadl.ui.preferences.SadlPreferencesInitializer
 import com.ge.research.sadl.ui.preferences.SadlRootPreferencePage
 import com.ge.research.sadl.ui.quickfix.SadlQuickAssistProcessor
+import com.ge.research.sadl.ui.refactoring.EclipseRefactoringHelper
 import com.ge.research.sadl.ui.refactoring.SadlReferenceUpdater
 import com.ge.research.sadl.ui.refactoring.SadlRenameContextFactory
+import com.ge.research.sadl.ui.refactoring.SadlRenameRefactoringController
+import com.ge.research.sadl.ui.refactoring.SadlRenameRefactoringExecuter
 import com.ge.research.sadl.ui.refactoring.SadlResourceRenameStrategy
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
 import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
@@ -64,6 +69,7 @@ import org.eclipse.xtext.ui.editor.copyqualifiedname.CopyQualifiedNameService
 import org.eclipse.xtext.ui.editor.folding.DefaultFoldingStructureProvider
 import org.eclipse.xtext.ui.editor.folding.IFoldingStructureProvider
 import org.eclipse.xtext.ui.editor.hover.IEObjectHoverProvider
+import org.eclipse.xtext.ui.editor.outline.impl.OutlineRefreshJob
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreAccess
 import org.eclipse.xtext.ui.editor.preferences.IPreferenceStoreInitializer
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage
@@ -71,6 +77,8 @@ import org.eclipse.xtext.ui.editor.quickfix.XtextQuickAssistProcessor
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfiguration
 import org.eclipse.xtext.ui.refactoring.IRenameStrategy
 import org.eclipse.xtext.ui.refactoring.ui.IRenameContextFactory
+import org.eclipse.xtext.ui.refactoring.ui.RenameRefactoringController
+import org.eclipse.xtext.ui.refactoring.ui.RenameRefactoringExecuter
 
 import static com.google.inject.Scopes.SINGLETON
 
@@ -82,7 +90,7 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	new(AbstractUIPlugin plugin) {
 		super(plugin);
-		OutputStreamStrategy.SADL.use;
+		OutputStreamStrategy.STD.use;
 	}
 
 	// Registers our own syntax coloring styles.
@@ -197,6 +205,30 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	def Class<? extends IRenameContextFactory> bindIRenameContextFactory() {
 		return SadlRenameContextFactory;
+	}
+
+	def Provider<? extends RefactoringHelper> provideRefactoringHelper() {
+		return [
+			EclipseRefactoringHelper.INSTANCE
+		];
+	}
+
+	def Provider<? extends EclipseRefactoringHelper> provideEclipseRefactoringHelper() {
+		return [
+			EclipseRefactoringHelper.INSTANCE
+		];
+	}
+
+	def Class<? extends RenameRefactoringController> bindRenameRefactoringController() {
+		return SadlRenameRefactoringController;
+	}
+
+	def Class<? extends OutlineRefreshJob> bindOutlineRefreshJob() {
+		return NoopOutlineRefreshJob;
+	}
+
+	def Class<? extends RenameRefactoringExecuter> bindRenameRefactoringExecuter() {
+		return SadlRenameRefactoringExecuter;
 	}
 
 }
