@@ -90,7 +90,7 @@ class SADLUiModule extends AbstractSADLUiModule {
 
 	new(AbstractUIPlugin plugin) {
 		super(plugin);
-		OutputStreamStrategy.STD.use;
+		OutputStreamStrategy.SADL.use;
 	}
 
 	// Registers our own syntax coloring styles.
