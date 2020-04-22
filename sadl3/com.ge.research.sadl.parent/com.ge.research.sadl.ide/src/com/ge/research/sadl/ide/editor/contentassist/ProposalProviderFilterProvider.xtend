@@ -91,26 +91,37 @@ class ProposalProviderFilterProvider {
 			];
 		}
 
-		val currntModel = context.currentModel;
+		val currentModel = context.currentModel;
 		return switch (grammarContextId) {
 			case grammarContextId == SADLPRIMARYTYPEREFERENCE_PRIMITIVETYPE ||
 				grammarContextId == SADLPRIMARYTYPEREFERENCE_TYPE:
-				currntModel.createPrimaryTypeRefFilter
+				currentModel.createPrimaryTypeRefFilter
+			case SADLPROPERTYDECLARATIONINCLASS_NAMEDECLARATIONS:
+				[ candidate |
+					val container = currentModel.eContainer;
+					if (container instanceof SadlClassOrPropertyDeclaration) {
+						return container.createNotSelfClassOrPropertyFilter.apply(candidate)
+					}
+					return candidate.EClass === SADL_RESOURCE
+				]
 			case SADLPROPERTYINITIALIZER_PROPERTY:
-				currntModel.createPropertyInitializerFilter
-			case SADLSTATEMENT_SUPERELEMENT: 
+				currentModel.createPropertyInitializerFilter
+			case SADLSTATEMENT_SUPERELEMENT:
 				switch (contextClass) {
 					case SADL_CLASS_OR_PROPERTY_DECLARATION:
-						[currntModel.createPrimaryTypeRefFilter.apply(it) && currntModel.createNotSelfClassOrPropertyFilter.apply(it)]
+						[
+							currentModel.createPrimaryTypeRefFilter.apply(it) &&
+								currentModel.createNotSelfClassOrPropertyFilter.apply(it)
+						]
 					default:
-						currntModel.createPrimaryTypeRefFilter
+						currentModel.createPrimaryTypeRefFilter
 				}
 			case PRIMARYEXPRESSION_VALUE:
 				switch (contextClass) {
 					case TEST_STATEMENT:
-						currntModel.createPropertyFilter
+						currentModel.createPropertyFilter
 					case PROP_OF_SUBJECT:
-						currntModel.createSubjectOfPropertyFilter
+						currentModel.createSubjectOfPropertyFilter
 					default:
 						[false]
 				}
