@@ -322,4 +322,16 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposalIsNot('IsSomethingWithoutW');
 	}
 
+	@Test
+	def void checkCA_DescribbedBy() {
+		// https://github.com/crapo/sadlos2/issues/412#issue-583680230
+		val builder = newBuilder('''
+			uri "http://sadl.org/ca.sadl".
+			area is a property with values of type float.
+			Shape is a class described by 
+		''');
+		builder.assertProposal('area');
+		builder.assertProposalIsNot('Shape');
+	}
+
 }
