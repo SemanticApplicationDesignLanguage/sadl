@@ -47,6 +47,13 @@ import static com.ge.research.sadl.markers.SadlMarkerConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 import org.eclipse.emf.common.util.URI
 import org.eclipse.xtext.ui.editor.IURIEditorOpener
+import org.eclipse.xtext.EcoreUtil2
+import com.ge.research.sadl.sADL.SadlModelElement
+import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.sADL.SadlResource
+import static java.lang.System.*
+import org.eclipse.xtext.resource.EObjectAtOffsetHelper
+import org.eclipse.xtext.resource.XtextResource
 
 /**
  * Quick fix provider for SADL.
@@ -64,6 +71,9 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 	
 	@Inject
 	IURIEditorOpener editorOpener;
+	
+	@Inject
+	EObjectAtOffsetHelper offsetHelper;
 	
 	@Fix("REPLACE_ALIAS")
 	def void replaceAlias(Issue issue, IssueResolutionAcceptor acceptor) {
@@ -116,44 +126,33 @@ class SADLQuickfixProvider extends DefaultQuickfixProvider {
 			]
 		}
 	}
-	
+
 	@Fix(SADLValidator.UNRESOLVED_SADL_RESOURCE)
 	def resolveSadlResource(Issue issue, IssueResolutionAcceptor acceptor) {
-
-		acceptor.accept(issue, "Create class definition", "New class definition", 'upcase.png',
-			[ EObject element, IModificationContext context |
-			
-			val xtextDocument = context.xtextDocument
-			val varNm = xtextDocument.get(issue.offset, issue.length)
-			val cont = element.eContainer
-			if (cont === null) {
-				val reqNode = NodeModelUtils.getNode(element)
-				var afterReqLocation = reqNode.endOffset
-				var char ch = xtextDocument.getChar(afterReqLocation)
-				while (ch == '.' || ch == '\n' || ch == '\r') {
-					afterReqLocation++
-					ch = xtextDocument.getChar(afterReqLocation)
-				} 
-				val replacement = " \n  where " + varNm + " is "
-				xtextDocument.replace(afterReqLocation, 0, replacement)
-				EditorUtils.activeXtextEditor.selectAndReveal(afterReqLocation + replacement.length, 1)
-			}
-			else {
-				val ctxNode = NodeModelUtils.getNode(cont)
-				var afterContext = ctxNode.endOffset + 1
-				var char ch = xtextDocument.getChar(afterContext)
-				while (ch != EOF && (ch == '.' || ch == '\n' || ch == '\r')) {
-					afterContext++
-					ch = xtextDocument.getChar(afterContext)
-				} 
-				val replacement = "\nShape is "
-				xtextDocument.replace(afterContext, 0, replacement)
-				EditorUtils.activeXtextEditor.selectAndReveal(afterContext + replacement.length, 1)		// this doesn't work--how to locate cursor after replacement?
-			}
-		]);	
-		
+		acceptor.accept(issue, "Create class definition", "New class definition",
+			'upcase.png', [ EObject element, IModificationContext context |
+				if (!(element.eResource instanceof XtextResource)) {
+					return;
+				}
+				val toFix = offsetHelper.resolveElementAt(element.eResource as XtextResource, issue.offset)
+				if (toFix instanceof SadlResource) {
+					// This is the model element that has the issue.
+					// We have to insert the new class before this element.
+					val modelElement = EcoreUtil2.getAllContainers(element).findLast[it instanceof SadlModelElement];
+					val model = EcoreUtil2.getContainerOfType(element, SadlModel);
+					val indexOf = model.elements.indexOf(modelElement);
+					val insertBeforeModelElement = model.elements.get(indexOf);
+					val node = NodeModelUtils.findActualNodeFor(insertBeforeModelElement);
+					if (node !== null) {
+						val name = context.xtextDocument.get(issue.offset, issue.length)
+						if (!name.nullOrEmpty) {
+							context.xtextDocument.replace(node.offset, 0, '''«name» is a class.«lineSeparator»''');
+						}
+					}
+				}
+			]);
 	}
-	
+
 	@Fix(SadlMarkerConstants.SADL_REFS)
 	def showSadlMarkerRefs(Issue it, IssueResolutionAcceptor acceptor) {
 		if (data !== null) {
