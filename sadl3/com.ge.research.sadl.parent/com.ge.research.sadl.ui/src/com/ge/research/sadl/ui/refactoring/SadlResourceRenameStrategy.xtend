@@ -89,7 +89,7 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 	}
 
 	override getOriginalName() {
-		return shouldUseDelegate ? delegate.originalName : originalName
+		return if(shouldUseDelegate) delegate.originalName else originalName
 	}
 
 	override revertDeclarationChange(ResourceSet resourceSet) {
