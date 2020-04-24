@@ -71,7 +71,7 @@ class SadlResourceRenameStrategy implements DefaultRenameStrategyProvider.IIniti
 			if (toRename === null || toRename.eIsProxy) {
 				throw new RefactoringException('''«toRename» was a proxy.''')
 			}
-			val escaped = newName.mustEscape ? '''^«newName»''' : newName
+			val escaped = if(newName.mustEscape) '''^«newName»''' else newName
 			new NewNameAdapter(escaped).attachToEmfObject(toRename)
 		}
 	}
