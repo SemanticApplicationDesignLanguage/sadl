@@ -34,6 +34,7 @@ import org.junit.runner.RunWith
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 
 import static extension java.lang.reflect.Modifier.*
+import org.junit.Ignore
 
 /**
  * Test for checking that the {@link ISadlOntologyHelper.GrammarContextIds} are in sync with the actual
@@ -44,6 +45,7 @@ import static extension java.lang.reflect.Modifier.*
  */
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
+@Ignore
 class GrammarContextIDsTest extends Assert {
 
 	@Inject
