@@ -21,10 +21,10 @@
 <repository location="http://download.eclipse.org/lsp4j/updates/releases/"/>
 </location>
 	<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-		<unit id="org.eclipse.jdt.feature.group" version="3.16.0.v20181206-1038"/>
-		<unit id="org.eclipse.platform.feature.group" version="4.10.0.v20181206-0815"/>
-		<unit id="org.eclipse.platform.source.feature.group" version="4.10.0.v20181206-0815"/>
-		<repository location="https://download.eclipse.org/releases/2018-12/"/>
+        <unit id="org.eclipse.platform.feature.group" version="4.15.0.v20200305-0155"/>
+        <unit id="org.eclipse.platform.source.feature.group" version="4.15.0.v20200305-0155"/>
+        <unit id="org.eclipse.jdt.feature.group" version="3.18.300.v20200305-0155"/>
+        <repository location="https://download.eclipse.org/releases/2020-03/"/>
 	</location>
 	<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 		<unit id="org.eclipse.emf.sdk.feature.group" version="2.16.0.v20181206-1055"/>
