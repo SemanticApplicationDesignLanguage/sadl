@@ -66,6 +66,7 @@ import static com.ge.research.sadl.preferences.SadlPreferences.*
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import org.eclipse.xtext.resource.XtextResource
 
 /**
  * Generic content proposal provider for the {@code SADL} language.
@@ -89,9 +90,6 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 
 	@Inject
 	IdeContentProposalPriorities proposalPriorities;
-	
-	@Inject
-	IPreferenceValuesProvider preferenceValuesProvider;
 
 	override protected _createProposals(RuleCall ruleCall, ContentAssistContext ctx,
 		IIdeContentProposalAcceptor acceptor) {
@@ -145,7 +143,7 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 		]);
 	}
 
-	private def Predicate<IEObjectDescription> getImplicitModelFilter(ContentAssistContext context) {
+	protected def Predicate<IEObjectDescription> getImplicitModelFilter(ContentAssistContext context) {
 		return if (context.currentModel.shouldFilterBuiltIns)
 			[
 				EObjectURI.trimFragment.lastSegment != SADL_IMPLICIT_MODEL_FILENAME
@@ -154,11 +152,16 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 			Predicates.alwaysTrue
 	}
 
-	private def boolean shouldFilterBuiltIns(EObject model) {
-		if (model === null || model.eIsProxy || model.eResource === null) {
+	protected def boolean shouldFilterBuiltIns(EObject model) {
+		if (model === null || model.eIsProxy || model.eResource === null || !(model.eResource instanceof XtextResource)) {
 			return false;
 		}
-		val values = preferenceValuesProvider.getPreferenceValues(model.eResource);
+
+		val serviceProvider = (model.eResource as XtextResource).resourceServiceProvider
+		if (serviceProvider === null) {
+			return false
+		}
+		val values = serviceProvider.get(IPreferenceValuesProvider).getPreferenceValues(model.eResource);
 		val preference = values.getPreference(CONTENT_ASSIST__FILTER_IMPLICIT_MODEL);
 		if (preference !== null) {
 			return Boolean.parseBoolean(preference);
