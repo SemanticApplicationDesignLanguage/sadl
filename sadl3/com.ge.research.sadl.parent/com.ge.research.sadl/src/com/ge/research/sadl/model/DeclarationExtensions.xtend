@@ -41,21 +41,23 @@ import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlRangeRestriction
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
+import com.ge.research.sadl.sADL.SadlTableDeclaration
 import com.ge.research.sadl.sADL.SadlTypeReference
 import com.ge.research.sadl.sADL.SadlUnionType
 import com.ge.research.sadl.sADL.SadlValueList
+import com.ge.research.sadl.sADL.UpdateStatement
+import com.ge.research.sadl.scoping.SadlQualifiedNameConverter
 import com.google.common.base.Supplier
 import com.google.inject.Inject
 import java.util.HashSet
 import java.util.Set
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
-import com.ge.research.sadl.scoping.SadlQualifiedNameConverter
-import org.eclipse.emf.ecore.resource.Resource
-import com.ge.research.sadl.sADL.UpdateStatement
-import com.ge.research.sadl.sADL.SadlTableDeclaration
+import org.eclipse.xtext.util.internal.EmfAdaptable
 
 class DeclarationExtensions {
 	
@@ -96,6 +98,10 @@ class DeclarationExtensions {
 		if (isExternal) {
 			return getExternalResourceAdapter.concreteName;
 		}
+		val nameAdapter = NewNameAdapter.findInEmfObject(it);
+		if (nameAdapter !== null && !nameAdapter.name.nullOrEmpty) {
+			return nameAdapter.name;
+		}
 		val resource = it.eResource as XtextResource
 		val nameSupplier = getConcreteNameSupplier(it, resource, trimPrefix);
 		if (resource === null) {
@@ -111,11 +117,11 @@ class DeclarationExtensions {
 			if (name.isNullOrEmpty) {
 				return null;
 			}
-			if (trimPrefix) {				
+			if (trimPrefix) {
 				val index = name.lastIndexOf(SadlQualifiedNameConverter.SEGMENT_SEPARATOR);
 				if (index !== -1) {
 					val ()=>String aliasSupplier = [
-						EcoreUtil2.getContainerOfType(it, SadlModel)?.alias;	
+						EcoreUtil2.getContainerOfType(it, SadlModel)?.alias;
 					];
 					val alias = if (resource instanceof XtextResource) {
 						resource.cache.get(it -> 'alias', resource, aliasSupplier);
@@ -422,5 +428,14 @@ class DeclarationExtensions {
 	
 	def ExternalResourceAdapter getExternalResourceAdapter(SadlResource resource) {
 		ExternalResourceAdapter.findInEmfObject(resource)
+	}
+
+	/**
+	 * Used by rename/refactoring.
+	 */
+	@Data
+	@EmfAdaptable
+	static class NewNameAdapter {
+		val String name;
 	}
 }

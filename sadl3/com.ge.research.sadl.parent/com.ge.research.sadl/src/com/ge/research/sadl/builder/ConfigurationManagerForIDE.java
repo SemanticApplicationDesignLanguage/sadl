@@ -1072,41 +1072,36 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	}
 
 	@Override
-	public void addPrivateKeyMapValueByResource(String key, org.eclipse.emf.ecore.resource.Resource rsrc,
+	public synchronized void addPrivateKeyMapValueByResource(String key, URI rsrcUri,
 			Object value) {
-		Object map = getPrivateKeyValuePair(key);
-		if (value != null && map == null) {
-			map = new HashMap<Resource,Object>();
-			addPrivateKeyValuePair(key, map);
-		}
-		if (map instanceof Map<?,?>) {
-			if (value != null) {
-				((Map<org.eclipse.emf.ecore.resource.Resource,Object>)map).put(rsrc, value);
+		if (rsrcUri != null) {
+			Object map = getPrivateKeyValuePair(key);
+			if (value != null && map == null) {
+				map = new HashMap<Resource,Object>();
+				addPrivateKeyValuePair(key, map);
 			}
-			else {
-				((Map<org.eclipse.emf.ecore.resource.Resource,Object>)map).remove(rsrc);
+			if (map instanceof Map<?,?>) {
+				if (value != null) {
+					((Map<URI,Object>)map).put(rsrcUri, value);
+				}
+				else {
+					((Map<URI,Object>)map).remove(rsrcUri);
+				}
 			}
 		}
 	}
 
 	@Override
-	public Object getPrivateKeyMapValueByResource(String key, org.eclipse.emf.ecore.resource.Resource rsrc) {
-		Object map = getPrivateKeyValuePair(key);
-		if (map != null && map instanceof Map<?,?>) {
-			Iterator<?> keyitr = ((Map<?,?>)map).keySet().iterator();
-			while (keyitr.hasNext()) {
-				Object ikey = keyitr.next();
-				if (ikey instanceof org.eclipse.emf.ecore.resource.Resource && 
-						((org.eclipse.emf.ecore.resource.Resource)ikey).getURI().equals(rsrc.getURI())) {
-					Object mval = ((Map<?,?>)map).get(ikey);
-					return mval;
-				}
+	public synchronized Object getPrivateKeyMapValueByResource(String key, URI rsrcUri) {
+		if (rsrcUri != null) {
+			Object map = getPrivateKeyValuePair(key);
+			if (map != null && map instanceof Map<?,?>) {
+				return (((Map<URI,Object>)map).get(rsrcUri));
 			}
-			return (((Map<org.eclipse.emf.ecore.resource.Resource,Object>)map).get(rsrc));
 		}
 		return null;
 	}
-
+	
 	/**
 	 * Method to remove all non-existent mappings with specified sources
 	 * @param sources -- the sources to be removed if non-existent

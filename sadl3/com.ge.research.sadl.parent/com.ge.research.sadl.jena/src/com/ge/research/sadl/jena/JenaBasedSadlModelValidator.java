@@ -1596,7 +1596,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			SadlTypeReference typ = expression.getType();
 			if (typ != null && typ instanceof SadlSimpleTypeReference) {
 				inst = ((SadlSimpleTypeReference)typ).getType();
-				if (declarationExtensions.getConceptUri(inst).equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().isIgnoreUnittedQuantities()) {
+				String instUri = declarationExtensions.getConceptUri(inst);
+				if (instUri != null && instUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && getModelProcessor().isIgnoreUnittedQuantities()) {
 					if (expression instanceof SadlNestedInstance) {
 						Iterator<SadlPropertyInitializer> pinititr = ((SadlNestedInstance)expression).getPropertyInitializers().iterator();
 						while (pinititr.hasNext()) {
