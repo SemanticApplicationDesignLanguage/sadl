@@ -7,10 +7,12 @@
         <repository location="https://download.eclipse.org/modeling/emft/mwe/updates/releases/2.11.1"/>
     </location>
     <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-        <unit id="org.apache.xerces" version="0.0.0"/>
+        <unit id="org.apache.xerces" version="2.9.0.v201101211617"/>
         <unit id="org.jsoup" version="1.7.2.v201411291515"/>
         <unit id="org.jsoup.source" version="1.7.2.v201411291515"/>
-        <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/"/>
+        <unit id="javax.activation" version="1.1.0.v201211130549"/>
+        <unit id="javax.activation.source" version="1.1.0.v201211130549"/>
+        <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/I20200203200403/repository/"/>
     </location>
     <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
         <unit id="org.objectweb.asm" version="7.1.0.v20190412-2143"/>
@@ -18,17 +20,17 @@
     </location>
     <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
         <unit id="org.eclipse.xtext.sdk.feature.group" version="2.20.0.v20191202-1256"/>
-        <repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.20.0/"/>
+        <repository location="https://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.20.0/"/>
     </location>
     <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
         <unit id="org.eclipse.lsp4j.sdk.feature.group" version="0.8.1.v20190925-0747"/>
         <repository location="https://download.eclipse.org/lsp4j/updates/releases/0.8.1/"/>
     </location>
     <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-        <unit id="org.eclipse.jdt.feature.group" version="3.16.0.v20181206-1038"/>
-        <unit id="org.eclipse.platform.feature.group" version="4.10.0.v20181206-0815"/>
-        <unit id="org.eclipse.platform.source.feature.group" version="4.10.0.v20181206-0815"/>
-        <repository location="https://download.eclipse.org/releases/2018-12/"/>
+        <unit id="org.eclipse.jdt.feature.group" version="3.18.300.v20200305-0155"/>
+        <unit id="org.eclipse.platform.feature.group" version="4.15.0.v20200305-0155"/>
+        <unit id="org.eclipse.platform.source.feature.group" version="4.15.0.v20200305-0155"/>
+        <repository location="https://download.eclipse.org/releases/2020-03/"/>
     </location>
     <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
         <unit id="org.eclipse.emf.sdk.feature.group" version="2.16.0.v20181206-1055"/>

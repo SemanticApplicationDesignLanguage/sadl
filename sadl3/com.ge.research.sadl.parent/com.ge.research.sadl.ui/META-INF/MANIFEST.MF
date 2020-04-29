@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.ui
 Bundle-Vendor: GE Research
-Bundle-Version: 3.2.1.qualifier
+Bundle-Version: 3.3.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.sadl,
@@ -30,6 +30,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.builder,
  com.ge.research.sadl.ui.contentassist,
+ com.ge.research.sadl.ui.editor,
  com.ge.research.sadl.ui.editor.folding,
  com.ge.research.sadl.ui.external,
  com.ge.research.sadl.ui.handlers,
@@ -40,6 +41,7 @@ Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.outline,
  com.ge.research.sadl.ui.preferences,
  com.ge.research.sadl.ui.quickfix,
+ com.ge.research.sadl.ui.refactoring,
  com.ge.research.sadl.ui.syntaxcoloring,
  com.ge.research.sadl.ui.visualize
 Import-Package: com.ge.research.sadl.errorgenerator.generator,

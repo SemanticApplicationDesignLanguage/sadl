@@ -57,6 +57,7 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.refactoring.RefactoringHelper;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.NumberLiteral;
@@ -69,7 +70,7 @@ import com.google.inject.Inject;
 
 public abstract class SadlModelProcessor implements IModelProcessor {
     private static final Logger logger = Logger.getLogger(SadlModelProcessor.class);
-    private Object target = null;	// the instance of Rule, Query, or Test into which we are trying to put the translation
+    private Object target = null;	// the instance of Rule, Query, Equation, External, or Test into which we are trying to put the translation
     private List<IFTranslationError> errors = null;
     private Object encapsulatingTarget = null;	// when a query is in a test
     public enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
@@ -81,6 +82,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
     @Inject
     protected SadlProjectHelper projectHelper;
     
+	@Inject
+	protected RefactoringHelper refactoringHelper;
+
 	public abstract Object processExpression(EObject expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 	public static String getOwlModelFormat(ProcessorContext context) {

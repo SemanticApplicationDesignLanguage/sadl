@@ -829,7 +829,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	@Override
 	public OntModel getOntModel(String publicUri, String serializedGraph, Scope scope, String format) {
 		Model m = ModelFactory.createDefaultModel()
-		        .read(new StringInputStream(serializedGraph), null, format);
+		        .read(new StringInputStream(serializedGraph), publicUri, format);
     	if (m instanceof OntModel) {
     		return (OntModel)m;
     	}
@@ -1069,6 +1069,89 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			return val;
 		}
 		return null;
+	}
+
+	@Override
+	public synchronized void addPrivateKeyMapValueByResource(String key, URI rsrcUri,
+			Object value) {
+		if (rsrcUri != null) {
+			Object map = getPrivateKeyValuePair(key);
+			if (value != null && map == null) {
+				map = new HashMap<Resource,Object>();
+				addPrivateKeyValuePair(key, map);
+			}
+			if (map instanceof Map<?,?>) {
+				if (value != null) {
+					((Map<URI,Object>)map).put(rsrcUri, value);
+				}
+				else {
+					((Map<URI,Object>)map).remove(rsrcUri);
+				}
+			}
+		}
+	}
+
+	@Override
+	public synchronized Object getPrivateKeyMapValueByResource(String key, URI rsrcUri) {
+		if (rsrcUri != null) {
+			Object map = getPrivateKeyValuePair(key);
+			if (map != null && map instanceof Map<?,?>) {
+				return (((Map<URI,Object>)map).get(rsrcUri));
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Method to remove all non-existent mappings with specified sources
+	 * @param sources -- the sources to be removed if non-existent
+	 */
+	public void cleanNonExisting(List<String> sources) {
+		try {
+			String prjname = new File(getProjectFolderPath()).getName();
+			List<Statement> toBeRemoved = new ArrayList<Statement>();
+			Model mm = getMappingModel();
+			StmtIterator apitr = mm.listStatements(null, altUrlProp, (RDFNode)null);
+			while (apitr.hasNext()) {
+				Statement stmt = apitr.nextStatement();
+				RDFNode altUrl = stmt.getObject();
+				if (altUrl.isURIResource()) {
+					String altUrlUrl = altUrl.asResource().getURI();
+					int prjloc = altUrlUrl.lastIndexOf(prjname);
+					if (prjloc > 0) {
+						prjloc = prjloc + prjname.length() + 1;
+						altUrlUrl = getProjectFolderPath() + altUrlUrl.substring(prjloc);
+					}
+					try {
+						String fn = (new SadlUtils()).fileUrlToFileName(altUrlUrl);
+						File fnf = new File(fn);
+						if (!fnf.exists()) {
+							StmtIterator cbitr = mm.listStatements(stmt.getSubject(), createdBy, (RDFNode)null);
+							while (cbitr.hasNext()) {
+								String cbstr = cbitr.nextStatement().getObject().toString();
+								if (sources.contains(cbstr)) {
+									StmtIterator delitr = mm.listStatements(stmt.getSubject(), null, (RDFNode)null);
+									while (delitr.hasNext()) {
+										toBeRemoved.add(delitr.nextStatement());
+									}
+								}
+							}
+						}
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			if (toBeRemoved.size() > 0 ) {
+				mm.remove(toBeRemoved);
+				setMappingChanged(true);
+				super.saveOntPolicyFile();
+			}
+		} catch (URISyntaxException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 
 }

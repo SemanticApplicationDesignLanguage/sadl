@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.ServiceLoader;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
 import com.ge.research.sadl.model.ConceptName;
@@ -381,4 +382,19 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 */
 	public abstract Object getPrivateKeyValuePair(String key);
 
+	/**
+	 * Method to retrieve a private key value from a Map using Resource URI as Map key
+	 * @param key
+	 * @param rsrc
+	 * @param value
+	 */
+	public abstract void addPrivateKeyMapValueByResource(String key, URI rsrcUri, Object value);
+	
+	/**
+	 * Method to persist a private key value in a Map using Resource as Map key
+	 * @param key
+	 * @param rsrc
+	 * @return
+	 */
+	public abstract Object getPrivateKeyMapValueByResource(String key, URI rsrcUri);
 }

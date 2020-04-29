@@ -18,7 +18,7 @@
 package com.ge.research.sadl.processing
 
 import com.ge.research.sadl.model.gp.Query
-import com.ge.research.sadl.model.gp.TripleElement
+import com.ge.research.sadl.model.gp.Rule
 import com.ge.research.sadl.reasoner.ConfigurationException
 import com.ge.research.sadl.reasoner.InvalidNameException
 import com.ge.research.sadl.reasoner.QueryCancelledException
@@ -26,11 +26,12 @@ import com.ge.research.sadl.reasoner.QueryParseException
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException
 import com.ge.research.sadl.reasoner.SadlCommandResult
 import com.ge.research.sadl.reasoner.TranslationException
+import com.hp.hpl.jena.ontology.OntModel
+import java.util.List
 import java.util.Map
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
-import com.hp.hpl.jena.ontology.OntModel
-import java.util.List
+import com.ge.research.sadl.model.gp.TripleElement
 
 /**
  * Generic hook for 3rd party processors to participate in the processing of SADL resources
@@ -70,6 +71,15 @@ interface ISadlInferenceProcessor {
 	 */
 	def Object[] insertTriplesAndQuery(Resource resource, List<TripleElement[]> triples) throws SadlInferenceException;
 
+	/**
+	 * Call to insert a List of Rules that may be used to infer desired results. 
+	 * Rules contain conditions (givens, normally empty, and ifs) and conclusions (thens). The
+	 * Rule also has a list of variables used in the rules and their type.
+	 * 
+	 * returns an array of ResultSet, one for the conclusions drawn by each Rule
+	 */
+	def Object[] insertRulesAndQuery(Resource resource, List<Rule> rules) throws SadlInferenceException;
+	
 	/**
 	 * {@code true} if the resource can be processed with the current processor.
 	 */

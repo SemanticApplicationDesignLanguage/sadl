@@ -2451,6 +2451,7 @@ public class CsvImporter implements ITabularDataImporter {
 			logTriple(rowNum, subj, pred, obj, modelArrayPosition);
 		}
 		getModel(modelArrayPosition).add(subj, pred, obj);
+//		getModel(modelArrayPosition).write(System.err, "N3");
 		numTriplesImported++;
 	}
 

@@ -175,6 +175,15 @@ public interface IReasoner {
 	 * throws QueryParseException, QueryCancelledException
 	 */
 	public ResultSet ask(String askQuery) throws QueryParseException, QueryCancelledException;
+
+	/**
+	 * Method to execute a SPARQL select query that returns results as a Json string
+	 * @param askQuery
+	 * @return Json string containing results of select query
+	 * throws QueryParseException, QueryCancelledException
+	 */
+	public String askJson(String askQuery) throws QueryParseException, QueryCancelledException;
+
 	
 	/**
 	 * Method to expand prefixes, find namespaces, and do whatever

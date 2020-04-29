@@ -944,7 +944,7 @@ public class OwlToSadl {
 			if (isVerboseMode()) {
 				verboseModeStringBuilder.append("// Processed statement: ");
 				verboseModeStringBuilder.append(s.toString());
-				verboseModeStringBuilder.append("\n");
+				verboseModeStringBuilder.append(System.lineSeparator());
 			}
 			Resource subj = s.getSubject();
 			OntResource ontSubj = theModel.getOntResource(subj);
@@ -954,7 +954,7 @@ public class OwlToSadl {
 					if (isVerboseMode()) {
 						verboseModeStringBuilder.append("//     subject resource not added to processing list: \": ");
 						verboseModeStringBuilder.append(ontSubj.toString());
-						verboseModeStringBuilder.append("\n");
+						verboseModeStringBuilder.append(System.lineSeparator());
 					}
 				}
 			}
@@ -968,14 +968,16 @@ public class OwlToSadl {
 						if (isVerboseMode()) {
 							verboseModeStringBuilder.append("//     predicate resource not added to processing list: \": ");
 							verboseModeStringBuilder.append(ontProp.toString());
-							verboseModeStringBuilder.append("\n");
+							verboseModeStringBuilder.append(System.lineSeparator());
 						}
 					}
 				}
 			}
 			else {
 				if (shouldResourceBeOutput(mprop, false, false, true)) {
-					getConcepts().addRdfProperty(mprop);
+					if (isPropertyInThisNamespace(mprop)) {
+						getConcepts().addRdfProperty(mprop);
+					}
 				}
 			}
 			RDFNode obj = s.getObject();
@@ -987,7 +989,7 @@ public class OwlToSadl {
 						if (isVerboseMode()) {
 							verboseModeStringBuilder.append("//     object resource not added to processing list: \": ");
 							verboseModeStringBuilder.append(ontObj.toString());
-							verboseModeStringBuilder.append("\n");
+							verboseModeStringBuilder.append(System.lineSeparator());
 						}
 					}
 				}
@@ -1011,7 +1013,7 @@ public class OwlToSadl {
 			while (erritr.hasNext()) {
 				sadlModel.append("// ");
 				sadlModel.append(erritr.next());
-				sadlModel.append("\n");
+				sadlModel.append(System.lineSeparator());
 			}
 		}
 		else if (isVerboseMode()) {
@@ -1024,7 +1026,7 @@ public class OwlToSadl {
 			while (erritr.hasNext()) {
 				sadlModel.append("// ");
 				sadlModel.append(erritr.next());
-				sadlModel.append("\n");
+				sadlModel.append(System.lineSeparator());
 			}
 		}
 		else if (isVerboseMode()) {
@@ -1037,7 +1039,7 @@ public class OwlToSadl {
 			while (erritr.hasNext()) {
 				sadlModel.append("// ");
 				sadlModel.append(erritr.next());
-				sadlModel.append("\n");
+				sadlModel.append(System.lineSeparator());
 			}
 		}
 		else if (isVerboseMode()) {
@@ -1054,7 +1056,7 @@ public class OwlToSadl {
 				Ontology onti = onts.get(i);
 				sadlModel.append("//    ");
 				sadlModel.append(onti.toString());
-				sadlModel.append("\n");
+				sadlModel.append(System.lineSeparator());
 			}
 		}
 		
@@ -1179,7 +1181,7 @@ public class OwlToSadl {
 					if (subj.canAs(Ontology.class) || subj.equals(OWL.Ontology)) {
 						sadlModel.append("// restriction on Ontology not supported in SADL: \n    // ");
 						sadlModel.append(restrictionToString(getConcepts(), null, res));
-						sadlModel.append("\n");
+						sadlModel.append(System.lineSeparator());
 						invalid = true;
 						break;
 					}
@@ -1346,7 +1348,7 @@ public class OwlToSadl {
 			}
 		}
 		for (int i = 0; i < numLineFeeds; i++) {
-			sb.append("\n");
+			sb.append(System.lineSeparator());
 		}
 	}
 
@@ -1564,7 +1566,7 @@ public class OwlToSadl {
 		else {
 			sb.append("// anonymous rdfs:Datatype encountered: ");
 			sb.append(rsrc.toString());
-			sb.append("\n");
+			sb.append(System.lineSeparator());
 		}
 		return sb.toString();
 	}
@@ -2054,14 +2056,14 @@ public class OwlToSadl {
 			bnode = true;
 		}
 		if (!isEquation) {
-			ExtendedIterator<OntClass> eitr = inst.listOntClasses(true);
+			StmtIterator stmtitr = theBaseModel.listStatements(inst, RDF.type, (RDFNode)null);
 			int itercnt = 0;
 			boolean intersectionClass = false;
-			while (eitr.hasNext()) {
-				try {
-					OntClass cls = eitr.next();
+			while (stmtitr.hasNext()) {
+				RDFNode type = stmtitr.nextStatement().getObject();
+				if (type.isResource()) {
 					if (itercnt == 0) {
-						if (eitr.hasNext()) {
+						if (stmtitr.hasNext()) {
 							intersectionClass = true;
 						}
 						if (intersectionClass) {
@@ -2071,12 +2073,32 @@ public class OwlToSadl {
 					if (itercnt++ > 0) {
 						sb.append(" and ");
 					}
-					sb.append(uriToSadlString(concepts, cls));
-				}
-				catch (Exception e){
-					System.err.println(e.getMessage());
+					sb.append(uriToSadlString(concepts, type.asResource()));
 				}
 			}
+//			ExtendedIterator<OntClass> eitr = inst.listOntClasses(true);
+//			int itercnt = 0;
+//			boolean intersectionClass = false;
+//			while (eitr.hasNext()) {
+//				try {
+//					OntClass cls = eitr.next();
+//					if (itercnt == 0) {
+//						if (eitr.hasNext()) {
+//							intersectionClass = true;
+//						}
+//						if (intersectionClass) {
+//							sb.append("{");
+//						}
+//					}
+//					if (itercnt++ > 0) {
+//						sb.append(" and ");
+//					}
+//					sb.append(uriToSadlString(concepts, cls));
+//				}
+//				catch (Exception e){
+//					System.err.println(e.getMessage());
+//				}
+//			}
 			if (intersectionClass) {
 				sb.append("}");
 			}
@@ -2144,7 +2166,10 @@ public class OwlToSadl {
 		if (s.getSubject().isAnon()) {
 			return null;	// wait and see if this is the object of a statement
 		}
-		if (ignoreNamespace(s.getPredicate(), false)) {
+		if (stripNamespaceDelimiter(s.getSubject().getNameSpace()).equals(getBaseUri())) {
+			return null;	// the model cannot be a subject
+		}
+		if (!s.getPredicate().equals(RDF.type) && ignoreNamespace(s.getPredicate(), false)) {
 			return null;
 		}
 		StringBuilder sb = new StringBuilder();
@@ -2159,12 +2184,20 @@ public class OwlToSadl {
 			sb.append(uriToSadlString(getConcepts(), subj));
 		}
 
-		sb.append(" has ");
-		sb.append(uriToSadlString(getConcepts(), s.getPredicate()));
-		sb.append(" ");
+		if (s.getPredicate().equals(RDF.type)) {
+			sb.append(" is a ");
+		}
+		else {
+			sb.append(" has ");
+			sb.append(uriToSadlString(getConcepts(), s.getPredicate()));
+			sb.append(" ");
+		}
 		RDFNode obj = s.getObject();
 		if (obj.isAnon()) {
 			sb.append(blankNodeToString(obj.asResource(), true));
+		}
+		else if (obj.isResource() && obj.asResource().equals(OWL.Ontology)) {
+			return null;	// the object can't be owl:Ontology
 		}
 		else {
 			sb.append(rdfNodeToString(obj, 0));
@@ -2338,18 +2371,28 @@ public class OwlToSadl {
 		if (supers.size() > 0) {
 			sb.append(" is a type of ");			
 			if (supers.size() > 1) {
-				sb.append("{");
+				List<String> typeStrings = new ArrayList<String>();
 				Iterator<Resource> spIter = supers.iterator();
-				int itercnt = 0;
 				while (spIter.hasNext()) {
+					Resource spcls = spIter.next();
+					String spStr = uriToSadlString(concepts, spcls);
+					if (!typeStrings.contains(spStr)) {
+						typeStrings.add(spStr);
+					}
+				}
+				if (typeStrings.size() > 1) {
+					sb.append("{");
+				}
+				int itercnt = 0;
+				for (String typeStr : typeStrings) {
 					if (itercnt++ > 0) {
 						sb.append(" and ");
 					}
-					Resource spcls = spIter.next();
-					String spStr = uriToSadlString(concepts, spcls);
-					sb.append(spStr);
+					sb.append(typeStr);
 				}
-				sb.append("}");
+				if (typeStrings.size() > 1) {
+					sb.append("}");
+				}
 			}
 			else {
 				sb.append(uriToSadlString(concepts, supers.get(0)));
@@ -2426,6 +2469,29 @@ public class OwlToSadl {
 					concepts.addErrorMessage(t.getMessage());
 				}
 				sb.append(restrictionToString(concepts, cls, res));
+				addEndOfStatement(sb, 1);
+			}
+		}
+		if (mappedRestrictions != null) {
+			for (OntClass res : mappedRestrictions) {
+				if (res.isRestriction()) {
+					try {
+						OntProperty op = res.asRestriction().getOnProperty();
+						if (!concepts.getCompleted().contains(op)) {
+							if (op.isObjectProperty()) {
+								sb.append(objPropertyToSadl(concepts, op));
+							}
+							else {
+								sb.append(dtPropertyToSadl(concepts, op));
+							}
+							concepts.addCompleted(op);
+						}
+					}
+					catch (Throwable t) {
+						concepts.addErrorMessage(t.getMessage());
+					}
+				}
+				sb.append(restrictionToString(concepts, cls, res.asRestriction()));
 				addEndOfStatement(sb, 1);
 			}
 		}
@@ -2891,11 +2957,15 @@ public class OwlToSadl {
 			}
 		}
 		else if (type.equals(OWL.ObjectProperty)) {
-			concepts.addObjProperty(ontRsrc.asObjectProperty());
+			if (isPropertyInThisNamespace(ontRsrc.asObjectProperty())) {
+				concepts.addObjProperty(ontRsrc.asObjectProperty());
+			}
 			return true;
 		}
 		else if (type.equals(OWL.DatatypeProperty)) {
-			concepts.addDtProperty(ontRsrc.asDatatypeProperty());
+			if (isPropertyInThisNamespace(ontRsrc.asDatatypeProperty())) {
+				concepts.addDtProperty(ontRsrc.asDatatypeProperty());
+			}
 			return true;
 		}
 		else if (type.equals(RDF.Property)) {
@@ -2911,11 +2981,15 @@ public class OwlToSadl {
 //					return true;
 //				}
 //			}
-			concepts.addRdfProperty(ontRsrc.asProperty());
-			return true;
+			if (isPropertyInThisNamespace(ontRsrc.asProperty())) {
+				concepts.addRdfProperty(ontRsrc.asProperty());
+				return true;
+			}
 		}
 		else if (type.equals(OWL.AnnotationProperty)) {
-			concepts.addAnnProperty(ontRsrc.asAnnotationProperty());
+			if (isPropertyInThisNamespace(ontRsrc.asAnnotationProperty())) {
+				concepts.addAnnProperty(ontRsrc.asAnnotationProperty());
+			}
 			return true;
 		}
 		else if (type.equals(OWL.Ontology)) {
@@ -3111,6 +3185,17 @@ public class OwlToSadl {
 		return false;
 	}
 
+	private boolean isPropertyInThisNamespace(Property mprop) {
+		String ns = mprop.getNameSpace();
+		if (ns.endsWith("#")) {
+			ns = ns.substring(0, ns.length() - 1);
+		}
+		if (mprop.isURIResource() && ns.equals(getBaseUri())) {
+			return true;
+		}
+		return false;
+	}
+
 	private Resource getSuperPropertyType(Resource ontRsrc) {
 		StmtIterator sitr = theModel.listStatements(null, RDFS.subPropertyOf, ontRsrc);
 		if (sitr.hasNext()) {
@@ -3150,7 +3235,7 @@ public class OwlToSadl {
 
 	private void addNewLineIfNotAtEndOfBuffer(StringBuilder sb) {
 		if (!isNewLineAtEndOfBuffer(sb)) {
-			sb.append("\n");
+			sb.append(System.lineSeparator());
 		}
 		
 	}

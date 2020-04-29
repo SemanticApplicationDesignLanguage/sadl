@@ -32,6 +32,7 @@ import java.util.Map
 import org.eclipse.emf.ecore.resource.Resource
 import com.hp.hpl.jena.ontology.OntModel
 import java.util.List
+import com.ge.research.sadl.model.gp.Rule
 
 /**
  * Provides {@code SADL} inferences.
@@ -71,6 +72,10 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 		}
 		
 		override setPreferences(Map<String, String> preferenceMap) {
+			throw new UnsupportedOperationException("TODO: auto-generated method stub")
+		}
+		
+		override insertRulesAndQuery(Resource resource, List<Rule> rules) throws SadlInferenceException {
 			throw new UnsupportedOperationException("TODO: auto-generated method stub")
 		}
 		

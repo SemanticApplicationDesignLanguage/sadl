@@ -3,7 +3,7 @@
   <parent>
       <groupId>com.ge.research.sadl</groupId>
       <artifactId>com.ge.research.sadl.reasoner</artifactId>
-      <version>3.2.1-SNAPSHOT</version>
+      <version>3.3.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>reasoner-api</artifactId>
@@ -47,6 +47,12 @@
                <artifactId>opencsv</artifactId>
                <version>2.3</version>
        </dependency>
+	<dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
   
 	<!-- Define where to deploy this project's artifacts -->

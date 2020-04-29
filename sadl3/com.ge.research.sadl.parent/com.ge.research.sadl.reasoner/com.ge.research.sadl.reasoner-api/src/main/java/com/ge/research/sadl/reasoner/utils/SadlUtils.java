@@ -14,6 +14,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -239,7 +240,9 @@ public class SadlUtils {
 			result = new String(buffer);
 		} finally {
 			try {
-				in.close();
+				if (in != null) {
+					in.close();
+				}
 			} catch (IOException e) { /* ignore it */
 			}
 		}
@@ -1356,4 +1359,56 @@ public class SadlUtils {
 		}
     }
 
+    /**
+     * Method to take in a list of number of the form [3.45678, 4.56789, 5.6789] and return a list of numbers with the number of
+     * specified significant figures. If there is only one number in the list the square brackets are dropped.
+     * @param numberList
+     * @param numSigFig
+     * @return
+     */
+    public static String formatNumberList(String numberList, int numSigFig) {
+     	boolean needsSquareBrackets = false;
+    	String nl = numberList.trim();
+    	if (nl.startsWith("[") && nl.endsWith("]")) {
+    		nl = nl.substring(1, nl.length() - 1);
+    	}
+    	String[] numbers = nl.split(",");
+    	if (numbers.length > 1) {
+    		needsSquareBrackets = true;
+    	}
+    	for (int i = 0; i < numbers.length; i++) {
+    		String num = numbers[i];
+    		numbers[i] = formatNumber(num, numSigFig);
+    	}
+    	StringBuilder sb = new StringBuilder();
+    	if (needsSquareBrackets) {
+    		sb.append("[");
+    	}
+		for (int i = 0; i < numbers.length; i++) {
+			if (i > 0) {
+				sb.append(", ");
+			}
+			sb.append(numbers[i]);
+		}
+		if (needsSquareBrackets) {
+			sb.append("]");
+		}
+    	return sb.toString();
+    }
+
+    /**
+     * Method to format a number represented as a String to the number of significant figures specified
+     * @param num
+     * @param numSigFig
+     * @return
+     */
+	public static String formatNumber(String num, int numSigFig) {
+		double val = Double.parseDouble(num);
+//		return Double.toString(Math.round(val*Math.pow(10, numSigFig))/Math.pow(10, numSigFig));
+//		BigDecimal d = BigDecimal.valueOf(val).setScale(numSigFig, RoundingMode.HALF_UP);
+//		double scaled = d.doubleValue();
+//		return Double.toString(scaled);
+	    String s = String.format("%."+numSigFig+"G", BigDecimal.valueOf(val));
+	    return s;
+	}
 }

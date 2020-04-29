@@ -231,7 +231,9 @@ public class Rule {
 		if (ruleVariables == null) {
 			ruleVariables = new ArrayList<VariableNode>();
 		}
-		ruleVariables.add(ruleVariable);
+		if (!ruleVariables.contains(ruleVariable)) {
+			ruleVariables.add(ruleVariable);
+		}
 		return true;
 	}
 	

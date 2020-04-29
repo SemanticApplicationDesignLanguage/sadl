@@ -12,21 +12,20 @@
 
 <h2>Installation Instructions for SADL-IDE, Version 3.2</h2>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/20/2018<!--webbot bot="Timestamp" endspan i-checksum="12521" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->04/27/2020<!--webbot bot="Timestamp" endspan i-checksum="12614" -->. 
 Send questions and comments to
 <a href="mailto:crapo@research.ge.com?subject=SADL V3 Installation">A. W. Crapo</a>.</h5>
+<p>To Install SADL Version 3 do the following:</p>
 <ol style="color: rgb(0, 0, 0); font-family: Times New Roman; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
   <li>If not already installed, install Java 1.8 from&nbsp;<a href="http://www.java.com/">http://www.java.com</a>&nbsp; 
-  (Java 1.8 required!). (See&nbsp;<a href="http://sadl.sourceforge.net/sadlv2release.html#CheckJavaVersion">How 
+  (Java 1.8 required!). (See&nbsp;<a href="CheckJavaVersion.html">How 
   to check Java Version</a>.)</li>
-  <li>Download and install Eclipse Kepler (Eclipse Standard 4.3.x) from&nbsp;<a href="http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>&nbsp;. 
-  (Note: if unable to install the SADL update in the next step due to missing 
-  requirements, install &quot;Eclipse IDE for Java and DSL Developers&quot;, which will 
-  include the Xtext dependencies which are most likely the problem.)</li>
-  <li>Download the SADL V3 installation ZIP file from
+  <li>Download and install Eclipse from&nbsp;<a href="http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>&nbsp;. 
+  (Note: Eclipse 2020-03 is recommended but other versions may work as well.)</li>
+  <li>Download the latest SADL V3 installation ZIP file from
   <a href="https://github.com/crapo/sadlos2/releases">
   https://github.com/crapo/sadlos2/releases</a>.</li>
-  <li>Start Eclipse Kepler, go to Help -&gt; Install New Software. Click on Add... 
+  <li>Start Eclipse, go to Help -&gt; Install New Software. Click on Add... 
   to create a new update site. Then click on Archive and browse to the ZIP file 
   downloaded in step 3. Click OK to install SADL. Select all features, accept 
   the license agreement, confirm installation and restart.</li>
@@ -35,6 +34,57 @@ Send questions and comments to
   switch to a different workspace on a valid (Unix-compatible) path (File -&gt; 
   Switch Workspace).</li>
 </ol>
+
+<p>To verify that SADL is properly installed, do the following:</p>
+<ol>
+  <li>Create a new Eclipse General project<ul>
+    <li>File -&gt; New -&gt; Project...</li>
+    <li>General -&gt; Project</li>
+    <li>Next</li>
+    <li>Name the project, e.g., MyFirstProject (<b><font color="#FF0000">Do not 
+    put spaces or other non-URL compatible characters in the project name.</font></b>)</li>
+    <li>Finish</li>
+  </ul>
+  </li>
+  <li>Create a new SADL file<ul>
+    <li>With the name of the project selected in the left-side Package Explorer 
+    window, either (If the Package Explorer isn't visible: Window -&gt; Show View 
+    -&gt; Package Explorer.)<ul>
+      <li>right-click on the project name and select New -&gt; File on the popup 
+      menu, or</li>
+      <li>select File -&gt; New -&gt; File from the menu bar</li>
+    </ul>
+    </li>
+    <li>Enter a file name ending in &quot;.sadl&quot;, e.g., MyFirstModel.sadl (<b><font color="#FF0000">Do 
+    not put spaces or other non-URL compatible characters in the file name.</font></b>)</li>
+    <li>Finish</li>
+  </ul>
+  </li>
+  <li>The file should be opened in an editor window. There should be an error 
+  marker <img border="0" src="images/SadlV31.gif" width="19" height="21"> on the 
+  first line of the file. Clicking on the error marker should display the 
+  message &quot;mismatched input '&lt;EOF&gt;' expecting 'uri'.</li>
+  <li>Click in the first line right after the error marker to place the focus in 
+  the editor window and the cursor at the beginning of the first line. </li>
+  <li>Hold down the control key and press the space bar (the content assist 
+  request (CA) in Windows, check Window -&gt; Preferences -&gt; General -&gt; Keys and 
+  find Content Assist to check key binding)</li>
+  <li>&quot;uri&quot; should be filled in as that is the first non-comment word in every 
+  SADL file. Type in a valid URI in double quotes or request CA again to 
+  generate the default model URI. </li>
+  <li>Type &quot;alias&quot; or request CA again and choose &quot;alias&quot; </li>
+  <li>Another request for CA will fill in the alias or prefix for the model 
+  (must be a single text string with no special characters)</li>
+  <li>Add a period (.), the end of statement (EOS) character.</li>
+  <li>The error marker should go away.</li>
+  <li>Save the model (cntr-s or File -&gt; Save.</li>
+</ol>
+<p>If you obtain the behavior described above you have a valid SADL editing 
+environment.</p>
+<h3>While you're installing....</h3>
+<p>You might want to install a graphing package to help you visualize your 
+models. See the <a href="../Visualization.html">Model Visualization</a>, section 
+for SADL V3.</p>
 
 </body>
 

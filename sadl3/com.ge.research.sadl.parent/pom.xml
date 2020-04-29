@@ -3,14 +3,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.ge.research.sadl</groupId>
 	<artifactId>com.ge.research.sadl.parent</artifactId>
-	<version>3.2.1-SNAPSHOT</version>
+	<version>3.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
 		<tycho-version>1.5.1</tycho-version>
 		<xtextVersion>2.20.0</xtextVersion>
 		<mwe2Version>2.11.1</mwe2Version>
-		<sadlOsgiVersion>3.2.1</sadlOsgiVersion>
+		<sadlOsgiVersion>3.3.0</sadlOsgiVersion>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>

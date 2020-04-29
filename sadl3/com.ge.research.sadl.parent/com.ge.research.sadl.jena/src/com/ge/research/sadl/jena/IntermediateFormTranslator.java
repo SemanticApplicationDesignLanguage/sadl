@@ -1171,11 +1171,21 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (!processed) {
 			if (gpe instanceof BuiltinElement) {
 				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				for (int i = 0; args != null && i < args.size(); i++ ) {
-					Node arg = args.get(i);
-					if (arg instanceof ProxyNode) {
-						GraphPatternElement gpeback = addImpliedAndExpandedProperties((GraphPatternElement)((ProxyNode)arg).getProxyFor());
-						((ProxyNode)arg).setProxyFor(gpeback);
+				if (args != null) {
+					if (args.size() == 2 && ((BuiltinElement)gpe).getFuncType().equals(BuiltinType.Equal) &&
+							args.get(1) instanceof VariableNode &&
+							args.get(0) instanceof ProxyNode && 
+							((ProxyNode)args.get(0)).getProxyFor() instanceof TripleElement &&
+							((TripleElement)((ProxyNode)args.get(0)).getProxyFor()).getObject() == null) {
+						// this needs to be collapsed to a single triple, which will happen later, so don't do anything
+						return gpe;
+					}
+					for (int i = 0; args != null && i < args.size(); i++ ) {
+						Node arg = args.get(i);
+						if (arg instanceof ProxyNode) {
+							GraphPatternElement gpeback = addImpliedAndExpandedProperties((GraphPatternElement)((ProxyNode)arg).getProxyFor());
+							((ProxyNode)arg).setProxyFor(gpeback);
+						}
 					}
 				}
 			}
@@ -1206,7 +1216,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				if (rhs instanceof ProxyNode) {
 					((Junction)gpe).setRhs(SadlModelProcessor.nodeCheck(addImpliedAndExpandedProperties(((ProxyNode)rhs).getProxyFor())));
 				}
-				else {
+				else if (rhs instanceof NamedNode && ((NamedNode)rhs).getNodeType().equals(NodeType.FunctionNode)) {
+					// let it go--it should eventually be a BuiltinElement.
+				}
+				else if (rhs != null){
 					throw new TranslationException("Junction must contain only ProxyNode as left and right.");
 				}
 			}
@@ -1418,7 +1431,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					for (Node n: ((BuiltinElement)premise).getArguments()) {
 						if (n instanceof VariableNode && ((VariableNode)n).isCRulesVariable() && ((VariableNode)n).getType() != null && !isCruleVariableInTypeOutput((VariableNode) n)) {
 							TripleElement newTypeTriple = new TripleElement(n, new RDFTypeNode(), ((VariableNode)n).getType());
-							gpes.add(++i, newTypeTriple);
+							if (isRuleThen && !((BuiltinElement)premise).getFuncName().equals("thereExists")) {
+								((Rule) getTarget()).getIfs().add(0, newTypeTriple);
+							}
+							else {
+								gpes.add(++i, newTypeTriple);
+							}
 							addCruleVariableToTypeOutput((VariableNode) n);
 							if (!isRuleThen) {
 								try {
@@ -1438,18 +1456,32 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					Node subj = gpe.getSubject();
 					Node obj = gpe.getObject();
 					if (subj instanceof VariableNode && ((VariableNode)subj).isCRulesVariable() && ((VariableNode)subj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) subj)) {
-						TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
-						newTypeTriple.setSourceType(TripleSourceType.ITC);
-						gpes.add(i++, newTypeTriple);
+						if (!updateVariableTypeTriple((VariableNode) subj, ((VariableNode)subj).getType(), gpes)) {
+							TripleElement newTypeTriple = new TripleElement(subj, new RDFTypeNode(), ((VariableNode)subj).getType());
+							newTypeTriple.setSourceType(TripleSourceType.ITC);
+							if (isRuleThen && getTarget() instanceof Rule) {
+								((Rule) getTarget()).getIfs().add(0, newTypeTriple);
+							}
+							else {
+								gpes.add(i++, newTypeTriple);
+							}
+						}
 						addCruleVariableToTypeOutput((VariableNode) subj);
 						if (!isRuleThen) {
 							i = addNotEqualsBuiltinsForNewCruleVariable(gpes, i, (VariableNode) subj);
 						}
 					}
 					if (obj instanceof VariableNode && ((VariableNode)obj).isCRulesVariable() && ((VariableNode)obj).getType() != null && !isCruleVariableInTypeOutput((VariableNode) obj)) {
-						TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
-						newTypeTriple.setSourceType(TripleSourceType.ITC);
-						gpes.add(++i, newTypeTriple);
+						if (!updateVariableTypeTriple((VariableNode) obj, ((VariableNode)obj).getType(), gpes)) {
+							TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
+							newTypeTriple.setSourceType(TripleSourceType.ITC);
+							if (isRuleThen) {
+								((Rule) getTarget()).getIfs().add(0, newTypeTriple);
+							}
+							else {
+								gpes.add(i++, newTypeTriple);
+							}
+						}
 						addCruleVariableToTypeOutput((VariableNode) obj);
 						if (!isRuleThen) {
 							i = addNotEqualsBuiltinsForNewCruleVariable(gpes, i, (VariableNode) obj);
@@ -1462,6 +1494,42 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 		}
 		return gpes;
+	}
+
+	private boolean updateVariableTypeTriple(VariableNode var, Node type, List<GraphPatternElement> gpes) {
+		for (GraphPatternElement gpe : gpes) {
+			if (gpe instanceof TripleElement && ((TripleElement)gpe).getPredicate() instanceof RDFTypeNode) {
+				if (((TripleElement)gpe).getSubject().equals(var)) {
+					// don't broaden the type
+					if (!classNodeIsSubclass(((TripleElement)gpe).getObject(), type)) {
+						((TripleElement)gpe).setObject(type);
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean classNodeIsSubclass(Node type, Node type2) {
+		if (type.equals(type2)) {
+			return true;
+		}
+		if (type instanceof NamedNode && type2 instanceof NamedNode && 
+				((NamedNode)type).getNodeType().equals(NodeType.ClassNode) &&
+				((NamedNode)type2).getNodeType().equals(NodeType.ClassNode)) {
+			OntClass cls1 = getTheJenaModel().getOntClass(type.getURI());
+			OntClass cls2 = getTheJenaModel().getOntClass(type2.getURI());
+			try {
+				if (SadlUtils.classIsSubclassOf(cls1, cls2, true, null)) {
+					return true;
+				}
+			} catch (CircularDependencyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return false;
 	}
 
 	private List<GraphPatternElement> flattenRuleJunctions(List<GraphPatternElement> lst) {
@@ -1562,6 +1630,16 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			rule.getIfs().add(tgpe);			
 		}
 		else {
+//			if (tgpe instanceof TripleElement) {
+//				if (((TripleElement)tgpe).getPredicate() instanceof RDFTypeNode && 
+//					((TripleElement)tgpe).getSubject() instanceof VariableNode) {
+//					if (isCruleVariableInTypeOutput((VariableNode) ((TripleElement)tgpe).getSubject())) {
+//						results.remove(tgpe);
+//						rule.getIfs().add(0, tgpe);
+//					}
+//				}
+//			}
+//			else 
 			if (tgpe instanceof Junction) {
 				int idx = results.indexOf(tgpe);
 				GraphPatternElement newtgpe = moveEmbeddedFromJunction(rule, (Junction)tgpe);
@@ -2273,6 +2351,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							if ((te.getSubject() == null || te.getSubject().equals(((TripleElement)gpe).getSubject()))
 									&& (te.getPredicate() == null || te.getPredicate().equals(((TripleElement)gpe).getPredicate()))
 									&& (te.getObject() == null || te.getObject().equals(((TripleElement)gpe).getObject()))) {
+								if (te.getObject() == null && te.getSubject() == null) {
+									// this is too broad for some cases
+									continue;
+								}
 								ProxyNode pn = retiredProxyNodes.get(gpe);
 								return pn.getReplacementNode();
 							}
@@ -2383,8 +2465,34 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						be.getArguments().get(1) instanceof VariableNode) && 
 						be.getArguments().get(0) instanceof ProxyNode && 
 						((ProxyNode)be.getArguments().get(0)).getProxyFor() instanceof TripleElement &&
-						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null) {
-					((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(be.getArguments().get(1));
+						(((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null ||
+								(((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() instanceof ProxyNode &&
+										((ProxyNode)((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject()).getProxyFor() instanceof TripleElement &&
+										((TripleElement)((ProxyNode)((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject()).getProxyFor()).getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI) &&
+										((TripleElement)((ProxyNode)((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject()).getProxyFor()).getSubject() == null &&
+										((TripleElement)((ProxyNode)((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject()).getProxyFor()).getObject() == null			
+										))) {
+					if (objectShouldBeUnittedQuantity((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor())) {
+						// make sure we have the right triples for UnittedQuantity
+						if (((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject() == null) {
+							if (be.getArguments().get(1) instanceof VariableNode) {
+								((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(be.getArguments().get(1));
+							}
+							else if (be.getArguments().get(1) instanceof Literal) {
+								// don't have triple for value of UnittedQuantity
+								TripleElement valueTriple = new TripleElement(null, new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI), be.getArguments().get(1));
+								((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(new ProxyNode(valueTriple));
+							}
+						}
+						else {
+							// have triple for value of UnittedQuantity
+							TripleElement valueTriple = (TripleElement) ((ProxyNode) ((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).getObject()).getProxyFor();
+							valueTriple.setObject(be.getArguments().get(1));
+						}
+					}
+					else {
+						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setObject(be.getArguments().get(1));
+					}
 					patterns.add(((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()));
 					if (be.getFuncName().equals("assign")) {
 						((TripleElement)((ProxyNode)be.getArguments().get(0)).getProxyFor()).setType(TripleModifierType.Assignment);
@@ -2536,6 +2644,44 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		patterns = moveTriplesOutOfBuiltin(patterns, be, isRuleThen);
 		return returnNode;
+	}
+
+	private boolean objectShouldBeUnittedQuantity(TripleElement tr) {
+		OntClass propRange = getPropertyRange(tr.getPredicate());
+		if (propRange != null) {
+			if (propRange.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+				return true;
+			}
+			OntClass unittedQuantitySubclass = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+			try {
+				if (SadlUtils.classIsSubclassOf(propRange, unittedQuantitySubclass, true, null)) {
+					return true;
+				}
+			} catch (CircularDependencyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+
+	private OntClass getPropertyRange(Node pred) {
+		Property prop = getTheJenaModel().getProperty(pred.getURI());
+		StmtIterator rngItr = getTheJenaModel().listStatements(prop.asResource(), RDFS.range, (RDFNode)null);
+		OntClass unittedQuantitySubclass = null;
+		if (rngItr.hasNext()) {
+			RDFNode rng = rngItr.nextStatement().getObject();
+			if (!rngItr.hasNext()) {
+				if (rng.isURIResource() && rng.canAs(OntClass.class)) {
+					unittedQuantitySubclass = rng.as(OntClass.class);
+				}
+			}
+			if (unittedQuantitySubclass == null) {
+				// apparently has more than 1 range, use UnittedQuantity
+				unittedQuantitySubclass = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+			}
+		}
+		return unittedQuantitySubclass;
 	}
 
 	/**
@@ -3477,6 +3623,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				rule.setThens((List<GraphPatternElement>)results);
 			}
 			// now post-process
+			replaceClassesWithInstances(rule);
 			replaceClassesWithVariables(rule);
 			postProcessRule(rule, null);
 			
@@ -3487,50 +3634,192 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return rule;
 	}
 
-	private void replaceClassesWithVariables(Rule rule) throws TranslationException {
-		List<VariableNode> variables = rule.getRuleVariables();
-		boolean newVarList = false;
-		if (variables == null) {
-			variables = new ArrayList<VariableNode>();
-			newVarList = true;
-		}
-		replaceClassesWithVariables(variables, rule.getGivens(), false);
-		replaceClassesWithVariables(variables,rule.getIfs(), false);
-		replaceClassesWithVariables(variables,rule.getThens(), false);
-		if (newVarList && variables.size() > 0) {
-			for (VariableNode var : variables) {
-				rule.addRuleVariable(var);
-			}
-			newVarList = false;
-		}
-		replaceClassesWithVariables(variables, rule.getGivens(), true);
-		replaceClassesWithVariables(variables,rule.getIfs(), true);
-		replaceClassesWithVariables(variables,rule.getThens(), true);
-		if (newVarList && variables.size() > 0) {
-			for (VariableNode var : variables) {
-				rule.addRuleVariable(var);
-				rule.getIfs().add(0, new TripleElement(var, new RDFTypeNode(), var.getType()));
-			}
-		}
+	private Map<NamedNode, NamedNode> findInstances(Rule rule) throws TranslationException {
+		Map<NamedNode,NamedNode> classInstanceMap = findInstances(null, rule.getGivens());
+		classInstanceMap = findInstances(classInstanceMap, rule.getIfs());
+		classInstanceMap = findInstances(classInstanceMap, rule.getThens());
+		return classInstanceMap;
 	}
 
-	private void replaceClassesWithVariables(List<VariableNode> variables, 
-			List<GraphPatternElement> gpes, boolean useOnlyClassesWithContext) throws TranslationException {
+	private Map<NamedNode, NamedNode> findInstances(Map<NamedNode, NamedNode> classInstanceMap, List<GraphPatternElement> gpes) throws TranslationException {
 		if (gpes != null) {
 			for (GraphPatternElement gpe : gpes) {
-				replaceClassesWithVariables(variables, gpe, useOnlyClassesWithContext);
+				classInstanceMap = findInstances(classInstanceMap, gpe);
+			}
+		}
+		return classInstanceMap;
+	}
+
+	private Map<NamedNode, NamedNode> findInstances(Map<NamedNode, NamedNode> classInstanceMap,
+			GraphPatternElement gpe) throws TranslationException {
+		if (gpe instanceof BuiltinElement) {
+			List<Node> args = ((BuiltinElement)gpe).getArguments();
+			for (Node n : args) {
+				if (n instanceof NamedNode && ((NamedNode)n).getNodeType().equals(NodeType.InstanceNode)) {
+					Node type = ((NamedNode)n).getLocalizedType();
+					if (type instanceof NamedNode && ((NamedNode)type).getNodeType().equals(NodeType.ClassNode)) {
+						if (classInstanceMap == null) classInstanceMap = new HashMap<NamedNode, NamedNode>();
+						if (classInstanceMap.containsKey(type)) {
+							throw new TranslationException("Multiple instances could match class '" + type.getName() + "'");
+						}
+						classInstanceMap.put((NamedNode)type, (NamedNode)n);
+					}
+				}
+				else if (n instanceof ProxyNode) {
+					classInstanceMap = findInstances(classInstanceMap, ((ProxyNode)n).getProxyFor());
+				}
+			}
+		}
+		else if (gpe instanceof TripleElement) {
+			Node subj = ((TripleElement)gpe).getSubject();
+			if ( subj instanceof NamedNode && ((NamedNode)subj).getNodeType().equals(NodeType.InstanceNode)) {
+				Node type = ((NamedNode)subj).getLocalizedType();
+				if (type instanceof NamedNode && ((NamedNode)type).getNodeType().equals(NodeType.ClassNode)) {
+					if (classInstanceMap == null) classInstanceMap = new HashMap<NamedNode, NamedNode>();
+					if (classInstanceMap.containsKey(type)) {
+						throw new TranslationException("Multiple instances could match class '" + type.getName() + "'");
+					}
+					classInstanceMap.put((NamedNode)type, (NamedNode)subj);
+				}
+			}
+			else if (subj instanceof ProxyNode) {
+				classInstanceMap = findInstances(classInstanceMap, ((ProxyNode)subj).getProxyFor());
+			}
+			Node obj = ((TripleElement)gpe).getObject();
+			if ( obj instanceof NamedNode && ((NamedNode)obj).getNodeType().equals(NodeType.InstanceNode)) {
+				Node type = ((NamedNode)obj).getLocalizedType();
+				if (type instanceof NamedNode && ((NamedNode)type).getNodeType().equals(NodeType.ClassNode)) {
+					if (classInstanceMap == null) classInstanceMap = new HashMap<NamedNode, NamedNode>();
+					if (classInstanceMap.containsKey(type)) {
+						throw new TranslationException("Multiple instances could match class '" + type.getName() + "'");
+					}
+					classInstanceMap.put((NamedNode)type, (NamedNode)obj);
+				}
+			}
+			else if (obj instanceof ProxyNode) {
+				classInstanceMap = findInstances(classInstanceMap, ((ProxyNode)obj).getProxyFor());
+			}
+		}
+		return classInstanceMap;
+	}
+
+	private void replaceClassesWithInstances(Rule rule) throws TranslationException {
+		Map<NamedNode,NamedNode> classInstanceMap = findInstances(rule);
+		replaceClassesWithInstances(classInstanceMap, rule.getGivens(), false);
+		replaceClassesWithInstances(classInstanceMap,rule.getIfs(), false);
+		replaceClassesWithInstances(classInstanceMap,rule.getThens(), false);
+	}
+
+	private void replaceClassesWithVariables(Rule rule) throws TranslationException {
+		List<VariableNode> variables = rule.getRuleVariables();
+		boolean newVarCreated = false;
+		if (variables == null) {
+			variables = new ArrayList<VariableNode>();
+			newVarCreated = true;
+		}
+		if (replaceClassesWithVariables(variables, rule.getGivens(), false)) {
+			newVarCreated = true;
+		}
+		if (replaceClassesWithVariables(variables,rule.getIfs(), false)) {
+			newVarCreated = true;
+		}
+		if (replaceClassesWithVariables(variables,rule.getThens(), false)) {
+			newVarCreated = true;
+		}
+		if (newVarCreated && variables.size() > 0) {
+			for (VariableNode var : variables) {
+				rule.addRuleVariable(var);
+			}
+			newVarCreated = false;
+		}
+		if (replaceClassesWithVariables(variables, rule.getGivens(), true)) {
+			newVarCreated = true;
+		}
+		if (replaceClassesWithVariables(variables,rule.getIfs(), true)) {
+			newVarCreated = true;
+		}
+		if (replaceClassesWithVariables(variables,rule.getThens(), true)) {
+			newVarCreated = true;
+		}
+		if (newVarCreated && variables.size() > 0) {
+			for (VariableNode var : variables) {	
+				rule.addRuleVariable(var);
+				int insertionIdx = varTypedInRuleIfs(rule, var);
+				if (insertionIdx >= 0) {
+					rule.getIfs().add(insertionIdx, new TripleElement(var, new RDFTypeNode(), var.getType()));
+				}
 			}
 		}
 	}
 
-	private void replaceClassesWithVariables(List<VariableNode> variables, 
-			GraphPatternElement gpe, boolean useOnlyClassesWithContext) throws TranslationException {
+	/**
+	 * Method to determine if this variable already has a type triple
+	 * @param rule
+	 * @param var
+	 * @return
+	 */
+	private int varTypedInRuleIfs(Rule rule, VariableNode var) {
+		int firstUsed = 0;	// default is to put at beginning
+		List<GraphPatternElement> ifs = rule.getIfs();
+		for (GraphPatternElement gpe : ifs) {
+			if (gpe instanceof TripleElement) {
+				if ((((TripleElement)gpe).getSubject() != null && ((TripleElement)gpe).getSubject().equals(var)) || 
+						(((TripleElement)gpe).getObject() != null && ((TripleElement)gpe).getObject().equals(var))) {
+					if (firstUsed == 0) {
+						// don't set it if it is already set to a first use
+						firstUsed = ifs.indexOf(gpe);
+					}
+				}
+				if (((TripleElement)gpe).getPredicate() instanceof RDFTypeNode &&
+						((TripleElement)gpe).getSubject() != null && ((TripleElement)gpe).getSubject().equals(var)) {
+					return -1;	// don't put it in at all
+				}
+			}
+		}
+		return firstUsed;
+	}
+
+	private void replaceClassesWithInstances(Map<NamedNode, NamedNode> classInstanceMap,
+			List<GraphPatternElement> gpes, boolean b) throws TranslationException {
+		if (gpes != null) {
+			for (GraphPatternElement gpe : gpes) {
+				replaceClassesWithInstances(classInstanceMap, gpe);
+			}
+		}
+	}
+
+	private boolean replaceClassesWithVariables(List<VariableNode> variables, 
+			List<GraphPatternElement> gpes, boolean useOnlyClassesWithContext) throws TranslationException {
+		boolean newVarCreated = false;
+		if (gpes != null) {
+			for (GraphPatternElement gpe : gpes) {
+				if (replaceClassesWithVariables(variables, gpe, useOnlyClassesWithContext)) {
+					newVarCreated = true;
+				}
+			}
+		}
+		return newVarCreated;
+	}
+
+	private void replaceClassesWithInstances(Map<NamedNode, NamedNode> classInstanceMap,
+			GraphPatternElement gpe) throws TranslationException {
 		if (gpe instanceof TripleElement) {
-			replaceClassesWithVariables(variables, (TripleElement)gpe, useOnlyClassesWithContext);
+			replaceClassesWithInstances(classInstanceMap, (TripleElement)gpe);
 		}
 		else if (gpe instanceof BuiltinElement) {
-			replaceClassesWithVariables(variables, (BuiltinElement)gpe, useOnlyClassesWithContext);
+			replaceClassesWithInstances(classInstanceMap, (BuiltinElement)gpe);
 		}
+	}
+
+	private boolean replaceClassesWithVariables(List<VariableNode> variables, 
+			GraphPatternElement gpe, boolean useOnlyClassesWithContext) throws TranslationException {
+		if (gpe instanceof TripleElement) {
+			return replaceClassesWithVariables(variables, (TripleElement)gpe, useOnlyClassesWithContext);
+		}
+		else if (gpe instanceof BuiltinElement) {
+			return replaceClassesWithVariables(variables, (BuiltinElement)gpe, useOnlyClassesWithContext);
+		}
+		return false;
 	}
 
 	/**
@@ -3539,14 +3828,109 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param be
 	 * @throws TranslationException 
 	 */
-	private void replaceClassesWithVariables(List<VariableNode> variables, 
-			BuiltinElement be, boolean useOnlyClassesWithContext) throws TranslationException {
+	private void replaceClassesWithInstances(Map<NamedNode, NamedNode> classInstanceMap, 
+			BuiltinElement be) throws TranslationException {
 		List<Node> args = be.getArguments();
 		int idx = 0;
 		if (args != null) {
 			for (Node arg : args) {
 				if (arg instanceof ProxyNode) {
-					replaceClassesWithVariables(variables, ((ProxyNode)arg).getProxyFor(), useOnlyClassesWithContext);
+					replaceClassesWithInstances(classInstanceMap, ((ProxyNode)arg).getProxyFor());
+				}
+				else if (arg instanceof NamedNode && 
+						(((NamedNode)arg).getNodeType().equals(NodeType.ClassNode) ||
+						((NamedNode)arg).getNodeType().equals(NodeType.ClassListNode))) {
+					NamedNode matchingInst = findInstanceOfRightType(classInstanceMap, (NamedNode)arg);
+					if (matchingInst != null) {
+						args.set(idx, matchingInst);
+					}
+				}
+				idx++;
+			}
+		}
+	}
+
+	private NamedNode findInstanceOfRightType(Map<NamedNode, NamedNode> classInstanceMap, NamedNode arg) {
+		if (classInstanceMap != null) {
+			if (classInstanceMap.containsKey(arg)) {
+				return classInstanceMap.get(arg);
+			}
+			NamedNode msc = findMatchingSubclass(classInstanceMap, arg);	
+			return msc;
+		}
+		return null;
+	}
+
+	private NamedNode findMatchingSubclass(Map<NamedNode, NamedNode> classInstanceMap, NamedNode arg) {
+		OntClass cls = getTheJenaModel().getOntClass(arg.getURI());
+		if (cls != null) {
+			ExtendedIterator<OntClass> scitr = cls.listSubClasses(true);
+			while (scitr.hasNext()) {
+				OntClass sc = scitr.next();
+				NamedNode scnn = new NamedNode(sc.getURI());
+				scnn.setNodeType(NodeType.ClassNode);
+				if (classInstanceMap.containsKey(scnn)) {
+					scitr.close();
+					return classInstanceMap.get(scnn);
+				}
+				else {
+					NamedNode other = findMatchingSubclass(classInstanceMap, scnn);
+					if (other != null) {
+						scitr.close();
+						return other;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Method to replace class subject and object in a TripleElement with the first variable of the same type (class)
+	 * @param variables
+	 * @param tr
+	 * @throws TranslationException 
+	 */
+	private void replaceClassesWithInstances(Map<NamedNode, NamedNode> classInstanceMap, 
+			TripleElement tr) throws TranslationException {
+		if (tr.getPredicate().getURI().equals(RDF.type.getURI()) || 
+				tr.getPredicate().getURI().equals(RDFS.subClassOf.getURI())) {
+			return;
+		}
+		if (tr.getSubject() instanceof NamedNode) {  // && ((NamedNode)tr.getSubject()).getContext() == null) {
+			if (((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassNode) ||
+					((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassListNode)) {
+				NamedNode matchingInst = findInstanceOfRightType(classInstanceMap, (NamedNode)tr.getSubject());
+				if (matchingInst != null) {
+					tr.setSubject(matchingInst);
+				}
+			}
+		}
+		if (tr.getObject() instanceof NamedNode) {
+			if (((NamedNode)tr.getObject()).getNodeType().equals(NodeType.ClassNode) ||
+					((NamedNode)tr.getObject()).getNodeType().equals(NodeType.ClassListNode)) {
+				NamedNode matchingInst = findInstanceOfRightType(classInstanceMap, (NamedNode)tr.getObject());
+				if (matchingInst != null) {
+					tr.setObject(matchingInst);
+				}
+			}
+		}
+	}
+	/**
+	 * Method to replace a class argument to a BuiltinElement with the first variable of the same type (class)
+	 * @param variables
+	 * @param be
+	 * @throws TranslationException 
+	 */
+	private boolean replaceClassesWithVariables(List<VariableNode> variables, 
+			BuiltinElement be, boolean useOnlyClassesWithContext) throws TranslationException {
+		boolean newVarCreated = false;
+		List<Node> args = be.getArguments();
+		int idx = 0;
+		if (args != null) {
+			for (Node arg : args) {
+				if (arg instanceof ProxyNode) {
+					newVarCreated = replaceClassesWithVariables(variables, ((ProxyNode)arg).getProxyFor(), useOnlyClassesWithContext);
 				}
 				else if (arg instanceof NamedNode && (!useOnlyClassesWithContext || ((NamedNode)arg).getContext() == null) &&
 						(((NamedNode)arg).getNodeType().equals(NodeType.ClassNode) ||
@@ -3558,12 +3942,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						matchingVar.setPrefix(getModelProcessor().getModelAlias());
 						matchingVar.setType(arg);
 						variables.add(matchingVar);
+						newVarCreated = true;
 					}
 					args.set(idx, matchingVar);
 				}
 				idx++;
 			}
 		}
+		return newVarCreated;
 	}
 
 	/**
@@ -3572,11 +3958,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param tr
 	 * @throws TranslationException 
 	 */
-	private void replaceClassesWithVariables(List<VariableNode> variables, 
+	private boolean replaceClassesWithVariables(List<VariableNode> variables, 
 			TripleElement tr, boolean matchOnSubclasses) throws TranslationException {
+		boolean newVarCreated = false;
 		if (tr.getPredicate().getURI().equals(RDF.type.getURI()) || 
 				tr.getPredicate().getURI().equals(RDFS.subClassOf.getURI())) {
-			return;
+			return newVarCreated;
 		}
 		if (tr.getSubject() instanceof NamedNode) {  // && ((NamedNode)tr.getSubject()).getContext() == null) {
 			if (((NamedNode)tr.getSubject()).getNodeType().equals(NodeType.ClassNode) ||
@@ -3595,6 +3982,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						matchingVar.setPrefix(getModelProcessor().getModelAlias());
 						matchingVar.setType(((NamedNode)tr.getSubject()));
 						variables.add(matchingVar);
+						newVarCreated = true;
 					}
 				}
 				if (matchingVar != null) {
@@ -3608,7 +3996,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				VariableNode matchingVar = findVariableOfRightType(variables, (NamedNode)tr.getObject(), matchOnSubclasses);
 				if (matchingVar != null && tr.getSubject().equals(matchingVar)) {
 					// this is the definition of an existing variable
-					return;
+					return newVarCreated;
 				}
 				if (matchingVar == null && matchOnSubclasses) {
 					// see if there is already a variable of a superclass that can be revised to be this class and used
@@ -3630,6 +4018,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 		}
+		return newVarCreated;
 	}
 
 	private VariableNode findVariableOfRightType(List<VariableNode> variables, 
@@ -3642,44 +4031,81 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 			if (matchOnSubclasses) {
+				OntClass cls = getTheJenaModel().getOntClass(classUri);
+				VariableNode subclassV = findVariableOfRIghtTypeInSubclass(cls, variables);
+				if (subclassV != null) {
+					return subclassV;
+				}
+//				for (VariableNode v : variables) {
+//					OntClass cls = getTheJenaModel().getOntClass(classUri);
+//					if (cls != null && v.getType() != null) {
+//						ExtendedIterator<OntClass> scitr = cls.listSubClasses();
+//						while (scitr.hasNext()) {
+//							OntClass sc = scitr.next();
+//							if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
+//								scitr.close();
+//								return v;
+//							}
+//						}
+//					}
+//				}
+			}
+		}
+		return null;
+	}
+	
+	private VariableNode findVariableOfRIghtTypeInSubclass(OntClass cls, List<VariableNode> variables) {
+		if (cls != null) {
+			ExtendedIterator<OntClass> scitr = cls.listSubClasses();
+			while (scitr.hasNext()) {
+				OntClass sc = scitr.next();
 				for (VariableNode v : variables) {
-					OntClass cls = getTheJenaModel().getOntClass(classUri);
-					if (cls != null && v.getType() != null) {
-						ExtendedIterator<OntClass> scitr = cls.listSubClasses();
-						while (scitr.hasNext()) {
-							OntClass sc = scitr.next();
-							if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
-								scitr.close();
-								return v;
-							}
-						}
+					if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
+						scitr.close();
+						return v;
 					}
 				}
-			}
-
+				VariableNode lowerV = findVariableOfRIghtTypeInSubclass(sc, variables);
+				if (lowerV != null) {
+					return lowerV;
+				}
+			}	
 		}
 		return null;
 	}
 
 	private VariableNode findSuperclassVariable(List<VariableNode> variables, NamedNode nn,
 			boolean matchOnSubclasses) {
+		// Note: this model is not an inferred model so transitive closure over class hierarchy cannot be assumed
 		String classUri = nn.getURI();
 		if (variables != null) {
 			for (VariableNode v : variables) {
 				OntClass cls = getTheJenaModel().getOntClass(classUri);
 				if (cls != null && v.getType() != null) {
-					ExtendedIterator<OntClass> scitr = cls.listSuperClasses();
-					while (scitr.hasNext()) {
-						OntClass sc = scitr.next();
-						if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
-							scitr.close();
-							return v;
-						}
+					if (findSuperclassVariable(v, cls)) {
+						return v;
 					}
 				}
 			}
 		}
 		return null;
+	}
+
+	private boolean findSuperclassVariable(VariableNode v, OntClass cls) {
+		ExtendedIterator<OntClass> scitr = cls.listSuperClasses(true);
+		while (scitr.hasNext()) {
+			OntClass sc = scitr.next();
+			if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
+				scitr.close();
+				return true;
+			}
+			else {
+				if (findSuperclassVariable(v, sc)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

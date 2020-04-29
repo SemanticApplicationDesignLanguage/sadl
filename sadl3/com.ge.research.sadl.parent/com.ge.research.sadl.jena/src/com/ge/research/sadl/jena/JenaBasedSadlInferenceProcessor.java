@@ -56,6 +56,7 @@ import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Read;
+import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.model.gp.StartWrite;
 import com.ge.research.sadl.model.gp.Test;
@@ -1771,6 +1772,12 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	}
 
 	@Override
+	public Object[] insertRulesAndQuery(Resource resource, List<Rule> rules) throws SadlInferenceException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public boolean isSupported(String fileExtension) {
 		return "sadl".equals(fileExtension);
 	}
@@ -1799,5 +1806,4 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		}
 		return null;
 	}
-
 }
