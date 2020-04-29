@@ -3,7 +3,7 @@
 
   <groupId>com.ge.research.sadl</groupId>
   <artifactId>com.ge.research.sadl.server</artifactId>
-  <version>3.2.1-SNAPSHOT</version>
+  <version>3.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>SADL Knowledge Services</name>
   <description>Supporting software for knowledge capture and delivery</description>
