@@ -10,7 +10,6 @@
     "@theia/git": "next",
     "@theia/languages": "next",
     "@theia/markers": "next",
-    "@theia/merge-conflicts": "next",
     "@theia/messages": "next",
     "@theia/monaco": "next",
     "@theia/navigator": "next",
@@ -34,8 +33,5 @@
     "start": "theia start ../sadl-extension/example-projects/",
     "start:debug": "node ./src-gen/backend/main.js --SADL_LSP=5007 --log-level=debug",
     "watch": "theia build --watch --mode development"
-  },
-  "theia": {
-    "target": "browser"
   }
 }
