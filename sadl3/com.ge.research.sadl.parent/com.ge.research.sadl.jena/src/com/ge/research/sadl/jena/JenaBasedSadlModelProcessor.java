@@ -106,6 +106,7 @@ import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
+import com.ge.research.sadl.model.gp.JunctionNode;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
@@ -4954,26 +4955,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return null;
 		}
 
-//		if (op.equals("and") || op.equals("or")) {
-			// now validate these (needed?)
-//			if (lexpr != null && rexpr != null) {
-//				if(!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
-//					addTypeCheckingError(errorMessage.toString(), container);
-//				}
-//				else {
-//					Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
-//					if (ip != null) {
-//						Iterator<EObject> ipitr = ip.keySet().iterator();
-//						while (ipitr.hasNext()) {
-//							EObject eobj = ipitr.next();
-//							OntModelProvider.addImpliedProperty(lexpr.eResource(), eobj, ip.get(eobj));
-//						}
-//						// TODO must add implied properties to rules, tests, etc.
-//					}
-//				}
-//			}
-//		}
-
 		if(lobj != null && robj !=null ) {
 			//Check to see if we need to add implied property to entire built in element
 			// Data has Implied property _number (int) and _valid (bool) dataList is list of type Data
@@ -5339,13 +5320,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 		if (op.equals("and") || op.equals("or")) {
 			boolean simpleUnionOrIntersection = true;
-//			if (!(robj instanceof NamedNode) && !(robj instanceof ConceptIdentifier)) {
-//				simpleUnionOrIntersection = false;
-//			}
-//			else if (!(lobj instanceof NamedNode) && !(lobj instanceof ConceptIdentifier)) {
-//				simpleUnionOrIntersection = false;
-//			}
-//			else 
 			if (robj instanceof ProxyNode || robj instanceof GraphPatternElement || 
 					robj instanceof ArrayList<?> || robj instanceof Object[]) {
 				simpleUnionOrIntersection = false;
@@ -5354,35 +5328,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					lobj instanceof ArrayList<?> || lobj instanceof Object[]) {
 				simpleUnionOrIntersection = false;
 			}
-//			else if (robj instanceof NamedNode && !((NamedNode)robj).getNodeType().equals(NodeType.ClassNode) &&
-//					!((NamedNode)robj).getNodeType().equals(NodeType.VariableNode) && 
-//					!((NamedNode)robj).getNodeType().equals(NodeType.InstanceNode)) {
-//				simpleUnionOrIntersection = false;
-//			}
-//			else if (lobj instanceof NamedNode && !((NamedNode)lobj).getNodeType().equals(NodeType.ClassNode) &&
-//					!((NamedNode)lobj).getNodeType().equals(NodeType.VariableNode) &&
-//					!((NamedNode)lobj).getNodeType().equals(NodeType.InstanceNode)) {
-//				simpleUnionOrIntersection = false;
-//			}
 			if (simpleUnionOrIntersection) {
-				// this is a special case--union or intersection class
-				ConceptIdentifier ci;
-				List<ConceptIdentifier> args = new ArrayList<ConceptIdentifier>();
-				if (lobj instanceof NamedNode) {
-					lobj = new ConceptName(((NamedNode)lobj).getURI());
-					((ConceptName)lobj).setType(ConceptType.ONTCLASS);
-				}
-				args.add((ConceptIdentifier) lobj);
-				if (robj instanceof NamedNode) {
-					robj = new ConceptName(((NamedNode)robj).getURI());
-					((ConceptName)robj).setType(ConceptType.ONTCLASS);
-				}
-				args.add((ConceptIdentifier) robj);
+				// this is a special case--union or intersection of two Nodes
+				JunctionNode ci;
 				if (op.equals("or")) {
-					ci = new SadlUnionClass(args);
+					ci = new JunctionNode(nodeCheck(lobj), nodeCheck(robj), JunctionType.Disj);
 				}
 				else {
-					ci = new SadlIntersectionClass(args);
+					ci = new JunctionNode(nodeCheck(lobj), nodeCheck(robj), JunctionType.Conj);
 				}
 				return ci;
 			}

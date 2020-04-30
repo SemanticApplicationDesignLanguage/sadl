@@ -76,6 +76,15 @@ public class Junction extends GraphPatternElement {
 			Conj.setTokens(AND_SYMBOL, AND_ALPHA);
 			Disj.setTokens(OR_SYMBOL, OR_ALPHA);
 		}
+		
+		public static String toString(JunctionType type) {
+			if (type.equals(JunctionType.Disj)) {
+				return "or";
+			}
+			else {
+				return "and";
+			}
+		}
 	}
 
 	/**
