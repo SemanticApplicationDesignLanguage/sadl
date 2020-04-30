@@ -84,7 +84,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 							StringBuilder sb = new StringBuilder(project.getName());
 							sb.append("/");
 							for (int i = 2; i < selection.size(); i++) {
-								if (i > 0) sb.append("/");
+								if (i > 2) sb.append("/");
 								sb.append(selection.get(i));
 							}
 							targetFile = sb.toString();
@@ -114,7 +114,7 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 						Job.getJobManager().join(GRAPH_JOB,monitor);
 						
 						if (imports.size() > 0) {
-							Map<String,String> prefMap = getPreferences(URI.createFileURI(sbmr.getFullPath().toPortableString()));
+							Map<String,String> prefMap = sbmr != null ? getPreferences(URI.createFileURI(sbmr.getFullPath().toPortableString())) : null;
 							IGraphVisualizer visualizer = getVisualizer(getConfigMgr(), prefMap);
 							GraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project);
 							IFile trgtFile = null;

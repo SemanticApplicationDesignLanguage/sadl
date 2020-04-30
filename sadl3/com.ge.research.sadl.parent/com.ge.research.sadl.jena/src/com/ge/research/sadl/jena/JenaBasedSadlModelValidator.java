@@ -3235,6 +3235,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return getType(sr, sr);
 	}
 	
+	public void clearTypeCache() {
+		if (typeCache != null) {
+			typeCache.clear();
+		}
+	}
+	
 	protected TypeCheckInfo getType(SadlResource sr, EObject reference) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
 		String conceptUri = declarationExtensions.getConceptUri(sr);
 		EObject expression = sr.eContainer();

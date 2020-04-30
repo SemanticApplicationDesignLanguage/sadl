@@ -13101,7 +13101,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return null;
 		}
 		List<ConceptName> cached = impliedPropoertiesCache.get(cls.getURI());
-		if (cached != null) {
+		if (cached != null && cached.size() > 0) {
 			return cached;
 		}
 		List<OntResource> allImplPropClasses = getAllImpliedPropertyClasses();

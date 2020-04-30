@@ -54,6 +54,10 @@ import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
+import com.ge.research.sadl.model.gp.ConstantNode;
+import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -244,7 +248,19 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		GraphGenerator gg = new GraphGenerator(configMgr, visualizer, project, publicUri, new ConceptName(publicUri), monitor);
 		gg.setUriStrategy(UriStrategy.QNAME_WITH_URI_TOOLTIP);
 		List<GraphSegment> imports = getAnchoredImports(configMgr, publicUri, prefix, trgtFile, derivedFN, graphRadius);
-		ResultSet rs = gg.convertDataToResultSet(imports, UriStrategy.QNAME_IF_IMPORT, prefix);
+		ResultSet rs = null;
+		if (imports == null) {
+			Object[][] rsTable = new Object[1][3];
+			NamedNode thisNode = new NamedNode(publicUri);
+			rsTable[0][0] = ((NamedNode)thisNode).toFullyQualifiedString();
+			rsTable[0][1] = null;
+			rsTable[0][2] = null;
+			String[] colNames = new String[]{"head", "edge", "tail"};
+			rs = new ResultSet(colNames, rsTable);
+		}
+		else {
+			rs = gg.convertDataToResultSet(imports, UriStrategy.QNAME_IF_IMPORT, prefix);
+		}
 		String tempDir = convertProjectRelativePathToAbsolutePath(getGraphDir(project)); 
 		File tmpDirFile = new File(tempDir);
 		tmpDirFile.mkdirs();

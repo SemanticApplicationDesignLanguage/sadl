@@ -461,11 +461,21 @@ public abstract class SadlActionHandler extends AbstractHandler {
 									IDE.openEditorOnFileStore(page, fileStore);
 								}
 								catch (Throwable t) {
-									console.error("Error trying to display graph file '" + fileToOpen + "': " + t.getMessage());
+									if (console != null) {
+										console.error("Error trying to display graph file '" + fileToOpen + "': " + t.getMessage());
+									}
+									else {
+										System.err.println(t.getMessage());
+									}
 								}
 							}
 							else if (fileToOpen != null) {
-								console.error("Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
+								if (console != null) {
+									console.error("Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
+								}
+								else {
+									System.err.println("Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
+								}
 							}
 						}
 					}

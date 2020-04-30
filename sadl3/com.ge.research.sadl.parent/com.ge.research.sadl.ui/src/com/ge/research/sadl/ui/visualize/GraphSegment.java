@@ -13,6 +13,7 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.ui.visualize.GraphGenerator.UriStrategy;
 import com.hp.hpl.jena.ontology.AllValuesFromRestriction;
 import com.hp.hpl.jena.ontology.CardinalityRestriction;
+import com.hp.hpl.jena.ontology.ConversionException;
 import com.hp.hpl.jena.ontology.EnumeratedClass;
 import com.hp.hpl.jena.ontology.HasValueRestriction;
 import com.hp.hpl.jena.ontology.IntersectionClass;
@@ -141,15 +142,23 @@ public class GraphSegment {
 					boolean first = true;
 					ExtendedIterator<? extends OntClass> eitr = ucls.listOperands();
 					while (eitr.hasNext()) {
-						OntClass uclsmember = eitr.next();
-						if (!first) {
-							sb.append(" or ");
+						try {
+							OntClass uclsmember = eitr.next();
+							if (!first) {
+								sb.append(" or ");
+							}
+							if (objectDisplayStrings != null && objectDisplayStrings.containsKey(uclsmember)) {
+								sb.append(objectDisplayStrings.get(uclsmember));
+							}
+							else {
+								sb.append(stringForm(uclsmember));
+							}
 						}
-						if (objectDisplayStrings != null && objectDisplayStrings.containsKey(uclsmember)) {
-							sb.append(objectDisplayStrings.get(uclsmember));
-						}
-						else {
-							sb.append(stringForm(uclsmember));
+						catch (ConversionException e) {
+							StmtIterator propstmts = ucls.listProperties();
+							while (propstmts.hasNext()) {
+								System.out.println(propstmts.next().toString());
+							}
 						}
 						first = false;
 					}

@@ -266,8 +266,12 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			s = rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]);
 			String edgeLbl = rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]);
 			Object o = rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]);
-
-			createGraphTriple(s, edgeLbl, o, headAttributes, edgeAttributes, tailAttributes, row, anchorNodeLabel, null);
+			if (s != null && edgeLbl != null && o != null) {
+				createGraphTriple(s, edgeLbl, o, headAttributes, edgeAttributes, tailAttributes, row, anchorNodeLabel, null);
+			}
+			else {
+				System.err.println("Invalid triple from ResultSet: " + s + "->" + edgeLbl + "->" + o);
+			}
 		}
 		if (duplicateObjectMap != null) {
 			Iterator<String> objitr = duplicateObjectMap.keySet().iterator();
@@ -283,7 +287,12 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 							Object s = rs.getShowNamespaces() ? row[0] : rs.extractLocalName(row[0]);
 							String edgeLbl = rs.getShowNamespaces() ? row[1].toString() : rs.extractLocalName(row[1]);
 							Object o = rs.getShowNamespaces() ? row[2] : rs.extractLocalName(row[2]);
-							createGraphTriple(s, edgeLbl, o, headAttributes, edgeAttributes, tailAttributes, row, anchorNodeLabel, key);
+							if (s != null && edgeLbl != null && o != null) {
+								createGraphTriple(s, edgeLbl, o, headAttributes, edgeAttributes, tailAttributes, row, anchorNodeLabel, key);
+							}
+							else {
+								System.err.println("Invalid triple from ResultSet: " + s + "->" + edgeLbl + "->" + o);
+							}
 						}
 					}
 				}
@@ -509,7 +518,13 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 						Object rval = row[key.intValue()];
 						if (needsQuotes(rval)) {
 							rval = escapeQuotes(rval.toString());
-							sb.append("\"" + rval + "\"");
+							if (!rval.toString().startsWith("\"")) {
+								// assuming if it starts it also ends 
+								sb.append("\"" + rval + "\"");
+							}
+							else {
+								sb.append(rval);
+							}
 						}
 						else {
 							sb.append(rval);
