@@ -1475,7 +1475,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						if (!updateVariableTypeTriple((VariableNode) obj, ((VariableNode)obj).getType(), gpes)) {
 							TripleElement newTypeTriple = new TripleElement(obj, new RDFTypeNode(), ((VariableNode)obj).getType());
 							newTypeTriple.setSourceType(TripleSourceType.ITC);
-							if (isRuleThen) {
+							if (isRuleThen && getTarget() != null && getTarget() instanceof Rule &&
+									((Rule)getTarget()).getIfs() != null) {
 								((Rule) getTarget()).getIfs().add(0, newTypeTriple);
 							}
 							else {
@@ -3654,19 +3655,21 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			GraphPatternElement gpe) throws TranslationException {
 		if (gpe instanceof BuiltinElement) {
 			List<Node> args = ((BuiltinElement)gpe).getArguments();
-			for (Node n : args) {
-				if (n instanceof NamedNode && ((NamedNode)n).getNodeType().equals(NodeType.InstanceNode)) {
-					Node type = ((NamedNode)n).getLocalizedType();
-					if (type instanceof NamedNode && ((NamedNode)type).getNodeType().equals(NodeType.ClassNode)) {
-						if (classInstanceMap == null) classInstanceMap = new HashMap<NamedNode, NamedNode>();
-						if (classInstanceMap.containsKey(type)) {
-							throw new TranslationException("Multiple instances could match class '" + type.getName() + "'");
+			if (args != null) {
+				for (Node n : args) {
+					if (n instanceof NamedNode && ((NamedNode)n).getNodeType().equals(NodeType.InstanceNode)) {
+						Node type = ((NamedNode)n).getLocalizedType();
+						if (type instanceof NamedNode && ((NamedNode)type).getNodeType().equals(NodeType.ClassNode)) {
+							if (classInstanceMap == null) classInstanceMap = new HashMap<NamedNode, NamedNode>();
+							if (classInstanceMap.containsKey(type)) {
+								throw new TranslationException("Multiple instances could match class '" + type.getName() + "'");
+							}
+							classInstanceMap.put((NamedNode)type, (NamedNode)n);
 						}
-						classInstanceMap.put((NamedNode)type, (NamedNode)n);
 					}
-				}
-				else if (n instanceof ProxyNode) {
-					classInstanceMap = findInstances(classInstanceMap, ((ProxyNode)n).getProxyFor());
+					else if (n instanceof ProxyNode) {
+						classInstanceMap = findInstances(classInstanceMap, ((ProxyNode)n).getProxyFor());
+					}
 				}
 			}
 		}
@@ -4456,7 +4459,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @throws TranslationException
 	 */
 	protected void applyMissingPatternsToGraphPatternElement(GraphPatternElement gpe) throws TranslationException {
-		if (gpe instanceof BuiltinElement) {
+		if (gpe instanceof BuiltinElement && ((BuiltinElement)gpe).getArguments() != null) {
 			for (Node arg : ((BuiltinElement)gpe).getArguments()) {
 				applyMissingPatternsToNode(gpe, arg);
 			}
@@ -4547,7 +4550,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @throws TranslationException
 	 */
 	protected void applyMissingPatternsToVariableDefinition(Node node, GraphPatternElement defn) throws TranslationException {
-		if (defn instanceof BuiltinElement) {
+		if (defn instanceof BuiltinElement && ((BuiltinElement)defn).getArguments() != null) {
 			for (Node arg : ((BuiltinElement)defn).getArguments()) {
 				if (!node.equals(arg)) {
 					applyMissingPatternsToVariableDefinition(node, arg);

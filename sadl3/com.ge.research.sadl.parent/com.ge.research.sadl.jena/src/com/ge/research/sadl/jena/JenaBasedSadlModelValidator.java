@@ -565,7 +565,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (getModelProcessor().isConjunction(op) || getModelProcessor().isDisjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					// check for implied properties on boolean "and" or "statements"
-					if(leftTypeCheckInfo.getImplicitProperties() != null) {
+					if(leftTypeCheckInfo != null && leftTypeCheckInfo.getImplicitProperties() != null) {
 						//property is implied
 						Iterator<ConceptName> ipitr = leftTypeCheckInfo.getImplicitProperties().iterator();
 						while (ipitr.hasNext()) {
@@ -649,7 +649,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				rightTypeCheckInfo = getType(rightExpression);
 				if (getModelProcessor().isConjunction(op) || getModelProcessor().isDisjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
-					if(rightTypeCheckInfo.getImplicitProperties() != null) {
+					if(rightTypeCheckInfo != null && rightTypeCheckInfo.getImplicitProperties() != null) {
 						// check for implied properties on boolean "and" or "statements"
 						Iterator<ConceptName> ipitr = rightTypeCheckInfo.getImplicitProperties().iterator();
 						while (ipitr.hasNext()) {
@@ -842,7 +842,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
-		else if (leftTypeCheckInfo.getCompoundTypes() != null || rightTypeCheckInfo.getCompoundTypes() != null) {
+		else if ((leftTypeCheckInfo != null && leftTypeCheckInfo.getCompoundTypes() != null) || 
+				(rightTypeCheckInfo != null && rightTypeCheckInfo.getCompoundTypes() != null)) {
 			// this is OK? At least it shouldn't create the exception below... AWC 11/26/2018
 		}
 		else {

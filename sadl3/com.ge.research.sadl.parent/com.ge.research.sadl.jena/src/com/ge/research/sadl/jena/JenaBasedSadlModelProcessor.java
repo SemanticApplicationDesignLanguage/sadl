@@ -5339,20 +5339,31 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 		if (op.equals("and") || op.equals("or")) {
 			boolean simpleUnionOrIntersection = true;
-			if (!(robj instanceof NamedNode) && !(robj instanceof ConceptIdentifier)) {
+//			if (!(robj instanceof NamedNode) && !(robj instanceof ConceptIdentifier)) {
+//				simpleUnionOrIntersection = false;
+//			}
+//			else if (!(lobj instanceof NamedNode) && !(lobj instanceof ConceptIdentifier)) {
+//				simpleUnionOrIntersection = false;
+//			}
+//			else 
+			if (robj instanceof ProxyNode || robj instanceof GraphPatternElement || 
+					robj instanceof ArrayList<?> || robj instanceof Object[]) {
 				simpleUnionOrIntersection = false;
 			}
-			else if (!(lobj instanceof NamedNode) && !(lobj instanceof ConceptIdentifier)) {
+			else if (lobj instanceof ProxyNode || lobj instanceof GraphPatternElement || 
+					lobj instanceof ArrayList<?> || lobj instanceof Object[]) {
 				simpleUnionOrIntersection = false;
 			}
-			else if (robj instanceof NamedNode && !((NamedNode)robj).getNodeType().equals(NodeType.ClassNode) &&
-					!((NamedNode)robj).getNodeType().equals(NodeType.VariableNode)) {
-				simpleUnionOrIntersection = false;
-			}
-			else if (lobj instanceof NamedNode && !((NamedNode)lobj).getNodeType().equals(NodeType.ClassNode) &&
-					!((NamedNode)lobj).getNodeType().equals(NodeType.VariableNode)) {
-				simpleUnionOrIntersection = false;
-			}
+//			else if (robj instanceof NamedNode && !((NamedNode)robj).getNodeType().equals(NodeType.ClassNode) &&
+//					!((NamedNode)robj).getNodeType().equals(NodeType.VariableNode) && 
+//					!((NamedNode)robj).getNodeType().equals(NodeType.InstanceNode)) {
+//				simpleUnionOrIntersection = false;
+//			}
+//			else if (lobj instanceof NamedNode && !((NamedNode)lobj).getNodeType().equals(NodeType.ClassNode) &&
+//					!((NamedNode)lobj).getNodeType().equals(NodeType.VariableNode) &&
+//					!((NamedNode)lobj).getNodeType().equals(NodeType.InstanceNode)) {
+//				simpleUnionOrIntersection = false;
+//			}
 			if (simpleUnionOrIntersection) {
 				// this is a special case--union or intersection class
 				ConceptIdentifier ci;
@@ -8123,7 +8134,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	public Object processExpression(UnaryExpression expr)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
-		Object eobj = processExpression(expr.getExpr());
+		Object eobj = expr.getExpr() != null ? processExpression(expr.getExpr()) : null;
+		if (eobj == null) {
+			return null;
+		}
 		// if (eobj instanceof VariableNode && ((VariableNode)eobj).isCRulesVariable()
 		// && ((VariableNode)eobj).getType() != null) {
 		// TripleElement trel = new TripleElement((VariableNode)eobj, new RDFTypeNode(),
@@ -8133,7 +8147,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// }
 		String op = expr.getOp();
 		Object val = null;
-		if (eobj instanceof com.ge.research.sadl.model.gp.Literal) {
+		if (eobj != null && eobj instanceof com.ge.research.sadl.model.gp.Literal) {
 			val = ((com.ge.research.sadl.model.gp.Literal) eobj).getValue();
 		}
 		if (op.equals("-") && val instanceof Number) {
