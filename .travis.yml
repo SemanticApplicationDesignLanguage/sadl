@@ -25,7 +25,7 @@ jobs:
       - export MAVEN_OPTS="-Dmaven.repo.local=$HOME/.m2/repository -Xms1024m -Xmx3072m -XX:PermSize=512m"
     script:
       - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean
-      - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml verify
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml verify -U
 
   - stage: "Theia build [yarn]"
     language: java
@@ -40,7 +40,7 @@ jobs:
       - nvm use 10.15.3
     script:
       - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml clean
-      - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml -Dmaven.test.skip=true verify
+      - mvn -f ./sadl3/com.ge.research.sadl.parent/pom.xml -Dmaven.test.skip=true verify -U
       - yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension
     before_deploy:
       - printf "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n" >> ~/.npmrc
