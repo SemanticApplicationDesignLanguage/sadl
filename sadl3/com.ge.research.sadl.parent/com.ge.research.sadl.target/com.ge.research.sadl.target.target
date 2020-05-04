@@ -12,7 +12,7 @@
         <unit id="org.jsoup.source" version="1.7.2.v201411291515"/>
         <unit id="javax.activation" version="1.1.0.v201211130549"/>
         <unit id="javax.activation.source" version="1.1.0.v201211130549"/>
-        <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/I20200203200403/repository/"/>
+        <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20200224183213/repository/"/>
     </location>
     <location includeAllPlatforms="false" includeConfigurePhase="true" includeMode="planner" includeSource="true" type="InstallableUnit">
         <unit id="org.objectweb.asm" version="7.1.0.v20190412-2143"/>
