@@ -1216,9 +1216,10 @@ public class OwlToSadl {
 						alreadyDone = true;
 						break;
 					}
-				}if (!alreadyDone) {
+				}
+				if (!alreadyDone) {
 					String stmtstr = blankNodeSubjectStatementToString(s);
-					if (stmtstr != null) {
+					if (stmtstr != null && !stmtstr.trim().equals(".")) {
 						otherSB.append(stmtstr);
 					}
 				}
