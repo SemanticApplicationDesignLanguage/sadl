@@ -726,6 +726,9 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
 					OwlToSadl ots;
 					try {
 						ots = new OwlToSadl(csvImporter.getOwlModel(), csvImporter.getModelName());
+						if (isDebugOutput()) {
+							ots.setVerboseMode(true);
+						}
 						String sadlmodel = ots.getSadlModel();
 						// convert string to InputStream
 						contentStream = new ByteArrayInputStream(sadlmodel.getBytes());
