@@ -23,7 +23,7 @@
     "@theia/terminal": "next",
     "@theia/userstorage": "next",
     "@theia/workspace": "next",
-    "sadl-extension": "^0.1.9"
+    "sadl-extension": "0.1.9"
   },
   "devDependencies": {
     "@theia/cli": "next"

@@ -8,6 +8,9 @@
   "devDependencies": {
     "lerna": "2.4.0"
   },
+  "resolutions": {
+    "**/**/moment": "2.24.0"
+  },
   "workspaces": [
     "sadl-extension",
     "browser-app"
