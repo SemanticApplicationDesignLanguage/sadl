@@ -15,7 +15,7 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  * 
  ***********************************************************************/
-package com.ge.research.sadl.utils
+package com.ge.research.sadl.ui.external
 
 import com.google.common.collect.ImmutableMap
 import com.google.inject.Singleton

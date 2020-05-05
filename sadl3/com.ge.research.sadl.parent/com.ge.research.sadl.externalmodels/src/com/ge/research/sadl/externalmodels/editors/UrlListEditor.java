@@ -64,6 +64,7 @@ import com.ge.research.sadl.external.ExternalEmfModelDownloader;
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.ui.external.EclipseNetworkProxyConfigurator;
 import com.ge.research.sadl.utils.EclipseSadlProjectHelper;
 import com.ge.research.sadl.utils.ResourceManager;
 
@@ -230,7 +231,7 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
 			java.nio.file.Path modelDefinitionPath = ((FileEditorInput) editor.getEditorInput()).getFile().getLocation().toFile().toPath();
 			EclipseSadlProjectHelper projectHelper = new EclipseSadlProjectHelper();
 			java.net.URI modelDefinitionUri = projectHelper.toUri(modelDefinitionPath);
-			new ExternalEmfModelDownloader(projectHelper).downloadModels(modelDefinitionUri);
+			new ExternalEmfModelDownloader(projectHelper, new EclipseNetworkProxyConfigurator()).downloadModels(modelDefinitionUri);
 			// check to see if there are any imports that are not either SADL models or external models processed above
 // TODO
 			// refresh the folder
@@ -292,7 +293,7 @@ public class UrlListEditor extends MultiPageEditorPart implements IResourceChang
     }
 	
 	String downloadURL(String downloadUrl, IPath downloadsRootFolder, String destinationRelativePath) {
-		return new ExternalEmfModelDownloader(new EclipseSadlProjectHelper()).downloadURL(
+		return new ExternalEmfModelDownloader(new EclipseSadlProjectHelper(), new EclipseNetworkProxyConfigurator()).downloadURL(
 				downloadUrl, 
 				Paths.get(downloadsRootFolder.toFile().toURI()),
 				destinationRelativePath);
