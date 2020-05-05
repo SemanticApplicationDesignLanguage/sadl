@@ -22,7 +22,6 @@ Require-Bundle: org.eclipse.xtext,
  com.ge.research.jena,
  com.ge.research.sadl.errorgenerator,
  org.jsoup,
- org.eclipse.core.net,
  javax.activation;visibility:=reexport
 Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

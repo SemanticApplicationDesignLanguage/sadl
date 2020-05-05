@@ -33,20 +33,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.regex.Pattern;
-
-import org.eclipse.emf.common.EMFPlugin;
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.utils.NetworkProxySettingsProvider;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.collect.Lists;
@@ -70,10 +64,12 @@ import com.google.inject.Singleton;
 public class ExternalEmfModelDownloader {
 	
 	private SadlProjectHelper projectHelper;
+	private NetworkProxyConfigurator proxyConfigurator;
 
 	@Inject
-	public ExternalEmfModelDownloader(SadlProjectHelper projectHelper) {
+	public ExternalEmfModelDownloader(SadlProjectHelper projectHelper, NetworkProxyConfigurator proxyConfigurator) {
 		this.projectHelper = projectHelper;
+		this.proxyConfigurator = proxyConfigurator;
 	}
 
 	public void downloadModels(URI modelDefinitionUri) {
@@ -147,19 +143,7 @@ public class ExternalEmfModelDownloader {
 
 		if (downloadUrl != null && !downloadUrl.isEmpty() && !downloadUrl.startsWith("--")) {
 			try {
-				Properties p = System.getProperties();
-				Iterator<Object> pitr = p.keySet().iterator();
-				while (pitr.hasNext()) {
-					Object key = pitr.next();
-					Object prop = p.get(key);
-					// System.out.println("Key=" + key.toString() + ", value = " + prop.toString());
-				}
-				if (EMFPlugin.IS_ECLIPSE_RUNNING) {
-					for (Entry<String, String> entry : new NetworkProxySettingsProvider().getConfigurations().entrySet()) {
-						p.put(entry.getKey(), entry.getValue());
-					}
-				}
-				System.setProperties(p);
+				proxyConfigurator.configureProxies();
 				url = new URL(downloadUrl);
 				is = url.openStream(); // throws an IOException
 				ReadableByteChannel rbc = Channels.newChannel(is);
