@@ -48,6 +48,7 @@ import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider;
 import org.eclipse.xtext.util.StringInputStream;
 
+import com.ge.research.sadl.external.XMLHelper;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -63,6 +64,7 @@ import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.utils.ResourceManager;
+import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.ontology.OntDocumentManager;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -978,6 +980,17 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		String uriForEmptyString = om.getNsPrefixURI("");
 		if (uriForEmptyString != null && uriForEmptyString.endsWith("#")) {
 			return uriForEmptyString.substring(0, uriForEmptyString.length() - 1);
+		}
+		try {
+			Optional<String> buri = new XMLHelper().tryReadBaseUri(new SadlUtils().fileToString(new File(owlFilename)));
+			if (buri.isPresent()) {
+				uriForEmptyString = buri.get();
+				return uriForEmptyString.endsWith("#") ? uriForEmptyString.substring(0, uriForEmptyString.length() - 1) : uriForEmptyString;
+
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return uriForEmptyString;
 	}
