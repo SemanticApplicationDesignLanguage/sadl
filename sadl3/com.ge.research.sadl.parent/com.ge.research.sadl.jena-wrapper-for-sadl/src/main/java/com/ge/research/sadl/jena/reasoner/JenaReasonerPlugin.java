@@ -2326,7 +2326,8 @@ public class JenaReasonerPlugin extends Reasoner{
 						altUrl = configurationMgr.getAltUrlFromPublicUri(impUri);
 					}
 					if (altUrl != null) {
-						String rulefn = altUrl.substring(0, altUrl.lastIndexOf(".")) + ".rules";
+						String rulefn = altUrl.contains(".") ? altUrl.substring(0, altUrl.lastIndexOf(".")) + ".rules" :
+							altUrl + ".rules";
 						if (!ruleFilesLoaded.contains(rulefn)) {
 							if (loadRules(rulefn)) {
 								ruleFilesLoaded.add(rulefn);
