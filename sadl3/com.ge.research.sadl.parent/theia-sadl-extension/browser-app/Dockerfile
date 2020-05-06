@@ -9,6 +9,8 @@ RUN npm install --global node-gyp@6.0.1 \
     && npm config set node_gyp "`npm prefix -g`/lib/node_modules/node-gyp/bin/node-gyp.js" \
     && echo "npm config get node_gyp -> `npm config get node_gyp`"
 
+RUN rm -rf ~/.node-gyp
+
 RUN yarn \
     && yarn theia build \
     && yarn cache clean
