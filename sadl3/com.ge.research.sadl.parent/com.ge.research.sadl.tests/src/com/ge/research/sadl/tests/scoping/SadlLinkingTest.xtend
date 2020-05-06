@@ -1367,4 +1367,35 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 
+	// https://github.com/crapo/sadlos2/issues/423
+	@Test
+	def void canLinkToFQNWithMultipleSegments() {
+		'''
+			uri "http://sadl.org/STEM/BaseModel" alias base.
+			[Thing] (alias "super class of everything") is a class.
+			[System] is a type of <Thing>. 
+			[Subsystem] is a type of <System>.
+			[Bus] is a type of <System>. 
+			// For reading in the tabular data; some properties will be from the 3rd csv file
+			[Connection] is a type of <Subsystem>
+				described by [binding] with a single value of type <Bus>.
+		'''.assertLinking[sadl]
+		'''
+			uri "http://sadl.org/STEM/Scenario" alias scn (note "This ontology was created from a CSV data source.").
+			import "http://sadl.org/STEM/BaseModel" as base.
+			[c16DeliveryDroneSystem.ImplDeliveryDroneSystem] is a <base:Connection>.
+			[c1DeliveryDroneSystem.ImplDeliveryDroneSystem] is a <base:Connection>.
+		'''.assertLinking[sadl]
+		'''
+			uri "http://sadl.org/STEM/Scenario3" alias scn3 (note "This ontology was created from a CSV data source.").
+			import "http://sadl.org/STEM/Scenario" as scn.
+			import "http://sadl.org/STEM/BaseModel" as base.
+			// Individuals:
+			[ethernet] is a <base:Bus>.
+			// Other statements:
+			<scn:c1DeliveryDroneSystem.ImplDeliveryDroneSystem> has <base:binding> <ethernet>.
+			<scn:c16DeliveryDroneSystem.ImplDeliveryDroneSystem> has <base:binding> <ethernet>.
+		'''.assertLinking[sadl]
+	}
+
 }
