@@ -486,6 +486,14 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		if (name2 !== null && parentScope.getSingleElement(name2) === null && ambiguousProblem === null) {
 			map.addElement(name2, it)
 		}
+		// https://github.com/crapo/sadlos2/issues/423
+		// We have to add the SADL resource to the scope with colons as the syntax is the following:
+		// import URL as importedAlis.
+		// importedAlias:something.from.imported.model
+		val name3 = if (namespace !== null) QualifiedName.create(namespace.toString + ':' + name1.toString) else null
+		if (name3 !== null &&  parentScope.getSingleElement(name3) === null && ambiguousProblem === null) {
+			map.addElement(name3, it)
+		}
 	}
 
 	protected def QualifiedName getName(SadlResource it) {
