@@ -54,6 +54,7 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.google.common.base.Optional;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
@@ -470,7 +471,30 @@ public class OwlToSadl {
 			theModel.read(owlFile.getCanonicalPath());
 		}
 		else {
-			theModel.read(new FileInputStream(owlFile), getBaseUri());
+			String baseUri = getBaseUri();
+			if (baseUri == null) {
+				String fn = owlFile.getName();
+				int lastDot = fn.lastIndexOf('.');
+				if (lastDot > 0) {
+					String ext = fn.substring(lastDot + 1);
+					if (ext.equalsIgnoreCase("rdf") || ext.equalsIgnoreCase("owl") || ext.equalsIgnoreCase("xml")) {
+						try {
+							Optional<String> buri = new XMLHelper().tryReadBaseUri(new SadlUtils().fileToString(owlFile));
+							if (buri.isPresent()) {
+								baseUri = buri.get();
+								baseUri = baseUri.endsWith("#") ? baseUri.substring(0, baseUri.length() - 1) : baseUri;
+
+							}
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+					}
+				}
+			}
+			theModel.read(new FileInputStream(owlFile), baseUri);
+			setBaseUri(baseUri);
 		}
 		
 //        theModel.read(owlFile.getCanonicalPath());
