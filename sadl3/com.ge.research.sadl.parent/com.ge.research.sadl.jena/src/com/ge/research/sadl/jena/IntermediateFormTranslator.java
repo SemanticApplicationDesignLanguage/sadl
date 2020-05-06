@@ -908,10 +908,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		} catch (InvalidTypeException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		} catch (TranslationException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		} 
 		
 		// convert givens linked list to array; expand conjunctions
 		List<GraphPatternElement> givens = flattenRuleJunctions(rule.getGivens());
@@ -929,9 +926,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvalidTypeException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (TranslationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 

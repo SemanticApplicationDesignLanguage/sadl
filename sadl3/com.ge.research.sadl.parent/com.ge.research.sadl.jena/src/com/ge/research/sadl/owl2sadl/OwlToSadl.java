@@ -466,7 +466,13 @@ public class OwlToSadl {
 		setSpec(spec);
 		theModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM); //_RDFS_INF);
 		theModel.getDocumentManager().setProcessImports(false);
-		theModel.read(new FileInputStream(owlFile), getBaseUri());
+		if (owlFile.getName().endsWith(".ttl")) {
+			theModel.read(owlFile.getCanonicalPath());
+		}
+		else {
+			theModel.read(new FileInputStream(owlFile), getBaseUri());
+		}
+		
 //        theModel.read(owlFile.getCanonicalPath());
 	}
 
@@ -2059,48 +2065,51 @@ public class OwlToSadl {
 		if (!isEquation) {
 			StmtIterator stmtitr = theBaseModel.listStatements(inst, RDF.type, (RDFNode)null);
 			int itercnt = 0;
+			int bracketLoc = 0;
+			boolean bNamedIndividualFound = false;
 			boolean intersectionClass = false;
 			while (stmtitr.hasNext()) {
 				RDFNode type = stmtitr.nextStatement().getObject();
 				if (type.isResource()) {
-					if (itercnt == 0) {
-						if (stmtitr.hasNext()) {
-							intersectionClass = true;
-						}
-						if (intersectionClass) {
-							sb.append("{");
-						}
+					if (type.isURIResource() && type.asResource().getNameSpace().equals(OWL.NS) && 
+							type.asResource().getLocalName().equals("NamedIndividual")) {
+						// this is an OWL 2 construct that must be left out of SADL
+						bNamedIndividualFound = true;
 					}
-					if (itercnt++ > 0) {
-						sb.append(" and ");
+					else if (type.isURIResource() && type.asResource().getURI().equals(OWL.Class.getURI())) {
+						// ignore
 					}
-					sb.append(uriToSadlString(concepts, type.asResource()));
+					else {
+						if (itercnt == 0) {
+							if (stmtitr.hasNext()) {
+								intersectionClass = true;
+							}
+							if (intersectionClass) {
+								bracketLoc = sb.length();
+								sb.append("{");
+							}
+						}
+						if (itercnt++ > 0) {
+							sb.append(" and ");
+						}
+						sb.append(uriToSadlString(concepts, type.asResource()));
+					}
 				}
 			}
-//			ExtendedIterator<OntClass> eitr = inst.listOntClasses(true);
-//			int itercnt = 0;
-//			boolean intersectionClass = false;
-//			while (eitr.hasNext()) {
-//				try {
-//					OntClass cls = eitr.next();
-//					if (itercnt == 0) {
-//						if (eitr.hasNext()) {
-//							intersectionClass = true;
-//						}
-//						if (intersectionClass) {
-//							sb.append("{");
-//						}
-//					}
-//					if (itercnt++ > 0) {
-//						sb.append(" and ");
-//					}
-//					sb.append(uriToSadlString(concepts, cls));
-//				}
-//				catch (Exception e){
-//					System.err.println(e.getMessage());
-//				}
-//			}
-			if (intersectionClass) {
+			if (bNamedIndividualFound) {
+				if (itercnt == 0) {
+					// only NamedIndividual
+					sb.setLength(0);
+					return sb.toString();
+				}
+				if (itercnt == 1) {
+					// remove opening curley bracket
+					int curlen = sb.length();
+					String afterBracket = sb.substring(bracketLoc + 1); 
+					sb.replace(bracketLoc, curlen, afterBracket);
+				}
+			}
+			else if (intersectionClass) {
 				sb.append("}");
 			}
 			addResourceProperties(sb, concepts, inst, embeddedBNode);
@@ -2172,6 +2181,18 @@ public class OwlToSadl {
 		}
 		if (!s.getPredicate().equals(RDF.type) && ignoreNamespace(s.getPredicate(), false)) {
 			return null;
+		}
+		if (s.getPredicate().equals(RDF.type) && s.getObject().isURIResource()) {
+			String uri = s.getObject().asResource().getURI();
+			if (uri.equals(OWL.NS + "NamedIndividual")){
+				return null;
+			}
+			else if (uri.equals(OWL.Ontology.getURI())) {
+				return null;
+			}
+			else if (uri.equals(OWL.Class.getURI())) {
+				return null;
+			}
 		}
 		StringBuilder sb = new StringBuilder();
 		Resource subj = s.getSubject();
@@ -2407,7 +2428,7 @@ public class OwlToSadl {
 			if (concepts.getAnonClasses().contains(eqcls)) {
 				concepts.getAnonClasses().remove(eqcls);
 				String str = uriToSadlString(concepts, eqcls);
-				sb.append(" must be ");
+//				sb.append(" must be ");
 				sb.append(str);
 			}
 		}
@@ -2577,6 +2598,25 @@ public class OwlToSadl {
 		OntProperty onprop = null;
 		try {
 			onprop = res.getOnProperty();
+			StmtIterator resDmnItr = theModel.listStatements(onprop, RDFS.domain, (RDFNode)null);
+			if (resDmnItr.hasNext()) {
+				// this restriction is in the domain of the restricted property; this is an OWL2 construct
+				if (res.isSomeValuesFromRestriction()) {
+					Resource onClass = res.asSomeValuesFromRestriction().getSomeValuesFrom();
+					if (onClass.canAs(OntClass.class)) {
+						StmtIterator rngItr = theModel.listStatements(onprop, RDFS.range, (RDFNode)null);
+						if (rngItr.hasNext()) {
+							RDFNode rng = rngItr.nextStatement().getObject();
+							if (rng.isResource() && rng.asResource().canAs(Restriction.class)) {
+								Restriction rngres = rng.asResource().as(Restriction.class);
+								String str = restrictionToString(concepts, onClass.as(OntClass.class), rngres);
+								sb.append(str);
+								return sb.toString();
+							}
+						}
+					}
+				}
+			}
 		}
 		catch (ConversionException e) {
 			onprop = getOnPropertyFromConversionException(e);
@@ -2654,6 +2694,63 @@ public class OwlToSadl {
 			if (onCls != null) {
 				sb.append(" of type ");
 				sb.append(rdfNodeToSadlString(concepts, onCls, false));
+			}
+		}
+		else if (res.hasProperty(OWL2.maxQualifiedCardinality)) {
+			RDFNode op = res.getPropertyValue(OWL.onProperty);
+			RDFNode oc = res.getPropertyValue(OWL2.onClass);
+			if (op.isResource() && op.equals(onprop)) {
+				sb.append(" has at most ");
+				RDFNode mcv = res.getPropertyValue(OWL2.maxQualifiedCardinality);
+				if (mcv.isLiteral()) {
+					int mcvInt = mcv.asLiteral().getInt();
+					sb.append(mcvInt);
+					if (mcvInt > 1) {
+						sb.append(" values of type ");
+					}
+					else {
+						sb.append(" value of type ");
+					}
+					sb.append(resourceToString(oc.asResource(), false));
+				}
+			}
+		}
+		else if (res.hasProperty(OWL2.qualifiedCardinality)) {
+			RDFNode op = res.getPropertyValue(OWL.onProperty);
+			RDFNode oc = res.getPropertyValue(OWL2.onClass);
+			if (op.isResource() && op.equals(onprop)) {
+				sb.append(" has exactly ");
+				RDFNode cv = res.getPropertyValue(OWL2.qualifiedCardinality);
+				if (cv.isLiteral()) {
+					int cvInt = cv.asLiteral().getInt();
+					sb.append(cvInt);
+					if (cvInt > 1) {
+						sb.append(" values of type ");
+					}
+					else {
+						sb.append(" value of type ");
+					}
+					sb.append(resourceToString(oc.asResource(), false));
+				}
+			}
+		}
+		else if (res.hasProperty(OWL2.minQualifiedCardinality)) {
+			RDFNode op = res.getPropertyValue(OWL.onProperty);
+			RDFNode oc = res.getPropertyValue(OWL2.onClass);
+			if (op.isResource() && op.equals(onprop)) {
+				sb.append(" has at least ");
+				RDFNode mcv = res.getPropertyValue(OWL2.minQualifiedCardinality);
+				if (mcv.isLiteral()) {
+					int mcvInt = mcv.asLiteral().getInt();
+					sb.append(mcvInt);
+					if (mcvInt > 1) {
+						sb.append(" values of type ");
+					}
+					else {
+						sb.append(" value of type ");
+					}
+					sb.append(resourceToString(oc.asResource(), false));
+				}
 			}
 		}
 		return sb.toString();
@@ -2861,6 +2958,7 @@ public class OwlToSadl {
 							}
 						}
 					}
+//					return rsrc.getLocalName();	// returning the URI may draw attention to the error but....
 					return rsrc.getURI();
 				}
 			}
@@ -3883,7 +3981,7 @@ public class OwlToSadl {
 	}
 	
 	private String enumeratedClassToString(EnumeratedClass enumcls) {
-		StringBuilder sb = new StringBuilder("must be one of {");
+		StringBuilder sb = new StringBuilder(" must be one of {");
 		ExtendedIterator<? extends OntResource> eitr = enumcls.listOneOf();
 		int cnt = 0;
 		while (eitr.hasNext()) {
