@@ -29,6 +29,7 @@
     "@theia/cli": "next"
   },
   "scripts": {
+    "preinstall": "node-gyp install",
     "prepare": "theia build --mode development",
     "start": "theia start ../sadl-extension/example-projects/",
     "start:debug": "node ./src-gen/backend/main.js --SADL_LSP=5007 --log-level=debug",
