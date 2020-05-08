@@ -1,0 +1,11 @@
+ uri "http://sadl.org/Shapes.sadl" alias Shapes.
+ 
+ Shape is a class described by area with values of type float.
+ 
+ Circle is a type of Shape described by radius with values of type float.
+ 
+ Rule AreaOfCircle: if c is a Circle then area of c is PI * radius of c ^ 2.
+ 
+ MyCircle is a Circle with radius 1.0.
+ 
+ Ask: area of a Circle.

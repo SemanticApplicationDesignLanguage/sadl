@@ -1,0 +1,15 @@
+ uri "http://sadl.org/Restrictions1.sadl" alias rstrctns1.
+ 
+ AnatomicalPart is a class.
+ Hand is a type of AnatomicalPart.
+ Digit is a type of AnatomicalPart.
+ {Finger, Thumb} are types of Digit.
+ 
+ digit describes Hand with values of type Digit.
+ 
+ digit of Hand has exactly 5 values.
+ 
+ digit of Hand has exactly 4 values of type Finger.
+ digit of Hand has exactly 1 value of type Thumb.
+ 
+ 

@@ -1,0 +1,9 @@
+digraph gProject {
+    label="Project SemanticsSeminar import map";
+    labelloc=top;
+    labeljust=left;
+     n1[shape=box label="sadllistmodel" tooltip=""http://sadl.org/sadllistmodel"" URL=""file:///C:/sadl/runtime-EclipseXtext/SemanticsSeminar/Graphs/SadlListModel.owl.svg""];
+     n2[shape=box label="pl" tooltip=""http://sadl.org/PredicateLogic.sadl"" URL=""file:///C:/sadl/runtime-EclipseXtext/SemanticsSeminar/Graphs/PredicateLogic.owl.svg""];
+     n3[shape=box label="sadlimplicitmodel" tooltip=""http://sadl.org/sadlimplicitmodel"" URL=""file:///C:/sadl/runtime-EclipseXtext/SemanticsSeminar/Graphs/SadlImplicitModel.owl.svg""];
+     n4[shape=box label="builtinfunctions" tooltip=""http://sadl.org/builtinfunctions"" URL=""file:///C:/sadl/runtime-EclipseXtext/SemanticsSeminar/Graphs/SadlBuiltinFunctions.owl.svg""];
+}

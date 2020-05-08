@@ -1,0 +1,95 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:pl="http://sadl.org/PredicateLogic.sadl#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/PredicateLogic.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'PredicateLogic.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Man">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="Person"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Woman">
+    <rdfs:subClassOf rdf:resource="#Person"/>
+  </owl:Class>
+  <owl:Class rdf:ID="Marriage"/>
+  <owl:ObjectProperty rdf:ID="favoriteThing">
+    <rdfs:domain rdf:resource="#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="child">
+    <rdfs:range rdf:resource="#Person"/>
+    <rdfs:domain rdf:resource="#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="wife">
+    <rdfs:domain rdf:resource="#Marriage"/>
+    <rdfs:range rdf:resource="#Woman"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="son">
+    <rdfs:subPropertyOf rdf:resource="#child"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="husband">
+    <rdfs:domain rdf:resource="#Marriage"/>
+    <rdfs:range rdf:resource="#Man"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="brother">
+    <rdfs:range rdf:resource="#Man"/>
+    <rdfs:domain rdf:resource="#Person"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:ID="date">
+    <rdfs:domain rdf:resource="#Marriage"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:ID="location">
+    <rdfs:domain rdf:resource="#Marriage"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:SymmetricProperty rdf:ID="sibling">
+    <rdfs:range rdf:resource="#Person"/>
+    <rdfs:domain rdf:resource="#Person"/>
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
+  </owl:SymmetricProperty>
+  <pl:Woman rdf:ID="Eve">
+    <pl:child>
+      <pl:Person rdf:ID="Cain">
+        <pl:brother>
+          <pl:Man rdf:ID="Abel"/>
+        </pl:brother>
+      </pl:Person>
+    </pl:child>
+  </pl:Woman>
+  <j.0:Rule rdf:ID="siblingRule"/>
+  <pl:Man rdf:ID="Andy">
+    <pl:favoriteThing>
+      <pl:Woman rdf:ID="Eileen"/>
+    </pl:favoriteThing>
+    <pl:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >chocolate</pl:favoriteThing>
+    <pl:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#double"
+    >3.141592653589793</pl:favoriteThing>
+  </pl:Man>
+  <pl:Man rdf:ID="Adam">
+    <pl:child rdf:resource="#Abel"/>
+    <pl:child rdf:resource="#Cain"/>
+  </pl:Man>
+  <pl:Marriage>
+    <pl:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+    >2000-07-01</pl:date>
+    <pl:location rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Palmyra, NY</pl:location>
+    <pl:wife rdf:resource="#Eileen"/>
+    <pl:husband>
+      <pl:Man rdf:ID="Dan"/>
+    </pl:husband>
+  </pl:Marriage>
+</rdf:RDF>

@@ -1,0 +1,11 @@
+digraph gsadllistmodel {
+    label="Graph of Ontology File: sadllistmodel";
+    labelloc=top;
+    labeljust=left;
+     n1[shape=box label="List" fillcolor=blue4 fontcolor=white style=filled fillcolor=blue4 fontcolor=white style=filled];
+     n2[shape=box label="xsd:int" isImport=true fillcolor=blue4 fontcolor=white style=filled href=""file:///C:/sadl/runtime-EclipseXtext/SemanticsSeminar/Graphs/XMLSchema.svg""];
+     n1->n2[label="lengthRestriction" color=green3];
+          n1->n2[label="minLengthRestriction" color=green3];
+          n1->n1[label="rest" color=green3];
+          n1->n2[label="maxLengthRestriction" color=green3];
+}

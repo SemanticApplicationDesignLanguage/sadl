@@ -806,7 +806,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private void checkForApplicableExpandedProperties(EObject expression, TypeCheckInfo leftTypeCheckInfo,
-			TypeCheckInfo rightTypeCheckInfo) {
+			TypeCheckInfo rightTypeCheckInfo) throws TranslationException {
 		Node type = null;
 		// since type checking has passed to get to this point:
 		//	if either side has no impliedProperties then the type can come from either side
@@ -847,12 +847,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			// this is OK? At least it shouldn't create the exception below... AWC 11/26/2018
 		}
 		else {
-			try {
-				throw new TranslationException("Unexpected failure to find binary operation type checking type");
-			} catch (TranslationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			throw new TranslationException("Unexpected failure to find binary operation type checking type");
 		}
 		
 		if (type != null && type instanceof NamedNode && 

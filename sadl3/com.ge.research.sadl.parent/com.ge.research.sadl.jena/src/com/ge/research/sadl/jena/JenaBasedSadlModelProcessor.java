@@ -941,8 +941,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String contextId = context.getGrammarContextId().orNull();
 		OntModel ontModel = context.getOntModel();
 		SadlResource subject = context.getSubject();
-		System.out.println("Subject: " + getDeclarationExtensions().getConceptUri(subject));
-		System.out.println("Candidate: " + getDeclarationExtensions().getConceptUri(candidate));
+//		System.out.println("Subject: " + getDeclarationExtensions().getConceptUri(subject));
+//		System.out.println("Candidate: " + getDeclarationExtensions().getConceptUri(candidate));
 
 		try {
 			if (subject == MISSING_SUBJECT) {
@@ -973,9 +973,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 				Iterator<SadlResource> ritr = context.getRestrictions().iterator();
-				while (ritr.hasNext()) {
-					System.out.println("Restriction: " + getDeclarationExtensions().getConceptUri(ritr.next()));
-				}
+//				while (ritr.hasNext()) {
+//					System.out.println("Restriction: " + getDeclarationExtensions().getConceptUri(ritr.next()));
+//				}
 				modelValidator.checkPropertyDomain(ontModel, subject, prop, subject, true);
 				StringBuilder errorMessageBuilder = new StringBuilder();
 				if (!modelValidator.validateBinaryOperationByParts(candidate, prop, candidate, "is",
@@ -8566,8 +8566,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		try {
 			propType = getDeclarationExtensions().getOntConceptType(sr);
 			if (!isProperty(propType)) {
-				addError(SadlErrorMessages.INVALID_USE_OF_CLASS_AS_PROPERTY
-						.get(getDeclarationExtensions().getConcreteName(sr)), element);
+				if (sr != null) {
+					addError(SadlErrorMessages.INVALID_USE_OF_CLASS_AS_PROPERTY
+							.get(getDeclarationExtensions().getConcreteName(sr)), element);
+				}
+				else {
+					addError("Property not found", element);
+				}
 			}
 		} catch (CircularDefinitionException e) {
 			propType = e.getDefinitionType();
@@ -9288,8 +9293,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (sr == null) {
 			sr = element.getProperty();
 		}
-		if (sr == null) {
-			sr = element.getNameDeclarations().iterator().next();
+		if (sr == null && element.getNameDeclarations() != null) {
+			Iterator<SadlResource> itr = element.getNameDeclarations().iterator();
+			if (itr.hasNext()) {
+				sr = itr.next();
+			}
 		}
 		return sr;
 	}
@@ -12141,13 +12149,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (isNegated) {
 						cv = cv * -1.0;
 					}
-					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), cv);
+					if (rng != null) {
+						return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), cv);
+					}
+					else {
+						return getTheJenaModel().createTypedLiteral(cv);
+					}
 				} else if (val.equals(SadlConstants.CONSTANT_E)) {
 					double cv = Math.E;
 					if (isNegated) {
 						cv = cv * -1.0;
 					}
-					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), cv);
+					if (rng != null) {
+						return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), cv);
+					}
+					else {
+						return getTheJenaModel().createTypedLiteral(cv);
+					}
 				} else if (rng != null) {
 					if (isNegated) {
 						val = "-" + val;

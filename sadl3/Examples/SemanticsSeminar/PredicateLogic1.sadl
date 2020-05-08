@@ -1,0 +1,10 @@
+ uri "http://sadl.org/PredicateLogic1.sadl" alias pl1.
+ 
+ Person is a class.
+ {Man, Woman} are types of Person.
+ 
+ Adam is a Man.
+ Eve is a Woman.
+ 
+ Ask: x is a Person.
+ 
