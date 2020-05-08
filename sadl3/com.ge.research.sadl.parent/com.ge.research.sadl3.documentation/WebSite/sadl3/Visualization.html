@@ -10,7 +10,7 @@
 
 <body>
 
-<h1>Model Visualization in the SADL-IDE</h1>
+<h1>Model Visualization in the Eclipse-Based SADL-IDE</h1>
 <h6>Last revised
 <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->04/30/2020<!--webbot bot="Timestamp" endspan i-checksum="12510" --> 
 by <a href="mailto:crapo@research.ge.com?subject=Model Visualization">A. W. 
@@ -44,7 +44,7 @@ environment variable GraphVizKeepDot to true:  </p>
 <p>Note that Eclipse must be restarted after setting environment variables for them 
 to become visible to Eclipse. (For some reason, a reboot has been found to be 
 necessary to make the environment variable visible in Eclipse.)</p>
-<h3>Graph Generation Options</h3>
+<h3>On-Demand Graph Generation Options</h3>
 <p>There are two basic graphing commands available on the SADL dropdown menu: 
 &quot;Show Graph&quot; and &quot;Graph Ontology&quot;. (In the SADL perspective, &quot;SADL&quot; appears in the top menu 
 bar; the SADL (gear) icon on the tool bar also has this dropdown menu.) </p>
@@ -95,27 +95,16 @@ the size of the graph generated around the &quot;anchor&quot; concept or model.<
     showing imports</td>
   </tr>
 </table>
-<p>Graphing options include:</p>
-<ol>
-  <li>Select a class in SADL editor window, invoke &quot;Show Graph&quot;: two graphs are 
-  generated, class hierarchy and domains and ranges</li>
-  <li>Select a property in SADL editor window, invoke &quot;Show Graph&quot;: a domains 
-  and ranges graph is generated</li>
-  <li>Select an instance in SADL editor window, invoke &quot;Show Graph&quot;: an instance 
-  graph is generated</li>
-  <li>Select a file in the Project Explorer window, invoke &quot;Show Graph&quot;: a graph 
-  showing what the selected file imports and what imports it is displayed</li>
-</ol>
-<p>Graphs can also be generated from SADL statements:</p>
+<h3>Graphing by SADL Statement</h3>
+<p>Graphs can also be generated from SADL statements within a .sadl file.</p>
 <ol>
   <li>Ask: &quot;construct ....&quot;.&nbsp;&nbsp;&nbsp; // will generate a graph for a 
   valid SPARQL construct statement (see
 <a href="http://www.w3.org/TR/sparql11-query/#construct">
 http://www.w3.org/TR/sparql11-query/#construct</a> )</li>
   <li>Graph: &quot;select ?s ?p ?v where {....}&quot;.&nbsp;&nbsp;&nbsp; // will construct 
-  a graph; requires a result with 3 columns</li>
+  a graph; requires a result with 3 columns (3 variables in the select)</li>
 </ol>
-<p>&nbsp;</p>
 
 </body>
 
