@@ -2,169 +2,225 @@
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:j.0="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#">
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/defaults.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >defs</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >rstrctns</j.0:prefix>
+    >Circle2</j.0:prefix>
     <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Circle2.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Circle2.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic2.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic2.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadlbasemodel"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/runtime-EclipseXtext/SemanticsSeminar/OwlModels/SadlBaseModel.owl"/>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
     <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >pl2</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >rstrctns2</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions2.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions2.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic3.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic3.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >pl4</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic4.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic4.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic2.sadl.metrics"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic2.sadl.metrics.owl"/>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Shapes.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Shapes.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
     >sadlbasemodel</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/runtime-EclipseXtext/SemanticsSeminar/OwlModels/SadlBaseModel.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/sadlbasemodel"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic1.sadl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic1.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Shapes.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Shapes.owl"/>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
     <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >pl1</j.0:prefix>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
     >Shapes</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Shapes.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Shapes.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >pl3</j.0:prefix>
+    >PeopleModel</j.0:prefix>
     <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic3.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic3.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PeopleModel.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/PeopleModel.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions1.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions1.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Circle1.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Circle1.sadl.metrics"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >builtinfunctions</j.0:prefix>
+    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
     <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/SadlBuiltinFunctions.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/builtinfunctions"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic1.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic1.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions2.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions2.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >rstrctns1</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions1.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions1.sadl"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic4.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic4.sadl.metrics"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >sadlimplicitmodel</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/SadlImplicitModel.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/sadlimplicitmodel"/>
-  </j.0:OntologySpec>
-  <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
     >pl</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
-    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic.sadl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:createdBy>SRL_Metrics</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic.sadl.metrics.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic3.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic3.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadllistmodel"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/runtime-EclipseXtext/SemanticsSeminar/OwlModels/SadlListModel.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >sadllistmodel</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PeopleData.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/PeopleData.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic2.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic2.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PeopleModel.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/PeopleModel.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Circle2.sadl.metrics.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Circle2.sadl.metrics"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >rstrctns</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadlimplicitmodel"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/SadlImplicitModel.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >sadlimplicitmodel</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions1.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions1.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic1.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic1.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions1.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions1.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >rstrctns1</j.0:prefix>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
     <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >sadllistmodel</j.0:prefix>
+    >defs</j.0:prefix>
     <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/C:/sadl/runtime-EclipseXtext/SemanticsSeminar/OwlModels/SadlListModel.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/sadllistmodel"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/defaults.owl"/>
+    <j.0:publicURI rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Shapes.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Shapes.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >pl1</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic1.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic1.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic3.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic3.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >pl3</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions2.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions2.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >rstrctns2</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic4.sadl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic4.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >pl4</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic4.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic4.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >pl2</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PredicateLogic2.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/PredicateLogic2.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Circle1</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Circle1.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Circle1.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/builtinfunctions"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/SadlBuiltinFunctions.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >builtinfunctions</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/Restrictions2.sadl.metrics"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/Restrictions2.sadl.metrics.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SRL_Metrics</j.0:createdBy>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >PeopleData</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/C:/sadl/git/sadlos2/sadl3/Examples/SemanticsSeminar/OwlModels/PeopleData.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/PeopleData.sadl"/>
   </j.0:OntologySpec>
 </rdf:RDF>

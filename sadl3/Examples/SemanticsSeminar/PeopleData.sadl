@@ -1,0 +1,22 @@
+ uri "http://sadl.org/PeopleData.sadl" alias PeopleData.
+ 
+ import "http://sadl.org/PeopleModel.sadl".
+ 
+ Adam is a Man.
+ Eve is a Woman.
+ Cain is a Person.
+ 
+ Adam has child Cain.
+ child of Eve is Cain. 
+ Cain has brother (a Man Abel).
+
+ A Marriage with husband (a Man Dan), with wife (a Woman Eileen),
+	with location "Palmyra, NY", with ^date "July 2000". 	
+ 
+ Andy is a Man, has favoriteThing PI, has favoriteThing "chocolate", has favoriteThing Eileen.
+ 
+ Adam has child Abel.
+
+ Ask: select x, y where x has sibling y. 
+ 
+ 

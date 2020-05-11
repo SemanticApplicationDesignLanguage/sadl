@@ -1,0 +1,3 @@
+ uri "http://sadl.org/Circle2.sadl" alias Circle2.
+ 
+ import "http://sadl.org/Circle1.sadl".
