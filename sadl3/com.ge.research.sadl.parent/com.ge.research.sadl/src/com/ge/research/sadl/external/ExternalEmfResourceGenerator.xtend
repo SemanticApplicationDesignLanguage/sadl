@@ -31,8 +31,8 @@ import org.eclipse.xtext.generator.IGeneratorContext
 class ExternalEmfResourceGenerator extends GeneratorDelegate {
 	
 	override doGenerate(Resource input, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		println("RESOURCE " +  input)
-		println("CONTEXT " +  context)
+//		println("RESOURCE " +  input)
+//		println("CONTEXT " +  context)
 	}
 	
 }
