@@ -3321,10 +3321,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					semTypeInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_SEM_TYPE_PROPERTY_URI), getTheJenaModel().getResource(((NamedNode)dd.getAugType()).getURI()));
 					ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_AUGMENTED_TYPE_PROPERTY_URI), semTypeInst);
 				}
-				else if (dd.getAugType() instanceof SadlUnionClass) {
+				else if (dd.getAugType() instanceof SadlUnionClass ||
+						(dd.getAugType() instanceof JunctionNode &&
+								((JunctionNode)dd.getAugType()).getType().equals(JunctionType.Disj))) {
 					addWarning("Union of classes as augmented type not currently supported", context);
 				}
-				else if (dd.getAugType() instanceof SadlIntersectionClass) {
+				else if (dd.getAugType() instanceof SadlIntersectionClass ||
+						(dd.getAugType() instanceof JunctionNode &&
+								((JunctionNode)dd.getAugType()).getType().equals(JunctionType.Conj))) {
 					addWarning("Intersection of classes as augmented type not currently supported", context);
 				}
 				else if (dd.getAugType() instanceof Object[]) {
