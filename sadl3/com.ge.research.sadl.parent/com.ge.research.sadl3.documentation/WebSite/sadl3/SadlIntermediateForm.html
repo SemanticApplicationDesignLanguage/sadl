@@ -1,6 +1,6 @@
 <h1>The SADL Intermediate Form</h1>
 <h6>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->03/30/2018<!--webbot bot="Timestamp" endspan i-checksum="12523" --> 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->05/14/2020<!--webbot bot="Timestamp" endspan i-checksum="12560" --> 
 by <a href="mailto:crapo@research.ge.com?subject=Requirements Language">A. W. 
 Crapo</a>.</h6>
 <h2>Table of Contents</h2>
@@ -180,7 +180,7 @@ the order is context-dependent. Note that the &quot;+&quot; BuiltinElement has 3
 in the cooked form. The third argument is the variable which is bound to the 
 results of performing the addition on the first two arguments.</p>
 <h2><a name="IF3">Other Node Sub-classes in the Intermediate Form</a></h2>
-<p>An instance of the Junction class can be conjunctive (&quot;and&quot;) or disjunctive 
+<p>An instance of the JunctionNode class can be conjunctive (&quot;and&quot;) or disjunctive 
 (&quot;or&quot;). The ConstantNode captures constants such as 
 the mathematical values &quot;PI&quot;, &quot;e&quot;, and &quot;known&quot;. The 
 ConstantNode with value &quot;known&quot; corresponds to the &quot;known&quot; keyword in 
@@ -279,7 +279,7 @@ additional variable argument to which the returned value will be assigned.</p>
   </li>
   <li>Quantification Keywords<ul>
   <li>there exists a &lt;type&gt; with &lt;prop&gt; &lt;val&gt; ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-  and(thereExists(&lt;typedVariable of &lt;type&gt;&gt;),rdf(&lt;typedVarible&gt;, &lt;prop&gt;, &lt;val&gt;))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  and(thereExists(&lt;typedVariable&gt; of &lt;type&gt;),rdf(&lt;typedVarible&gt;, &lt;prop&gt;, &lt;val&gt;))&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   </li>
 </ul>
   </li>
@@ -296,6 +296,7 @@ SADL External statements in the SadlBuiltinFunctions.sadl file in the project's
 ImplicitModel folder. These may or may not come with a complete signature 
 indicating the number and type of arguments and the type returned by the 
 function, depending upon the reasoner/translator selected.</p>
+<p><b>Note</b>: the first type is not fully implemented at this time (5/2020).</p>
 <h2><a name="SC1">SADL Commands (SadlCommand class)</a></h2>
 <p>The SadlCommand class is the abstract root class for capturing the results of 
 parsing a number of top-level SADL grammar constructs that are useful in 
