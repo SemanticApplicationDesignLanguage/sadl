@@ -2580,6 +2580,15 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 								retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
 								args.set(i, SadlModelProcessor.nodeCheck(argNode));
 							}
+							else if (((BuiltinElement)realArg).getArguments() == null &&
+									getModelProcessor().isBuiltinMissingArgument(((BuiltinElement)realArg).getFuncName(), 0)) {
+								Node newNode = getVariableNode((BuiltinElement)realArg);
+								((BuiltinElement)realArg).addArgument(newNode);
+								argNode = newNode;
+								((ProxyNode)arg).setReplacementNode(SadlModelProcessor.nodeCheck(argNode));
+								retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
+								args.set(i, SadlModelProcessor.nodeCheck(argNode));
+							}
 						}
 						else if (realArg instanceof TripleElement) {
 							// don't do anything--keep proxy if triple, negate triple if "not" builtin

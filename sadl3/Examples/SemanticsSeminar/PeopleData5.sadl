@@ -1,6 +1,6 @@
- uri "http://sadl.org/PeopleData.sadl" alias PeopleData.
+ uri "http://sadl.org/PeopleData5.sadl" alias PeopleData5.
  
- import "http://sadl.org/PeopleModel.sadl".
+ import "http://sadl.org/PeopleModel5.sadl".
  
  Adam is a Man with age 50.
  Eve is a Woman with age 50.
@@ -22,14 +22,6 @@
 
  Ask: select x, y where x has sibling y. 
  
-// Test: Abel has sibling Cain.
-// Ask: "ask {<Abel> <sibling> <Cain>}".
-// Graph: "select ?s1 ?p ?s2 where {?s1 ?p ?s2 . values ?p {<sibling>}}".
-// Ask: "construct {?s1 <sibling> ?s2} where {?s1 <sibling> ?s2}".
-// 
-// Expr: 2 + 3 / 4.
-// Expr: child of Adam. 
- 
  Ask: FindAdults.
  Ask: FindPeopleByAgeRange:[30,35].
  
@@ -47,10 +39,4 @@
  
  Rule printNumGrandChildren: if x is a Person and ngc = countMatches(x, child, y, y, child, z) then print(localname(x), " has ", ngc, " grandchildren").
  
- Janet is a Parent
-// , has child (a Person Kyle)
- .
- 
- Ask: select p, c where p has child c.
- 
-  
+  Explain: Cain sibling Abel.

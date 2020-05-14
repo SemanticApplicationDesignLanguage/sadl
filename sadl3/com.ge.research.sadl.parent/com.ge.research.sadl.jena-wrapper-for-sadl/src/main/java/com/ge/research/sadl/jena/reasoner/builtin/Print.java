@@ -76,7 +76,14 @@ public class Print extends TypedBaseBuiltin {
     public void print(Node[] args, int length, RuleContext context) {
         String msg = "";
     	for (int i = 0 ; i < length; i++) {
-       		msg += PrintUtil.print(getArg(i, args, context)) + " ";
+    		Node arg = getArg(i, args, context);
+    		if (arg instanceof Node_Literal) {
+    			Object argLV = ((Node_Literal)arg).getLiteralValue();
+    			msg += PrintUtil.print(argLV + " ");
+    		}
+    		else {
+    			msg += PrintUtil.print(arg) + " ";
+    		}
         }
     	System.out.println("print: " + msg);
     }

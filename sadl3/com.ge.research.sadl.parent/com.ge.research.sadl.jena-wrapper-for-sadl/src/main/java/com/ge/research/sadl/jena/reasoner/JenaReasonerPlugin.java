@@ -246,7 +246,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	protected boolean newInputFlag = false;
 	protected boolean initialized = false;
 
-	private boolean explanationsEnabled;
+	private boolean explanationsEnabled = false;
 	
 	private String luceneIndexerClass = null;
 	
@@ -341,9 +341,13 @@ public class JenaReasonerPlugin extends Reasoner{
 		} catch (MalformedURLException e) {
 			throw new ConfigurationException("The actual file URL '" + tbox + "' for model '" + getModelName() + "' is not well-formed.");
 		}
-
-		String derval = getStringConfigurationValue(preferences , pDerivationLogging, DERIVATION_NONE);
-		derivationLogging = (derval != null && !derval.equals(DERIVATION_NONE));
+		if (explanationsEnabled) {
+			derivationLogging = true;
+		}
+		else {
+			String derval = getStringConfigurationValue(preferences , pDerivationLogging, DERIVATION_NONE);
+			derivationLogging = (derval != null && !derval.equals(DERIVATION_NONE));
+		}
 		modelSpec = getModelSpec(preferences);	// get this for later use when creating InfModel
 
 		logger.debug("JenaReasonerPlugin.initializeReasoner, tbox = "+tbox);
@@ -2746,8 +2750,8 @@ public class JenaReasonerPlugin extends Reasoner{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			explanationsEnabled = true;
 		}
+		explanationsEnabled = true;
 	}
 	
 

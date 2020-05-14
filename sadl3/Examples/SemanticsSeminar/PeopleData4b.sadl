@@ -1,0 +1,32 @@
+ uri "http://sadl.org/PeopleData4b.sadl" alias PeopleData4b.
+ 
+ import "http://sadl.org/PeopleModel.sadl".
+ 
+ Adam is a Man with age 50.
+ Eve is a Woman with age 50.
+ Cain is a Person with age 35.
+ 
+ Adam has child Cain.
+ child of Eve is Cain. 
+ Cain has brother (a Man Abel with age 32).
+ Cain has sister (a Woman with age 25).
+
+ A Marriage with husband (a Man Dan), with wife (a Woman Eileen),
+	with location "Palmyra, NY", with ^date "July 2000". 	
+ 
+ Andy is a Man, has favoriteThing PI, has favoriteThing "chocolate", has favoriteThing Eileen.
+ 
+ Adam has child Abel.
+
+ Ask: select x, y where x has sibling y. 
+ 
+ Ask: FindAdults.
+ Ask: FindPeopleByAgeRange:[30,35].
+ 
+ Test: Adam is a Person.
+ Test: age of Abel is 32.
+ Test: age of Abel > 25.
+ Test: Eve has child Cain.
+ Test: Abel has sibling Cain.
+ Test: "select ?ch where {<Adam> <child> ?ch}" is {[Cain],[Abel]}.
+  

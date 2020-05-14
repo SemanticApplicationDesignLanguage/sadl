@@ -6,6 +6,11 @@
  
  Rule AreaOfCircle: if c is a Circle then area of c is PI * radius of c ^ 2.
  
+ Rule AreaOfCircle2: then the area of a Circle is PI * the radius of the Circle ^2.
+ 
  MyCircle is a Circle with radius 1.0.
  
  Ask: area of a Circle.
+ 
+ Explain: area of MyCircle.
+ 

@@ -1,0 +1,51 @@
+uri "http://sadl.org/model3.sadl" alias model3.
+ 
+AdjacencyType is a class, must be one of {TANGENT, CONVEX}.
+
+AbstractSADLnx is a top-level class.
+		
+AbstractEdge (alias "Edge") is a type of AbstractSADLnx,
+	described by edgeAdjacencyType with a single value of type AdjacencyType.
+	
+Intersection is a type of AbstractEdge.
+
+AbstractFace is a type of AbstractSADLnx,
+	described by edge with values of type AbstractEdge, 
+	described by adjacentFace with values of type AbstractFace.
+	
+{Cylindrical, Blending} are types of AbstractFace.
+
+isFloorFace describes Cylindrical with a single value of type boolean. 
+concave describes Cylindrical with a single value of type boolean. 
+
+AbstractFeature is a type of AbstractSADLnx,
+	described by featureFace with values of type AbstractFace,
+	described by otherFace with values of type AbstractFace.
+
+PadFillet is a type of AbstractFeature,
+	described by bottomFace with a single value of type AbstractFace,
+	described by bottomEdge with a single value of type AbstractEdge.
+	
+facesShareEndPoint describes AbstractFace with values of type AbstractFace.
+
+Rule findPadFillet1:
+if a Blending has edge (a first Intersection with edgeAdjacencyType TANGENT) and
+	the Blending has edge (a second Intersection with edgeAdjacencyType TANGENT) and
+	the second Intersection != the first Intersection and
+	a first AbstractFace has edge the second Intersection and
+	concave of the first AbstractFace is false and	
+	isFloorFace of the first AbstractFace is false and	
+	the first AbstractFace is a Cylindrical and 
+	a second AbstractFace has edge the first Intersection and
+	the first Blending != the second AbstractFace and
+	the Blending has adjacentFace a third AbstractFace and
+	the Blending has facesShareEndPoint the third AbstractFace and	
+	not the first AbstractFace has facesShareEndPoint the second AbstractFace and	
+	the second AbstractFace has edge (an AbstractEdge with edgeAdjacencyType CONVEX) and
+	the AbstractEdge != the first Intersection
+then
+	there exists a PadFillet with featureFace the Blending and
+	the PadFillet has otherFace the second AbstractFace and
+	the PadFillet has bottomFace the first AbstractFace and
+	the PadFillet has bottomEdge the second Intersection and
+	the PadFillet has otherFace "Pad Fillet".

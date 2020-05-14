@@ -1,0 +1,9 @@
+ uri "http://sadl.org/Temporal.sadl" alias Temporal.
+ 
+ import "http://www.isi.edu/~pan/damltime/time-entry.owl" as teo.
+ 
+ MyLife is an IntervalThing.
+ MyBirth is an InstantThing.
+ 
+ MyLife has inside MyBirth.
+ 

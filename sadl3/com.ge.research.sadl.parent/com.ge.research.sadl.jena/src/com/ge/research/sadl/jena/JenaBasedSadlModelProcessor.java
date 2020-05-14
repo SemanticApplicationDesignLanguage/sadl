@@ -955,7 +955,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					context.getAcceptor().add("No", candidate, Severity.ERROR);
 					return;
 				}
-				modelValidator.checkPropertyDomain(ontModel, subject, candidate, candidate, true);
+				try {
+					modelValidator.checkPropertyDomain(ontModel, subject, candidate, candidate, true);
+				} catch (CircularDependencyException e) {
+					addError(e.getMessage(), subject);
+				}
 				return;
 			}
 			case SADLPROPERTYINITIALIZER_VALUE: {
@@ -976,7 +980,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //				while (ritr.hasNext()) {
 //					System.out.println("Restriction: " + getDeclarationExtensions().getConceptUri(ritr.next()));
 //				}
-				modelValidator.checkPropertyDomain(ontModel, subject, prop, subject, true);
+				try {
+					modelValidator.checkPropertyDomain(ontModel, subject, prop, subject, true);
+				} catch (CircularDependencyException e) {
+					// TODO Auto-generated catch block
+					addError(e.getMessage(), subject);
+				}
 				StringBuilder errorMessageBuilder = new StringBuilder();
 				if (!modelValidator.validateBinaryOperationByParts(candidate, prop, candidate, "is",
 						errorMessageBuilder, false)) {
@@ -1000,7 +1009,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
 				if ((candtype.equals(OntConceptType.CLASS) || candtype.equals(OntConceptType.INSTANCE))
 						&& isProperty(subjtype)) {
-					modelValidator.checkPropertyDomain(ontModel, candidate, subject, candidate, true);
+					try {
+						modelValidator.checkPropertyDomain(ontModel, candidate, subject, candidate, true);
+					} catch (CircularDependencyException e) {
+						addError(e.getMessage(), candidate);
+					}
 					return;
 				}
 				context.getAcceptor().add("No", candidate, Severity.ERROR);
@@ -1012,7 +1025,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
 				if ((candtype.equals(OntConceptType.CLASS) || candtype.equals(OntConceptType.INSTANCE))
 						&& isProperty(subjtype)) {
-					modelValidator.checkPropertyDomain(ontModel, candidate, subject, candidate, true);
+					try {
+						modelValidator.checkPropertyDomain(ontModel, candidate, subject, candidate, true);
+					} catch (CircularDependencyException e) {
+						addError(e.getMessage(), candidate);
+					}
 					return;
 				}
 				context.getAcceptor().add("No", candidate, Severity.ERROR);
@@ -2249,7 +2266,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				Explain cmd = new Explain((GraphPatternElement) ((Object[])result)[1]);
 				addSadlCommand(cmd);
 			} else if (result != null) {
-				throw new TranslationException("Unhandled ExplainStatement: " + result.toString());
+//				throw new TranslationException("Unhandled ExplainStatement: " + result.toString());
+				addError("Unhandled ExplainStatement: " + result.toString(), element);
 			}
 		}
 	}
@@ -2356,6 +2374,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	public Query processStatement(QueryStatement element) throws JenaProcessorException, InvalidNameException,
 			InvalidTypeException, TranslationException, CircularDefinitionException {
+		clearCruleVariables();
 		Expression qexpr = element.getExpr();
 		if (qexpr == null) {
 			qexpr = element.getSrname();
@@ -5870,8 +5889,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return;
 			}
 			if (!(tr.getSubject() instanceof VariableNode) || !isContainedByQuery(expr)) {
-				getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true,
-						isCrVar ? varName : null);
+				try {
+					getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true,
+							isCrVar ? varName : null);
+				} 
+				catch (CircularDependencyException e) {
+					addError(e.getMessage(), subjeo);
+				}
 			}
 			NodeType pnodetype;
 			if (pnode instanceof NamedNode) {
@@ -6621,10 +6645,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			jct.setRhs(nodeCheck(robj));
 			return jct;
 		} else if (name.equals("is") && getTarget() instanceof Test) {
-			((Test)getTarget()).setLhs(lobj);
-			((Test)getTarget()).setRhs(robj);
-			((Test)getTarget()).setCompName(name);
-			return null;
+			if (lobj instanceof NamedNode && ((NamedNode)lobj).getNodeType().equals(NodeType.InstanceNode) &&
+					robj instanceof VariableNode && ((VariableNode)robj).getType() instanceof NamedNode &&
+					((NamedNode) ((VariableNode)robj).getType()).getNodeType().equals(NodeType.ClassNode) &&
+					((VariableNode)robj).isCRulesVariable()) {
+				// the right was a Declaration so this is of the form <inst> is a <class>
+				TripleElement te = new TripleElement((Node) lobj, new RDFTypeNode(), ((VariableNode)robj).getType());
+				return te;
+			}
+				else {
+				((Test)getTarget()).setLhs(lobj);
+				((Test)getTarget()).setRhs(robj);
+				((Test)getTarget()).setCompName(name);
+				return null;
+				}
 		} else {
 			BuiltinElement builtin = new BuiltinElement();
 			builtin.setFuncName(transformOpName(name));
@@ -7391,7 +7425,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					getModelValidator().handleValidationException(predicate, e);
 				} catch (URISyntaxException | IOException | ConfigurationException
 						| CircularDefinitionException | CircularDependencyException e) {
-					e.printStackTrace();
+					addError(e.getMessage(), subject);
 				}
 				returnTriple = new TripleElement(subjNode, predNode, null);
 				returnTriple.setSourceType(TripleSourceType.PSV);

@@ -1,4 +1,4 @@
- uri "http://sadl.org/PeopleModel.sadl" alias PeopleModel.
+ uri "http://sadl.org/PeopleModel5.sadl" alias PeopleModel5.
  
  Person is a class.
  {Man, Woman} are types of Person.
@@ -8,7 +8,7 @@
  relationship of Person to Man is brother.
  sister describes Person with values of type Woman.
  age describes Person with values of type int.
- Parent is a type of Person.
+ 
  dateOfBirth describes Person with values of type date.
 
  Marriage is a class, 
@@ -24,20 +24,9 @@
  sibling describes Person with values of type Person.
  sibling is symmetrical.
 
- Uncle is a type of Man.
- uncle describes Person with values of type Man.
- 
- A Man is an Uncle only if sibling has at least one value of type (child has at least 1 value). 
- Rule UncleRule: if a Man has sibling a Person and the Person has child a second Person then the Man is an Uncle and the second Person has uncle the Man.
- Rule UR2: if x is a Man and x has sibling y and y has child z then x is an Uncle and z has uncle x.
-  
  Rule siblingRule: if x is a Person and x has child y and x has child z and y != z then y has sibling z.
  
  Rule ageRule: if x is a Person and x has dateOfBirth y then age of x is subtractDates(now(), y, "y").
- 
-// Rule createChild: if x is a Parent then there exists a Person and x has child the Person.
-Rule createChild: if a Person is a Parent then there exists a second Person and the Person has child the second Person.
-
  
  Ask FindAdults: select p where p is a Person and p has age ag and ag >= 18 order by ag.
  

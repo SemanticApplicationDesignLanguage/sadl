@@ -1061,6 +1061,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			} else if (t instanceof CircularDefinitionException) {
 				t.printStackTrace();
 			}
+			else if (t instanceof CircularDependencyException) {
+				getModelProcessor().addTypeCheckingError(t.getMessage(), expr);
+				return true;
+			}
 			else {
 				t.printStackTrace();
 			}
@@ -3058,7 +3062,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		int minNumArgs = 0;
 		if (args.size() != params.size() || (params.size() > 1 && params.get(params.size() - 1).getEllipsis() != null)) {
 			boolean wrongNumArgs = true;
-			if (params.get(params.size() - 1).getEllipsis() != null) {
+			String ellipsis = params.size() > 0 ? params.get(params.size() - 1).getEllipsis() : null;
+			if ( ellipsis != null) {
 				minNumArgs = params.size() - 1;
 				variableNumArgs = true;
 				if (args.size() >= minNumArgs) {
@@ -5273,7 +5278,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, Expression target, boolean propOfSubjectCheck) throws InvalidTypeException {
+	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, Expression target, boolean propOfSubjectCheck) throws InvalidTypeException, CircularDependencyException {
 		OntConceptType ptype = null;
 		try {
 			ptype = declarationExtensions.getOntConceptType(predicate);
@@ -5412,7 +5417,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 
-	public void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression target, boolean propOfSubjectCheck, String varName) throws InvalidTypeException {
+	public void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression target, boolean propOfSubjectCheck, String varName) throws InvalidTypeException, CircularDependencyException {
 		if(subj == null || prop == null || prop.canAs(AnnotationProperty.class)){
 			return;
 		}
@@ -5471,7 +5476,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
-	private boolean checkForPropertyDomainMatch(Resource subj, Property prop, Resource obj) throws InvalidTypeException {
+	private boolean checkForPropertyDomainMatch(Resource subj, Property prop, Resource obj) throws InvalidTypeException, CircularDependencyException {
 		if (obj.isResource()) {
 			if (obj.canAs(UnionClass.class)){
 				List<OntResource> uclsMembers = getModelProcessor().getOntResourcesInUnionClass(theJenaModel, obj.as(UnionClass.class));
@@ -5516,7 +5521,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //						}
 					} catch (CircularDependencyException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+//						e.printStackTrace();
+						throw e;
 					}
 				}
 				else if (subj instanceof Property || subj.canAs(OntProperty.class)) {
@@ -5840,6 +5846,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		StmtIterator rngitr = theJenaModel2.listStatements(pred, RDFS.range, (RDFNode)null);
 		while (rngitr.hasNext()) {
 			RDFNode rng = rngitr.nextStatement().getObject();
+			if (rng.equals(obj)) {
+				return true;
+			}
 			if (isTypedListSubclass(rng)) {
 				if (!isList) {
 					rngitr.close();

@@ -51,6 +51,7 @@ import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Print;
 import com.ge.research.sadl.model.gp.Query;
@@ -957,6 +958,14 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			obj = newQuery;
 		} else if (obj instanceof ValueTableNode) {
 			return obj;
+		} else if (obj instanceof VariableNode) {
+			if (((VariableNode)obj).isCRulesVariable()) {
+				Node typeNode = ((VariableNode)obj).getType();
+				if (typeNode instanceof NamedNode && ((NamedNode)typeNode).getNodeType().equals(NodeType.ClassNode)) {
+					// this was a declaration
+					return new TripleElement(null, new RDFTypeNode(), typeNode);
+				}
+			}
 		} else if (obj instanceof NamedNode) {
 			return obj;
 		} else if (obj instanceof com.ge.research.sadl.model.gp.Literal) {

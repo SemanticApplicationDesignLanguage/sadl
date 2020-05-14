@@ -1,0 +1,25 @@
+ uri "http://sadl.org/PeopleModel2.sadl" alias PeopleModel2.
+ 
+ Person is a class.
+ {Man, Woman} are types of Person.
+
+ child describes Person with values of type Person.
+ 
+ relationship of Person to Man is brother.
+ sister describes Person with values of type Woman.
+ 
+ Marriage is a class, 
+ 	described by husband with values of type Man,
+ 	described by wife with values of type Woman,
+ 	described by location with values of type string,
+ 	described by ^date with values of type date.
+ 
+ favoriteThing describes Person.
+ 
+ son is a type of child.
+
+ sibling describes Person with values of type Person.
+ sibling is symmetrical.
+
+ Rule siblingRule: if x is a Person and x has child y and x has child z and y != z then y has sibling z.
+ 

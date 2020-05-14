@@ -303,7 +303,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 						while (restIdx < elements.size()) {
 							// these should all be TripleElement graph patterns 
 							GraphPatternElement gpe = elements.get(restIdx);
-							if (!(gpe instanceof TripleElement) || !((TripleElement)gpe).getSubject().equals(thereExistsVar)) {
+							if (!(gpe instanceof TripleElement) || 
+									(!((TripleElement)gpe).getSubject().equals(thereExistsVar) &&
+											!((TripleElement)gpe).getObject().equals(thereExistsVar))) {
 								logger.error("Found end of 'thereExists' with something after");
 								sb.append(graphPatternElementToJenaRuleString(elements.get(idx), rulePart));
 								idx++;
@@ -1642,6 +1644,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 				else {
 					pss.setLiteral(idx++, model.createTypedLiteral(val.toString()));
 				}
+			}
+			else if (val instanceof Literal) {
+				pss.setLiteral(idx++, model.createTypedLiteral(((Literal)val).getValue()));
 			}
 			else {
 				pss.setLiteral(idx++, model.createTypedLiteral(val));
