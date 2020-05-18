@@ -474,7 +474,20 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 					sb.append(" ");
 					sb.append(value);
 					sb.append("=");
-					sb.append(row[key.intValue()]);
+					Object rval = row[key.intValue()];
+					if (value.equalsIgnoreCase("tooltip") || needsQuotes(rval)) {
+						rval = escapeQuotes(rval.toString());
+						if (!rval.toString().startsWith("\"")) {
+							// assuming if it starts it also ends 
+							sb.append("\"" + rval + "\"");
+						}
+						else {
+							sb.append(rval);
+						}
+					}
+					else {
+						sb.append(rval);
+					}
 				}
 			}
 		}
@@ -516,7 +529,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 					}
 					else {
 						Object rval = row[key.intValue()];
-						if (needsQuotes(rval)) {
+						if (value.equalsIgnoreCase("tooltip") || needsQuotes(rval)) {
 							rval = escapeQuotes(rval.toString());
 							if (!rval.toString().startsWith("\"")) {
 								// assuming if it starts it also ends 
