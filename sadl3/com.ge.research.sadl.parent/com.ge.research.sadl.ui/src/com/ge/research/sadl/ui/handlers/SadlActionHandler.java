@@ -470,11 +470,18 @@ public abstract class SadlActionHandler extends AbstractHandler {
 								}
 							}
 							else if (fileToOpen != null) {
-								if (console != null) {
-									console.error("Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
+								String msg;
+								if (fto.exists()) {
+									msg = "Failed to open graph file '" + fileToOpen + "'. Try opening it manually.";
 								}
 								else {
-									System.err.println("Failed to open graph file '" + fileToOpen + "'. Try opening it manually.");
+									msg = "Failed to create graph file '" + fileToOpen + "'";
+								}
+								if (console != null) {
+									console.error(msg);
+								}
+								else {
+									System.err.println(msg);
 								}
 							}
 						}
