@@ -25,7 +25,7 @@
  
  Test: Adam is a Person.
  Test: age of Abel is 32.
- Test: age of Abel > 25.
+ Test: age of Abel > 18.
  Test: Eve has child Cain.
  Test: Abel has sibling Cain.
  Test: "select ?ch where {<Adam> <child> ?ch}" is {[Cain],[Abel]}.

@@ -1,4 +1,4 @@
- uri "http://sadl.org/PredicateLogic4.sadl" alias pl4.
+ uri "http://sadl.org/PredicateLogic7.sadl" alias pl7.
  
  Person is a class.
  {Man, Woman} are types of Person.
@@ -20,3 +20,20 @@
  	
 A Marriage with husband (a Man Dan), with wife (a Woman Eileen),
 	with location "Palmyra, NY", with ^date "July 2000". 	
+ 
+favoriteThing describes Person.
+
+Andy is a Man, has favoriteThing PI, has favoriteThing "chocolate", has favoriteThing Eileen.
+
+son is a type of child.
+
+sibling describes Person with values of type Person.
+sibling is symmetrical.
+
+Rule siblingRule: if x is a Person and x has child y and x has child z and y != z then y has sibling z.
+
+Ask: select x, y where x has sibling y.
+
+Explain: Rule sibling.
+
+Adam has child Abel.			// added only after  demonstrating Explain: Rule siblingRule

@@ -1,6 +1,6 @@
- uri "http://sadl.org/PeopleData5.sadl" alias PeopleData5.
+ uri "http://sadl.org/PeopleData6b.sadl" alias PeopleData6b.
  
- import "http://sadl.org/PeopleModel5.sadl".
+ import "http://sadl.org/PeopleModel.sadl".
  
  Adam is a Man with age 50.
  Eve is a Woman with age 50.
@@ -16,12 +16,19 @@
  
  Andy is a Man, has favoriteThing PI, has favoriteThing "chocolate", has favoriteThing Eileen.
  Andy has dateOfBirth "July 19, 1913".
- Eileen has dateOfBirth "March 29, 1980".
- Dan has dateOfBirth "May 2, 1979".
+ Eileen has dateOfBirth "March 29, 2010".
  
  Adam has child Abel.
 
  Ask: select x, y where x has sibling y. 
+ 
+// Test: Abel has sibling Cain.
+// Ask: "ask {<Abel> <sibling> <Cain>}".
+// Graph: "select ?s1 ?p ?s2 where {?s1 ?p ?s2 . values ?p {<sibling>}}".
+// Ask: "construct {?s1 <sibling> ?s2} where {?s1 <sibling> ?s2}".
+// 
+// Expr: 2 + 3 / 4.
+// Expr: child of Adam. 
  
  Ask: FindAdults.
  Ask: FindPeopleByAgeRange:[30,35].
@@ -40,4 +47,26 @@
  
  Rule printNumGrandChildren: if x is a Person and ngc = countMatches(x, child, y, y, child, z) then print(localname(x), " has ", ngc, " grandchildren").
  
-  Explain: Cain sibling Abel.
+ Janet is a Parent
+// , has child (a Person Kyle)
+ .
+ 
+ Ask: select p, c where p has child c.
+ 
+  Expr: 1+2.
+  Expr: PI * 2.
+  
+  Expr: age of x.
+  Expr: age of son of p.
+  Expr: age of the brother of Adam.
+  
+  
+  Expr: age of p is known.
+  Expr: age of p is not known.
+  
+  Ask: select p where age of p is  known.
+  Ask: select p where age of p is not known.
+  
+  Rule rw: if p is a Person and age of p is known then print(p, " has a known age").
+  Rule rx: if p is a Person and age of p is not known then print("How old is ", p).
+  

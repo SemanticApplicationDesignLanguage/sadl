@@ -5,24 +5,6 @@
  
  Adam is a Man.
  Eve is a Woman.
- child describes Person with values of type Person.
- Cain is a Person.
- Adam has child Cain.
- child of Eve is Cain.
- relationship of Person to Man is brother.
- Cain has brother (a Man Abel).
  
- Marriage is a class, 
- 	described by husband with values of type Man,
- 	described by wife with values of type Woman,
- 	described by location with values of type string,
- 	described by ^date with values of type date.
- 	
-A Marriage with husband (a Man Dan), with wife (a Woman Eileen),
-	with location "Palmyra, NY", with ^date "July 2000". 	
+ Ask: p is a Person.
  
-favoriteThing describes Person.
-
-Andy is a Man, has favoriteThing PI, has favoriteThing "chocolate", has favoriteThing Eileen.
-
-son is a type of child.
