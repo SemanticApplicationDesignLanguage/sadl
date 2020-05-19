@@ -1,0 +1,25 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:Temporal="http://sadl.org/Temporal.sadl#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.0="http://www.isi.edu/~pan/damltime/time-entry.owl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:teo="http://www.isi.edu/~pan/damltime/time-entry.owl"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/Temporal.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="http://www.isi.edu/~pan/damltime/time-entry.owl"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Temporal.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <j.0:IntervalThing rdf:ID="MyLife">
+    <j.0:inside>
+      <j.0:InstantThing rdf:ID="MyBirth"/>
+    </j.0:inside>
+  </j.0:IntervalThing>
+</rdf:RDF>

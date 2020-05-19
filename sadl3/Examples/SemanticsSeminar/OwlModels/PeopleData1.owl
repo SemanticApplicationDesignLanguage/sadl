@@ -1,0 +1,52 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:PeopleData1="http://sadl.org/PeopleData1.sadl#"
+    xmlns:PeopleModel1="http://sadl.org/PeopleModel1.sadl"
+    xmlns:j.0="http://sadl.org/PeopleModel1.sadl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/PeopleData1.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="PeopleModel1.sadl"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'PeopleData1.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <j.0:Man rdf:ID="Andy">
+    <j.0:favoriteThing>
+      <j.0:Woman rdf:ID="Eileen"/>
+    </j.0:favoriteThing>
+    <j.0:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >chocolate</j.0:favoriteThing>
+    <j.0:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#double"
+    >3.141592653589793</j.0:favoriteThing>
+  </j.0:Man>
+  <j.0:Marriage>
+    <j.0:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+    >2000-07-01</j.0:date>
+    <j.0:location rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Palmyra, NY</j.0:location>
+    <j.0:wife rdf:resource="#Eileen"/>
+    <j.0:husband>
+      <j.0:Man rdf:ID="Dan"/>
+    </j.0:husband>
+  </j.0:Marriage>
+  <j.0:Woman rdf:ID="Eve">
+    <j.0:child>
+      <j.0:Person rdf:ID="Cain">
+        <j.0:brother>
+          <j.0:Man rdf:ID="Abel"/>
+        </j.0:brother>
+      </j.0:Person>
+    </j.0:child>
+  </j.0:Woman>
+  <j.0:Man rdf:ID="Adam">
+    <j.0:child rdf:resource="#Abel"/>
+    <j.0:child rdf:resource="#Cain"/>
+  </j.0:Man>
+</rdf:RDF>
