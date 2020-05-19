@@ -2,6 +2,7 @@
 #  Created from SADL model 'http://sadl.org/sadlimplicitmodel'
 
 @prefix sadlimplicitmodel: <http://sadl.org/sadlimplicitmodel#>
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 [Transitive: (?inst rdf:type ?cls), (?cls http://www.w3.org/2000/01/rdf-schema#subClassOf http://sadl.org/sadlimplicitmodel#CodeVariable) -> (?inst rdf:type http://sadl.org/sadlimplicitmodel#CodeVariable)]
 [SetNotFirstRef1: (?c rdf:type http://sadl.org/sadlimplicitmodel#CodeVariable), (?c http://sadl.org/sadlimplicitmodel#reference ?ref), (?ref http://sadl.org/sadlimplicitmodel#usage ?v0), oneOf(?v0, http://sadl.org/sadlimplicitmodel#Used, http://sadl.org/sadlimplicitmodel#Reassigned), (?c http://sadl.org/sadlimplicitmodel#reference ?ref2), notEqual(?ref, ?ref2), (?ref http://sadl.org/sadlimplicitmodel#codeBlock ?cb), (?ref2 http://sadl.org/sadlimplicitmodel#codeBlock ?cb2), equal(?cb, ?cb2), (?ref http://sadl.org/sadlimplicitmodel#beginsAt ?l1), (?ref2 http://sadl.org/sadlimplicitmodel#beginsAt ?l2), greaterThan(?l2, ?l1) -> (?ref2 http://sadl.org/sadlimplicitmodel#firstRef 'false'^^http://www.w3.org/2001/XMLSchema#boolean)]

@@ -2,5 +2,6 @@
 #  Created from SADL model 'http://sadl.org/GetInstance.sadl'
 
 @prefix GetInstance: <http://sadl.org/GetInstance.sadl#>
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 [UnNamedChild: (?v0 rdf:type http://sadl.org/GetInstance.sadl#Parent) -> getInstance(http://sadl.org/GetInstance.sadl#Person), (?v3 http://sadl.org/GetInstance.sadl#child ?v4)]

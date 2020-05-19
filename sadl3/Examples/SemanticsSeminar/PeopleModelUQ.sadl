@@ -1,4 +1,4 @@
- uri "http://sadl.org/PeopleModel.sadl" alias PeopleModel.
+ uri "http://sadl.org/PeopleModelUQ.sadl" alias PeopleModelUQ.
  
  Person is a class.
  {Man, Woman} are types of Person.
@@ -7,7 +7,7 @@
  
  relationship of Person to Man is brother.
  sister describes Person with values of type Woman.
- age describes Person with values of type int.
+ age describes Person with values of type UnittedQuantity.
  dateOfBirth describes Person with values of type date.
 
  Parent is a type of Person.

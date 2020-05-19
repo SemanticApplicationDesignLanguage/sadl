@@ -87,6 +87,18 @@
     </rdfs:subClassOf>
     <rdfs:subClassOf rdf:resource="#AnatomicalPart"/>
   </owl:Class>
+  <owl:Class>
+    <owl:intersectionOf rdf:parseType="Collection">
+      <owl:Class rdf:about="#AnatomicalPart"/>
+      <owl:Restriction>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="#digit"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </owl:intersectionOf>
+  </owl:Class>
   <owl:Class rdf:about="#Finger">
     <rdfs:subClassOf>
       <owl:Class rdf:about="#Digit"/>
@@ -100,18 +112,6 @@
       <owl:Class rdf:about="#AnatomicalPart"/>
       <owl:Restriction>
         <owl:someValuesFrom rdf:resource="#Digit"/>
-        <owl:onProperty>
-          <owl:ObjectProperty rdf:about="#digit"/>
-        </owl:onProperty>
-      </owl:Restriction>
-    </owl:intersectionOf>
-  </owl:Class>
-  <owl:Class>
-    <owl:intersectionOf rdf:parseType="Collection">
-      <owl:Class rdf:about="#AnatomicalPart"/>
-      <owl:Restriction>
-        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
-        >1</owl:minCardinality>
         <owl:onProperty>
           <owl:ObjectProperty rdf:about="#digit"/>
         </owl:onProperty>

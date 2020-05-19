@@ -2,6 +2,7 @@
 #  Created from SADL model 'http://sadl.org/TestGraphPatternBuiltins.sadl'
 
 @prefix tgpb: <http://sadl.org/TestGraphPatternBuiltins.sadl#>
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 [avgRule: (?s rdf:type http://sadl.org/TestGraphPatternBuiltins.sadl#Student), average(?s, http://sadl.org/TestGraphPatternBuiltins.sadl#test, ?t, ?t, http://sadl.org/TestGraphPatternBuiltins.sadl#score, ?v0) -> (?s http://sadl.org/TestGraphPatternBuiltins.sadl#averageScore ?v0)]
 [minRule: (?s rdf:type http://sadl.org/TestGraphPatternBuiltins.sadl#Student), min(?s, http://sadl.org/TestGraphPatternBuiltins.sadl#test, ?t, ?t, http://sadl.org/TestGraphPatternBuiltins.sadl#score, ?v0) -> (?s http://sadl.org/TestGraphPatternBuiltins.sadl#minScore ?v0)]

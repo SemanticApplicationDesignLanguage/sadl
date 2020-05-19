@@ -31,5 +31,6 @@
     <Shapes:radius rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
     >1.0</Shapes:radius>
   </Shapes:Circle>
+  <j.0:Rule rdf:ID="AreaOfCircle2"/>
   <j.0:Rule rdf:ID="AreaOfCircle"/>
 </rdf:RDF>

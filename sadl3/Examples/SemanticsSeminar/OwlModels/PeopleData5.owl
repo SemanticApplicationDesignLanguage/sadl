@@ -18,6 +18,7 @@
     <owl:imports rdf:resource="sadlbasemodel"/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'PeopleData5.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
+<<<<<<< HEAD
   <j.1:Marriage>
     <j.1:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
     >2000-07-01</j.1:date>
@@ -36,6 +37,8 @@
       </j.1:Man>
     </j.1:husband>
   </j.1:Marriage>
+=======
+>>>>>>> 5cd7fe4b2e06920367bf10c26106d137d7c89087
   <j.1:Woman rdf:ID="Eve">
     <j.1:child>
       <j.1:Person rdf:ID="Cain">
@@ -72,12 +75,37 @@
   <j.1:Man rdf:ID="Andy">
     <j.1:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
     >1913-07-19</j.1:dateOfBirth>
+<<<<<<< HEAD
     <j.1:favoriteThing rdf:resource="#Eileen"/>
+=======
+    <j.1:favoriteThing>
+      <j.1:Woman rdf:ID="Eileen">
+        <j.1:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+        >1980-03-29</j.1:dateOfBirth>
+      </j.1:Woman>
+    </j.1:favoriteThing>
+>>>>>>> 5cd7fe4b2e06920367bf10c26106d137d7c89087
     <j.1:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
     >chocolate</j.1:favoriteThing>
     <j.1:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#double"
     >3.141592653589793</j.1:favoriteThing>
   </j.1:Man>
+<<<<<<< HEAD
+=======
+  <j.1:Marriage>
+    <j.1:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+    >2000-07-01</j.1:date>
+    <j.1:location rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Palmyra, NY</j.1:location>
+    <j.1:wife rdf:resource="#Eileen"/>
+    <j.1:husband>
+      <j.1:Man rdf:ID="Dan">
+        <j.1:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+        >1979-05-02</j.1:dateOfBirth>
+      </j.1:Man>
+    </j.1:husband>
+  </j.1:Marriage>
+>>>>>>> 5cd7fe4b2e06920367bf10c26106d137d7c89087
   <j.0:Rule rdf:ID="printNumGrandChildren"/>
   <j.1:Man rdf:ID="Adam">
     <j.1:child rdf:resource="#Abel"/>

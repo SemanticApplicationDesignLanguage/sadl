@@ -2,6 +2,7 @@
 #  Created from SADL model 'http://sadl.org/RulePofS.sadl'
 
 @prefix RulePofS: <http://sadl.org/RulePofS.sadl#>
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 [ClsProp: (?x rdf:type http://sadl.org/RulePofS.sadl#Cls) -> (?x http://sadl.org/RulePofS.sadl#prop 5)]
 [ClsProp2: (?x rdf:type http://sadl.org/RulePofS.sadl#Cls) -> (?x http://sadl.org/RulePofS.sadl#prop 5)]

@@ -1,4 +1,4 @@
- uri "http://sadl.org/Shapes.sadl" alias Shapes.
+ uri "http://sadl.org/Shapes2.sadl" alias Shapes2.
  
  Shape is a class described by area with values of type float.
  
@@ -14,4 +14,4 @@
  
  Explain: area of MyCircle.
  
- 
+ Equation areaOfCircle(float radius) returns float : radius^2*PI.
