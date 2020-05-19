@@ -194,6 +194,7 @@
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
   </owl:DatatypeProperty>
   <j.0:Rule rdf:ID="NorthernerAtHeart3"/>
+  <j.0:Rule rdf:ID="R2"/>
   <gm:Birth>
     <gm:when rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime"
     >1732-02-22T00:00:00-05:00</gm:when>
@@ -219,7 +220,6 @@
       </gm:Person>
     </gm:child>
   </gm:Birth>
-  <j.0:Rule rdf:ID="R2"/>
   <gm:Location rdf:ID="Philadelphia">
     <gm:latitude rdf:datatype="http://www.w3.org/2001/XMLSchema#double"
     >39.9522</gm:latitude>

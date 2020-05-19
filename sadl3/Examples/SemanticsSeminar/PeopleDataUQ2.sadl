@@ -1,0 +1,11 @@
+ uri "http://sadl.org/PeopleDataUQ2.sadl" alias PeopleDataUQ2.
+ 
+ import "http://sadl.org/PeopleModelUQ.sadl".
+ 
+ Adam is a Person with age 50 yrs.
+ 
+ Test: age of Adam is 50.
+ Test: age of Adam is 50 yrs.
+ 
+ 
+ 

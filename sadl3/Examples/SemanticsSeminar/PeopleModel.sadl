@@ -7,7 +7,7 @@
  
  relationship of Person to Man is brother.
  sister describes Person with values of type Woman.
- age describes Person with values of type UnittedQuantity. //int.
+ age describes Person with values of type int.
  dateOfBirth describes Person with values of type date.
 
  Parent is a type of Person.

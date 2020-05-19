@@ -1,23 +1,71 @@
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns="http://com.ge.research.sadl.configuration#">
+  <rdf:Description rdf:about="http://com.ge.research.sadl.configuration#AdHocQuery">
+    <pQuery>
+      <rdf:Seq>
+        <rdf:li rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+        >select x, y where x has sibling y.</rdf:li>
+      </rdf:Seq>
+    </pQuery>
+  </rdf:Description>
   <Category rdf:about="http://com.ge.research.sadl.configuration#Jena-Based">
     <subcategory>
       <rdf:Bag>
         <rdf:li>
           <Builtin>
-            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >pow</name>
             <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
             >com.ge.research.sadl.jena.reasoner.builtin.Pow</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >pow</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >product</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Product</class>
           </Builtin>
         </rdf:li>
         <rdf:li>
           <Builtin>
             <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >com.ge.research.sadl.jena.reasoner.builtin.Product</class>
+            >com.ge.research.sadl.jena.reasoner.builtin.CountMatches</class>
             <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-            >product</name>
+            >countMatches</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >localname</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Localname</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.Print</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >print</name>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >getInstance</name>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.GetInstance</class>
+          </Builtin>
+        </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <class rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >com.ge.research.sadl.jena.reasoner.builtin.SubtractDates</class>
+            <name rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+            >subtractDates</name>
           </Builtin>
         </rdf:li>
       </rdf:Bag>
@@ -27,14 +75,6 @@
     <reasonerClassName rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
     >com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin</reasonerClassName>
   </Category>
-  <rdf:Description rdf:about="http://com.ge.research.sadl.configuration#AdHocQuery">
-    <pQuery>
-      <rdf:Seq>
-        <rdf:li rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-        >select x, y where x has sibling y.</rdf:li>
-      </rdf:Seq>
-    </pQuery>
-  </rdf:Description>
   <Category rdf:about="http://com.ge.research.sadl.configuration#Jena">
     <pOWLTranslation rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
     >false</pOWLTranslation>

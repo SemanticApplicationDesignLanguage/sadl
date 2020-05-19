@@ -3,4 +3,4 @@
 
 @prefix rulevars2: <http://sadl.org/rulevars2.sadl#>
 
-[example-1: (http://sadl.org/rulevars2.sadl#System http://sadl.org/rulevars2.sadl#var2 ?v0), (http://sadl.org/rulevars2.sadl#System http://sadl.org/rulevars2.sadl#var3 ?v1), noValue(equal(?v0, ?v1)), sum(?v0, ?v1, ?v2) -> (http://sadl.org/rulevars2.sadl#System http://sadl.org/rulevars2.sadl#var1 ?v2)]
+[example-1: (http://sadl.org/rulevars2.sadl#System http://sadl.org/rulevars2.sadl#var2 ?v0), (http://sadl.org/rulevars2.sadl#System http://sadl.org/rulevars2.sadl#var3 ?v1), noValue(http://sadl.org/rulevars2.sadl#System, http://sadl.org/rulevars2.sadl#var3, ?v0), sum(?v0, ?v1, ?v2) -> (http://sadl.org/rulevars2.sadl#System http://sadl.org/rulevars2.sadl#var1 ?v2)]

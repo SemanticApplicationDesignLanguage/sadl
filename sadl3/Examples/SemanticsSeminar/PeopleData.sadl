@@ -64,7 +64,7 @@
   Expr: age of p is not known.
   
   Ask: select p where age of p is  known.
-  Ask: select p where age of p is not known.
+//  Ask: select p where age of p is not known.
   
   Rule rw: if p is a Person and age of p is known then print(p, " has a known age").
   Rule rx: if p is a Person and age of p is not known then print("How old is ", p).

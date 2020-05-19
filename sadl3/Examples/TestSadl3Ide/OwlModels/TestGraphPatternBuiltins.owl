@@ -125,7 +125,7 @@
   </tgpb:Student>
   <j.0:Rule rdf:ID="prodRule"/>
   <j.0:Rule rdf:ID="sumRule"/>
-  <j.0:Rule rdf:ID="maxRule"/>
   <j.0:Rule rdf:ID="avgRule"/>
+  <j.0:Rule rdf:ID="maxRule"/>
   <j.0:Rule rdf:ID="minRule"/>
 </rdf:RDF>

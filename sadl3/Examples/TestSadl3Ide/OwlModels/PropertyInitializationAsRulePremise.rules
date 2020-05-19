@@ -2,6 +2,7 @@
 #  Created from SADL model 'http://sadl.org/PropertyInitializationAsRulePremise.sadl'
 
 @prefix PropertyInitializationAsRulePremise: <http://sadl.org/PropertyInitializationAsRulePremise.sadl#>
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 [ChildRule2: (?v0 http://sadl.org/PropertyInitializationAsRulePremise.sadl#age ?v3), le(?v3, 12) -> (?v1 rdf:type http://sadl.org/PropertyInitializationAsRulePremise.sadl#Child)]
 [ChildRule2b: (?x rdf:type http://sadl.org/PropertyInitializationAsRulePremise.sadl#Person), (?x http://sadl.org/PropertyInitializationAsRulePremise.sadl#age ?v0), le(?v0, 12) -> (?x rdf:type http://sadl.org/PropertyInitializationAsRulePremise.sadl#Child)]

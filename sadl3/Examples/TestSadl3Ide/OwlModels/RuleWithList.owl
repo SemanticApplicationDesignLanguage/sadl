@@ -1,0 +1,53 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:j.0="http://sadl.org/sadllistmodel#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.1="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:sadllistmodel="http://sadl.org/sadllistmodel"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:RuleWithList="http://sadl.org/RuleWithList.sadl#"
+  xml:base="http://sadl.org/RuleWithList.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="sadllistmodel"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RuleWithList.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Scores">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="#Scores"/>
+        <owl:onProperty rdf:resource="sadllistmodel#rest"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+        <owl:onProperty rdf:resource="sadllistmodel#first"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="sadllistmodel#List"/>
+  </owl:Class>
+  <j.1:Rule rdf:ID="testListVar"/>
+  <RuleWithList:Scores rdf:ID="MyScores">
+    <j.0:rest>
+      <RuleWithList:Scores>
+        <j.0:rest>
+          <RuleWithList:Scores>
+            <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+            >86</j.0:first>
+          </RuleWithList:Scores>
+        </j.0:rest>
+        <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >54</j.0:first>
+      </RuleWithList:Scores>
+    </j.0:rest>
+    <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >25</j.0:first>
+  </RuleWithList:Scores>
+</rdf:RDF>

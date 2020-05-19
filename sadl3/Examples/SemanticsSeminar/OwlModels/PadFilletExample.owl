@@ -1,0 +1,144 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:model3="http://sadl.org/model3.sadl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/model3.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'PadFilletExample.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Cylindrical">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="concave"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:ID="isFloorFace"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="AbstractFace"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="#AbstractFace">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="AbstractSADLnx"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="PadFillet">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="bottomEdge"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="bottomFace"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="AbstractFeature"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Intersection">
+    <rdfs:subClassOf>
+      <owl:Class rdf:ID="AbstractEdge"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:ID="Blending">
+    <rdfs:subClassOf rdf:resource="#AbstractFace"/>
+  </owl:Class>
+  <owl:Class rdf:about="#AbstractEdge">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:ID="edgeAdjacencyType"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="en">Edge</rdfs:label>
+    <rdfs:subClassOf rdf:resource="#AbstractSADLnx"/>
+  </owl:Class>
+  <owl:Class rdf:ID="AdjacencyType">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <model3:AdjacencyType rdf:ID="TANGENT"/>
+          <model3:AdjacencyType rdf:ID="CONVEX"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="#AbstractFeature">
+    <rdfs:subClassOf rdf:resource="#AbstractSADLnx"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:ID="adjacentFace">
+    <rdfs:domain rdf:resource="#AbstractFace"/>
+    <rdfs:range rdf:resource="#AbstractFace"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="featureFace">
+    <rdfs:domain rdf:resource="#AbstractFeature"/>
+    <rdfs:range rdf:resource="#AbstractFace"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#edgeAdjacencyType">
+    <rdfs:domain rdf:resource="#AbstractEdge"/>
+    <rdfs:range rdf:resource="#AdjacencyType"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#bottomEdge">
+    <rdfs:domain rdf:resource="#PadFillet"/>
+    <rdfs:range rdf:resource="#AbstractEdge"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="facesShareEndPoint">
+    <rdfs:range rdf:resource="#AbstractFace"/>
+    <rdfs:domain rdf:resource="#AbstractFace"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="edge">
+    <rdfs:domain rdf:resource="#AbstractFace"/>
+    <rdfs:range rdf:resource="#AbstractEdge"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="#bottomFace">
+    <rdfs:domain rdf:resource="#PadFillet"/>
+    <rdfs:range rdf:resource="#AbstractFace"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:ID="otherFace">
+    <rdfs:domain rdf:resource="#AbstractFeature"/>
+    <rdfs:range rdf:resource="#AbstractFace"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="#concave">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <rdfs:domain rdf:resource="#Cylindrical"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="#isFloorFace">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <rdfs:domain rdf:resource="#Cylindrical"/>
+  </owl:DatatypeProperty>
+  <j.0:Rule rdf:ID="findPadFillet1"/>
+</rdf:RDF>

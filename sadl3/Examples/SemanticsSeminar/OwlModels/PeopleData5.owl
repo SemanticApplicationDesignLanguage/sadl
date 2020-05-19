@@ -1,0 +1,88 @@
+<rdf:RDF
+    xmlns:PeopleModel5="http://sadl.org/PeopleModel5.sadl"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:j.1="http://sadl.org/PeopleModel5.sadl#"
+    xmlns:PeopleData5="http://sadl.org/PeopleData5.sadl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/PeopleData5.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="PeopleModel5.sadl"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'PeopleData5.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <j.1:Woman rdf:ID="Eve">
+    <j.1:child>
+      <j.1:Person rdf:ID="Cain">
+        <j.1:child>
+          <j.1:Man rdf:ID="Enoch">
+            <j.1:child>
+              <j.1:Man rdf:ID="Irad">
+                <j.1:child>
+                  <j.1:Man rdf:ID="Mehujael"/>
+                </j.1:child>
+              </j.1:Man>
+            </j.1:child>
+          </j.1:Man>
+        </j.1:child>
+        <j.1:sister>
+          <j.1:Woman>
+            <j.1:age rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+            >25</j.1:age>
+          </j.1:Woman>
+        </j.1:sister>
+        <j.1:brother>
+          <j.1:Man rdf:ID="Abel">
+            <j.1:age rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+            >32</j.1:age>
+          </j.1:Man>
+        </j.1:brother>
+        <j.1:age rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >35</j.1:age>
+      </j.1:Person>
+    </j.1:child>
+    <j.1:age rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >50</j.1:age>
+  </j.1:Woman>
+  <j.1:Man rdf:ID="Andy">
+    <j.1:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+    >1913-07-19</j.1:dateOfBirth>
+    <j.1:favoriteThing>
+      <j.1:Woman rdf:ID="Eileen">
+        <j.1:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+        >1980-03-29</j.1:dateOfBirth>
+      </j.1:Woman>
+    </j.1:favoriteThing>
+    <j.1:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >chocolate</j.1:favoriteThing>
+    <j.1:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#double"
+    >3.141592653589793</j.1:favoriteThing>
+  </j.1:Man>
+  <j.1:Marriage>
+    <j.1:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+    >2000-07-01</j.1:date>
+    <j.1:location rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
+    >Palmyra, NY</j.1:location>
+    <j.1:wife rdf:resource="#Eileen"/>
+    <j.1:husband>
+      <j.1:Man rdf:ID="Dan">
+        <j.1:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+        >1979-05-02</j.1:dateOfBirth>
+      </j.1:Man>
+    </j.1:husband>
+  </j.1:Marriage>
+  <j.0:Rule rdf:ID="printNumGrandChildren"/>
+  <j.1:Man rdf:ID="Adam">
+    <j.1:child rdf:resource="#Abel"/>
+    <j.1:child rdf:resource="#Cain"/>
+    <j.1:age rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+    >50</j.1:age>
+  </j.1:Man>
+</rdf:RDF>

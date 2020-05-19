@@ -5,3 +5,4 @@
 @prefix Shapes: <http://sadl.org/Shapes.sadl#>
 
 [AreaOfCircle: (?c rdf:type http://sadl.org/Shapes.sadl#Circle), (?c http://sadl.org/Shapes.sadl#radius ?v0), pow(?v0, 2, ?v1), product(3.141592653589793, ?v1, ?v2) -> (?c http://sadl.org/Shapes.sadl#area ?v2)]
+[AreaOfCircle2: (?v0 rdf:type http://sadl.org/Shapes.sadl#Circle), (?v0 http://sadl.org/Shapes.sadl#radius ?v1), pow(?v1, 2, ?v2), product(3.141592653589793, ?v2, ?v3) -> (?v0 http://sadl.org/Shapes.sadl#area ?v3)]

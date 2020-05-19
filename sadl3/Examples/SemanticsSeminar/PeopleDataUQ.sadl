@@ -1,0 +1,8 @@
+ uri "http://sadl.org/PeopleDataUQ.sadl" alias PeopleDataUQ.
+ 
+ import "http://sadl.org/PeopleModelUQ.sadl".
+ 
+ Adam is a Person with age 50 yrs.
+ 
+  
+ 

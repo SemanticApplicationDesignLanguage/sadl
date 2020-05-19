@@ -78,10 +78,6 @@
     <pl:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#double"
     >3.141592653589793</pl:favoriteThing>
   </pl:Man>
-  <pl:Man rdf:ID="Adam">
-    <pl:child rdf:resource="#Abel"/>
-    <pl:child rdf:resource="#Cain"/>
-  </pl:Man>
   <pl:Marriage>
     <pl:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
     >2000-07-01</pl:date>
@@ -92,4 +88,8 @@
       <pl:Man rdf:ID="Dan"/>
     </pl:husband>
   </pl:Marriage>
+  <pl:Man rdf:ID="Adam">
+    <pl:child rdf:resource="#Abel"/>
+    <pl:child rdf:resource="#Cain"/>
+  </pl:Man>
 </rdf:RDF>

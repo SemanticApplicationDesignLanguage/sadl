@@ -3,4 +3,4 @@
 
 @prefix RuleWithList: <http://sadl.org/RuleWithList.sadl#>
 
-[testListVar: (?x rdf:type http://sadl.org/RuleWithList.sadl#Scores), listLength(?x, ?y) -> print('length of list is'^^http://www.w3.org/2001/XMLSchema#string, ?y)]
+[testListVar: assign(http://sadl.org/RuleWithList.sadl#Scores,?x), length(http://sadl.org/RuleWithList.sadl#MyScores, ?y) -> print('length of list is'^^http://www.w3.org/2001/XMLSchema#string, ?y)]
