@@ -37,7 +37,7 @@
  Test: age of Abel is 32.
  Test: age of Abel > 25.
  Test: Eve has child Cain.
- Test: "select ?ch where {<Adam> <child> ?ch}" is {[Cain],[Abel]}.
+ Test: "select ?ch where {<Adam> <child> ?ch}" is {[Cain],[Abel]}.  
  
  Ask: select p, ag where p has age ag.
  

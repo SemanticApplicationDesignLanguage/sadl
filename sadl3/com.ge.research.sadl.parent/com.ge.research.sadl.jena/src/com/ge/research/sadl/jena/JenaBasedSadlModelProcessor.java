@@ -1290,6 +1290,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected void processModelElement(SadlModelElement element) {
 		setDefaultEObject(element);
 		try {
+			if (getModelValidator() != null) {
+				getModelValidator().clearImpliedPropertiesUsed();
+			}
+		} catch (TranslationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
 			if (element instanceof SadlClassOrPropertyDeclaration) {
 				processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration) element);
 			} else if (element instanceof SadlProperty) {
@@ -5609,7 +5617,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						int i = 0;
 					}
 					// TODO must add implied properties to rules, tests, etc.
-				} else {
+				} 
+				else if (maybeGpe == null && getTarget() != null) {
+					addError("implied properties not yet implemented for " + getTarget().getClass().getSimpleName(), binobj);
+				}
+				else {
 					throw new TranslationException("Unexpected type to which to apply implied and expanded properties");
 				}
 			}
@@ -9930,7 +9942,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					prop = sr;
 					sr = subj;
 					instUri = getDeclarationExtensions().getConceptUri(sr);
-					inst = getTheJenaModel().getIndividual(instUri);
+					if (instUri == null) {
+						addError("instance does not exist", element);
+						return null;
+					}
+					else {
+						inst = getTheJenaModel().getIndividual(instUri);
+					}
 					subjType = getDeclarationExtensions().getOntConceptType(sr);
 				}
 				else if (inst == null) {

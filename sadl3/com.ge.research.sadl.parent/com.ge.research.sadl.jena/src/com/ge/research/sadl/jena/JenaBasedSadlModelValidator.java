@@ -5595,9 +5595,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	public void resetValidatorState(SadlModelElement element) {
-		if (impliedPropertiesUsed != null) {
-			impliedPropertiesUsed.clear();
-		}
+		clearImpliedPropertiesUsed();
 		if (binaryOpLeftImpliedProperties != null) {
 			binaryOpLeftImpliedProperties.clear();
 		}
