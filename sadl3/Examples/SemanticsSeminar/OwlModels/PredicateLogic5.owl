@@ -49,6 +49,18 @@
     <rdfs:domain rdf:resource="#Marriage"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
   </owl:DatatypeProperty>
+<<<<<<< HEAD
+  <pl5:Man rdf:ID="Adam">
+    <pl5:child>
+      <pl5:Person rdf:ID="Cain">
+        <pl5:brother>
+          <pl5:Man rdf:ID="Abel"/>
+        </pl5:brother>
+      </pl5:Person>
+    </pl5:child>
+  </pl5:Man>
+=======
+>>>>>>> 5cd7fe4b2e06920367bf10c26106d137d7c89087
   <pl5:Marriage>
     <pl5:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
     >2000-07-01</pl5:date>
@@ -61,6 +73,8 @@
       <pl5:Man rdf:ID="Dan"/>
     </pl5:husband>
   </pl5:Marriage>
+<<<<<<< HEAD
+=======
   <pl5:Man rdf:ID="Adam">
     <pl5:child>
       <pl5:Person rdf:ID="Cain">
@@ -70,6 +84,7 @@
       </pl5:Person>
     </pl5:child>
   </pl5:Man>
+>>>>>>> 5cd7fe4b2e06920367bf10c26106d137d7c89087
   <pl5:Man rdf:ID="Andy">
     <pl5:favoriteThing rdf:resource="#Eileen"/>
     <pl5:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#string"

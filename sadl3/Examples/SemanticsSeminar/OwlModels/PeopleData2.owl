@@ -29,10 +29,13 @@
       </j.0:Person>
     </j.0:child>
   </j.0:Woman>
+<<<<<<< HEAD
+=======
   <j.0:Man rdf:ID="Adam">
     <j.0:child rdf:resource="#Abel"/>
     <j.0:child rdf:resource="#Cain"/>
   </j.0:Man>
+>>>>>>> 5cd7fe4b2e06920367bf10c26106d137d7c89087
   <j.0:Marriage>
     <j.0:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
     >2000-07-01</j.0:date>
@@ -45,6 +48,13 @@
       <j.0:Man rdf:ID="Dan"/>
     </j.0:husband>
   </j.0:Marriage>
+<<<<<<< HEAD
+  <j.0:Man rdf:ID="Adam">
+    <j.0:child rdf:resource="#Abel"/>
+    <j.0:child rdf:resource="#Cain"/>
+  </j.0:Man>
+=======
+>>>>>>> 5cd7fe4b2e06920367bf10c26106d137d7c89087
   <j.0:Man rdf:ID="Andy">
     <j.0:favoriteThing rdf:resource="#Eileen"/>
     <j.0:favoriteThing rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
