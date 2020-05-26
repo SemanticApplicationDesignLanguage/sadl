@@ -25,8 +25,9 @@ favoriteThing describes Person.
 
 Andy is a Man, has favoriteThing PI, has favoriteThing "chocolate", has favoriteThing Eileen.
 
-son is a type of child.
+son is a type of child with values of type Man.
+
 
 Martha is a Person with son (a Person Jacky).
 
-Ask: select p, c where p, child c.
+Ask: select p, c where p child c.
