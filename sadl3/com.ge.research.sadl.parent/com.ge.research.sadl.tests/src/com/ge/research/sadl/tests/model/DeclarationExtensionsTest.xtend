@@ -212,7 +212,23 @@ class DeclarationExtensionsTest {
 		assertEquals(OntConceptType.CLASS, name2resource.get('Pet').ontConceptType)
 		assertEquals(OntConceptType.CLASS_PROPERTY, name2resource.get('owns').ontConceptType)
 	}
-	
+
+	// https://github.com/crapo/sadlos2/issues/447
+	@Test def void testGetOntConceptType_09() {
+		val model = '''
+			uri "http://glguy.net/sadl/alldifferentexample".
+			C is a class.
+			I is a C.
+			J is a C.
+			{I,J} are not the same.
+		'''.parse
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+
+		assertEquals(OntConceptType.INSTANCE, name2resource.get('I').ontConceptType)
+		assertEquals(OntConceptType.INSTANCE, name2resource.get('J').ontConceptType)
+		assertEquals(OntConceptType.CLASS, name2resource.get('C').ontConceptType)
+	}
+
 	@Test def void testEscapedName() {
 		val model = '''
 			uri "http://sadl.org/TestRequrements/StringLength" alias strlen. 
