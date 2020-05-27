@@ -160,20 +160,30 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 	}
 
 	protected void displayInferenceResults(Object[] retvals, Path trgtFile, String owlModelPath, String modelFolderPath, Map<String, String> prefMap) throws ConfigurationException, IOException {
-    	
 		if (retvals == null || retvals.length < 1) {
-    		
+			console.error("There are inference results.");
+			return;
     	}
 		int numTests = 0;
 		int numTestsPassed = 0;
     	for (int idx = 0; idx < retvals.length; idx++) {
-    		if (!(retvals[idx] instanceof SadlCommandResult)) {
-    			console.error("Unexpected inference result is not a SadlCommandResult (" + (retvals[idx] != null ? retvals[idx].toString() : "null"));
+    		if (retvals[idx] != null && !(retvals[idx] instanceof SadlCommandResult)) {
+    			if (retvals[idx] instanceof List<?>) {
+    				// this should be errors but not in the context of a SadlCommandResult
+    				for (int i = 0; i < ((List<?>)retvals[idx]).size(); i++) {
+    					console.error(((List<?>)retvals[idx]).get(i).toString() + "\n");
+    				}
+    			}
+    			else {
+    				console.error("Unexpected inference result is not a SadlCommandResult (" + retvals[idx].toString());
+    			}
+    			break;
     		}
-    		SadlCommandResult result = (SadlCommandResult) retvals[idx];
-    		SadlCommand cmd = result.getCmd();
-    		Object infresults = result.getResults();
-    		List<ModelError> errors = result.getErrors();
+    		Object resultObj = retvals[idx];
+    		SadlCommandResult result = (SadlCommandResult) resultObj;
+    		SadlCommand cmd = result != null ? result.getCmd() : null;
+    		Object infresults = result != null ? result.getResults() : null;
+    		List<ModelError> errors = result != null ? result.getErrors() : null;
     		
     		if (infresults != null) {
     			if (infresults instanceof ResultSet) {
@@ -245,7 +255,7 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
     				console.info(infresults.toString() + "\n");
     			}
     		}
-			else {
+			else if (cmd != null) {
 				if (cmd instanceof Query) {
 					String msg;
 					if (((Query)cmd).isUpdate()) {
@@ -271,16 +281,18 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 					}
     			}
     		}
-    		if (result.getTimingInfo() != null) {
-    			console.info("Timing info:\n");
-    			for (ReasonerTiming tinfo : result.getTimingInfo()) {
-    				console.info("   " + tinfo.toString() + "\n");
-    			}
-    			console.info("\n");
-    		}
-    		if (result.getDerivations() != null) {
-    			DataSource ds = result.getDerivations();
-    			console.info(writeDerivationsToFile(trgtFile, ds));
+    		if (result != null) {
+	    		if (result.getTimingInfo() != null) {
+	    			console.info("Timing info:\n");
+	    			for (ReasonerTiming tinfo : result.getTimingInfo()) {
+	    				console.info("   " + tinfo.toString() + "\n");
+	    			}
+	    			console.info("\n");
+	    		}
+	    		if (result.getDerivations() != null) {
+	    			DataSource ds = result.getDerivations();
+	    			console.info(writeDerivationsToFile(trgtFile, ds));
+	    		}
     		}
     	}
     	if (numTests > 0) {

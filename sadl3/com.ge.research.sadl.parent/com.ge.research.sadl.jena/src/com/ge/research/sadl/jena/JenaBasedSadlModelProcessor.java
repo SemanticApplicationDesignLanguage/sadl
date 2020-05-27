@@ -189,6 +189,7 @@ import com.ge.research.sadl.sADL.SadlImport;
 import com.ge.research.sadl.sADL.SadlInstance;
 import com.ge.research.sadl.sADL.SadlIntersectionType;
 import com.ge.research.sadl.sADL.SadlIsAnnotation;
+import com.ge.research.sadl.sADL.SadlIsFunctional;
 import com.ge.research.sadl.sADL.SadlIsInverseOf;
 import com.ge.research.sadl.sADL.SadlIsSymmetrical;
 import com.ge.research.sadl.sADL.SadlIsTransitive;
@@ -4152,7 +4153,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		return expr;
 	}
-
+	
 	public Object processExpression(ValueTable expr) throws InvalidNameException, InvalidTypeException, TranslationException {
 		ValueRow row = ((ValueTable) expr).getRow();
 		if (row == null) {
@@ -9047,6 +9048,37 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						getTheJenaModel().add(prop, RDF.type, OWL.SymmetricProperty);
 					}
 				}
+			} else if (spr1 instanceof SadlIsFunctional) {
+				boolean isInverse = ((SadlIsFunctional) spr1).isInverse();
+				if (isInverse) {
+					if (!propType.equals(OntConceptType.CLASS_PROPERTY)) {
+						addError("Only object properties can be inverse functional", spr1);
+					}
+					else {
+						ObjectProperty prop = getOrCreateObjectProperty(propUri);
+						if (prop != null) {
+							getTheJenaModel().add(prop, RDF.type, OWL.InverseFunctionalProperty);
+						}
+					}
+				}
+				else {
+					Property prop = null;
+					if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+						prop = getOrCreateObjectProperty(propUri);
+					}
+					else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+						prop = getOrCreateDatatypeProperty(propUri);
+					}
+					else if (propType.equals(OntConceptType.RDF_PROPERTY)) {
+						prop = getOrCreateRdfProperty(propUri);
+					}
+					else {
+						addError("Property type '" + propType.toString() + "' can't be made functional", spr1);
+					}
+					if (prop != null) {
+						getTheJenaModel().add(prop, RDF.type, OWL.FunctionalProperty);
+					}
+				}
 			} else {
 				throw new JenaProcessorException("Unhandled SadlProperty expression");
 			}
@@ -9732,12 +9764,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			while (djitr.hasNext()) {
 				SadlResource sr = djitr.next();
 				String declUri = getDeclarationExtensions().getConceptUri(sr);
-				if (declUri == null) {
-					throw new JenaProcessorException(
-							"Failed to get concept URI for SadlResource in processSadlDifferentFrom");
+				OntConceptType type = null;
+				try {
+					type = getDeclarationExtensions().getOntConceptType(sr);
+				} catch (CircularDefinitionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-				Individual inst = getTheJenaModel().getIndividual(declUri);
-				differentFrom.add(inst);
+				if (type != null && !type.equals(OntConceptType.INSTANCE)) {
+					addTypeCheckingError("Only instances can be different from each other.", element);
+				}
+				else {
+					if (declUri == null) {
+						throw new JenaProcessorException(
+								"Failed to get concept URI for SadlResource in processSadlDifferentFrom");
+					}
+					Individual inst = getTheJenaModel().getIndividual(declUri);
+					differentFrom.add(inst);
+				}
 			}
 		}
 		SadlTypeReference nsas = element.getNotTheSameAs();
@@ -9971,8 +10015,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (getModelValidator() != null && !propType.equals(OntConceptType.ANNOTATION_PROPERTY)) {
 						// don't type check annotation properties--they have no range (OWL 1)
 						StringBuilder error = new StringBuilder();
-						if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val, error)) {
-							addTypeCheckingError(error.toString(), propinit);
+						if (val instanceof Expression && propinit.getFirstConnective() != null && propinit.getFirstConnective().equals("is")) {
+							if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), (Expression) val, prop, sr, error)) {
+								addTypeCheckingError(error.toString(), propinit);
+							}
+						}
+						else {
+							if (!getModelValidator().checkPropertyValueInRange(getTheJenaModel(), sr, prop, val, error)) {
+								addTypeCheckingError(error.toString(), propinit);
+							}
 						}
 					}
 				} catch (DontTypeCheckException e) {
@@ -9993,7 +10044,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				} catch (Exception e) {
 					throw new JenaProcessorException("Unexpected error checking value in range", e);
 				}
-				assignInstancePropertyValue(inst, cls, prop, val);
+				if (val instanceof SadlResource && propinit.getFirstConnective() != null && propinit.getFirstConnective().equals("is")) {
+					String valinstUri = getDeclarationExtensions().getConceptUri((SadlResource) val);
+					Individual valinst = getTheJenaModel().getIndividual(valinstUri);
+					assignInstancePropertyValue(valinst, cls, prop, sr);
+				}
+				else {
+					assignInstancePropertyValue(inst, cls, prop, val);
+				}
 			} else {
 				addError("no value found", propinit);
 			}

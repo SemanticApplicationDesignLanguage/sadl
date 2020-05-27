@@ -2611,7 +2611,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		
 		map.put(pModelSpec, 
 				new ConfigurationOption(categoryHierarchy, pModelSpec, "Jena ontology model specification",
-						OWL_DL_MEM_RDFS, modelSpecOptions));
+						OWL_MEM, modelSpecOptions));
 		map.put(pTimeOut, 
 				new ConfigurationOption(categoryHierarchy, pTimeOut, "Query timeout (seconds, -1 for no limit)", "-1", null));
 		map.put(pRuleMode, 
