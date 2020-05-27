@@ -117,6 +117,7 @@ class SadlIdeActionHandler {
 			preferences.putBoolean(preferenceValues, SadlPreferences.VALIDATE_BEFORE_TEST);
 			preferences.putBoolean(preferenceValues, SadlPreferences.NAMESPACE_IN_QUERY_RESULTS);
 			preferences.putNonBoolean(preferenceValues, SadlPreferences.GRAPH_RENDERER_CLASS);
+			preferences.putNonBoolean(preferenceValues, SadlPreferences.OWL_MODEL_FORMAT);
 		}
 		return preferences;
 	}
