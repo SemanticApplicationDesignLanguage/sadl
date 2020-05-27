@@ -1,0 +1,10 @@
+uri "http://glguy.net/sadl/alldifferentexample".
+
+C is a class.
+I is a C.
+J is a C.
+//K is a C.
+//L is a C.
+{I,J} are not the same.   
+//K is not the same as L.
+ 

@@ -1,0 +1,16 @@
+ uri "http://sadl.org/Issue446.sadl" alias i446.
+ 
+ Person is a class.
+ {Man, Woman} are types of Person.
+
+ spouse describes Person with values of type Person.
+ 
+ Marriage is a class, 
+ 	described by husband with values of type Man,
+ 	described by wife with values of type Woman,
+ 	described by location with values of type string,
+ 	described by ^date with values of type date.
+ 	
+ George is a Person.
+  	
+ A Marriage with spouse George. 	 

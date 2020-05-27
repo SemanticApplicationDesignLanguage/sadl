@@ -1,0 +1,5 @@
+ uri "http://sadl.org/MustVsCan.sadl" alias MustVsCan.
+ 
+ Season is a class, must be one of {Fall, Winter, Spring, Summer}.
+ Season2 is a class, can only be one of {Fall2, Winter2, Spring2, Summer2}.
+ 

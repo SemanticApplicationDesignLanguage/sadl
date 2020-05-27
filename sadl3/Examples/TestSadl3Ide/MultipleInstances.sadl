@@ -2,7 +2,7 @@
  
  Actor is a class described by rating with values of type string.
  
-// {John, James, Susan} are instances of Actor.
+ {John, James, Susan} are instances of Actor.
  
  John has rating "good".
  

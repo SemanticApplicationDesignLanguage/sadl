@@ -1,0 +1,7 @@
+ uri "http://sadl.org/Issue445.sadl" alias Issue445.
+ 
+ import "http://sadl.org/PeopleModel.sadl".
+ 
+ son is child of sibling. 
+ 
+ 

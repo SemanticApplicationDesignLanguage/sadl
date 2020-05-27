@@ -1,0 +1,8 @@
+uri "http://glguy.net/sadl/demo".
+
+C is a class.
+D is a class.
+p describes C with a single value of type string.
+p describes D with a single value of type string.
+//p has a single subject.
+//p has a single value.
