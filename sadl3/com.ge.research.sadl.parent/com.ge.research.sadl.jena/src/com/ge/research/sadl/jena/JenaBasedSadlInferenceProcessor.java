@@ -131,6 +131,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 
 	@Override
 	public Object[] runInference(Resource resource, String owlModelPath, String modelFolderPath, Map<String,String> prefMap) throws SadlInferenceException {
+		preferenceMap = prefMap;
 		try {
 			setModelFolderPath(modelFolderPath);
 			setCurrentResource(resource);
@@ -150,7 +151,6 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-		preferenceMap = prefMap;
 		OntModel om = OntModelProvider.find(resource);
 		if (om == null) {
 			throw new SadlInferenceException("Unable to find OWL model for Resource '" + resource.getURI().toString() + "'");

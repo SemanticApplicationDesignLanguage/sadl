@@ -79,14 +79,33 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 	public void run(Path path, Supplier<XtextResource> resourceSupplier, Map<String, String> properties) {
 		try {
 			// *** NOTE: Copied from com.ge.research.sadl.ui.handlers.RunInference.execute(ExecutionEvent) *** 
-
+			String frmt = properties.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
+			if (frmt != null) {
+				if (frmt.equals("N3")) {
+					frmt = ".n3";
+				}
+				else if (frmt.equals("N-TRIPLE")) {
+					frmt = ".nt";
+				}
+				else if (frmt.equals("TURTLE")) {
+					frmt = ".turtle";
+				}
+				else {
+					frmt = ".owl";
+				}
+			}
+			else {
+				frmt = ".owl";
+			}
+			
 			if (path.getFileName().toString().endsWith(".sadl")) {
 				// run inference on this model
 				console.info("Inference of '" + path.toAbsolutePath().toString() + "' requested.\n");
 				final List<Issue> issues = new ArrayList<Issue>();
 				final List<SadlMessage> results = null;
 				String modelFolderPath = getOwlModelsFolderPath(path).toString();
-				String owlModelPath = modelFolderPath + "/" + path.getFileName().toString().replaceFirst("[.][^.]+$", ".owl");
+				
+				String owlModelPath = modelFolderPath + "/" + path.getFileName().toString().replaceFirst("[.][^.]+$", frmt);
 				Resource res = prepareResource(resourceSupplier.get());
 				Object[] retvals = inferenceProcessor.runInference(res, owlModelPath, modelFolderPath, properties);
 				displayInferenceResults(retvals, path, owlModelPath, modelFolderPath, properties);
@@ -108,7 +127,7 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 						int testLoc = templateLine.indexOf("Test:");
 						String testfile = templateLine.substring(testLoc + 5).trim();
 						String modelFolderPath = getOwlModelsFolderPath(path).toString();
-						String owlModelPath = modelFolderPath + "/" + path.getFileName().toString().replaceFirst("[.][^.]+$", ".owl");
+						String owlModelPath = modelFolderPath + "/" + path.getFileName().toString().replaceFirst("[.][^.]+$", frmt);
 						if (configMgr == null) {
 							configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderPath, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
 						}

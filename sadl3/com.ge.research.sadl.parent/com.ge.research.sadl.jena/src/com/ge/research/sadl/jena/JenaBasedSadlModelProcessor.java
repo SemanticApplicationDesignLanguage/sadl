@@ -2417,11 +2417,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			Query theQuery = new Query();
 			theQuery.setContext(qexpr);
 			setTarget(theQuery);
-			if (qexpr instanceof Name) {
-				OntConceptType qntype = getDeclarationExtensions().getOntConceptType(((Name) qexpr).getName());
+			if (qexpr instanceof SadlResource) {
+				OntConceptType qntype = getDeclarationExtensions().getOntConceptType(((SadlResource) qexpr).getName());
 				if (qntype.equals(OntConceptType.STRUCTURE_NAME)) {
 					// this is just a named query declared elsewhere
-					SadlResource qdecl = getDeclarationExtensions().getDeclaration(((Name) qexpr).getName());
+					SadlResource qdecl = getDeclarationExtensions().getDeclaration(((SadlResource) qexpr).getName());
 					EObject qdeclcont = qdecl.eContainer();
 					if (qdeclcont instanceof QueryStatement) {
 						qexpr = ((QueryStatement) qdeclcont).getExpr();
