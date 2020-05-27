@@ -180,7 +180,7 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 
 	protected void displayInferenceResults(Object[] retvals, Path trgtFile, String owlModelPath, String modelFolderPath, Map<String, String> prefMap) throws ConfigurationException, IOException {
 		if (retvals == null || retvals.length < 1) {
-			console.error("There are inference results.");
+			console.error("There are no inference results.");
 			return;
     	}
 		int numTests = 0;
