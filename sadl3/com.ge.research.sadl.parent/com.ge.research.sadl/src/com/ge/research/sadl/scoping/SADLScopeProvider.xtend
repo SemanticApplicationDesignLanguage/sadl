@@ -74,6 +74,7 @@ import static com.ge.research.sadl.processing.SadlConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension com.ge.research.sadl.utils.SadlASTUtils.*
+import com.ge.research.sadl.sADL.SadlDifferentFrom
 
 /**
  * This class contains custom scoping description.
@@ -104,7 +105,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	val LocalScopeProvider localScope_01 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope, true) [
 			if (it instanceof SadlResource) {
-				return eContainer instanceof SadlClassOrPropertyDeclaration && eContainingFeature == SADL_CLASS_OR_PROPERTY_DECLARATION__CLASS_OR_PROPERTY
+				return eContainer instanceof SadlClassOrPropertyDeclaration && eContainingFeature == SADL_CLASS_OR_PROPERTY_DECLARATION__CLASS_OR_PROPERTY && !(eContainer.eContainer instanceof SadlDifferentFrom)
 					|| eContainer instanceof SadlProperty && (eContainer as SadlProperty).isPrimaryDeclaration() && eContainingFeature == SADL_PROPERTY__NAME_OR_REF;
 					
 			} 

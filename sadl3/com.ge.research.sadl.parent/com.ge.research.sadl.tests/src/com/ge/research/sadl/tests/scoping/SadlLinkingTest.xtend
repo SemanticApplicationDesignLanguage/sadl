@@ -1398,4 +1398,16 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 
+	// https://github.com/crapo/sadlos2/issues/447
+	@Test
+	def void canLinkToAllDifferentStatement() {
+		'''
+			uri "http://glguy.net/sadl/alldifferentexample".
+			[C] is a class.
+			[I] is a <C>.
+			[J] is a <C>.
+			{<I>,<J>} are not the same.
+		'''.assertLinking[sadl]
+	}
+
 }
