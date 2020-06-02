@@ -4844,6 +4844,27 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						return true;
 					}
 				}
+				if (leftCName.getUri().equals(XSD.duration.getURI())) {
+					if (((ConceptName)rightConceptIdentifier).getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+						return true;
+					}
+					else if (((ConceptName)rightConceptIdentifier).getUri().equals(XSD.xstring.getURI()) && 
+							rightExpression instanceof SadlStringLiteral) {
+						String lstr = ((SadlStringLiteral)rightExpression).getLiteralString();
+						try {
+							Literal lval = SadlUtils.getLiteralMatchingDataPropertyRange(theJenaModel, XSD.duration.getURI(), lstr);
+							if (lval != null) {
+								return true;
+							}
+							else {
+								return false;
+							}
+						}
+						catch (Exception e) {
+							return false;
+						}
+					}
+				}
 			}
 		}
 				

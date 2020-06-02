@@ -1852,6 +1852,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					Object testExpanded = getIfTranslator().expandProxyNodes(testtrans, false, true);
 					boolean treatAsMultipleTests = false;
 					{
+						if (testExpanded instanceof List<?> && ((List<?>)testExpanded).size() == 1) {
+							testExpanded = ((List<?>)testExpanded).get(0);
+						}
+						if (testExpanded instanceof Junction) {
+							testExpanded = getIfTranslator().junctionToList((Junction) testExpanded);
+						}
 						if (testExpanded instanceof List<?>) {
 							treatAsMultipleTests = containsMultipleTests((List<GraphPatternElement>) testExpanded);
 						}
@@ -5141,6 +5147,31 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else if (lobj instanceof TripleElement && robj instanceof Node) {
 				assignedNode = validateNode((Node) robj);
 				pattern = (TripleElement) lobj;
+			}
+			else if (getTarget() != null && getTarget() instanceof Test &&
+					lobj instanceof NamedNode && ((NamedNode)lobj).getNodeType().equals(NodeType.InstanceNode) &&
+					robj instanceof VariableNode && rest instanceof GraphPatternElement) {
+				// this is a test with type and properties
+				TripleElement tr1 = new TripleElement((Node) lobj, new RDFTypeNode(), ((VariableNode)robj).getType());
+				if (rest instanceof Junction) {
+					rest = getIfTranslator().junctionToList((Junction)rest);
+				}
+				else if (rest instanceof TripleElement) {
+					List<GraphPatternElement> lst = new ArrayList<GraphPatternElement>();
+					lst.add((GraphPatternElement) rest);
+					rest = lst;
+				}
+				else {
+					addError("Unhandled Test pattern", container);
+				}
+				List<TripleElement> results = new ArrayList<TripleElement>();
+				results.add(tr1);
+				for (int i = 0; i < ((List<?>)rest).size(); i++) {
+					GraphPatternElement gpe = (GraphPatternElement) ((List<?>)rest).get(i);
+					((TripleElement)gpe).setSubject((Node) lobj);
+					results.add((TripleElement) gpe);
+				}
+				return results;
 			}
 			if (assignedNode != null && pattern != null) {
 				// We're expressing the type of a named thing.
@@ -10427,7 +10458,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					Individual instval = processSadlInstance((SadlInstance) val);
 					OntClass uQCls = getTheJenaModel()
 							.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
-					if (uQCls != null && instval.hasRDFType(uQCls) && isIgnoreUnittedQuantities()) {
+					if (uQCls != null && instval != null && instval.hasRDFType(uQCls) && isIgnoreUnittedQuantities()) {
 						if (val instanceof SadlNestedInstance) {
 							Iterator<SadlPropertyInitializer> propinititr = ((SadlNestedInstance) val)
 									.getPropertyInitializers().iterator();
@@ -10442,7 +10473,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								}
 							}
 						}
-					} else {
+					} else if (instval != null){
 						addInstancePropertyValue(inst, oprop, instval, val);
 					}
 				} else if (val instanceof SadlResource) {
@@ -12224,6 +12255,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (value instanceof SadlNumberLiteral) {
 				String val = ((SadlNumberLiteral) value).getLiteralNumber().toPlainString();
+				if (rng != null && rng.getURI().equals(XSD.duration.getURI()) && 
+						((SadlNumberLiteral) value).getUnit() != null) {
+					val = val + " " + ((SadlNumberLiteral)value).getUnit();
+				}
 				if (isNegated) {
 					val = "-" + val;
 				}
@@ -13536,6 +13571,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		//uri is exactly a numeric type
 		if (uri.equals(XSD.decimal.getURI()) || uri.equals(XSD.integer.getURI()) || uri.equals(XSD.xdouble.getURI())
 				|| uri.equals(XSD.xfloat.getURI()) || uri.equals(XSD.xint.getURI()) || uri.equals(XSD.xlong.getURI())) {
+			return true;
+		}
+		if (uri.equals(XSD.duration.getURI())) {
+			// xsd:duration will be considered numeric for type checking.
 			return true;
 		}
 		//If Unitted Quantities are ignored then they are also considered a numeric type

@@ -184,6 +184,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 	public String translateRule(OntModel model, String modelName, Rule rule)
 			throws TranslationException {
+		setTheModel(model);
 		setRuleInTranslation(rule);
 		boolean translateToBackwardRule = false;
 		StringBuilder sb = new StringBuilder();

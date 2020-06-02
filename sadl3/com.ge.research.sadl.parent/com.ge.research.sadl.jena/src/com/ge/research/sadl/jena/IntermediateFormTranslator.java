@@ -48,6 +48,7 @@ import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
+import com.ge.research.sadl.model.gp.JunctionNode;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
@@ -3184,9 +3185,32 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 
 		return lResult;
+	}	
+	
+	public static List<Node> conjunctionToList(JunctionNode jn) throws TranslationException {
+		List<Node> lResult = new ArrayList<>();
+
+		Node lhs = (Node)jn.getLhs();
+		if (lhs instanceof ProxyNode) {
+			throw new TranslationException("A JunctionNode should never contain a ProxyNode");
+		} else if (lhs instanceof JunctionNode) {
+			lResult.addAll(conjunctionToList((JunctionNode)lhs));
+		} else {
+			lResult.add(lhs);
+		}
+
+		Node rhs = (Node)jn.getRhs();
+		if (rhs instanceof ProxyNode) {
+			throw new TranslationException("A JunctionNode should never contain a ProxyNode");
+		} else if (rhs instanceof JunctionNode) {
+			lResult.addAll(conjunctionToList((JunctionNode)rhs));
+		} else {
+			lResult.add(rhs);
+		}
+
+		return lResult;
 	}
-	
-	
+
 	public static List<Node> disjunctionToList(Junction gpe) {
 		List<Node> lResult = new ArrayList<>();
 

@@ -20,6 +20,10 @@ package com.ge.research.sadl.tests
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.runner.RunWith
+import com.ge.research.sadl.reasoner.ITranslator
+import com.ge.research.sadl.jena.IJenaBasedModelProcessor
+import java.lang.reflect.Method
+import com.ge.research.sadl.builder.ConfigurationManagerForIDE
 
 /**
  * Use this class as the super class of your test classes if you would like to run the model processors.
@@ -27,5 +31,14 @@ import org.junit.runner.RunWith
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 abstract class AbstractSADLModelProcessorTest extends AbstractSADLParsingTest {
+		
+	def ITranslator getTranslator(IJenaBasedModelProcessor processor) {
+		val gcm = processor.getClass.getDeclaredMethod("getConfigMgr") as Method
+		gcm.accessible = true
+		val cm = gcm.invoke(processor, null) as ConfigurationManagerForIDE;
+		val trans =cm.translator as ITranslator
+		trans
+	}
+	
 	
 }

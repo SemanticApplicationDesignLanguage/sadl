@@ -28,6 +28,7 @@ import java.util.StringTokenizer;
 import javax.activation.DataSource;
 
 import org.pojava.datetime.DateTime;
+import org.pojava.datetime.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -829,6 +830,28 @@ public class SadlUtils {
 		            else {
 		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range date/dateTime/time";
 		            }
+		        }
+		        else if (rnguri.endsWith("duration")) {
+		        	if (v instanceof String) {
+		        		v = stripQuotes((String)v);
+		        		if (v != null && ((String)v).length() > 0) {
+		        			String lc = ((String)v).toLowerCase();
+		        			if (lc.contains("ye") ||lc.contains("yr") || lc.contains("mo")) {
+		        				errMsg = "Durations containing years or months are not supported";
+		        			}
+		        			else {
+		        				Duration dur = new Duration((String)v);
+		        				String modDur = "PT" + dur.toString().toUpperCase();
+		        				val = m.createTypedLiteral(modDur, rnguri);
+		        			}
+		        		}
+		        		else {
+			                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range duration";
+		        		}
+		        	}
+		        	else {
+		                errMsg = "Unexpected value '" + v.toString() + "' (" + v.getClass().getSimpleName() + ") doesn't match range duration";
+		        	}
 		        }
 		        else if (rnguri.endsWith("boolean")) {
 		        	if (v instanceof String) {

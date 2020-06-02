@@ -1,0 +1,268 @@
+package com.ge.research.sadl.jena.translator;
+
+import com.ge.research.sadl.builder.ConfigurationManagerForIDE
+import com.ge.research.sadl.jena.IJenaBasedModelProcessor
+import com.ge.research.sadl.reasoner.ConfigurationManager
+import com.ge.research.sadl.reasoner.ITranslator
+import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
+import com.ge.research.sadl.tests.SADLInjectorProvider
+import java.lang.reflect.Method
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
+import org.junit.Test
+import org.junit.runner.RunWith
+
+import static org.junit.Assert.*
+import com.ge.research.sadl.model.gp.Query
+import org.pojava.datetime.Duration
+import com.hp.hpl.jena.rdf.model.ModelFactory
+import com.hp.hpl.jena.ontology.OntModelSpec
+import com.hp.hpl.jena.vocabulary.XSD
+import com.ge.research.sadl.reasoner.utils.SadlUtils
+import com.ge.research.sadl.reasoner.TranslationException
+
+@RunWith(XtextRunner)
+@InjectWith(SADLInjectorProvider)
+public class TestJenaTranslator extends AbstractSADLModelProcessorTest {
+
+	@Test
+	def void testGetTranslatorInstance() {
+		val cm = new ConfigurationManager
+		val tr = cm.translator
+		print(tr)
+	}
+		
+	@Test
+	def void testThereExists_01() {
+		'''
+			 uri "http://sadl.org/SadlJenaOSTest.sadl" alias sjost.
+			
+			Person is a class described by child with values of type Person.
+			A Person is a Parent only if child has at least 1 value.
+			
+			Rule UnnamedChild: 
+			if X is a Parent
+			then there exists a Person and X has child the Person.
+			'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.size == 0)
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule UnnamedChild:  if rdf(X, rdf:type, sjost:Parent) then thereExists(v0) and rdf(X, sjost:child, v1)."))
+		]
+
+	}
+	
+	@Test
+	def void testNoValue_01() {
+		'''
+		 uri "http://sadl.org/ruleps2.sadl" alias ruleps2.
+		 
+		 System is a class,
+		    described by p1 with a single value of type int,
+		    described by p2 with a single value of type int,
+		    described by p3 with a single value of type int,
+		    described by p4 with a single value of type int.
+		     	
+		 Rule example-1:
+		 	if x is a System and p2 of x is p3 of x
+		 	then p1 of x is  p2 of x + p3 of x.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.size == 0)
+			assertTrue(rules.size == 1)
+			val trans = getTranslator(processor)
+			if (rules != null) {
+				for (rule : rules) {
+					val rl = trans.translateRule(jenaModel, "http://sadl.org/ruleps2.sadl", rule)
+					print(rl)
+					assertTrue(processor.compareTranslations(rl, 
+					"[example-1: (?x rdf:type http://sadl.org/ruleps2.sadl#System), (?x http://sadl.org/ruleps2.sadl#p2 ?v0), (?x http://sadl.org/ruleps2.sadl#p3 ?v1), equal(?v0, ?v1), sum(?v0, ?v1, ?v2) -> (?x http://sadl.org/ruleps2.sadl#p1 ?v2)]"))
+				}
+			}
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule example-1:  if rdf(x, rdf:type, ruleps2:System) and rdf(x, ruleps2:p2, v0) and rdf(x, ruleps2:p3, v1) and equal(v0,v1) and sum(v0,v1,v2) then rdf(x, ruleps2:p1, v2)."))
+		]
+	}
+	
+	@Test
+	def void testNoValue_02() {
+		'''
+		 uri "http://sadl.org/rulevars2.sadl" alias rulevars2.
+		 
+		 System is a class,
+		    described by var1 with a single value of type int,
+		    described by var2 with a single value of type int,
+		    described by var3 with a single value of type int,
+		    described by var4 with a single value of type int.
+		     	
+		 Rule example-1:
+		 	if var2 of a System is not var3 of the System
+		 	then var1 of a System is  var2 of the System + var3 of the System.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.size == 0)
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule example-1:  if rdf(v0, rulevars2:var2, v5) and not(rdf(v1, rulevars2:var3, v5)) and 
+rdf(v3, rulevars2:var2, v7) and rdf(v4, rulevars2:var3, v8) and +(v7,v8,v9) then rdf(v2, rulevars2:var1, v9)."))
+		]
+	}
+	
+	@Test
+	def void testNoValue_03() {
+		'''
+		 uri "http://sadl.org/rulevars2.sadl" alias rulevars2.
+		 
+		 Status is a class, must be one of {Success, Failed}.
+		 System is a class,
+		    described by var1 with a single value of type Status,
+		    described by var2 with a single value of type Status,
+		    described by var3 with a single value of type Status,
+		    described by var4 with a single value of type Status.
+		     	
+		 Rule example-3:
+		 	if var2 of a System is not Success
+		 	then var1 of a System is Failed and var3 of the System is Failed.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.size == 0)
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule example-3:  if not(rdf(v0, rulevars2:var2, rulevars2:Success)) 
+then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulevars2:Failed).
+"))
+		]
+	}
+	
+	@Test
+	def void testPOJavaDuration() {
+		val durStr = "23 minutes"	
+		val pojDur = new Duration(durStr)
+		val stdStr = pojDur.toString
+		println(stdStr)
+		
+		val durStr2 = "23 min"	
+		val pojDur2 = new Duration(durStr2)
+		val stdStr2 = pojDur2.toString
+		println(stdStr2)
+
+		val durStr3 = "PT23M"	
+		val pojDur3 = new Duration(durStr3)
+		val stdStr3 = pojDur3.toString
+		println(stdStr3)
+		
+		val durUri = XSD.duration.URI
+		val m = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM)
+		val tl = m.createTypedLiteral(stdStr, durUri)
+		println(tl.toString)
+		val tl2 = m.createTypedLiteral(stdStr2, durUri)
+		println(tl2.toString)
+		val tl3 = m.createTypedLiteral(stdStr3, durUri)
+		println(tl3.toString)
+		assertEquals(tl.toString, "23m^^http://www.w3.org/2001/XMLSchema#duration")
+		assertEquals(tl2.toString, "23m^^http://www.w3.org/2001/XMLSchema#duration")
+		assertEquals(tl3.toString, "23m^^http://www.w3.org/2001/XMLSchema#duration")
+	}
+	
+	@Test
+	def void testPOJavaDuration_02() {
+		val durUri = XSD.duration.URI
+		val m = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM)
+		
+		val durStr = "23 minutes 15 seconds"		
+		val lit1 = SadlUtils.getLiteralMatchingDataPropertyRange(m, durUri, durStr);
+		println(lit1.lexicalForm)
+		
+		val durStr2 = "1 week 3 days 2 hours 23 min 15 sec"	
+		val lit2 = SadlUtils.getLiteralMatchingDataPropertyRange(m, durUri, durStr2);
+		println(lit2.lexicalForm)
+		
+		assertEquals("PT23M15S^^http://www.w3.org/2001/XMLSchema#duration", lit1.toString)
+		assertEquals("PT10D2H23M15S^^http://www.w3.org/2001/XMLSchema#duration", lit2.toString)
+		
+		try {
+			val durStr3 = "1 year 3 months"	
+			val lit3 = SadlUtils.getLiteralMatchingDataPropertyRange(m, durUri, durStr3);
+			println(lit3.lexicalForm)
+			fail("Should have generated error with years and months")
+		}
+		catch (TranslationException e) {
+			println("Exception: " + e.getMessage())
+		}
+	}
+	
+	@Test
+	def void testQuery01() {
+		'''
+		 uri "http://sadl.org/Issue442.sadl" alias Issue442.
+		 
+		 Person is a class described by age with values of type int.
+		 
+		 George is a Person.
+		 
+		 Ask: select p where p is a Person and age of p is not known.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+					if (cmd instanceof Query) {
+						val query = getTranslator(processor).translateQuery(jenaModel, "http://sadl.org/Issue442.sadl", cmd as Query)
+						println(query)
+					}
+				}
+			}
+		]
+	}
+
+}
