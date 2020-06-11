@@ -27,12 +27,14 @@ import { Command, CommandContribution, CommandRegistry, MessageService } from '@
 import { ApplicationShell, SingleTextInputDialog, SelectableTreeNode, ExpandableTreeNode } from '@theia/core/lib/browser';
 import { OutputContribution } from '@theia/output/lib/browser/output-contribution';
 import { UriAwareCommandHandler } from '@theia/core/lib/common/uri-command-handler';
+import { TreeWidgetSelection } from '@theia/core/lib/browser/tree/tree-widget-selection';
 import { SadlLanguageClientContribution } from './sadl-language-client-contribution';
 import { SadlReloadExternals } from './protocol/sadl-reload-externals';
 import { SadlRunQuery } from './protocol/sadl-run-query';
 import { SadlTestModel } from './protocol/sadl-test-model';
 import { SadlProjectRoot } from './protocol/sadl-project-root';
 import { DefaultSadlConfigSchema } from './sadl-preferences';
+import { ILanguageClient } from '@theia/languages/lib/browser';
 
 const validFilename: (arg: string) => boolean = require('valid-filename');
 
@@ -131,7 +133,7 @@ export class SadlCommandContribution implements CommandContribution {
     protected async testModel(): Promise<void> {
         const uri = this.selectedUri();
         if (uri && await this.isSadl(uri)) {
-            const languageClient = await this.languageClientContribution.languageClient;
+            const languageClient = await this.languageClient();
             await this.revealOutput();
             await languageClient.sendNotification(SadlTestModel.TYPE, { uri: uri.toString() });
         } else {
@@ -142,7 +144,7 @@ export class SadlCommandContribution implements CommandContribution {
     protected async runQuery(): Promise<void> {
         const uri = this.selectedUri();
         if (uri && await this.isSadl(uri)) {
-            const languageClient = await this.languageClientContribution.languageClient;
+            const languageClient = await this.languageClient();
             const dialog = new SingleTextInputDialog({ title: 'Run Query' });
             try {
                 const query = await dialog.open();
@@ -161,7 +163,7 @@ export class SadlCommandContribution implements CommandContribution {
     protected async reloadExternals(): Promise<void> {
         const uri = this.selectedUri();
         if (uri && await this.isExternalDefinition(uri)) {
-            const languageClient = await this.languageClientContribution.languageClient;
+            const languageClient = await this.languageClient();
             // XXX: The result of the request is currently unused.
             await languageClient.sendRequest(SadlReloadExternals.TYPE, { uri: uri.toString() });
         } else {
@@ -171,12 +173,7 @@ export class SadlCommandContribution implements CommandContribution {
 
     protected selectedUri(): URI | undefined {
         const { selection } = this.selectionService;
-        if (selection) {
-            if (UriSelection.is(selection)) {
-                return selection.uri;
-            }
-        }
-        return undefined;
+        return this.toUri(selection);
     }
 
     protected activeEditorUri(): URI | undefined {
@@ -189,7 +186,7 @@ export class SadlCommandContribution implements CommandContribution {
 
     protected async inSadlProject(uri: URI | undefined): Promise<boolean> {
         if (uri) {
-            const languageClient = await this.languageClientContribution.languageClient;
+            const languageClient = await this.languageClient();
             const result = await languageClient.sendRequest(SadlProjectRoot.TYPE, { uri: uri.toString() });
             return !!result.uri;
         }
@@ -263,6 +260,33 @@ export class SadlCommandContribution implements CommandContribution {
             base = name + '_' + index + ext;
         }
         return parentUri.resolve(base);
+    }
+
+    protected toUri(arg: any): URI | undefined {
+        if (arg instanceof URI) {
+            return arg;
+        }
+        if (UriSelection.is(arg)) {
+            return arg.uri;
+        }
+        if (TreeWidgetSelection.is(arg) && arg.length === 1) {
+            return this.toUri(arg[0]);
+        }
+        if ('uri' in arg) {
+            const uri = arg.uri;
+            if (uri instanceof URI) {
+                return uri;
+            } else if (typeof uri === 'string') {
+                return new URI(uri);
+            }
+        }
+        return undefined;
+    }
+
+    protected async languageClient(): Promise<ILanguageClient> {
+        const languageClient = await this.languageClientContribution.languageClient;
+        await languageClient.onReady();
+        return languageClient;
     }
 
 }
