@@ -26,47 +26,50 @@
 
 <body>
 
-<h1>Web SADL</h1>
+<h1>WebSADL</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/03/2018<!--webbot bot="Timestamp" endspan i-checksum="12542" -->. 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/10/2020<!--webbot bot="Timestamp" endspan i-checksum="12498" -->. 
 Send comments to <a href="mailto:crapo@research.ge.com?subject=SADL 3">mailto:crapo@research.ge.com</a>.</h5>
 
 <h4>Table of Contents</h4>
 
 <h2>Introduction</h2>
 
-<p>Web SADL is a set of services that allow a SADL IDE to be instantiated in a 
-Web browser. The functionality mirrors that of the Eclipse-based SADL IDE. Web 
-SADL features include the following.</p>
+<p>WebSADL is a set of services that allow a SADL IDE to be instantiated in a 
+Web browser. The functionality mirrors that of the Eclipse-based SADL IDE. 
+WebSADL capabilities include the following.</p>
 <ul>
   <li>
-<p class="MsoNormal">Authoring of SADL model files in a feature-rich text 
+<p class="MsoNormal">Authoring of SADL model (.sadl) files in a feature-rich text 
 editor.</p>
   </li>
   <li>
-<p class="MsoNormal">Live model instance validation.</p>
+<p class="MsoNormal">Live model  validation with error, warning, and information 
+markers in the editor.</p>
   </li>
   <li>
-<p class="MsoNormal">Generation (OWL, N3, and NT) based on valid SADL models.</p>
+<p class="MsoNormal">Generation (OWL, N3, and NT) from valid SADL models.</p>
   </li>
   <li>
-<p class="MsoNormal">LS based semantic highlighting.</p>
+<p class="MsoNormal">LS-based semantic highlighting of content in the SADL 
+editor.</p>
   </li>
   <li>
-<p class="MsoNormal">Navigation between the SADL model elements.</p>
+<p class="MsoNormal">Hyperlinking between the SADL model concepts, both from 
+references to declaration and to references.</p>
   </li>
   <li>
-<p class="MsoNormal">Content assist in the SADL editors.</p>
+<p class="MsoNormal">Content assist in the SADL editor.</p>
   </li>
   <li>
-<p class="MsoNormal">Downloading and managing external SADL resources into 
+<p class="MsoNormal">Downloading and managing external OWL resources into 
 the workspace.</p>
   </li>
   <li>
-<p class="MsoNormal">Preferences.</p>
+<p class="MsoNormal">Preferences set via an editable JSON file.</p>
   </li>
   <li>
-<p class="MsoNormal">Testing and querying SADL models.</p>
+<p class="MsoNormal">Testing, querying, explanation of SADL models.</p>
   </li>
   <li>
 <p class="MsoNormal">Reviewing the output of any SADL model via Ask and Test 
@@ -77,47 +80,48 @@ statements.</p>
   </li>
 </ul>
 
-<p>This document is primarily about using Web SADL in a browser. For more 
-information about setting up the Web SADL backend services, please see
-<a href="WebSadlBackend.html">Web SADL Backend</a>.</p>
+<p>This document is primarily about using WebSADL in a browser. For more 
+information about setting up the WebSADL backend services, please see
+<a href="WebSadlBackend.html">WebSADL Backend</a>.</p>
 
-<h2>Connecting to the Web SADL Backend</h2>
+<h2>Connecting to the WebSADL Backend</h2>
 
-<p>The Web SADL client will run in a Web browser. Chrome is recommended and it 
+<p>The WebSADL client will run in a Web browser. Chrome is recommended and is 
 the browser that has been used in testing.</p>
 
-<p>Connect to the Web SADL backed by entering the service URL of the form 
+<p>Connect to the WebSADL backend by entering the service URL of the form 
 &quot;http://&lt;host&gt;:&lt;port&gt;, e.g.,</p>
 
-<p>&nbsp;&nbsp;&nbsp; <a href="http://nsk1twin01:3000">http://nsk1twin01:3000</a></p>
+<p>&nbsp;&nbsp;&nbsp; <a href="http://nsk1websadl01.crd.ge.com:3000">
+http://nsk1websadl01.crd.ge.com:3000</a></p>
 
-<p>The result should be a browser tab with menu items across the top and down 
-the left and right sides as shown below.</p>
+<p>The result should be a browser tab with menu items around content areas as shown below.</p>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img border="0" src="images/WebSAD2.jpg" width="487" height="239"></p>
+<img border="0" src="images/WebSADLOverview.png" width="1031" height="738"></p>
 
-<h2>Using Web SADL</h2>
+<h2>Using WebSADL</h2>
 
 <h3>Creating a SADL Project</h3>
 
-<p>To create a new SADL project, click on &quot;Files&quot; on the left-side menu to show 
-the file system. Select a folder, e.g., &quot;project&quot;, and right-click to obtain a 
-popup menu. Note that the Files view can be made invisible by clicking on 
-&quot;Files&quot; again.</p>
+<p>To create a new SADL project, first make sure the&nbsp; Explorer is visible 
+using the Explorer Toggle. Select a folder under which the new project is to be 
+located and right-click to obtain a popup menu.</p>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img border="0" src="images/WebSAD7.gif" width="414" height="406"></p>
+<img border="0" src="images/WebSAD7.gif" width="739" height="543"></p>
 
 <p>Click on &quot;New SADL Project&quot; to create a SADL project. Name your project as 
-requested. For purposes of this tutorial, you might want to name it &quot;Shapes&quot;.</p>
+requested. For purposes of this tutorial, you might want to name it &quot;Shapes&quot;. 
+Note: SADL projects should not be nested within SADL projects.</p>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img border="0" src="images/WebSAD8.gif" width="371" height="136"></p>
+<img border="0" src="images/WebSAD8.gif" width="636" height="198"></p>
 
-<p>Note that the &quot;settings.json&quot; file contains the project settings and can be 
-opened in an editor by double-clicking on the name or by right-clicking for a 
-popup menu.</p>
+<p>Note that in the new SADL project the &quot;settings.json&quot; file is 
+created. This contains the project's 
+preference settings and can be 
+opened in an editor by  clicking on the name of the file in the Explorer.</p>
 
 <h3>Creating SADL Model Files</h3>
 
@@ -125,12 +129,12 @@ popup menu.</p>
 Right-click on the project name (e.g., &quot;Shapes&quot;) and select &quot;New File&quot;. In the 
 naming dialog give the file a name ending in &quot;.sadl&quot;, e.g., &quot;ShapesTop.sadl&quot;. 
 The result will be a new SADL model file opened in a SADL editor window. This 
-editor window will have content assist, error and warning markers, hyperlinking, 
+editor window will have content assist, error, warning, and info markers, hyperlinking, 
 etc., just like the Eclipse-based SADL IDE. Holding down the Control key and 
 pressing the space bar activates content assistance. </p>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img border="0" src="images/WebSAD9.jpg" width="533" height="117"></p>
+<img border="0" src="images/WebSAD9.jpg" width="654" height="285"></p>
 
 <p>Pressing the Enter key will insert the selected suggestion into the model 
 file.</p>
@@ -139,13 +143,13 @@ file.</p>
 &quot;float&quot; results in the following state of the project.</p>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img border="0" src="images/WebSAD10.jpg" width="797" height="329"></p>
+<img border="0" src="images/WebSAD10.jpg" width="739" height="509"></p>
 
-<p>Note that an &quot;OwlModels&quot; folder has been created containing the translated 
-model for our newly created model as well as several other files. The &quot;ImplicitModel&quot; 
+<p>Note that an &quot;OwlModels&quot; folder has been created and contains the translated 
+OWL file for our newly created model as well as several other files. The &quot;ImplicitModel&quot; 
 folder contains the definition of the built-in functions supported by the 
 selected reasoner. It also contains the SadlImplicitModel. These two editable 
-files, along with SadlBaseModel.owl in the OwlModels folder, are implicitly 
+files, along with SadlBaseModel.owl and SadlListModel.owl in the OwlModels folder, are implicitly 
 imported by every SADL model. </p>
 
 <p>To complete our simple demo project, we create a second SADL model file which 
@@ -154,7 +158,7 @@ defining properties. Finally we add a couple of rules to compute the area of
 these types of Shape.</p>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img border="0" src="images/WebSAD11.jpg" width="759" height="225"></p>
+<img border="0" src="images/WebSAD11.jpg" width="802" height="238"></p>
 
 <h3>Search</h3>
 
@@ -163,11 +167,13 @@ with <i>control-f</i> or <i>Edit -&gt; Find</i> on the menu bar. In either case,
 popup allows text to be entered and arrows allow movement from one matching 
 occurrence to the next. The in-file text search dialog can be dismissed by 
 clicking on the &quot;x&quot; in the upper right corner. Find and replace within a file 
-works similarly.</p>
+works similarly. Note that concepts should be renamed using the &quot;Rename Symbol&quot; 
+popup menu choice to rename across all references in the project rather than 
+with find and replace.</p>
 
-<p>Searching the workspace is initiated with <i>control-shift-f </i>or<i> Edit 
--&gt; Search In Workspace.</i> The result will be the appearance Search tab on the 
-left and a list of all of the matches to the entered string in the entire 
+<p>Searching the workspace is initiated with <i>Search icon </i>or with<i> control-shift-f </i>or<i> Edit 
+-&gt; Find in Files.</i> The result will be the appearance of the Search tab on the 
+left of the content area and a list of all of the matches to the entered string in the entire 
 workspace. Each occurrence is a hyperlink which, if clicked, will open the file 
 containing the match and highlight the matching text in that file. Icons near 
 the text input box allow additional control of the search.</p>
@@ -198,7 +204,7 @@ shown below.</p>
 
 </blockquote>
 
-<p>The icons shown indicate that there is 1 error and 38 warnings in the current 
+<p>The icons shown above indicate that there is 1 error and 38 warnings in the current 
 workspace.</p>
 
 <h4>Terminal</h4>
@@ -214,21 +220,21 @@ of Shape and some tests to verify that the rules compute correct areas.</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img border="0" src="images/WebSAD12.jpg" width="536" height="187"></p>
 
-<p>By clicking on the &quot;SADL&quot; top menu item and selecting &quot;Test Model&quot;, with the 
-editor focus on TestShapes.sadl, we can run inference. The results are displayed 
+<p>By clicking on &quot;SADL&quot; in the menu bar and selecting &quot;Test Model&quot;, with the 
+focus in the TestShapes.sadl editor, we can run inference. The results are displayed 
 in the Output window and include the test results.</p>
 
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img border="0" src="images/WebSAD13.gif" width="490" height="48"></p>
 
-<h2>Using Web SADL with Git</h2>
+<h2>Using WebSADL with Git</h2>
 
 <p>Git can be set up on the server machine so that it uses the config 
 information (e.g., user) from a local git repo which is the current directory or 
 a parent thereof.</p>
 
 <p>The &quot;Git&quot; tab on the left allows adding files to tracking and committing 
-changes, as well as comparing a changed file with ?? </p>
+changes, as well as comparing a changed file with its head revision. </p>
 
 <p>A terminal window opened up in the browser interface allows other git 
 operations such as cloning, pushing.</p>
