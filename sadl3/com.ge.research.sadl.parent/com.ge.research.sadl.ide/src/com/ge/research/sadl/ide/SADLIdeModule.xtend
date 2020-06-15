@@ -30,6 +30,7 @@ import com.ge.research.sadl.ide.external.SadlIdeExternalEmfResourcePredicate
 import com.ge.research.sadl.ide.lsp.^extension.ISadlLanguageServerExtension
 import com.ge.research.sadl.ide.lsp.^extension.SadlLanguageServerExtension
 import com.ge.research.sadl.ide.preferences.SadlIdePreferenceValuesProvider
+import com.ge.research.sadl.ide.rename.SadlIdeRenameService
 import com.ge.research.sadl.ide.scoping.SadlIdeGlobalScopeProviderFilterProvider
 import com.ge.research.sadl.ide.validator.SadlIdeResourceValidator
 import com.ge.research.sadl.model.SadlEObjectDocumentationProvider.DocumentationUtils
@@ -46,6 +47,7 @@ import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFact
 import org.eclipse.xtext.ide.editor.contentassist.antlr.internal.Lexer
 import org.eclipse.xtext.ide.server.ILanguageServerExtension
 import org.eclipse.xtext.ide.server.coloring.IColoringService
+import org.eclipse.xtext.ide.server.rename.IRenameService2
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.validation.ResourceValidatorImpl
 
@@ -108,6 +110,10 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 
 	def Class<? extends IdeContentProposalPriorities> bindIdeContentProposalPriorities() {
 		return SadlIdeContentProposalPriorities;
+	}
+
+	override Class<? extends IRenameService2> bindIRenameService2() {
+		return SadlIdeRenameService;
 	}
 
 }
