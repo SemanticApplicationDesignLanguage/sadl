@@ -799,7 +799,10 @@ public class OwlToSadl {
 			sadlModel.append(" alias ");
 			sadlModel.append(alias);
 		}
-		Ontology ont = theModel.getOntology(getBaseUri());;
+		Ontology ont = theModel.getOntology(getBaseUri());
+		if (ont == null && !getBaseUri().endsWith("#")) {
+			ont = theModel.getOntology(getBaseUri() + "#");
+		}
 		
 		String version;
 		if (ont != null && (version = ont.getVersionInfo()) != null) {
@@ -808,41 +811,44 @@ public class OwlToSadl {
 			sadlModel.append("\"");
 		}
 
-		StmtIterator sitr = theModel.listStatements(ont, RDFS.label, (RDFNode)null);
-		if (sitr.hasNext()) {
-			int cnt = 0;
-			sadlModel.append("\n    (alias ");
-			while (sitr.hasNext()) {
-				Statement s = sitr.nextStatement();
-				RDFNode obj = s.getObject();
-				String label = obj.isLiteral() ? ((Literal)obj).getString() : obj.toString();
-				if (cnt++ > 0) {
-					sadlModel.append(", ");
+		if (ont != null) {
+			StmtIterator sitr = theModel.listStatements(ont, RDFS.label, (RDFNode)null);
+			if (sitr.hasNext()) {
+				int cnt = 0;
+				sadlModel.append("\n    (alias ");
+				while (sitr.hasNext()) {
+					Statement s = sitr.nextStatement();
+					RDFNode obj = s.getObject();
+					String label = obj.isLiteral() ? ((Literal)obj).getString() : obj.toString();
+					if (cnt++ > 0) {
+						sadlModel.append(", ");
+					}
+					sadlModel.append("\"");
+					sadlModel.append(label);
+					sadlModel.append("\"");
 				}
-				sadlModel.append("\"");
-				sadlModel.append(label);
-				sadlModel.append("\"");
+				sadlModel.append(")");
 			}
-			sadlModel.append(")");
+		
+			sitr = theModel.listStatements(ont, RDFS.comment, (RDFNode)null);
+			if (sitr.hasNext()) {
+				int cnt = 0;
+				sadlModel.append("\n    (note ");
+				while (sitr.hasNext()) {
+					Statement s = sitr.nextStatement();
+					RDFNode obj = s.getObject();
+					String comment = obj.isLiteral() ? ((Literal)obj).getString() : obj.toString();
+					if (cnt++ > 0) {
+						sadlModel.append(", ");
+					}
+					sadlModel.append("\"");
+					sadlModel.append(comment);
+					sadlModel.append("\"");
+				}
+				sadlModel.append(")");
+			}
 		}
 		
-		sitr = theModel.listStatements(ont, RDFS.comment, (RDFNode)null);
-		if (sitr.hasNext()) {
-			int cnt = 0;
-			sadlModel.append("\n    (note ");
-			while (sitr.hasNext()) {
-				Statement s = sitr.nextStatement();
-				RDFNode obj = s.getObject();
-				String comment = obj.isLiteral() ? ((Literal)obj).getString() : obj.toString();
-				if (cnt++ > 0) {
-					sadlModel.append(", ");
-				}
-				sadlModel.append("\"");
-				sadlModel.append(comment);
-				sadlModel.append("\"");
-			}
-			sadlModel.append(")");
-		}
 		if (sourceFile != null) {
 			sadlModel.append("\n    (note \"");
 			sadlModel.append("This model was generated from the OWL model in file '");
@@ -2898,7 +2904,8 @@ public class OwlToSadl {
 
 	private String rdfNodeToSadlString(ModelConcepts concepts, RDFNode object, boolean forceQuotes) throws OwlImportException {
 		if (object.isURIResource()) {
-			return uriToSadlString(concepts, object.asResource());
+			String objStr = uriToSadlString(concepts, object.asResource());
+			return makeStringDoubleQuoted(objStr);
 		}
 		else if (object.isLiteral()) {
 			String dturi = object.asLiteral().getDatatypeURI();
@@ -2907,8 +2914,7 @@ public class OwlToSadl {
 				String lf = object.asLiteral().getLexicalForm();
 				if (forceQuotes || lf.contains(" ") || lf.contains("\"")) {
 					String s = object.asLiteral().getLexicalForm();
-					s = s.replace("\"", "\\\"");
-					return "\"" + s + "\""; 
+					return makeStringDoubleQuoted(s); 
 				}
 				return object.asLiteral().getLexicalForm();
 			}
@@ -2917,8 +2923,7 @@ public class OwlToSadl {
 				if (s.startsWith("\"") && s.endsWith("\"")) {
 					s = s.substring(1, s.length() - 2);
 				}
-				s = s.replace("\"", "\\\"");
-				return "\"" + s + "\""; 
+				return makeStringDoubleQuoted(s); 
 			}
 			else {
 				return object.asLiteral().getLexicalForm();
@@ -2941,6 +2946,11 @@ public class OwlToSadl {
 		else {
 			return object.toString();
 		}
+	}
+
+	private String makeStringDoubleQuoted(String s) {
+		s = s.replace("\"", "\\\"");
+		return "\"" + s + "\"";
 	}
 
 	private String uriToSadlString(ModelConcepts concepts, Resource rsrc) throws OwlImportException {
@@ -4226,7 +4236,13 @@ public class OwlToSadl {
 		if (typitr.hasNext()) {
 			return true;
 		}
-		if (rsrc.getRDFType() == null) {
+		try {
+			if (rsrc.getRDFType() == null) {
+				return false;
+			}
+		}
+		catch (Throwable t) {
+			concepts.addErrorMessage("Error trying to get type of '" + rsrc.toString() + "': " + t.getMessage());
 			return false;
 		}
 		return true;
