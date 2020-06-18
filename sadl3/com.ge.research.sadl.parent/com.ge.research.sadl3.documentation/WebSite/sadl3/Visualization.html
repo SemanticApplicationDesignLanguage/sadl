@@ -12,7 +12,7 @@
 
 <h1>Model Visualization in the Eclipse-Based SADL-IDE</h1>
 <h6>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->04/30/2020<!--webbot bot="Timestamp" endspan i-checksum="12510" --> 
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/18/2020<!--webbot bot="Timestamp" endspan i-checksum="12626" --> 
 by <a href="mailto:crapo@research.ge.com?subject=Model Visualization">A. W. 
 Crapo</a></h6>
 <h2>Visualization in SADL Version 3</h2>
@@ -44,6 +44,39 @@ environment variable GraphVizKeepDot to true:  </p>
 <p>Note that Eclipse must be restarted after setting environment variables for them 
 to become visible to Eclipse. (For some reason, a reboot has sometimes been found to be 
 necessary to make the environment variable visible in Eclipse.)</p>
+<h4>Adding GraphViz Attributes</h4>
+<p>GraphViz has many node and edge attributes that can be used to give shape, 
+color, tooltips, and more to graphs. For detailed information see
+<a href="https://graphviz.org/doc/info/attrs.html">
+https://graphviz.org/doc/info/attrs.html</a>. </p>
+<p>SPARQL queries can be constructed that will generate ResultSets that provide 
+attribute values to nodes and edges in the resulting graph. This is accomplished 
+as follows. The names of the first three columns of the ResultSet are the names 
+of the variables for the directed graph's head-node, edge label, and tail-node, 
+respectively. More columns can be included in the result set to provide 
+additional attribute information by giving a column a name composed of one of 
+the name of one of the first three columns concatenated with an underscore and 
+the name of an attribute that is meaningful for the column with the prefixed 
+name. For example, consider a query with this beginning:</p>
+<font SIZE="2" COLOR="#2a00ff">
+<blockquote>
+  <p>&quot;select distinct ?N1 ?link ?N2 ?N1_style ?N1_fillcolor ?N2_style 
+  ?N2_fillcolor (?cplist as ?N1_tooltip) where </p>
+</blockquote>
+</font>
+<p>The first column, the head-node, is named &quot;N1&quot;. The edge label is named 
+&quot;link&quot;. The tail-node is named &quot;N2&quot;. The 4th column sets the style of the 
+head-node, the 5th column sets the fill color of the head-node. The 6th column 
+sets the style of the tail-node. The 7th column sets the fill color of the 
+tail-node. The 8th column, which is called &quot;cplist&quot; in the query but renamed to 
+&quot;N1_tooltip&quot;, sets a tooltip for the head-node. The header and first row of this 
+ResultSet might look like this:</p>
+<font SIZE="2">
+<p ALIGN="LEFT">
+&quot;N1&quot;,&quot;link&quot;,&quot;N2&quot;,&quot;N1_style&quot;,&quot;N1_fillcolor&quot;,&quot;N2_style&quot;,&quot;N2_fillcolor&quot;,&quot;N1_tooltip&quot;<br>
+&quot;HeadNode&quot;,&quot;link-label&quot;,&quot;TailNode&quot;,&quot;filled&quot;,:yellow&quot;,&quot;filled&quot;,&quot;red&quot;,&quot;I'm a 
+tooltip; I show up when you mouse over my node&quot;</p>
+</font>
 <h3>On-Demand Graph Generation Options</h3>
 <p>There are two basic graphing commands available on the SADL dropdown menu: 
 &quot;Show Graph&quot; and &quot;Graph Ontology&quot;. (In the SADL perspective, &quot;SADL&quot; appears in the top menu 
