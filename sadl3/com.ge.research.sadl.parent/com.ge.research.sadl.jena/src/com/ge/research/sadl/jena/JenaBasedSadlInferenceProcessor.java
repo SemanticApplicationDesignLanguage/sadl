@@ -92,6 +92,7 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.QueryStatement;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
 import com.hp.hpl.jena.datatypes.xsd.XSDDuration;
@@ -330,6 +331,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		SadlCommandResult result = new SadlCommandResult(cmd);
 		String ifn = ((Read)cmd).getInputFilename();
 		String tfn = ((Read)cmd).getTemplateFilename();
+		SadlUtils su = new SadlUtils();
+		ifn = su.fileUrlToFileName(ifn);
 		File inFile = getConfigMgr(getOwlFormat()).resolveFilename(ifn);
 		if (inFile == null) {
 			String msg = "Failed to find Read file '" + ifn + ".\n";
@@ -338,6 +341,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		}
 //		System.out.println("CSV File: " + inFile.getCanonicalPath());
 		if (tfn != null) {		// this is a mapped read with template
+			tfn = su.fileUrlToFileName(tfn);
 			File tf = getConfigMgr(getOwlFormat()).resolveFilename(tfn);
 			if (tf == null) {
 				String msg = "Failed to find Template file '" + tfn + "'.\n";

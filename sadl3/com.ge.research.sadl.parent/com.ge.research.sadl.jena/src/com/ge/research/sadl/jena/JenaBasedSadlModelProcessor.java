@@ -9794,7 +9794,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			Iterator<SadlResource> djitr = decl.getClassOrProperty().iterator();
 			while (djitr.hasNext()) {
 				SadlResource sr = djitr.next();
-				String declUri = getDeclarationExtensions().getConceptUri(sr);
 				OntConceptType type = null;
 				try {
 					type = getDeclarationExtensions().getOntConceptType(sr);
@@ -9806,22 +9805,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					addTypeCheckingError("Only instances can be different from each other.", element);
 				}
 				else {
-					if (declUri == null) {
-						throw new JenaProcessorException(
-								"Failed to get concept URI for SadlResource in processSadlDifferentFrom");
+					Individual inst;
+					try {
+						inst = getOrCreateIndividual(sr);
+						if (inst != null) {
+							differentFrom.add(inst);
+						}
+					} catch (CircularDefinitionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					Individual inst = getTheJenaModel().getIndividual(declUri);
-					differentFrom.add(inst);
 				}
 			}
 		}
 		SadlTypeReference nsas = element.getNotTheSameAs();
 		if (nsas != null) {
 			OntResource nsasrsrc = sadlTypeReferenceToOntResource(nsas);
-			differentFrom.add(nsasrsrc.asIndividual());
+			if (nsasrsrc != null) {
+				differentFrom.add(nsasrsrc.asIndividual());
+			}
+			else {
+				addError("Could not resolve reference", nsas);
+			}
 			SadlResource sr = element.getNameOrRef();
 			Individual otherInst = getTheJenaModel().getIndividual(getDeclarationExtensions().getConceptUri(sr));
-			differentFrom.add(otherInst);
+			if (otherInst != null) {
+				differentFrom.add(otherInst);
+			}
+			else {
+				addError("Could not resolve reference", sr);
+			}
 		}
 		RDFNode[] nodeArray = null;
 		if (differentFrom.size() > 0) {
@@ -11435,6 +11448,35 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		EList<SadlAnnotation> anns = srsrc.getAnnotations();
 		if (anns != null) {
 			addAnnotationsToResource(inst, anns);
+		}
+		return inst;
+	}
+	
+	private Individual getOrCreateIndividual(SadlResource isr) throws CircularDefinitionException, JenaProcessorException {
+		Individual inst = null;
+		String declUri = getDeclarationExtensions().getConceptUri(isr);
+		if (declUri != null) {
+			OntConceptType type = getDeclarationExtensions().getOntConceptType(isr);
+			if (type != null && !type.equals(OntConceptType.INSTANCE)) {
+				addTypeCheckingError("Expected an instance.", isr);
+			}
+			else {
+				inst = getTheJenaModel().getIndividual(declUri);
+				if (inst == null) {
+					SadlResource nsr = isr.getName();
+					if (nsr != isr) {
+						inst = getOrCreateIndividual(nsr);
+					}
+					else {
+						if (nsr.eContainer() instanceof SadlInstance) {
+							inst = processSadlInstance((SadlInstance) nsr.eContainer());
+						}
+					}
+				}
+			}
+		}
+		if (inst == null) {
+			addError("Failed to find instance", isr);
 		}
 		return inst;
 	}
