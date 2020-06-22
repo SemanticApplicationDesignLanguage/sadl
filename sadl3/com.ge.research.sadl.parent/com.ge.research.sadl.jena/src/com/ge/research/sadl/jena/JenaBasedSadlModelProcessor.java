@@ -5131,6 +5131,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							"Left and right are not both nodes."), container);
 				}
 			}
+			else if (lobj instanceof VariableNode && rexpr instanceof Declaration && robj instanceof VariableNode &&
+					!((VariableNode)robj).isCRulesVariable()) {
+				// this condition happens when a variable is being given a type which is also a variable, e.g. x is a y
+				assignedNode = validateNode((Node)lobj);
+				pattern = new TripleElement(assignedNode, new RDFTypeNode(), (Node) robj);
+			}
 			if (lobj instanceof NamedNode && !(lobj instanceof VariableNode) && hasCommonVariableSubject(robj)) {
 				TripleElement trel = (TripleElement) robj; // TODO how do we know this is a TripleElement? What happens
 				// to it?
