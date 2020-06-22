@@ -481,7 +481,8 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
 		
 		if(baseFilename!=null){
-			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
+//			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
+			return "\"file:./" + baseFilename + getGraphFilenameExtension() + "\"";		// relative paths allow folder to be copied, moved.
 		}
 		throw new Exception("Cannot find graph file in getCurrentFileLink()");
 	}
