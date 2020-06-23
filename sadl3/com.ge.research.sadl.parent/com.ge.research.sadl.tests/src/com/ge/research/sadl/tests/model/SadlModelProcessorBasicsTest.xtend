@@ -59,6 +59,44 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 	}
 	
 	@Test
+	def void testInstanceNotTheSame1() {
+		val sadlModel = '''
+			  uri "http://sadl.org/GH466.sadl" alias GH466.
+			  
+			  Entity is a class.
+			 
+			 CodeFile is an Entity.
+			 
+			 {CodeFile, SomeModel} are not the same.
+			 
+			 SomeModel is an Entity. 
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)		// just checking for errors, owl:AllDifferent doesn't query well
+ 		]
+	}
+	
+	@Test
+	def void testInstanceNotTheSame2() {
+		val sadlModel = '''
+			  uri "http://sadl.org/GH466.sadl" alias GH466.
+			  
+			  Entity is a class.
+			 
+			 CodeFile is an Entity.
+			 
+			 CodeFile is not the same as SomeModel.
+			 
+			 SomeModel is an Entity. 
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)		// just checking for errors, owl:AllDifferent doesn't query well
+ 		]
+	}
+
+	@Test
 	def void testPropertySingleValue() {
 		val sadlModel = '''
 			 uri "http://sadl.org/test.sadl" alias test.
