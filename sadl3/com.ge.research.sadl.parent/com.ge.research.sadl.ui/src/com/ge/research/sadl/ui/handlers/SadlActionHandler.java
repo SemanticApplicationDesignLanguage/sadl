@@ -384,6 +384,9 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	}
 	
 	protected XtextResource getXtextResource(IProject project, IFile trgtFile) throws ExecutionException {
+		if (resourceSetProvider == null) {
+			throw new ExecutionException("Unable to obtain a resource set for the target file '" + trgtFile.getName() + "'");
+		}
 		ResourceSet resourceSet = resourceSetProvider.get(project);
 		if (resourceSet != null) {
 	    	Resource res = resourceSet.getResource(URI.createPlatformResourceURI(trgtFile.getFullPath().toString(), true), true);

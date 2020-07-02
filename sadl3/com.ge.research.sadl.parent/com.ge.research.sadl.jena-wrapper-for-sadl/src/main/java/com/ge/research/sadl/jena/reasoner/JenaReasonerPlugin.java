@@ -43,6 +43,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.activation.DataSource;
 
@@ -71,6 +72,7 @@ import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -2987,26 +2989,40 @@ public class JenaReasonerPlugin extends Reasoner{
 			model = schemaModel;
 		}
 		if (model != null) {
-			try {
-				if (SadlUtils.validateUri(query) == null) {
-					Individual inst = model.getIndividual(query);
-					if (inst != null) {
-						RDFNode idb = inst.getPropertyValue(RDFS.isDefinedBy);
-						if (idb instanceof Literal) {
-							String qstr = ((Literal)idb).getValue().toString();
-							if (qstr.contains("ask") || qstr.contains("select") || qstr.contains("construct") ||
-									qstr.contains("insert") || qstr.contains("delete")) {
-								query = qstr;
-							}
-							else {
-								throw new InvalidNameException("'" + inst.getURI() + "' appears to be a named query or update but SPARQL string not found.");
-							}
+			String queryUri = null;
+			if (SadlUtils.validateRdfUri(query) == null && query.indexOf('#') > 0) {
+				// this appears to be a complete NamedQuery URI
+				queryUri = query;
+			}
+			else {
+				if (query.indexOf('?') < 0 && query.indexOf('{') < 0 && query.indexOf('<') < 0) {
+					// this is probably a NamedQuery local name
+					StmtIterator stmtitr = model.listStatements(null, RDF.type, model.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_NAMEDQUERY_CLASS_URI));
+					while (stmtitr.hasNext()) {
+						Resource nq = stmtitr.nextStatement().getSubject();
+						if (nq.isURIResource() && nq.getLocalName().equals(query)) {
+							queryUri = nq.getURI();
+							stmtitr.close();
+							break;
 						}
 					}
 				}
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			}
+			if (queryUri != null) {
+				Individual inst = model.getIndividual(queryUri);
+				if (inst != null) {
+					RDFNode idb = inst.getPropertyValue(RDFS.isDefinedBy);
+					if (idb instanceof Literal) {
+						String qstr = ((Literal)idb).getValue().toString();
+						if (qstr.contains("ask") || qstr.contains("select") || qstr.contains("construct") ||
+								qstr.contains("insert") || qstr.contains("delete")) {
+							query = qstr;
+						}
+						else {
+							throw new InvalidNameException("'" + inst.getURI() + "' appears to be a named query or update but SPARQL string not found.");
+						}
+					}
+				}
 			}
 		}
 		return query;

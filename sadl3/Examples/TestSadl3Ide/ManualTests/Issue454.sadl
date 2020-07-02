@@ -1,0 +1,12 @@
+ uri "http://sadl.org/Issue454.sadl" alias Issue454.
+ 
+ CookedFood is a class described by cookingTime with values of type duration .
+ 
+ Browies is a CookedFood with cookingTime 20 min.
+ Cake is a CookedFood with cookingTime 20 minutes.
+ Cookies is a CookedFood with cookingTime "PT20M".
+ PotRoast is a CookedFood with cookingTime "2 hrs 10 min 30 sec".
+// Babe is a CookedFood with cookingTime "9 months".
+ 
+ Ask: select x, ct where x has cookingTime ct.
+ 

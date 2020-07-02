@@ -74,7 +74,12 @@ public class RunInference extends SadlActionHandler {
 								delegate.run(trgtFile.getLocation().toFile().toPath(), resourceSupplier);
 								project.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 							} catch (Exception e) {
-								console.error(Throwables.getStackTraceAsString(e));
+								if (console != null) {
+									console.error(Throwables.getStackTraceAsString(e));
+								}
+								else {
+									System.err.println(e.getMessage());
+								}
 							}
 						}
 					};

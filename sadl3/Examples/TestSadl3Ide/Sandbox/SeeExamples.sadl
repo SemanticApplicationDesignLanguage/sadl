@@ -1,0 +1,15 @@
+ uri "http://sadl.org/SeeExamples.sadl" alias SeeExamples.
+ 
+ PhysicalThing is a class.
+ 
+ Agent is a class.
+ 
+ Rock (see "https://www.wikidata.org/wiki/Q22731") is a type of PhysicalThing.
+ 
+ rock (see "https://www.merriam-webster.com/dictionary/rock") (note "to move back and forth rhythmically") describes Agent with values of type PhysicalThing.
+ 
+ AgentInfluence (see Agent) is a class.
+ 
+ swing (see rock) describes Agent with values of type PhysicalThing.
+ 
+ 

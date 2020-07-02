@@ -1,0 +1,10 @@
+ uri "http://sadl.org/Issue455.sadl" alias Issue455.
+ 
+ Person is a class described by age with values of type int, described by gender with values of type Gender.
+ Gender is a class, can only be one of {Male, Female}.
+ 
+ Dan is a Person with gender Male, with age 30.
+ 
+ Test: Dan is a Person with age 30, with gender Male.
+ Test: Dan has age x and x < 40.
+ 

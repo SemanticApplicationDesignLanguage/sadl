@@ -437,12 +437,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 							if (args.size() > 1) {
 								Node biarg2 = args.get(1);
 								Node trsubj = ((TripleElement)elements.get(index)).getSubject();
-								if (biarg2 instanceof NamedNode && !(biarg2 instanceof VariableNode) && trsubj instanceof NamedNode &&
-										!(((NamedNode)biarg2).getName().equals(((NamedNode)trsubj).getName()))) {
-									((TripleElement)elements.get(index)).setObject(args.get(1));
-									elements.remove(index + 1);
-									return SpecialBuiltin.NOVALUESPECIFIC;
-								}
+//								if (biarg2 instanceof NamedNode && !(biarg2 instanceof VariableNode) && trsubj instanceof NamedNode &&
+//										!(((NamedNode)biarg2).getName().equals(((NamedNode)trsubj).getName()))) {
+//									((TripleElement)elements.get(index)).setObject(args.get(1));
+//									elements.remove(index + 1);
+//									return SpecialBuiltin.NOVALUESPECIFIC;
+//								}
 							}
 						}
 					}

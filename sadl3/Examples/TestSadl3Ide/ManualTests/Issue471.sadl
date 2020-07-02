@@ -1,0 +1,8 @@
+ uri "http://sadl.org/Issue471.sadl" alias Issue471.
+ 
+ Person is a class described by sibling with values of type Person.
+ 
+ {Man, Woman} are types of Person.
+ 
+ sister is a type of sibling with values of type Woman.
+ 

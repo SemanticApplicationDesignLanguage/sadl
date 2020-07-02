@@ -59,6 +59,28 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 	}
 	
 	@Test
+	def void testSubpropertyWithRange () {
+		val sadlModel = '''
+			 uri "http://sadl.org/Issue471.sadl" alias Issue471.
+			 
+			 Person is a class described by sibling with values of type Person.
+			 
+			 {Man, Woman} are types of Person.
+			 
+			 sister is a type of sibling with values of type Woman.			 
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val sisProp = jenaModel.getOntProperty("http://sadl.org/Issue471.sadl#sister")
+ 			assertNotNull(sisProp)
+ 			val rng = sisProp.range
+ 			assertNotNull(rng)
+ 			assertTrue(rng.URI.equals("http://sadl.org/Issue471.sadl#Woman"))
+  		]
+	}
+	
+	@Test
 	def void testInstanceNotTheSame1() {
 		val sadlModel = '''
 			  uri "http://sadl.org/GH466.sadl" alias GH466.

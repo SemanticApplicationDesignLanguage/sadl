@@ -1,0 +1,5 @@
+ uri "http://sadl.org/test.sadl" alias test.
+ 
+ Dog is a class.
+ {Spot, Lassie} are instances of Dog.
+ 

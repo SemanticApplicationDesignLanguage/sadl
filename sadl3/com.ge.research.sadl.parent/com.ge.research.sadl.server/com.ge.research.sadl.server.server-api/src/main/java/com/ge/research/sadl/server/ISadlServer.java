@@ -449,6 +449,15 @@ public interface ISadlServer {
      */
 	public abstract DataSource getDerivations() throws ConfigurationException, InvalidDerivationException, SessionNotFoundException;
 
+	/**
+	 * Gets the inferred model as a DataSource
+	 * @param deductionsOnly -- if true return only the deductions else return the entire inferred model
+	 * @param format -- format for serialization (RDF/XML, RDF/XML-ABBREV, N3, N-TRIPLES, TURTLE)
+	 * @return inferred model DataSource
+	 * @throws ConfigurationException 
+	 */
+	public abstract DataSource getInferredModel(boolean deductionsOnly, String format) throws ConfigurationException;
+
     /**
      * Executes a construct query, which will return a subgraph of the knowledge base and instance data.
      * 

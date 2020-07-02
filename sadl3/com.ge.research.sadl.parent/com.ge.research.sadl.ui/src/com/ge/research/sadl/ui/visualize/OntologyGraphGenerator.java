@@ -482,7 +482,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		
 		if(baseFilename!=null){
 //			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
-			return "\"file:./" + baseFilename + getGraphFilenameExtension() + "\"";		// relative paths allow folder to be copied, moved.
+			return "\"./" + baseFilename + getGraphFilenameExtension() + "\"";		// relative paths allow folder to be copied, moved.
 		}
 		throw new Exception("Cannot find graph file in getCurrentFileLink()");
 	}

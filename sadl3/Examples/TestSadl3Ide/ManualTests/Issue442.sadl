@@ -1,0 +1,31 @@
+ uri "http://sadl.org/Issue442.sadl" alias Issue442.
+ 
+ Person is a class described by age with values of type int.
+ 
+ George is a Person.
+ 
+// Ask: select p where age of p is not known.
+// Ask: select p where p is a Person and age of p is not known.
+ 
+ /*
+  *  SELECT ?name
+ WHERE {
+   ?x foaf:name ?name
+   NOT EXISTS {
+     ?x foaf:knows [foaf:name "Simon"]
+   }
+ }
+ * 
+ */
+ /*
+ * SELECT ?name
+WHERE 
+{
+  ?x foaf:givenName ?name .
+  FILTER NOT EXISTS { ?x foaf:knows ?who }
+}
+  */
+  
+ Ask: "select ?p where {?p <rdf:type> <Person> . OPTIONAL{?p <age> ?x} . FILTER (!bound(?x))}".
+ Ask: "select ?p where {?p <rdf:type> <Person> . FILTER NOT EXISTS {?p <age> ?v}}".
+ 

@@ -35,6 +35,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -85,6 +86,7 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.rdf.model.InfModel;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -1095,6 +1097,23 @@ public class SadlServerImpl implements ISadlServer {
 
 	protected void setServiceModelName(String serviceModelName) {
 		this.serviceModelName = serviceModelName;
+	}
+
+	@Override
+	public DataSource getInferredModel(boolean deductionsOnly, String format) throws ConfigurationException {
+		Object infModel = reasoner.getInferredModel(deductionsOnly);
+		if (infModel instanceof InfModel) {
+			StringWriter swriter = new StringWriter();
+			PrintWriter out = new PrintWriter(swriter);
+			((InfModel)infModel).write(swriter, format);
+			String derivations = swriter.toString();
+			out.close();
+			StringDataSource ds = new StringDataSource(derivations, "text/plain");
+			ds.setName("Inferred Model");
+			return ds;
+			
+		}
+		return null;
 	}
 
 }

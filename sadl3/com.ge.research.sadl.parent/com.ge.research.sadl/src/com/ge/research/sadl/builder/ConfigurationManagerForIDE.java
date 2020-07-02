@@ -1058,9 +1058,10 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 
 	private String getOwlFormatFromFile(String owlFilename) {
 		if (owlFilename.endsWith(".owl")) return "RDF/XML";
-		if (owlFilename.endsWith("nt")) return "N-TRIPLE";
-		if (owlFilename.endsWith("turtle")) return "TURTLE";
-		if (owlFilename.endsWith("n3")) return "N3";
+		if (owlFilename.endsWith(".nt")) return "N-TRIPLE";
+		if (owlFilename.endsWith(".turtle")) return "TURTLE";
+		if (owlFilename.endsWith(".ttl")) return "TURTLE";
+		if (owlFilename.endsWith(".n3")) return "N3";
 		return "RDF/XML";
 	}
 	

@@ -1,0 +1,5 @@
+ uri "http://sadl.org/ProblemCharsInComments.sadl" alias ProblemCharsInComments 
+ 	(alias "Model to highlight comment issues found in importing OWL models to SADL") 
+ 	(note "This document is published by the Provenance Working Group (http://www.w3.org/2011/prov/wiki/Main_Page).") .
+ 
+ 
