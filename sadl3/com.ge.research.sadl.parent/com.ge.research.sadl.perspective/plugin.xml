@@ -23,7 +23,7 @@
             name="Show Graph">
       </command>
       <command
-            defaultHandler="com.ge.research.sadl.ui.handlers.RunInference"
+            defaultHandler="com.ge.research.sadl.perspective.PerspectiveExecutableExtensionFactory:com.ge.research.sadl.ui.handlers.RunInference"
             id="referenceToSadlMenuId"
             name="Test Model">
       </command>
