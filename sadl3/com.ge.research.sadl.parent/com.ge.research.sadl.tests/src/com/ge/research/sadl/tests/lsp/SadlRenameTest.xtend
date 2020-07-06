@@ -1,16 +1,19 @@
 package com.ge.research.sadl.tests.lsp
 
+import com.google.common.base.Throwables
+import org.eclipse.emf.common.util.URI
 import org.eclipse.lsp4j.Position
 import org.eclipse.lsp4j.RenameParams
 import org.eclipse.lsp4j.TextDocumentIdentifier
+import org.eclipse.lsp4j.WorkspaceEdit
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtext.testing.TextDocumentPositionConfiguration
 import org.junit.Test
 
-import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.unifyEOL
-import static org.junit.Assert.fail
-import com.google.common.base.Throwables
 import static org.junit.Assert.assertTrue
+import static org.junit.Assert.fail
+
+import static extension com.ge.research.sadl.tests.helpers.XtendTemplateHelper.unifyEOL
 
 class SadlRenameTest extends AbstractSadlLanguageServerTest {
 
@@ -131,6 +134,25 @@ class SadlRenameTest extends AbstractSadlLanguageServerTest {
 	override assertEquals(String expected, String actual) {
 		super.assertEquals(expected.unifyEOL, actual.unifyEOL)
 	}
+
+	// Overridden to be able to sort by resource name: https://github.com/crapo/sadlos2/issues/475
+	override dispatch String toExpectation(WorkspaceEdit it) '''
+		changes :
+			«IF changes !== null»
+				«FOR entry : changes.entrySet.toList.sortBy[URI.createURI(key).lastSegment]»
+					«URI.createURI(entry.key).lastSegment» : «entry.value.toExpectation»
+				«ENDFOR»
+			«ENDIF»
+		documentChanges : 
+			«IF !documentChanges.nullOrEmpty»
+				«FOR entry: documentChanges.filter[isLeft].map[getLeft]»
+					«entry.toExpectation»
+				«ENDFOR»
+				«FOR entry: documentChanges.filter[isRight].map[getRight]»
+					«entry.toExpectation»
+				«ENDFOR»
+			«ENDIF»
+	'''
 
 	protected def void testRename((TestRenameConfiguration)=>void configurator) {
 		val extension configuration = new TestRenameConfiguration
