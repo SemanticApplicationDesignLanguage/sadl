@@ -2,6 +2,7 @@ package com.ge.research.sadl.ui.visualize;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import com.hp.hpl.jena.ontology.SomeValuesFromRestriction;
 import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.RDFList;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
@@ -155,9 +157,35 @@ public class GraphSegment {
 							}
 						}
 						catch (ConversionException e) {
-							StmtIterator propstmts = ucls.listProperties();
-							while (propstmts.hasNext()) {
-								System.out.println(propstmts.next().toString());
+							if (getObject().equals(RDFS.Datatype)) {
+								StmtIterator stmtItr = ontcls.listProperties(OWL.unionOf);
+								RDFNode collection = stmtItr.nextStatement().getObject();
+								if (collection.canAs(RDFList.class)) {
+									RDFList uclsr = collection.as(RDFList.class);
+									List<RDFNode> jlst = uclsr.asJavaList();
+									sb.delete(0, sb.length());
+									first = true;
+									for (int i = 0; jlst != null && i < jlst.size(); i++) {
+										RDFNode element = jlst.get(i);
+										if (!first) {
+											sb.append(" or ");
+										}
+										if (objectDisplayStrings != null && objectDisplayStrings.containsKey(element)) {
+											sb.append(objectDisplayStrings.get(element));
+										}
+										else {
+											sb.append(stringForm(element));
+										}
+										first = false;
+									}
+									return sb.toString();
+								}
+							}
+							else {
+								StmtIterator propstmts = ucls.listProperties();
+								while (propstmts.hasNext()) {
+									System.out.println(propstmts.next().toString());
+								}
 							}
 						}
 						first = false;
@@ -250,16 +278,33 @@ public class GraphSegment {
 		StringBuilder sb = new StringBuilder("one of {");
 		ExtendedIterator<RDFNode> eitr = enumcls.listIsDefinedBy(); //listOneOf();
 		int cnt = 0;
-		while (eitr.hasNext()) {
-			RDFNode r = eitr.next();
-			if (cnt++ > 0) {
-				sb.append(", ");
+		if (eitr.hasNext()) {
+			while (eitr.hasNext()) {
+				RDFNode r = eitr.next();
+				if (cnt++ > 0) {
+					sb.append(", ");
+				}
+				if (objectDisplayStrings != null && objectDisplayStrings.containsKey(r)) {
+					sb.append(objectDisplayStrings.get(r));
+				}
+				else {
+					sb.append(rdfNodeToString(r, false));
+				}
 			}
-			if (objectDisplayStrings != null && objectDisplayStrings.containsKey(r)) {
-				sb.append(objectDisplayStrings.get(r));
-			}
-			else {
-				sb.append(rdfNodeToString(r, false));
+		}
+		else {
+			ExtendedIterator<? extends OntResource> eitr2 = enumcls.listOneOf();
+			while (eitr2.hasNext()) {
+				OntResource or = eitr2.next();
+				if (cnt++ > 0) {
+					sb.append(",");
+				}
+				if (objectDisplayStrings != null && objectDisplayStrings.containsKey(or)) {
+					sb.append(objectDisplayStrings.get(or));
+				}
+				else {
+					sb.append(rdfNodeToString(or, false));
+				}
 			}
 		}
 		sb.append("}");

@@ -254,7 +254,17 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 				prefix = getConfigMgr().getGlobalPrefix(publicUri);
 			}
 			catch (Exception e) {
-				publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
+				if (owlFileName.equals(SadlConstants.SADL_LIST_MODEL_FILENAME + ".owl")) {
+					// not imported--OK
+					return;
+				}
+				else if (owlFileName.equals(SadlConstants.SADL_BASE_MODEL_FILENAME + ".owl")) {
+					// don't show
+					return;
+				}
+				else {
+					publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
+				}
 			}
 			
 			OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project, publicUri, monitor, getOntologyGraphPreferences());

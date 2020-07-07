@@ -148,6 +148,38 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		List<GraphSegment> data = new ArrayList<GraphSegment>();
 		try {
 			addByStatements(publicUri, data);
+			if (data.size() == 0) {
+				StmtIterator stmtitr = getLocalModel().listStatements();
+				List<String> added = new ArrayList<String>();
+				while (stmtitr.hasNext()) {
+					Statement stmt = stmtitr.nextStatement();
+					if (stmt.getSubject().isURIResource()) {
+						String subns = stmt.getSubject().getNameSpace();
+						if (subns.endsWith("#")) {
+							subns = subns.substring(0, subns.length() - 1);
+						}
+						if (!added.contains(subns) &&
+							subns.equals(publicUri) && !stmt.getSubject().getURI().equals(publicUri) && 
+							(stmt.getSubject().canAs(OntClass.class) || stmt.getSubject().canAs(Property.class))) {
+							GraphSegment gs = new GraphSegment(publicUri, stmt.getSubject(), null, null, getConfigMgr());
+							if (stmt.getSubject().canAs(Property.class)) {
+								gs.addHeadAttribute(SHAPE, OCTAGON);
+								gs.addHeadAttribute(COLOR, PROPERTY_GREEN);
+							}
+							else {
+								gs.addHeadAttribute(COLOR, CLASS_BLUE);
+							}
+							data.add(gs);
+							added.add(subns);
+						}
+					}
+				}
+				if (data.size() == 0) {
+					GraphSegment gs = new GraphSegment(publicUri, "no content found", null, null, getConfigMgr());
+					gs.addHeadAttribute(SHAPE, ELLIPSE);
+					data.add(gs);
+				}
+			}
 		} catch (ConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -169,6 +201,11 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	private void addByStatements(String publicUri, List<GraphSegment> data) throws ConfigurationException, IOException, URISyntaxException, Exception {
 		Boolean graphImplicitElements = getPreferenceValue(SadlPreferences.GRAPH_IMPLICIT_ELEMENTS.getId());
 		Boolean graphImplicitElementInstances = getPreferenceValue(SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES.getId());
+		if (publicUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
+			// always graph implicit content of the SADL implicit model.
+			graphImplicitElements = Boolean.TRUE;
+			graphImplicitElementInstances = Boolean.TRUE;
+		}
 		
 		StmtIterator stmtitr = getLocalModel().listStatements();
 		Map<Resource, RDFNode> propertyDomains = null;
