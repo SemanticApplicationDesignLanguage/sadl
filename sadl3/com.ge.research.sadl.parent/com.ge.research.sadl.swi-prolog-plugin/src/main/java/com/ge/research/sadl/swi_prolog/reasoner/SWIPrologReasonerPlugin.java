@@ -46,14 +46,14 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologServiceInterface;
 import com.ge.research.sadl.swi_prolog.translator.SWIPrologTranslatorPlugin;
 //import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologInterface;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.vocabulary.OWL;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.OWL;
 
 public class SWIPrologReasonerPlugin extends Reasoner {
     protected static final Logger logger = LoggerFactory.getLogger(SWIPrologReasonerPlugin.class);

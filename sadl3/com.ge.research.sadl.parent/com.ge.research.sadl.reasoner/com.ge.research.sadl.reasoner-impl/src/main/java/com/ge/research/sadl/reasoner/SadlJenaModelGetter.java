@@ -34,17 +34,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.ReadWrite;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ModelGetter;
-import com.hp.hpl.jena.rdf.model.ModelReader;
-import com.hp.hpl.jena.tdb.TDB;
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.vocabulary.OWL;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.ModelGetter;
+import org.apache.jena.rdf.model.ModelReader;
+import org.apache.jena.tdb.TDB;
+import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.vocabulary.OWL;
 
 /**
  * This class can be registered with the Jena OntModelSpec to provide loading
@@ -101,7 +101,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     
     
     /* (non-Javadoc)
-	 * @see com.ge.research.sadl.reasoner.ISadlJenaModelGetter#configureToModel(com.hp.hpl.jena.ontology.OntModel)
+	 * @see com.ge.research.sadl.reasoner.ISadlJenaModelGetter#configureToModel(org.apache.jena.ontology.OntModel)
 	 */
     public boolean configureToModel(OntModel m) {
     	ModelGetter mg = m.getSpecification().getImportModelGetter();

@@ -32,19 +32,19 @@ import org.apache.xerces.xs.XSNamespaceItem;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.hp.hpl.jena.datatypes.DatatypeFormatException;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.datatypes.TypeMapper;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-//import com.hp.hpl.jena.datatypes.xsd.XSDDatatype.XSDGenericType;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.ontology.DatatypeProperty;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.reasoner.ValidityReport;
-import com.hp.hpl.jena.reasoner.ValidityReport.Report;
+import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.TypeMapper;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
+//import org.apache.jena.datatypes.xsd.XSDDatatype.XSDGenericType;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.ontology.DatatypeProperty;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.reasoner.ValidityReport;
+import org.apache.jena.reasoner.ValidityReport.Report;
 
 public class TestUserDefinedDatatype {
 	
@@ -66,7 +66,7 @@ public class TestUserDefinedDatatype {
         }
 
         System.out.println("\n\nLoading user-defined '" + filename2 + "':");
-        XSDDatatype.loadUserDefined(uri, new FileReader(filename2), null, tm);
+//        XSDDatatype.loadUserDefined(uri, new FileReader(filename2), null, tm);
 
         types = tm.listTypes();
         while (types.hasNext()) {
@@ -75,7 +75,7 @@ public class TestUserDefinedDatatype {
         }
 
         System.out.println("\n\nLoading user-defined '" + filename3 + "':");
-        XSDDatatype.loadUserDefined(uri, new FileReader(filename3), null, tm);
+//        XSDDatatype.loadUserDefined(uri, new FileReader(filename3), null, tm);
 
         types = tm.listTypes();
         while (types.hasNext()) {

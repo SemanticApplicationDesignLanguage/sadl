@@ -23,11 +23,11 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import com.hp.hpl.jena.reasoner.rulesys.*;
-import com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin;
-import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.graph.*;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.reasoner.rulesys.*;
+import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.graph.*;
 
 /**
 	This class converts an RDF list to a string of the form "{element1, element2, ....}". 

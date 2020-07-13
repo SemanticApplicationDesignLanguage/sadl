@@ -30,7 +30,7 @@ import com.google.inject.Inject
 import com.google.inject.Injector
 import java.util.Map
 import org.eclipse.emf.ecore.resource.Resource
-import com.hp.hpl.jena.ontology.OntModel
+import org.apache.jena.ontology.OntModel
 import java.util.List
 import com.ge.research.sadl.model.gp.Rule
 

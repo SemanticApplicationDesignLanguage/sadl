@@ -19,8 +19,8 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.Property;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Property;
 
 public class OntModelProvider {
 	

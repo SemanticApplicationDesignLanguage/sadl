@@ -23,7 +23,7 @@ import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.ResourceManager;
-import com.hp.hpl.jena.ontology.OntModelSpec;
+import org.apache.jena.ontology.OntModelSpec;
 
 public class TestGetModelImports {
 	

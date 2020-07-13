@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.slf4j.Logger;
 
-import com.hp.hpl.jena.ontology.OntDocumentManager.ReadFailureHandler;
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
+import org.apache.jena.rdf.model.Model;
 
 public class SadlReadFailureHandler implements ReadFailureHandler {
 	Logger logger;

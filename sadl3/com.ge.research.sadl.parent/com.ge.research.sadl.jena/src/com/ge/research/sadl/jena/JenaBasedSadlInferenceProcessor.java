@@ -94,19 +94,19 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.QueryStatement;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
-import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
-import com.hp.hpl.jena.datatypes.xsd.XSDDuration;
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntProperty;
-import com.hp.hpl.jena.ontology.OntResource;
-import com.hp.hpl.jena.rdf.model.InfModel;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.vocabulary.XSD;
+import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.datatypes.xsd.XSDDuration;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntProperty;
+import org.apache.jena.ontology.OntResource;
+import org.apache.jena.rdf.model.InfModel;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.XSD;
 
 public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlInferenceProcessor.class);
@@ -891,9 +891,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		} else if (rngrsrc != null) {
 			// we know the range so let's try to convert each value to the
 			// desired value type and compare
-			com.hp.hpl.jena.rdf.model.Literal v1 = getTheJenaModel().createTypedLiteral(lval,
+			org.apache.jena.rdf.model.Literal v1 = getTheJenaModel().createTypedLiteral(lval,
 					rngrsrc.getURI());
-			com.hp.hpl.jena.rdf.model.Literal v2 = getTheJenaModel().createTypedLiteral(objVal,
+			org.apache.jena.rdf.model.Literal v2 = getTheJenaModel().createTypedLiteral(objVal,
 					rngrsrc.getURI());
 			if (v1 != null && v2 != null && v1.equals(v2)) {
 				return true;
@@ -1705,7 +1705,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					ArrayList<ArrayList<Object>> rows = new ArrayList<ArrayList<Object>>();
 					for (int i = 0; i < queryStmts.size(); i++) {
 						RDFNode[] qstmt = queryStmts.get(i);
-						com.hp.hpl.jena.rdf.model.Resource subj = (com.hp.hpl.jena.rdf.model.Resource)qstmt[0];
+						org.apache.jena.rdf.model.Resource subj = (org.apache.jena.rdf.model.Resource)qstmt[0];
 						Property pred = (Property) qstmt[1];
 						RDFNode val = qstmt[2];
 						StmtIterator stmtitr = ((InfModel)infModel).listStatements(subj, pred, val);
@@ -1734,8 +1734,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 									}
 								}
 								else if (n != null && n.isResource()) {
-									if (!((com.hp.hpl.jena.rdf.model.Resource)n).isAnon()){
-										row.add(((com.hp.hpl.jena.rdf.model.Resource)n).getURI());
+									if (!((org.apache.jena.rdf.model.Resource)n).isAnon()){
+										row.add(((org.apache.jena.rdf.model.Resource)n).getURI());
 									}
 									else {
 										row.add(n.toString() + "(blank node)");

@@ -22,10 +22,9 @@ import com.ge.research.sadl.sADL.SadlResource
 import com.google.common.base.Optional
 import com.google.common.base.Preconditions
 import com.google.inject.ImplementedBy
-import com.hp.hpl.jena.ontology.OntModel
 import java.util.Collection
+import org.apache.jena.ontology.OntModel
 import org.eclipse.emf.ecore.EClass
-import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.Assignment
 

@@ -18,7 +18,7 @@ import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
 import com.google.inject.Provider
-import com.hp.hpl.jena.ontology.OntModel
+import org.apache.jena.ontology.OntModel
 import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider

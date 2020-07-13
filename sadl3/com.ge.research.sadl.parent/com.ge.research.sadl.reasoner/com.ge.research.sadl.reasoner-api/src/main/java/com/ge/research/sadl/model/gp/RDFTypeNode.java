@@ -18,7 +18,7 @@
 
 package com.ge.research.sadl.model.gp;
 
-import com.hp.hpl.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDF;
 
 /**
  * Class representing rdf:type, or "is a" in SADL

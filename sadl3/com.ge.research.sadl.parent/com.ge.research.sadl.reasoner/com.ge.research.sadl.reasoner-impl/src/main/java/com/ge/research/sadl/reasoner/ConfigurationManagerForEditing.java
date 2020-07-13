@@ -46,27 +46,27 @@ import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.hp.hpl.jena.ontology.AnnotationProperty;
-import com.hp.hpl.jena.ontology.DatatypeProperty;
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.ObjectProperty;
-import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntDocumentManager;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.Bag;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.RDFWriter;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Seq;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.util.FileUtils;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
-import com.hp.hpl.jena.vocabulary.RDF;
+import org.apache.jena.ontology.AnnotationProperty;
+import org.apache.jena.ontology.DatatypeProperty;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.ObjectProperty;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntDocumentManager;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Bag;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Seq;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.util.FileUtils;
+import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.RDF;
 
 /**
  * this class extension supports configuration tasks unique to the IDE
@@ -349,7 +349,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * (non-Javadoc)
 	 * 
 	 * @see com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#
-	 * replaceJenaModelCache(com.hp.hpl.jena.ontology.OntModel,
+	 * replaceJenaModelCache(org.apache.jena.ontology.OntModel,
 	 * java.lang.String)
 	 */
 	public boolean replaceJenaModelCache(OntModel model, String publicUri) {
@@ -384,7 +384,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * (non-Javadoc)
 	 * 
 	 * @see com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#
-	 * clearJenaModelContent(com.hp.hpl.jena.ontology.OntModel)
+	 * clearJenaModelContent(org.apache.jena.ontology.OntModel)
 	 */
 	public boolean clearJenaModelContent(OntModel model) {
 		ExtendedIterator<OntModel> smitr = model.listSubModels();
@@ -428,8 +428,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * 
 	 * @see
 	 * com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#addMapping
-	 * (com.hp.hpl.jena.rdf.model.Resource, com.hp.hpl.jena.rdf.model.Resource,
-	 * com.hp.hpl.jena.rdf.model.Literal)
+	 * (org.apache.jena.rdf.model.Resource, org.apache.jena.rdf.model.Resource,
+	 * org.apache.jena.rdf.model.Literal)
 	 */
 	public synchronized boolean addMapping(Resource altv, Resource pubv, Literal prefix, boolean bKeepPrefix,
 			String source) throws ConfigurationException, IOException,
@@ -587,9 +587,9 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 				prefixProp = getMappingModel().createProperty(
 						ONT_MANAGER_PREFIX);
 			}
-			com.hp.hpl.jena.rdf.model.Resource type = getMappingModel()
+			org.apache.jena.rdf.model.Resource type = getMappingModel()
 					.createResource(ONT_MANAGER_ONTOLOGY_SPEC);
-			com.hp.hpl.jena.rdf.model.Resource newOntSpec = getMappingModel()
+			org.apache.jena.rdf.model.Resource newOntSpec = getMappingModel()
 					.createResource(type);
 			Property langp = getMappingModel()
 					.getProperty(ONT_MANAGER_LANGUAGE);
@@ -1430,7 +1430,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * (non-Javadoc)
 	 * 
 	 * @see com.ge.research.sadl.reasoner.IConfigurationManagerForEditing#
-	 * getNamedConceptsInModel(com.hp.hpl.jena.ontology.OntModel,
+	 * getNamedConceptsInModel(org.apache.jena.ontology.OntModel,
 	 * java.lang.String, com.ge.research.sadl.utils.SadlUtils.ConceptType,
 	 * com.ge.research.sadl.reasoner.ConfigurationManagerForEditing.Scope)
 	 */

@@ -32,7 +32,7 @@ import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.processing.ISadlImportProcessor;
 import com.google.inject.Inject;
-import com.hp.hpl.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModel;
 
 public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlImportProcessor.class);

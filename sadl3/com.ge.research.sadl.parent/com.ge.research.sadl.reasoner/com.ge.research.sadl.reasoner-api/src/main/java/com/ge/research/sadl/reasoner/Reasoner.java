@@ -24,8 +24,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.rdf.model.Literal;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.rdf.model.Literal;
 
 /**
  * This class implements utility methods believed to of general use to

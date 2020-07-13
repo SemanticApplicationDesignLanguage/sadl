@@ -10,20 +10,20 @@ package com.ge.research.sadl.tests.model
 
 import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
-import com.hp.hpl.jena.ontology.AllValuesFromRestriction
-import com.hp.hpl.jena.ontology.CardinalityRestriction
-import com.hp.hpl.jena.ontology.HasValueRestriction
-import com.hp.hpl.jena.ontology.OntClass
-import com.hp.hpl.jena.rdf.model.RDFNode
-import com.hp.hpl.jena.rdf.model.Resource
-import com.hp.hpl.jena.vocabulary.OWL
+import org.apache.jena.ontology.AllValuesFromRestriction
+import org.apache.jena.ontology.CardinalityRestriction
+import org.apache.jena.ontology.HasValueRestriction
+import org.apache.jena.ontology.OntClass
+import org.apache.jena.rdf.model.RDFNode
+import org.apache.jena.rdf.model.Resource
+import org.apache.jena.vocabulary.OWL
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.hp.hpl.jena.ontology.OntResource
+import org.apache.jena.ontology.OntResource
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)

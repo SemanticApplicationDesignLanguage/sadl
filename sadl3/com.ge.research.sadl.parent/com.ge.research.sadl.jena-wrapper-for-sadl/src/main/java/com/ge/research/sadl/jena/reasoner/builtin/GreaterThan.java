@@ -17,14 +17,14 @@
  ***********************************************************************/
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.impl.LiteralLabelFactory;
-import com.hp.hpl.jena.reasoner.rulesys.BuiltinException;
-import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
-import com.hp.hpl.jena.reasoner.rulesys.Util;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.impl.LiteralLabelFactory;
+import org.apache.jena.reasoner.rulesys.BuiltinException;
+import org.apache.jena.reasoner.rulesys.RuleContext;
+import org.apache.jena.reasoner.rulesys.Util;
 
-public class GreaterThan extends com.hp.hpl.jena.reasoner.rulesys.builtins.GreaterThan{
+public class GreaterThan extends org.apache.jena.reasoner.rulesys.builtins.GreaterThan{
 	
     @Override
     public int getArgLength() {

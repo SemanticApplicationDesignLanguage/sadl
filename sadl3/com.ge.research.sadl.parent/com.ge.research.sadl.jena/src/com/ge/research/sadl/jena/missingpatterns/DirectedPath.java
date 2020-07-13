@@ -6,7 +6,7 @@ import java.util.List;
 import com.ge.research.sadl.jena.missingpatterns.PathFinder.PatternType;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.hp.hpl.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Resource;
 
 public class DirectedPath {
 	private Resource subject;

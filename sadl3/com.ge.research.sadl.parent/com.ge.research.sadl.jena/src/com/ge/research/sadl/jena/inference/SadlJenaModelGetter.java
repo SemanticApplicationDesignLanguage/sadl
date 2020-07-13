@@ -37,20 +37,20 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.hp.hpl.jena.datatypes.TypeMapper;
-import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
-import com.hp.hpl.jena.ontology.OntDocumentManager;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.ReadWrite;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ModelGetter;
-import com.hp.hpl.jena.rdf.model.ModelReader;
-import com.hp.hpl.jena.tdb.TDB;
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.vocabulary.OWL;
+import org.apache.jena.datatypes.TypeMapper;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.ontology.OntDocumentManager;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.ModelGetter;
+import org.apache.jena.rdf.model.ModelReader;
+import org.apache.jena.tdb.TDB;
+import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.vocabulary.OWL;
 
 /**
  * This class can be registered with the Jena OntModelSpec to provide loading
@@ -130,7 +130,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     
     
     /* (non-Javadoc)
-	 * @see com.ge.research.sadl.reasoner.ISadlJenaModelGetter#configureToModel(com.hp.hpl.jena.ontology.OntModel)
+	 * @see com.ge.research.sadl.reasoner.ISadlJenaModelGetter#configureToModel(org.apache.jena.ontology.OntModel)
 	 */
     public boolean configureToModel(OntModel m) {
     	ModelGetter mg = m.getSpecification().getImportModelGetter();
@@ -243,7 +243,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 	            	TDB.sync(ds);
 	            }
             }
-            loadUserDefinedDataTypes(uri, altUrl);
+//            loadUserDefinedDataTypes(uri, altUrl);
         }
 
         return m;
@@ -351,28 +351,28 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 		this.format = format;
 	}
 
-    private void loadUserDefinedDataTypes(String uri, String altUrl) {
-		String uddtFolder;
-		try {
-			uddtFolder = getModelXsdFolder(uri, altUrl);
-			if (uddtFolder != null) {
-				File uddtFolderFile = new File(uddtFolder);
-				if (uddtFolderFile.exists() && uddtFolderFile.isDirectory()) {
-					File[] xsdFiles = uddtFolderFile.listFiles();
-					for (int i = 0; i < xsdFiles.length; i++) {
-						FileReader fr = new FileReader(xsdFiles[i]);
-				        XSDDatatype.loadUserDefined(uri, fr, null, TypeMapper.getInstance());				
-					}
-				}
-			}
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//    private void loadUserDefinedDataTypes(String uri, String altUrl) {
+//		String uddtFolder;
+//		try {
+//			uddtFolder = getModelXsdFolder(uri, altUrl);
+//			if (uddtFolder != null) {
+//				File uddtFolderFile = new File(uddtFolder);
+//				if (uddtFolderFile.exists() && uddtFolderFile.isDirectory()) {
+//					File[] xsdFiles = uddtFolderFile.listFiles();
+//					for (int i = 0; i < xsdFiles.length; i++) {
+//						FileReader fr = new FileReader(xsdFiles[i]);
+//				        XSDDatatype.loadUserDefined(uri, fr, null, TypeMapper.getInstance());				
+//					}
+//				}
+//			}
+//		} catch (MalformedURLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 
 	private String getModelXsdFolder(String uri, String altUrl) throws MalformedURLException {
 		String uriModified = uri.substring(7);

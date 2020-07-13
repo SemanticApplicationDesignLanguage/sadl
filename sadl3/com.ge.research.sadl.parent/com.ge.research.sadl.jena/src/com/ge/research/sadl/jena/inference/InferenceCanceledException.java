@@ -17,9 +17,9 @@
  ***********************************************************************/
 package com.ge.research.sadl.jena.inference;
 
-import com.hp.hpl.jena.reasoner.rulesys.Builtin;
-import com.hp.hpl.jena.reasoner.rulesys.BuiltinException;
-import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
+import org.apache.jena.reasoner.rulesys.Builtin;
+import org.apache.jena.reasoner.rulesys.BuiltinException;
+import org.apache.jena.reasoner.rulesys.RuleContext;
 
 @SuppressWarnings("serial")
 public class InferenceCanceledException extends BuiltinException {

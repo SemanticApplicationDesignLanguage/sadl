@@ -80,21 +80,21 @@ import com.ge.research.sadl.reasoner.utils.StringDataSource;
 import com.ge.research.sadl.server.ISadlServer;
 import com.ge.research.sadl.server.NamedServiceNotFoundException;
 import com.ge.research.sadl.server.SessionNotFoundException;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.Syntax;
-import com.hp.hpl.jena.rdf.model.InfModel;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.vocabulary.RDF;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.Syntax;
+import org.apache.jena.rdf.model.InfModel;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.RDF;
 
 /**
  * This class provides the implementation of the ISadlService interface
@@ -747,7 +747,7 @@ public class SadlServerImpl implements ISadlServer {
 		FileInputStream is = new FileInputStream(file);
 		m = m.read(is, null);
 		QueryExecution qexec = null;		
-		com.hp.hpl.jena.query.ResultSet results = null;		
+		org.apache.jena.query.ResultSet results = null;		
 		String query = "select ?url ?sn ?mn where {?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/sadlserver/Services#KnowledgeBase> . " +
 				"?x <http://com.ge.research.sadl/sadlserver/Services#entryPoint> ?sn . " +
 				"OPTIONAL{?sn <http://com.ge.research.sadl/sadlserver/Services#modelName> ?mn} . " +
@@ -1106,12 +1106,21 @@ public class SadlServerImpl implements ISadlServer {
 			StringWriter swriter = new StringWriter();
 			PrintWriter out = new PrintWriter(swriter);
 			((InfModel)infModel).write(swriter, format);
+			String infModelStr = swriter.toString();
+			out.close();
+			StringDataSource ds = new StringDataSource(infModelStr, "text/plain");
+			ds.setName("Inferred Model");
+			return ds;		
+		}
+		else if (infModel instanceof Model) {
+			StringWriter swriter = new StringWriter();
+			PrintWriter out = new PrintWriter(swriter);
+			((Model)infModel).write(swriter, format);
 			String derivations = swriter.toString();
 			out.close();
 			StringDataSource ds = new StringDataSource(derivations, "text/plain");
-			ds.setName("Inferred Model");
+			ds.setName("Instance model plus deductions");
 			return ds;
-			
 		}
 		return null;
 	}

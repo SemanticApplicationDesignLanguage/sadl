@@ -25,8 +25,8 @@ import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
 import com.google.inject.Provider
-import com.hp.hpl.jena.ontology.OntModel
-import com.hp.hpl.jena.query.QueryExecutionFactory
+import org.apache.jena.ontology.OntModel
+import org.apache.jena.query.QueryExecutionFactory
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream

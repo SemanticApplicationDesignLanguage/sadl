@@ -26,7 +26,7 @@ import com.ge.research.sadl.reasoner.QueryParseException
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException
 import com.ge.research.sadl.reasoner.SadlCommandResult
 import com.ge.research.sadl.reasoner.TranslationException
-import com.hp.hpl.jena.ontology.OntModel
+import org.apache.jena.ontology.OntModel
 import java.util.List
 import java.util.Map
 import org.eclipse.emf.common.util.URI

@@ -98,68 +98,68 @@ import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
-import com.hp.hpl.jena.datatypes.DatatypeFormatException;
-import com.hp.hpl.jena.datatypes.xsd.XSDDateTime;
-import com.hp.hpl.jena.datatypes.xsd.XSDDuration;
-import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node_Literal;
-import com.hp.hpl.jena.graph.Node_URI;
-import com.hp.hpl.jena.graph.Node_Variable;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntDocumentManager;
-import com.hp.hpl.jena.ontology.OntDocumentManager.ReadFailureHandler;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.ontology.OntProperty;
-import com.hp.hpl.jena.ontology.Ontology;
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.Syntax;
-import com.hp.hpl.jena.rdf.model.InfModel;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.ModelGetter;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.RDFReader;
-import com.hp.hpl.jena.rdf.model.RDFWriter;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.ResourceFactory;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.reasoner.Derivation;
-import com.hp.hpl.jena.reasoner.InfGraph;
-import com.hp.hpl.jena.reasoner.TriplePattern;
-import com.hp.hpl.jena.reasoner.ValidityReport;
-import com.hp.hpl.jena.reasoner.ValidityReport.Report;
-import com.hp.hpl.jena.reasoner.rulesys.Builtin;
-import com.hp.hpl.jena.reasoner.rulesys.BuiltinRegistry;
-import com.hp.hpl.jena.reasoner.rulesys.ClauseEntry;
-import com.hp.hpl.jena.reasoner.rulesys.Functor;
-import com.hp.hpl.jena.reasoner.rulesys.GenericRuleReasoner;
-import com.hp.hpl.jena.reasoner.rulesys.Node_RuleVariable;
-import com.hp.hpl.jena.reasoner.rulesys.Rule;
-import com.hp.hpl.jena.reasoner.rulesys.Rule.ParserException;
-import com.hp.hpl.jena.reasoner.rulesys.RuleDerivation;
-import com.hp.hpl.jena.reasoner.rulesys.builtins.Product;
-import com.hp.hpl.jena.shared.RulesetNotFoundException;
-import com.hp.hpl.jena.sparql.syntax.Template;
-import com.hp.hpl.jena.update.UpdateAction;
-import com.hp.hpl.jena.update.UpdateFactory;
-import com.hp.hpl.jena.update.UpdateRequest;
-import com.hp.hpl.jena.util.FileManager;
-import com.hp.hpl.jena.util.PrintUtil;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
-import com.hp.hpl.jena.vocabulary.OWL;
-import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.RDFS;
+import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.datatypes.xsd.XSDDuration;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Node_Literal;
+import org.apache.jena.graph.Node_URI;
+import org.apache.jena.graph.Node_Variable;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntDocumentManager;
+import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.ontology.OntProperty;
+import org.apache.jena.ontology.Ontology;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.Syntax;
+import org.apache.jena.rdf.model.InfModel;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.ModelGetter;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.RDFReader;
+import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.reasoner.Derivation;
+import org.apache.jena.reasoner.InfGraph;
+import org.apache.jena.reasoner.TriplePattern;
+import org.apache.jena.reasoner.ValidityReport;
+import org.apache.jena.reasoner.ValidityReport.Report;
+import org.apache.jena.reasoner.rulesys.Builtin;
+import org.apache.jena.reasoner.rulesys.BuiltinRegistry;
+import org.apache.jena.reasoner.rulesys.ClauseEntry;
+import org.apache.jena.reasoner.rulesys.Functor;
+import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
+import org.apache.jena.reasoner.rulesys.Node_RuleVariable;
+import org.apache.jena.reasoner.rulesys.Rule;
+import org.apache.jena.reasoner.rulesys.Rule.ParserException;
+import org.apache.jena.reasoner.rulesys.RuleDerivation;
+import org.apache.jena.reasoner.rulesys.builtins.Product;
+import org.apache.jena.shared.RulesetNotFoundException;
+import org.apache.jena.sparql.syntax.Template;
+import org.apache.jena.update.UpdateAction;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateRequest;
+import org.apache.jena.util.FileManager;
+import org.apache.jena.util.PrintUtil;
+import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 
 /**
  * This class implements the IReasoner interface (by extending Reasoner)
@@ -931,7 +931,8 @@ public class JenaReasonerPlugin extends Reasoner{
 				dataModel.getDocumentManager().setProcessImports(false);
 			}
 			else if (schemaModel != null) {
-				dataModel.add(schemaModel);
+//				dataModel.add(schemaModel);		
+				dataModel.addSubModel(schemaModel, false);
 			}
 			infModel = null;
 		}
@@ -1096,7 +1097,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 			return ds;
 		} 
-		catch (com.hp.hpl.jena.query.QueryCancelledException e) {
+		catch (org.apache.jena.query.QueryCancelledException e) {
 			e.printStackTrace();
 			logger.error("query timed out with Exception: " + e.getMessage());
 			throw new QueryCancelledException("Construct Query '" + constructQuery + "' timed out: " + e.getLocalizedMessage());
@@ -1118,7 +1119,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			startTrace();
 			QueryExecution qexec = null;		
-			com.hp.hpl.jena.query.ResultSet results = null;		
+			org.apache.jena.query.ResultSet results = null;		
 			prepareInfModel();
 			try {
 				String qstr = handleNamedQueryByName(askQuery);
@@ -1159,7 +1160,7 @@ public class JenaReasonerPlugin extends Reasoner{
 					else {
 						results = qexec.execSelect();
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						com.hp.hpl.jena.query.ResultSetFormatter.outputAsJSON(baos, results);
+						org.apache.jena.query.ResultSetFormatter.outputAsJSON(baos, results);
 						resJsonStr = new String(baos.toByteArray(), Charset.defaultCharset()).replace(System.getProperty("line.separator"), "\n");
 					}
 					if (collectTimingInfo) {
@@ -1168,7 +1169,7 @@ public class JenaReasonerPlugin extends Reasoner{
 					}
 				}
 			}
-			catch (com.hp.hpl.jena.query.QueryCancelledException e) {
+			catch (org.apache.jena.query.QueryCancelledException e) {
 				resJsonStr = null;
 				cancelled = true;
 				throw new QueryCancelledException("Query timed out (" + queryTimeout + " seconds): '" + askQuery + "'\n");
@@ -1202,7 +1203,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			startTrace();
 			QueryExecution qexec = null;		
-			com.hp.hpl.jena.query.ResultSet results = null;		
+			org.apache.jena.query.ResultSet results = null;		
 			prepareInfModel();
 			try {
 				String qstr = handleNamedQueryByName(askQuery);
@@ -1275,9 +1276,9 @@ public class JenaReasonerPlugin extends Reasoner{
 	//							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
 	//							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
 	//							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
-								com.hp.hpl.jena.graph.Node subj = triple0.getSubject();
-								com.hp.hpl.jena.graph.Node pred = triple0.getPredicate();
-								com.hp.hpl.jena.graph.Node obj = triple0.getObject();
+								org.apache.jena.graph.Node subj = triple0.getSubject();
+								org.apache.jena.graph.Node pred = triple0.getPredicate();
+								org.apache.jena.graph.Node obj = triple0.getObject();
 								
 								columnName[0] = subj.isVariable() ? subj.getName() : subj.getLocalName();
 								columnName[1] = pred.isVariable() ? pred.getName() : pred.getLocalName();
@@ -1320,7 +1321,7 @@ public class JenaReasonerPlugin extends Reasoner{
 					}
 				}
 			}
-			catch (com.hp.hpl.jena.query.QueryCancelledException e) {
+			catch (org.apache.jena.query.QueryCancelledException e) {
 				rs = null;
 				cancelled = true;
 				throw new QueryCancelledException("Query timed out (" + queryTimeout + " seconds): '" + askQuery + "'\n");
@@ -1370,7 +1371,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		return false;
 	}
 
-	protected ResultSet convertFromJenaResultSetToReasonerResultSet(com.hp.hpl.jena.query.ResultSet results) {
+	protected ResultSet convertFromJenaResultSetToReasonerResultSet(org.apache.jena.query.ResultSet results) {
 		if (!results.hasNext()) {
 			return null;
 		}
@@ -1593,7 +1594,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				}
 				else if (premises[pi] instanceof Functor) {
 					String functorName = ((Functor)premises[pi]).getName();
-					com.hp.hpl.jena.graph.Node[] args = ((Functor)premises[pi]).getArgs();
+					org.apache.jena.graph.Node[] args = ((Functor)premises[pi]).getArgs();
 					String functorMsg = functorName + "(";
 					for (int ai = 0; args != null && ai < args.length; ai++) {
 						functorMsg += nodeShortString(args[ai]) + (ai < (args.length - 1) ? ", " : "");
@@ -1705,7 +1706,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	protected String functorToFilter(Functor functor, String oldFilterString) {
 		String filterString = null;
 		String functorName = functor.getName();
-		com.hp.hpl.jena.graph.Node[] args = functor.getArgs();
+		org.apache.jena.graph.Node[] args = functor.getArgs();
 		if (functorName.equals("equal")) {
 			if (filterString == null && args.length > 1) {
 				filterString = nodeToFilterString(args[0]);
@@ -1762,7 +1763,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		}
 	}
 	
-	protected String nodeToFilterString(com.hp.hpl.jena.graph.Node node) {
+	protected String nodeToFilterString(org.apache.jena.graph.Node node) {
 		if (node instanceof Node_Literal) {
 			return ((Node_Literal)node).getLiteralLexicalForm();
 		}
@@ -1793,7 +1794,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	 * @param node
 	 * @return
 	 */
-	protected Node graphNodeToSadlNode(com.hp.hpl.jena.graph.Node node) {
+	protected Node graphNodeToSadlNode(org.apache.jena.graph.Node node) {
 		if (node instanceof Node_Variable) {
 			return new VariableNode(((Node_Variable)node).getName().substring(1));
 		}
@@ -1817,7 +1818,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		return tripleStr;
 	}
 	
-	protected String nodeShortString(com.hp.hpl.jena.graph.Node n) {
+	protected String nodeShortString(org.apache.jena.graph.Node n) {
 		if (n instanceof Node_RuleVariable) {
 			return((Node_RuleVariable)n).toString();
 		}
@@ -1831,7 +1832,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	protected String generateTripleStringWithVars(List<String> selectVars, TriplePattern pattern) {
 		String tripleStr = "";
-		com.hp.hpl.jena.graph.Node s = pattern.getSubject();
+		org.apache.jena.graph.Node s = pattern.getSubject();
 		if (s instanceof Node_RuleVariable) {
 			String vn = ((Node_RuleVariable)s).toString();
 			if (!selectVars.contains(vn)) {
@@ -1842,7 +1843,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		else {
 			tripleStr += "<" + s.toString() + "> ";
 		}
-		com.hp.hpl.jena.graph.Node p = pattern.getPredicate();
+		org.apache.jena.graph.Node p = pattern.getPredicate();
 		if (p instanceof Node_RuleVariable) {
 			String vn = ((Node_RuleVariable)p).toString();
 			if (!selectVars.contains(vn)) {
@@ -1853,7 +1854,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		else {
 			tripleStr += "<" + p.toString() + "> ";
 		}
-		com.hp.hpl.jena.graph.Node o = pattern.getObject();
+		org.apache.jena.graph.Node o = pattern.getObject();
 		if (o instanceof Node_RuleVariable) {
 			String vn = ((Node_RuleVariable)o).toString();
 			if (!selectVars.contains(vn)) {
@@ -1871,7 +1872,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		return tripleStr;
 	}
 
-	protected ResultSet processRuleQuery(com.hp.hpl.jena.reasoner.rulesys.Rule rule, List<String> premisesAsStrings, String q) throws QueryParseException, QueryCancelledException, InvalidNameException, ConfigurationException {
+	protected ResultSet processRuleQuery(org.apache.jena.reasoner.rulesys.Rule rule, List<String> premisesAsStrings, String q) throws QueryParseException, QueryCancelledException, InvalidNameException, ConfigurationException {
 		logger.debug("Explanation executing query: " + q);
 		q = prepareQuery(q);
 		ResultSet rs = ask(q);
@@ -1888,8 +1889,8 @@ public class JenaReasonerPlugin extends Reasoner{
 				for (int col = 0; col < rs.getColumnCount(); col++) {
 					if (col > 0) rowStr += ", ";
 					Object o = rs.getResultAt(row, col);
-					if (o instanceof com.hp.hpl.jena.graph.Node) {
-						rowStr += nodeShortString((com.hp.hpl.jena.graph.Node)o);
+					if (o instanceof org.apache.jena.graph.Node) {
+						rowStr += nodeShortString((org.apache.jena.graph.Node)o);
 					}
 					else if (o instanceof String && ((String)o).indexOf('#') > 0) {
 						rowStr += ((String)o).substring(((String)o).indexOf('#') + 1);
@@ -2070,9 +2071,9 @@ public class JenaReasonerPlugin extends Reasoner{
 						ClauseEntry cls = hdelmts[j];
 						if (cls instanceof TriplePattern) {
 							// at this time we only consider triple patterns
-							com.hp.hpl.jena.graph.Node sjn = ((TriplePattern)cls).getSubject();
-							com.hp.hpl.jena.graph.Node pjn = ((TriplePattern)cls).getPredicate();
-							com.hp.hpl.jena.graph.Node ojn = ((TriplePattern)cls).getObject();
+							org.apache.jena.graph.Node sjn = ((TriplePattern)cls).getSubject();
+							org.apache.jena.graph.Node pjn = ((TriplePattern)cls).getPredicate();
+							org.apache.jena.graph.Node ojn = ((TriplePattern)cls).getObject();
 							
 							if ((snUri != null && sjn instanceof Node_URI && ((Node_URI)sjn).getURI().equals(snUri)) ||
 									sjn instanceof Node_Variable || snUri == null) {
@@ -2138,7 +2139,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				        	ClauseEntry term = ((RuleDerivation) d).getRule().getBodyElement(i);
 				        	if (term instanceof Functor) {
 				        		sb.append(((Functor)term).getName() + "(");
-				        		com.hp.hpl.jena.graph.Node[] args = ((Functor)term).getArgs();
+				        		org.apache.jena.graph.Node[] args = ((Functor)term).getArgs();
 				        		for (int j = 0; j < args.length; j++) {
 				        			String nstr;
 				        			if (args[j].isURI()) {
@@ -2208,12 +2209,12 @@ public class JenaReasonerPlugin extends Reasoner{
 		sb.append(" ");
 		sb.append(t.getPredicate().getLocalName());
 		sb.append(" ");
-		com.hp.hpl.jena.graph.Node n = t.getObject();
+		org.apache.jena.graph.Node n = t.getObject();
 		sb.append(tripleValueToString(n));
 		return sb.toString();
 	}
 
-	protected String tripleSubjectToString(com.hp.hpl.jena.graph.Node s) {
+	protected String tripleSubjectToString(org.apache.jena.graph.Node s) {
 		if (s.isURI()) {
 			return s.getLocalName();
 		}
@@ -2222,7 +2223,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		}
 	}
 
-	public String tripleValueToString(com.hp.hpl.jena.graph.Node n) {
+	public String tripleValueToString(org.apache.jena.graph.Node n) {
 		StringBuffer sb = new StringBuffer();
 		if (n.isLiteral()) {
 			Object val = n.getLiteralValue();
@@ -2708,7 +2709,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		return OntModelSpec.OWL_MEM;
 	}
 
-	protected com.hp.hpl.jena.reasoner.rulesys.GenericRuleReasoner.RuleMode getRuleMode(List<ConfigurationItem> preferences) throws ConfigurationException {
+	protected org.apache.jena.reasoner.rulesys.GenericRuleReasoner.RuleMode getRuleMode(List<ConfigurationItem> preferences) throws ConfigurationException {
 		Object ruleModeID = findPreference(preferences, pRuleMode);
 		if (ruleModeID != null) {
 			configure(findConfigurationItem(preferences, pRuleMode));
@@ -2723,7 +2724,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 	
 	
-	protected com.hp.hpl.jena.reasoner.rulesys.GenericRuleReasoner.RuleMode getRuleMode(String ruleModeID) throws ConfigurationException {
+	protected org.apache.jena.reasoner.rulesys.GenericRuleReasoner.RuleMode getRuleMode(String ruleModeID) throws ConfigurationException {
 		if (ruleModeID.equals(GenericRuleReasoner.BACKWARD.toString())) {
 			return GenericRuleReasoner.BACKWARD;
 		}
@@ -3065,7 +3066,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	public List<BuiltinInfo> getImplicitBuiltins() {
 		List<BuiltinInfo> implbltins = new ArrayList<BuiltinInfo>();
-		String pkg = "com.hp.hpl.jena.reasoner.rulesys.builtins";
+		String pkg = "org.apache.jena.reasoner.rulesys.builtins";
 		String[] impbuiltinnames = {
 		"AddOne", "Bound", "CountLiteralValues", "IsBNode", "IsDType",
 		"IsLiteral", "ListContains", "ListEntry", "ListEqual", "ListLength", 
@@ -3154,7 +3155,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (localName.startsWith("^")) {
 				localName = localName.substring(1);
 			}
-			fsList.add(new FunctionSignature(s,	"com.hp.hpl.jena.reasoner.rulesys.builtins" + "#" + localName));
+			fsList.add(new FunctionSignature(s,	"org.apache.jena.reasoner.rulesys.builtins" + "#" + localName));
 		}
 		return fsList;
 	}
@@ -3490,7 +3491,47 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (deductionsOnly && infModel instanceof InfModel) {
 			return ((InfModel)infModel).getDeductionsModel();
 		}
-		return infModel;
+		else {
+			// this won't work asthe dataModel will have triples that may have been removed by inference (remove(...) builtin)
+//			Model bdm = dataModel.getBaseModel();
+//			Model ddm = ((InfModel)infModel).getDeductionsModel();
+//			return bdm.add(ddm);
+//			String fmt = "TURTLE";
+//			String inffn = "C:/tmp/infdump";
+//			String schfn = "C:/tmp/schdump";
+//			int cntr = 0;
+//			try {
+//				dumpInfModel(inffn + cntr + ".ttl", infModel, getInstanceDataNS(), fmt);
+//				dumpInfModel(schfn + ++cntr + ".ttl", schemaModel, getBaseUriOfModel(schemaModel), fmt);
+//				Model infMinus = infModel.remove(schemaModel);
+//				dumpInfModel(inffn + ++cntr + ".ttl", infMinus, getInstanceDataNS(), fmt);	
+//				ExtendedIterator<OntModel> smitr = schemaModel.listSubModels(true);
+//				while (smitr.hasNext()) {
+//					OntModel schm = smitr.next();
+//					dumpInfModel(schfn + ++cntr + ".ttl", schm, getBaseUriOfModel(schm), fmt);
+//					infMinus = infMinus.remove(schm);
+//					dumpInfModel(inffn + ++cntr + ".ttl", infMinus, getInstanceDataNS(), fmt);	
+//				}
+//				return infMinus;
+//			} catch (FileNotFoundException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//				throw new ConfigurationException("filed to reduce infModel", e);
+//			}
+			return infModel;
+		}
+	}
+	
+	private void dumpInfModel(String filename, Model m, String modelname, String format) throws FileNotFoundException {
+	    FileOutputStream fps = new FileOutputStream(filename);
+        RDFWriter rdfw = m.getWriter(format);
+        rdfw.write(m, fps, modelname);
+        try {
+			fps.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public boolean clearCache() throws InvalidNameException {

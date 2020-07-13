@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin;
 import com.ge.research.sadl.jena.reasoner.builtin.Utils;
-import com.hp.hpl.jena.reasoner.rulesys.*;
-import com.hp.hpl.jena.util.iterator.ClosableIterator;
-import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.RDFS;
-import com.hp.hpl.jena.graph.*;
+import org.apache.jena.reasoner.rulesys.*;
+import org.apache.jena.util.iterator.ClosableIterator;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.graph.*;
 
 /**
  * Create a new anonymous node and bind it to the each argument

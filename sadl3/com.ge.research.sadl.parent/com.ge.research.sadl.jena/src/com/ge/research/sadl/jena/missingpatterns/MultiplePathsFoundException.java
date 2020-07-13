@@ -1,7 +1,7 @@
 package com.ge.research.sadl.jena.missingpatterns;
 
 import com.ge.research.sadl.model.gp.NamedNode;
-import com.hp.hpl.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Resource;
 
 public class MultiplePathsFoundException extends Exception {
 	/**

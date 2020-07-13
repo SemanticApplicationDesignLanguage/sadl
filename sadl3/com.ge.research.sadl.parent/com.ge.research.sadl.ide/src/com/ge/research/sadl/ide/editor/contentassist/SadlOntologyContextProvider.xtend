@@ -38,7 +38,7 @@ import com.ge.research.sadl.sADL.SubjHasProp
 import com.google.common.base.Optional
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import com.hp.hpl.jena.ontology.OntModel
+import org.apache.jena.ontology.OntModel
 import java.util.List
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.Assignment

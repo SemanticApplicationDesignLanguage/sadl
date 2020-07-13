@@ -15,9 +15,9 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 import com.ge.research.sadl.model.gp.Query
 import org.pojava.datetime.Duration
-import com.hp.hpl.jena.rdf.model.ModelFactory
-import com.hp.hpl.jena.ontology.OntModelSpec
-import com.hp.hpl.jena.vocabulary.XSD
+import org.apache.jena.rdf.model.ModelFactory
+import org.apache.jena.ontology.OntModelSpec
+import org.apache.jena.vocabulary.XSD
 import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.reasoner.TranslationException
 

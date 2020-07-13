@@ -35,18 +35,18 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.ResourceManager;
-import com.hp.hpl.jena.ontology.CardinalityRestriction;
-import com.hp.hpl.jena.ontology.MaxCardinalityRestriction;
-import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntDocumentManager;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.ontology.OntProperty;
-import com.hp.hpl.jena.ontology.Restriction;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
-import com.hp.hpl.jena.vocabulary.OWL2;
+import org.apache.jena.ontology.CardinalityRestriction;
+import org.apache.jena.ontology.MaxCardinalityRestriction;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntDocumentManager;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.ontology.OntProperty;
+import org.apache.jena.ontology.Restriction;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.OWL2;
 
 public class UtilsForJena {
 	protected static final Logger logger = LoggerFactory.getLogger(UtilsForJena.class);
@@ -355,9 +355,9 @@ public class UtilsForJena {
 //		}
 //
 //		if (!mappingFound) {
-//			com.hp.hpl.jena.rdf.model.Resource type = m
+//			org.apache.jena.rdf.model.Resource type = m
 //					.createResource(ONT_MANAGER_ONTOLOGY_SPEC);
-//			com.hp.hpl.jena.rdf.model.Resource newOntSpec = m
+//			org.apache.jena.rdf.model.Resource newOntSpec = m
 //					.createResource(type);
 //			Property langp = m
 //					.getProperty(ONT_MANAGER_LANGUAGE);
@@ -457,7 +457,7 @@ public class UtilsForJena {
 //        	fileName = null;
 //        	actualFilePath = null;
 //            Statement s = sitr.nextStatement();
-//            com.hp.hpl.jena.rdf.model.Resource subj = s.getSubject();	
+//            org.apache.jena.rdf.model.Resource subj = s.getSubject();	
 //            Statement salt = subj.getProperty(altUrlProp);
 //            Statement spub = subj.getProperty(publicUrlProp);
 //            Statement sprefix = subj.getProperty(prefixProp);

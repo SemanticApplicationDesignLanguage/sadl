@@ -30,7 +30,7 @@ import com.google.common.collect.Iterables
 import com.google.common.collect.Lists
 import com.google.common.io.Files
 import com.google.inject.Inject
-import com.hp.hpl.jena.ontology.OntModel
+import org.apache.jena.ontology.OntModel
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Arrays

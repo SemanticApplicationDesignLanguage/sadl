@@ -66,20 +66,20 @@ import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
-import com.hp.hpl.jena.ontology.OntDocumentManager;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.ontology.OntResource;
-import com.hp.hpl.jena.ontology.Ontology;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.ontology.OntDocumentManager;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.ontology.OntResource;
+import org.apache.jena.ontology.Ontology;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.util.iterator.ExtendedIterator;
 
 /**
  * this class extension supports configuration tasks unique to the IDE (development environment)
@@ -347,8 +347,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
         		publicUrlProp = getMappingModel().createProperty(ONT_MANAGER_PUBLIC_URI);
         		prefixProp = getMappingModel().createProperty(ONT_MANAGER_PREFIX);
         	}
-    		com.hp.hpl.jena.rdf.model.Resource type = getMappingModel().createResource(ONT_MANAGER_ONTOLOGY_SPEC);
-    		com.hp.hpl.jena.rdf.model.Resource newOntSpec = getMappingModel().createResource(type);
+    		org.apache.jena.rdf.model.Resource type = getMappingModel().createResource(ONT_MANAGER_ONTOLOGY_SPEC);
+    		org.apache.jena.rdf.model.Resource newOntSpec = getMappingModel().createResource(type);
     		Property langp = getMappingModel().getProperty(ONT_MANAGER_LANGUAGE);
     		RDFNode langv = getMappingModel().createResource(OWL_ONT_MANAGER_PUBLIC_URINS);
     		getMappingModel().add(newOntSpec, publicUrlProp, pubv);

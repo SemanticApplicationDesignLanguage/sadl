@@ -37,7 +37,7 @@ import com.google.common.base.Predicate
 import com.google.common.base.Predicates
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import com.hp.hpl.jena.vocabulary.XSD
+import org.apache.jena.vocabulary.XSD
 import java.util.ArrayList
 import java.util.Collection
 import java.util.HashMap

@@ -46,12 +46,12 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.swi_prolog.fileinterface.FileInterface;
 //import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologInterface;
 import com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntProperty;
-import com.hp.hpl.jena.ontology.OntResource;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.vocabulary.RDFS;
-import com.hp.hpl.jena.vocabulary.XSD;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntProperty;
+import org.apache.jena.ontology.OntResource;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 
 public class SWIPrologTranslatorPlugin implements ITranslator {
     public static final String SWI_RUN_PROLOG_SERVICE_PL = "swi-run-prolog-service.pl";

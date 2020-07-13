@@ -25,7 +25,7 @@ package com.ge.research.sadl.reasoner;
 
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.*;
-import com.hp.hpl.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModel;
 
 import java.util.Enumeration;
 import java.util.List;

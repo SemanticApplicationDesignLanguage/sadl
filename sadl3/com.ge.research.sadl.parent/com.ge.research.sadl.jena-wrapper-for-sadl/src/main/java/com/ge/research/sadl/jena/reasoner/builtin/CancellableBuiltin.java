@@ -19,9 +19,9 @@ package com.ge.research.sadl.jena.reasoner.builtin;
 
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InferenceCanceledException;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
-import com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin;
+import org.apache.jena.graph.Node;
+import org.apache.jena.reasoner.rulesys.RuleContext;
+import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 
 public abstract class CancellableBuiltin extends BaseBuiltin {
 

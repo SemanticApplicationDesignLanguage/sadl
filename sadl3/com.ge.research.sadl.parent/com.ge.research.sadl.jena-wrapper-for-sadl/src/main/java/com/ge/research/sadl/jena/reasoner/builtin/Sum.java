@@ -18,17 +18,17 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import com.hp.hpl.jena.reasoner.rulesys.*;
-import com.hp.hpl.jena.vocabulary.RDF;
+import org.apache.jena.reasoner.rulesys.*;
+import org.apache.jena.vocabulary.RDF;
 
 import java.util.Arrays;
 
-import com.hp.hpl.jena.graph.*;
+import org.apache.jena.graph.*;
 
 /**
 
  */
-public class Sum extends com.hp.hpl.jena.reasoner.rulesys.builtins.Sum {
+public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum {
 
 	private int argLength = 0;
 

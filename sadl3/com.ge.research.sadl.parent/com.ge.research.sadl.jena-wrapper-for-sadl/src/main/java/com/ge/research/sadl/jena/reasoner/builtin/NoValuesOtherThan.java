@@ -18,10 +18,10 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import com.hp.hpl.jena.reasoner.rulesys.*;
-import com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin;
-import com.hp.hpl.jena.util.iterator.ClosableIterator;
-import com.hp.hpl.jena.graph.*;
+import org.apache.jena.reasoner.rulesys.*;
+import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
+import org.apache.jena.util.iterator.ClosableIterator;
+import org.apache.jena.graph.*;
 
 /**
  * Has only three arg form (X, P, V). 

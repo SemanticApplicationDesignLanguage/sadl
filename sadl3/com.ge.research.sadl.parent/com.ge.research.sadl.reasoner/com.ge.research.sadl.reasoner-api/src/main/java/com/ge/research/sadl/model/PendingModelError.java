@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.hp.hpl.jena.ontology.OntResource;
+import org.apache.jena.ontology.OntResource;
 
 public class PendingModelError extends ModelError {
     

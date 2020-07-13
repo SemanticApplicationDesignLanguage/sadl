@@ -2,7 +2,7 @@ package com.ge.research.sadl.reasoner;
 
 import java.net.MalformedURLException;
 
-import com.hp.hpl.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModel;
 
 public interface ISadlJenaModelGetter {
 

@@ -18,17 +18,17 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import com.hp.hpl.jena.reasoner.rulesys.*;
-import com.hp.hpl.jena.vocabulary.RDF;
+import org.apache.jena.reasoner.rulesys.*;
+import org.apache.jena.vocabulary.RDF;
 
 import java.util.Arrays;
 
-import com.hp.hpl.jena.graph.*;
+import org.apache.jena.graph.*;
 
 /**
 
  */
-public class Product extends com.hp.hpl.jena.reasoner.rulesys.builtins.Product {
+public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
 
 	private int argLength = 0;
 

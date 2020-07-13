@@ -34,7 +34,7 @@ import com.google.common.base.Supplier
 import com.google.common.base.Suppliers
 import com.google.inject.Inject
 import com.google.inject.Provider
-import com.hp.hpl.jena.ontology.OntModel
+import org.apache.jena.ontology.OntModel
 import java.util.List
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource

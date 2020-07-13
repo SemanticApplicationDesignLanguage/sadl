@@ -30,9 +30,9 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.reasoner.rulesys.RuleContext;
-import com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin;
+import org.apache.jena.graph.Node;
+import org.apache.jena.reasoner.rulesys.RuleContext;
+import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 
 /**
  * Tests whether the first argument is an instance of the type specified 

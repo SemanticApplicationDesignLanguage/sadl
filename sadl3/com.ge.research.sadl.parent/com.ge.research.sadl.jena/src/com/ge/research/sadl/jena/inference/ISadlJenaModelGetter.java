@@ -23,7 +23,7 @@ import java.util.Map;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
-import com.hp.hpl.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModel;
 
 public interface ISadlJenaModelGetter {
 

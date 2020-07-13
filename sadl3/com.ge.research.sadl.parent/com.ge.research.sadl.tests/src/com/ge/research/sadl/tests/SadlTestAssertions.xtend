@@ -23,7 +23,7 @@ import com.ge.research.sadl.model.gp.SadlCommand
 import com.ge.research.sadl.processing.OntModelProvider
 import com.ge.research.sadl.validation.ModelProcessorAdapter
 import com.google.common.collect.Iterables
-import com.hp.hpl.jena.ontology.OntModel
+import org.apache.jena.ontology.OntModel
 import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.diagnostics.Severity
