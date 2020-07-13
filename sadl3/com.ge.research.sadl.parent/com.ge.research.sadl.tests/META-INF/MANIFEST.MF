@@ -24,7 +24,7 @@ Export-Package: com.ge.research.sadl.jena.translator;
    org.slf4j,
    com.ge.research.sadl.reasoner,
    com.ge.research.sadl.model,
-   com.hp.hpl.jena.ontology",
+   org.apache.jena.ontology",
  com.ge.research.sadl.tests;x-internal=true,
  com.ge.research.sadl.tests.helpers
 Import-Package: org.hamcrest.core,

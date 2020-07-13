@@ -19,28 +19,29 @@ Bundle-ActivationPolicy: lazy
 Export-Package: com.ge.research.sadl.jena.importer,
  com.ge.research.sadl.jena.multithreaded,
  com.ge.research.sadl.jena.reasoner;
-  uses:="com.hp.hpl.jena.reasoner,
+  uses:="org.apache.jena.reasoner,
    com.ge.research.sadl.model.gp,
    org.slf4j,
-   com.hp.hpl.jena.graph,
-   com.hp.hpl.jena.query,
-   com.hp.hpl.jena.reasoner.rulesys,
-   com.hp.hpl.jena.rdf.model,
+   org.apache.jena.graph,
+   org.apache.jena.query,
+   org.apache.jena.reasoner.rulesys,
+   org.apache.jena.reasoner.rulesys.builtins,
+   org.apache.jena.rdf.model,
    com.ge.research.sadl.reasoner,
-   com.hp.hpl.jena.ontology,
+   org.apache.jena.ontology,
    javax.activation",
- com.ge.research.sadl.jena.reasoner.builtin;
-  uses:="com.hp.hpl.jena.datatypes.xsd,
-   com.hp.hpl.jena.graph,
-   com.hp.hpl.jena.reasoner.rulesys.builtins,
-   com.hp.hpl.jena.reasoner.rulesys,
+   com.ge.research.sadl.jena.reasoner.builtin;
+  uses:="org.apache.jena.datatypes.xsd,
+   org.apache.jena.graph,
+   org.apache.jena.reasoner.rulesys.builtins,
+   org.apache.jena.reasoner.rulesys,
    com.ge.research.sadl.reasoner",
  com.ge.research.sadl.jena.translator;
   uses:="com.ge.research.sadl.model.gp,
    org.slf4j,
    com.ge.research.sadl.reasoner,
    com.ge.research.sadl.model,
-   com.hp.hpl.jena.ontology"
+   org.apache.jena.ontology"
 Bundle-ClassPath: .
 Import-Package: com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,

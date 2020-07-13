@@ -22,8 +22,8 @@ Require-Bundle: com.ge.research.sadl.importer,
  com.ge.research.sadl.jena-wrapper-for-sadl,
  com.ge.research.sadl.ui,
  com.ge.research.sadl.jena
-Import-Package: com.hp.hpl.jena.query,
- com.hp.hpl.jena.rdf.model,
+Import-Package: org.apache.jena.query,
+ org.apache.jena.rdf.model,
  org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.importer.ui.quickfix,
