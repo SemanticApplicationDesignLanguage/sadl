@@ -36,73 +36,73 @@ class SadlTestHelper {
 		uri "http://sadl.org/builtinfunctions" alias builtinfunctions.
 		
 		External addOne(decimal X) returns decimal:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#addOne".
+		"org.apache.jena.reasoner.rulesys.builtins#addOne".
 		
 		External bound(string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#bound".
+		"org.apache.jena.reasoner.rulesys.builtins#bound".
 		
 		External countLiteralValues(string X, string X) returns int:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#countLiteralValues".
+		"org.apache.jena.reasoner.rulesys.builtins#countLiteralValues".
 		
 		External isBNode(string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#isBNode".
+		"org.apache.jena.reasoner.rulesys.builtins#isBNode".
 		
 		External isDType(string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#isDType".
+		"org.apache.jena.reasoner.rulesys.builtins#isDType".
 		
 		External isLiteral(string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#isLiteral".
+		"org.apache.jena.reasoner.rulesys.builtins#isLiteral".
 		
 		External listContains(string X, string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#listContains".
+		"org.apache.jena.reasoner.rulesys.builtins#listContains".
 		
 		External listEntry(string X, int X) returns string:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#listEntry".
+		"org.apache.jena.reasoner.rulesys.builtins#listEntry".
 		
 		External listEqual(string X, string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#listEqual".
+		"org.apache.jena.reasoner.rulesys.builtins#listEqual".
 		
 		External listLength(string X) returns int:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#listLength".
+		"org.apache.jena.reasoner.rulesys.builtins#listLength".
 		
 		External listMapAsObject(string X, string X, string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#listMapAsObject".
+		"org.apache.jena.reasoner.rulesys.builtins#listMapAsObject".
 		
 		External listMapAsSubject(string X, string X, string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#listMapAsSubject".
+		"org.apache.jena.reasoner.rulesys.builtins#listMapAsSubject".
 		
 		External listNotContains(string X, string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#listNotContains".
+		"org.apache.jena.reasoner.rulesys.builtins#listNotContains".
 		
 		External listNotEqual(string X, string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#listNotEqual".
+		"org.apache.jena.reasoner.rulesys.builtins#listNotEqual".
 		
 		External notBNode(string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#notBNode".
+		"org.apache.jena.reasoner.rulesys.builtins#notBNode".
 		
 		External notBType(string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#notBType".
+		"org.apache.jena.reasoner.rulesys.builtins#notBType".
 		
 		External notDType(string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#notDType".
+		"org.apache.jena.reasoner.rulesys.builtins#notDType".
 		
 		External notLiteral(string X) returns boolean:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#notLiteral".
+		"org.apache.jena.reasoner.rulesys.builtins#notLiteral".
 		
 		External now() returns dateTime:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#now".
+		"org.apache.jena.reasoner.rulesys.builtins#now".
 		
 		External regex(string X, string X) returns string:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#regex".
+		"org.apache.jena.reasoner.rulesys.builtins#regex".
 		
 		External strConcat(string X, string X) returns string:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#strConcat".
+		"org.apache.jena.reasoner.rulesys.builtins#strConcat".
 		
 		External uriConcat(string X, string X) returns string:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#uriConcat".
+		"org.apache.jena.reasoner.rulesys.builtins#uriConcat".
 		
 		External unbound(string X) returns string:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#unbound".
+		"org.apache.jena.reasoner.rulesys.builtins#unbound".
 		
 		External abs(decimal X) returns decimal:
 		"com.ge.research.sadl.jena.reasoner.builtin#abs".
@@ -186,10 +186,10 @@ class SadlTestHelper {
 		"com.ge.research.sadl.jena.reasoner.builtin#tan".
 		
 		External table(--) returns --:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#table".
+		"org.apache.jena.reasoner.rulesys.builtins#table".
 		
 		External tableAll(--) returns --:
-		"com.hp.hpl.jena.reasoner.rulesys.builtins#tableAll".Ï
+		"org.apache.jena.reasoner.rulesys.builtins#tableAll".Ï
 	'''
 
 }

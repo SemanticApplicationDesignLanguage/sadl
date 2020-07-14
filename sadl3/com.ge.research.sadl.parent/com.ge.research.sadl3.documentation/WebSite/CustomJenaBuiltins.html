@@ -16,7 +16,7 @@ custom Jena built-ins. For more details, see
 http://jena.apache.org/documentation/inference/#RULEextensions</a>. </p>
 <h2>Building the Custom Built-in</h2>
 <p>A custom Jena built-in must extend the Java class <i>
-com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin</i>. Since the deployment 
+org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin</i>. Since the deployment 
 is to an Eclipse environment, it is assumed in this discussion that the building 
 of the custom built-ins also takes place in an Eclipse Java development 
 environment. Building a custom built-in consists of the following steps. The <i>
@@ -53,11 +53,11 @@ translator takes this into account. For example,</p>
 <blockquote>
 <p>package com.ge.research.sadl.jena.reasoner.builtin;<br>
 <br>
-import com.hp.hpl.jena.graph.Node;<br>
-import com.hp.hpl.jena.reasoner.rulesys.BindingEnvironment;<br>
-import com.hp.hpl.jena.reasoner.rulesys.RuleContext;<br>
-import com.hp.hpl.jena.reasoner.rulesys.Util;<br>
-import com.hp.hpl.jena.reasoner.rulesys.builtins.BaseBuiltin;<br>
+import org.apache.jena.graph.Node;<br>
+import org.apache.jena.reasoner.rulesys.BindingEnvironment;<br>
+import org.apache.jena.reasoner.rulesys.RuleContext;<br>
+import org.apache.jena.reasoner.rulesys.Util;<br>
+import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;<br>
 <br>
 public class Pow extends BaseBuiltin {<br>
 &nbsp;&nbsp;&nbsp; /**<br>
@@ -150,7 +150,7 @@ Overview tab you can increment the version number of your fragment as you make
 new releases.</p>
 <p>Under the Plug-in Fragment project's META-INF folder (which contains the MANFEST.MF 
 file), create a folder named &quot;services&quot;. In this folder create a file with the 
-same name as the base class, &quot;com.hp.hpl.jena.reasoner.rulesys.Builtin&quot;. In this 
+same name as the base class, &quot;org.apache.jena.reasoner.rulesys.Builtin&quot;. In this 
 file, add one line for each custom built-in in the project. For example, the 
 entry for the example built-in above might be as follows.</p>
 <p>&nbsp;&nbsp;&nbsp; com.ge.research.sadl.myapp.jena.builtin.Pow</p>

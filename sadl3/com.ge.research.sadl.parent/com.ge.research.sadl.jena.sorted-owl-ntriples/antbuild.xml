@@ -12,12 +12,12 @@
                 <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
                 <attribute name="Rsrc-Main-Class" value="com.ge.research.sadl.jena.SortedOwlNtriples"/>
                 <attribute name="Class-Path" value="."/>
-                <attribute name="Rsrc-Class-Path" value="./ jena-tdb-1.1.2.jar jena-arq-2.13.0.jar httpclient-4.2.6.jar httpcore-4.2.5.jar commons-codec-1.6.jar jsonld-java-0.5.1.jar jackson-core-2.3.3.jar jackson-databind-2.3.3.jar jackson-annotations-2.3.0.jar httpclient-cache-4.2.6.jar libthrift-0.9.2.jar jcl-over-slf4j-1.7.6.jar commons-csv-1.0.jar commons-lang3-3.3.2.jar jena-core-2.13.0.jar jena-iri-1.1.2.jar xercesImpl-2.11.0.jar xml-apis-1.4.01.jar slf4j-api-1.7.6.jar slf4j-log4j12-1.7.6.jar log4j-1.2.17.jar"/>
+                <attribute name="Rsrc-Class-Path" value="./ jena-tdb-1.1.2.jar jena-arq-3.15.0.jar httpclient-4.2.6.jar httpcore-4.2.5.jar commons-codec-1.6.jar jsonld-java-0.5.1.jar jackson-core-2.3.3.jar jackson-databind-2.3.3.jar jackson-annotations-2.3.0.jar httpclient-cache-4.2.6.jar libthrift-0.9.2.jar jcl-over-slf4j-1.7.6.jar commons-csv-1.0.jar commons-lang3-3.3.2.jar jena-core-3.15.0.jar jena-iri-1.1.2.jar xercesImpl-2.11.0.jar xml-apis-1.4.01.jar slf4j-api-1.7.6.jar slf4j-log4j12-1.7.6.jar log4j-1.2.17.jar"/>
             </manifest>
             <zipfileset src="jar-in-jar-loader.zip"/>
             <fileset dir="${dir.buildfile}/target/classes"/>
             <zipfileset dir="D:/Users/200005201/.m2/repository/org/apache/jena/jena-tdb/1.1.2" includes="jena-tdb-1.1.2.jar"/>
-            <zipfileset dir="D:/Users/200005201/.m2/repository/org/apache/jena/jena-arq/2.13.0" includes="jena-arq-2.13.0.jar"/>
+            <zipfileset dir="D:/Users/200005201/.m2/repository/org/apache/jena/jena-arq/3.15.0" includes="jena-arq-3.15.0.jar"/>
             <zipfileset dir="D:/Users/200005201/.m2/repository/org/apache/httpcomponents/httpclient/4.2.6" includes="httpclient-4.2.6.jar"/>
             <zipfileset dir="D:/Users/200005201/.m2/repository/org/apache/httpcomponents/httpcore/4.2.5" includes="httpcore-4.2.5.jar"/>
             <zipfileset dir="D:/Users/200005201/.m2/repository/commons-codec/commons-codec/1.6" includes="commons-codec-1.6.jar"/>
@@ -30,7 +30,7 @@
             <zipfileset dir="D:/Users/200005201/.m2/repository/org/slf4j/jcl-over-slf4j/1.7.6" includes="jcl-over-slf4j-1.7.6.jar"/>
             <zipfileset dir="D:/Users/200005201/.m2/repository/org/apache/commons/commons-csv/1.0" includes="commons-csv-1.0.jar"/>
             <zipfileset dir="D:/Users/200005201/.m2/repository/org/apache/commons/commons-lang3/3.3.2" includes="commons-lang3-3.3.2.jar"/>
-            <zipfileset dir="D:/Users/200005201/.m2/repository/org/apache/jena/jena-core/2.13.0" includes="jena-core-2.13.0.jar"/>
+            <zipfileset dir="D:/Users/200005201/.m2/repository/org/apache/jena/jena-core/3.15.0" includes="jena-core-3.15.0.jar"/>
             <zipfileset dir="D:/Users/200005201/.m2/repository/org/apache/jena/jena-iri/1.1.2" includes="jena-iri-1.1.2.jar"/>
             <zipfileset dir="D:/Users/200005201/.m2/repository/xerces/xercesImpl/2.11.0" includes="xercesImpl-2.11.0.jar"/>
             <zipfileset dir="D:/Users/200005201/.m2/repository/xml-apis/xml-apis/1.4.01" includes="xml-apis-1.4.01.jar"/>

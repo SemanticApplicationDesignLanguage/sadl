@@ -24,6 +24,11 @@
 			<artifactId>apache-jena-libs</artifactId>
 			<type>pom</type>
 		</dependency>
+	  <dependency>
+	    <groupId>org.apache.jena</groupId>
+	    <artifactId>jena-tdb</artifactId>
+	    <version>3.15.0</version>
+	  </dependency>
 	</dependencies>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

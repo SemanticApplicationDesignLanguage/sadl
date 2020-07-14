@@ -425,11 +425,11 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 //	}
 
 //	private List<String[]> addToDomainRangeGraph(List<String[]> domainRange, OntModel m, OntClass cls) {
-//		List<com.hp.hpl.jena.rdf.model.Resource> props = getPropertiesWithDomain(m, cls);
+//		List<org.apache.jena.rdf.model.Resource> props = getPropertiesWithDomain(m, cls);
 //		if (props != null) {
-//			Iterator<com.hp.hpl.jena.rdf.model.Resource> propsitr = props.iterator();
+//			Iterator<org.apache.jena.rdf.model.Resource> propsitr = props.iterator();
 //			while (propsitr.hasNext()) {
-//				com.hp.hpl.jena.rdf.model.Resource prop = propsitr.next();
+//				org.apache.jena.rdf.model.Resource prop = propsitr.next();
 //				StmtIterator sitr = m.listStatements(prop, RDFS.range, (RDFNode)null);
 //				while (sitr.hasNext()) {
 //					String[] triple = new String[3];
@@ -579,12 +579,12 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 //		return null;
 //	}
 
-//	private List<com.hp.hpl.jena.rdf.model.Resource> getPropertiesWithDomain(OntModel m, OntClass cls) {
+//	private List<org.apache.jena.rdf.model.Resource> getPropertiesWithDomain(OntModel m, OntClass cls) {
 //		StmtIterator ditr = m.listStatements(null, RDFS.domain, cls);
 //		if (ditr.hasNext()) {
-//			List<com.hp.hpl.jena.rdf.model.Resource> props = new ArrayList<com.hp.hpl.jena.rdf.model.Resource>();
+//			List<org.apache.jena.rdf.model.Resource> props = new ArrayList<org.apache.jena.rdf.model.Resource>();
 //			while (ditr.hasNext()) {
-//				com.hp.hpl.jena.rdf.model.Resource prop = ditr.nextStatement().getSubject();
+//				org.apache.jena.rdf.model.Resource prop = ditr.nextStatement().getSubject();
 //				props.add(prop);
 //			}
 //			return props;

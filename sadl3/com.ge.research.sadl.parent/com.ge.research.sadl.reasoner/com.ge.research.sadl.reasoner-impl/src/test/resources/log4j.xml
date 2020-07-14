@@ -27,7 +27,7 @@
         <level value="DEBUG"/>
     </logger>
  
-    <logger name="com.hp.hpl.jena.reasoner">
+    <logger name="org.apache.jena.reasoner">
         <level value="DEBUG"/>
     </logger>
  
