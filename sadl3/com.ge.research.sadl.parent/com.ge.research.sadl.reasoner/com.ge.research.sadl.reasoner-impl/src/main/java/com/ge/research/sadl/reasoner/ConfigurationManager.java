@@ -481,31 +481,31 @@ public class ConfigurationManager implements IConfigurationManager {
 		}
 	}
 
-    /**
-     * This method converts a configuration path filename to a Jena policy file to an
-     * InputStream and a uri string
-     * @param configFilename
-     *
-     * @return -- an Object[2] array: 0th element is an InputStream, 1st element is a URI string used for guessing the language and for writing back to disk
-     */
-    protected static Object[] findInputStream(String configFilename) {
-        FileManager fm = new FileManager();
-        fm.addLocatorFile();
-        fm.addLocatorURL();
-        fm.addLocatorClassLoader( fm.getClass().getClassLoader() );
-
-        InputStream in = null ;
-        String uri = null;
-        StringTokenizer pathElems = new StringTokenizer( configFilename, FileManager.PATH_DELIMITER );
-        while (in == null && pathElems.hasMoreTokens()) {
-            uri = pathElems.nextToken();
-            in = fm.openNoMap( uri );
-        }
-        Object[] ret = new Object[2];
-        ret[0] = in;
-        ret[1] = uri;
-        return ret;
-    }
+//    /**
+//     * This method converts a configuration path filename to a Jena policy file to an
+//     * InputStream and a uri string
+//     * @param configFilename
+//     *
+//     * @return -- an Object[2] array: 0th element is an InputStream, 1st element is a URI string used for guessing the language and for writing back to disk
+//     */
+//    protected static Object[] findInputStream(String configFilename) {
+//        FileManager fm = FileManager.create(); // new FileManager();
+//        fm.addLocatorFile();
+//        fm.addLocatorURL();
+//        fm.addLocatorClassLoader( fm.getClass().getClassLoader() );
+//
+//        InputStream in = null ;
+//        String uri = null;
+//        StringTokenizer pathElems = new StringTokenizer( configFilename, FileManager.PATH_DELIMITER );
+//        while (in == null && pathElems.hasMoreTokens()) {
+//            uri = pathElems.nextToken();
+//            in = fm.openNoMap( uri );
+//        }
+//        Object[] ret = new Object[2];
+//        ret[0] = in;
+//        ret[1] = uri;
+//        return ret;
+//    }
 
 	protected void setTranslator(ITranslator translator) {
 		this.translator = translator;

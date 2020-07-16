@@ -139,6 +139,7 @@ import com.ge.research.sadl.processing.ValidationAcceptorExt;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
@@ -272,6 +273,8 @@ import org.apache.jena.rdf.model.RDFWriter;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.JenaTransactionException;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OWL;
@@ -581,12 +584,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// // Output the OWL file for the ontology model
 			URI lastSeg = fsa.getURI(resource.getURI().lastSegment());
 			String owlFN = getOwlFilename(lastSeg, format);
-			RDFWriter w = getTheJenaModel().getWriter(format);
-			w.setProperty("xmlbase", getModelName());
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			w.write(getTheJenaModel().getBaseModel(), out, getModelName());
+//			boolean useRdfDataMgr;
+//			if (format.equals(IConfigurationManager.JSON_LD_FORMAT)) {
+//				useRdfDataMgr = true;
+//			}
+//			else {
+//				useRdfDataMgr = false;
+//			}
+//			if (useRdfDataMgr) {
+//				System.out.println("JSON-LD output using RDFDataMgr:");
+//				RDFDataMgr.write(System.out, getTheJenaModel().getBaseModel(), RDFFormat.JSONLD);
+//			}
+//			RDFWriter w = getTheJenaModel().getWriter(format);
+//			w.setProperty("xmlbase", getModelName());
+//			w.write(getTheJenaModel().getBaseModel(), out, getModelName());
 			Charset charset = Charset.forName("UTF-8");
-			CharSequence seq = new String(out.toByteArray(), charset);
+//			CharSequence seq = new String(out.toByteArray(), charset);
+			CharSequence seq = serializeModelToString(getTheJenaModel().getBaseModel(), format, charset);
 			fsa.generateFile(owlFN, seq);
 
 			// // if there are equations, output them to a Prolog file
@@ -608,11 +623,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (!fileExists(fsa, fn)) {
 					sadlBaseModel = OntModelProvider.getSadlBaseModel();
 					if (sadlBaseModel != null) {
-						RDFWriter w2 = sadlBaseModel.getWriter(format);
-						w.setProperty("xmlbase", SadlConstants.SADL_BASE_MODEL_URI);
-						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-						w2.write(sadlBaseModel.getBaseModel(), out2, SadlConstants.SADL_BASE_MODEL_URI);
-						CharSequence seq2 = new String(out2.toByteArray(), charset);
+						CharSequence seq2 = serializeModelToString(sadlBaseModel.getBaseModel(), format, charset);
 						fsa.generateFile(fn, seq2);
 						String[] mapping = new String[3];
 						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
@@ -625,11 +636,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (!fileExists(fsa, fn)) {
 					sadlListModel = OntModelProvider.getSadlListModel();
 					if (sadlListModel != null) {
-						RDFWriter w2 = sadlListModel.getWriter(format);
-						w.setProperty("xmlbase", SadlConstants.SADL_LIST_MODEL_URI);
-						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-						w2.write(sadlListModel.getBaseModel(), out2, SadlConstants.SADL_LIST_MODEL_URI);
-						CharSequence seq2 = new String(out2.toByteArray(), charset);
+//						RDFWriter w2 = sadlListModel.getWriter(format);
+//						w2.setProperty("xmlbase", SadlConstants.SADL_LIST_MODEL_URI);
+//						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+//						w2.write(sadlListModel.getBaseModel(), out2, SadlConstants.SADL_LIST_MODEL_URI);
+//						CharSequence seq2 = new String(out2.toByteArray(), charset);
+						CharSequence seq2 = serializeModelToString(sadlListModel.getBaseModel(), format, charset);
 						fsa.generateFile(fn, seq2);
 						String[] mapping = new String[3];
 						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
@@ -642,11 +654,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (!fileExists(fsa, fn)) {
 					sadlDefaultsModel = OntModelProvider.getSadlDefaultsModel();
 					if (sadlDefaultsModel != null) {
-						RDFWriter w2 = sadlDefaultsModel.getWriter(format);
-						w.setProperty("xmlbase", SadlConstants.SADL_DEFAULTS_MODEL_URI);
-						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-						w2.write(sadlDefaultsModel.getBaseModel(), out2, SadlConstants.SADL_DEFAULTS_MODEL_URI);
-						CharSequence seq2 = new String(out2.toByteArray(), charset);
+//						RDFWriter w2 = sadlDefaultsModel.getWriter(format);
+//						w2.setProperty("xmlbase", SadlConstants.SADL_DEFAULTS_MODEL_URI);
+//						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+//						w2.write(sadlDefaultsModel.getBaseModel(), out2, SadlConstants.SADL_DEFAULTS_MODEL_URI);
+//						CharSequence seq2 = new String(out2.toByteArray(), charset);
+						CharSequence seq2 = serializeModelToString(sadlDefaultsModel.getBaseModel(), format, charset);
 						fsa.generateFile(fn, seq2);
 						String[] mapping = new String[3];
 						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
@@ -659,11 +672,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (!fileExists(fsa, fn)) {
 					sadlServicesConfigConceptModel = OntModelProvider.getSadlServicesConfigConceptsModel();
 					if (sadlServicesConfigConceptModel != null) {
-						RDFWriter w2 = sadlServicesConfigConceptModel.getWriter(format);
-						w.setProperty("xmlbase", SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI);
-						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-						w2.write(sadlServicesConfigConceptModel.getBaseModel(), out2, SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI);
-						CharSequence seq2 = new String(out2.toByteArray(), charset);
+//						RDFWriter w2 = sadlServicesConfigConceptModel.getWriter(format);
+//						w2.setProperty("xmlbase", SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI);
+//						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+//						w2.write(sadlServicesConfigConceptModel.getBaseModel(), out2, SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI);
+//						CharSequence seq2 = new String(out2.toByteArray(), charset);
+						CharSequence seq2 = serializeModelToString(sadlServicesConfigConceptModel.getBaseModel(), format, charset);
 						fsa.generateFile(fn, seq2);
 						String[] mapping = new String[3];
 						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
@@ -703,6 +717,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		generationInProgress = false;
 		logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
+	}
+
+	private CharSequence serializeModelToString(Model model, String format, Charset charset) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		if (format.equals(IConfigurationManager.JSON_LD_FORMAT)) {
+			RDFDataMgr.write(out, getTheJenaModel().getBaseModel(), RDFFormat.JSONLD);
+		}
+		else {
+			RDFWriter w2 = model.getWriter(format);
+			w2.setProperty("xmlbase", SadlConstants.SADL_BASE_MODEL_URI);
+			w2.write(model, out, SadlConstants.SADL_BASE_MODEL_URI);
+		}
+		CharSequence seq = new String(out.toByteArray(), charset);
+		return seq;
 	}
 
 	protected String getOwlFilename(URI lastSeg, String format) {

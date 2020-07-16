@@ -475,7 +475,8 @@ public class JenaReasonerPlugin extends Reasoner{
 						!format.equals(IConfigurationManager.N3_FORMAT) &&
 						!format.equals(IConfigurationManager.N_TRIPLE_FORMAT) &&
 						!format.equals(IConfigurationManager.RDF_XML_ABBREV_FORMAT) &&
-						!format.equals(IConfigurationManager.RDF_XML_FORMAT))) {
+						!format.equals(IConfigurationManager.RDF_XML_FORMAT) &&
+						!format.equals(IConfigurationManager.JSON_LD_FORMAT))) {
 			return false;
 		}
 		return true;
@@ -527,6 +528,9 @@ public class JenaReasonerPlugin extends Reasoner{
 				}
 				else if (ext.equalsIgnoreCase(".ntriple") || ext.equalsIgnoreCase(".nt")) {
 					format = "N-TRIPLE";
+				}
+				else if (ext.equalsIgnoreCase(".jsonld")) {
+					format = "JSON-LD";
 				}
 				configurationMgr.getModelGetter().setFormat(format);
 			}

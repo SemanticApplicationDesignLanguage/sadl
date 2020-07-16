@@ -90,6 +90,9 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 				else if (frmt.equals("TURTLE")) {
 					frmt = ".turtle";
 				}
+				else if (frmt.equals("JSON-LD")) {
+					frmt = ".jsonld";
+				}
 				else {
 					frmt = ".owl";
 				}

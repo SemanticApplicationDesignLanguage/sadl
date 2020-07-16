@@ -31,6 +31,7 @@ public class SadlPreferences {
 	public static final PreferenceKey RDF_XML_ABBREV_FORMAT = new PreferenceKey("RDF/XML-ABBREV", "");
 	public static final PreferenceKey N_TRIPLE_FORMAT = new PreferenceKey("N-TRIPLE", "");
 	public static final PreferenceKey N3_FORMAT = new PreferenceKey("N3", "");
+	public static final PreferenceKey JSON_LD = new PreferenceKey("JSON-LD", "");
 	public static final PreferenceKey JENA_TDB = new PreferenceKey("Jena TDB", "");
 	public static final PreferenceKey MODEL_NAMESPACES = new PreferenceKey("ns", "");
 	public static final PreferenceKey SADL_FILE_NAMES = new PreferenceKey("fn", "");
@@ -67,6 +68,7 @@ public class SadlPreferences {
 			RDF_XML_ABBREV_FORMAT,
 			N_TRIPLE_FORMAT,
 			N3_FORMAT,
+			JSON_LD,
 			JENA_TDB,
 			MODEL_NAMESPACES,
 			SADL_FILE_NAMES,

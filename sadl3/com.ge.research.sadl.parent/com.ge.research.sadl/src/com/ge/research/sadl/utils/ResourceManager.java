@@ -315,6 +315,9 @@ public class ResourceManager {
     	else if (format.equals(IConfigurationManager.N_TRIPLE_FORMAT)) {
     		return "nt";
     	}
+    	else if (format.equals(IConfigurationManager.JSON_LD_FORMAT)) {
+    		return "jsonld";
+    	}
     	else {
     		return "owl";	// reasonable default?
     	}

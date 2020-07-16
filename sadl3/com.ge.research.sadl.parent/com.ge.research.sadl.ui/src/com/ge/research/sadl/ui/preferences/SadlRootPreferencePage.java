@@ -34,6 +34,7 @@ import static com.ge.research.sadl.preferences.SadlPreferences.JENA_TDB;
 import static com.ge.research.sadl.preferences.SadlPreferences.METRICS_QUERY_FILENAME;
 import static com.ge.research.sadl.preferences.SadlPreferences.MODEL_NAMESPACES;
 import static com.ge.research.sadl.preferences.SadlPreferences.N3_FORMAT;
+import static com.ge.research.sadl.preferences.SadlPreferences.JSON_LD;
 import static com.ge.research.sadl.preferences.SadlPreferences.NAMESPACE_IN_QUERY_RESULTS;
 import static com.ge.research.sadl.preferences.SadlPreferences.N_TRIPLE_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.OWL_MODEL_FORMAT;
@@ -160,6 +161,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 					{ RDF_XML_FORMAT.getId(), RDF_XML_FORMAT.getId() },
 					{ N3_FORMAT.getId(), N3_FORMAT.getId() },
 					{ N_TRIPLE_FORMAT.getId(), N_TRIPLE_FORMAT.getId() },
+					{ JSON_LD.getId(), JSON_LD.getId() },
 					{ JENA_TDB.getId(), JENA_TDB.getId() },
 				}, generalSettings));
 		addField(new RadioGroupFieldEditorExt("importBy", "Show import model list as:", 2,
