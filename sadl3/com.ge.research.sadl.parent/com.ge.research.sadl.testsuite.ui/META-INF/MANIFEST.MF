@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Automatic-Module-Name: com.ge.research.sadl.testsuite.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.testsuite.ui
-Bundle-Vendor: My Company
-Bundle-Version: 3.3.0.qualifier
+Bundle-Vendor: General Electic Company
+Bundle-Version: 3.4.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.testsuite.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.sadl.testsuite,
