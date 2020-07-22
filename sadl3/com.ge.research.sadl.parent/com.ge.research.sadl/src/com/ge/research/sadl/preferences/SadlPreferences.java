@@ -22,17 +22,25 @@ import java.util.List;
 
 import org.eclipse.xtext.preferences.PreferenceKey;
 
+import com.ge.research.sadl.model.SadlSerializationFormat;
+
 @SuppressWarnings("restriction")
 public class SadlPreferences {
 	
 	public static final PreferenceKey SADL_BASE_URI= new PreferenceKey("baseUri", "http://sadl.org");
-	public static final PreferenceKey OWL_MODEL_FORMAT = new PreferenceKey("OWL_Format", "RDF/XML-ABBREV");
-	public static final PreferenceKey RDF_XML_FORMAT = new PreferenceKey("RDF/XML", ""); // default
-	public static final PreferenceKey RDF_XML_ABBREV_FORMAT = new PreferenceKey("RDF/XML-ABBREV", "");
-	public static final PreferenceKey N_TRIPLE_FORMAT = new PreferenceKey("N-TRIPLE", "");
-	public static final PreferenceKey N3_FORMAT = new PreferenceKey("N3", "");
-	public static final PreferenceKey JSON_LD = new PreferenceKey("JSON-LD", "");
-	public static final PreferenceKey JENA_TDB = new PreferenceKey("Jena TDB", "");
+	public static final PreferenceKey OWL_MODEL_FORMAT = new PreferenceKey("OWL_Format", "");
+	public static final PreferenceKey RDF_XML_FORMAT = new PreferenceKey(SadlSerializationFormat.RDF_XML_FORMAT, ""); // default
+	public static final PreferenceKey RDF_XML_ABBREV_FORMAT = new PreferenceKey(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, "");
+	public static final PreferenceKey N_TRIPLE_FORMAT = new PreferenceKey(SadlSerializationFormat.N_TRIPLE_FORMAT, "");
+	public static final PreferenceKey TURTLE_FORMAT = new PreferenceKey(SadlSerializationFormat.TURTLE_FORMAT, "");
+	public static final PreferenceKey JSON_LD = new PreferenceKey(SadlSerializationFormat.JSON_LD_FORMAT, "");
+	public static final PreferenceKey RDF_JSON = new PreferenceKey(SadlSerializationFormat.RDF_JSON_FORMAT, "");
+	public static final PreferenceKey TRIG = new PreferenceKey(SadlSerializationFormat.TRIG_FORMAT, "");
+	public static final PreferenceKey N_QUAD = new PreferenceKey(SadlSerializationFormat.N_QUADS_FORMAT, "");
+	public static final PreferenceKey TRIX = new PreferenceKey(SadlSerializationFormat.TRIX_FORMAT, "");
+	public static final PreferenceKey RDF_BINARY = new PreferenceKey(SadlSerializationFormat.RDF_BINARY_FORMAT, "");
+	public static final PreferenceKey JENA_TDB = new PreferenceKey(SadlSerializationFormat.JENA_TDB_FORMAT, "");
+	
 	public static final PreferenceKey MODEL_NAMESPACES = new PreferenceKey("ns", "");
 	public static final PreferenceKey SADL_FILE_NAMES = new PreferenceKey("fn", "");
 	public static final PreferenceKey PREFIXES_ONLY_AS_NEEDED = new PreferenceKey("prefixesOnlyAsNeeded", "");
@@ -67,8 +75,13 @@ public class SadlPreferences {
 			RDF_XML_FORMAT,
 			RDF_XML_ABBREV_FORMAT,
 			N_TRIPLE_FORMAT,
-			N3_FORMAT,
+			TURTLE_FORMAT,
 			JSON_LD,
+			RDF_JSON,
+			TRIG,
+			N_QUAD,
+			TRIX,
+			RDF_BINARY,
 			JENA_TDB,
 			MODEL_NAMESPACES,
 			SADL_FILE_NAMES,

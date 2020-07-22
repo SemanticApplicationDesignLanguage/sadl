@@ -259,6 +259,20 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
   			}
 		]
  	}
+ 	
+ 	@Test
+ 	def void testCommentNotOnDefinition() {
+ 		'''
+			uri "http://sadl.org/a.sadl".
+			AllThingsGood is a class.
+			AllThingsGood (note "comment") is described by age with values of type float.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			assertNotNull(issues)
+			assertTrue(issues.toString.contains("Annotations are only valid in concept definitions"))
+			
+		]
+ 	}
 	
 	@Test
 	def void testTypedList1() {

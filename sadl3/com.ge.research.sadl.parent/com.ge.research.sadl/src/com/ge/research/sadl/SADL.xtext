@@ -28,6 +28,13 @@ SadlModel :
     
 SadlAnnotation :
 	','? '(' type=('alias'|'note'|'see') contents+=STRING (',' contents+=STRING)* ')'
+//	','? '(' 
+//	(type=('alias'|'note') contents+=STRING (',' contents +=STRING)*)
+//	| ('see' 
+//		(uris+=STRING (',' uris+=STRING)*) 
+//		| (localRefs+=SadlResource (',' localRefs+=SadlResource)*)
+//		)
+//	')'
 ;
 
 SadlImport :
@@ -102,7 +109,7 @@ SadlStatement returns SadlStatement:
 				(('top-level'? 'classes' | (oftype='types'  | oftype='instances') 'of' superElement=SadlPrimaryTypeReference) describedBy+=SadlPropertyDeclarationInClass* 
 			|	{SadlDisjointClasses.types+=current} 'disjoint'
 			|	{SadlDifferentFrom.types+=current} (complement?='not')? 'the' 'same')
-    | 	{SadlProperty} AnArticle? 'relationship' 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource 
+    | 	{SadlProperty} AnArticle? ('relationship'|'Relationship') 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource 
     | 	AnArticle SadlTypeReference (
     		{SadlInstance.type=current} instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*
     	|	{SadlNecessaryAndSufficient.subject=current} 'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*)

@@ -46,6 +46,51 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.jena.datatypes.TypeMapper;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.ontology.AllValuesFromRestriction;
+import org.apache.jena.ontology.AnnotationProperty;
+import org.apache.jena.ontology.CardinalityRestriction;
+import org.apache.jena.ontology.ComplementClass;
+import org.apache.jena.ontology.DatatypeProperty;
+import org.apache.jena.ontology.EnumeratedClass;
+import org.apache.jena.ontology.HasValueRestriction;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.IntersectionClass;
+import org.apache.jena.ontology.MaxCardinalityRestriction;
+import org.apache.jena.ontology.MinCardinalityRestriction;
+import org.apache.jena.ontology.ObjectProperty;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntDocumentManager;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.ontology.OntProperty;
+import org.apache.jena.ontology.OntResource;
+import org.apache.jena.ontology.Ontology;
+import org.apache.jena.ontology.Restriction;
+import org.apache.jena.ontology.SomeValuesFromRestriction;
+import org.apache.jena.ontology.UnionClass;
+import org.apache.jena.rdf.model.HasNoModelException;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.NodeIterator;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFList;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.sparql.JenaTransactionException;
+import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.OWL2;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -96,6 +141,7 @@ import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.SadlIntersectionClass;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.SadlUnionClass;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
@@ -141,6 +187,7 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.ISadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
@@ -237,51 +284,6 @@ import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
-import org.apache.jena.datatypes.TypeMapper;
-import org.apache.jena.datatypes.xsd.XSDDatatype;
-import org.apache.jena.ontology.AllValuesFromRestriction;
-import org.apache.jena.ontology.AnnotationProperty;
-import org.apache.jena.ontology.CardinalityRestriction;
-import org.apache.jena.ontology.ComplementClass;
-import org.apache.jena.ontology.DatatypeProperty;
-import org.apache.jena.ontology.EnumeratedClass;
-import org.apache.jena.ontology.HasValueRestriction;
-import org.apache.jena.ontology.Individual;
-import org.apache.jena.ontology.IntersectionClass;
-import org.apache.jena.ontology.MaxCardinalityRestriction;
-import org.apache.jena.ontology.MinCardinalityRestriction;
-import org.apache.jena.ontology.ObjectProperty;
-import org.apache.jena.ontology.OntClass;
-import org.apache.jena.ontology.OntDocumentManager;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.ontology.OntProperty;
-import org.apache.jena.ontology.OntResource;
-import org.apache.jena.ontology.Ontology;
-import org.apache.jena.ontology.Restriction;
-import org.apache.jena.ontology.SomeValuesFromRestriction;
-import org.apache.jena.ontology.UnionClass;
-import org.apache.jena.rdf.model.HasNoModelException;
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.NodeIterator;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFList;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.RDFWriter;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.sparql.JenaTransactionException;
-import org.apache.jena.util.iterator.ExtendedIterator;
-import org.apache.jena.vocabulary.OWL;
-import org.apache.jena.vocabulary.OWL2;
-import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
-import org.apache.jena.vocabulary.XSD;
 
 public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements IJenaBasedModelProcessor {
 	public static final String THERE_EXISTS = "thereExists";
@@ -581,109 +583,86 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				e1.printStackTrace();
 			}
 
-			// // Output the OWL file for the ontology model
-			URI lastSeg = fsa.getURI(resource.getURI().lastSegment());
-			String owlFN = getOwlFilename(lastSeg, format);
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-//			boolean useRdfDataMgr;
-//			if (format.equals(IConfigurationManager.JSON_LD_FORMAT)) {
-//				useRdfDataMgr = true;
-//			}
-//			else {
-//				useRdfDataMgr = false;
-//			}
-//			if (useRdfDataMgr) {
-//				System.out.println("JSON-LD output using RDFDataMgr:");
-//				RDFDataMgr.write(System.out, getTheJenaModel().getBaseModel(), RDFFormat.JSONLD);
-//			}
-//			RDFWriter w = getTheJenaModel().getWriter(format);
-//			w.setProperty("xmlbase", getModelName());
-//			w.write(getTheJenaModel().getBaseModel(), out, getModelName());
-			Charset charset = Charset.forName("UTF-8");
-//			CharSequence seq = new String(out.toByteArray(), charset);
-			CharSequence seq = serializeModelToString(getTheJenaModel().getBaseModel(), format, charset);
-			fsa.generateFile(owlFN, seq);
-
-			// // if there are equations, output them to a Prolog file
-			// List<Equation> eqs = getEquations();
-			// if (eqs != null) {
-			// StringBuilder sb = new StringBuilder();
-			// for (int i = 0; i < eqs.size(); i++) {
-			// sb.append(eqs.get(i).toFullyQualifiedString());
-			// sb.append("\n");
-			// }
-			// fsa.generateFile(lastSeg.appendFileExtension("pl").lastSegment().toString(),
-			// sb.toString());
-			// }
-
 			try {
-				String modelFolder = getModelFolderPath(resource);
+				URI lastSeg = fsa.getURI(resource.getURI().lastSegment());
+				String owlFN = getOwlFilename(lastSeg, format);
 				SadlUtils su = new SadlUtils();
-				String fn = SadlConstants.SADL_BASE_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-				if (!fileExists(fsa, fn)) {
-					sadlBaseModel = OntModelProvider.getSadlBaseModel();
-					if (sadlBaseModel != null) {
-						CharSequence seq2 = serializeModelToString(sadlBaseModel.getBaseModel(), format, charset);
-						fsa.generateFile(fn, seq2);
-						String[] mapping = new String[3];
-						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
-						mapping[1] = SadlConstants.SADL_BASE_MODEL_URI;
-						mapping[2] = SadlConstants.SADL_BASE_MODEL_PREFIX;
-						newMappings.add(mapping);
+				String modelFolder = getModelFolderPath(resource);
+				// // Output the OWL file for the ontology model
+				if (format != null && format.equals("Jena TDB")) {
+					ISadlJenaModelGetter modgetter = getConfigMgr().getModelGetter();
+					if (modgetter == null) {
+				    	modgetter = (ISadlJenaModelGetter) new com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter(getConfigMgr(), getConfigMgr().getTdbFolder(), format);
+				    	getConfigMgr().setModelGetter(modgetter);
+						getConfigMgr().getModelGetter().setTdbFolder(getConfigMgr().getTdbFolder());
+
+					}
+					if (!(modgetter instanceof com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter)) {
+						addError("Unable to save model to Jena TDB, invalid model getter.", null);
+					}
+					else {
+						String owlFullFN = getConfigMgr().getModelFolder() + "/" + owlFN;
+						((com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter) modgetter).saveModel(getTheJenaModel().getBaseModel(), getModelNamespace(), getModelName(), owlFullFN, format);
 					}
 				}
-				fn = SadlConstants.SADL_LIST_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-				if (!fileExists(fsa, fn)) {
-					sadlListModel = OntModelProvider.getSadlListModel();
-					if (sadlListModel != null) {
-//						RDFWriter w2 = sadlListModel.getWriter(format);
-//						w2.setProperty("xmlbase", SadlConstants.SADL_LIST_MODEL_URI);
-//						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-//						w2.write(sadlListModel.getBaseModel(), out2, SadlConstants.SADL_LIST_MODEL_URI);
-//						CharSequence seq2 = new String(out2.toByteArray(), charset);
-						CharSequence seq2 = serializeModelToString(sadlListModel.getBaseModel(), format, charset);
-						fsa.generateFile(fn, seq2);
-						String[] mapping = new String[3];
-						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
-						mapping[1] = SadlConstants.SADL_LIST_MODEL_URI;
-						mapping[2] = SadlConstants.SADL_LIST_MODEL_PREFIX;
-						newMappings.add(mapping);
+				else {
+					getConfigMgr().cleanTdbFolder();
+					ByteArrayOutputStream out = new ByteArrayOutputStream();
+					Charset charset = Charset.forName("UTF-8");
+					CharSequence seq = serializeModelToString(getTheJenaModel().getBaseModel(), getModelAlias(), getModelName(), format, charset);
+					fsa.generateFile(owlFN, seq);
+	
+					String fn = SadlConstants.SADL_BASE_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
+					if (!fileExists(fsa, fn)) {
+						sadlBaseModel = OntModelProvider.getSadlBaseModel();
+						if (sadlBaseModel != null) {
+							CharSequence seq2 = serializeModelToString(sadlBaseModel.getBaseModel(), SadlConstants.SADL_BASE_MODEL_PREFIX, SadlConstants.SADL_BASE_MODEL_URI, format, charset);
+							fsa.generateFile(fn, seq2);
+							String[] mapping = new String[3];
+							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
+							mapping[1] = SadlConstants.SADL_BASE_MODEL_URI;
+							mapping[2] = SadlConstants.SADL_BASE_MODEL_PREFIX;
+							newMappings.add(mapping);
+						}
 					}
-				}
-				fn = SadlConstants.SADL_DEFAULTS_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-				if (!fileExists(fsa, fn)) {
-					sadlDefaultsModel = OntModelProvider.getSadlDefaultsModel();
-					if (sadlDefaultsModel != null) {
-//						RDFWriter w2 = sadlDefaultsModel.getWriter(format);
-//						w2.setProperty("xmlbase", SadlConstants.SADL_DEFAULTS_MODEL_URI);
-//						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-//						w2.write(sadlDefaultsModel.getBaseModel(), out2, SadlConstants.SADL_DEFAULTS_MODEL_URI);
-//						CharSequence seq2 = new String(out2.toByteArray(), charset);
-						CharSequence seq2 = serializeModelToString(sadlDefaultsModel.getBaseModel(), format, charset);
-						fsa.generateFile(fn, seq2);
-						String[] mapping = new String[3];
-						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
-						mapping[1] = SadlConstants.SADL_DEFAULTS_MODEL_URI;
-						mapping[2] = SadlConstants.SADL_DEFAULTS_MODEL_PREFIX;
-						newMappings.add(mapping);
+					fn = SadlConstants.SADL_LIST_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
+					if (!fileExists(fsa, fn)) {
+						sadlListModel = OntModelProvider.getSadlListModel();
+						if (sadlListModel != null) {
+							CharSequence seq2 = serializeModelToString(sadlListModel.getBaseModel(), SadlConstants.SADL_LIST_MODEL_PREFIX, SadlConstants.SADL_LIST_MODEL_URI, format, charset);
+							fsa.generateFile(fn, seq2);
+							String[] mapping = new String[3];
+							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
+							mapping[1] = SadlConstants.SADL_LIST_MODEL_URI;
+							mapping[2] = SadlConstants.SADL_LIST_MODEL_PREFIX;
+							newMappings.add(mapping);
+						}
 					}
-				}
-				fn = SadlConstants.SADL_SERVICES_CONFIGURATION_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-				if (!fileExists(fsa, fn)) {
-					sadlServicesConfigConceptModel = OntModelProvider.getSadlServicesConfigConceptsModel();
-					if (sadlServicesConfigConceptModel != null) {
-//						RDFWriter w2 = sadlServicesConfigConceptModel.getWriter(format);
-//						w2.setProperty("xmlbase", SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI);
-//						ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-//						w2.write(sadlServicesConfigConceptModel.getBaseModel(), out2, SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI);
-//						CharSequence seq2 = new String(out2.toByteArray(), charset);
-						CharSequence seq2 = serializeModelToString(sadlServicesConfigConceptModel.getBaseModel(), format, charset);
-						fsa.generateFile(fn, seq2);
-						String[] mapping = new String[3];
-						mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
-						mapping[1] = SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI;
-						mapping[2] = SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX;
-						newMappings.add(mapping);
+					fn = SadlConstants.SADL_DEFAULTS_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
+					if (!fileExists(fsa, fn)) {
+						sadlDefaultsModel = OntModelProvider.getSadlDefaultsModel();
+						if (sadlDefaultsModel != null) {
+							CharSequence seq2 = serializeModelToString(sadlDefaultsModel.getBaseModel(), SadlConstants.SADL_DEFAULTS_MODEL_PREFIX, SadlConstants.SADL_DEFAULTS_MODEL_URI, format, charset);
+							fsa.generateFile(fn, seq2);
+							String[] mapping = new String[3];
+							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
+							mapping[1] = SadlConstants.SADL_DEFAULTS_MODEL_URI;
+							mapping[2] = SadlConstants.SADL_DEFAULTS_MODEL_PREFIX;
+							newMappings.add(mapping);
+						}
+					}
+					fn = SadlConstants.SADL_SERVICES_CONFIGURATION_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
+					if (!fileExists(fsa, fn)) {
+						sadlServicesConfigConceptModel = OntModelProvider.getSadlServicesConfigConceptsModel();
+						if (sadlServicesConfigConceptModel != null) {
+							CharSequence seq2 = serializeModelToString(sadlServicesConfigConceptModel.getBaseModel(),SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX, SadlConstants.SADL_SERIVCES_CONFIGURATION_URI, format, charset);
+							fsa.generateFile(fn, seq2);
+							String[] mapping = new String[3];
+							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
+							mapping[1] = SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI;
+							mapping[2] = SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX;
+							newMappings.add(mapping);
+						}
 					}
 				}
 				String[] mapping = new String[3];
@@ -712,29 +691,39 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					modelErrorsToOutput(resource, results);
 				}
 			} catch (Exception e) {
-
+				System.err.println(e.getMessage());
 			}
 		}
 		generationInProgress = false;
 		logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
 	}
 
-	private CharSequence serializeModelToString(Model model, String format, Charset charset) {
+	private CharSequence serializeModelToString(Model model, String prefix, String modelName, String format, Charset charset) throws TranslationException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		if (format.equals(IConfigurationManager.JSON_LD_FORMAT)) {
-			RDFDataMgr.write(out, getTheJenaModel().getBaseModel(), RDFFormat.JSONLD);
-		}
-		else {
+		if (format.equals(SadlSerializationFormat.RDF_XML_FORMAT) || 
+				format.equals(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT)) {
 			RDFWriter w2 = model.getWriter(format);
 			w2.setProperty("xmlbase", SadlConstants.SADL_BASE_MODEL_URI);
 			w2.write(model, out, SadlConstants.SADL_BASE_MODEL_URI);
 		}
+		else {
+			getTheJenaModel().getBaseModel().setNsPrefix(prefix, modelName);
+			RDFDataMgr.write(out, getTheJenaModel().getBaseModel(), SadlSerializationFormat.getRDFFormat(format));
+		}	
+//		if (format.equals(IConfigurationManager.JSON_LD_FORMAT)) {
+//			RDFDataMgr.write(out, getTheJenaModel().getBaseModel(), RDFFormat.JSONLD);
+//		}
+//		else {
+//			RDFWriter w2 = model.getWriter(format);
+//			w2.setProperty("xmlbase", SadlConstants.SADL_BASE_MODEL_URI);
+//			w2.write(model, out, SadlConstants.SADL_BASE_MODEL_URI);
+//		}
 		CharSequence seq = new String(out.toByteArray(), charset);
 		return seq;
 	}
 
-	protected String getOwlFilename(URI lastSeg, String format) {
-		String owlFN = lastSeg.trimFileExtension().appendFileExtension(ResourceManager.getOwlFileExtension(format))
+	protected String getOwlFilename(URI lastSeg, String format) throws TranslationException {
+		String owlFN = lastSeg.trimFileExtension().appendFileExtension(SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(format)))
 				.lastSegment().toString();
 		return owlFN;
 	}
@@ -1294,7 +1283,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (!isSyntheticUri(null, resource)) {
 						// don't do metrics on JUnit tests
 						if (getMetricsProcessor() != null) {
-							getMetricsProcessor().saveMetrics(ConfigurationManager.RDF_XML_ABBREV_FORMAT);
+							getMetricsProcessor().saveMetrics(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 						}
 					}
 				}
@@ -7837,6 +7826,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	public Node processExpression(SadlResource expr) throws TranslationException {
+		checkForInvalidAnnotation(expr);
 		String nm = getDeclarationExtensions().getConcreteName(expr);
 		String ns = getDeclarationExtensions().getConceptNamespace(expr);
 		String prfx = getDeclarationExtensions().getConceptPrefix(expr);
@@ -7885,6 +7875,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return n;
 		}
 		return null;
+	}
+
+	private void checkForInvalidAnnotation(SadlResource sr) {
+		if (sr != null) {
+			EList<SadlAnnotation> anns = sr.getAnnotations();
+			if (anns != null && anns.size() > 0 && !declarationExtensions.getDeclaration(sr).equals(sr)) {
+				addError("Annotations are only valid in concept definitions", sr);
+			}
+		}
 	}
 
 	protected Object processSubjHasPropUnitExpression(SubjHasProp expr)
@@ -8768,6 +8767,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// SadlTypeAssociation, 2nd spr is a SadlCanOnlyBeOneOf)
 		SadlResource sr = sadlResourceFromSadlProperty(element);
 		String propUri = getDeclarationExtensions().getConceptUri(sr);
+		checkForInvalidAnnotation(sr);
 		OntConceptType propType;
 		try {
 			propType = getDeclarationExtensions().getOntConceptType(sr);
@@ -9981,6 +9981,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		SadlTypeReference type = element.getType();
 		boolean isList = typeRefIsList(type);
 		SadlResource sr = sadlResourceFromSadlInstance(element);
+		checkForInvalidAnnotation(sr);
 		Individual inst = null;
 		String instUri = null;
 		OntConceptType subjType = null;
@@ -12983,7 +12984,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			projectRootPath = su.fileUrlToFileName(projectRootPath);
 		}
 		final File mfFolder = new File(projectRootPath + "/" + ResourceManager.OWLDIR);
-		final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+		final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
 		String fixedModelFolderName = mfFolder.getCanonicalPath().replace("\\", "/");
 		IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory
 				.getConfigurationManagerForIDE(fixedModelFolderName, format);
@@ -13279,7 +13280,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (configMgr == null) {
 			String modelFolderPathname = getModelFolderPath(resource);
 			if (format == null) {
-				format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+				format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT; // default
 			}
 			if (isSyntheticUri(modelFolderPathname, resource)) {
 				modelFolderPathname = null;

@@ -44,11 +44,11 @@ public class TestGetModelImports {
 		}
 	}
 
-	@Ignore("https://github.com/crapo/sadlos2/issues/332")
+//	@Ignore("https://github.com/crapo/sadlos2/issues/332")
 	@Test
 	public void test() throws ConfigurationException, URISyntaxException {
-		String modelFolder = kbroot + "/TestImports/OwlModels";
-		String modelName = "M1.nt";
+		String modelFolder = kbroot + "/Shapes";
+		String modelName = "Test.owl";
 		Map<String,Map>imports = getImportHierarch(modelFolder, modelName);
 		System.out.println("Import hierarchy for '" + modelName + "'");
 		displayImportMap(imports, 1);

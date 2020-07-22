@@ -43,6 +43,7 @@ import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.model.Explanation;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.EndWrite;
 import com.ge.research.sadl.model.gp.Explain;
@@ -455,7 +456,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 
 	private String getOwlFormat() {
 		if (_repoType == null) {
-			_repoType = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+			_repoType = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
 			if (preferenceMap != null) {
 				if (preferenceMap.containsKey(SadlPreferences.OWL_MODEL_FORMAT.getId())) {
 					_repoType = preferenceMap.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
@@ -1488,7 +1489,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	protected IConfigurationManagerForIDE getConfigMgr(String format) throws ConfigurationException {
 		if (configMgr == null) {
 			if (format == null) {
-				format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+				format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT; // default
 			}
 			if ((getModelFolderPath() == null && 
 					getCurrentResource().getURI().toString().startsWith("synthetic")) ||

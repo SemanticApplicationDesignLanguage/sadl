@@ -40,6 +40,7 @@ import com.ge.research.sadl.importer.AbortDataRowException;
 import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.reasoner.AvailablePlugin.PluginType;
 import com.ge.research.sadl.reasoner.IReasoner;
@@ -179,7 +180,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 					+ File.separator + CONFIG_FILENAME;
 			// save model
 			fps = new FileOutputStream(configFilename);
-			getConfigModel().write(fps, RDF_XML_ABBREV_FORMAT);
+			getConfigModel().write(fps, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 			return true;
 		} catch (Exception e) {
 			logger.error("Failed to save ont-policy file", e);
@@ -704,10 +705,10 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	public boolean deleteModel(String publicUri) throws ConfigurationException,
 			IOException, URISyntaxException {
 		String altUrl = getAltUrlFromPublicUri(publicUri);
-		if (repoType.equals(IConfigurationManager.JENA_TDB)) {
+		if (repoType.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 			try {
 				OntModel modelToDelete = getModelGetter().getOntModel(
-						publicUri, altUrl, IConfigurationManager.JENA_TDB);
+						publicUri, altUrl, SadlSerializationFormat.JENA_TDB_FORMAT);
 				modelToDelete.removeAll();
 				getModelGetter().sync();
 			} catch (Throwable t) {
@@ -1200,7 +1201,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 			try {
 				// save model
 				fps = new FileOutputStream(configFile);
-				getConfigModel().write(fps, RDF_XML_ABBREV_FORMAT);
+				getConfigModel().write(fps, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 				setConfigChanged(false);
 				return true;
 			} catch (Exception e) {
@@ -1239,7 +1240,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 			try {
 				// save model
 				fps = new FileOutputStream(mappingFile);
-				getMappingModel().write(fps, RDF_XML_ABBREV_FORMAT);
+				getMappingModel().write(fps, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 				setMappingChanged(false);
 				logger.debug("saved mapping file '" + mappingFilename + "'");
 				return true;

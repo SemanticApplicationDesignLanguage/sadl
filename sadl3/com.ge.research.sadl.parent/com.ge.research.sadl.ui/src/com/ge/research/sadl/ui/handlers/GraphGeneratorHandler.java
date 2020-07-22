@@ -54,6 +54,7 @@ import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.Node;
@@ -134,7 +135,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			}	
 			
 			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-			final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+			final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
 			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
 
 			IGraphVisualizer visualizer = getVisualizer(configMgr, prefMap);
@@ -663,7 +664,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		if (configMgr == null || !sameProject()) {
 			//create the configuration manager
 			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-			final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+			final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
 			setConfigMgr(ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format));
 		}
 		return configMgr;

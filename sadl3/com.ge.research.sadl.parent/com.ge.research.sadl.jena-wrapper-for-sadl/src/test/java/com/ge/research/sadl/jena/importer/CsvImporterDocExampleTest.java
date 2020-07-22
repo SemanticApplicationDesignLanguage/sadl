@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import com.ge.research.sadl.importer.AbortDataRowException;
 import com.ge.research.sadl.importer.TemplateException;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
@@ -63,7 +64,7 @@ public class CsvImporterDocExampleTest {
 		imp.setModelFolder(modelPath);
 		imp.setImportFilename(dataPath, true);
 		imp.setTemplates(templatePath);
-		imp.setOwlModelFormat(IConfigurationManager.N3_FORMAT);
+		imp.setOwlModelFormat(SadlSerializationFormat.N3_FORMAT);
 		long numRowsImported = imp.processImport();
 		System.out.println("Number Triples Imported: " + numRowsImported);
 		imp.getOwlModel().write(System.out, "N3");

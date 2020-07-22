@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
@@ -118,7 +119,7 @@ public class SadlJenaModelGetterPutter extends SadlJenaModelGetter {
 	 * @throws IOException 
 	 */
 	public synchronized boolean saveModel(Model m, String modelNamespace, String publicUri, String owlFilename, String format) throws IOException {
-    	if (format.equals(IConfigurationManager.JENA_TDB)) {
+    	if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
     		if (ds == null) {
     			setTdbFolder(getTdbFolder());
     		}

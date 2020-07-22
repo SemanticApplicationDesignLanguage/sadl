@@ -36,7 +36,9 @@ import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.framework.Bundle;
 
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.google.common.base.Predicate;
 
@@ -305,22 +307,8 @@ public class ResourceManager {
 		return null;
 	}
 
-	public static String getOwlFileExtension(String format) {
-    	if (format.equals(IConfigurationManager.RDF_XML_ABBREV_FORMAT) || format.equals(IConfigurationManager.RDF_XML_FORMAT)) {
-    		return "owl";
-    	}
-    	else if (format.equals(IConfigurationManager.N3_FORMAT))	{
-    		return "n3";
-    	}
-    	else if (format.equals(IConfigurationManager.N_TRIPLE_FORMAT)) {
-    		return "nt";
-    	}
-    	else if (format.equals(IConfigurationManager.JSON_LD_FORMAT)) {
-    		return "jsonld";
-    	}
-    	else {
-    		return "owl";	// reasonable default?
-    	}
+	public static String getOwlFileExtension(String format) throws TranslationException {
+		return SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(format));
 	}
 
 //    /**

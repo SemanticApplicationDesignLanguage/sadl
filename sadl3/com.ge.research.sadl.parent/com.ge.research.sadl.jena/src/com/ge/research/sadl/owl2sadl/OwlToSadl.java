@@ -606,6 +606,7 @@ public class OwlToSadl {
 				"single",
 				"asc",
 				"sublist",
+				"Relationship",
 				"ask",
 				"Model",
 				"located",
@@ -703,7 +704,8 @@ public class OwlToSadl {
 				"PI",
 				"Deductions",
 				"time",
-				"gYearMonth");	}
+				"gYearMonth");	
+	}
 	
 	/**
 	 * Save the SADL model to the specified file

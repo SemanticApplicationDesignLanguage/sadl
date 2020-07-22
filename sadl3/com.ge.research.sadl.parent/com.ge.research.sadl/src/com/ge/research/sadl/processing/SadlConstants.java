@@ -101,4 +101,5 @@ public class SadlConstants {
 	public static final String OF_TYPE_INSTANCES = "instances";
 		
 	public static enum OWL_FLAVOR {OWL_FULL, OWL_DL, OWL_LITE};
+	
 }

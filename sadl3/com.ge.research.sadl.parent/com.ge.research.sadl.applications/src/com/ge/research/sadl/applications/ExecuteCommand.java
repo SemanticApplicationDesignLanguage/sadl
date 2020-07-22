@@ -364,7 +364,7 @@ public class ExecuteCommand implements IApplication {
                             } else if (sadlValue.replace(" ", "").toLowerCase().equals("n3")) {
                                 sadlPreferences.put(
                                         SadlPreferences.OWL_MODEL_FORMAT.getId(),
-                                        SadlPreferences.N3_FORMAT.getId());
+                                        SadlPreferences.TURTLE_FORMAT.getId());
                             } else if (sadlValue
                                     .replace(" ", "")
                                     .toLowerCase()

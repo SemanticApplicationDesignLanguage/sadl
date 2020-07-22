@@ -29,7 +29,9 @@ import org.eclipse.xtext.resource.XtextResource;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.external.ExternalEmfResource;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
@@ -65,6 +67,9 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 			// XXX: this is not used anyway!
 			String owlFileName = null;
 			boolean tryAddingOwlExtension = true;
+			String fmt = properties.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
+			final String format = fmt != null ? fmt : SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+			String ext = "." + SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(format));
 			if (path.getFileName().toString().endsWith(".sadl")) {
 				// run query on this model
 //				Resource res = prepareActionHandler(target[2]);
@@ -84,7 +89,7 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 //						output.writeToConsole(MessageType.ERROR, issue.getMessage() + "\n");
 //					}
 //				}
-				owlFileName = path.getFileName().toString().replaceFirst("[.][^.]+$", ".owl");
+				owlFileName = path.getFileName().toString().replaceFirst("[.][^.]+$", ext);
 			}
 			else if (path.getFileName().toString().endsWith(".owl")) {
 				// run query on this model
@@ -96,7 +101,6 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 				owlFileName = path.getFileName().toString().concat(".owl");
 			}
 			String modelFolderUri = getOwlModelsFolderPath(path).toString(); 
-			final String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
 			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
 			new SadlUtils();
 			query = SadlUtils.stripQuotes(query);

@@ -62,6 +62,7 @@ import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin.TranslationTarget;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.ImportMapping;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -95,6 +96,7 @@ import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
@@ -365,7 +367,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (!validateFormat(format)) {
 				throw new ConfigurationException("Format '" + format + "' is not supported by reasoner '" + getConfigurationCategory() + "'.");
 			}
-			if (format.equals(IConfigurationManager.JENA_TDB)) {
+			if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 				schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);	
 				schemaModel.getDocumentManager().setProcessImports(true);
 				schemaModel.loadImports();
@@ -470,16 +472,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 
 	private boolean validateFormat(String format) {
-		if (format == null ||
-				(!format.equals(IConfigurationManager.JENA_TDB) &&
-						!format.equals(IConfigurationManager.N3_FORMAT) &&
-						!format.equals(IConfigurationManager.N_TRIPLE_FORMAT) &&
-						!format.equals(IConfigurationManager.RDF_XML_ABBREV_FORMAT) &&
-						!format.equals(IConfigurationManager.RDF_XML_FORMAT) &&
-						!format.equals(IConfigurationManager.JSON_LD_FORMAT))) {
-			return false;
-		}
-		return true;
+		return SadlSerializationFormat.validateSadlFormat(format);
 	}
 
 	public int initializeReasoner(String folderName, String _modelName, 
@@ -520,9 +513,9 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 			format = configurationMgr.getModelGetter().getFormat();
 			if (repoType == null) repoType = format;	
-			if (!format.equals(IConfigurationManager.JENA_TDB)) {
+			if (!format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 				String ext = tbox.substring(tbox.lastIndexOf('.'));
-				format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;	// this will create a reader that will handle either RDF/XML or RDF/XML-ABBREV 
+				format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	// this will create a reader that will handle either RDF/XML or RDF/XML-ABBREV 
 				if (ext.equalsIgnoreCase(".n3")) {
 					format = "N3";
 				}
@@ -2782,7 +2775,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			else {
 				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), infModel);
 			}
-			String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;	
+			String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	
 		    FileOutputStream fps = new FileOutputStream(filename);
 	        RDFWriter rdfw = m.getWriter(format);
 	        rdfw.write(m, fps, modelname);
@@ -3431,11 +3424,9 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 	public void setOutputFormat(String outputFmt) {
-		if (outputFmt != null &&
-				(outputFmt.equals(IConfigurationManager.N3_FORMAT) ||
-						outputFmt.equals(IConfigurationManager.N_TRIPLE_FORMAT) ||
-						outputFmt.equals(IConfigurationManager.RDF_XML_ABBREV_FORMAT) ||
-						outputFmt.equals(IConfigurationManager.RDF_XML_FORMAT))) {
+		if (outputFmt != null && 
+				(outputFmt.equals(SadlSerializationFormat.JENA_TDB_FORMAT) ||
+				SadlSerializationFormat.validateSadlFormat(outputFmt))) {
 			this.outputFormat = outputFmt;
 		}
 	}

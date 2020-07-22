@@ -59,21 +59,6 @@ public interface IConfigurationManager {
 	
 	public static final String dummyModelFolderPath = "http://sadl.org";
 
-
-	
-	/*
-	 * From the Jena OntModel.java file:
-	 * <p>The language in which to write the model is specified by the
-	 * <code>lang</code> argument.  Predefined values are "RDF/XML",
-	 * "RDF/XML-ABBREV", "N-TRIPLE" and "N3".  The default value,
-	 * represented by <code>null</code> is "RDF/XML".</p>
-	 */
-	public static final String RDF_XML_FORMAT = "RDF/XML"; // default
-	public static final String RDF_XML_ABBREV_FORMAT = "RDF/XML-ABBREV";
-	public static final String N_TRIPLE_FORMAT = "N-TRIPLE";
-	public static final String N3_FORMAT = "N3";
-	public static final String JSON_LD_FORMAT = "JSON-LD";
-	public static final String JENA_TDB = "Jena TDB";
 //	public static final String OWL_Func_SWRL = "OWL Functional with SWRL";
 	
 	public final boolean inferenceCanceled = false;

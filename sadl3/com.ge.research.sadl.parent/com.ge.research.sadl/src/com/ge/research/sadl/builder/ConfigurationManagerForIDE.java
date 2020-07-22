@@ -51,6 +51,7 @@ import org.eclipse.xtext.util.StringInputStream;
 import com.ge.research.sadl.external.XMLHelper;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -446,11 +447,11 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	public static String getOWLFormat() {
 		IPreferencesService service = Platform.isRunning() ? Platform.getPreferencesService() : null;
 		if (service != null) {
-			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManager.RDF_XML_ABBREV_FORMAT, null);
+			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, null);
 			return format;
 		}
 		else {
-			return ConfigurationManager.RDF_XML_ABBREV_FORMAT;
+			return SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
 		}
 	}
 
@@ -796,10 +797,10 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), repoType);
 		    setModelGetter(modelGetter);
 		}
-		if (repoType != null && repoType.equals(IConfigurationManager.JENA_TDB)) {
+		if (repoType != null && repoType.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 			try {
 				theModel = getModelGetter().getOntModel(publicUri, altUrl,
-						IConfigurationManager.JENA_TDB);
+						SadlSerializationFormat.JENA_TDB_FORMAT);
 			} catch (Throwable t) {
 				// ok to fail; may not exist
 			}
@@ -1057,12 +1058,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	}
 
 	private String getOwlFormatFromFile(String owlFilename) {
-		if (owlFilename.endsWith(".owl")) return "RDF/XML";
-		if (owlFilename.endsWith(".nt")) return "N-TRIPLE";
-		if (owlFilename.endsWith(".turtle")) return "TURTLE";
-		if (owlFilename.endsWith(".ttl")) return "TURTLE";
-		if (owlFilename.endsWith(".n3")) return "N3";
-		return "RDF/XML";
+		return SadlSerializationFormat.getSadlSerializationFormatFromFilename(owlFilename);
 	}
 	
 	public void addPrivateKeyValuePair(String key, Object value) {
@@ -1165,6 +1161,36 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		} catch (URISyntaxException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		}
+	}
+
+	@Override
+	public boolean cleanTdbFolder() {
+		String tdbfolder;
+		try {
+			tdbfolder = getTdbFolder();
+			File tdbf = new File(tdbfolder);
+			if (tdbf.exists()) {
+				cleanContents(tdbf);
+				tdbf.delete();
+			}
+			return true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	private void cleanContents(File dir) {
+		File[] contents = dir.listFiles();
+		if (contents != null) {
+			for (File c : contents) {
+				if (c.isDirectory()) {
+					cleanContents(c);
+				}
+				c.delete();
+			}
 		}
 	}
 

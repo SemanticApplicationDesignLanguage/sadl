@@ -57,39 +57,9 @@ import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.activation.URLDataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import au.com.bytecode.opencsv.CSVParser;
-import au.com.bytecode.opencsv.CSVReader;
-
-import com.ge.research.sadl.importer.AbortDataRowException;
-import com.ge.research.sadl.importer.ITabularDataImporter;
-import com.ge.research.sadl.importer.SkipGroupException;
-import com.ge.research.sadl.importer.SkipTripleException;
-import com.ge.research.sadl.importer.TemplateException;
-import com.ge.research.sadl.model.ConceptName;
-import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.reasoner.CircularDependencyException;
-import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
-import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
-import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
-import com.ge.research.sadl.reasoner.IReasoner;
-import com.ge.research.sadl.reasoner.InvalidNameException;
-import com.ge.research.sadl.reasoner.QueryCancelledException;
-import com.ge.research.sadl.reasoner.QueryParseException;
-import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
-import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
-import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.reasoner.utils.StringDataSource;
 import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
 import org.apache.jena.ontology.Ontology;
@@ -112,6 +82,36 @@ import org.apache.jena.vocabulary.OWL2;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ge.research.sadl.importer.AbortDataRowException;
+import com.ge.research.sadl.importer.ITabularDataImporter;
+import com.ge.research.sadl.importer.SkipGroupException;
+import com.ge.research.sadl.importer.SkipTripleException;
+import com.ge.research.sadl.importer.TemplateException;
+import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.reasoner.CircularDependencyException;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
+import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.QueryCancelledException;
+import com.ge.research.sadl.reasoner.QueryParseException;
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
+import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
+import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.reasoner.utils.StringDataSource;
+
+import au.com.bytecode.opencsv.CSVParser;
+import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * This class converts a CSV file to an OWL model.
@@ -146,7 +146,7 @@ public class CsvImporter implements ITabularDataImporter {
 	private GroupOfTriples activeGroup = null;
 	private Map<String, Object> varMap = null;
 
-	private String owlModelFormat = IConfigurationManager.RDF_XML_ABBREV_FORMAT;	// default format
+	private String owlModelFormat = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	// default format
 	private OntModel models[];					// an array to hold the collection of models which may be used. 
 	// this array should be sized to the value in "numThreads"
 	private Dataset tdbDS = null;				// the TDB repository to which the import is adding triples
@@ -707,7 +707,7 @@ public class CsvImporter implements ITabularDataImporter {
 			}
 			
 			int iStatus = reasoner.initializeReasoner(modelFolderName,
-					(importer.imports != null && importer.imports.length > 0) ? importer.imports[0] : null, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+					(importer.imports != null && importer.imports.length > 0) ? importer.imports[0] : null, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 			if (iStatus == 0) {
 				logger.error("Reasoner initialization returned failure status 0.");
 			}
@@ -945,7 +945,7 @@ public class CsvImporter implements ITabularDataImporter {
 	 */
 	@Override
 	public String getSaveAsFileName() throws ConfigurationException {
-		if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
+		if (owlModelFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 			if (saveAsFileName == null || saveAsFileName.startsWith(HTTP_URI_SCHEME)) {
 				if (importModelNS == null) {
 					throw new ConfigurationException("Either the 'saveAsFileName' or the 'importModelNS' must be set; neither are.");
@@ -1031,7 +1031,7 @@ public class CsvImporter implements ITabularDataImporter {
 			}
 			Resource importedOntology = getModel(arraypos).createResource(publicUri);
 			getModel(arraypos).getOntology(importModelNS).addImport(importedOntology);
-			if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
+			if (owlModelFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 				getModel(arraypos).add(getImportModel());
 			}
 			else {
@@ -1626,7 +1626,7 @@ public class CsvImporter implements ITabularDataImporter {
 				try {
 					infer = true;
 					// inferred model only go to TDB for now
-					setOwlModelFormat(IConfigurationManager.JENA_TDB);
+					setOwlModelFormat(SadlSerializationFormat.JENA_TDB_FORMAT);
 					String[] tokens = line.split("\\s+");
 					for (int i = 1; i < tokens.length; i+=2) {
 						String token = tokens[i];
@@ -1985,7 +1985,7 @@ public class CsvImporter implements ITabularDataImporter {
 			else {
 				String currentMapping = getConfigMgr().getAltUrlFromPublicUri(importModelNS);
 				if ( currentMapping == null || !currentMapping.equals(actualUrl)) {
-					ConfigurationManagerForEditing cfmfe = new ConfigurationManagerForEditing(modelFolderName, IConfigurationManager.JENA_TDB);
+					ConfigurationManagerForEditing cfmfe = new ConfigurationManagerForEditing(modelFolderName, SadlSerializationFormat.JENA_TDB_FORMAT);
 					cfmfe.addMapping(getSadlUtils().fileNameToFileUrl(actualUrl), publicUri, prefix, false, CSV_IMPORTER);
 //					cfmfe.saveOntPolicyFile();
 				}
@@ -2022,7 +2022,7 @@ public class CsvImporter implements ITabularDataImporter {
 			throw new IOException("Import failed: " + e.getMessage(), e);
 		}
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
+		if (owlModelFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 			Model m = getModelFromTdbDS();
 			m.write(out, format);
 		}
@@ -2052,7 +2052,7 @@ public class CsvImporter implements ITabularDataImporter {
 		} catch (QueryCancelledException e) {
 			throw new IOException("Import failed: " + e.getMessage(), e);
 		}
-		if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
+		if (owlModelFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 			Model m = getModelFromTdbDS();
 			return ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);			
 		}
@@ -2061,19 +2061,13 @@ public class CsvImporter implements ITabularDataImporter {
 		}
 	}
 
-	private String validateFormat(String format) throws IOException {
-		if (format != null) {
-			if (format.equals("RDF/XML") ||
-					format.equals("RDF/XML-ABBREV") ||
-					format.equals("N-TRIPLE") ||
-					format.equals("N3")) {
-				return format;
-			}
+	private String validateFormat(String format) {
+		if (SadlSerializationFormat.validateSadlFormat(format)) {
+			return format;
 		}
 		else {
 			return "RDF/XML-ABBREV";
 		}
-		throw new IOException("'" + format + "' is not a valid OWL serialization format.");
 	}
 
 	private boolean doImport(InputStreamReader isReader) throws ConfigurationException, IOException, InvalidNameException, AbortDataRowException, QueryCancelledException, ReasonerNotFoundException {
@@ -2219,7 +2213,7 @@ public class CsvImporter implements ITabularDataImporter {
 					triplesLoggerOut.flush();
 					triplesLoggerOut.close();
 				}
-				if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
+				if (owlModelFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 					closeTdbDS();
 				}
 				if (reader != null) {
@@ -3208,7 +3202,7 @@ public class CsvImporter implements ITabularDataImporter {
 		// hopefully, this will allow me to use multiple threads which each have their own associated model.
 		if (models[arraypos] == null) {
 			models[arraypos] = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null));
-			if (owlModelFormat.equals(IConfigurationManager.JENA_TDB)) {
+			if (owlModelFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 				if (getTdbDS(false) == null) {
 					tdbFolder = getSaveAsFileName();
 					File f = new File(tdbFolder);
@@ -3253,7 +3247,7 @@ public class CsvImporter implements ITabularDataImporter {
 			}
 			if (modelFolderName.startsWith(HTTP_URI_SCHEME)) {
 				//				configMgr = new ConfigurationManager(modelFolderName);
-				configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderName, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+				configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderName, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 			}
 			// TODO resolve code removal
 			else {
@@ -3264,10 +3258,10 @@ public class CsvImporter implements ITabularDataImporter {
 					fname = getSadlUtils().fileUrlToFileName(tdbFolder);
 					File tdbFile = new File(fname);
 					if (tdbFile.exists()) {
-						repoType = IConfigurationManager.JENA_TDB;	
+						repoType = SadlSerializationFormat.JENA_TDB_FORMAT;	
 					}
 					else {
-						repoType = IConfigurationManager.RDF_XML_ABBREV_FORMAT;
+						repoType = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
 					}
 					configMgr = new ConfigurationManager(modelFolderName, repoType);
 					SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configMgr, configMgr.getTdbFolder(), repoType);
@@ -3342,14 +3336,7 @@ public class CsvImporter implements ITabularDataImporter {
 	 */
 	@Override
 	public void setOwlModelFormat(String owlModelFormat) throws InvalidNameException {
-		if (owlModelFormat == null) {
-			throw new InvalidNameException("Invalid OWL model format: " + owlModelFormat);
-		}
-		if (!owlModelFormat.equals(IConfigurationManager.JENA_TDB) &&
-				!owlModelFormat.equals(IConfigurationManager.N3_FORMAT) &&
-				!owlModelFormat.equals(IConfigurationManager.N_TRIPLE_FORMAT) &&
-				!owlModelFormat.equals(IConfigurationManager.RDF_XML_ABBREV_FORMAT) &&
-				!owlModelFormat.equals(IConfigurationManager.RDF_XML_FORMAT)) {
+		if (!SadlSerializationFormat.validateSadlFormat(owlModelFormat)) {
 			throw new InvalidNameException("Invalid OWL model format: " + owlModelFormat);
 		}
 		this.owlModelFormat = owlModelFormat;
@@ -3478,7 +3465,7 @@ public class CsvImporter implements ITabularDataImporter {
 								}
 							}
 							if (owlmodelFormatUsed
-									.equals(IConfigurationManager.JENA_TDB)) {
+									.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 								reas.loadInstanceData(mod);
 								Object imo = reas.getInferredModel(false);
 								if (!(imo instanceof Model)) {
@@ -3511,7 +3498,7 @@ public class CsvImporter implements ITabularDataImporter {
 				}
 				else {
 					//System.out.println("inference turned off for thread " + this.modelpos);
-					if (owlmodelFormatUsed.equals(IConfigurationManager.JENA_TDB)) {
+					if (owlmodelFormatUsed.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 						addModelToTdbDS(mod);
 						clearModel(modelpos);
 						prepareNewModel(modelpos);

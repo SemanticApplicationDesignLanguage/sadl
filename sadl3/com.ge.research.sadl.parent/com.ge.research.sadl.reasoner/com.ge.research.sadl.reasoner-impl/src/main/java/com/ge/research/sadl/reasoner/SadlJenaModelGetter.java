@@ -33,6 +33,7 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
@@ -70,11 +71,11 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     	configurationManager = configMgr;
     	File tdbFile = _tdbFolder != null ? new File(_tdbFolder) : null;
     	if (tdbFile != null && tdbFile.exists()) {
-    		setFormat(IConfigurationManager.JENA_TDB);	// if the caller doesn't tell us the format
+    		setFormat(SadlSerializationFormat.JENA_TDB_FORMAT);	// if the caller doesn't tell us the format
     													// and the TDB folder exists, use it
     	}
     	else {
-    		setFormat(IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+    		setFormat(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
     	}
     	setTdbFolder(_tdbFolder);
      	if (originalModelGetter == null) {
@@ -185,7 +186,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     		// this is a special case--it is always left as an OWL file in RDF/XML format
     		addToTDB = false;
     	}
-    	else if (getFormat().equals(IConfigurationManager.JENA_TDB)) {
+    	else if (getFormat().equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
     		// try TDB first
     		m = getModel(uri);
     	}
@@ -206,7 +207,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
             else {
                 m = ModelFactory.createDefaultModel();
 	            loadIfAbsent.readModel( m, altUrl != null ? altUrl : uri );
-	            if (addToTDB && ds != null && getFormat().equals(IConfigurationManager.JENA_TDB)) {
+	            if (addToTDB && ds != null && getFormat().equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 	            	ds.begin(ReadWrite.WRITE);
 	            	ds.addNamedModel( uri, m );
 	            	ds.commit();
@@ -267,7 +268,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     			ds = TDBFactory.createDataset( _tdbFolder );
     		}
     	}
-    	else if (getFormat().equals(IConfigurationManager.JENA_TDB)){
+    	else if (getFormat().equals(SadlSerializationFormat.JENA_TDB_FORMAT)){
 			ds = TDBFactory.createDataset( _tdbFolder );
     	}
 		tdbFolder = _tdbFolder;

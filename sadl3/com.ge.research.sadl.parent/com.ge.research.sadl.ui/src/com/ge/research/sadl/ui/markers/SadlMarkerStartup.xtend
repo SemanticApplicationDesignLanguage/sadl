@@ -54,6 +54,7 @@ import static com.ge.research.sadl.reasoner.IConfigurationManager.*
 import org.eclipse.core.runtime.IPath
 import com.ge.research.sadl.sADL.SadlModel
 import org.eclipse.emf.ecore.util.EcoreUtil
+import com.ge.research.sadl.model.SadlSerializationFormat
 
 /**
  * Contribution that registers a resource change listener for tracking all the {@code .err} 
@@ -197,7 +198,7 @@ class SadlMarkerStartup implements IStartup {
 
 	private def getConfigurationManager(IProject it) {
 		val modelFolder = '''«Paths.get(locationURI).resolve(OWL_MODELS_FOLDER_NAME)»''';
-		return ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, RDF_XML_FORMAT);
+		return ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, SadlSerializationFormat.RDF_XML_FORMAT);
 	}
 
 	private def getResourceUri(String modelUri, IProject project) {

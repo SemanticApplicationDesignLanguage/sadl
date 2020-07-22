@@ -444,11 +444,22 @@ class SADLParsingTest extends AbstractSADLParsingTest {
 			 George is a Person with age 23, with height 70, with weight 165.	
 			 
 			 Mary is a Person with weight PI.
-			// Emily is a Person with weight e .		// why does this statement fail?
+			 Emily is a Person with weight e .
 			 
 			 Rule DumbRule:
 			 	if p is a Person
 			 	then weight of p is age of p * PI * e^3.
+		'''.assertNoErrors
+	}
+	
+	@Test
+	def void testRelationship() {
+		'''
+			 uri "http://sadl.org/relationships.sadl" alias relationships.
+			 
+			 Person is a class.
+			 relationship of Person to Person is friend.
+			 Relationship of Person to Person is spouse.
 		'''.assertNoErrors
 	}
 	

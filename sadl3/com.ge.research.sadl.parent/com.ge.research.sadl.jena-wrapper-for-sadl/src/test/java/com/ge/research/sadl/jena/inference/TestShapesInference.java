@@ -7,6 +7,7 @@ import java.net.URL;
 
 import org.junit.Test;
 
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -29,7 +30,7 @@ public class TestShapesInference {
 		IReasoner reasoner = configmgr.getReasoner();
 		if (!reasoner.isInitialized()) {
 			reasoner.setConfigurationManager(configmgr);
-			reasoner.initializeReasoner(kbid, modelName, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+			reasoner.initializeReasoner(kbid, modelName, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 		}
 		String query = reasoner.prepareQuery("select ?s ?p ?v where {?s <rdf:type> <Shape> . ?s ?p ?v}");
 		ResultSet rs = reasoner.ask(query);

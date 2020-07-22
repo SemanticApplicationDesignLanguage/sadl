@@ -36,6 +36,7 @@ import org.eclipse.xtext.resource.XtextSyntaxDiagnostic;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.OntConceptType;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -88,7 +89,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	public abstract Object processExpression(EObject expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 	public static String getOwlModelFormat(ProcessorContext context) {
-		String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT; // default
+		String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT; // default
 		if (context != null) {
 			String pv = context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT);
 			if (pv != null && pv.length() > 0) {

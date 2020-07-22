@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.ModelError;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.Equation;
@@ -1713,7 +1714,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		if (!reasoner.isInitialized()) {
 			reasoner.setConfigurationManager(configurationMgr);
 			int iStatus = reasoner.initializeReasoner(
-					getTranslationFolder(), modelName, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+					getTranslationFolder(), modelName, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 		}
 		return reasoner;
 	}

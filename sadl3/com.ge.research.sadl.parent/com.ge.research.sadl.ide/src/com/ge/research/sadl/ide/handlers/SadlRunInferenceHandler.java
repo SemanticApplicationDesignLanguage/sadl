@@ -41,6 +41,7 @@ import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.jena.importer.CsvImporter;
 import com.ge.research.sadl.model.Explanation;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.EndWrite;
 import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -132,7 +133,7 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 						String modelFolderPath = getOwlModelsFolderPath(path).toString();
 						String owlModelPath = modelFolderPath + "/" + path.getFileName().toString().replaceFirst("[.][^.]+$", frmt);
 						if (configMgr == null) {
-							configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderPath, IConfigurationManager.RDF_XML_ABBREV_FORMAT);
+							configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderPath, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 						}
 						String actualUrl = new SadlUtils().fileUrlToFileName(configMgr.getAltUrlFromPublicUri(SadlUtils.stripQuotes(testfile)));
 						File actualFile = new File(actualUrl);

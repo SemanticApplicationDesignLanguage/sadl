@@ -37,6 +37,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import com.ge.research.sadl.model.SadlSerializationFormat
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -520,7 +521,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 				found = true;
 			}
 //			if (!found) {
-				jenaModel.write(System.out, ConfigurationManager.RDF_XML_ABBREV_FORMAT)
+				jenaModel.write(System.out, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT)
 //			}
 			assertTrue(found);
 		]

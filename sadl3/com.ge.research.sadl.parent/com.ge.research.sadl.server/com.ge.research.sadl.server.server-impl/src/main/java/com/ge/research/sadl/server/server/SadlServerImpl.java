@@ -61,6 +61,7 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.jena.importer.CsvImporter;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
@@ -355,11 +356,11 @@ public class SadlServerImpl implements ISadlServer {
     	File tdbFile = new File(fname);
     	if (tdbFile.exists()) {
     		logger.debug("Repo type set to TDB as the folder '" + fname + "' exists.");
-    		return IConfigurationManager.JENA_TDB;	
+    		return SadlSerializationFormat.JENA_TDB_FORMAT;	
     	}
     	else {
     		logger.debug("Repo type set to RDF/XML ABBREV as folder '" + tdbFolder + "' does not exist.");
-    		return IConfigurationManager.RDF_XML_ABBREV_FORMAT;
+    		return SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
     	}
 	}
 	

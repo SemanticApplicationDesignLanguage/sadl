@@ -19,10 +19,7 @@
 package com.ge.research.sadl.jena.inference;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -31,15 +28,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import org.apache.jena.datatypes.TypeMapper;
-import org.apache.jena.datatypes.xsd.XSDDatatype;
-import org.apache.jena.ontology.OntDocumentManager;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.Dataset;
@@ -51,6 +39,13 @@ import org.apache.jena.rdf.model.ModelReader;
 import org.apache.jena.tdb.TDB;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.vocabulary.OWL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 /**
  * This class can be registered with the Jena OntModelSpec to provide loading
@@ -68,19 +63,6 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     private boolean addMissingModelToTDB = false;
     
     private IConfigurationManager configurationManager = null;
-
-    /*
-	 * From the Jena OntModel.java file:
-	 * <p>The language in which to write the model is specified by the
-	 * <code>lang</code> argument.  Predefined values are "RDF/XML",
-	 * "RDF/XML-ABBREV", "N-TRIPLE" and "N3".  The default value,
-	 * represented by <code>null</code> is "RDF/XML".</p>
-	 */
-	public static final String RDF_XML_FORMAT = "RDF/XML"; // default
-	public static final String RDF_XML_ABBREV_FORMAT = "RDF/XML-ABBREV";
-	public static final String N_TRIPLE_FORMAT = "N-TRIPLE";
-	public static final String N3_FORMAT = "N3";
-	public static final String JENA_TDB = "Jena TDB";
 	
 	public static final String ServicesConfigurationURI = "http://com.ge.research.sadl/sadlserver/Services";
 
@@ -100,11 +82,11 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     	modelSpec = spec;
     	File tdbFile = new File(getTdbFolder());
     	if (tdbFile.exists()) {
-    		setFormat(JENA_TDB);	// if the caller doesn't tell us the format
+    		setFormat(SadlSerializationFormat.JENA_TDB_FORMAT);	// if the caller doesn't tell us the format
     													// and the TDB folder exists, use it
     	}
     	else {
-    		setFormat(RDF_XML_ABBREV_FORMAT);
+    		setFormat(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
     	}
      	if (originalModelGetter == null) {
     		// save original (file-based) importModelGetter
@@ -214,7 +196,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     		// this is a special case--it is always left as an OWL file in RDF/XML format
     		addToTDB = false;
     	}
-    	else if (getFormat().equals(JENA_TDB)) {
+    	else if (getFormat().equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
     		// try TDB first
     		m = getModel(uri);
     	}
@@ -235,7 +217,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
             else {
                 m = ModelFactory.createDefaultModel();
 	            loadIfAbsent.readModel( m, altUrl != null ? altUrl : uri );
-	            if (addToTDB && ds != null && getFormat().equals(JENA_TDB)) {
+	            if (addToTDB && ds != null && getFormat().equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 	            	ds.begin(ReadWrite.WRITE);
 	            	ds.addNamedModel( uri, m );
 	            	ds.commit();
@@ -301,7 +283,7 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     			ds = TDBFactory.createDataset( _tdbFolder );
     		}
     	}
-    	else if (getFormat().equals(JENA_TDB)){
+    	else if (getFormat().equals(SadlSerializationFormat.JENA_TDB_FORMAT)){
 			ds = TDBFactory.createDataset( _tdbFolder );
     	}
 		tdbFolder = _tdbFolder;

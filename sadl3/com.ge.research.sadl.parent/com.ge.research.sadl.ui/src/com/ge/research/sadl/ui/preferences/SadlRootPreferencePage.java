@@ -33,8 +33,13 @@ import static com.ge.research.sadl.preferences.SadlPreferences.IGNORE_UNITTEDQUA
 import static com.ge.research.sadl.preferences.SadlPreferences.JENA_TDB;
 import static com.ge.research.sadl.preferences.SadlPreferences.METRICS_QUERY_FILENAME;
 import static com.ge.research.sadl.preferences.SadlPreferences.MODEL_NAMESPACES;
-import static com.ge.research.sadl.preferences.SadlPreferences.N3_FORMAT;
+import static com.ge.research.sadl.preferences.SadlPreferences.TURTLE_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.JSON_LD;
+import static com.ge.research.sadl.preferences.SadlPreferences.RDF_JSON;
+import static com.ge.research.sadl.preferences.SadlPreferences.TRIG;
+import static com.ge.research.sadl.preferences.SadlPreferences.N_QUAD;
+import static com.ge.research.sadl.preferences.SadlPreferences.TRIX;
+import static com.ge.research.sadl.preferences.SadlPreferences.RDF_BINARY;
 import static com.ge.research.sadl.preferences.SadlPreferences.NAMESPACE_IN_QUERY_RESULTS;
 import static com.ge.research.sadl.preferences.SadlPreferences.N_TRIPLE_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.OWL_MODEL_FORMAT;
@@ -67,6 +72,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
@@ -159,9 +165,14 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 				new String[][] {
 					{ RDF_XML_ABBREV_FORMAT.getId(), RDF_XML_ABBREV_FORMAT.getId() },
 					{ RDF_XML_FORMAT.getId(), RDF_XML_FORMAT.getId() },
-					{ N3_FORMAT.getId(), N3_FORMAT.getId() },
+					{ TURTLE_FORMAT.getId(), TURTLE_FORMAT.getId() },
 					{ N_TRIPLE_FORMAT.getId(), N_TRIPLE_FORMAT.getId() },
 					{ JSON_LD.getId(), JSON_LD.getId() },
+					{ RDF_JSON.getId(), RDF_JSON.getId() },
+					{ TRIG.getId(), TRIG.getId() },
+					{ N_QUAD.getId(), N_QUAD.getId() },
+					{ TRIX.getId(), TRIX.getId() },
+//					{ RDF_BINARY.getId(), RDF_BINARY.getId() },		// AWC 7/22/2020: This isn't working. Posted question on Jena users mailing list
 					{ JENA_TDB.getId(), JENA_TDB.getId() },
 				}, generalSettings));
 		addField(new RadioGroupFieldEditorExt("importBy", "Show import model list as:", 2,
@@ -256,7 +267,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		if (retVal && isPropertyPage()) {
 			// the changes apply only to the current project
 			IPreferencesService service = Platform.getPreferencesService();
-			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManager.RDF_XML_ABBREV_FORMAT, null);
+			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, null);
 //			if (visitor.getCurrentResource() != null) {
 //				try {
 //					String curResource = ResourceManager.getOwlModelsFolder(visitor.getCurrentResource().getURI());
@@ -298,7 +309,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		else {
 			// the changes apply to all projects
 			IPreferencesService service = Platform.getPreferencesService();
-			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", ConfigurationManager.RDF_XML_ABBREV_FORMAT, null);
+			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, null);
 			String dmyOrder = service.getString("com.ge.research.sadl.Sadl", "dmyOrder", "mdy", null);
 			String[] itemContent = new String[1];
 			itemContent[0] = IConfigurationManager.DateFormat;

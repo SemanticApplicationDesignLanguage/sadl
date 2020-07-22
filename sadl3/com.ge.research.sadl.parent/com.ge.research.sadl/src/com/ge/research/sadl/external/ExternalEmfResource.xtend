@@ -19,12 +19,17 @@ package com.ge.research.sadl.external
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE
 import com.ge.research.sadl.model.OntConceptType
+import com.ge.research.sadl.model.SadlSerializationFormat
 import com.ge.research.sadl.reasoner.ConfigurationManager
 import com.ge.research.sadl.sADL.SADLFactory
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.utils.ResourceManager
 import com.google.inject.Inject
 import com.google.inject.Injector
+import java.io.IOException
+import java.io.InputStream
+import java.util.Collection
+import java.util.Map
 import org.apache.jena.ontology.AnnotationProperty
 import org.apache.jena.ontology.DatatypeProperty
 import org.apache.jena.ontology.Individual
@@ -40,10 +45,6 @@ import org.apache.jena.util.iterator.ExtendedIterator
 import org.apache.jena.vocabulary.OWL
 import org.apache.jena.vocabulary.RDF
 import org.apache.jena.vocabulary.RDFS
-import java.io.IOException
-import java.io.InputStream
-import java.util.Collection
-import java.util.Map
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl
@@ -112,11 +113,11 @@ class ExternalEmfResource extends ResourceImpl {
 	 */
 	protected def getConfigurationManager(Map<?, ?> options) {
 		if (ResourceManager.isSyntheticUri(null, URI)) {
-			return getConfigurationManagerForIDE(null, ConfigurationManager.RDF_XML_ABBREV_FORMAT, true);
+			return getConfigurationManagerForIDE(null, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, true);
 		}
 		val modelFolderUri = getModelFolderUri(URI, options);
 		val modelFolderPath = ResourceManager.toAbsoluteFilePath(modelFolderUri);
-		return getConfigurationManagerForIDE(modelFolderPath, ConfigurationManager.RDF_XML_ABBREV_FORMAT);
+		return getConfigurationManagerForIDE(modelFolderPath, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 	}
 
 	/**
@@ -142,7 +143,7 @@ class ExternalEmfResource extends ResourceImpl {
 		val baseUri = model.getNsPrefixURI('');
 		if (baseUri === null) {
 			val fileExtension = fileExtension;
-			return if (fileExtension == 'n3' || fileExtension == 'nt') {
+			return if (fileExtension == 'n3' || fileExtension == 'ttl' || fileExtension == 'nt') {
 				model.listOntologies.head?.URI
 			} else {
 				new XMLHelper().tryReadBaseUri(content).orNull
@@ -225,13 +226,7 @@ class ExternalEmfResource extends ResourceImpl {
 
 	// TODO: duplicate of com.ge.research.sadl.builder.ConfigurationManagerForIDE.getOwlFormatFromFile(String)
 	private def getSerializationLanguage() {
-		return switch URI.fileExtension {
-			case 'owl': 'RDF/XML'
-			case 'nt': 'N-TRIPLE'
-			case 'turtle': 'TURTLE'
-			case 'n3': 'N3'
-			default: 'RDF/XML'
-		};
+		return SadlSerializationFormat.getSadlSerializationFormatFromFilename(URI.path);
 	}
 
 	// TODO this does not belong to here. Should go to a utility class.
@@ -294,7 +289,7 @@ class ExternalEmfResource extends ResourceImpl {
 
 class ExternalEmfResourceFactory extends ResourceFactoryImpl {
 
-	public static val Collection<String> EXTERNAL_EXTENSIONS = #{'owl', 'nt', 'n3'};
+	public static val Collection<String> EXTERNAL_EXTENSIONS = #{'owl', 'nt', 'n3', 'ttl', 'nq', 'trig', 'trdf', 'jsonld', 'rt', 'rj', 'trix'};
 
 	@Inject
 	Injector injector;

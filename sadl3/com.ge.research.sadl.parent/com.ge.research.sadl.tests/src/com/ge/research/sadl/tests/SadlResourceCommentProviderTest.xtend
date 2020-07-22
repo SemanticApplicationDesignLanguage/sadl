@@ -98,6 +98,15 @@ comment', 'third
 
 comment']);
 	}
+	
+	@Test
+	def void testCommentNotOnDefinition() {
+		'''
+			uri "http://sadl.org/a.sadl".
+			AllThingsGood is a class.
+			AllThingsGood (note "comment") is described by age with values of type float.
+		'''.assertComments(#[]);
+	}
 
 	protected def dispatch void assertComments(CharSequence model, Iterable<String> expected) {
 		assertComments(model.sadl, expected);
