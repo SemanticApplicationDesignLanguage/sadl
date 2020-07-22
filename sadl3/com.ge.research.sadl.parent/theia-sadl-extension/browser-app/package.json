@@ -16,7 +16,6 @@
     "@theia/outline-view": "next",
     "@theia/output": "next",
     "@theia/preferences": "next",
-    "@theia/preferences-api": "next",
     "@theia/preview": "next",
     "@theia/process": "next",
     "@theia/search-in-workspace": "next",
