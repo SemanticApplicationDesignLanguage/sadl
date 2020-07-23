@@ -1,0 +1,87 @@
+<h1>SADL Version 3 Development Environment Setup</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->07/23/2020<!--webbot bot="Timestamp" endspan i-checksum="12556" --> 
+by <a href="mailto:crapo@research.ge.com?subject=Model Visualization">A. W. 
+Crapo</a></h5>
+<p>To create a development environment for SADL Version 3, do the following. 
+Order matters for some of the steps.</p>
+<h2>Pre-requisites</h2>
+<ol>
+  <li>Maven Version 3.5 or later should be installed on your computer.</li>
+  <li>Eclipse IDE for Java Developers, Version 2020-03 or later should be 
+  installed on your computer.</li>
+  <li>A Java JDK Version 8 or later set as the default JRE in Eclipse<ul>
+    <li><img border="0" src="images/Develo1.jpg" width="775" height="369"></li>
+  </ul>
+  </li>
+</ol>
+<h2>Setup</h2>
+<ol>
+  <li>Pull the SADL repository from github.com<ul>
+    <li>Go to <a href="https://github.com/crapo/sadlos2">
+    https://github.com/crapo/sadlos2</a></li>
+    <li>Copy the URL for repository cloning or choose some other way to clone</li>
+    <li>For command line cloning: git clone
+    <a href="https://github.com/crapo/sadlos2.git">
+    https://github.com/crapo/sadlos2.git</a></li>
+  </ul>
+  </li>
+  <li>Change directory within the repository to &quot;.../sadlos2/sadl3/com.ge.research.sadl.parent&quot;</li>
+  <li>Run a Maven build<ul>
+    <li>mvn install -U</li>
+    <li>No errors should occur.</li>
+  </ul>
+  </li>
+  <li>Start Eclipse<ul>
+    <li>It may be helpful to have an Eclipse workspace whose path is not too 
+    long.</li>
+  </ul>
+  </li>
+  <li>Import the SADL V3 projects into Eclipse as Maven projects&nbsp;&nbsp;&nbsp;
+  <ul>
+    <li>File -&gt; Import... -&gt;Maven -&gt; Existing Maven Projects</li>
+    <li>Set the Root Directory by browse to &quot;.../sadlos2/sadl3&quot; in the git 
+    reposotiry created in step 1</li>
+    <li>Click Next</li>
+    <li>Select all of the projects (only the com.ge.research.sadl.server 
+    projects at the bottom of the list can be omitted)</li>
+    <li><img border="0" src="images/Develo2.gif" width="455" height="645"></li>
+    <li>Click Finish</li>
+    <li>If you are asked about setting up Maven plugin connectors, click Finsish</li>
+    <li><img border="0" src="images/Develo3.jpg" width="508" height="531"></li>
+    <li>Similarly, if asked about installing Tycho Project Configurators, do so 
+    by clicking Next, accept the license, and click Finish.</li>
+    <li><img border="0" src="images/Develo4.jpg" width="865" height="520"></li>
+    <li>You will be warned that the software is unsigned.</li>
+    <li>You may be prompted to restart Eclipse</li>
+  </ul>
+  </li>
+  <li>Eclipse will now work for some time to complete the import of the Maven 
+  projects. Allow it to continue until complete.<ul>
+    <li><img border="0" src="images/Develo5.jpg" width="391" height="78"></li>
+    <li>If necessary, close the Welcome screen to be able to see the imported 
+    projects in the Package Explorer. At this point there will be errors.</li>
+  </ul>
+  </li>
+  <li>Set the target platform:<ul>
+    <li>In the project com.ge.research.sadl.target, open the file 
+    com.ge.research.sadl.target.target.</li>
+    <li><img border="0" src="images/Develo6.jpg" width="354" height="94"></li>
+    <li>Click on Set as the Active Target Platform</li>
+    <li><img border="0" src="images/Develo7.jpg" width="322" height="200"></li>
+    <li>Allow the process to complete</li>
+    <li><img border="0" src="images/Develo8.jpg" width="523" height="102"></li>
+  </ul>
+  </li>
+  <li>At this point you should have an Eclipse plug-in development environment 
+  without any errors.</li>
+  <li>To run SADL from the development environment:<ul>
+    <li>Right-click on any project in the Project Explorer</li>
+    <li>Select Run As -&gt; Eclipse Application or Debug As -&gt; Eclipse Application</li>
+  </ul>
+  </li>
+  <li>Note that running a Maven build (see steps 2 and 3 above) will, if 
+  successful, create an Eclipse update file in project 
+  com.ge.research.sadl.update. target/com.ge.research.sadl.update-xxxxxx.zip. 
+  This can be uploaded to github.com to create a new release.</li>
+</ol>
