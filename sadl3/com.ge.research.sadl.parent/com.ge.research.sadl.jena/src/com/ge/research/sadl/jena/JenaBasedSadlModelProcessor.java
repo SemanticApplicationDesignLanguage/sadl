@@ -83,7 +83,6 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.JenaTransactionException;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OWL;
@@ -185,7 +184,6 @@ import com.ge.research.sadl.processing.ValidationAcceptorExt;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ISadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.ITranslator;
@@ -7880,8 +7878,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private void checkForInvalidAnnotation(SadlResource sr) {
 		if (sr != null) {
 			EList<SadlAnnotation> anns = sr.getAnnotations();
-			if (anns != null && anns.size() > 0 && !declarationExtensions.getDeclaration(sr).equals(sr)) {
-				addError("Annotations are only valid in concept definitions", sr);
+			if (anns != null && anns.size() > 0) {
+				SadlResource dsr = declarationExtensions.getDeclaration(sr);
+				if (!dsr.equals(sr)) {
+					String sruri = declarationExtensions.getConceptNamespace(sr);
+					if (sruri != null && !sruri.equals(getModelNamespace())) {
+						addError("Annotations are only allowed in the model where a concept is defined", sr);
+					}
+				}
 			}
 		}
 	}
