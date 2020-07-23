@@ -17,11 +17,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.apache.jena.atlas.logging.LogCtl;
-import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -97,16 +94,6 @@ public class ExecuteCommand implements IApplication {
 
     public ExecuteCommand() {
         this.sadlPreferences = new HashMap<String, String>();
-
-        // Configure to avoid log4j warning messages on startup
-        Properties log4jProperties = new Properties();
-        log4jProperties.setProperty("log4j.rootLogger", "INFO, stdout");
-        log4jProperties.setProperty("log4j.appender.stdout", "org.apache.log4j.ConsoleAppender");
-        log4jProperties.setProperty(
-                "log4j.appender.stdout.layout", "org.apache.log4j.PatternLayout");
-        log4jProperties.setProperty("log4j.appender.stdout.layout.ConversionPattern", "%-5p %m%n");
-        PropertyConfigurator.configure(log4jProperties);
-        LogCtl.setCmdLogging();
     }
 
     @Override
