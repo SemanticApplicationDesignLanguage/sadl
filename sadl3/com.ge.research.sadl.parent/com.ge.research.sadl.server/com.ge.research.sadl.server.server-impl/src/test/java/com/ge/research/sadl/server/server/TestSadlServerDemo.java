@@ -40,15 +40,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataSource;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -118,11 +114,6 @@ public class TestSadlServerDemo {
 //		modelFolder = ClassLoader.getSystemResource("DataModels/Advise2").getFile();
 //		modelFolder = ClassLoader.getSystemResource("DataModels/ShapesSadlServerTest/OwlModels").getFile();
 		modelFolder = ClassLoader.getSystemResource("DataModels/ShapesDemo/OwlModels").getFile();
-		List<Logger> loggers = Collections.<Logger>list(LogManager.getCurrentLoggers());
-		loggers.add(LogManager.getRootLogger());
-		for ( Logger logger : loggers ) {
-		    logger.setLevel(Level.OFF);
-		}
 		shapesMN = "http://sadl.imp/shapes";
 		shapesNS = shapesMN + "#";
 

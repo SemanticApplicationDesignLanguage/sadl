@@ -8,12 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -52,11 +48,6 @@ public class TestSadlServerMD_Mobius {
 	public void setUp() throws Exception {
 //		modelFolder = ClassLoader.getSystemResource("DataModels/mobius20160211").getFile();
 		modelFolder = "D:/sadl/workspace-sadl/Mobius2/OwlModels";
-		List<Logger> loggers = Collections.<Logger>list(LogManager.getCurrentLoggers());
-		loggers.add(LogManager.getRootLogger());
-		for ( Logger logger : loggers ) {
-		    logger.setLevel(Level.OFF);
-		}
 		modelName = "http://www.mobius.illinois.edu/advise/ont/core/Queries";
 	}
 

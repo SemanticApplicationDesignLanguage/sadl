@@ -3,12 +3,7 @@ package com.ge.research.sadl.server.server;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.List;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,11 +46,6 @@ public class TestSadlServerPEOnShapes extends TestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		modelFolder = ClassLoader.getSystemResource("DataModels/ShapesDemo").getFile();
-		List<Logger> loggers = Collections.<Logger>list(LogManager.getCurrentLoggers());
-		loggers.add(LogManager.getRootLogger());
-		for ( Logger logger : loggers ) {
-		    logger.setLevel(Level.OFF);
-		}
 		modelName = "http://www.illinois.edu/advise/SmallExample";
 	}
 
