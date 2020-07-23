@@ -204,7 +204,7 @@ public class SadlServerMain {
 				outputFormat = args[6];
 			}
 			else {
-				logger.equals("OWL output file format '" + args[6] +
+				logger.error("OWL output file format '" + args[6] +
 						"' is not a supported format. Use one of \"N-TRIPLE\", \"TURTLE\", \"N3\", \"RDF/XML\", \"RDF/XML-ABBREV\".");
 			}
 		}
