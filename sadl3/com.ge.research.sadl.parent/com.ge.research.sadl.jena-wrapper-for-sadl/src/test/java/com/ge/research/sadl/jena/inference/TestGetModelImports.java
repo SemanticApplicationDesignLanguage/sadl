@@ -1,29 +1,19 @@
 package com.ge.research.sadl.jena.inference;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.jena.ontology.OntModelSpec;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import com.ge.research.sadl.model.SadlUnionClass;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.utils.ResourceManager;
-import org.apache.jena.ontology.OntModelSpec;
 
 public class TestGetModelImports {
 	
@@ -32,11 +22,6 @@ public class TestGetModelImports {
 	@Before
 	public void setUp() throws Exception {
 		kbroot = ClassLoader.getSystemResource("TestModels").getFile();
-		List<Logger> loggers = Collections.<Logger>list(LogManager.getCurrentLoggers());
-		loggers.add(LogManager.getRootLogger());
-		for ( Logger logger : loggers ) {
-		    logger.setLevel(Level.OFF);
-		}
 		System.out.println("kbroot: " + kbroot);
 		File check = new File(kbroot);
 		if (!check.exists()) {

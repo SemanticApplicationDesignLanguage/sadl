@@ -25,13 +25,14 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextSyntaxDiagnostic;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
@@ -53,7 +54,6 @@ import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -70,7 +70,7 @@ import com.google.inject.Inject;
 
 
 public abstract class SadlModelProcessor implements IModelProcessor {
-    private static final Logger logger = Logger.getLogger(SadlModelProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(SadlModelProcessor.class);
     private Object target = null;	// the instance of Rule, Query, Equation, External, or Test into which we are trying to put the translation
     private List<IFTranslationError> errors = null;
     private Object encapsulatingTarget = null;	// when a query is in a test

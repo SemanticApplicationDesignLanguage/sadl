@@ -3,18 +3,12 @@
  */
 package com.ge.research.sadl.jena.importer;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.List;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -23,7 +17,6 @@ import com.ge.research.sadl.importer.AbortDataRowException;
 import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
@@ -39,11 +32,6 @@ public class CsvImporterDocExampleTest {
 	@Before
 	public void setUp() throws Exception {
 		kbroot = ClassLoader.getSystemResource("TestModels").getFile();
-		List<Logger> loggers = Collections.<Logger>list(LogManager.getCurrentLoggers());
-		loggers.add(LogManager.getRootLogger());
-		for ( Logger logger : loggers ) {
-		    logger.setLevel(Level.OFF);
-		}
 		System.out.println("kbroot: " + kbroot);
 		File check = new File(kbroot);
 		if (!check.exists()) {
