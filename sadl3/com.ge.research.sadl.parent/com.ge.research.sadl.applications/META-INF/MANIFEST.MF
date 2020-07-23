@@ -24,6 +24,5 @@ Bundle-ActivationPolicy: lazy
 Bundle-Activator: com.ge.research.sadl.applications.Activator
 Import-Package: com.ge.research.sadl.ide.handlers,
  com.ge.research.sadl.jena,
- com.ge.research.sadl.ui.handlers,
- org.apache.log4j
+ com.ge.research.sadl.ui.handlers
 Automatic-Module-Name: com.ge.research.sadl.applications
