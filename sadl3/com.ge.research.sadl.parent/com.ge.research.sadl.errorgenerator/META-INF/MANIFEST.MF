@@ -8,3 +8,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.errorgenerator.generator,
  com.ge.research.sadl.errorgenerator.messages,
  com.ge.research.sadl.errorgeneratorbase
+Automatic-Module-Name: com.ge.research.sadl.errorgenerator

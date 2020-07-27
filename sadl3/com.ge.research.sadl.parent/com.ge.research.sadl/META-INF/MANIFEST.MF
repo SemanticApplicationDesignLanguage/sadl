@@ -49,3 +49,4 @@ Export-Package: com.ge.research.sadl,
  com.ge.research.sadl.utils,
  com.ge.research.sadl.validation
 Import-Package: org.apache.log4j
+Automatic-Module-Name: com.ge.research.sadl
