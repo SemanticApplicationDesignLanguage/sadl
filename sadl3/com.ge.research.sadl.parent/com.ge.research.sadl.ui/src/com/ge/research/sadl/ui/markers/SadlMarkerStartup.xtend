@@ -24,7 +24,9 @@ import com.ge.research.sadl.markers.SadlMarkerLocationProvider
 import com.ge.research.sadl.markers.SadlMarkerLocationProvider.Location
 import com.ge.research.sadl.markers.SadlMarkerRefType
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
+import com.ge.research.sadl.model.SadlSerializationFormat
 import com.ge.research.sadl.reasoner.utils.SadlUtils
+import com.ge.research.sadl.sADL.SadlModel
 import com.google.common.collect.Iterables
 import com.google.inject.Inject
 import java.io.File
@@ -37,11 +39,13 @@ import org.eclipse.core.resources.IResource
 import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.core.resources.WorkspaceJob
 import org.eclipse.core.runtime.CoreException
+import org.eclipse.core.runtime.IPath
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.Status
 import org.eclipse.core.runtime.SubMonitor
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.util.EcoreUtil
 import org.eclipse.ui.IStartup
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.ui.resource.IResourceSetProvider
@@ -50,11 +54,6 @@ import org.eclipse.xtext.validation.Issue
 
 import static com.ge.research.sadl.jena.UtilsForJena.*
 import static com.ge.research.sadl.markers.SadlMarkerConstants.*
-import static com.ge.research.sadl.reasoner.IConfigurationManager.*
-import org.eclipse.core.runtime.IPath
-import com.ge.research.sadl.sADL.SadlModel
-import org.eclipse.emf.ecore.util.EcoreUtil
-import com.ge.research.sadl.model.SadlSerializationFormat
 
 /**
  * Contribution that registers a resource change listener for tracking all the {@code .err} 

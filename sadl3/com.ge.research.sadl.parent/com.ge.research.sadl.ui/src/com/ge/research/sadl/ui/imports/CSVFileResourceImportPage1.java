@@ -21,7 +21,6 @@ import java.util.Scanner;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -1064,42 +1063,46 @@ public class CSVFileResourceImportPage1 extends WizardResourceImportPage
     	File f = new File(fileName);
     	List<String> templateImports = new ArrayList<String>();
 		try {
-			Scanner s = new Scanner(f).useDelimiter("\\n");
-			while (s.hasNext()) {
-				String templateLine = s.next();
-				templateLine = CsvImporter.dropEOS(templateLine);
-				if (templateLine.endsWith("\r")) {
-					templateLine = templateLine.substring(0,templateLine.length()-1);
-					usesCR = true;
+			Scanner s = new Scanner(f);
+			if (s != null) {
+				s.useDelimiter("\\n");
+				while (s.hasNext()) {
+					String templateLine = s.next();
+					templateLine = CsvImporter.dropEOS(templateLine);
+					if (templateLine.endsWith("\r")) {
+						templateLine = templateLine.substring(0,templateLine.length()-1);
+						usesCR = true;
+					}
+					templateLine = templateLine.trim();
+					if (templateLine.matches("\\s*import\\s+\\S*")) {
+						String imp = templateLine.replaceFirst("\\s*import\\s+","");
+						if (imp.startsWith("\"") && imp.endsWith("\"")) {
+							imp = imp.substring(1, imp.length() - 1);
+						}
+						templateImports.add(imp);
+					}
+					else if (templateLine.matches("\\s*uri\\s+(\\S|\\s)*")) {
+						String uri = templateLine.replaceFirst("\\s*uri\\s+","");
+						int lastQuote = uri.lastIndexOf("\"");
+						if (lastQuote > 0) {
+							uri = uri.substring(0, lastQuote + 1);
+						}
+						if (uri.startsWith("\"") && uri.endsWith("\"")) {
+							uri = uri.substring(1, uri.length() - 1);
+						}
+						this.uri = uri;
+						namespaceText.setText(uri);
+					} 
+	//				else {
+						templateSb.append(templateLine);
+						if (usesCR) {
+							templateSb.append("\r\n");
+						} else {
+							templateSb.append("\n");
+						}
+	//				}
 				}
-				templateLine = templateLine.trim();
-				if (templateLine.matches("\\s*import\\s+\\S*")) {
-					String imp = templateLine.replaceFirst("\\s*import\\s+","");
-					if (imp.startsWith("\"") && imp.endsWith("\"")) {
-						imp = imp.substring(1, imp.length() - 1);
-					}
-					templateImports.add(imp);
-				}
-				else if (templateLine.matches("\\s*uri\\s+(\\S|\\s)*")) {
-					String uri = templateLine.replaceFirst("\\s*uri\\s+","");
-					int lastQuote = uri.lastIndexOf("\"");
-					if (lastQuote > 0) {
-						uri = uri.substring(0, lastQuote + 1);
-					}
-					if (uri.startsWith("\"") && uri.endsWith("\"")) {
-						uri = uri.substring(1, uri.length() - 1);
-					}
-					this.uri = uri;
-					namespaceText.setText(uri);
-				} 
-//				else {
-					templateSb.append(templateLine);
-					if (usesCR) {
-						templateSb.append("\r\n");
-					} else {
-						templateSb.append("\n");
-					}
-//				}
+				s.close();
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

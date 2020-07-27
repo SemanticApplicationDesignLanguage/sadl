@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.imports
 
+import com.ge.research.sadl.external.XMLHelper
 import com.ge.research.sadl.jena.JenaBasedSadlImportProcessor
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContext
@@ -25,14 +26,14 @@ import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.tests.SADLInjectorProvider
 import com.google.inject.Inject
 import com.google.inject.Provider
-import org.apache.jena.ontology.OntModel
-import org.apache.jena.query.QueryExecutionFactory
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.ArrayList
 import java.util.List
+import org.apache.jena.ontology.OntModel
+import org.apache.jena.query.QueryExecutionFactory
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
@@ -43,13 +44,10 @@ import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.Issue
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.ge.research.sadl.external.XMLHelper
-import com.google.common.base.Optional
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)

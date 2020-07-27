@@ -20,7 +20,6 @@ package com.ge.research.sadl.external
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.model.SadlSerializationFormat
-import com.ge.research.sadl.reasoner.ConfigurationManager
 import com.ge.research.sadl.sADL.SADLFactory
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.utils.ResourceManager

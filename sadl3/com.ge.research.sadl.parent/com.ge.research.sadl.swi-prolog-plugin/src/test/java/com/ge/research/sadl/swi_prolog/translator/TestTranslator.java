@@ -1,21 +1,20 @@
 package com.ge.research.sadl.swi_prolog.translator;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.net.URL;
 
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.model.gp.Rule;
-import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.rdf.model.ModelFactory;
 
 public class TestTranslator {
 

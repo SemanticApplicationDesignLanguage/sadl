@@ -17,25 +17,16 @@
  ***********************************************************************/
 package com.ge.research.sadl.jena.userdefineddatatypes;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.net.URL;
 import java.util.Iterator;
-import java.util.List;
-
-import org.apache.xerces.impl.dv.XSSimpleType;
-import org.apache.xerces.impl.dv.xs.XSSimpleTypeDecl;
-import org.apache.xerces.xs.XSAnnotation;
-import org.apache.xerces.xs.XSNamespaceItem;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
-import org.apache.jena.datatypes.xsd.XSDDatatype;
 //import org.apache.jena.datatypes.xsd.XSDDatatype.XSDGenericType;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.ontology.DatatypeProperty;
@@ -45,6 +36,10 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.reasoner.ValidityReport.Report;
+import org.apache.xerces.impl.dv.XSSimpleType;
+import org.apache.xerces.impl.dv.xs.XSSimpleTypeDecl;
+import org.junit.Ignore;
+import org.junit.Test;
 
 public class TestUserDefinedDatatype {
 	

@@ -8,6 +8,7 @@
  */
 package com.ge.research.sadl.tests.model
 
+import com.ge.research.sadl.model.gp.GraphPatternElement
 import com.ge.research.sadl.processing.SadlConstants
 import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
@@ -27,9 +28,6 @@ import org.junit.runner.RunWith
 import static org.junit.Assert.*
 
 import static extension com.ge.research.sadl.tests.SadlTestAssertions.*
-import com.ge.research.sadl.model.gp.Rule
-import org.junit.Ignore
-import com.ge.research.sadl.model.gp.GraphPatternElement
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)

@@ -119,63 +119,67 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 				console.info("Testing of suite '" + path.toAbsolutePath().toString() + "' requested.\n");
 		    	File f = path.toFile();
 		    	List<String> templateImports = new ArrayList<String>();
-				Scanner s = new Scanner(f).useDelimiter("\\n");
-				int totalTestCount = 0;
-				int passedTestCount = 0;
-				IConfigurationManager configMgr = null;
-				ResourceSet resourceSet = resourceSupplier.get().getResourceSet();
-				while (s.hasNext()) {
-					String templateLine = s.next();
-					templateLine = CsvImporter.dropEOS(templateLine);
-					if (templateLine.trim().startsWith("Test:")) {
-						int testLoc = templateLine.indexOf("Test:");
-						String testfile = templateLine.substring(testLoc + 5).trim();
-						String modelFolderPath = getOwlModelsFolderPath(path).toString();
-						String owlModelPath = modelFolderPath + "/" + path.getFileName().toString().replaceFirst("[.][^.]+$", frmt);
-						if (configMgr == null) {
-							configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderPath, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
-						}
-						String actualUrl = new SadlUtils().fileUrlToFileName(configMgr.getAltUrlFromPublicUri(SadlUtils.stripQuotes(testfile)));
-						File actualFile = new File(actualUrl);
-						String fileName = actualFile.getName();
-						fileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".sadl";
-//						Path projectPath = Paths.get(projectHelper.getRoot(path.toUri()));
-						Path projectPath = new File(modelFolderPath).getParentFile().toPath();
-						Path file = findFileRecursively(projectPath, fileName);
-						if (file != null) {
-							Resource res = findAndPrepareResource(resourceSet, file);
-							if (res != null) {
-								Object[] retvals = inferenceProcessor.runInference(res, actualUrl, modelFolderPath, properties);
-								for (int i = 0; retvals != null && i < retvals.length; i++) {
-									SadlCommandResult result = (SadlCommandResult) retvals[i];
-					        		SadlCommand cmd = result.getCmd();
-					        		Object infresults = result.getResults();										Object retval = retvals[i];
-									if (infresults instanceof TestResult) {
-		        						TestResult tr = (TestResult)infresults;
-		        						totalTestCount++;
-//		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
-		        						String msg;
-		        						if (tr.isPassed()) {
-		        							msg = "Test passed: " + cmd.toString() + "\n";
-		        							passedTestCount++;
-		        						}
-		        						else {
-		        							msg = "Test failed: " + cmd.toString() + "(" + tr.toString() + ")\n";
-		        						}
-		        						console.info(msg);
+				Scanner s = new Scanner(f);
+				if (s != null) {
+					s.useDelimiter("\\n");
+					int totalTestCount = 0;
+					int passedTestCount = 0;
+					IConfigurationManager configMgr = null;
+					ResourceSet resourceSet = resourceSupplier.get().getResourceSet();
+					while (s.hasNext()) {
+						String templateLine = s.next();
+						templateLine = CsvImporter.dropEOS(templateLine);
+						if (templateLine.trim().startsWith("Test:")) {
+							int testLoc = templateLine.indexOf("Test:");
+							String testfile = templateLine.substring(testLoc + 5).trim();
+							String modelFolderPath = getOwlModelsFolderPath(path).toString();
+							String owlModelPath = modelFolderPath + "/" + path.getFileName().toString().replaceFirst("[.][^.]+$", frmt);
+							if (configMgr == null) {
+								configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderPath, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+							}
+							String actualUrl = new SadlUtils().fileUrlToFileName(configMgr.getAltUrlFromPublicUri(SadlUtils.stripQuotes(testfile)));
+							File actualFile = new File(actualUrl);
+							String fileName = actualFile.getName();
+							fileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".sadl";
+	//						Path projectPath = Paths.get(projectHelper.getRoot(path.toUri()));
+							Path projectPath = new File(modelFolderPath).getParentFile().toPath();
+							Path file = findFileRecursively(projectPath, fileName);
+							if (file != null) {
+								Resource res = findAndPrepareResource(resourceSet, file);
+								if (res != null) {
+									Object[] retvals = inferenceProcessor.runInference(res, actualUrl, modelFolderPath, properties);
+									for (int i = 0; retvals != null && i < retvals.length; i++) {
+										SadlCommandResult result = (SadlCommandResult) retvals[i];
+						        		SadlCommand cmd = result.getCmd();
+						        		Object infresults = result.getResults();										Object retval = retvals[i];
+										if (infresults instanceof TestResult) {
+			        						TestResult tr = (TestResult)infresults;
+			        						totalTestCount++;
+	//		        						SadlConsole.writeToConsole(MessageType.INFO, "Inference result " + (idx + 1) + ":\n");
+			        						String msg;
+			        						if (tr.isPassed()) {
+			        							msg = "Test passed: " + cmd.toString() + "\n";
+			        							passedTestCount++;
+			        						}
+			        						else {
+			        							msg = "Test failed: " + cmd.toString() + "(" + tr.toString() + ")\n";
+			        						}
+			        						console.info(msg);
+										}
 									}
+								}
+								else {
+									console.error("Unable to find Resource for '" + testfile + "'\n");
 								}
 							}
 							else {
-								console.error("Unable to find Resource for '" + testfile + "'\n");
+								console.error("Unable to find actual file for '" + testfile + "'\n");
 							}
 						}
-						else {
-							console.error("Unable to find actual file for '" + testfile + "'\n");
-						}
 					}
+					console.info("Completed test suite'" + path.toAbsolutePath().toString() + "': passed " + passedTestCount + " of " + totalTestCount + " tests.\n");
+					s.close();
 				}
-				console.info("Completed test suite'" + path.toAbsolutePath().toString() + "': passed " + passedTestCount + " of " + totalTestCount + " tests.\n");
 			}
 		} catch (Exception e) {
 			console.error(Throwables.getStackTraceAsString(e));

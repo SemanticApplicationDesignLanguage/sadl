@@ -1,6 +1,5 @@
 package com.ge.research.sadl.model;
 
-import org.apache.jena.datatypes.xsd.impl.RDFjson;
 import org.apache.jena.riot.RDFFormat;
 
 import com.ge.research.sadl.reasoner.TranslationException;

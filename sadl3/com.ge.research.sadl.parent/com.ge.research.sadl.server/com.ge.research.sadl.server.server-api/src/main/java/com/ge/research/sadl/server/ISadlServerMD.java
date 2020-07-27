@@ -37,7 +37,6 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
-import com.ge.research.sadl.server.SessionNotFoundException;
 
 /**
  * This Interface class defines additional methods beyond those in 

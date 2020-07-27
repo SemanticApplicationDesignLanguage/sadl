@@ -1,14 +1,14 @@
 package com.ge.research.sadl.tests.model
 
 import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
-import org.eclipse.xtext.testing.XtextRunner
-import org.eclipse.xtext.testing.InjectWith
 import com.ge.research.sadl.tests.SADLInjectorProvider
-import org.junit.runner.RunWith
-import org.junit.Assert
-import static org.junit.Assert.*
-import org.junit.Test
+import org.eclipse.xtext.testing.InjectWith
+import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Ignore
+import org.junit.Test
+import org.junit.runner.RunWith
+
+import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)

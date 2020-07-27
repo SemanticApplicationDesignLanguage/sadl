@@ -473,7 +473,9 @@ public class TestSadlServerDemo {
 			is = out.getInputStream();
 			java.util.Scanner s = new java.util.Scanner(is);
 			s.useDelimiter("\\A");
-		    return s.hasNext() ? s.next() : "";
+		    String ret = s.hasNext() ? s.next() : "";
+		    s.close();
+		    return ret;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -1,6 +1,7 @@
 package com.ge.research.sadl.jena;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -8,7 +9,6 @@ import org.junit.Test;
 import com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
-import com.ge.research.sadl.reasoner.ResultSet;
 
 public class TestIsDeleteOrInsert {
 

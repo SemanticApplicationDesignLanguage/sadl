@@ -941,6 +941,7 @@ public class SadlServerImpl implements ISadlServer {
 				while ((n = reader.read(buffer)) != -1) {
 					writer.write(buffer, 0, n);
 				}
+				reader.close();
 			} finally {
 				is.close();
 			}

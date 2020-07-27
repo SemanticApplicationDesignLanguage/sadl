@@ -1,10 +1,11 @@
 package com.ge.research.sadl.jena.inference;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.net.URL;
 
+import org.apache.jena.rdf.model.Model;
 import org.junit.Test;
 
 import com.ge.research.sadl.model.SadlSerializationFormat;
@@ -17,7 +18,6 @@ import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
-import org.apache.jena.rdf.model.Model;
 
 public class TestShapesInference {
 

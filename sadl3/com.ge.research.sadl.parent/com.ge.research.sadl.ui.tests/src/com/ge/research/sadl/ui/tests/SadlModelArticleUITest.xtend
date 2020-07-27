@@ -19,10 +19,8 @@ package com.ge.research.sadl.ui.tests
 
 import com.ge.research.sadl.preferences.SadlPreferences
 import org.eclipse.xtext.preferences.PreferenceKey
-import org.junit.Test
-
-import static extension com.ge.research.sadl.tests.SadlTestAssertions.*
 import org.junit.Ignore
+import org.junit.Test
 
 class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 

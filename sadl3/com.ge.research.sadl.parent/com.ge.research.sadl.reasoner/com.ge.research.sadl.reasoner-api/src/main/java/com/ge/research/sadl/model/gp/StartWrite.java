@@ -1,8 +1,5 @@
 package com.ge.research.sadl.model.gp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class StartWrite extends SadlCommand {
 	private boolean dataOnly = false;
 	

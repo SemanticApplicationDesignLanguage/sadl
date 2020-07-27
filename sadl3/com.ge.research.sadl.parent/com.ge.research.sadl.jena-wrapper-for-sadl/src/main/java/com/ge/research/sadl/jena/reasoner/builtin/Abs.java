@@ -18,14 +18,12 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
-import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Abs extends TypedBaseBuiltin {
 	private static final Logger logger = LoggerFactory.getLogger(Abs.class);

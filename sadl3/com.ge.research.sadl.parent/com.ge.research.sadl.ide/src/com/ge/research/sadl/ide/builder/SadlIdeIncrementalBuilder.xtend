@@ -21,7 +21,6 @@ import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.inject.Inject
 import java.net.URI
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.build.BuildContext
 import org.eclipse.xtext.build.BuildRequest
 import org.eclipse.xtext.build.IncrementalBuilder
 import org.eclipse.xtext.build.Source2GeneratedMapping

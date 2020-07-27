@@ -33,7 +33,6 @@ import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ResultSet;

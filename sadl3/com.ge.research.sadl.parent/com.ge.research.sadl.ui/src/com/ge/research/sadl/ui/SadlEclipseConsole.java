@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.debug.ui.console.FileLink;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.IWorkbench;

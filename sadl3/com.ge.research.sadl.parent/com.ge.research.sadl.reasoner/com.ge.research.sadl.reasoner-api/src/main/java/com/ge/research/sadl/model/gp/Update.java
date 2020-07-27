@@ -3,9 +3,6 @@ package com.ge.research.sadl.model.gp;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ge.research.sadl.model.gp.Query.Order;
-import com.ge.research.sadl.model.gp.Query.OrderingPair;
-
 public class Update extends Query {
 	private String secondKeyword = null;
 	private boolean deleteData = false;

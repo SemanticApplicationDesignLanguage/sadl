@@ -1,11 +1,8 @@
 package com.ge.research.sadl.tests.owl2sadl;
 
-import static org.junit.Assert.*;
-
 import java.net.URL;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.ge.research.sadl.owl2sadl.OwlImportException;

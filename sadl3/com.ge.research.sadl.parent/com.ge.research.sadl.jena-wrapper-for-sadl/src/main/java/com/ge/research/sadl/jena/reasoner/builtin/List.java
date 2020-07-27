@@ -23,10 +23,6 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ge.research.sadl.jena.reasoner.builtin.Utils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
@@ -35,6 +31,8 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 import org.apache.jena.vocabulary.RDF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class List extends BaseBuiltin {
     protected static final Logger logger = LoggerFactory.getLogger(List.class);

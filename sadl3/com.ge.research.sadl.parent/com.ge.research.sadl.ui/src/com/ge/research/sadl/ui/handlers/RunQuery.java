@@ -31,7 +31,6 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.common.base.Supplier;

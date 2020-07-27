@@ -1,25 +1,21 @@
 package com.ge.research.sadl.jena.translator;
 
-import com.ge.research.sadl.builder.ConfigurationManagerForIDE
-import com.ge.research.sadl.jena.IJenaBasedModelProcessor
+import com.ge.research.sadl.model.gp.Query
 import com.ge.research.sadl.reasoner.ConfigurationManager
-import com.ge.research.sadl.reasoner.ITranslator
+import com.ge.research.sadl.reasoner.TranslationException
+import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
-import java.lang.reflect.Method
+import org.apache.jena.ontology.OntModelSpec
+import org.apache.jena.rdf.model.ModelFactory
+import org.apache.jena.vocabulary.XSD
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.pojava.datetime.Duration
 
 import static org.junit.Assert.*
-import com.ge.research.sadl.model.gp.Query
-import org.pojava.datetime.Duration
-import org.apache.jena.rdf.model.ModelFactory
-import org.apache.jena.ontology.OntModelSpec
-import org.apache.jena.vocabulary.XSD
-import com.ge.research.sadl.reasoner.utils.SadlUtils
-import com.ge.research.sadl.reasoner.TranslationException
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)

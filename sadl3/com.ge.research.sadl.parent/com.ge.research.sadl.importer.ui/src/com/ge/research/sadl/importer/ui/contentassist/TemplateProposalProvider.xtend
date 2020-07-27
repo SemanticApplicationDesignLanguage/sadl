@@ -21,13 +21,12 @@ import com.ge.research.sadl.importer.template.TemplateModel
 import java.util.Collection
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.Assignment
+import org.eclipse.xtext.CrossReference
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.RuleCall
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
-import com.ge.research.sadl.importer.template.Import
-import org.eclipse.xtext.CrossReference
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/304_ide_concepts.html#content-assist

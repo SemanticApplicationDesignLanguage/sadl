@@ -4,14 +4,9 @@ import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
- 
-
-import javax.net.ssl.HttpsURLConnection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin;
  
 public class PlServiceInterface {
     protected static final Logger logger = LoggerFactory.getLogger(PlServiceInterface.class);

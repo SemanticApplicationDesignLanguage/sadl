@@ -17,10 +17,10 @@
  ***********************************************************************/
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import org.apache.jena.reasoner.rulesys.*;
-import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Node_Literal;
+import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.util.PrintUtil;
-import org.apache.jena.graph.*;
 
 /**
  * Print its argument list as a side effect

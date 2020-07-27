@@ -23,23 +23,16 @@
 
 package com.ge.research.sadl.ui.preferences;
 
-import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationOption;
-import com.ge.research.sadl.reasoner.ITranslator;
-import com.ge.research.sadl.utils.ResourceManager;
-import com.ge.research.sadl.reasoner.IReasoner;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -82,7 +75,11 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationOption;
+import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.ITranslator;
+import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
 
 /**

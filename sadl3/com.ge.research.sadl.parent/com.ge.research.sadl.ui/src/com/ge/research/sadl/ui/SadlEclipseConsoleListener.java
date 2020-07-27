@@ -3,11 +3,9 @@ package com.ge.research.sadl.ui;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import org.eclipse.core.internal.localstore.FileSystemResourceManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.debug.ui.console.FileLink;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;

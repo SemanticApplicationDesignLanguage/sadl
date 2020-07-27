@@ -17,10 +17,11 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.model
 
+import com.ge.research.sadl.model.SadlSerializationFormat
 import com.ge.research.sadl.processing.SadlConstants
-import com.ge.research.sadl.reasoner.ConfigurationManager
 import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
+import java.util.ArrayList
 import org.apache.jena.ontology.OntClass
 import org.apache.jena.ontology.OntModel
 import org.apache.jena.ontology.Ontology
@@ -30,14 +31,12 @@ import org.apache.jena.rdf.model.RDFNode
 import org.apache.jena.vocabulary.OWL
 import org.apache.jena.vocabulary.RDF
 import org.apache.jena.vocabulary.XSD
-import java.util.ArrayList
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
-import com.ge.research.sadl.model.SadlSerializationFormat
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)

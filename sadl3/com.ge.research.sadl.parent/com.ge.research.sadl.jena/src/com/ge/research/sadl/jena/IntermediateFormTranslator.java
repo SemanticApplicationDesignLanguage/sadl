@@ -378,83 +378,83 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return null;
 	}
 
-	/**
-	 * This method fills in missing information in a NamedNode: 
-	 * the prefix, the namespace, the type
-	 * 
-	 * @param namedNode
-	 * @return
-	 * @throws InvalidNameException 
-	 */
-	protected Node validateNode(Node node) throws InvalidNameException {
-		if (node instanceof NamedNode) {
-			if (!((NamedNode)node).isValidated()) {
-				if (node instanceof VariableNode) {
-					((VariableNode) node).setNodeType(NodeType.VariableNode);
-					userDefinedVariables.add(((NamedNode) node).getName());
-				}
-				else if (node instanceof RDFTypeNode) {
-					((RDFTypeNode) node).setNodeType(NodeType.PropertyNode);
-				}
-				else {
-					ConceptName cname = null;
-					ConceptType ctype = null;
-					String name = ((NamedNode)node).toString(); //getName();
-					if (name == null) {
-						throw new InvalidNameException("A NamedNode has a null name! Did ResourceByName resolution fail?");
-					}
-				    int colon = name.indexOf(':');
-					if (colon > 0 && colon < name.length() - 1) {
-						String pfx = name.substring(0, colon);
-				        ((NamedNode)node).setPrefix(pfx);
-				        String lname = name.substring(colon + 1);
-				        ((NamedNode)node).setName(lname);
-//				        cname = modelManager.validateConceptName(new ConceptName(pfx, lname));
-				    }
-				    else {
-//				    	cname = modelManager.validateConceptName(new ConceptName(name));
-				    }
-			        ctype = cname.getType();
-			        ((NamedNode)node).setNamespace(cname.getNamespace());
-			        ((NamedNode)node).setPrefix(cname.getPrefix());
-			    	if (ctype.equals(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL)) {
-//			    		modelManager.addToVariableNamesCache(cname);
-			    		node = new VariableNode(((NamedNode)node).getName());
-			    		userDefinedVariables.add(((NamedNode) node).getName());
-			    	}
-			    	else if (ctype.equals(ConceptType.ANNOTATIONPROPERTY)){
-			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
-			    	}
-			    	else if (ctype.equals(ConceptType.DATATYPEPROPERTY)){
-			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
-			    	}
-			    	else if (ctype.equals(ConceptType.OBJECTPROPERTY)){
-			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
-			    	}
-			    	else if (ctype.equals(ConceptType.ONTCLASS)){
-			    		((NamedNode)node).setNodeType(NodeType.ClassNode);
-			    	}
-			    	else if (ctype.equals(ConceptType.INDIVIDUAL)){
-			    		((NamedNode)node).setNodeType(NodeType.InstanceNode);
-			    	}
-			    	else {
-			    		logger.error("Unexpected ConceptType: " + ctype.toString());
-				    	addError(new IFTranslationError("Unexpected ConceptType: " + ctype.toString()));
-			    	}
-			    	if (isCollectNamedNodes()) {
-			    		if (namedNodes == null) {
-			    			namedNodes = new ArrayList<ConceptName>();
-			    		}
-			    		if (!namedNodes.contains(cname)) {
-			    			namedNodes.add(cname);
-			    		}
-			    	}
-				}
-				((NamedNode)node).setValidated(true);
-			}
-		}
-		return node;
-	}
+//	/**
+//	 * This method fills in missing information in a NamedNode: 
+//	 * the prefix, the namespace, the type
+//	 * 
+//	 * @param namedNode
+//	 * @return
+//	 * @throws InvalidNameException 
+//	 */
+//	protected Node validateNode(Node node) throws InvalidNameException {
+//		if (node instanceof NamedNode) {
+//			if (!((NamedNode)node).isValidated()) {
+//				if (node instanceof VariableNode) {
+//					((VariableNode) node).setNodeType(NodeType.VariableNode);
+//					userDefinedVariables.add(((NamedNode) node).getName());
+//				}
+//				else if (node instanceof RDFTypeNode) {
+//					((RDFTypeNode) node).setNodeType(NodeType.PropertyNode);
+//				}
+//				else {
+//					ConceptName cname = null;
+//					ConceptType ctype = null;
+//					String name = ((NamedNode)node).toString(); //getName();
+//					if (name == null) {
+//						throw new InvalidNameException("A NamedNode has a null name! Did ResourceByName resolution fail?");
+//					}
+//				    int colon = name.indexOf(':');
+//					if (colon > 0 && colon < name.length() - 1) {
+//						String pfx = name.substring(0, colon);
+//				        ((NamedNode)node).setPrefix(pfx);
+//				        String lname = name.substring(colon + 1);
+//				        ((NamedNode)node).setName(lname);
+////				        cname = modelManager.validateConceptName(new ConceptName(pfx, lname));
+//				    }
+//				    else {
+////				    	cname = modelManager.validateConceptName(new ConceptName(name));
+//				    }
+//			        ctype = cname.getType();
+//			        ((NamedNode)node).setNamespace(cname.getNamespace());
+//			        ((NamedNode)node).setPrefix(cname.getPrefix());
+//			    	if (ctype.equals(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL)) {
+////			    		modelManager.addToVariableNamesCache(cname);
+//			    		node = new VariableNode(((NamedNode)node).getName());
+//			    		userDefinedVariables.add(((NamedNode) node).getName());
+//			    	}
+//			    	else if (ctype.equals(ConceptType.ANNOTATIONPROPERTY)){
+//			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
+//			    	}
+//			    	else if (ctype.equals(ConceptType.DATATYPEPROPERTY)){
+//			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
+//			    	}
+//			    	else if (ctype.equals(ConceptType.OBJECTPROPERTY)){
+//			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
+//			    	}
+//			    	else if (ctype.equals(ConceptType.ONTCLASS)){
+//			    		((NamedNode)node).setNodeType(NodeType.ClassNode);
+//			    	}
+//			    	else if (ctype.equals(ConceptType.INDIVIDUAL)){
+//			    		((NamedNode)node).setNodeType(NodeType.InstanceNode);
+//			    	}
+//			    	else {
+//			    		logger.error("Unexpected ConceptType: " + ctype.toString());
+//				    	addError(new IFTranslationError("Unexpected ConceptType: " + ctype.toString()));
+//			    	}
+//			    	if (isCollectNamedNodes()) {
+//			    		if (namedNodes == null) {
+//			    			namedNodes = new ArrayList<ConceptName>();
+//			    		}
+//			    		if (!namedNodes.contains(cname)) {
+//			    			namedNodes.add(cname);
+//			    		}
+//			    	}
+//				}
+//				((NamedNode)node).setValidated(true);
+//			}
+//		}
+//		return node;
+//	}
 	
 	private void addError(IFTranslationError error) {
 		if (errors == null) {

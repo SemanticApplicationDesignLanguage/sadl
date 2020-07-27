@@ -26,7 +26,6 @@ package com.ge.research.sadl.reasoner;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.Node;

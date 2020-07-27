@@ -38,24 +38,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.external.XMLHelper;
-import com.ge.research.sadl.model.gp.NamedNode;
-import com.ge.research.sadl.processing.SadlConstants;
-import com.ge.research.sadl.processing.SparqlQueries;
-import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
-import com.ge.research.sadl.reasoner.IReasoner;
-import com.ge.research.sadl.reasoner.InvalidNameException;
-import com.ge.research.sadl.reasoner.QueryCancelledException;
-import com.ge.research.sadl.reasoner.QueryParseException;
-import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.google.common.base.Optional;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.ontology.AllValuesFromRestriction;
@@ -103,6 +85,23 @@ import org.apache.jena.vocabulary.OWL2;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ge.research.sadl.external.XMLHelper;
+import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.processing.SparqlQueries;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.QueryCancelledException;
+import com.ge.research.sadl.reasoner.QueryParseException;
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.google.common.base.Optional;
 
 /**
  * This class converts an OWL file to a SADL file.

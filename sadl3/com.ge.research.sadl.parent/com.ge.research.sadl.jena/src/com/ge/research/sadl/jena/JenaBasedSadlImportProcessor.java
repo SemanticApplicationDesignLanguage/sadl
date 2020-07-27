@@ -18,12 +18,10 @@
 package com.ge.research.sadl.jena;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.activation.DataSource;
-
+import org.apache.jena.ontology.OntModel;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +30,6 @@ import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.processing.ISadlImportProcessor;
 import com.google.inject.Inject;
-import org.apache.jena.ontology.OntModel;
 
 public class JenaBasedSadlImportProcessor implements ISadlImportProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlImportProcessor.class);

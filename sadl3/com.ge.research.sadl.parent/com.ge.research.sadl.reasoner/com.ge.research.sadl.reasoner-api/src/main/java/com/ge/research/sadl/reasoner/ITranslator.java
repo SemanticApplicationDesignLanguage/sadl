@@ -23,15 +23,19 @@
 
 package com.ge.research.sadl.reasoner;
 
-import com.ge.research.sadl.model.ModelError;
-import com.ge.research.sadl.model.gp.*;
-import org.apache.jena.ontology.OntModel;
-
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.jena.ontology.OntModel;
+
+import com.ge.research.sadl.model.ModelError;
+import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.ConstantNode;
+import com.ge.research.sadl.model.gp.Equation;
+import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.gp.Rule;
 
 public interface ITranslator {
 	

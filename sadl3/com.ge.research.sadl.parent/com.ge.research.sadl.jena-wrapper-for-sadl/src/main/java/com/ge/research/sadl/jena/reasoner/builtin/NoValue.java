@@ -32,14 +32,14 @@ package com.ge.research.sadl.jena.reasoner.builtin;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ge.research.sadl.jena.reasoner.builtin.Utils;
-import org.apache.jena.reasoner.rulesys.*;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.reasoner.rulesys.BuiltinException;
+import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 import org.apache.jena.util.iterator.ClosableIterator;
-import org.apache.jena.graph.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Can be used in two arg form (X, P) or three arg form (X, P, V). 

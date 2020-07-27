@@ -21,39 +21,36 @@ import com.ge.research.sadl.markers.SadlMarkerConstants
 import com.ge.research.sadl.markers.SadlMarkerRefType
 import com.ge.research.sadl.resource.UserDataHelper
 import com.ge.research.sadl.sADL.SadlModel
+import com.ge.research.sadl.sADL.SadlModelElement
+import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.scoping.AmbiguousNameErrorEObjectDescription
 import com.ge.research.sadl.validation.SADLValidator
 import com.google.inject.Inject
 import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.core.runtime.Path
+import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.jface.dialogs.MessageDialog
 import org.eclipse.swt.widgets.Display
 import org.eclipse.ui.PlatformUI
 import org.eclipse.ui.ide.IDE
-import org.eclipse.xtext.EOF
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.eclipse.xtext.resource.EObjectAtOffsetHelper
+import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.scoping.IGlobalScopeProvider
+import org.eclipse.xtext.ui.editor.IURIEditorOpener
 import org.eclipse.xtext.ui.editor.model.edit.IModification
 import org.eclipse.xtext.ui.editor.model.edit.IModificationContext
 import org.eclipse.xtext.ui.editor.model.edit.IssueModificationContext
 import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
 import org.eclipse.xtext.ui.editor.quickfix.Fix
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
-import org.eclipse.xtext.ui.editor.utils.EditorUtils
 import org.eclipse.xtext.validation.Issue
 
 import static com.ge.research.sadl.markers.SadlMarkerConstants.*
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
-import org.eclipse.emf.common.util.URI
-import org.eclipse.xtext.ui.editor.IURIEditorOpener
-import org.eclipse.xtext.EcoreUtil2
-import com.ge.research.sadl.sADL.SadlModelElement
-import com.ge.research.sadl.model.DeclarationExtensions
-import com.ge.research.sadl.sADL.SadlResource
 import static java.lang.System.*
-import org.eclipse.xtext.resource.EObjectAtOffsetHelper
-import org.eclipse.xtext.resource.XtextResource
 
 /**
  * Quick fix provider for SADL.

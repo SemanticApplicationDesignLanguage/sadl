@@ -14,7 +14,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,17 +26,6 @@ import java.util.StringTokenizer;
 
 import javax.activation.DataSource;
 
-import org.pojava.datetime.DateTime;
-import org.pojava.datetime.Duration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ge.research.sadl.model.ConceptName;
-import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.reasoner.CircularDependencyException;
-import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.InvalidNameException;
-import com.ge.research.sadl.reasoner.TranslationException;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.ontology.AnnotationProperty;
@@ -61,6 +49,17 @@ import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.OWL2;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.pojava.datetime.DateTime;
+import org.pojava.datetime.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.ge.research.sadl.reasoner.CircularDependencyException;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.TranslationException;
 
 public class SadlUtils {
 	private static final Logger logger = LoggerFactory.getLogger(SadlUtils.class);

@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
 
+import org.apache.jena.ontology.OntDocumentManager;
+import org.apache.jena.ontology.OntModel;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
 import com.ge.research.sadl.model.ConceptName;
@@ -22,9 +23,6 @@ import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
-import org.apache.jena.ontology.OntDocumentManager;
-import org.apache.jena.ontology.OntModel;
 
 public interface IConfigurationManagerForIDE extends IConfigurationManagerForEditing {
 

@@ -27,6 +27,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.datatypes.xsd.XSDDuration;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntProperty;
+import org.apache.jena.ontology.OntResource;
+import org.apache.jena.rdf.model.InfModel;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.XSD;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
@@ -93,21 +106,7 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.QueryStatement;
-import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
-import org.apache.jena.datatypes.xsd.XSDDateTime;
-import org.apache.jena.datatypes.xsd.XSDDuration;
-import org.apache.jena.ontology.Individual;
-import org.apache.jena.ontology.OntClass;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntProperty;
-import org.apache.jena.ontology.OntResource;
-import org.apache.jena.rdf.model.InfModel;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.vocabulary.XSD;
 
 public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlInferenceProcessor.class);
@@ -1095,11 +1094,11 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			Node subj = ((TripleElement) gpe).getSubject();
 			Node obj = ((TripleElement) gpe).getObject();
 			if (subj instanceof VariableNode
-					&& !vars.contains(((VariableNode) subj).getName())) {
+					&& !vars.contains(((VariableNode) subj))) {
 				vars.add(((VariableNode) subj));
 			}
 			if (obj instanceof VariableNode
-					&& !vars.contains(((VariableNode) obj).getName())) {
+					&& !vars.contains(((VariableNode) obj))) {
 				vars.add(((VariableNode) obj));
 			}
 		} else if (gpe instanceof Junction) {
@@ -1725,10 +1724,10 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 								if (n != null && n.isLiteral()) {
 									Object v = n.asLiteral().getValue();
 									if (v instanceof XSDDateTime) {
-										row.add(((XSDDateTime)val).asCalendar().getTime());
+										row.add(((XSDDateTime)v).asCalendar().getTime());
 									} 
 									else if (v instanceof XSDDuration) {
-										row.add(((XSDDuration)val).toString());
+										row.add(((XSDDuration)v).toString());
 									}
 									else {
 										row.add(v);

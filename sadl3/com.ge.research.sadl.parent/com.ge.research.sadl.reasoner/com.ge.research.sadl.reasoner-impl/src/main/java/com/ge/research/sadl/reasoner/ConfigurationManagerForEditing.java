@@ -28,7 +28,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,17 +35,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ServiceLoader;
 
-import com.ge.research.sadl.importer.AbortDataRowException;
-import com.ge.research.sadl.importer.ITabularDataImporter;
-import com.ge.research.sadl.model.ConceptName;
-import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.model.SadlSerializationFormat;
-import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
-import com.ge.research.sadl.reasoner.AvailablePlugin.PluginType;
-import com.ge.research.sadl.reasoner.IReasoner;
-import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
-import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import org.apache.jena.ontology.AnnotationProperty;
 import org.apache.jena.ontology.DatatypeProperty;
 import org.apache.jena.ontology.Individual;
@@ -68,6 +56,16 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.FileUtils;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
+
+import com.ge.research.sadl.importer.ITabularDataImporter;
+import com.ge.research.sadl.model.ConceptName;
+import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
+import com.ge.research.sadl.reasoner.AvailablePlugin.PluginType;
+import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
+import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 /**
  * this class extension supports configuration tasks unique to the IDE

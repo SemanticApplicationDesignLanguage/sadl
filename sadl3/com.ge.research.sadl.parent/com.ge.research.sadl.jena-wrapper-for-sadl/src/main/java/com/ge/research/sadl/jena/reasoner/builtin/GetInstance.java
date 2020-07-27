@@ -11,16 +11,16 @@ package com.ge.research.sadl.jena.reasoner.builtin;
 import java.io.InvalidObjectException;
 import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin;
-import com.ge.research.sadl.jena.reasoner.builtin.Utils;
-import org.apache.jena.reasoner.rulesys.*;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.reasoner.rulesys.BuiltinException;
+import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.apache.jena.graph.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Create a new anonymous node and bind it to the each argument

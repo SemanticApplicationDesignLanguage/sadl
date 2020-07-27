@@ -28,7 +28,7 @@ import org.junit.Test
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.SADL_RESOURCE
 import static org.eclipse.xtext.ui.testing.util.IResourcesSetupUtil.*
 
-class SadlEditorTest extends AbstractEditorTest {
+class SadlRenameTest extends AbstractEditorTest {
 
 	@Inject
 	Provider<RenameElementProcessor> processorProvider

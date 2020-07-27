@@ -25,13 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.jena.atlas.web.HttpException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ge.research.sadl.jena.reasoner.SadlReadFailureHandler;
+import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
@@ -40,19 +36,18 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.ModelGetter;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.reasoner.rulesys.Rule.ParserException;
 import org.apache.jena.shared.Lock;
 import org.apache.jena.shared.RulesetNotFoundException;
 import org.apache.jena.util.FileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ge.research.sadl.jena.reasoner.SadlReadFailureHandler;
 
 public class JenaBareThread extends Thread {
 	private static Logger logger = LoggerFactory.getLogger("JenaBareThread");

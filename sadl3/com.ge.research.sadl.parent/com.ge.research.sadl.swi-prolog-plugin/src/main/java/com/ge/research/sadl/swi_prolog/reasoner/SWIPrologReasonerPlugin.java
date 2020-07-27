@@ -8,7 +8,6 @@ import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -17,6 +16,15 @@ import java.util.Map;
 
 import javax.activation.DataSource;
 
+//import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologInterface;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.OWL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,15 +53,6 @@ import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologServiceInterface;
 import com.ge.research.sadl.swi_prolog.translator.SWIPrologTranslatorPlugin;
-//import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologInterface;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.vocabulary.OWL;
 
 public class SWIPrologReasonerPlugin extends Reasoner {
     protected static final Logger logger = LoggerFactory.getLogger(SWIPrologReasonerPlugin.class);

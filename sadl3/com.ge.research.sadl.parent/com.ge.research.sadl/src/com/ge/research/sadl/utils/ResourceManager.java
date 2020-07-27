@@ -37,7 +37,6 @@ import org.eclipse.emf.common.util.URI;
 import org.osgi.framework.Bundle;
 
 import com.ge.research.sadl.model.SadlSerializationFormat;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.google.common.base.Predicate;
