@@ -264,14 +264,53 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  	def void testCommentNotOnDefinition() {
  		'''
 			uri "http://sadl.org/a.sadl".
-			AllThingsGood is a class.
-			AllThingsGood (note "comment") is described by age with values of type float.
+			AllThingsGood (note "all good things") is a class.
+			age is a property with values of type data.
+			age (note "how old") describes AllThingsGood with values of type float.
+			AllThingsGood (note "comment").
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			assertNotNull(issues)
-			assertTrue(issues.toString.contains("Annotations are only valid in concept definitions"))
+			assertTrue(issues.empty)
+			val rsrc = jenaModel.getOntResource("http://sadl.org/a.sadl#AllThingsGood")
+			val cmnts = rsrc.listComments(null)
+			assertNotNull(cmnts)
+//			assertTrue(cmnts.size == 2)
+			var cntr = 0
+			while (cmnts.hasNext) {
+				val cmnt = cmnts.next;
+				val cmntstr = cmnt.toString
+				if (cmntstr.equals("all good things@en")) {
+					cntr++
+				}
+				if (cmntstr.equals("comment@en")) {
+					cntr++
+				}
+			}
+			assertTrue(cntr == 2)
 			
 		]
+ 	}
+ 	
+ 	@Test
+ 	def void testCommentNotInNamespace() {
+ 				val sadlModel1 = '''
+			 uri "http://sadl.org/model1.sadl" alias model1.
+			 
+			Rock is a class.
+ 		'''.sadl
+		val sadlModel2 = '''
+			 uri "http://sadl.org/model2.sadl" alias model2.
+			 
+			 import "http://sadl.org/model1.sadl".
+			 
+			 Rock (note "not here").
+ 		'''.sadl
+ 		val issues1 = _validationTestHelper.validate(sadlModel1)
+		val issues2 = _validationTestHelper.validate(sadlModel2)
+ 		assertTrue(issues1.empty)
+ 		assertFalse(issues2.empty)
+ 		assertTrue(issues2.toString.contains("Annotations are only allowed in the model where a concept is defined"))
+ 	
  	}
 	
 	@Test

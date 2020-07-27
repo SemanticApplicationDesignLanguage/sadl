@@ -7885,8 +7885,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (sruri != null && !sruri.equals(getModelNamespace())) {
 						addError("Annotations are only allowed in the model where a concept is defined", sr);
 					}
+					else {
+						OntResource rsrc = getTheJenaModel().getOntResource(sruri);
+						if (rsrc != null) {
+							addAnnotationsToResource(rsrc, anns);
+						}
+					}
 				}
 			}
+
 		}
 	}
 

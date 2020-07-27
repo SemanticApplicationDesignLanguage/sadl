@@ -8,7 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -28,7 +29,7 @@ import com.google.inject.Inject;
 
 public class ErrorAddingLinkingService extends DefaultLinkingService {
 
-	private static final Logger logger = Logger.getLogger(ErrorAddingLinkingService.class);
+	private static final Logger logger = LoggerFactory.getLogger(ErrorAddingLinkingService.class);
 	
 	@Inject
 	private IQualifiedNameConverter qualifiedNameConverter;
@@ -46,18 +47,14 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 
 		final String crossRefString = getCrossRefNodeAsString(node);
 		if (crossRefString != null && !crossRefString.equals("")) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("before getLinkedObjects: node: '" + crossRefString + "'");
-			}
+			logger.debug("before getLinkedObjects: node: '" + crossRefString + "'");
 			if (SadlASTUtils.isUnit(context)) {
 				return Collections.emptyList();
 			}
 			final IScope scope = getScope(context, ref);
 			QualifiedName qualifiedLinkName =  qualifiedNameConverter.toQualifiedName(crossRefString);
 			IEObjectDescription eObjectDescription = scope.getSingleElement(qualifiedLinkName);
-			if (logger.isDebugEnabled()) {
-				logger.debug("after getLinkedObjects: node: '" + crossRefString + "' result: " + eObjectDescription);
-			}
+			logger.debug("after getLinkedObjects: node: '" + crossRefString + "' result: " + eObjectDescription);
 			if (eObjectDescription != null) {
 				String errorMessage = eObjectDescription.getUserData(AMBIGUOUS_NAME_ERROR);
 				if (errorMessage != null && !alternativesAllSame(eObjectDescription)) {
