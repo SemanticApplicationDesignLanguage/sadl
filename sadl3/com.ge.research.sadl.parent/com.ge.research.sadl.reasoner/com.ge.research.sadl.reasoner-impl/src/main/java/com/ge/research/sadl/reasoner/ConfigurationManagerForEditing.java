@@ -615,6 +615,10 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 					.toString())) {
 				bChanged = true;
 			}
+			// add prefix to global prefixes
+			if (prefix != null) {
+				addGlobalPrefix(pubv.getURI(), prefix.getString());
+			}
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

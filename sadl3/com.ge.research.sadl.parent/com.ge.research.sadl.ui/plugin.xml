@@ -516,6 +516,12 @@
 			<selection class="org.eclipse.core.resources.IFile" name="*.owl"/> 
 		</wizard> 
    </extension>
+	 <extension
+	       point="org.eclipse.ui.startup">
+	    <startup
+	          class="com.ge.research.sadl.ui.SadlEarlyStartup">
+	    </startup>
+	 </extension>
   <extension
         point="org.eclipse.ui.startup">
      <startup
