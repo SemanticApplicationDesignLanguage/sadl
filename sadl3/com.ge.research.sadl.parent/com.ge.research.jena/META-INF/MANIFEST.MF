@@ -188,3 +188,4 @@ Bundle-ClassPath: lib/activation.jar,
  lib/slf4j-api.jar,
  lib/stax-api.jar,
  lib/wstx-asl.jar
+Automatic-Module-Name: com.ge.research.jena

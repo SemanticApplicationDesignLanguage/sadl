@@ -27,3 +27,4 @@ Export-Package: com.ge.research.sadl.swi_prolog.fileinterface,
  com.ge.research.sadl.swi_prolog.translator
 Bundle-ClassPath: .,
  target/classes/com/ge/research/sadl/swi-prolog/plinterface/
+Automatic-Module-Name: com.ge.research.sadl.swi.prolog.plugin

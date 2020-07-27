@@ -54,3 +54,4 @@ Import-Package: com.ge.research.sadl.errorgenerator.generator,
  org.eclipse.jdt.internal.ui.packageview,
  org.pojava.datetime
 Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator
+Automatic-Module-Name: com.ge.research.sadl.ui

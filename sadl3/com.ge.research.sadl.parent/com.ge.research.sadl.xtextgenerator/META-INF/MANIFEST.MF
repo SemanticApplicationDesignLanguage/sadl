@@ -12,3 +12,4 @@ Require-Bundle: org.eclipse.xtext.xtext.generator,
  org.eclipse.emf.mwe2.launch
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: General Electric Company
+Automatic-Module-Name: com.ge.research.sadl.xtextgenerator

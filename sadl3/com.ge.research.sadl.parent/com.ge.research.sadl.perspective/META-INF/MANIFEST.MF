@@ -33,3 +33,4 @@ Import-Package: com.ge.research.sadl.utils
 Export-Package: com.ge.research.sadl.perspective,
  com.ge.research.sadl.perspective.perspectives,
  com.ge.research.sadl.perspective.util
+Automatic-Module-Name: com.ge.research.sadl.perspective
