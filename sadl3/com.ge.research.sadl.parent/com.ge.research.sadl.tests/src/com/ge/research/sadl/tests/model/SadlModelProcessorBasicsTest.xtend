@@ -261,6 +261,37 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  	}
  	
  	@Test
+ 	def void testAmbiguousNamesInAparqlQuery() {
+ 		val sadlModel1 = '''
+ 		 uri "http://sadl.org/model1.sadl" alias model1.
+ 		 
+ 		 Rock is a class described by weight with values of type float.
+ 		 
+ 		 MyRock is a Rock with weight 24.5.
+ 		'''.sadl
+ 		val sadlModel2 = '''
+		  uri "http://sadl.org/model2.sadl" alias model2.
+		  
+		  Oil is a class described by weight with values of type int.
+  		'''.sadl
+ 		val sadlModel3 = '''
+ 		 uri "http://sadl.org/test.sadl" alias tst.
+ 		 
+ 		 import "http://sadl.org/model1.sadl".
+ 		 import "http://sadl.org/model2.sadl".
+ 		 
+ 		// Ask: select x, y where x has weight y.
+ 		 
+ 		 Ask: "select ?x ?y where {?x <weight> ?y}".
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(issues)
+ 			assertTrue(issues.size == 1)
+ 			val issue0 = issues.get(0).toString
+ 			assertTrue(issue0.startsWith("ERROR:weight is ambiguous; see 'http://sadl.org/model2.sadl#weight' and 'http://sadl.org/model1.sadl#weight'"))
+ 		]
+ 	}
+ 	
+ 	@Test
  	def void testCommentNotOnDefinition() {
  		'''
 			uri "http://sadl.org/a.sadl".

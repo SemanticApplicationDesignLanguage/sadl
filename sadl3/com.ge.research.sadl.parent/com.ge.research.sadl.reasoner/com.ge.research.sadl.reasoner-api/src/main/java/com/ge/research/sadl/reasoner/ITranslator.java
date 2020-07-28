@@ -127,7 +127,7 @@ public interface ITranslator {
 	 * @throws TranslationException
 	 * @throws InvalidNameException 
 	 */
-	public String translateQuery(OntModel model, String modelName, Query query) throws TranslationException, InvalidNameException;	
+	public String translateQuery(OntModel model, String modelName, Query query) throws TranslationException, InvalidNameException, AmbiguousNameException;	
 	
 	/**
 	 * Method to identify the family of reasoners to which this translator can be applied, e.g., "Jena-Based".
@@ -181,7 +181,7 @@ public interface ITranslator {
 	 * @return
 	 * @throws InvalidNameException
 	 */
-	public String prepareQuery(OntModel model, String queryStr) throws InvalidNameException;
+	public String prepareQuery(OntModel model, String queryStr) throws InvalidNameException, AmbiguousNameException;
 	
 	/**
 	 * Method to substitute parameter values for "?" terms in a query string.
@@ -192,7 +192,7 @@ public interface ITranslator {
 	 * @return parameterized query
 	 * @throws InvalidNameException
 	 */
-	public String parameterizeQuery(OntModel model, String queryStr, List<Object> values) throws InvalidNameException;
+	public String parameterizeQuery(OntModel model, String queryStr, List<Object> values) throws InvalidNameException, AmbiguousNameException;
 	
 	/**
 	 * Method to explore translator configuration options to discover those
@@ -257,7 +257,7 @@ public interface ITranslator {
 	 * @throws InvalidNameException
 	 * @throws ConfigurationException
 	 */
-	public String getLocalFragmentNamespace(String localFragmentName) throws InvalidNameException, ConfigurationException;
+	public String getLocalFragmentNamespace(String localFragmentName) throws InvalidNameException, AmbiguousNameException, ConfigurationException;
 	
 	/**
 	 * Returns supported data types for the project to show a warning for RCE that 

@@ -181,6 +181,7 @@ import com.ge.research.sadl.processing.SadlConstants.OWL_FLAVOR;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.processing.ValidationAcceptorExt;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -552,15 +553,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							Individual queryInst = getTheJenaModel().getIndividual(((Query) cmd).getFqName());
 							if (queryInst != null && !namedQueryList.contains(queryInst.getURI())) {
 								try {
-									String translatedQuery = null;
-									try {
-										translatedQuery = translator.translateQuery(getTheJenaModel(), getModelName(), (Query) cmd);
-									} catch (UnsupportedOperationException e) {
-										IReasoner defaultReasoner = getConfigMgr(resource, format)
-												.getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
-										translator = getConfigMgr(resource, format)
-												.getTranslatorForReasoner(defaultReasoner);
-										translatedQuery = translator.translateQuery(getTheJenaModel(), getModelName(), (Query) cmd);
+									String translatedQuery = ((Query)cmd).getPreparedQueryString();
+									if (translatedQuery == null) {
+										try {
+											translatedQuery = translator.translateQuery(getTheJenaModel(), getModelName(), (Query) cmd);
+										} catch (AmbiguousNameException e) {
+											addError(e.getMessage(), (EObject) ((Query)cmd).getContext());
+										} catch (UnsupportedOperationException e) {
+											IReasoner defaultReasoner = getConfigMgr(resource, format)
+													.getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
+											translator = getConfigMgr(resource, format)
+													.getTranslatorForReasoner(defaultReasoner);
+											try {
+												translatedQuery = translator.translateQuery(getTheJenaModel(), getModelName(), (Query) cmd);
+											} catch (AmbiguousNameException e1) {
+												addError(e.getMessage(), (EObject) ((Query)cmd).getContext());
+											}
+										}
 									}
 									Literal queryLit = getTheJenaModel().createTypedLiteral(translatedQuery);
 									queryInst.addProperty(RDFS.isDefinedBy, queryLit);
@@ -2373,7 +2382,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 			} else {
-				query = processQuery(postProcessTranslationResult(qobj));
+				query = processQuery(postProcessTranslationResult(qobj), qexpr);
 			}
 			if (query != null) {
 				if (element.getName() != null) {
@@ -2473,7 +2482,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 					}
 				} else {
-					query = processQuery(postProcessTranslationResult(qobj));
+					query = processQuery(postProcessTranslationResult(qobj), qexpr);
 				}
 				if (query != null) {
 					if (elementName != null) {
@@ -2993,7 +3002,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return query;
 	}
 
-	private Query processQuery(Object qobj) throws JenaProcessorException {
+	private Query processQuery(Object qobj, EObject context) throws JenaProcessorException {
 		String qstr = null;
 		Query q = (Query) getTarget();
 		if (q == null) {
@@ -3041,6 +3050,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			q.setKeyword("select");
 		} else {
 			throw new JenaProcessorException("Unexpected query type: " + qobj.getClass().getCanonicalName());
+		}
+		if (q.getSparqlQueryString() != null) {
+			ITranslator translator;
+			try {
+				translator = getTranslator();
+				if (translator != null) {
+					try {
+						String preparedQuery = translator.prepareQuery(getTheJenaModel(), q.getSparqlQueryString());
+						q.setPreparedQueryString(preparedQuery);
+					} catch (Exception e) {
+						addError(e.getMessage(), context);
+					}
+				}
+			} catch (ConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
 		}
 		setTarget(null);
 		return q;

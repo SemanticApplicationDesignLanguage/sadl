@@ -62,6 +62,7 @@ import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.jena.importer.CsvImporter;
 import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
@@ -513,14 +514,14 @@ public class SadlServerImpl implements ISadlServer {
 		throw new ReasonerNotFoundException("No reasoner found.");
 	}
 
-	public String prepareQuery(String query) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException {
+	public String prepareQuery(String query) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, AmbiguousNameException {
 		if (reasoner != null) {
 			return reasoner.prepareQuery(query);
 		}
 		throw new ReasonerNotFoundException("No reasoner found.");
 	}
 
-	public String parameterizeQuery(String query, List<Object> values) throws InvalidNameException, ConfigurationException, ReasonerNotFoundException {
+	public String parameterizeQuery(String query, List<Object> values) throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, AmbiguousNameException {
 		if (reasoner != null) {
 			return reasoner.parameterizeQuery(query, values);
 		}
@@ -840,7 +841,7 @@ public class SadlServerImpl implements ISadlServer {
 	public ResultSet[] atomicQuery(String serviceName, DataSource dataSrc, String inputFormat,
 			String[] sparql) throws IOException, ConfigurationException,
 			NamedServiceNotFoundException, QueryParseException,
-			ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException, URISyntaxException {
+			ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException, URISyntaxException, AmbiguousNameException {
 		ResultSet[] results = null;
 		if (serviceName == null || serviceName.length() == 0) {
 			throw new NamedServiceNotFoundException("Service name is null");
@@ -874,7 +875,7 @@ public class SadlServerImpl implements ISadlServer {
 			String[] sparql) throws IOException, ConfigurationException,
 			NamedServiceNotFoundException, QueryParseException,
 			ReasonerNotFoundException, SessionNotFoundException,
-			InvalidNameException, TemplateException, QueryCancelledException, URISyntaxException {
+			InvalidNameException, TemplateException, QueryCancelledException, URISyntaxException, AmbiguousNameException {
 		ResultSet[] results = null;
 		if (serviceName == null || serviceName.length() == 0) {
 			throw new NamedServiceNotFoundException("Service name is null");
@@ -910,7 +911,7 @@ public class SadlServerImpl implements ISadlServer {
 		return oldNS;
 	}
 	
-	public String createInstance(String name, String className) throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException {
+	public String createInstance(String name, String className) throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException, AmbiguousNameException {
 		String error = SadlUtils.validateRdfUri(name);
 		if (error != null) {
 			throw new InvalidNameException("Invalid instance name (" + name + "): " + error);

@@ -87,6 +87,7 @@ import com.ge.research.sadl.processing.OntModelProvider;
 import com.ge.research.sadl.processing.SadlInferenceException;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.query.SadlQueryHelper;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
@@ -680,6 +681,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		} catch (InvalidTypeException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (AmbiguousNameException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		result.setResults(testResult);
 		result.setErrors(getInitializedReasoner().getErrors());
@@ -989,7 +993,10 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 						e.printStackTrace();
 						throw new TranslationException(
 								"Unable to prepare SPARQL query", e);
-					}
+					} catch (AmbiguousNameException e) {
+						e.printStackTrace();
+						throw new TranslationException(
+								"Unable to prepare SPARQL query", e);					}
 				}
 			}
 			return obj;
@@ -1012,6 +1019,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					ResultSet lhResultSet = reasoner.ask(queryStr);
 					obj = lhResultSet;
 				} catch (InvalidNameException e) {
+					throw new TranslationException("Translation failed: ", e);
+				} catch (AmbiguousNameException e) {
 					throw new TranslationException("Translation failed: ", e);
 				}
 			} else {
@@ -1307,7 +1316,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return mfp.toString();
 	}
 
-	public SadlCommandResult processAdhocQuery(Resource resource, Query cmd) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
+	public SadlCommandResult processAdhocQuery(Resource resource, Query cmd) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException, AmbiguousNameException {
 		setCurrentResource(resource);
 		setTheJenaModel(OntModelProvider.find(resource));
 //		getTheJenaModel().write(System.out);
@@ -1316,7 +1325,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return processAdhocQuery(cmd);
 	}
 
-	private SadlCommandResult processAdhocQuery(Query cmd) throws TranslationException, InvalidNameException, ConfigurationException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
+	private SadlCommandResult processAdhocQuery(Query cmd) throws TranslationException, InvalidNameException, ConfigurationException, ReasonerNotFoundException, QueryParseException, QueryCancelledException, AmbiguousNameException {
 		String queryString;
 		String query = cmd.getSparqlQueryString();
 		ITranslator translator = null;
@@ -1360,7 +1369,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return result;
 	}
 	
-	private ResultSet processAdhocQuery(ITranslator translator, Query q) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException {
+	private ResultSet processAdhocQuery(ITranslator translator, Query q) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException, AmbiguousNameException {
 		String queryString = null;
 		try {
 			if (q.getParameterizedValues() != null) {

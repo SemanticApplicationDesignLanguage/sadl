@@ -32,6 +32,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError;
@@ -144,8 +145,9 @@ public interface ISadlServerPE extends ISadlServer {
      * @throws InvalidNameException
      * @throws SessionNotFoundException
      * @throws IOException 
+     * @throws AmbiguousNameException 
      */
-    abstract public String createInstance(String modelName, String name, String className) throws ConfigurationException, InvalidNameException, SessionNotFoundException, IOException;
+    abstract public String createInstance(String modelName, String name, String className) throws ConfigurationException, InvalidNameException, SessionNotFoundException, IOException, AmbiguousNameException;
 
     /**
 	 * Call this method to delete the specified triple from the specified existing model.
@@ -562,8 +564,9 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @throws ConfigurationException 
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
+	 * @throws AmbiguousNameException 
 	 */
-	public String prepareQuery(String modelName, String query) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, InvalidNameException, SessionNotFoundException;
+	public String prepareQuery(String modelName, String query) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, InvalidNameException, SessionNotFoundException, AmbiguousNameException;
 
 	/**
 	 * Method to substitute parameter values for "?" terms in a query string.
@@ -576,7 +579,8 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @throws InvalidNameException 
 	 * @throws ReasonerNotFoundException 
 	 * @throws SessionNotFoundException 
+	 * @throws AmbiguousNameException 
 	 */
-	public String parameterizeQuery(String modelName, String queryStr, List<Object> values) throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException;
+	public String parameterizeQuery(String modelName, String queryStr, List<Object> values) throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, AmbiguousNameException;
 
 }

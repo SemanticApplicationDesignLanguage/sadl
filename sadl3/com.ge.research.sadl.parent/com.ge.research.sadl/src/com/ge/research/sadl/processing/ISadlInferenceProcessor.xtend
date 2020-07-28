@@ -32,6 +32,7 @@ import java.util.Map
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import com.ge.research.sadl.model.gp.TripleElement
+import com.ge.research.sadl.reasoner.AmbiguousNameException
 
 /**
  * Generic hook for 3rd party processors to participate in the processing of SADL resources
@@ -57,7 +58,7 @@ interface ISadlInferenceProcessor {
 	/**
 	 * Called to run an ad hoc query
 	 */
-	def SadlCommandResult processAdhocQuery(Resource resource, Query query) throws ConfigurationException, TranslationException, InvalidNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException;
+	def SadlCommandResult processAdhocQuery(Resource resource, Query query) throws ConfigurationException, TranslationException, InvalidNameException, AmbiguousNameException, ReasonerNotFoundException, QueryParseException, QueryCancelledException;
 
 	/**
 	 * Call to insert complete triples into model and query using incomplete triples

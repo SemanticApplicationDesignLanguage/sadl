@@ -65,6 +65,7 @@ import org.eclipse.xtext.util.TextRegion
 import static com.ge.research.sadl.preferences.SadlPreferences.*
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
+import static com.ge.research.sadl.processing.SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 import org.eclipse.xtext.resource.XtextResource
 
@@ -134,6 +135,7 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 			val imports = model.imports.map[importedResource].filterNull.map[baseUri].toSet;
 			return [
 				return SADL_IMPLICIT_MODEL_FILENAME != EObjectURI?.lastSegment &&
+				    SADL_BUILTIN_FUNCTIONS_FILENAME != EObjectURI?.lastSegment && 
 					KNOWN_FILE_EXTENSION.contains(EObjectURI?.fileExtension) && !imports.contains(name.toString);
 			];
 		}

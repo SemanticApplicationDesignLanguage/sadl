@@ -93,6 +93,7 @@ import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -722,6 +723,9 @@ public class CsvImporter implements ITabularDataImporter {
 				throw new QueryParseException("Invalid name in query: " + e.getMessage(), e);
 			} catch (QueryCancelledException e) {
 				throw new QueryCancelledException("Query timed out: " + e.getMessage(), e);
+			} catch (AmbiguousNameException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			if (rs != null) {
 				//				int colcnt = rs.getColumnCount() ;

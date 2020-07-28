@@ -57,6 +57,7 @@ import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.Update;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -499,7 +500,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 
 	public String translateQuery(OntModel model, String modelName, Query query)
-			throws TranslationException, InvalidNameException {
+			throws TranslationException, InvalidNameException, AmbiguousNameException {
 		boolean isEval = false;
 		setTheModel(model);
 		setModelName(modelName);
@@ -1579,7 +1580,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	 * @return
 	 * @throws InvalidNameException
 	 */
-	public String prepareQuery(OntModel model, String q) throws InvalidNameException {
+	public String prepareQuery(OntModel model, String q) throws InvalidNameException, AmbiguousNameException {
 		int openBracket = q.indexOf('<');
 		if (openBracket >= 0) {
 			int closeBracket = q.indexOf('>', openBracket);
@@ -1612,7 +1613,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	 * @param values -- the list of values to be used in parameterizing the query
 	 * @return -- the parameterized query string
 	 */
-	public String parameterizeQuery(OntModel model, String q, List<Object> values) throws InvalidNameException {
+	public String parameterizeQuery(OntModel model, String q, List<Object> values) throws InvalidNameException, AmbiguousNameException {
 		int idx = q.indexOf("?}");
 		int lastIdx = 0;
 		if (idx > 0) {
@@ -1672,13 +1673,15 @@ public class JenaTranslatorPlugin implements ITranslator {
 	 * @return -- the fuly-qualified name of the concept as found in some model
 	 * 
 	 * @throws InvalidNameException -- the concept was not found
+	 * @throws AmbiguousNameException 
 	 */
-	public static synchronized String findNameNs(OntModel model, String name) throws InvalidNameException {
+	public static synchronized String findNameNs(OntModel model, String name) throws InvalidNameException, AmbiguousNameException {
 		String uri = findConceptInSomeModel(model, name);
 		if (uri != null) {
 			return uri;
 		}
 		Iterator<String> impitr = model.listImportedOntologyURIs(true).iterator();
+		String firstFoundUri = null;
 		while (impitr.hasNext()) {
 			String impuri = impitr.next();
 			OntModel submodel = model.getImportedModel(impuri);
@@ -1693,9 +1696,19 @@ public class JenaTranslatorPlugin implements ITranslator {
 			}
 			if (impuri != null) {
 				logger.debug("found concept with URI '" + impuri + "'");
-				return impuri;
+				if (firstFoundUri != null) {
+					// this is a second find so the name is ambiguous
+					if (!firstFoundUri.equals(impuri)) {
+						throw new AmbiguousNameException(name + " is ambiguous; see '" + firstFoundUri + "' and '" + impuri + "'");						
+					}
+				}
+				firstFoundUri = impuri;
 			}
 		}
+		if (firstFoundUri != null) {
+			return firstFoundUri;
+		}
+
 		ExtendedIterator<Ontology> oitr = model.listOntologies();
 		while (oitr.hasNext()) {
 			Ontology onto = oitr.next();
@@ -1710,6 +1723,11 @@ public class JenaTranslatorPlugin implements ITranslator {
 					String muri = getUriInModel(model, or.getURI(), name);
 					if (muri != null) {
 						logger.debug("found concept with URI '" + muri + "'");
+						if (firstFoundUri != null) {
+							// this is a second find so the name is ambiguous
+							throw new AmbiguousNameException(name + " is an ambiguous; see '" + firstFoundUri + "' and '" + muri + "'");
+						}
+						firstFoundUri = muri;
 						return muri;
 					}
 				}
@@ -1717,9 +1735,17 @@ public class JenaTranslatorPlugin implements ITranslator {
 				String muri = getUriInModel(model, onto.getURI() + "#", name);
 				if (muri != null) {
 					logger.debug("found concept with URI '" + muri + "'");
+					if (firstFoundUri != null && !firstFoundUri.equals(muri)) {
+						// this is a second find so the name is ambiguous
+						throw new AmbiguousNameException(name + " is an ambiguous; see '" + firstFoundUri + "' and '" + muri + "'");
+					}
+					firstFoundUri = muri;
 					return muri;
 				}
 			}
+		}
+		if (firstFoundUri != null) {
+			return firstFoundUri;
 		}
 		
 		if (logger.isDebugEnabled()) {
@@ -1731,19 +1757,26 @@ public class JenaTranslatorPlugin implements ITranslator {
 		throw new InvalidNameException("'" + name + "' not found in any model.");
 	}
 
-	private static synchronized String findConceptInSomeModel(OntModel model, String name) {
+	private static synchronized String findConceptInSomeModel(OntModel model, String name) throws AmbiguousNameException {
 		Map<String, String> map = model.getNsPrefixMap();
 		Iterator<String> uriitr = map.values().iterator();
+		String firstFoundUri = null;
 		while (uriitr.hasNext()) {
 			String ns = uriitr.next();
 			String uri = getUriInModel(model, ns, name);
 			if (uri != null) {
 				logger.debug("found concept with URI '" + uri + "'");
-				return uri;
+				if (firstFoundUri != null) {
+					// this is a second find so the name is ambiguous
+					if (!firstFoundUri.equals(uri)) {
+						throw new AmbiguousNameException(name + " is ambiguous; see '" + firstFoundUri + "' and '" + uri + "'");						
+					}
+				}
+				firstFoundUri = uri;
 			}
 		}
 		logger.debug("did not find concept with name '" + name + "'");
-		return null;
+		return firstFoundUri;
 	}
 	
 	private static synchronized String getUriInModel(OntModel model, String ns, String name) {
@@ -2262,7 +2295,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 
 	@Override
-	public String getLocalFragmentNamespace(String name) throws InvalidNameException, ConfigurationException {
+	public String getLocalFragmentNamespace(String name) throws InvalidNameException, AmbiguousNameException, ConfigurationException {
 		OntModel model = getTheModel();
 		if (model != null) {
 			String fqn = findNameNs(model, name);

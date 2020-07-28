@@ -92,6 +92,7 @@ import com.ge.research.sadl.external.XMLHelper;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SparqlQueries;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -2043,6 +2044,9 @@ public class OwlToSadl {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ReasonerNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (AmbiguousNameException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

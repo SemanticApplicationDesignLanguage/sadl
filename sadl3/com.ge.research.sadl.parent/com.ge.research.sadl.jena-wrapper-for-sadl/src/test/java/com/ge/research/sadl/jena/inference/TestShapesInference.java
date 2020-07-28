@@ -9,6 +9,7 @@ import org.apache.jena.rdf.model.Model;
 import org.junit.Test;
 
 import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -22,7 +23,7 @@ import com.ge.research.sadl.reasoner.ResultSet;
 public class TestShapesInference {
 
 	@Test
-	public void test() throws ConfigurationException, ReasonerNotFoundException, QueryParseException, QueryCancelledException, InvalidNameException {
+	public void test() throws ConfigurationException, ReasonerNotFoundException, QueryParseException, QueryCancelledException, InvalidNameException, AmbiguousNameException {
 		URL dataModelsFolder = ClassLoader.getSystemResource("TestModels");
 		String kbid = dataModelsFolder.getFile() + "/Shapes";
 		String modelName = "http://sadl.org/Test.sadl";

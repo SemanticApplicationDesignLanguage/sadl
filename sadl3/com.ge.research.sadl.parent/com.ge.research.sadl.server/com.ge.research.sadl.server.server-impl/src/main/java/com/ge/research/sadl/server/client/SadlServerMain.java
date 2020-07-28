@@ -51,6 +51,7 @@ import javax.naming.NameNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.InvalidDerivationException;
@@ -692,8 +693,9 @@ public class SadlServerMain {
 		 * @throws SessionNotFoundException 
 		 * @throws QueryCancelledException 
 		 * @throws URISyntaxException 
+		 * @throws AmbiguousNameException 
 	 */
-	public String[] getLeafClassesOfTaxonomy(String root) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException {
+	public String[] getLeafClassesOfTaxonomy(String root) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException, AmbiguousNameException {
 		String query = "select ?et where {?et <rdfs:subClassOf> <" + root + "> . OPTIONAL {?et2 <rdfs:subClassOf> ?et . FILTER ((?et2 != <owl:Nothing> && ?et2 != ?et)) } FILTER (!bound(?et2)) }";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -728,8 +730,9 @@ public class SadlServerMain {
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
 	 * @throws URISyntaxException 
+	 * @throws AmbiguousNameException 
 	 */
-	public String[] getInstancesOfClass(String cls) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException {
+	public String[] getInstancesOfClass(String cls) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException, AmbiguousNameException {
 		String query = "select ?i where { ?i <rdf:type> <" + cls + "> }";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -764,8 +767,9 @@ public class SadlServerMain {
 	 * @throws QueryCancelledException 
 	 * @throws URISyntaxException 
 	 * @throws IOException 
+	 * @throws AmbiguousNameException 
 	 */
-	public boolean isObjectProperty(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
+	public boolean isObjectProperty(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException, AmbiguousNameException {
 		String query = "select ?t where {<" + property + "> <rdf:type> ?t . FILTER(?t = <http://www.w3.org/2002/07/owl#ObjectProperty>)}";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -789,8 +793,9 @@ public class SadlServerMain {
 	 * @throws QueryCancelledException 
 	 * @throws URISyntaxException 
 	 * @throws IOException 
+	 * @throws AmbiguousNameException 
 	 */
-	public boolean isDatatypeProperty(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
+	public boolean isDatatypeProperty(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException, AmbiguousNameException {
 		String query = "select ?t where {<" + property + "> <rdf:type> ?t . FILTER(?t = <http://www.w3.org/2002/07/owl#DatatypeProperty>)}";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -814,8 +819,9 @@ public class SadlServerMain {
 	 * @throws QueryCancelledException 
 	 * @throws URISyntaxException 
 	 * @throws IOException 
+	 * @throws AmbiguousNameException 
 	 */
-	public String[] getPropertyDomain(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
+	public String[] getPropertyDomain(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException, AmbiguousNameException {
 		String query = "select ?d where { <" + property + "> <rdfs:domain> ?d }";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -851,8 +857,9 @@ public class SadlServerMain {
 	 * @throws QueryCancelledException 
 	 * @throws URISyntaxException 
 	 * @throws IOException 
+	 * @throws AmbiguousNameException 
 	 */
-	public String[] getPropertyRange(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
+	public String[] getPropertyRange(String property) throws NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException, AmbiguousNameException {
 		String query = "select ?r where { <" + property + "> <rdfs:range> ?r }";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -889,8 +896,9 @@ public class SadlServerMain {
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
 	 * @throws URISyntaxException 
+	 * @throws AmbiguousNameException 
 	 */
-	public String[] getRequiredRangeClassesOfPropertyOfClass(String cls, String property) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException {
+	public String[] getRequiredRangeClassesOfPropertyOfClass(String cls, String property) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException, AmbiguousNameException {
 		String query = "select ?v where { <" + cls + "> <rdfs:subClassOf> ?r . ?r <rdf:type> <owl:Restriction> . ?r <owl:someValuesFrom> ?v . ?r <owl:onProperty> <" + property + ">}";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -927,8 +935,9 @@ public class SadlServerMain {
 	 * @throws QueryCancelledException 
 	 * @throws URISyntaxException 
 	 * @throws IOException 
+	 * @throws AmbiguousNameException 
 	 */
-	public String[] getAllowedRangeClassesOfPropertyOfClass(String cls, String property) throws NameNotFoundException, InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
+	public String[] getAllowedRangeClassesOfPropertyOfClass(String cls, String property) throws NameNotFoundException, InvalidNameException, ReasonerNotFoundException, ConfigurationException, QueryParseException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException, AmbiguousNameException {
 		String query = "select ?v where { <" + cls + "> <rdfs:subClassOf> ?r . ?r <rdf:type> <owl:Restriction> . ?r <owl:allValuesFrom> ?v . ?r <owl:onProperty> <" + property + ">}";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -965,8 +974,9 @@ public class SadlServerMain {
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
 	 * @throws URISyntaxException 
+	 * @throws AmbiguousNameException 
 	 */
-	public String[] getAllowedValuesOfObjectPropertyOfClass(String cls, String property) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException {
+	public String[] getAllowedValuesOfObjectPropertyOfClass(String cls, String property) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, URISyntaxException, AmbiguousNameException {
 		String query = "select ?v where { <" + cls + "> <rdfs:subClassOf> ?r . ?r <rdf:type> <owl:Restriction> . ?r <owl:onProperty> <" + property + "> . ?r <owl:allValuesFrom> ?o . ?o <owl:oneOf> ?l . ?l <http://jena.hpl.hp.com/ARQ/list#member> ?v}";
 		query = sadlSvc.prepareQuery(query);
 		String[][] results = getDataAsStringArray(query);
@@ -1003,8 +1013,9 @@ public class SadlServerMain {
 	 * @throws SessionNotFoundException 
 	 * @throws QueryCancelledException 
 	 * @throws URISyntaxException 
+	 * @throws AmbiguousNameException 
 	 */
-	public Object[] getAllowedValuesOfDataPropertyOfClass(String cls, String property) throws QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException {
+	public Object[] getAllowedValuesOfDataPropertyOfClass(String cls, String property) throws QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, QueryCancelledException, IOException, URISyntaxException, AmbiguousNameException {
 		String query = "select distinct ?v where { <" + cls + "> <rdfs:subClassOf> ?r . ?r <rdf:type> <owl:Restriction> . ?r <owl:onProperty> <" + property + "> . ?r <owl:hasValue> ?v}";
 		query = sadlSvc.prepareQuery(query);
 		ResultSet results = sadlSvc.query(query);
