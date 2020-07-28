@@ -907,6 +907,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	
 	private boolean typeCheckingRangeRequired = true;
 	
+	private boolean enableMetricsCollection = false;
+	
 	private boolean typeUnsupportedDownstreamWarnings;
 	
 	//-----------END PEFERENCES --------------
@@ -1189,7 +1191,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return;
 		}
 
-		boolean enableMetricsCollection = true; // no longer a preference
+		initializePreferences(context);
+
 		try {
 			if (enableMetricsCollection) {
 				if (!isSyntheticUri(null, resource)) {
@@ -1204,8 +1207,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		initializePreferences(context);
 
 		// create validator for expressions
 		initializeModelValidator();
@@ -14504,6 +14505,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			setTypeCheckingRangeRequired(Boolean.parseBoolean(typeCheckingRangeRequiredStr));
 			modelProcessorPreferenceMap.put(SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED.getId(), typeCheckingRangeRequiredStr);
+			
+			String enableMetricsCollectionStr = preferenceValues.getPreference(SadlPreferences.ENABLE_METRICS_COLLECTION);
+			if (enableMetricsCollectionStr == null) {
+				enableMetricsCollectionStr = "false";
+			}
+			setEnableMetricsCollection(Boolean.parseBoolean(enableMetricsCollectionStr));
+			modelProcessorPreferenceMap.put(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), enableMetricsCollectionStr);
 		}
 		return modelProcessorPreferenceMap;
 	}
@@ -14537,5 +14545,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected void setAllowedVariableContainers(List<Class> allowedVariableContainers) {
 		this.allowedVariableContainers = allowedVariableContainers;
+	}
+
+	private boolean isEnableMetricsCollection() {
+		return enableMetricsCollection;
+	}
+
+	private void setEnableMetricsCollection(boolean enableMetricsCollection) {
+		this.enableMetricsCollection = enableMetricsCollection;
 	}
 }

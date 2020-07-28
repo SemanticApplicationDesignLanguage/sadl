@@ -61,7 +61,7 @@ public class SadlPreferences {
 	public static final PreferenceKey TYPE_CHECKING_RANGE_REQUIRED = new PreferenceKey("typeCheckingRangeRequired", String.valueOf(true));
 	public static final PreferenceKey IGNORE_UNITTEDQUANTITIES = new PreferenceKey("ignoreUnittedQuantities", String.valueOf(false));
 	public static final PreferenceKey CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES = new PreferenceKey("domainAndRangeAsUnionClasses", String.valueOf(true));
-	//	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
+	public static final PreferenceKey ENABLE_METRICS_COLLECTION = new PreferenceKey("metricsCollectionOn", String.valueOf(false));
 	public static final PreferenceKey GENERATE_METRICS_REPORT_ON_CLEAN_BUILD = new PreferenceKey("generateMetricsReport", String.valueOf(false));
 	public static final PreferenceKey METRICS_QUERY_FILENAME = new PreferenceKey("metricsQueryFilename", "");
 	public static final PreferenceKey GRAPH_IMPLICIT_ELEMENTS = new PreferenceKey("graphImplicitElements", String.valueOf(false));
@@ -104,7 +104,7 @@ public class SadlPreferences {
 			TYPE_CHECKING_RANGE_REQUIRED,
 			IGNORE_UNITTEDQUANTITIES,
 			CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES,
-//			ENABLE_METRICS_COLLECTION,
+			ENABLE_METRICS_COLLECTION,
 			GENERATE_METRICS_REPORT_ON_CLEAN_BUILD,
 			METRICS_QUERY_FILENAME, 
 			GRAPH_IMPLICIT_ELEMENTS,

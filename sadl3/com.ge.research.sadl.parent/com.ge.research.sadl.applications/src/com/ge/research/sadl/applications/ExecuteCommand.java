@@ -461,6 +461,11 @@ public class ExecuteCommand implements IApplication {
                                             .getId(),
                                     sadlValue);
                         } else if (sadlLabel.equals(
+                                "EnableMetricsCollection")) {
+                            sadlPreferences.put(
+                                    SadlPreferences.ENABLE_METRICS_COLLECTION.getId(),
+                                    sadlValue);
+                        } else if (sadlLabel.equals(
                                 "GenerateMetricsReportDuringProjectCleanBuild")) {
                             sadlPreferences.put(
                                     SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD.getId(),

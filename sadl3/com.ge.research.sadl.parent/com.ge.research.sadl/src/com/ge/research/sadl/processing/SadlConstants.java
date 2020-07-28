@@ -1,5 +1,7 @@
 package com.ge.research.sadl.processing;
 
+import java.io.File;
+
 public class SadlConstants {
 	public static final String SADL_BASE_MODEL_FILENAME = "SadlBaseModel";
 	public static final String SADL_BASE_MODEL_URI = "http://sadl.org/sadlbasemodel";
@@ -99,6 +101,9 @@ public class SadlConstants {
 	public static final String CONSTANT_E = "e";
 	public static final String CONSTANT_KNOWN = "known";
 	public static final String OF_TYPE_INSTANCES = "instances";
+	public static final String SADL_METRICS_METAMODEL_FILENAME = "sadlmetricsmodel.metrics.owl";
+	public static final String SADL_METRICS_METAMODEL_URI = "http://com.ge.research.sadl/sadlmetricsmodel";
+	public static final String SADL_METRICS_METAMODEL_NS = SADL_METRICS_METAMODEL_URI + "#";
 		
 	public static enum OWL_FLAVOR {OWL_FULL, OWL_DL, OWL_LITE};
 	
