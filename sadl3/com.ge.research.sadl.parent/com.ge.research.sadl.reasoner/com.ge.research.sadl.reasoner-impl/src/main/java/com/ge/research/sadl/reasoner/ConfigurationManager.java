@@ -912,63 +912,85 @@ public class ConfigurationManager implements IConfigurationManager {
 	            }
 	            else {
 	            	// this handles mappings that are not created by SADL
-	            	//  1) if the mapping is of type "file:" and the file exists assume it is correct
+	            	//  1) if the mapping is of type "file:"
+	            	//		a) if the path has a match to the project and there is a file in the current project matching the rest of the path, use this matching path
+	            	//		b) if the file exists assume it is correct
 	            	//	2) else if their is a file of that name in the same folder as the policy file assume that file is the correct one
 	            	//	3) else if there is a sibling folder to the folder of the policy file that contains a file of that name assume it is the correct one
 	            	if (strAltv.startsWith(IConfigurationManager.FILE_SHORT_PREFIX)) {
 			            StringTokenizer st1 = new StringTokenizer(strAltv, "/");
 			            String lastToken = null;
+	 					String projectName = getModelFolderPath().getParentFile().getName();
+	 					StringBuilder relativePath = null;
 			 			while(st1.hasMoreTokens()) {
 			 				lastToken = fileName;
 			            	fileName = st1.nextToken();
+			            	if (relativePath != null) {
+			            		relativePath.append("/");
+			            		relativePath.append(fileName);
+			            	}
+			            	else if (fileName.equals(projectName)) {
+			            		relativePath = new StringBuilder();
+			            	}
 			 			}
 			 			String testName = strAltv;
 		 				try {
-				 			File testFile = new File(fileUrlToFileName(testName));
-				 			if (testFile.exists()) {
-				 				// the actualUrl exists as is so use it
-				 				actualFilePath = testName;
-				 			}
-				 			else {
-				 				testName =  getActualUrl(fileName);
-								testFile = new File(fileUrlToFileName(testName));
-				 				if (testFile.exists()) {
-				 					// the actualUrl adjusted to have the relative location of the models folder exists so use it
-				 					actualFilePath = testName;
-				 				}
-				 				else {
-				 					String siblingName = siblingFolderUrl(fileName, lastToken);
-				 					boolean siblingFound = false;
-				 					if (siblingName != null) {
-				 						File sibling = new File(fileUrlToFileName(siblingName));
-				 						if (sibling.exists()) {
-				 							// the named file exists in a sibling directory; use it
-				 							siblingFound = true;
-				 							actualFilePath = siblingName;
-				 						}
-				 					}
-				 					if (!siblingFound) {
-				 						if (getModelFolderPath() != null) {
-								 			String folderPath = fileNameToFileUrl(getModelFolderPath().getAbsolutePath());
-						 					testName = folderPath.substring(0, folderPath.length() - (1 + lastToken.length())) + "/" + fileName;
-						 					testFile = new File(fileUrlToFileName(testName));
-						 					if (testFile.exists()) {
-						 						// folder above??
-						 						actualFilePath = testName;
-						 					}
-						 					else {
-						 						logger.warn("Mapping file has actual URL '" + testName + "' but it does not appear to exist and could not be found in adjacent folders.");
-						 					}
-				 						}
-				 						else {
-				 							actualFilePath = testName;
-				 							if (!actualFilePath.startsWith("http:")) {
-				 								logger.warn("Mapping file '" + strAltv + "'; using '" + actualFilePath + "'");
-				 							}
-				 						}
-				 					}
-				 				}
-				 			}
+		 					boolean found = false;
+		 					if (relativePath != null) {
+		 						String relTestName = getProjectPath() + relativePath.toString();
+		 						File relTestFile = new File(relTestName);
+		 						if (relTestFile.exists()) {
+		 							actualFilePath = fileNameToFileUrl(relTestName);
+		 							found = true;
+		 						}
+		 					}
+		 					if (!found) {
+					 			File testFile = new File(fileUrlToFileName(testName));
+					 			if (testFile.exists()) {
+					 				// the actualUrl exists as is so use it
+					 				actualFilePath = testName;
+					 			}
+					 			else {
+					 				testName =  getActualUrl(fileName);
+									testFile = new File(fileUrlToFileName(testName));
+					 				if (testFile.exists()) {
+					 					// the actualUrl adjusted to have the relative location of the models folder exists so use it
+					 					actualFilePath = testName;
+					 				}
+					 				else {
+					 					String siblingName = siblingFolderUrl(fileName, lastToken);
+					 					boolean siblingFound = false;
+					 					if (siblingName != null) {
+					 						File sibling = new File(fileUrlToFileName(siblingName));
+					 						if (sibling.exists()) {
+					 							// the named file exists in a sibling directory; use it
+					 							siblingFound = true;
+					 							actualFilePath = siblingName;
+					 						}
+					 					}
+					 					if (!siblingFound) {
+					 						if (getModelFolderPath() != null) {
+									 			String folderPath = fileNameToFileUrl(getModelFolderPath().getAbsolutePath());
+							 					testName = folderPath.substring(0, folderPath.length() - (1 + lastToken.length())) + "/" + fileName;
+							 					testFile = new File(fileUrlToFileName(testName));
+							 					if (testFile.exists()) {
+							 						// folder above??
+							 						actualFilePath = testName;
+							 					}
+							 					else {
+							 						logger.warn("Mapping file has actual URL '" + testName + "' but it does not appear to exist and could not be found in adjacent folders.");
+							 					}
+					 						}
+					 						else {
+					 							actualFilePath = testName;
+					 							if (!actualFilePath.startsWith("http:")) {
+					 								logger.warn("Mapping file '" + strAltv + "'; using '" + actualFilePath + "'");
+					 							}
+					 						}
+					 					}
+					 				}
+					 			}
+		 					}
 		 				}
 						catch (MalformedURLException e) {
 							// oh well, we tried

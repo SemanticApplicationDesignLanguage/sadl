@@ -7854,8 +7854,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public Node processExpression(SadlResource expr) throws TranslationException {
 		checkForInvalidAnnotation(expr);
 		String nm = getDeclarationExtensions().getConcreteName(expr);
+		String uri = getDeclarationExtensions().getConceptUri(expr);
 		String ns = getDeclarationExtensions().getConceptNamespace(expr);
 		String prfx = getDeclarationExtensions().getConceptPrefix(expr);
+//		if (nm.indexOf(':') > 0) {
+//			// in this case the returned name has a prefix (must be an import) so get the name from the declaration
+//			nm = getDeclarationExtensions().getConcreteName(getDeclarationExtensions().getDeclaration(expr));
+//		}
 		OntConceptType type;
 		try {
 			type = getDeclarationExtensions().getOntConceptType(expr);
@@ -7885,7 +7890,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return vn;
 		} else if (nm != null) {
-			NamedNode n = new NamedNode(createUri(ns, nm), ontConceptTypeToNodeType(type));
+			NamedNode n = new NamedNode(uri, ontConceptTypeToNodeType(type));
 			n.setContext(expr);
 			n.setNamespace(ns);
 			n.setPrefix(prfx);

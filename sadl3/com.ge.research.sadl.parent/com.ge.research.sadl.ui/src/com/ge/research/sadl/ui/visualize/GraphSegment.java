@@ -295,15 +295,24 @@ public class GraphSegment {
 		else {
 			ExtendedIterator<? extends OntResource> eitr2 = enumcls.listOneOf();
 			while (eitr2.hasNext()) {
-				OntResource or = eitr2.next();
-				if (cnt++ > 0) {
-					sb.append(",");
+				try {
+					OntResource or = eitr2.next();
+					if (cnt++ > 0) {
+						sb.append(",");
+					}
+					if (objectDisplayStrings != null && objectDisplayStrings.containsKey(or)) {
+						sb.append(objectDisplayStrings.get(or));
+					}
+					else {
+						sb.append(rdfNodeToString(or, false));
+					}
 				}
-				if (objectDisplayStrings != null && objectDisplayStrings.containsKey(or)) {
-					sb.append(objectDisplayStrings.get(or));
-				}
-				else {
-					sb.append(rdfNodeToString(or, false));
+				catch (Exception e) {
+					e.printStackTrace();
+					if (cnt++ > 0) {
+						sb.append(",");
+					}
+					sb.append("<error>");
 				}
 			}
 		}
