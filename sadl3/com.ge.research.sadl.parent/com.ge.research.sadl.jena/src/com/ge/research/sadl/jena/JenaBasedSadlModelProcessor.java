@@ -7529,7 +7529,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				subjNode = new ProxyNode((GraphPatternElement) trSubj);
 			}
 			if (subjNode == null) {
-				throw new TranslationException("Subject is neither Node nor GraphPatternElement: " + subjNode.getClass().getCanonicalName());
+				throw new TranslationException("Subject is neither Node nor GraphPatternElement");
 			}
 			if (predNode != null && predNode instanceof Node) {
 				//Add range information to predNode based on domain restriction
@@ -10263,7 +10263,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					assignInstancePropertyValue(valinst, cls, prop, sr);
 				}
 				else {
+					EObject save = getHostEObject();
+					setHostEObject(element);
 					assignInstancePropertyValue(inst, cls, prop, val);
+					setHostEObject(save);
 				}
 			} else {
 				addError("no value found", propinit);
@@ -10963,6 +10966,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else if (prop.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_EXPANDED_PROPERTY_URI)) {
 			addExpandedPropertyClass(inst);
 		}
+		try {
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), inst, prop, null, false, null);
+		} catch (InvalidTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CircularDependencyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		inst.addProperty(prop, value);
 		logger.debug("added value '" + value.toString() + "' to property '" + prop.toString() + "' for instance '"
 				+ inst.toString() + "'");
