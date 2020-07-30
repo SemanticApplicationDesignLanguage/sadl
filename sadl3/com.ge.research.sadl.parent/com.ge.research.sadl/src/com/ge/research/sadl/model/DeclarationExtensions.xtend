@@ -90,6 +90,11 @@ class DeclarationExtensions {
 	 * println(extensions.getConcreteName(resource, true)); // Foo
 	 * println(extensions.getConcreteName(resource, false)); // current:Foo
 	 * </pre>
+	 *
+	 * <b>Note</b>: this should be used by only the scoping, and the ambiguous name detection when the objects have not been linked together,
+	 * and traversing the AST is not possible. The prefix will be trimmed iff the prefix equals with the alias of the current SADL model.
+	 * No other uses-cases are supported currently. Consider using {@code getConcreteName(getDeclaration(sadlResource), true))} instead.
+	 * For more details, read <a href="https://github.com/crapo/sadlos2/issues/483#issuecomment-665754270">here</a>.
 	 * 
 	 * @param it the SADL resource who's name we are looking for.
 	 * @param trimPrefix when {@code true} any leading prefixes (if any) will be omitted from the result.
