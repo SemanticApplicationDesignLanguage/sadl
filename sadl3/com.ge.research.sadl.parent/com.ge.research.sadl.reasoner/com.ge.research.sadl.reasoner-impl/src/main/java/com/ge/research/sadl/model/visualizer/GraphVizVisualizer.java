@@ -2,6 +2,12 @@ package com.ge.research.sadl.model.visualizer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -324,7 +330,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 	}
 
 	private void createGraphTriple(Object s, String edgeLbl, Object o, Map<Integer, String> headAttributes, Map<Integer, String> edgeAttributes, Map<Integer, 
-			String> tailAttributes, Object[] row, String anchorNodeLabel, String subjectNode) {
+			String> tailAttributes, Object[] row, String anchorNodeLabel, String subjectNode)  {
 		String slbl = subjectNode;
 		String olbl;
 		if (slbl == null) {
@@ -432,11 +438,31 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			sb.append(olbl);
 			if (o.equals(OWL.Nothing)) {
 				sb.append("[shape=point label=\"");
+				sb.append(replaceDoubleQuotes(o.toString()));
 			}
 			else {
 				sb.append("[shape=box label=\"");
+				//CharsetEncoder csE = StandardCharsets.UTF_8.newEncoder();
+				//boolean canEncode = csE.canEncode(o.toString());
+
+//				CharsetEncoder charsetEncoder = StandardCharsets.UTF_8.newEncoder()
+//						.onMalformedInput(CodingErrorAction.REPLACE)
+//						.onUnmappableCharacter(CodingErrorAction.REPLACE);
+//				CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder()
+//						.onMalformedInput(CodingErrorAction.REPLACE)
+//						.onUnmappableCharacter(CodingErrorAction.REPLACE);
+//				byte[] o_bytes = new byte[o.toString().length()];
+//				CharBuffer cb = CharBuffer.wrap(o.toString());
+//				//byte[] bba = new byte[o.toString().length()];
+//				ByteBuffer bb = ByteBuffer.wrap(o_bytes);
+//				asciiEncoder.encode(cb, bb, true);
+//				String convStr = bb.toString();
+				
+				byte[] o_utf8 = o.toString().getBytes();
+				String o_utf8_str = new String(o_utf8, StandardCharsets.UTF_8);
+				sb.append(replaceDoubleQuotes(o_utf8_str));
 			}
-			sb.append(replaceDoubleQuotes(o.toString()));
+//			sb.append(replaceDoubleQuotes(o.toString()));
 			sb.append("\"");
 			boolean anchored = false;
 			if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {
