@@ -35,6 +35,7 @@ import java.util.Map;
 import javax.activation.DataSource;
 
 import com.ge.research.sadl.importer.TemplateException;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.InvalidDerivationException;
@@ -135,8 +136,9 @@ public interface ISadlServer {
      * @throws SessionNotFoundException
      * @throws InvalidNameException 
      * @throws URISyntaxException 
+     * @throws AmbiguousNameException 
      */
-    abstract public ResultSet[] atomicQuery(String serviceName, DataSource dataSrc, String inputFormat, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, URISyntaxException;
+    abstract public ResultSet[] atomicQuery(String serviceName, DataSource dataSrc, String inputFormat, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, URISyntaxException, AmbiguousNameException;
                               
 
     /**
@@ -159,8 +161,9 @@ public interface ISadlServer {
      * @throws InvalidNameException 
      * @throws TemplateException 
      * @throws URISyntaxException 
+     * @throws AmbiguousNameException 
      */
-    abstract public ResultSet[] atomicQueryCsvData(String serviceName, DataSource csvDataSrc, boolean includesHeader, String csvTemplate, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, TemplateException, URISyntaxException;
+    abstract public ResultSet[] atomicQueryCsvData(String serviceName, DataSource csvDataSrc, boolean includesHeader, String csvTemplate, String[] query) throws IOException, ConfigurationException, NamedServiceNotFoundException, QueryCancelledException, QueryParseException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, TemplateException, URISyntaxException, AmbiguousNameException;
 
     /**
      * This method retrieves the results of an RDF triple matching request as a list of matching statements. Zero or more of the
@@ -191,8 +194,9 @@ public interface ISadlServer {
 	 * @throws ConfigurationException 
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
+	 * @throws AmbiguousNameException 
 	 */
-	public String prepareQuery(String query) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, InvalidNameException, SessionNotFoundException;
+	public String prepareQuery(String query) throws InvalidNameException, ReasonerNotFoundException, ConfigurationException, InvalidNameException, SessionNotFoundException, AmbiguousNameException;
 
 	/**
 	 * Method to substitute parameter values for "?" terms in a query string.
@@ -204,8 +208,9 @@ public interface ISadlServer {
 	 * @throws InvalidNameException 
 	 * @throws ReasonerNotFoundException 
 	 * @throws SessionNotFoundException 
+	 * @throws AmbiguousNameException 
 	 */
-	public String parameterizeQuery(String queryStr, List<Object> values) throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException;
+	public String parameterizeQuery(String queryStr, List<Object> values) throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, AmbiguousNameException;
 
 	/**
      * This method is called to cause abox data to be loaded from the server environment.
@@ -376,8 +381,9 @@ public interface ISadlServer {
      * @throws InvalidNameException
      * @throws IOException
      * @throws SessionNotFoundException
+     * @throws AmbiguousNameException 
      */
-    abstract public String createInstance(String name, String className) throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException;
+    abstract public String createInstance(String name, String className) throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException, AmbiguousNameException;
     
     /**
      * This method is called to delete a triple from the instance data. The subject, predicate, and/or object can be null to delete everything 

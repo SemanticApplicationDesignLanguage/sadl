@@ -14,6 +14,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
@@ -53,7 +54,7 @@ public class TestSadlServerMD_Mobius {
 
 	@Ignore
 	@Test
-	public void testWithJenaReasoner() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException, IOException, URISyntaxException {
+	public void testWithJenaReasoner() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException, IOException, URISyntaxException, AmbiguousNameException {
 		// demonstrate ability to access the base named service
 		modelFolder = "D:/sadl/workspace-sadl/Mobius2.new/OwlModels";
 		ISadlServerMD srvr = new SadlServerMDImpl();
@@ -75,7 +76,7 @@ public class TestSadlServerMD_Mobius {
 
 	@Ignore
 	@Test
-	public void testWithSWIPrologReasoner() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException, IOException, URISyntaxException {
+	public void testWithSWIPrologReasoner() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException, IOException, URISyntaxException, AmbiguousNameException {
 		// demonstrate ability to access the base named service
 		modelFolder = "D:/sadl/workspace-sadl/Mobius2.new/OwlModels";
 		ISadlServerMD srvr = new SadlServerMDImpl();
@@ -98,7 +99,7 @@ public class TestSadlServerMD_Mobius {
 
 	@Ignore
 	@Test
-	public void test1() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException, IOException, URISyntaxException {
+	public void test1() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException, IOException, URISyntaxException, AmbiguousNameException {
 		// demonstrate ability to get correct query answer
 		modelFolder = "DS:/sadl/workspace-sadl/Mobius2.new/OwlModels";
 		String modelName = "http://www.mobius.illinois.edu/advise/ont/core/RecloserSimple1";
@@ -114,7 +115,7 @@ public class TestSadlServerMD_Mobius {
 	
 	@Ignore
 	@Test
-	public void testCreateAndDelete() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, URISyntaxException {
+	public void testCreateAndDelete() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, URISyntaxException, AmbiguousNameException {
 		String modelName = "http://www.mobius.illinois.edu/advise/ont/core/InitInstanceModel";
 		ISadlServerMD srvr = new SadlServerMDImpl();
 		assertNotNull(srvr);

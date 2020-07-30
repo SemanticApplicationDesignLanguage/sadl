@@ -175,8 +175,15 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			}
 			
 		}
-		sb = new StringBuilder("digraph g");
+		boolean anchorNodeNameContainsDQuotes = (anchorNodeName != null ? anchorNodeName.contains("\"") : false);
+		if (anchorNodeNameContainsDQuotes) {
+			anchorNodeName = anchorNodeName.replaceAll("\"", "\\\\\"");
+		}
+		sb = new StringBuilder("digraph ");
+		sb.append("\"");
+		sb.append("g");
 		sb.append(anchorNodeName);
+		sb.append("\"");
 		sb.append(" {\n");
 		if (orientation != null && orientation != Orientation.TD){
 			sb.append("   rankdir=");

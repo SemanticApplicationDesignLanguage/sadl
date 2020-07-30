@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -81,9 +82,19 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 							}
 							targetFile = sb.toString();
 						}
-						else if (sf != null && (sf.endsWith(".owl") || sf.endsWith(".nt") || sf.endsWith(".n3"))) {
-							targetFile = sf;
-							owlFile = sf;
+						else if (sf != null) {
+							String fmt = SadlSerializationFormat.getSadlSerializationFormatFromFilename(sf);
+							if (selection.size() > 3 && selection.get(4).equals(fmt)) {
+							}
+							StringBuilder sb = new StringBuilder();
+							for (int i = 2; i < selection.size(); i++) {
+								if (i > 2) {
+									sb.append("/");
+								}
+								sb.append(selection.get(i));
+							}
+							targetFile = sb.toString();
+							owlFile = sb.toString();
 						}
 					}
 					if (targetFile != null) {
@@ -238,7 +249,17 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 		Map<String,String> prefMap = getPreferences(URI.createFileURI(ontfilename));
 		visualizer = getVisualizer(getConfigMgr(), prefMap);
 		if (visualizer != null) {
-			String fullFileName = modelFolderUri + "/" + owlFileName;
+			String fullFileName = null;
+			if (owlFileName.indexOf('/') > 0 || owlFileName.indexOf('\\') > 0) {
+				// this is the path of an OWL file not in the OwlModels folder
+				File omfolder = new File(modelFolderUri);
+				if (omfolder.exists()) {
+					fullFileName = omfolder.getParentFile() + "/" + owlFileName;
+				}
+			}
+			else {
+				fullFileName = modelFolderUri + "/" + owlFileName;
+			}
 			String publicUri;
 			String prefix = null;
 			try {
@@ -255,8 +276,12 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 					return;
 				}
 				else {
-					publicUri = new SadlUtils().fileNameToFileUrl(modelFolderUri + "/" + owlFileName);
+					publicUri = new SadlUtils().fileNameToFileUrl(fullFileName);
 				}
+			}
+			if (prefix == null) {
+				// set a pseudo prefix
+				prefix = "this";
 			}
 			
 			OntologyGraphGenerator ogg = new OntologyGraphGenerator(getConfigMgr(), visualizer, project, publicUri, monitor, getOntologyGraphPreferences());

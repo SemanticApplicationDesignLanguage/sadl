@@ -42,6 +42,7 @@ public class Query extends SadlCommand {
 	private List<VariableNode> variables = null;
 	private List<GraphPatternElement> patterns = null;
 	protected String sparqlQueryString = null;
+	private String preparedQueryString = null;
 	private List<OrderingPair> orderBy = null;
 	private boolean distinct = false;
 	private boolean toBeEvaluated = false;
@@ -338,5 +339,17 @@ public class Query extends SadlCommand {
 
 	public void setParameterizedValues(List<Object> parameterizedValues) {
 		this.parameterizedValues = parameterizedValues;
+	}
+
+	public String getPreparedQueryString() {
+		return preparedQueryString;
+	}
+
+	/**
+	 * Method to set the final query string rendered by expanding names and qnames to full URIs
+	 * @param preparedQueryString
+	 */
+	public void setPreparedQueryString(String preparedQueryString) {
+		this.preparedQueryString = preparedQueryString;
 	}
 }

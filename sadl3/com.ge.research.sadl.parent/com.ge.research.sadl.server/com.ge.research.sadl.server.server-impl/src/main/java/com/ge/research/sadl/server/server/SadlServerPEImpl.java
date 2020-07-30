@@ -45,6 +45,7 @@ import javax.activation.DataSource;
 
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.model.PrefixNotFoundException;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.InvalidNameException;
@@ -503,6 +504,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			return addError(new ModelError("Failed to edit model '" + modelName + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
 		} catch (InvalidNameException e) {
 			return addError(new ModelError("Failed to edit model '" + modelName + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
+		} catch (AmbiguousNameException e) {
+			return addError(new ModelError("Failed to edit model '" + modelName + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
 		} catch (URISyntaxException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -511,7 +514,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		return super.addTriple(subject, predicate, value);
 	}
 
-	private String getUri(String modelName, String fragment) throws PrefixNotFoundException, ConfigurationException, IOException, InvalidNameException, URISyntaxException {
+	private String getUri(String modelName, String fragment) throws PrefixNotFoundException, ConfigurationException, IOException, InvalidNameException, URISyntaxException, AmbiguousNameException {
 		if (fragment.contains("#")) {
 			return fragment;
 		}
@@ -531,11 +534,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
             }
 		}
 		else {
-			try {
-				return JenaTranslatorPlugin.findNameNs(getOntModelForEditing(modelName), fragment);
-			} catch (InvalidNameException e) {
-				throw new InvalidNameException(e.getMessage());
-			}
+			return JenaTranslatorPlugin.findNameNs(getOntModelForEditing(modelName), fragment);
 		}
 		return fragment;
 	}
@@ -690,6 +689,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			return addError(new ModelError("Failed to edit model '" + modelName + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
 		} catch (InvalidNameException e) {
 			return addError(new ModelError("Failed to edit model '" + modelName + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
+		} catch (AmbiguousNameException e) {
+			return addError(new ModelError("Failed to edit model '" + modelName + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
 		} catch (URISyntaxException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -788,6 +789,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to create class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to create class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to create class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -806,6 +809,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				} catch (IOException e) {
 					return addError(new ModelError("Failed to find super class '" + superClassName + "' in model '" + modelName + "'", ErrorType.ERROR));
 				} catch (InvalidNameException e) {
+					return addError(new ModelError("Failed to find super class '" + superClassName + "' in model '" + modelName + "'", ErrorType.ERROR));
+				} catch (AmbiguousNameException e) {
 					return addError(new ModelError("Failed to find super class '" + superClassName + "' in model '" + modelName + "'", ErrorType.ERROR));
 				} catch (URISyntaxException e) {
 					// TODO Auto-generated catch block
@@ -847,6 +852,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to create property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to create property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to create property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -862,6 +869,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				} catch (IOException e) {
 					return addError(new ModelError("Failed to find super property '" + superPropertyName + "' in model '" + modelName + "'", ErrorType.ERROR));
 				} catch (InvalidNameException e) {
+					return addError(new ModelError("Failed to find super property '" + superPropertyName + "' in model '" + modelName + "'", ErrorType.ERROR));
+				} catch (AmbiguousNameException e) {
 					return addError(new ModelError("Failed to find super property '" + superPropertyName + "' in model '" + modelName + "'", ErrorType.ERROR));
 				} catch (URISyntaxException e) {
 					// TODO Auto-generated catch block
@@ -903,6 +912,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -920,6 +931,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			} catch (IOException e) {
 				return addError(new ModelError("Failed to find domain class '" + domainClassName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
+				return addError(new ModelError("Failed to find domain class '" + domainClassName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
 				return addError(new ModelError("Failed to find domain class '" + domainClassName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
@@ -968,6 +981,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -985,6 +1000,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			} catch (IOException e) {
 				return addError(new ModelError("Failed to find range class '" + rangeClassName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
+				return addError(new ModelError("Failed to find range class '" + rangeClassName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
 				return addError(new ModelError("Failed to find range class '" + rangeClassName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
@@ -1030,6 +1047,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			} catch (IOException e) {
 				return addError(new ModelError("Failed to find property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
+				return addError(new ModelError("Failed to find property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
 				return addError(new ModelError("Failed to find property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
@@ -1121,6 +1140,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1139,6 +1160,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1156,6 +1179,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			} catch (IOException e) {
 				return addError(new ModelError("Failed to find restricted to class '" + restrictionName + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (InvalidNameException e) {
+				return addError(new ModelError("Failed to find restricted to class '" + restrictionName + "' in model '" + modelName + "'", ErrorType.ERROR));
+			} catch (AmbiguousNameException e) {
 				return addError(new ModelError("Failed to find restricted to class '" + restrictionName + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
@@ -1200,6 +1225,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1218,6 +1245,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1235,6 +1264,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			} catch (IOException e) {
 				return addError(new ModelError("Failed to find restricted to class '" + restrictionName + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (InvalidNameException e) {
+				return addError(new ModelError("Failed to find restricted to class '" + restrictionName + "' in model '" + modelName + "'", ErrorType.ERROR));
+			} catch (AmbiguousNameException e) {
 				return addError(new ModelError("Failed to find restricted to class '" + restrictionName + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
@@ -1282,6 +1313,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1300,6 +1333,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1317,6 +1352,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			} catch (IOException e) {
 				return addError(new ModelError("Failed to find restricted to instance '" + restInst + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (InvalidNameException e) {
+				return addError(new ModelError("Failed to find restricted to instance '" + restInst + "' in model '" + modelName + "'", ErrorType.ERROR));
+			} catch (AmbiguousNameException e) {
 				return addError(new ModelError("Failed to find restricted to instance '" + restInst + "' in model '" + modelName + "'", ErrorType.ERROR));
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
@@ -1364,6 +1401,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1381,6 +1420,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			} catch (IOException e) {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
+				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
@@ -1425,6 +1466,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1442,6 +1485,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			} catch (IOException e) {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
+				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
@@ -1486,6 +1531,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
 				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
+				return addError(new ModelError("Failed to find restriction class '" + className + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1503,6 +1550,8 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			} catch (IOException e) {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (InvalidNameException e) {
+				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
+			} catch (AmbiguousNameException e) {
 				return addError(new ModelError("Failed to find restricion property '" + propertyName + "' in model '" + modelName + "'", ErrorType.ERROR));				
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
@@ -1603,7 +1652,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	
 	@Override
 	public String createInstance(String name, String className) 
-				throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException {
+			throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException, AmbiguousNameException {
 		String instanceModelName = getDefaultModelName();
 		if (instanceModelName == null) {
 			if (name.indexOf("#") > 0) {
@@ -1676,7 +1725,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 
 	@Override
 	public String createInstance(String modelName, String name, String className)
-			throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException {
+			throws ConfigurationException, InvalidNameException, IOException, SessionNotFoundException, AmbiguousNameException {
 		String instname = null;
 		try {
 			if (!(name.indexOf('#') > 0)) {
@@ -2033,12 +2082,12 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 	}
 
 	public String prepareQuery(String modelName, String query) throws InvalidNameException, ReasonerNotFoundException,
-			ConfigurationException, InvalidNameException, SessionNotFoundException {
+			ConfigurationException, InvalidNameException, SessionNotFoundException, AmbiguousNameException {
 		return super.prepareQuery(query);
 	}
 
 	public String parameterizeQuery(String modelName, String query, List<Object> values)
-			throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException {
+			throws InvalidNameException, ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, AmbiguousNameException {
 		return super.parameterizeQuery(query, values);
 	}
 

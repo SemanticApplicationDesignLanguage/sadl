@@ -135,6 +135,7 @@ import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -1668,6 +1669,9 @@ public class JenaReasonerPlugin extends Reasoner{
 				} catch (ConfigurationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+				} catch (AmbiguousNameException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 			else {
@@ -1866,7 +1870,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		return tripleStr;
 	}
 
-	protected ResultSet processRuleQuery(org.apache.jena.reasoner.rulesys.Rule rule, List<String> premisesAsStrings, String q) throws QueryParseException, QueryCancelledException, InvalidNameException, ConfigurationException {
+	protected ResultSet processRuleQuery(org.apache.jena.reasoner.rulesys.Rule rule, List<String> premisesAsStrings, String q) throws QueryParseException, QueryCancelledException, InvalidNameException, ConfigurationException, AmbiguousNameException {
 		logger.debug("Explanation executing query: " + q);
 		q = prepareQuery(q);
 		ResultSet rs = ask(q);
@@ -2883,7 +2887,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 
-	public String prepareQuery(String query) throws InvalidNameException, ConfigurationException {
+	public String prepareQuery(String query) throws InvalidNameException, AmbiguousNameException, ConfigurationException {
 		getReasonerOnlyWhenNeeded();
 		OntModel model = null;
 		if (dataModel != null) {
@@ -2926,7 +2930,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 
-	public String parameterizeQuery(String query, List<Object> values) throws InvalidNameException, ConfigurationException {
+	public String parameterizeQuery(String query, List<Object> values) throws InvalidNameException, AmbiguousNameException, ConfigurationException {
 		getReasonerOnlyWhenNeeded();
 		OntModel model = null;
 		if (dataModel != null) {

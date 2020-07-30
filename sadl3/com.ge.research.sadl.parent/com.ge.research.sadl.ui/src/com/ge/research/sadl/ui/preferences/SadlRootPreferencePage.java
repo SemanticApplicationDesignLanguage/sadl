@@ -25,6 +25,7 @@ import static com.ge.research.sadl.preferences.SadlPreferences.DEEP_VALIDATION_O
 import static com.ge.research.sadl.preferences.SadlPreferences.DMY_ORDER_DMY;
 import static com.ge.research.sadl.preferences.SadlPreferences.DMY_ORDER_MDY;
 import static com.ge.research.sadl.preferences.SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS;
+import static com.ge.research.sadl.preferences.SadlPreferences.ENABLE_METRICS_COLLECTION;
 import static com.ge.research.sadl.preferences.SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD;
 import static com.ge.research.sadl.preferences.SadlPreferences.GRAPH_IMPLICIT_ELEMENTS;
 import static com.ge.research.sadl.preferences.SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES;
@@ -203,6 +204,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 
 		// Metrics Settings
 		Composite metricsSettings = createSettingsGroup(getFieldEditorParent(), SWT.NONE, "Metrics Settings");
+		addField(new BooleanFieldEditorExt(ENABLE_METRICS_COLLECTION.getId(), "Enable Metrics Collection", metricsSettings));
 		addField(new BooleanFieldEditorExt(GENERATE_METRICS_REPORT_ON_CLEAN_BUILD.getId(), "Generate metrics report during project clean/build", metricsSettings));
 		addField(new FileFieldEditorExt(METRICS_QUERY_FILENAME.getId(), "File containing metric queries: ", metricsSettings));
 

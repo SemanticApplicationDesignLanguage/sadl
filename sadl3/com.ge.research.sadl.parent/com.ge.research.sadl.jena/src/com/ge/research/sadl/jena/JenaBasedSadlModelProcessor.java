@@ -181,6 +181,7 @@ import com.ge.research.sadl.processing.SadlConstants.OWL_FLAVOR;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.processing.ValidationAcceptor;
 import com.ge.research.sadl.processing.ValidationAcceptorExt;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
@@ -552,15 +553,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							Individual queryInst = getTheJenaModel().getIndividual(((Query) cmd).getFqName());
 							if (queryInst != null && !namedQueryList.contains(queryInst.getURI())) {
 								try {
-									String translatedQuery = null;
-									try {
-										translatedQuery = translator.translateQuery(getTheJenaModel(), getModelName(), (Query) cmd);
-									} catch (UnsupportedOperationException e) {
-										IReasoner defaultReasoner = getConfigMgr(resource, format)
-												.getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
-										translator = getConfigMgr(resource, format)
-												.getTranslatorForReasoner(defaultReasoner);
-										translatedQuery = translator.translateQuery(getTheJenaModel(), getModelName(), (Query) cmd);
+									String translatedQuery = ((Query)cmd).getPreparedQueryString();
+									if (translatedQuery == null) {
+										try {
+											translatedQuery = translator.translateQuery(getTheJenaModel(), getModelName(), (Query) cmd);
+										} catch (AmbiguousNameException e) {
+											addError(e.getMessage(), (EObject) ((Query)cmd).getContext());
+										} catch (UnsupportedOperationException e) {
+											IReasoner defaultReasoner = getConfigMgr(resource, format)
+													.getOtherReasoner(ConfigurationManager.DEFAULT_REASONER);
+											translator = getConfigMgr(resource, format)
+													.getTranslatorForReasoner(defaultReasoner);
+											try {
+												translatedQuery = translator.translateQuery(getTheJenaModel(), getModelName(), (Query) cmd);
+											} catch (AmbiguousNameException e1) {
+												addError(e.getMessage(), (EObject) ((Query)cmd).getContext());
+											}
+										}
 									}
 									Literal queryLit = getTheJenaModel().createTypedLiteral(translatedQuery);
 									queryInst.addProperty(RDFS.isDefinedBy, queryLit);
@@ -907,6 +916,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	
 	private boolean typeCheckingRangeRequired = true;
 	
+	private boolean enableMetricsCollection = false;
+	
 	private boolean typeUnsupportedDownstreamWarnings;
 	
 	//-----------END PEFERENCES --------------
@@ -1189,7 +1200,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return;
 		}
 
-		boolean enableMetricsCollection = true; // no longer a preference
+		initializePreferences(context);
+
 		try {
 			if (enableMetricsCollection) {
 				if (!isSyntheticUri(null, resource)) {
@@ -1204,8 +1216,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		initializePreferences(context);
 
 		// create validator for expressions
 		initializeModelValidator();
@@ -2372,7 +2382,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 			} else {
-				query = processQuery(postProcessTranslationResult(qobj));
+				query = processQuery(postProcessTranslationResult(qobj), qexpr);
 			}
 			if (query != null) {
 				if (element.getName() != null) {
@@ -2472,7 +2482,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 					}
 				} else {
-					query = processQuery(postProcessTranslationResult(qobj));
+					query = processQuery(postProcessTranslationResult(qobj), qexpr);
 				}
 				if (query != null) {
 					if (elementName != null) {
@@ -2992,7 +3002,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return query;
 	}
 
-	private Query processQuery(Object qobj) throws JenaProcessorException {
+	private Query processQuery(Object qobj, EObject context) throws JenaProcessorException {
 		String qstr = null;
 		Query q = (Query) getTarget();
 		if (q == null) {
@@ -3040,6 +3050,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			q.setKeyword("select");
 		} else {
 			throw new JenaProcessorException("Unexpected query type: " + qobj.getClass().getCanonicalName());
+		}
+		if (q.getSparqlQueryString() != null) {
+			ITranslator translator;
+			try {
+				translator = getTranslator();
+				if (translator != null) {
+					try {
+						String preparedQuery = translator.prepareQuery(getTheJenaModel(), q.getSparqlQueryString());
+						q.setPreparedQueryString(preparedQuery);
+					} catch (Exception e) {
+						addError(e.getMessage(), context);
+					}
+				}
+			} catch (ConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
 		}
 		setTarget(null);
 		return q;
@@ -7501,7 +7529,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				subjNode = new ProxyNode((GraphPatternElement) trSubj);
 			}
 			if (subjNode == null) {
-				throw new TranslationException("Subject is neither Node nor GraphPatternElement: " + subjNode.getClass().getCanonicalName());
+				throw new TranslationException("Subject is neither Node nor GraphPatternElement");
 			}
 			if (predNode != null && predNode instanceof Node) {
 				//Add range information to predNode based on domain restriction
@@ -7826,8 +7854,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public Node processExpression(SadlResource expr) throws TranslationException {
 		checkForInvalidAnnotation(expr);
 		String nm = getDeclarationExtensions().getConcreteName(expr);
+		String uri = getDeclarationExtensions().getConceptUri(expr);
 		String ns = getDeclarationExtensions().getConceptNamespace(expr);
 		String prfx = getDeclarationExtensions().getConceptPrefix(expr);
+//		if (nm.indexOf(':') > 0) {
+//			// in this case the returned name has a prefix (must be an import) so get the name from the declaration
+//			nm = getDeclarationExtensions().getConcreteName(getDeclarationExtensions().getDeclaration(expr));
+//		}
 		OntConceptType type;
 		try {
 			type = getDeclarationExtensions().getOntConceptType(expr);
@@ -7857,7 +7890,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return vn;
 		} else if (nm != null) {
-			NamedNode n = new NamedNode(createUri(ns, nm), ontConceptTypeToNodeType(type));
+			NamedNode n = new NamedNode(uri, ontConceptTypeToNodeType(type));
 			n.setContext(expr);
 			n.setNamespace(ns);
 			n.setPrefix(prfx);
@@ -10230,7 +10263,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					assignInstancePropertyValue(valinst, cls, prop, sr);
 				}
 				else {
+					EObject save = getHostEObject();
+					setHostEObject(element);
 					assignInstancePropertyValue(inst, cls, prop, val);
+					setHostEObject(save);
 				}
 			} else {
 				addError("no value found", propinit);
@@ -10930,6 +10966,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else if (prop.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_EXPANDED_PROPERTY_URI)) {
 			addExpandedPropertyClass(inst);
 		}
+		try {
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), inst, prop, null, false, null);
+		} catch (InvalidTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CircularDependencyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		inst.addProperty(prop, value);
 		logger.debug("added value '" + value.toString() + "' to property '" + prop.toString() + "' for instance '"
 				+ inst.toString() + "'");
@@ -14504,6 +14553,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			setTypeCheckingRangeRequired(Boolean.parseBoolean(typeCheckingRangeRequiredStr));
 			modelProcessorPreferenceMap.put(SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED.getId(), typeCheckingRangeRequiredStr);
+			
+			String enableMetricsCollectionStr = preferenceValues.getPreference(SadlPreferences.ENABLE_METRICS_COLLECTION);
+			if (enableMetricsCollectionStr == null) {
+				enableMetricsCollectionStr = "false";
+			}
+			setEnableMetricsCollection(Boolean.parseBoolean(enableMetricsCollectionStr));
+			modelProcessorPreferenceMap.put(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), enableMetricsCollectionStr);
 		}
 		return modelProcessorPreferenceMap;
 	}
@@ -14537,5 +14593,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected void setAllowedVariableContainers(List<Class> allowedVariableContainers) {
 		this.allowedVariableContainers = allowedVariableContainers;
+	}
+
+	private boolean isEnableMetricsCollection() {
+		return enableMetricsCollection;
+	}
+
+	private void setEnableMetricsCollection(boolean enableMetricsCollection) {
+		this.enableMetricsCollection = enableMetricsCollection;
 	}
 }

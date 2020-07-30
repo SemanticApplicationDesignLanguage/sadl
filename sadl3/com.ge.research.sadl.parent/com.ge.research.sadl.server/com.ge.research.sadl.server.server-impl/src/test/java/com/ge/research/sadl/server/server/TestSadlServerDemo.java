@@ -52,6 +52,7 @@ import org.junit.Test;
 import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.model.visualizer.GraphVizVisualizer;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
@@ -135,7 +136,7 @@ public class TestSadlServerDemo {
 	}
 
 	@Test
-	public void testServerVersionInfo() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException, QueryParseException, IOException, URISyntaxException {
+	public void testServerVersionInfo() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, InvalidNameException, QueryCancelledException, QueryParseException, IOException, URISyntaxException, AmbiguousNameException {
 		// get an instance of the server
 		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
 		assertNotNull(srvr);
@@ -186,7 +187,7 @@ public class TestSadlServerDemo {
 
 //	@Ignore
 	@Test
-	public void testSadlServerClientSideScenario() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException {
+	public void testSadlServerClientSideScenario() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, AmbiguousNameException {
 		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
 		assertNotNull(srvr);
 		Map<String, String[]> map = srvr.getServiceNameMap();
@@ -204,7 +205,7 @@ public class TestSadlServerDemo {
 
 	@Ignore
 	@Test
-	public void testSadlServerClientSideScenarioWithPersistence() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, URISyntaxException {
+	public void testSadlServerClientSideScenarioWithPersistence() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, URISyntaxException, AmbiguousNameException {
 		ISadlServerPE srvr = new SadlServerPEImpl(kbaseRoot);
 		assertNotNull(srvr);
 		assertNotNull(srvr.selectServiceModel(initialNamedService));
@@ -236,7 +237,7 @@ public class TestSadlServerDemo {
 
 	@Ignore
 	@Test
-	public void testSTEM() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, IOException, InvalidNameException, QueryCancelledException, QueryParseException, TemplateException, URISyntaxException {
+	public void testSTEM() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, IOException, InvalidNameException, QueryCancelledException, QueryParseException, TemplateException, URISyntaxException, AmbiguousNameException {
 		//Path stemKbaseLocation = Paths.get(ClassLoader.getSystemResource("STEM").toURI());
 		Path stemKbaseLocation = Paths.get("C:/New/STEM");
 		ISadlServer srvr = new SadlServerImpl(stemKbaseLocation.toString());
@@ -424,9 +425,10 @@ public class TestSadlServerDemo {
 	 * @throws QueryCancelledException
 	 * @throws QueryParseException
 	 * @throws URISyntaxException
+	 * @throws AmbiguousNameException 
 	 */
 	@Test
-	public void testSadlServerParameterizedQuery() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, QueryParseException, URISyntaxException {
+	public void testSadlServerParameterizedQuery() throws ConfigurationException, ReasonerNotFoundException, SessionNotFoundException, NamedServiceNotFoundException, InvalidNameException, IOException, TripleNotFoundException, QueryCancelledException, QueryParseException, URISyntaxException, AmbiguousNameException {
 		ISadlServer srvr = new SadlServerImpl(kbaseRoot);
 		assertNotNull(srvr);
 		Map<String, String[]> map = srvr.getServiceNameMap();

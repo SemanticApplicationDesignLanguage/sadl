@@ -195,7 +195,7 @@ public interface IReasoner {
 	 * @throws InvalidNameException 
 	 * @throws ConfigurationException 
 	 */
-	public String prepareQuery(String query) throws InvalidNameException, ConfigurationException;
+	public String prepareQuery(String query) throws InvalidNameException, AmbiguousNameException, ConfigurationException;
 	
 	/**
 	 * Method to substitute parameter values for "?" terms in a query string.
@@ -205,7 +205,7 @@ public interface IReasoner {
 	 * @return parameterized query
 	 * @throws InvalidNameException
 	 */
-	public String parameterizeQuery(String query, List<Object> values) throws InvalidNameException, ConfigurationException;
+	public String parameterizeQuery(String query, List<Object> values) throws InvalidNameException, AmbiguousNameException, ConfigurationException;
 	
 	/**
 	 * Method to return a subject and/or object and/or predicate of a triple. This method takes an incomplete triple and 

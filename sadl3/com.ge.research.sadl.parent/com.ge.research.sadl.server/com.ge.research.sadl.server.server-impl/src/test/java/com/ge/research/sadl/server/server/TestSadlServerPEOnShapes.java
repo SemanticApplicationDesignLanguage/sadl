@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
@@ -52,7 +53,7 @@ public class TestSadlServerPEOnShapes extends TestCase {
 
 
 	@Test
-	public void test0() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException, IOException, URISyntaxException {
+	public void test0() throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException, SessionNotFoundException, QueryCancelledException, QueryParseException, InvalidNameException, IOException, URISyntaxException, AmbiguousNameException {
 		// demonstrate ability to access the base named service
 		ISadlServerMD srvr = new SadlServerMDImpl();
 		srvr.setKbaseRoot(modelFolder);

@@ -5471,11 +5471,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		if (subj != null && !matchFound) {
+			EObject tgt = target != null ? target : getModelProcessor().getHostEObject();
 			if (varName != null) {
 				if(propOfSubjectCheck){
-					getModelProcessor().addTypeCheckingError(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), target);
+					getModelProcessor().addTypeCheckingError(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, subj.getURI(),prop.getURI()), tgt);
 				}else{
-					getModelProcessor().addWarning(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop)), target);
+					getModelProcessor().addWarning(SadlErrorMessages.VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY.get(varName, getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop)), tgt);
 				}
 			}
 			else {
@@ -5484,12 +5485,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					msg = SadlErrorMessages.RANGE_OF_NOT_IN_DOMAIN_OF.get(getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop));
 				}
 				else {
-					msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop));
+					if (subj.isAnon()) {
+						msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get("The subject ",getModelProcessor().rdfNodeToString(prop));						
+					}
+					else {
+						msg = SadlErrorMessages.SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY.get(getModelProcessor().rdfNodeToString(subj),getModelProcessor().rdfNodeToString(prop));
+					}
 				}
 				if(propOfSubjectCheck){
-					getModelProcessor().addTypeCheckingError(msg, target);
+					getModelProcessor().addTypeCheckingError(msg, tgt);
 				}else{
-					getModelProcessor().addWarning(msg, target);
+					getModelProcessor().addWarning(msg, tgt);
 				}
 			}
 		}
