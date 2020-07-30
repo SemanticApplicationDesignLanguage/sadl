@@ -22,9 +22,11 @@ Export-Package: com.ge.research.sadl.swi_prolog.fileinterface,
    com.ge.research.sadl.swi_prolog.plinterface,
    com.ge.research.sadl.reasoner,
    org.apache.jena.rdf.model,
-   org.apache.jena.ontology,
-   javax.activation",
+   org.apache.jena.ontology",
  com.ge.research.sadl.swi_prolog.translator
 Bundle-ClassPath: .,
  target/classes/com/ge/research/sadl/swi-prolog/plinterface/
+Import-Package: com.ge.research.sadl.model,
+ com.ge.research.sadl.model.gp,
+ com.ge.research.sadl.reasoner
 Automatic-Module-Name: com.ge.research.sadl.swi.prolog.plugin

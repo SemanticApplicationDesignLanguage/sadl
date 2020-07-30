@@ -146,8 +146,7 @@ Export-Package: au.com.bytecode.opencsv,
  org.slf4j
 Require-Bundle: org.apache.xerces
 Eclipse-RegisterBuddy: com.ge.research.sadl
-Bundle-ClassPath: lib/activation.jar,
- lib/collection.jar,
+Bundle-ClassPath: lib/collection.jar,
  lib/commons-cli.jar,
  lib/commons-codec.jar,
  lib/commons-compress.jar,

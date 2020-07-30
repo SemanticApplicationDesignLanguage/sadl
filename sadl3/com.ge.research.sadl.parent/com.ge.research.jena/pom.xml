@@ -12,6 +12,12 @@
 
     <dependencies>
 	<dependency>
+	    <groupId>javax.activation</groupId>
+	    <artifactId>activation</artifactId>
+	    <version>1.1</version>
+	    <scope>provided</scope>
+	</dependency>
+	<dependency>
 	    <groupId>com.ge.research.sadl</groupId>
 	    <artifactId>reasoner-api</artifactId>
 	    <version>${project.version}</version>
