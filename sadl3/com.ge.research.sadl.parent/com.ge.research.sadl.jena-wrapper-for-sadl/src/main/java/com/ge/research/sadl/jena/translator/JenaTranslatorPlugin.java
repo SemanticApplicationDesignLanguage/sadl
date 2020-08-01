@@ -281,11 +281,11 @@ public class JenaTranslatorPlugin implements ITranslator {
 						trel = (TripleElement)elements.get(idx);
 					}
 					else if (elements.get(idx) instanceof BuiltinElement && ((BuiltinElement)elements.get(idx)).getFuncName().equals(THERE_EXISTS)) {
-						if (((BuiltinElement)elements.get(idx)).getArguments() == null || ((BuiltinElement)elements.get(idx)).getArguments().size() != 1) {
-							logger.error("Function 'thereExists' should have one and only one argument");
-							addError("Function 'thereExists' should have one and only one argument.");						
-							return sb.toString();
-						}
+//						if (((BuiltinElement)elements.get(idx)).getArguments() == null || ((BuiltinElement)elements.get(idx)).getArguments().size() != 1) {
+//							logger.error("Function 'thereExists' should have one and only one argument");
+//							addError("Function 'thereExists' should have one and only one argument.");						
+//							return sb.toString();
+//						}
 						if (!(((BuiltinElement)elements.get(idx)).getArguments().get(0) instanceof VariableNode)) {
 							logger.error("Function 'thereExists' should have a variable as argument.");
 							addError("Function 'thereExists' should have a variable as argument.");	
@@ -465,9 +465,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 				return SpecialBuiltin.ISKNOWN;
 			}
 		}
-		else if (elements.get(index) instanceof BuiltinElement && ((BuiltinElement)elements.get(index)).getFuncName().equals(THERE_EXISTS)) {
-			return SpecialBuiltin.THEREEXISTS;
-		}
+//		else if (elements.get(index) instanceof BuiltinElement && ((BuiltinElement)elements.get(index)).getFuncName().equals(THERE_EXISTS)) {
+//			return SpecialBuiltin.THEREEXISTS;
+//		}
 		return null;
 	}
 	

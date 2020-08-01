@@ -35,4 +35,5 @@ com.ge.research.sadl.jena.reasoner.builtin.Sqrt
 com.ge.research.sadl.jena.reasoner.builtin.SubtractDates
 com.ge.research.sadl.jena.reasoner.builtin.Sum
 com.ge.research.sadl.jena.reasoner.builtin.Tan
+com.ge.research.sadl.jena.reasoner.builtin.ThereExists
 com.ge.research.sadl.jena.reasoner.builtin.Unique

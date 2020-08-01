@@ -72,35 +72,35 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 			}
 		}
 		
-		if (segments.size < 3 || 
-			(!segments.get(2).equals("OwlModels") &&
-				!segments.get(2).equals(EXTRACTED_MODELS) &&
-				!segments.get(2).equals(com.ge.research.sadl.external.EclipseExternalEmfResourcePredicate.CG_MODELS))) {
-			// this isn't something in the OwlModels folder
-			val prjuri = project.locationURI
-			if (prjuri !== null) {
-				val prjpath = prjuri.path
-				val owlmodelfolder = prjpath + "/OwlModels"
-				val cmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(owlmodelfolder, null);
-				if (cmgr !== null) {
-					var cntr = 0;
-					var sb = new StringBuilder()
-					for (seg : segments) {
-						if (cntr > 1) {
-							sb.append("/")
-							sb.append(seg)
-						}
-						cntr++
-					}
-					val su = new SadlUtils()
-					val fnuri = su.fileNameToFileUrl(prjpath + "/" + sb.toString)
-					
-					val puri = cmgr.getPublicUriFromActualUrl(fnuri)
-					
-					println(puri)
-				}
-			}
-		}
+//		if (segments.size < 3 || 
+//			(!segments.get(2).equals("OwlModels") &&
+//				!segments.get(2).equals(EXTRACTED_MODELS) &&
+//				!segments.get(2).equals(com.ge.research.sadl.external.EclipseExternalEmfResourcePredicate.CG_MODELS))) {
+//			// this isn't something in the OwlModels folder
+//			val prjuri = project.locationURI
+//			if (prjuri !== null) {
+//				val prjpath = prjuri.path
+//				val owlmodelfolder = prjpath + "/OwlModels"
+//				val cmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(owlmodelfolder, null);
+//				if (cmgr !== null) {
+//					var cntr = 0;
+//					var sb = new StringBuilder()
+//					for (seg : segments) {
+//						if (cntr > 1) {
+//							sb.append("/")
+//							sb.append(seg)
+//						}
+//						cntr++
+//					}
+//					val su = new SadlUtils()
+//					val fnuri = su.fileNameToFileUrl(prjpath + "/" + sb.toString)
+//					
+//					val puri = cmgr.getPublicUriFromActualUrl(fnuri)
+//					
+//					println(puri)
+//				}
+//			}
+//		}
 		
 		val externalDefinitions = newArrayList;
 		project.accept([

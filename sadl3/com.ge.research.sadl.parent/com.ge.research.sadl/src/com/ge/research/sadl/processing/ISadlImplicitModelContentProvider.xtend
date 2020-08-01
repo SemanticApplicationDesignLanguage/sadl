@@ -163,6 +163,7 @@ interface ISadlImplicitModelContentProvider {
 			NamedQuery is a class.
 			derivedFrom (note "for use with named structures (Equations, NamedQueries, ...), where it has special SADL syntax") 
 				is a type of annotation.
+			AddAlso is a GPAtom.
 		''';
 
 		override getContent() {
