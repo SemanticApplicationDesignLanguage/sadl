@@ -3131,7 +3131,7 @@ public class JenaReasonerPlugin extends Reasoner{
 							"notLiteral(string)boolean", 
 							"now()dateTime", 
 							"regex(string,string)string", 
-							"strConcat(string,string)string", 
+							"strConcat(string,...)string", 
 							"uriConcat(string,string)string",
 							"pow(decimal,decimal)decimal",
 							"sqrt(decimal)decimal",

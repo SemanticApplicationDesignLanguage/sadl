@@ -101,6 +101,7 @@ import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.ISadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
@@ -2025,13 +2026,28 @@ public class CsvImporter implements ITabularDataImporter {
 		} catch (QueryCancelledException e) {
 			throw new IOException("Import failed: " + e.getMessage(), e);
 		}
+		boolean success = false;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		if (owlModelFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-			Model m = getModelFromTdbDS();
-			m.write(out, format);
+		if (getConfigMgr() != null) {
+			ISadlJenaModelGetter modgetter = getConfigMgr().getModelGetter();
+			if (modgetter == null) {
+		    	modgetter = (ISadlJenaModelGetter) new com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter(getConfigMgr(), getConfigMgr().getTdbFolder(), format);
+		    	getConfigMgr().setModelGetter(modgetter);
+		    	getConfigMgr().getModelGetter().setTdbFolder(getConfigMgr().getTdbFolder());
+			}
+			if ((modgetter instanceof com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter)) {
+				((com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter) modgetter).saveModel(getModel(0), getModelNamespace(), getModelName(), format, out);
+				success = true;
+			}
 		}
-		else {
-			getModel(0).write(out, format);
+		if (!success) {
+			if (owlModelFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+				Model m = getModelFromTdbDS();
+				m.write(out, format);
+			}
+			else {
+				getModel(0).write(out, format);
+			}
 		}
 		String data = out.toString();
 		StringDataSource ds = new StringDataSource(data, "text/plain");

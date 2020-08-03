@@ -26,6 +26,7 @@ package com.ge.research.sadl.reasoner;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -147,22 +148,7 @@ public class SadlJenaModelGetterPutter extends SadlJenaModelGetter {
     	}
     	else {
 			FileOutputStream fps = new FileOutputStream(owlFilename);
-			RDFWriter rdfw = m.getWriter(format);
-			// NTripleWriter.setProperty always throws UnknownPropertyException;
-			// ditto for N3.
-			if (format.startsWith("RDF/XML")) {
-				rdfw.setProperty("xmlbase", publicUri);
-				rdfw.setProperty("relativeURIs", "");
-				rdfw.setProperty("minimalPrefixes", true);
-			}
-
-			m.setNsPrefix("", modelNamespace);
-			if (m instanceof OntModel) {
-				rdfw.write(((OntModel)m).getBaseModel(), fps, publicUri);
-			}
-			else {
-				rdfw.write(m, fps, publicUri);
-			}
+			saveModel(m, modelNamespace, publicUri, format, fps);
 			fps.close();
 			
 			boolean tdbFolderExists = false;
@@ -196,5 +182,32 @@ public class SadlJenaModelGetterPutter extends SadlJenaModelGetter {
 			}
     	}
 		return true;
+	}
+
+	/** Method to save a Jena Model to an OutputStream
+	 * 
+	 * @param m -- the Jena Model
+	 * @param modelNamespace -- the namespace of the model
+	 * @param publicUri -- the base URI of the model
+	 * @param format -- the format of the model
+	 * @param os -- the OutputStream
+	 */
+	public void saveModel(Model m, String modelNamespace, String publicUri, String format, OutputStream os) {
+		RDFWriter rdfw = m.getWriter(format);
+		// NTripleWriter.setProperty always throws UnknownPropertyException;
+		// ditto for N3.
+		if (format.startsWith("RDF/XML")) {
+			rdfw.setProperty("xmlbase", publicUri);
+			rdfw.setProperty("relativeURIs", "");
+			rdfw.setProperty("minimalPrefixes", true);
+		}
+
+		m.setNsPrefix("", modelNamespace);
+		if (m instanceof OntModel) {
+			rdfw.write(((OntModel)m).getBaseModel(), os, publicUri);
+		}
+		else {
+			rdfw.write(m, os, publicUri);
+		}
 	}
 }

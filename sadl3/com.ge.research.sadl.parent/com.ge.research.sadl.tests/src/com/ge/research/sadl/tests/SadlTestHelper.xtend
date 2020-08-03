@@ -31,6 +31,8 @@ class SadlTestHelper {
 	 * Normally, this is retrieved via the configuration manager for IDE > translator > content.
 	 * For tests this is just a string unless one figures out how to deal with the configuration manager
 	 * in a headless tests.
+	 * 
+	 * NOTE: this must be updated if any functions are used in tests with the default reasoner/translator that are not in this content.
 	 */
 	public static val SADL_BUILTIN_FUNCTIONS_CONTENT = '''
 		uri "http://sadl.org/builtinfunctions" alias builtinfunctions.
@@ -44,6 +46,15 @@ class SadlTestHelper {
 		External countLiteralValues(string X, string X) returns int:
 		"org.apache.jena.reasoner.rulesys.builtins#countLiteralValues".
 		
+		External difference(decimal X,  decimal X) returns decimal:
+		"org.apache.jena.reasoner.rulesys.builtins#difference".
+		
+		External ge(decimal X, decimal X) returns boolean:
+		"org.apache.jena.reasoner.rulesys.builtins#ge".
+		
+		External le(decimal X, decimal X) returns boolean:
+		"org.apache.jena.reasoner.rulesys.builtins#le".
+
 		External isBNode(string X) returns boolean:
 		"org.apache.jena.reasoner.rulesys.builtins#isBNode".
 		
@@ -95,12 +106,18 @@ class SadlTestHelper {
 		External regex(string X, string X) returns string:
 		"org.apache.jena.reasoner.rulesys.builtins#regex".
 		
-		External strConcat(string X, string X) returns string:
+		External strConcat(string X, ...) returns string:
 		"org.apache.jena.reasoner.rulesys.builtins#strConcat".
 		
 		External uriConcat(string X, string X) returns string:
 		"org.apache.jena.reasoner.rulesys.builtins#uriConcat".
 		
+		External pow(decimal X, decimal X) returns decimal:
+		"org.apache.jena.reasoner.rulesys.builtins#pow".
+		
+		External sqrt(decimal X) returns decimal:
+		"org.apache.jena.reasoner.rulesys.builtins#sqrt".
+
 		External unbound(string X) returns string:
 		"org.apache.jena.reasoner.rulesys.builtins#unbound".
 		
@@ -128,15 +145,39 @@ class SadlTestHelper {
 		External cos(--) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#cos".
 		
+		External countMatches(...) returns int:
+		"com.ge.research.sadl.jena.reasoner.builtin#countMatches".
+		
+		External countUniqueMatches(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#countUniqueMatches".
+
 		External floor(--) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#floor".
 		
+		External getClassFromConstraint(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#getClassFromConstraint".
+		
+		External getInstance(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#getInstance".
+
 		External greaterThan(--) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#greaterThan".
 		
 		External lessThan(--) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#lessThan".
 		
+		External list(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#list".
+		
+		External listConcat(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#listConcat".
+		
+		External listSubtract(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#listSubtract".
+		
+		External listToString(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#listToString".
+
 		External localname(--) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#localname".
 		
@@ -158,13 +199,19 @@ class SadlTestHelper {
 		External noUnknownValues(--) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#noUnknownValues".
 		
+		External noValue(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#noValue".
+
 		External noValuesOtherThan(--) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#noValuesOtherThan".
 		
+		External oneOf(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#oneOf".
+
 		External pow(--) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#pow".
 		
-		External print(--) returns string:
+		External print(string X, ...) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#print".
 		
 		External product(--) returns --:
@@ -185,6 +232,12 @@ class SadlTestHelper {
 		External tan(--) returns --:
 		"com.ge.research.sadl.jena.reasoner.builtin#tan".
 		
+		External thereExists(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#thereExists".
+		
+		External ^unique(--) returns --:
+		"com.ge.research.sadl.jena.reasoner.builtin#unique".
+
 		External table(--) returns --:
 		"org.apache.jena.reasoner.rulesys.builtins#table".
 		
