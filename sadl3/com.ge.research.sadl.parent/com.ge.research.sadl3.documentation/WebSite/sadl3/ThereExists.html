@@ -72,7 +72,19 @@ and conditions of the rule create a context for the existence reasoning. Any
 additional conditions for uniquely identifying an instance satisfying the &quot;there 
 exists&quot; must be explicitly stated. In addition, the rule may add additional 
 information to the inferred model which is not part of the uniquely identifying 
-criteria. Consider this example. Suppose we have this simple domain model.</p>
+criteria. If there is no instance in the data that matches the criteria, we do 
+not want to create one unless the rule conditions are all met. For this reason, 
+the &quot;there exists&quot; is only legal in the rule conclusion. The actual 
+implementation of this functionality is in a single built-in function named &quot;thereExists&quot;. 
+The arguments of the function fall into 3 categories.</p>
+<ol>
+  <li>The type (class) of the instance that must be found or created</li>
+  <li>A set of triple patterns to which the instance to be found or created must 
+  conform</li>
+  <li>An optional set of triple patterns that are to be added to the instance 
+  but which are not part of the criteria for finding or creating the instance.</li>
+</ol>
+<p>Consider this example. Suppose we have this simple domain model.</p>
 <p>&nbsp;</p>
 <p>Now imagine that we wish to express two rules, one that adds <i>commentary</i> 
 to children of smart parents and one that adds <i>commentary</i> to children of 
