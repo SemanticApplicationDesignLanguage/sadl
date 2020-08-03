@@ -1,18 +1,24 @@
 <rdf:RDF
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
-    xmlns:NotCircularRoot="http://sadl.org/NotCircularRoot.sadl#"
     xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns="http://glguy.net/sadl/alldifferentexample#"
     xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
     xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
   xml:base="http://sadl.org/sadlbasemodel">
-  <owl:Ontology rdf:about="NotCircularRoot.sadl">
+  <owl:Ontology rdf:about="http://glguy.net/sadl/alldifferentexample">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
     <owl:imports rdf:resource=""/>
-    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'NotCircularRoot.sadl' and should not be directly edited.</rdfs:comment>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'glguy447.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:about="NotCircularRoot.sadl#Foo"/>
+  <owl:Class rdf:about="http://glguy.net/sadl/alldifferentexample#C"/>
+  <owl:AllDifferent>
+    <owl:distinctMembers rdf:parseType="Collection">
+      <C rdf:about="http://glguy.net/sadl/alldifferentexample#I"/>
+      <C rdf:about="http://glguy.net/sadl/alldifferentexample#J"/>
+    </owl:distinctMembers>
+  </owl:AllDifferent>
 </rdf:RDF>

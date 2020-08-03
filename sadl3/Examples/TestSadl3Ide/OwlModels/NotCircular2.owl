@@ -8,12 +8,12 @@
     xmlns:NotCircular2="http://sadl.org/NotCircular2.sadl#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/NotCircular2.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="NotCircular2.sadl">
     <owl:imports rdf:resource="NotCircular1a.sadl"/>
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'NotCircular2.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
 </rdf:RDF>

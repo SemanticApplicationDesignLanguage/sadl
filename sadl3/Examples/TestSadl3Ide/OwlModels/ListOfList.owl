@@ -9,18 +9,18 @@
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:sadllistmodel="http://sadl.org/sadllistmodel"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/ListOfList.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="ListOfList.sadl">
     <owl:imports rdf:resource="sadllistmodel"/>
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'ListOfList.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="IntList">
+  <owl:Class rdf:about="ListOfList.sadl#IntList">
     <rdfs:subClassOf>
       <owl:Restriction>
-        <owl:allValuesFrom rdf:resource="#IntList"/>
+        <owl:allValuesFrom rdf:resource="ListOfList.sadl#IntList"/>
         <owl:onProperty rdf:resource="sadllistmodel#rest"/>
       </owl:Restriction>
     </rdfs:subClassOf>
@@ -32,11 +32,11 @@
     </rdfs:subClassOf>
     <rdfs:subClassOf rdf:resource="sadllistmodel#List"/>
   </owl:Class>
-  <ListOfList:IntList rdf:ID="L3">
+  <ListOfList:IntList rdf:about="ListOfList.sadl#L3">
     <j.0:rest>
       <ListOfList:IntList>
         <j.0:first>
-          <xsd:int rdf:ID="L2">
+          <xsd:int rdf:about="ListOfList.sadl#L2">
             <j.0:rest>
               <ListOfList:IntList>
                 <j.0:rest>
@@ -51,13 +51,13 @@
             </j.0:rest>
             <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
             >4</j.0:first>
-            <rdf:type rdf:resource="#IntList"/>
+            <rdf:type rdf:resource="ListOfList.sadl#IntList"/>
           </xsd:int>
         </j.0:first>
       </ListOfList:IntList>
     </j.0:rest>
     <j.0:first>
-      <xsd:int rdf:ID="L1">
+      <xsd:int rdf:about="ListOfList.sadl#L1">
         <j.0:rest>
           <ListOfList:IntList>
             <j.0:rest>
@@ -72,7 +72,7 @@
         </j.0:rest>
         <j.0:first rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >1</j.0:first>
-        <rdf:type rdf:resource="#IntList"/>
+        <rdf:type rdf:resource="ListOfList.sadl#IntList"/>
       </xsd:int>
     </j.0:first>
   </ListOfList:IntList>

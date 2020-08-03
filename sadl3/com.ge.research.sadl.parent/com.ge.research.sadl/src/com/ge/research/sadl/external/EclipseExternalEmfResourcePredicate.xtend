@@ -17,15 +17,12 @@
  ***********************************************************************/
 package com.ge.research.sadl.external
 
-import com.ge.research.sadl.external.ExternalEmfResourcePredicate
-import com.google.common.base.Preconditions
-import org.eclipse.core.resources.IFile
-import org.eclipse.core.resources.IResource
-import org.eclipse.core.resources.ResourcesPlugin
-import org.eclipse.emf.common.util.URI
-import com.google.inject.Singleton
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory
 import com.ge.research.sadl.reasoner.utils.SadlUtils
+import com.google.common.base.Preconditions
+import com.google.inject.Singleton
+import org.eclipse.core.resources.ResourcesPlugin
+import org.eclipse.emf.common.util.URI
 
 /**
  * External EMF resource that uses the Eclipse workspace.
@@ -64,7 +61,7 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 				return true;
 			}
 		}
-		val cgModelsFolder = project.findMember(com.ge.research.sadl.external.EclipseExternalEmfResourcePredicate.CG_MODELS);
+		val cgModelsFolder = project.findMember(EclipseExternalEmfResourcePredicate.CG_MODELS);
 		if (cgModelsFolder !== null && cgModelsFolder.accessible) {
 			// The current file is an external file and is inside the `ExtractedModels` folder.
 			if (cgModelsFolder.getFullPath().isPrefixOf(file.getFullPath())) {
@@ -75,7 +72,7 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 		if (segments.size < 3 || 
 			(!segments.get(2).equals("OwlModels") &&
 				!segments.get(2).equals(EXTRACTED_MODELS) &&
-				!segments.get(2).equals(com.ge.research.sadl.external.EclipseExternalEmfResourcePredicate.CG_MODELS))) {
+				!segments.get(2).equals(EclipseExternalEmfResourcePredicate.CG_MODELS))) {
 			// this isn't something in the OwlModels folder
 			val prjuri = project.locationURI
 			if (prjuri !== null) {
@@ -95,9 +92,9 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 					val su = new SadlUtils()
 					val fnuri = su.fileNameToFileUrl(prjpath + "/" + sb.toString)
 					try {
+						// if we succeed in getting a public URI then there is a mapping and we should import the OWL file
 						val puri = cmgr.getPublicUriFromActualUrl(fnuri)
-						println("Index non-SADL-generated OWL model '" + puri + "' located at '" + fnuri + "' returning true");
-						// external with mapping, index
+//						println("Index non-SADL-generated OWL model '" + puri + "' located at '" + fnuri + "' returning true");
 						return true;
 					}
 					catch (Throwable t) {

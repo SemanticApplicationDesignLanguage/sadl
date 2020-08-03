@@ -1,18 +1,19 @@
 <rdf:RDF
+    xmlns:ProblemCharsInComments="http://sadl.org/ProblemCharsInComments.sadl#"
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
-    xmlns:NotCircularRoot="http://sadl.org/NotCircularRoot.sadl#"
     xmlns:owl="http://www.w3.org/2002/07/owl#"
     xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
     xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
   xml:base="http://sadl.org/sadlbasemodel">
-  <owl:Ontology rdf:about="NotCircularRoot.sadl">
+  <owl:Ontology rdf:about="ProblemCharsInComments.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
     <owl:imports rdf:resource=""/>
-    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'NotCircularRoot.sadl' and should not be directly edited.</rdfs:comment>
+    <rdfs:comment xml:lang="en">This document is published by the Provenance Working Group (http://www.w3.org/2011/prov/wiki/Main_Page).</rdfs:comment>
+    <rdfs:label xml:lang="en">Model to highlight comment issues found in importing OWL models to SADL</rdfs:label>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'ProblemCharsInComments.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:about="NotCircularRoot.sadl#Foo"/>
 </rdf:RDF>

@@ -8,69 +8,69 @@
     xmlns:RuleVariableAsDomain="http://sadl.org/RuleVariableAsDomain.sadl#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/RuleVariableAsDomain.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="RuleVariableAsDomain.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RuleVariableAsDomain.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Person">
+  <owl:Class rdf:about="RuleVariableAsDomain.sadl#Person">
     <rdfs:subClassOf>
       <owl:Restriction>
-        <owl:allValuesFrom rdf:resource="#Person"/>
+        <owl:allValuesFrom rdf:resource="RuleVariableAsDomain.sadl#Person"/>
         <owl:onProperty>
-          <owl:ObjectProperty rdf:ID="child"/>
+          <owl:ObjectProperty rdf:about="RuleVariableAsDomain.sadl#child"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
     <rdfs:subClassOf>
-      <owl:Class rdf:ID="Mammal"/>
+      <owl:Class rdf:about="RuleVariableAsDomain.sadl#Mammal"/>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:ID="PhysicalThing"/>
-  <owl:Class rdf:ID="Pet">
+  <owl:Class rdf:about="RuleVariableAsDomain.sadl#PhysicalThing"/>
+  <owl:Class rdf:about="RuleVariableAsDomain.sadl#Pet">
     <rdfs:subClassOf>
       <owl:Restriction>
         <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >1</owl:cardinality>
         <owl:onProperty>
-          <owl:DatatypeProperty rdf:ID="caredFor"/>
+          <owl:DatatypeProperty rdf:about="RuleVariableAsDomain.sadl#caredFor"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:about="#Mammal">
+  <owl:Class rdf:about="RuleVariableAsDomain.sadl#Mammal">
     <rdfs:subClassOf>
-      <owl:Class rdf:ID="LivingThing"/>
+      <owl:Class rdf:about="RuleVariableAsDomain.sadl#LivingThing"/>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:about="#LivingThing">
-    <rdfs:subClassOf rdf:resource="#PhysicalThing"/>
+  <owl:Class rdf:about="RuleVariableAsDomain.sadl#LivingThing">
+    <rdfs:subClassOf rdf:resource="RuleVariableAsDomain.sadl#PhysicalThing"/>
   </owl:Class>
-  <owl:ObjectProperty rdf:ID="weight">
-    <rdfs:domain rdf:resource="#PhysicalThing"/>
+  <owl:ObjectProperty rdf:about="RuleVariableAsDomain.sadl#weight">
+    <rdfs:domain rdf:resource="RuleVariableAsDomain.sadl#PhysicalThing"/>
     <rdfs:range rdf:resource="sadlimplicitmodel#UnittedQuantity"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:ID="owns">
-    <rdfs:range rdf:resource="#Pet"/>
-    <rdfs:domain rdf:resource="#Person"/>
+  <owl:ObjectProperty rdf:about="RuleVariableAsDomain.sadl#owns">
+    <rdfs:range rdf:resource="RuleVariableAsDomain.sadl#Pet"/>
+    <rdfs:domain rdf:resource="RuleVariableAsDomain.sadl#Person"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:about="#child">
-    <rdfs:domain rdf:resource="#Mammal"/>
-    <rdfs:range rdf:resource="#Mammal"/>
+  <owl:ObjectProperty rdf:about="RuleVariableAsDomain.sadl#child">
+    <rdfs:domain rdf:resource="RuleVariableAsDomain.sadl#Mammal"/>
+    <rdfs:range rdf:resource="RuleVariableAsDomain.sadl#Mammal"/>
   </owl:ObjectProperty>
-  <owl:DatatypeProperty rdf:ID="dateOfBirth">
-    <rdfs:domain rdf:resource="#LivingThing"/>
+  <owl:DatatypeProperty rdf:about="RuleVariableAsDomain.sadl#dateOfBirth">
+    <rdfs:domain rdf:resource="RuleVariableAsDomain.sadl#LivingThing"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
   </owl:DatatypeProperty>
-  <owl:DatatypeProperty rdf:about="#caredFor">
-    <rdfs:domain rdf:resource="#Pet"/>
+  <owl:DatatypeProperty rdf:about="RuleVariableAsDomain.sadl#caredFor">
+    <rdfs:domain rdf:resource="RuleVariableAsDomain.sadl#Pet"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
   </owl:DatatypeProperty>
-  <owl:DatatypeProperty rdf:ID="density">
-    <rdfs:domain rdf:resource="#PhysicalThing"/>
+  <owl:DatatypeProperty rdf:about="RuleVariableAsDomain.sadl#density">
+    <rdfs:domain rdf:resource="RuleVariableAsDomain.sadl#PhysicalThing"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
   </owl:DatatypeProperty>
-  <j.0:Rule rdf:ID="R1"/>
+  <j.0:Rule rdf:about="RuleVariableAsDomain.sadl#R1"/>
 </rdf:RDF>

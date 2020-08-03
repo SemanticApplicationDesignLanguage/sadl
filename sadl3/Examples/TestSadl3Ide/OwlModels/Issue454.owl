@@ -1,0 +1,38 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:Issue454="http://sadl.org/Issue454.sadl#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="Issue454.sadl">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource=""/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Issue454.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:about="Issue454.sadl#CookedFood"/>
+  <owl:DatatypeProperty rdf:about="Issue454.sadl#cookingTime">
+    <rdfs:domain rdf:resource="Issue454.sadl#CookedFood"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#duration"/>
+  </owl:DatatypeProperty>
+  <Issue454:CookedFood rdf:about="Issue454.sadl#Browies">
+    <Issue454:cookingTime rdf:datatype="http://www.w3.org/2001/XMLSchema#duration"
+    >PT20M</Issue454:cookingTime>
+  </Issue454:CookedFood>
+  <Issue454:CookedFood rdf:about="Issue454.sadl#Cookies">
+    <Issue454:cookingTime rdf:datatype="http://www.w3.org/2001/XMLSchema#duration"
+    >PT20M</Issue454:cookingTime>
+  </Issue454:CookedFood>
+  <Issue454:CookedFood rdf:about="Issue454.sadl#PotRoast">
+    <Issue454:cookingTime rdf:datatype="http://www.w3.org/2001/XMLSchema#duration"
+    >PT2H10M30S</Issue454:cookingTime>
+  </Issue454:CookedFood>
+  <Issue454:CookedFood rdf:about="Issue454.sadl#Cake">
+    <Issue454:cookingTime rdf:datatype="http://www.w3.org/2001/XMLSchema#duration"
+    >PT20M</Issue454:cookingTime>
+  </Issue454:CookedFood>
+</rdf:RDF>

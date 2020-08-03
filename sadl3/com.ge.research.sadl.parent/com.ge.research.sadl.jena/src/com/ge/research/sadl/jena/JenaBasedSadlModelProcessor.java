@@ -185,6 +185,7 @@ import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ISadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.ITranslator;
@@ -14094,6 +14095,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				} else if (eResource instanceof ExternalEmfResource) {
 					ExternalEmfResource emfResource = (ExternalEmfResource) eResource;
 					addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getOntModel());
+					
+					// we need to load any imports of the external resource
+					ExtendedIterator<Ontology> ontologyItr = emfResource.getOntModel().listOntologies();
+					while (ontologyItr.hasNext()) {
+						Ontology impont = ontologyItr.next();
+						ExtendedIterator<OntResource> imports = impont.listImports();
+						while (imports.hasNext()) {
+							OntResource imprsrc = imports.next();
+							String imprsrcuri = imprsrc.getURI();
+//							System.out.println(imprsrcuri);
+							try {
+								OntModel impom = getConfigMgr().getOntModel(imprsrcuri, Scope.INCLUDEIMPORTS);
+								getTheJenaModel().addSubModel(impom);
+								getTheJenaModel().addLoadedImport(imprsrcuri);
+								addOrderedImport(imprsrcuri);
+							} catch (ConfigurationException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
 				}
 				else {
 					failure = true;

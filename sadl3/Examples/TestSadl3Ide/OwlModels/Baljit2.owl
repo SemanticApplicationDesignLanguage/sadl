@@ -7,32 +7,32 @@
     xmlns="http://ge.com/coreality/example2#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://ge.com/coreality/example2">
-  <owl:Ontology rdf:about="">
-    <owl:imports rdf:resource="http://sadl.org/builtinfunctions"/>
-    <owl:imports rdf:resource="http://sadl.org/sadlimplicitmodel"/>
-    <owl:imports rdf:resource="http://sadl.org/sadlbasemodel"/>
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="http://ge.com/coreality/example2">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Baljit2.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Galaxy">
+  <owl:Class rdf:about="http://ge.com/coreality/example2#Galaxy">
     <rdfs:subClassOf>
-      <owl:Class rdf:ID="Region"/>
+      <owl:Class rdf:about="http://ge.com/coreality/example2#Region"/>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:about="#Region">
+  <owl:Class rdf:about="http://ge.com/coreality/example2#Region">
     <rdfs:subClassOf>
       <owl:Restriction>
         <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >1</owl:cardinality>
         <owl:onProperty>
-          <owl:ObjectProperty rdf:ID="inside"/>
+          <owl:ObjectProperty rdf:about="http://ge.com/coreality/example2#inside"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:ObjectProperty rdf:about="#inside">
-    <rdfs:domain rdf:resource="#Region"/>
-    <rdfs:range rdf:resource="#Region"/>
+  <owl:ObjectProperty rdf:about="http://ge.com/coreality/example2#inside">
+    <rdfs:domain rdf:resource="http://ge.com/coreality/example2#Region"/>
+    <rdfs:range rdf:resource="http://ge.com/coreality/example2#Region"/>
   </owl:ObjectProperty>
-  <Galaxy rdf:ID="MilkyWay"/>
+  <Galaxy rdf:about="http://ge.com/coreality/example2#MilkyWay"/>
 </rdf:RDF>

@@ -8,51 +8,51 @@
     xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/rulevars.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="rulevars.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'rulevars.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Parent">
+  <owl:Class rdf:about="rulevars.sadl#Parent">
     <owl:equivalentClass>
       <owl:Class>
         <owl:intersectionOf rdf:parseType="Collection">
-          <owl:Class rdf:ID="Person"/>
+          <owl:Class rdf:about="rulevars.sadl#Person"/>
           <owl:Restriction>
             <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
             >1</owl:minCardinality>
             <owl:onProperty>
-              <owl:ObjectProperty rdf:ID="child"/>
+              <owl:ObjectProperty rdf:about="rulevars.sadl#child"/>
             </owl:onProperty>
           </owl:Restriction>
         </owl:intersectionOf>
       </owl:Class>
     </owl:equivalentClass>
   </owl:Class>
-  <owl:ObjectProperty rdf:about="#child">
-    <rdfs:range rdf:resource="#Person"/>
-    <rdfs:domain rdf:resource="#Person"/>
+  <owl:ObjectProperty rdf:about="rulevars.sadl#child">
+    <rdfs:range rdf:resource="rulevars.sadl#Person"/>
+    <rdfs:domain rdf:resource="rulevars.sadl#Person"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:ID="knows">
-    <rdfs:range rdf:resource="#Person"/>
-    <rdfs:domain rdf:resource="#Person"/>
+  <owl:ObjectProperty rdf:about="rulevars.sadl#knows">
+    <rdfs:range rdf:resource="rulevars.sadl#Person"/>
+    <rdfs:domain rdf:resource="rulevars.sadl#Person"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:ID="teaches">
-    <rdfs:range rdf:resource="#Person"/>
-    <rdfs:domain rdf:resource="#Person"/>
+  <owl:ObjectProperty rdf:about="rulevars.sadl#teaches">
+    <rdfs:range rdf:resource="rulevars.sadl#Person"/>
+    <rdfs:domain rdf:resource="rulevars.sadl#Person"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:ID="acquaintance">
-    <rdfs:range rdf:resource="#Person"/>
-    <rdfs:domain rdf:resource="#Person"/>
+  <owl:ObjectProperty rdf:about="rulevars.sadl#acquaintance">
+    <rdfs:range rdf:resource="rulevars.sadl#Person"/>
+    <rdfs:domain rdf:resource="rulevars.sadl#Person"/>
   </owl:ObjectProperty>
-  <rulevars:Parent rdf:ID="Lana"/>
-  <j.0:Rule rdf:ID="R5b"/>
-  <j.0:Rule rdf:ID="R4b"/>
-  <j.0:Rule rdf:ID="R2"/>
-  <j.0:Rule rdf:ID="R1"/>
-  <j.0:Rule rdf:ID="R6"/>
-  <j.0:Rule rdf:ID="R5"/>
-  <j.0:Rule rdf:ID="R3"/>
+  <rulevars:Parent rdf:about="rulevars.sadl#Lana"/>
+  <j.0:Rule rdf:about="rulevars.sadl#R5b"/>
+  <j.0:Rule rdf:about="rulevars.sadl#R4b"/>
+  <j.0:Rule rdf:about="rulevars.sadl#R2"/>
+  <j.0:Rule rdf:about="rulevars.sadl#R1"/>
+  <j.0:Rule rdf:about="rulevars.sadl#R6"/>
+  <j.0:Rule rdf:about="rulevars.sadl#R5"/>
+  <j.0:Rule rdf:about="rulevars.sadl#R3"/>
 </rdf:RDF>

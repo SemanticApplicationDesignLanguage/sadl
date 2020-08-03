@@ -18,7 +18,7 @@ Crapo</a></h5>
 <h2>Introduction</h2>
 <p>The &quot;there exists&quot; construct in SADL merits special explanation. This 
 construct can only appear in the conclusion of a rule. It is related to 
-existential quantification, that is reasoning about what must exist.</p>
+existential quantification, that is, reasoning about what must exist.</p>
 <p>For example, suppose that we define the class <i>Parent</i> as a <i>Person</i> 
 who has at least 1 <i>child</i>:</p>
 <font SIZE="2" COLOR="#800080">
@@ -43,26 +43,29 @@ who has at least 1 <i>child</i>:</p>
 </font>
 <p>then we know, given that the range of <i>child</i> is <i>Person</i>, that 
 there must exist an instance of <i>Person</i> who is the <i>child</i> of <i>Eve</i>. 
-The &quot;there exists&quot; construct allows us to reason in if-then rules about 
-scenarios in which such existence can be inferred, even&nbsp; if we don't know 
-the name (URI) of the <i>Person</i> in question.</p>
+However, inference over OWL entailments will not create an instance. The &quot;there 
+exists&quot; construct allows us to create if-then rules to do reasoning about 
+scenarios in which such existence can be inferred.</p>
 <h2>About Identity of Blank Nodes</h2>
 <p>As noted in ??, OWL does not require that graph nodes be given unique 
-identity with a URI. Rather OWL permits that unnamed instances (or classes) be 
+identity with a URI. Rather OWL permits unnamed instances (or classes) be 
 identified by their relationships with other things and/or their innate 
 properties. The question arises as to how much must be known about these 
-relationships and/or properties to uniquely identify the concept, to distinguish 
-this one concept from all others, or at least all others in a given context.</p>
+relationships and/or properties to uniquely identify the concept--to distinguish 
+this concept from all others, or at least all others in a given context.</p>
 <p>The combination of properties that uniquely identify an instance is sometimes 
-referred to as the &quot;primary key&quot;. For example, given that a Parent may have more 
-than one child, how much information must be known about an unnamed instance of 
-Person to </p>
+referred to as the &quot;primary key&quot;. For example, given a rule in which, for a 
+given <i>Parent</i>, we wish to identify a <i>child</i> of that <i>Parent</i>, 
+how much information must be known about the unidentified instance of <i>Person</i> 
+which is the child in order to find or create the <i>Person</i> of interest that 
+is known to exist?</p>
 <p>The context matters as more or less information is needed to ensure unique 
 identification in different contexts. For example, in a world where a <i>Parent</i> 
 can only have 1 child, knowing the identity of the <i>Parent</i> would be 
 sufficient to uniquely identify the child. In a world where twins are not 
-possible, knowing the identity of the <i>Parent</i> and the birthdate of the 
-child would be sufficient.</p>
+possible, knowing the identity of the <i>Parent</i> and the birth date of the 
+child would be sufficient. Or perhaps in the context of a rule it is sufficient 
+simply to identify a <i>Person</i> who is a <i>child</i> of the <i>Parent</i>.</p>
 <h2>Triple Patterns and There Exists</h2>
 <p>When &quot;there exists&quot; is used in the conclusion of a rule, the domain ontology 
 and conditions of the rule create a context for the existence reasoning. Any 
@@ -71,19 +74,21 @@ exists&quot; must be explicitly stated. In addition, the rule may add additional
 information to the inferred model which is not part of the uniquely identifying 
 criteria. Consider this example. Suppose we have this simple domain model.</p>
 <p>&nbsp;</p>
-<p>Now imagine that we wish to express two rules, one that adds commentary to 
-children of smart parents and one that adds commentary to wealthy parents. Of 
-course the Parent of a particular child might be both smart and wealthy, so the 
-commentary is not part of the unique identification criteria.</p>
+<p>Now imagine that we wish to express two rules, one that adds <i>commentary</i> 
+to children of smart parents and one that adds <i>commentary</i> to children of 
+wealthy parents. Of course the <i>Parent</i> of a particular child might be both 
+smart and wealthy or neither one, so the <i>commentary</i> is not part of the 
+unique identification criteria.</p>
 <p>&nbsp;</p>
-<p>Note that if the scenario data already contains Person instances that match 
-the criteria, that is they are the child of a Parent, then the rule will fire 
-for each matching instance. However, if there are no pre-existing instances of 
-Person with a child relationship to the Parent, then one will be created, 
-associated with the Parent per the criteria, and the commentary added. Given no 
-pre-existing match to a given Parent, which ever of the two rules fires first 
-will create the instance of Person and the second rule will find and use this 
-instance, adding the conclusions commentary.</p>
+<p>Note that if the scenario data already contains <i>Person</i> instances that 
+match the criteria, that is they are the <i>child</i> of a <i>Parent</i>, then 
+the rule will fire for each matching instance. However, if there are no 
+pre-existing instances of <i>Person</i> with a <i>child</i> relationship to the
+<i>Parent</i>, then one will be created, associated with the <i>Parent</i> per 
+the criteria, and the commentary added. Given no pre-existing match to a given
+<i>Parent</i>, which ever of the two rules above fires first will create the 
+instance of <i>Person</i> and the second rule will find and use this instance, 
+adding the conclusions <i>commentary</i>.</p>
 <p>&nbsp;</p>
 <p>&nbsp;</p>
 

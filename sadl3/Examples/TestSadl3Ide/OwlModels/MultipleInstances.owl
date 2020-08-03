@@ -7,20 +7,21 @@
     xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/MultipleInstances.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="MultipleInstances.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'MultipleInstances.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Actor"/>
-  <owl:DatatypeProperty rdf:ID="rating">
-    <rdfs:domain rdf:resource="#Actor"/>
+  <owl:Class rdf:about="MultipleInstances.sadl#Actor"/>
+  <owl:DatatypeProperty rdf:about="MultipleInstances.sadl#rating">
+    <rdfs:domain rdf:resource="MultipleInstances.sadl#Actor"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
   </owl:DatatypeProperty>
-  <rdf:Description rdf:ID="John">
-    <MultipleInstances:rating rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >good</MultipleInstances:rating>
-  </rdf:Description>
+  <MultipleInstances:Actor rdf:about="MultipleInstances.sadl#James"/>
+  <MultipleInstances:Actor rdf:about="MultipleInstances.sadl#John">
+    <MultipleInstances:rating>good</MultipleInstances:rating>
+  </MultipleInstances:Actor>
+  <MultipleInstances:Actor rdf:about="MultipleInstances.sadl#Susan"/>
 </rdf:RDF>

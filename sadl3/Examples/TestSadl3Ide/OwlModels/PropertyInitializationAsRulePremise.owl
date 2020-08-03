@@ -8,22 +8,22 @@
     xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/PropertyInitializationAsRulePremise.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="PropertyInitializationAsRulePremise.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'PropertyInitializationAsRulePremise.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Person"/>
-  <owl:Class rdf:ID="Child">
-    <rdfs:subClassOf rdf:resource="#Person"/>
+  <owl:Class rdf:about="PropertyInitializationAsRulePremise.sadl#Person"/>
+  <owl:Class rdf:about="PropertyInitializationAsRulePremise.sadl#Child">
+    <rdfs:subClassOf rdf:resource="PropertyInitializationAsRulePremise.sadl#Person"/>
   </owl:Class>
-  <owl:DatatypeProperty rdf:ID="age">
-    <rdfs:domain rdf:resource="#Person"/>
+  <owl:DatatypeProperty rdf:about="PropertyInitializationAsRulePremise.sadl#age">
+    <rdfs:domain rdf:resource="PropertyInitializationAsRulePremise.sadl#Person"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
   </owl:DatatypeProperty>
-  <j.0:Rule rdf:ID="ChildRule3"/>
-  <j.0:Rule rdf:ID="ChildRule2"/>
-  <j.0:Rule rdf:ID="ChildRule2b"/>
+  <j.0:Rule rdf:about="PropertyInitializationAsRulePremise.sadl#ChildRule3"/>
+  <j.0:Rule rdf:about="PropertyInitializationAsRulePremise.sadl#ChildRule2"/>
+  <j.0:Rule rdf:about="PropertyInitializationAsRulePremise.sadl#ChildRule2b"/>
 </rdf:RDF>

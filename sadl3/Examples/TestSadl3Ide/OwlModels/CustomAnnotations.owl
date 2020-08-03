@@ -7,19 +7,19 @@
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
     xmlns:CustomAnnotations="http://sadl.org/CustomAnnotations.sadl#"
-  xml:base="http://sadl.org/CustomAnnotations.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="CustomAnnotations.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'CustomAnnotations.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="AllThingsGood">
+  <owl:Class rdf:about="CustomAnnotations.sadl#AllThingsGood">
     <rdfs:comment xml:lang="en">this is a second comment</rdfs:comment>
     <rdfs:comment xml:lang="en">This is a first comment</rdfs:comment>
     <rdfs:label xml:lang="en">things that are good</rdfs:label>
     <rdfs:label xml:lang="en">good things</rdfs:label>
     <rdfs:label xml:lang="en">all things good</rdfs:label>
   </owl:Class>
-  <owl:AnnotationProperty rdf:ID="giberish"/>
+  <owl:AnnotationProperty rdf:about="CustomAnnotations.sadl#giberish"/>
 </rdf:RDF>

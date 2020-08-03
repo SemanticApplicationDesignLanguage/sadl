@@ -7,156 +7,156 @@
     xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/TestSadlIde/AnonRestrictions">
-  <owl:Ontology rdf:about="">
-    <owl:imports rdf:resource="/builtinfunctions"/>
-    <owl:imports rdf:resource="/sadlimplicitmodel"/>
-    <owl:imports rdf:resource="/sadlbasemodel"/>
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="TestSadlIde/AnonRestrictions">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource=""/>
     <owl:versionInfo>$Revision: 1.3 $ Last modified on   $Date: 2015/06/30 21:27:33 $</owl:versionInfo>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'AnonRestrictions.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="EngineeringProfessor">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#EngineeringProfessor">
     <owl:equivalentClass>
       <owl:Class>
         <owl:intersectionOf rdf:parseType="Collection">
-          <owl:Class rdf:ID="Person"/>
+          <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Person"/>
           <owl:Restriction>
             <owl:someValuesFrom>
-              <owl:Class rdf:ID="Student"/>
+              <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Student"/>
             </owl:someValuesFrom>
             <owl:onProperty>
-              <owl:ObjectProperty rdf:ID="teaches"/>
+              <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#teaches"/>
             </owl:onProperty>
           </owl:Restriction>
           <owl:Restriction>
             <owl:someValuesFrom>
               <owl:Class>
                 <owl:unionOf rdf:parseType="Collection">
-                  <owl:Class rdf:ID="Engineering"/>
+                  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Engineering"/>
                   <owl:Restriction>
                     <owl:someValuesFrom>
-                      <owl:Class rdf:about="#Engineering"/>
+                      <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Engineering"/>
                     </owl:someValuesFrom>
                     <owl:onProperty>
-                      <owl:TransitiveProperty rdf:ID="parentDepartment"/>
+                      <owl:TransitiveProperty rdf:about="TestSadlIde/AnonRestrictions#parentDepartment"/>
                     </owl:onProperty>
                   </owl:Restriction>
                 </owl:unionOf>
               </owl:Class>
             </owl:someValuesFrom>
             <owl:onProperty>
-              <owl:ObjectProperty rdf:ID="department"/>
+              <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#department"/>
             </owl:onProperty>
           </owl:Restriction>
         </owl:intersectionOf>
       </owl:Class>
     </owl:equivalentClass>
   </owl:Class>
-  <owl:Class rdf:ID="Meat">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Meat">
     <rdfs:subClassOf>
-      <owl:Class rdf:ID="Food"/>
+      <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Food"/>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:ID="Manufacturer">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Manufacturer">
     <rdfs:subClassOf>
-      <owl:Class rdf:ID="Organization"/>
+      <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Organization"/>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:ID="LegalEntity"/>
-  <owl:Class rdf:ID="Computer">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#LegalEntity"/>
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Computer">
     <rdfs:subClassOf>
-      <owl:Class rdf:ID="Artifact"/>
+      <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Artifact"/>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:about="#Engineering">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Engineering">
     <rdfs:subClassOf>
-      <owl:Class rdf:ID="Department"/>
+      <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Department"/>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:ID="Professor">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Professor">
     <owl:equivalentClass>
       <owl:Class>
         <owl:intersectionOf rdf:parseType="Collection">
-          <owl:Class rdf:about="#Person"/>
+          <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Person"/>
           <owl:Restriction>
             <owl:someValuesFrom>
-              <owl:Class rdf:about="#Student"/>
+              <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Student"/>
             </owl:someValuesFrom>
             <owl:onProperty>
-              <owl:ObjectProperty rdf:about="#teaches"/>
+              <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#teaches"/>
             </owl:onProperty>
           </owl:Restriction>
         </owl:intersectionOf>
       </owl:Class>
     </owl:equivalentClass>
   </owl:Class>
-  <owl:Class rdf:about="#Department">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Department">
     <rdfs:subClassOf>
-      <owl:Class rdf:about="#Organization"/>
+      <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Organization"/>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:ID="AppleProfessor">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#AppleProfessor">
     <owl:equivalentClass>
       <owl:Class>
         <owl:intersectionOf rdf:parseType="Collection">
-          <owl:Class rdf:about="#Professor"/>
+          <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Professor"/>
           <owl:Restriction>
             <owl:someValuesFrom>
               <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
-                  <owl:Class rdf:about="#Student"/>
+                  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Student"/>
                   <owl:Restriction>
                     <owl:someValuesFrom>
                       <owl:Class>
                         <owl:intersectionOf rdf:parseType="Collection">
-                          <owl:Class rdf:about="#Computer"/>
+                          <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Computer"/>
                           <owl:Restriction>
                             <owl:hasValue>
-                              <anonrest:Manufacturer rdf:ID="Apple"/>
+                              <anonrest:Manufacturer rdf:about="TestSadlIde/AnonRestrictions#Apple"/>
                             </owl:hasValue>
                             <owl:onProperty>
-                              <owl:ObjectProperty rdf:ID="manufacturer"/>
+                              <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#manufacturer"/>
                             </owl:onProperty>
                           </owl:Restriction>
                         </owl:intersectionOf>
                       </owl:Class>
                     </owl:someValuesFrom>
                     <owl:onProperty>
-                      <owl:ObjectProperty rdf:ID="owns"/>
+                      <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#owns"/>
                     </owl:onProperty>
                   </owl:Restriction>
                 </owl:intersectionOf>
               </owl:Class>
             </owl:someValuesFrom>
             <owl:onProperty>
-              <owl:ObjectProperty rdf:about="#teaches"/>
+              <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#teaches"/>
             </owl:onProperty>
           </owl:Restriction>
         </owl:intersectionOf>
       </owl:Class>
     </owl:equivalentClass>
   </owl:Class>
-  <owl:Class rdf:ID="AppleLovingStudent">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#AppleLovingStudent">
     <owl:equivalentClass>
       <owl:Class>
         <owl:intersectionOf rdf:parseType="Collection">
-          <owl:Class rdf:about="#Student"/>
+          <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Student"/>
           <owl:Restriction>
             <owl:allValuesFrom>
               <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
-                  <owl:Class rdf:about="#Computer"/>
+                  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Computer"/>
                   <owl:Restriction>
-                    <owl:hasValue rdf:resource="#Apple"/>
+                    <owl:hasValue rdf:resource="TestSadlIde/AnonRestrictions#Apple"/>
                     <owl:onProperty>
-                      <owl:ObjectProperty rdf:about="#manufacturer"/>
+                      <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#manufacturer"/>
                     </owl:onProperty>
                   </owl:Restriction>
                 </owl:intersectionOf>
               </owl:Class>
             </owl:allValuesFrom>
             <owl:onProperty>
-              <owl:ObjectProperty rdf:about="#owns"/>
+              <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#owns"/>
             </owl:onProperty>
           </owl:Restriction>
         </owl:intersectionOf>
@@ -167,170 +167,170 @@
         <owl:allValuesFrom>
           <owl:Class>
             <owl:intersectionOf rdf:parseType="Collection">
-              <owl:Class rdf:about="#Computer"/>
+              <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Computer"/>
               <owl:Restriction>
-                <owl:hasValue rdf:resource="#Apple"/>
+                <owl:hasValue rdf:resource="TestSadlIde/AnonRestrictions#Apple"/>
                 <owl:onProperty>
-                  <owl:ObjectProperty rdf:about="#manufacturer"/>
+                  <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#manufacturer"/>
                 </owl:onProperty>
               </owl:Restriction>
             </owl:intersectionOf>
           </owl:Class>
         </owl:allValuesFrom>
         <owl:onProperty>
-          <owl:ObjectProperty rdf:about="#owns"/>
+          <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#owns"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:ID="DellProfessor">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#DellProfessor">
     <owl:equivalentClass>
       <owl:Class>
         <owl:intersectionOf rdf:parseType="Collection">
-          <owl:Class rdf:about="#Professor"/>
+          <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Professor"/>
           <owl:Restriction>
             <owl:someValuesFrom>
               <owl:Restriction>
                 <owl:someValuesFrom>
                   <owl:Class>
                     <owl:intersectionOf rdf:parseType="Collection">
-                      <owl:Class rdf:about="#Computer"/>
+                      <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Computer"/>
                       <owl:Restriction>
                         <owl:hasValue>
-                          <anonrest:Manufacturer rdf:ID="Dell"/>
+                          <anonrest:Manufacturer rdf:about="TestSadlIde/AnonRestrictions#Dell"/>
                         </owl:hasValue>
                         <owl:onProperty>
-                          <owl:ObjectProperty rdf:about="#manufacturer"/>
+                          <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#manufacturer"/>
                         </owl:onProperty>
                       </owl:Restriction>
                     </owl:intersectionOf>
                   </owl:Class>
                 </owl:someValuesFrom>
                 <owl:onProperty>
-                  <owl:ObjectProperty rdf:about="#owns"/>
+                  <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#owns"/>
                 </owl:onProperty>
               </owl:Restriction>
             </owl:someValuesFrom>
             <owl:onProperty>
-              <owl:ObjectProperty rdf:about="#teaches"/>
+              <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#teaches"/>
             </owl:onProperty>
           </owl:Restriction>
         </owl:intersectionOf>
       </owl:Class>
     </owl:equivalentClass>
   </owl:Class>
-  <owl:Class rdf:about="#Person">
-    <rdfs:subClassOf rdf:resource="#LegalEntity"/>
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Person">
+    <rdfs:subClassOf rdf:resource="TestSadlIde/AnonRestrictions#LegalEntity"/>
   </owl:Class>
-  <owl:Class rdf:about="#Organization">
-    <rdfs:subClassOf rdf:resource="#LegalEntity"/>
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Organization">
+    <rdfs:subClassOf rdf:resource="TestSadlIde/AnonRestrictions#LegalEntity"/>
   </owl:Class>
-  <owl:Class rdf:about="#Student">
-    <rdfs:subClassOf rdf:resource="#Person"/>
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Student">
+    <rdfs:subClassOf rdf:resource="TestSadlIde/AnonRestrictions#Person"/>
   </owl:Class>
-  <owl:Class rdf:ID="AppleComputer">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#AppleComputer">
     <rdfs:subClassOf>
       <owl:Restriction>
-        <owl:hasValue rdf:resource="#Apple"/>
+        <owl:hasValue rdf:resource="TestSadlIde/AnonRestrictions#Apple"/>
         <owl:onProperty>
-          <owl:ObjectProperty rdf:about="#manufacturer"/>
+          <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#manufacturer"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
     <owl:equivalentClass>
       <owl:Class>
         <owl:intersectionOf rdf:parseType="Collection">
-          <owl:Class rdf:about="#Computer"/>
+          <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Computer"/>
           <owl:Restriction>
-            <owl:hasValue rdf:resource="#Apple"/>
+            <owl:hasValue rdf:resource="TestSadlIde/AnonRestrictions#Apple"/>
             <owl:onProperty>
-              <owl:ObjectProperty rdf:about="#manufacturer"/>
+              <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#manufacturer"/>
             </owl:onProperty>
           </owl:Restriction>
         </owl:intersectionOf>
       </owl:Class>
     </owl:equivalentClass>
   </owl:Class>
-  <owl:Class rdf:ID="Vegetable">
-    <owl:complementOf rdf:resource="#Meat"/>
-    <rdfs:subClassOf rdf:resource="#Food"/>
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Vegetable">
+    <owl:complementOf rdf:resource="TestSadlIde/AnonRestrictions#Meat"/>
+    <rdfs:subClassOf rdf:resource="TestSadlIde/AnonRestrictions#Food"/>
   </owl:Class>
-  <owl:Class rdf:ID="Carnivor">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Carnivor">
     <owl:equivalentClass>
       <owl:Class>
         <owl:intersectionOf rdf:parseType="Collection">
-          <owl:Class rdf:about="#Person"/>
+          <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Person"/>
           <owl:Restriction>
-            <owl:someValuesFrom rdf:resource="#Meat"/>
+            <owl:someValuesFrom rdf:resource="TestSadlIde/AnonRestrictions#Meat"/>
             <owl:onProperty>
-              <owl:ObjectProperty rdf:ID="eats"/>
+              <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#eats"/>
             </owl:onProperty>
           </owl:Restriction>
         </owl:intersectionOf>
       </owl:Class>
     </owl:equivalentClass>
   </owl:Class>
-  <owl:Class rdf:ID="Vegetarian">
+  <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Vegetarian">
     <owl:equivalentClass>
       <owl:Class>
         <owl:intersectionOf rdf:parseType="Collection">
-          <owl:Class rdf:about="#Person"/>
+          <owl:Class rdf:about="TestSadlIde/AnonRestrictions#Person"/>
           <owl:Restriction>
-            <owl:allValuesFrom rdf:resource="#Vegetable"/>
+            <owl:allValuesFrom rdf:resource="TestSadlIde/AnonRestrictions#Vegetable"/>
             <owl:onProperty>
-              <owl:ObjectProperty rdf:about="#eats"/>
+              <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#eats"/>
             </owl:onProperty>
           </owl:Restriction>
         </owl:intersectionOf>
       </owl:Class>
     </owl:equivalentClass>
   </owl:Class>
-  <owl:ObjectProperty rdf:about="#eats">
-    <rdfs:range rdf:resource="#Food"/>
-    <rdfs:domain rdf:resource="#Person"/>
+  <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#eats">
+    <rdfs:range rdf:resource="TestSadlIde/AnonRestrictions#Food"/>
+    <rdfs:domain rdf:resource="TestSadlIde/AnonRestrictions#Person"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:about="#teaches">
-    <rdfs:range rdf:resource="#Person"/>
-    <rdfs:domain rdf:resource="#Person"/>
+  <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#teaches">
+    <rdfs:range rdf:resource="TestSadlIde/AnonRestrictions#Person"/>
+    <rdfs:domain rdf:resource="TestSadlIde/AnonRestrictions#Person"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:about="#department">
-    <rdfs:range rdf:resource="#Department"/>
-    <rdfs:domain rdf:resource="#Person"/>
+  <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#department">
+    <rdfs:range rdf:resource="TestSadlIde/AnonRestrictions#Department"/>
+    <rdfs:domain rdf:resource="TestSadlIde/AnonRestrictions#Person"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:about="#owns">
-    <rdfs:domain rdf:resource="#LegalEntity"/>
-    <rdfs:range rdf:resource="#Artifact"/>
+  <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#owns">
+    <rdfs:domain rdf:resource="TestSadlIde/AnonRestrictions#LegalEntity"/>
+    <rdfs:range rdf:resource="TestSadlIde/AnonRestrictions#Artifact"/>
   </owl:ObjectProperty>
-  <owl:ObjectProperty rdf:about="#manufacturer">
-    <rdfs:domain rdf:resource="#Artifact"/>
-    <rdfs:range rdf:resource="#LegalEntity"/>
+  <owl:ObjectProperty rdf:about="TestSadlIde/AnonRestrictions#manufacturer">
+    <rdfs:domain rdf:resource="TestSadlIde/AnonRestrictions#Artifact"/>
+    <rdfs:range rdf:resource="TestSadlIde/AnonRestrictions#LegalEntity"/>
   </owl:ObjectProperty>
-  <owl:TransitiveProperty rdf:about="#parentDepartment">
-    <rdfs:range rdf:resource="#Department"/>
-    <rdfs:domain rdf:resource="#Department"/>
+  <owl:TransitiveProperty rdf:about="TestSadlIde/AnonRestrictions#parentDepartment">
+    <rdfs:range rdf:resource="TestSadlIde/AnonRestrictions#Department"/>
+    <rdfs:domain rdf:resource="TestSadlIde/AnonRestrictions#Department"/>
     <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#ObjectProperty"/>
   </owl:TransitiveProperty>
-  <anonrest:AppleProfessor rdf:ID="YourProf">
+  <anonrest:AppleProfessor rdf:about="TestSadlIde/AnonRestrictions#YourProf">
     <anonrest:teaches>
-      <anonrest:Student rdf:ID="DellCore">
+      <anonrest:Student rdf:about="TestSadlIde/AnonRestrictions#DellCore">
         <anonrest:owns>
-          <anonrest:Computer rdf:ID="DellSkin">
-            <anonrest:manufacturer rdf:resource="#Dell"/>
+          <anonrest:Computer rdf:about="TestSadlIde/AnonRestrictions#DellSkin">
+            <anonrest:manufacturer rdf:resource="TestSadlIde/AnonRestrictions#Dell"/>
           </anonrest:Computer>
         </anonrest:owns>
       </anonrest:Student>
     </anonrest:teaches>
   </anonrest:AppleProfessor>
-  <anonrest:Professor rdf:ID="MyProf">
+  <anonrest:Professor rdf:about="TestSadlIde/AnonRestrictions#MyProf">
     <anonrest:teaches>
-      <anonrest:Student rdf:ID="AppleCore">
+      <anonrest:Student rdf:about="TestSadlIde/AnonRestrictions#AppleCore">
         <anonrest:owns>
-          <anonrest:Computer rdf:ID="AppleSkin">
-            <anonrest:manufacturer rdf:resource="#Apple"/>
+          <anonrest:Computer rdf:about="TestSadlIde/AnonRestrictions#AppleSkin">
+            <anonrest:manufacturer rdf:resource="TestSadlIde/AnonRestrictions#Apple"/>
           </anonrest:Computer>
         </anonrest:owns>
       </anonrest:Student>
     </anonrest:teaches>
   </anonrest:Professor>
-  <anonrest:Computer rdf:ID="Foo"/>
+  <anonrest:Computer rdf:about="TestSadlIde/AnonRestrictions#Foo"/>
 </rdf:RDF>

@@ -7,28 +7,27 @@
     xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/QueryWithEmbeddedDecl.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="QueryWithEmbeddedDecl.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'QueryWithEmbeddedDecl.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Foo"/>
-  <owl:Class rdf:ID="Whim"/>
-  <owl:ObjectProperty rdf:ID="bar">
-    <rdfs:domain rdf:resource="#Foo"/>
-    <rdfs:range rdf:resource="#Whim"/>
+  <owl:Class rdf:about="QueryWithEmbeddedDecl.sadl#Foo"/>
+  <owl:Class rdf:about="QueryWithEmbeddedDecl.sadl#Whim"/>
+  <owl:ObjectProperty rdf:about="QueryWithEmbeddedDecl.sadl#bar">
+    <rdfs:domain rdf:resource="QueryWithEmbeddedDecl.sadl#Foo"/>
+    <rdfs:range rdf:resource="QueryWithEmbeddedDecl.sadl#Whim"/>
   </owl:ObjectProperty>
-  <owl:DatatypeProperty rdf:ID="wham">
-    <rdfs:domain rdf:resource="#Whim"/>
+  <owl:DatatypeProperty rdf:about="QueryWithEmbeddedDecl.sadl#wham">
+    <rdfs:domain rdf:resource="QueryWithEmbeddedDecl.sadl#Whim"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
   </owl:DatatypeProperty>
-  <QueryWithEmbeddedDecl:Foo rdf:ID="F1">
+  <QueryWithEmbeddedDecl:Foo rdf:about="QueryWithEmbeddedDecl.sadl#F1">
     <QueryWithEmbeddedDecl:bar>
-      <QueryWithEmbeddedDecl:Whim rdf:ID="W1">
-        <QueryWithEmbeddedDecl:wham rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-        >hi</QueryWithEmbeddedDecl:wham>
+      <QueryWithEmbeddedDecl:Whim rdf:about="QueryWithEmbeddedDecl.sadl#W1">
+        <QueryWithEmbeddedDecl:wham>hi</QueryWithEmbeddedDecl:wham>
       </QueryWithEmbeddedDecl:Whim>
     </QueryWithEmbeddedDecl:bar>
   </QueryWithEmbeddedDecl:Foo>
