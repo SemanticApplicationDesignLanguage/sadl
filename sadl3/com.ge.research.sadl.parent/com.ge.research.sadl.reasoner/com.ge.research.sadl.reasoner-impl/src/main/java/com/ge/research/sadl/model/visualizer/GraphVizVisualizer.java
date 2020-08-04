@@ -315,7 +315,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		sb.append("}\n");
 		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
 				((bfn != null ? bfn : "") + ".dot"));
-		new SadlUtils().stringToFile(dotFile, sb.toString(), false, StandardCharsets.UTF_16);
+		new SadlUtils().stringToFile(dotFile, sb.toString(), false, StandardCharsets.UTF_8);
 		return dotFile;
 	}
 	
