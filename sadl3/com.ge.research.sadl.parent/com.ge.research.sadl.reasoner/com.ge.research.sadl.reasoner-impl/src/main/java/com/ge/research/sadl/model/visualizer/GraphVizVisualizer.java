@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
@@ -314,7 +315,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		sb.append("}\n");
 		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
 				((bfn != null ? bfn : "") + ".dot"));
-		new SadlUtils().stringToFile(dotFile, sb.toString(), false);
+		new SadlUtils().stringToFile(dotFile, sb.toString(), false, StandardCharsets.UTF_16);
 		return dotFile;
 	}
 	
@@ -458,9 +459,37 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 //				asciiEncoder.encode(cb, bb, true);
 //				String convStr = bb.toString();
 				
-				byte[] o_utf8 = o.toString().getBytes();
-				String o_utf8_str = new String(o_utf8, StandardCharsets.UTF_8);
-				sb.append(replaceDoubleQuotes(o_utf8_str));
+				//File tf = new File("testFile.txt");
+				//tf.
+				
+                CharsetEncoder cse = StandardCharsets.UTF_16.newEncoder();
+                CharBuffer cb = CharBuffer.wrap(o.toString());
+                String cbstr = null;
+                try {
+                       boolean canEncode = cse.canEncode(cb);
+                       if (canEncode) {
+                              ByteBuffer cr = cse.encode(cb);
+                              cbstr = cr.asCharBuffer().toString();
+                              System.out.println(cbstr);
+                       }
+                       else {
+                              System.out.println("Can't encode '" + cb.toString() + "'");
+                       }
+                      
+                } catch (CharacterCodingException e) {
+                       // TODO Auto-generated catch block
+                       e.printStackTrace();
+                }
+                if (cbstr != null) {
+                       sb.append(replaceDoubleQuotes(cbstr));
+                }
+                else {
+                       byte[] o_utf8 = o.toString().getBytes();
+                       String o_utf8_str = new String(o_utf8);
+                       sb.append(replaceDoubleQuotes(o_utf8_str));
+                }
+			
+			
 			}
 //			sb.append(replaceDoubleQuotes(o.toString()));
 			sb.append("\"");
