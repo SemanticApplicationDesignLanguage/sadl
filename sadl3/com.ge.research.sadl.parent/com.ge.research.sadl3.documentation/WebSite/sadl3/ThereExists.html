@@ -80,17 +80,34 @@ The arguments of the function fall into 3 categories.</p>
 <ol>
   <li>The type (class) of the instance that must be found or created</li>
   <li>A set of triple patterns to which the instance to be found or created must 
-  conform</li>
+  conform, which we will refer to as the &quot;matching triples&quot;</li>
   <li>An optional set of triple patterns that are to be added to the instance 
-  but which are not part of the criteria for finding or creating the instance.</li>
+  but which are not part of the criteria for finding or creating the instance, 
+  which we will refer to as the &quot;also add triples&quot;.</li>
 </ol>
 <p>Consider this example. Suppose we have this simple domain model.</p>
+<p>if x is a Parent and iq of x &gt; 120 then there exists a Person y such that x 
+has child y plus y has commentary &quot;child of a smart parent&quot;.</p>
+<p>if the iq of a Parent &gt; 120 then there exists a Person such that the Parent 
+has child the Person plus the Person has commentary &quot;child of a smart parent&quot;.</p>
+<p>if x is a Parent and iq of x &gt; 120 then there exists a Person y and x has 
+child y plus y has commentary &quot;child of a smart parent&quot;.</p>
+<p>if the iq of a Parent &gt; 120 then there exists a Person and the Parent has 
+child the Person plus the Person has commentary &quot;child of a smart parent&quot;.</p>
 <p>&nbsp;</p>
 <p>Now imagine that we wish to express two rules, one that adds <i>commentary</i> 
 to children of smart parents and one that adds <i>commentary</i> to children of 
 wealthy parents. Of course the <i>Parent</i> of a particular child might be both 
 smart and wealthy or neither one, so the <i>commentary</i> is not part of the 
-unique identification criteria.</p>
+unique criteria for identifying a <i>child</i> of a given <i>Parent</i>.</p>
+<h2>The &quot;thereExists&quot; Built-in Function</h2>
+<p>The various rule formulations illustrated above using the SADL grammar are 
+all translated to the &quot;thereExists&quot; built-in function in the SADL Intermediate 
+Form (see ??) and then translated by the reasoner-specific translator into the 
+form that can be used by a specific reasoner. The Jena-based reasoner uses a 
+custom built-in named &quot;thereExists&quot;, which is aligned with the Intermediate 
+Form, to implement this functionality. The built-in is of this form:</p>
+<p>&nbsp;</p>
 <p>&nbsp;</p>
 <p>Note that if the scenario data already contains <i>Person</i> instances that 
 match the criteria, that is they are the <i>child</i> of a <i>Parent</i>, then 
