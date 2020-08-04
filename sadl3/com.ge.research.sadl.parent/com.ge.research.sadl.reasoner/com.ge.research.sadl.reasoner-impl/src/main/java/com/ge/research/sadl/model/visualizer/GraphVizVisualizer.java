@@ -315,6 +315,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		sb.append("}\n");
 		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
 				((bfn != null ? bfn : "") + ".dot"));
+		//AG: UTF_8 works on both Windows and MacOS
 		new SadlUtils().stringToFile(dotFile, sb.toString(), false, StandardCharsets.UTF_8);
 		return dotFile;
 	}
@@ -439,59 +440,11 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 			sb.append(olbl);
 			if (o.equals(OWL.Nothing)) {
 				sb.append("[shape=point label=\"");
-				sb.append(replaceDoubleQuotes(o.toString()));
 			}
 			else {
 				sb.append("[shape=box label=\"");
-				//CharsetEncoder csE = StandardCharsets.UTF_8.newEncoder();
-				//boolean canEncode = csE.canEncode(o.toString());
-
-//				CharsetEncoder charsetEncoder = StandardCharsets.UTF_8.newEncoder()
-//						.onMalformedInput(CodingErrorAction.REPLACE)
-//						.onUnmappableCharacter(CodingErrorAction.REPLACE);
-//				CharsetEncoder asciiEncoder = StandardCharsets.US_ASCII.newEncoder()
-//						.onMalformedInput(CodingErrorAction.REPLACE)
-//						.onUnmappableCharacter(CodingErrorAction.REPLACE);
-//				byte[] o_bytes = new byte[o.toString().length()];
-//				CharBuffer cb = CharBuffer.wrap(o.toString());
-//				//byte[] bba = new byte[o.toString().length()];
-//				ByteBuffer bb = ByteBuffer.wrap(o_bytes);
-//				asciiEncoder.encode(cb, bb, true);
-//				String convStr = bb.toString();
-				
-				//File tf = new File("testFile.txt");
-				//tf.
-				
-                CharsetEncoder cse = StandardCharsets.UTF_16.newEncoder();
-                CharBuffer cb = CharBuffer.wrap(o.toString());
-                String cbstr = null;
-                try {
-                       boolean canEncode = cse.canEncode(cb);
-                       if (canEncode) {
-                              ByteBuffer cr = cse.encode(cb);
-                              cbstr = cr.asCharBuffer().toString();
-                              System.out.println(cbstr);
-                       }
-                       else {
-                              System.out.println("Can't encode '" + cb.toString() + "'");
-                       }
-                      
-                } catch (CharacterCodingException e) {
-                       // TODO Auto-generated catch block
-                       e.printStackTrace();
-                }
-                if (cbstr != null) {
-                       sb.append(replaceDoubleQuotes(cbstr));
-                }
-                else {
-                       byte[] o_utf8 = o.toString().getBytes();
-                       String o_utf8_str = new String(o_utf8);
-                       sb.append(replaceDoubleQuotes(o_utf8_str));
-                }
-			
-			
 			}
-//			sb.append(replaceDoubleQuotes(o.toString()));
+			sb.append(replaceDoubleQuotes(o.toString()));
 			sb.append("\"");
 			boolean anchored = false;
 			if (anchorNodeLabel != null && o.toString().equals(anchorNodeLabel)) {

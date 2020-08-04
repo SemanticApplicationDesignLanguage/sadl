@@ -333,8 +333,9 @@ public class SadlUtils {
 			try {
 				//use buffering
 				//FileWriter always assumes default encoding is OK!
-				//Charset charset = StandardCharsets.UTF_16;//Charset.forName("US-ASCII");
 				//output = new BufferedWriter( new FileWriter(aFile) );
+				//AG: the default charset sometimes results in bad dot/svg files on Windows
+				// The UTF_8 charset seems to work fine on both MacOS and Windows.
 				output = Files.newBufferedWriter(aFile.toPath(), charset);
 				output.write( contents );
 			}
