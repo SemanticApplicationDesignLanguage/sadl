@@ -6,14 +6,20 @@
  
  child describes Parent with values of type Person.
  commentary describes Person with values of type string.
+ knows describes Person with values of type Person.
+ 
+ A Parent Hillary has child (a Person Chelsea).
  
 // Rule YP if x is a Parent and age of x < 30 then there exists a Person y such that x has child y and y has commentary "This is the child of a young parent".
 // Rule YP2 if a Parent has age < 30 then there exists a Person such that the Parent has child the Person and the Person has commentary "This is the child of a young parent".
- Rule YP if x is a Parent and age of x < 30 then there exists a Person y and x has child y and y has commentary "This is the child of a young parent".
- Rule YP2 if age of a Parent < 30 then there exists a Person and the Parent has child the Person and the Person has commentary "This is the child of a young parent".
+ Rule YP if x is a Parent and age of x < 30 then there exists a Person y and x has child y plus y has commentary "This is the child of a young parent". 
+ Rule YP2 if age of a Parent < 30 then there exists a Person and the Parent has child the Person plus the Person has commentary "This is the child of a young parent".
+ 
  Rule YP3 if x is Parent and age of x < 30 then thereExists(Person, x, child, AddAlso, commentary, "This is the child of a young parent").
  
  Rule OP if x is a Parent and age of x >= 30 then thereExists(Person, x, child, AddAlso, commentary, "This is the child of an older parent").
+ 
+ Rule S2p if x is a Parent then there exists a Person y and x has child y and there exists a Person z and z has child y plus x knows z.
  
  Rule SP if x is a Parent and iq of x >= 120 then thereExists(Person, x, child, AddAlso, commentary, "This is the child of a smart parent").
  
