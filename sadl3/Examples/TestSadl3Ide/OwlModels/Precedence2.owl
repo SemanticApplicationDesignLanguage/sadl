@@ -1,0 +1,145 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:j.0="http://sadl.org/sadllistmodel#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:Precedence2="http://sadl.org/Precedence2.sadl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.1="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:sadllistmodel="http://sadl.org/sadllistmodel"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="Precedence2.sadl">
+    <owl:imports rdf:resource="sadllistmodel"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource=""/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Precedence2.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:about="Precedence2.sadl#Rectangle"/>
+  <owl:Class rdf:nodeID="A0">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:nodeID="A0"/>
+        <owl:onProperty rdf:resource="sadllistmodel#rest"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="sadlimplicitmodel#DataDescriptor"/>
+        <owl:onProperty rdf:resource="sadllistmodel#first"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="sadllistmodel#List"/>
+  </owl:Class>
+  <owl:Class rdf:about="Precedence2.sadl#Paper"/>
+  <owl:DatatypeProperty rdf:about="Precedence2.sadl#height">
+    <rdfs:domain rdf:resource="Precedence2.sadl#Rectangle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="Precedence2.sadl#titlePageContent">
+    <rdfs:domain rdf:resource="Precedence2.sadl#Paper"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="Precedence2.sadl#area">
+    <rdfs:domain rdf:resource="Precedence2.sadl#Rectangle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="Precedence2.sadl#abstract">
+    <rdfs:domain rdf:resource="Precedence2.sadl#Paper"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="Precedence2.sadl#width">
+    <rdfs:domain rdf:resource="Precedence2.sadl#Rectangle"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="Precedence2.sadl#author">
+    <rdfs:domain rdf:resource="Precedence2.sadl#Paper"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+  </owl:DatatypeProperty>
+  <j.1:Equation rdf:about="Precedence2.sadl#strcat">
+    <j.1:returnTypes rdf:parseType="Resource">
+      <j.0:first>
+        <j.1:DataDescriptor>
+          <j.1:dataType>http://www.w3.org/2001/XMLSchema#string</j.1:dataType>
+        </j.1:DataDescriptor>
+      </j.0:first>
+      <rdf:type rdf:nodeID="A0"/>
+    </j.1:returnTypes>
+    <j.1:arguments rdf:parseType="Resource">
+      <j.0:rest rdf:parseType="Resource">
+        <j.0:first>
+          <j.1:DataDescriptor>
+            <j.1:dataType>http://www.w3.org/2001/XMLSchema#string</j.1:dataType>
+            <j.1:descriptorVariable>
+              <j.1:GPVariable rdf:about="Precedence2.sadl#strcat_s2"/>
+            </j.1:descriptorVariable>
+            <j.1:localDescriptorName>s2</j.1:localDescriptorName>
+          </j.1:DataDescriptor>
+        </j.0:first>
+        <rdf:type rdf:nodeID="A0"/>
+      </j.0:rest>
+      <j.0:first>
+        <j.1:DataDescriptor>
+          <j.1:dataType>http://www.w3.org/2001/XMLSchema#string</j.1:dataType>
+          <j.1:descriptorVariable>
+            <j.1:GPVariable rdf:about="Precedence2.sadl#strcat_s1"/>
+          </j.1:descriptorVariable>
+          <j.1:localDescriptorName>s1</j.1:localDescriptorName>
+        </j.1:DataDescriptor>
+      </j.0:first>
+      <rdf:type rdf:nodeID="A0"/>
+    </j.1:arguments>
+    <j.1:expression>
+      <j.1:Script>
+        <j.1:language rdf:resource="sadlimplicitmodel#Text"/>
+        <j.1:script>string strcat(string s1,string s2): </j.1:script>
+      </j.1:Script>
+    </j.1:expression>
+  </j.1:Equation>
+  <j.1:Rule rdf:about="Precedence2.sadl#RectArea"/>
+  <j.1:Equation rdf:about="Precedence2.sadl#areaOfRect">
+    <j.1:returnTypes rdf:parseType="Resource">
+      <j.0:first>
+        <j.1:DataDescriptor>
+          <j.1:dataType>http://www.w3.org/2001/XMLSchema#float</j.1:dataType>
+        </j.1:DataDescriptor>
+      </j.0:first>
+      <rdf:type rdf:nodeID="A0"/>
+    </j.1:returnTypes>
+    <j.1:arguments rdf:parseType="Resource">
+      <j.0:rest rdf:parseType="Resource">
+        <j.0:first>
+          <j.1:DataDescriptor>
+            <j.1:dataType>http://www.w3.org/2001/XMLSchema#float</j.1:dataType>
+            <j.1:descriptorVariable>
+              <j.1:GPVariable rdf:about="Precedence2.sadl#areaOfRect_w"/>
+            </j.1:descriptorVariable>
+            <j.1:localDescriptorName>w</j.1:localDescriptorName>
+          </j.1:DataDescriptor>
+        </j.0:first>
+        <rdf:type rdf:nodeID="A0"/>
+      </j.0:rest>
+      <j.0:first>
+        <j.1:DataDescriptor>
+          <j.1:dataType>http://www.w3.org/2001/XMLSchema#float</j.1:dataType>
+          <j.1:descriptorVariable>
+            <j.1:GPVariable rdf:about="Precedence2.sadl#areaOfRect_h"/>
+          </j.1:descriptorVariable>
+          <j.1:localDescriptorName>h</j.1:localDescriptorName>
+        </j.1:DataDescriptor>
+      </j.0:first>
+      <rdf:type rdf:nodeID="A0"/>
+    </j.1:arguments>
+    <j.1:expression>
+      <j.1:Script>
+        <j.1:language rdf:resource="sadlimplicitmodel#Text"/>
+        <j.1:script>float areaOfRect(float h,float w): *(h,w)</j.1:script>
+      </j.1:Script>
+    </j.1:expression>
+  </j.1:Equation>
+  <j.1:Rule rdf:about="Precedence2.sadl#PaperTitle"/>
+  <j.1:Rule rdf:about="Precedence2.sadl#PT2"/>
+</rdf:RDF>

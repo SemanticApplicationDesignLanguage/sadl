@@ -1,0 +1,150 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:Test1="http://sadl.org/Test1.sadl#"
+    xmlns:j.0="http://sadl.org/sadllistmodel#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.1="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:sadllistmodel="http://sadl.org/sadllistmodel"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="Test1.sadl">
+    <owl:imports rdf:resource="sadllistmodel"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource=""/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Test1.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:nodeID="A0">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:nodeID="A0"/>
+        <owl:onProperty rdf:resource="sadllistmodel#rest"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="sadlimplicitmodel#DataDescriptor"/>
+        <owl:onProperty rdf:resource="sadllistmodel#first"/>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="sadllistmodel#List"/>
+  </owl:Class>
+  <owl:Class rdf:about="Test1.sadl#Mammal">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="Test1.sadl#LivingThing"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="Test1.sadl#Pet">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+        <owl:onProperty>
+          <owl:DatatypeProperty rdf:about="Test1.sadl#caredFor"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="Test1.sadl#Person">
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:allValuesFrom rdf:resource="Test1.sadl#Person"/>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="Test1.sadl#child"/>
+        </owl:onProperty>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:subClassOf rdf:resource="Test1.sadl#Mammal"/>
+  </owl:Class>
+  <owl:Class rdf:about="Test1.sadl#PhysicalThing"/>
+  <owl:Class rdf:about="Test1.sadl#LivingThing">
+    <rdfs:subClassOf rdf:resource="Test1.sadl#PhysicalThing"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="Test1.sadl#child">
+    <rdfs:domain rdf:resource="Test1.sadl#Mammal"/>
+    <rdfs:range rdf:resource="Test1.sadl#Mammal"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="Test1.sadl#owns">
+    <rdfs:range rdf:resource="Test1.sadl#Pet"/>
+    <rdfs:domain rdf:resource="Test1.sadl#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="Test1.sadl#weight">
+    <rdfs:domain rdf:resource="Test1.sadl#PhysicalThing"/>
+    <rdfs:range rdf:resource="sadlimplicitmodel#UnittedQuantity"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="Test1.sadl#age">
+    <rdfs:domain rdf:resource="Test1.sadl#LivingThing"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="Test1.sadl#dateOfBirth">
+    <rdfs:domain rdf:resource="Test1.sadl#LivingThing"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="Test1.sadl#caredFor">
+    <rdfs:domain rdf:resource="Test1.sadl#Pet"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="Test1.sadl#density">
+    <rdfs:domain rdf:resource="Test1.sadl#PhysicalThing"/>
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+  </owl:DatatypeProperty>
+  <j.1:Rule rdf:about="Test1.sadl#AgeRule"/>
+  <j.1:ExternalEquation rdf:about="Test1.sadl#subtractDates">
+    <j.1:externalURI>http://sadl.org/builtins/subtractDates</j.1:externalURI>
+    <j.1:returnTypes rdf:parseType="Resource">
+      <j.0:first>
+        <j.1:DataDescriptor>
+          <j.1:dataType>http://www.w3.org/2001/XMLSchema#float</j.1:dataType>
+        </j.1:DataDescriptor>
+      </j.0:first>
+      <rdf:type rdf:nodeID="A0"/>
+    </j.1:returnTypes>
+    <j.1:arguments rdf:parseType="Resource">
+      <j.0:rest rdf:parseType="Resource">
+        <j.0:rest rdf:parseType="Resource">
+          <j.0:first>
+            <j.1:DataDescriptor>
+              <j.1:dataType>http://www.w3.org/2001/XMLSchema#string</j.1:dataType>
+              <j.1:descriptorVariable>
+                <j.1:GPVariable rdf:about="Test1.sadl#subtractDates_u"/>
+              </j.1:descriptorVariable>
+              <j.1:localDescriptorName>u</j.1:localDescriptorName>
+            </j.1:DataDescriptor>
+          </j.0:first>
+          <rdf:type rdf:nodeID="A0"/>
+        </j.0:rest>
+        <j.0:first>
+          <j.1:DataDescriptor>
+            <j.1:dataType>http://www.w3.org/2001/XMLSchema#dateTime</j.1:dataType>
+            <j.1:descriptorVariable>
+              <j.1:GPVariable rdf:about="Test1.sadl#subtractDates_t2"/>
+            </j.1:descriptorVariable>
+            <j.1:localDescriptorName>t2</j.1:localDescriptorName>
+          </j.1:DataDescriptor>
+        </j.0:first>
+        <rdf:type rdf:nodeID="A0"/>
+      </j.0:rest>
+      <j.0:first>
+        <j.1:DataDescriptor>
+          <j.1:dataType>http://www.w3.org/2001/XMLSchema#dateTime</j.1:dataType>
+          <j.1:descriptorVariable>
+            <j.1:GPVariable rdf:about="Test1.sadl#subtractDates_t1"/>
+          </j.1:descriptorVariable>
+          <j.1:localDescriptorName>t1</j.1:localDescriptorName>
+        </j.1:DataDescriptor>
+      </j.0:first>
+      <rdf:type rdf:nodeID="A0"/>
+    </j.1:arguments>
+    <j.1:expression>
+      <j.1:Script>
+        <j.1:language rdf:resource="sadlimplicitmodel#Text"/>
+        <j.1:script>float subtractDates(dateTime t1,dateTime t2,string u): uri("http://sadl.org/builtins/subtractDates")</j.1:script>
+      </j.1:Script>
+    </j.1:expression>
+  </j.1:ExternalEquation>
+  <j.1:Rule rdf:about="Test1.sadl#AgeRule2"/>
+</rdf:RDF>
