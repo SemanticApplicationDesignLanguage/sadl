@@ -1,0 +1,18 @@
+ uri "http://sadl.org/SplitIRIInQuery.sadl" alias SplitIRIInQuery.
+ 
+ Rock is a class.
+ 
+ MyRock is a Rock.
+ 
+ Ask: "select ?r where { ?r <rdf:type> <Rock>}".
+ 
+ Ask: "
+PREFIX apf: <java:org.apache.jena.query.pfunction.library.>
+SELECT * where {?r <rdf:type> <Rock> . OPTIONAL{?r apf:splitIRI (?namespace ?localname) }
+}".
+
+//Ask: "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+//PREFIX apf: <java:org.apache.jena.query.pfunction.library.>
+//SELECT ?namespace ?localname { 
+//    xsd:string apf:splitIRI (?namespace ?localname) 
+//}".
