@@ -648,6 +648,7 @@ public class OwlToSadl {
 				"last",
 				"level",
 				"count",
+				"plus",
 				"most",
 				"base64Binary",
 				"Print:",
@@ -704,7 +705,7 @@ public class OwlToSadl {
 				"PI",
 				"Deductions",
 				"time",
-				"gYearMonth");	
+				"gYearMonth");
 	}
 	
 	/**

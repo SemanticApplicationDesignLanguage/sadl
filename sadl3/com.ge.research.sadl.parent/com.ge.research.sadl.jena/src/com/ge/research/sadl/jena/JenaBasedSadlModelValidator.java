@@ -3345,7 +3345,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 						else {
 							SadlResource nor = ((SadlInstance)qnmDecl.eContainer()).getNameOrRef();
-							if (!nor.equals(qnmDecl)) {
+							if (nor != null && !nor.equals(qnmDecl)) {
 								return getType(nor);
 							}
 						}
@@ -4132,7 +4132,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if (refContainer instanceof PropOfSubject) {
 			Expression pred = ((PropOfSubject)refContainer).getLeft();
-			if (pred instanceof SadlResource && ((PropOfSubject)refContainer).getRight().equals(name)) {
+			if (pred instanceof SadlResource && ((PropOfSubject)refContainer).getRight() != null && 
+					((PropOfSubject)refContainer).getRight().equals(name)) {
 				return getPropertyDomainType((SadlResource) pred, reference);
 			}
 		}

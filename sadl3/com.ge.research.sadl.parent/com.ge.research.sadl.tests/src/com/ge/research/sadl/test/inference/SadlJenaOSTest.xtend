@@ -32,7 +32,7 @@ class SadlJenaOSTest extends AbstractSADLModelProcessorTest {
 			
 			Rule UnnamedChild: 
 			if X is a Parent
-			then there exists a Person and X has child the Person.
+			then there exists a Person y and X has child y.
 			'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			if (issues !== null) {
@@ -49,7 +49,7 @@ class SadlJenaOSTest extends AbstractSADLModelProcessorTest {
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule UnnamedChild:  if rdf(X, rdf:type, sjost:Parent) then thereExists(v0) and rdf(X, sjost:child, v1)."))
+					"Rule UnnamedChild:  if rdf(X, rdf:type, sjost:Parent) then thereExists(sjost:Person,X,sjost:child)."))
 		]
 
 	}

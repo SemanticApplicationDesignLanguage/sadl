@@ -278,17 +278,15 @@ NamedStructureAnnotation :
 
 RuleStatement returns ExpressionScope :
 	{RuleStatement}
-	('Stage' stage=NUMBER)? 'Rule' name=SadlResource (annotations+=NamedStructureAnnotation)* ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
-						   'then' 
-//						   (thens +=Expression |
-//						   	thereExists = ThereExists)
-						   thens += (Expression | ThereExistsStatement)
+	('Stage' stage=NUMBER)? 'Rule' name=SadlResource (annotations+=NamedStructureAnnotation)* ':'? 
+		('given' ifs+=Expression)? 
+		('if' ifs+=Expression)?
+		'then' thens += (Expression | ThereExistsStatement)
 ;
 
 ThereExistsStatement returns Expression : 
 	{ThereExistsStatement}
-	(('there' 'exists') match+=Expression ('plus' plus+=Expression)?) ('and' 'there' 'exists' match+=Expression ('plus' plus+=Expression)?)*
-//	('there' 'exists') match=Expression ('plus' plus=Expression)?
+	('there' 'exists') match=Expression ('plus' plus=Expression)?
 ;
 
 

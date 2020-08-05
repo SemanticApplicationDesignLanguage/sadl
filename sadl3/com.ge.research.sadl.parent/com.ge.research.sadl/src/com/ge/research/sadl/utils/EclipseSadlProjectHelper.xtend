@@ -82,7 +82,9 @@ class EclipseSadlProjectHelper implements SadlProjectHelper {
 
 	protected def checkUri(URI uri) {
 		Preconditions.checkNotNull(uri, 'uri');
-		Preconditions.checkArgument(uri.toEmfUri.platformResource, '''Expected a `platform:/resource/` URI. Got instead: «uri».''')
+		if (!uri.scheme.equals("synthetic")) {
+			Preconditions.checkArgument(uri.toEmfUri.platformResource, '''Expected a `platform:/resource/` URI. Got instead: «uri».''')
+		}
 		return uri;
 	}
 

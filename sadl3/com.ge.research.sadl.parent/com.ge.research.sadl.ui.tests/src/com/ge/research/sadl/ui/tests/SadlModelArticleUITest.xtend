@@ -88,7 +88,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	}
 
-	@Ignore
+//	@Ignore
 	@Test
 	def void testArticles_03() {
 
@@ -129,12 +129,11 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule R1:  if rdf(v0, rdf:type, TestArticles:Circle) and rdf(v0, TestArticles:radius, X) and >(X,0) and ^(X,2,v0) and *(v0,PI,Y) then rdf(v0, TestArticles:area, Y)."))
+					"Rule R1:  if rdf(v0, rdf:type, TestArticles:Circle) and rdf(v0, TestArticles:radius, X) and >(X,0) and ^(X,2,v1) and *(v1,PI,Y) then rdf(v0, TestArticles:area, Y)."))
 		]
 
 	}
 	
-	@Ignore
 	@Test
 	def void testArticles_04() {
 
@@ -155,10 +154,49 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			
 			Rule R1: 
 			if X is radius of Circle and
-				X > 0 and
-				Y is X^2*PI
+				X > 0
 			then
-				area of Circle is Y.
+				area of Circle is X^2*PI.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(issues.get(0).toString.contains(""))
+			if (rules !== null) {
+				for (rule : rules) {
+					print(rule.toString + "\n")
+				}
+			}
+		]
+
+	}
+	
+	@Test
+	def void testArticles_05() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			 uri "http://sadl.org/TestArticles.sadl" alias TestArticles.
+			
+			Shape is a class described by area with values of type decimal.
+			
+			Rectangle is a type of Shape, described by height with values of type decimal, described by width with values of type decimal.
+			
+			Circle is a type of Shape, described by radius with values of type decimal.
+			
+			ShapeCalculator is a class.
+			MyShapeCalculator is a ShapeCalculator.
+			MyCircle is a Circle.
+			
+			Rule R1: 
+			if X is radius of a Circle and
+				X > 0
+			then
+				area of the Circle is X^2*PI.
 		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
 			if (issues !== null) {
@@ -175,20 +213,19 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule R1:  if rdf(TestArticles:Circle, TestArticles:radius, X) and >(X,0) and ^(X,2,v0) and *(v0,PI,Y) then rdf(TestArticles:Circle, TestArticles:area, Y)."))
+					"Rule R1:  if rdf(v0, rdf:type, TestArticles:Circle) and rdf(v0, TestArticles:radius, X) and >(X,0) and ^(X,2,v1) and *(v1,PI,v2) then rdf(v0, TestArticles:area, v2)."))
 		]
 
 	}
 	
-	@Ignore
 	@Test
 	def void testCRule_01() {
 		val grd = newArrayList(
 "Rule R1:  if rdf(x, rdf:type, rulevars:Person) and rdf(x, rulevars:teaches, y) then rdf(x, rulevars:knows, y).",
 "Rule R2:  if rdf(x, rdf:type, rulevars:Person) and rdf(x, rulevars:teaches, y) then rdf(x, rulevars:acquaintance, y).",
 "Rule R3:  if rdf(x, rdf:type, rulevars:Person) and rdf(x, rulevars:teaches, y) then rdf(x, rulevars:knows, y).",
-"Rule R4:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and rdf(v1, rdf:type, rulevars:Person) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).",
-"Rule R4b:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and rdf(v1, rdf:type, rulevars:Person) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).",
+"Rule R4:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).",
+"Rule R4b:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).",
 "Rule R5:  if rdf(x, rdf:type, rulevars:Person) and rdf(x, rulevars:knows, y) then rdf(y, rulevars:knows, x).",
 "Rule R5b:  if rdf(x, rdf:type, rulevars:Person) and rdf(x, rulevars:knows, y) then rdf(y, rulevars:knows, x).",
 "Rule R6:  if rdf(x, rdf:type, rulevars:Person) and rdf(y, rulevars:teaches, x) then rdf(x, rulevars:knows, y).")
@@ -286,7 +323,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 	def void testCRule_03() {
 		val grd = newArrayList(
 //"Rule findPadFillet1:  if rdf(v0, rdf:type, model3:Blending) and rdf(v1, rdf:type, model3:Intersection) and rdf(v0, model3:edge, v1) and rdf(v1, model3:edgeAdjacencyType, model3:TANGENT) and rdf(v0, model3:edge, v2) and rdf(v2, rdf:type, model3:Intersection) and rdf(v2, model3:edgeAdjacencyType, model3:TANGENT) and !=(v2,v1) and rdf(v3, rdf:type, model3:AbstractFace) and rdf(v3, model3:edge, v2) and rdf(v3, model3:concave, false) and rdf(v3, model3:isFloorFace, false) and rdf(v3, rdf:type, model3:Cylindrical) and rdf(v4, rdf:type, model3:AbstractFace) and rdf(v4, model3:edge, v1) and !=(v3,v4) and !=(v0,v4) and rdf(v0, model3:adjacentFace, v5) and rdf(v5, rdf:type, model3:AbstractFace) and !=(v4,v5) and !=(v3,v5) and rdf(v0, model3:facesShareEndPoint, v5) and not(rdf(v3, model3:facesShareEndPoint, v4)) and rdf(v4, model3:edge, v6) and rdf(v6, rdf:type, model3:AbstractEdge) and rdf(v6, model3:edgeAdjacencyType, model3:CONVEX) and !=(v6,v1) then thereExists(v7) and rdf(v7, rdf:type, model3:PadFillet) and rdf(v7, model3:featureFace, v0) and rdf(v7, model3:otherFace, v4) and rdf(v7, model3:bottomFace, v3) and rdf(v7, model3:bottomEdge, v2) and rdf(v7, model3:otherFace, \"Pad Fillet\").",
-"Rule findPadFillet1:  if rdf(v0, rdf:type, model3:Blending) and rdf(v1, rdf:type, model3:Intersection) and rdf(v0, model3:edge, v1) and rdf(v1, model3:edgeAdjacencyType, model3:TANGENT) and rdf(v2, rdf:type, model3:Intersection) and rdf(v0, model3:edge, v2) and rdf(v2, model3:edgeAdjacencyType, model3:TANGENT) and !=(v2,v1) and rdf(v3, model3:edge, v2) and rdf(v3, model3:concave, false) and rdf(v3, model3:isFloorFace, false) and rdf(v3, rdf:type, model3:Cylindrical) and rdf(v4, rdf:type, model3:AbstractFace) and rdf(v4, model3:edge, v1) and !=(v3,v4) and !=(v0,v4) and rdf(v5, rdf:type, model3:AbstractFace) and rdf(v0, model3:adjacentFace, v5) and !=(v4,v5) and !=(v3,v5) and rdf(v0, model3:facesShareEndPoint, v5) and not(rdf(v3, model3:facesShareEndPoint, v4)) and rdf(v6, rdf:type, model3:AbstractEdge) and rdf(v4, model3:edge, v6) and rdf(v6, model3:edgeAdjacencyType, model3:CONVEX) and !=(v6,v1) then thereExists(v7) and rdf(v7, rdf:type, model3:PadFillet) and rdf(v7, model3:featureFace, v0) and rdf(v7, model3:otherFace, v4) and rdf(v7, model3:bottomFace, v3) and rdf(v7, model3:bottomEdge, v2) and rdf(v7, model3:otherFace, \"Pad Fillet\")."
+"Rule findPadFillet1:  if rdf(v0, rdf:type, model3:Blending) and rdf(v1, rdf:type, model3:Intersection) and rdf(v0, model3:edge, v1) and rdf(v1, model3:edgeAdjacencyType, model3:TANGENT) and rdf(v2, rdf:type, model3:Intersection) and rdf(v0, model3:edge, v2) and rdf(v2, model3:edgeAdjacencyType, model3:TANGENT) and !=(v2,v1) and rdf(v3, model3:edge, v2) and rdf(v3, model3:concave, false) and rdf(v3, model3:isFloorFace, false) and rdf(v3, rdf:type, model3:Cylindrical) and rdf(v4, rdf:type, model3:AbstractFace) and rdf(v4, model3:edge, v1) and !=(v3,v4) and !=(v0,v4) and rdf(v5, rdf:type, model3:AbstractFace) and rdf(v0, model3:adjacentFace, v5) and !=(v4,v5) and !=(v3,v5) and rdf(v0, model3:facesShareEndPoint, v5) and not(rdf(v3, model3:facesShareEndPoint, v4)) and rdf(v6, rdf:type, model3:AbstractEdge) and rdf(v4, model3:edge, v6) and rdf(v6, model3:edgeAdjacencyType, model3:CONVEX) and !=(v6,v1) then thereExists(model3:PadFillet,model3:featureFace,v0,model3:otherFace,v4,model3:bottomFace,v3,model3:bottomEdge,v2,model3:otherFace,\"Pad Fillet\")."
 )
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
@@ -476,17 +513,16 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	}
 
-	@Ignore
 	@Test
 	def void testVariables_01() {
 		val grd = newArrayList(
 "Rule R1:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:teaches, y) then rdf(x, ht:acquaintance, y).",
 "Rule R2:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:teaches, y) then rdf(x, ht:knows, y).",
-"Rule R3:  if rdf(v0, rdf:type, ht:Person) and rdf(v0, ht:knows, v1) and rdf(v1, rdf:type, ht:Person) and !=(v0,v1) then rdf(v1, ht:knows, v0).",
-"Rule R4:  if rdf(v0, rdf:type, ht:Person) and rdf(v0, ht:knows, v1) and rdf(v1, rdf:type, ht:Person) and !=(v0,v1) then rdf(v1, ht:knows, v0).",
+"Rule R3:  if rdf(v0, rdf:type, ht:Person) and rdf(v1, rdf:type, ht:Person) and rdf(v0, ht:knows, v1) and !=(v0,v1) then rdf(v1, ht:knows, v0).",
+"Rule R4:  if rdf(v0, rdf:type, ht:Person) and rdf(v1, rdf:type, ht:Person) and rdf(v0, ht:knows, v1) and !=(v0,v1) then rdf(v1, ht:knows, v0).",
 "Rule R5:  if rdf(x, ht:knows, y) then rdf(y, ht:knows, x).",
 "Rule R6:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:knows, y) then rdf(y, ht:knows, x).",
-"Rule R7:  if rdf(x, rdf:type, ht:Parent) then thereExists(v0) and rdf(v0, rdf:type, ht:Person) and rdf(x, ht:teaches, v0).")
+"Rule R7:  if rdf(x, rdf:type, ht:Parent) then thereExists(ht:Person,x,ht:teaches).")
 
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
 

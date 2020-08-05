@@ -36,10 +36,10 @@ public class ThereExists extends CancellableBuiltin {
     private static final Logger _logger = LoggerFactory.getLogger (ThereExists.class) ;
 	private boolean doTransitiveClosure = true;
 
-    private Node[] subj = null;
-	private Node[] prop = null;
-	private Node[] obj = null;
-	private boolean[] getObjectValue = null;
+    private Node[] subj = null;	// the set of subjects to be matched
+	private Node[] prop = null;	// the set of predicates to be matched
+	private Node[] obj = null;	// the set of objects to be matched
+	private boolean[] getObjectValue = null;	// false if the first of a pair is a property else true if the second of the pair is a property 
 
 	/**
      * This method is invoked when the builtin is called in a rule head.
@@ -57,15 +57,14 @@ public class ThereExists extends CancellableBuiltin {
     		throw new BuiltinException(this, context, "First argument to thereExists is not a class (" + pclass.toString() + ")");
     	}
     	
-    	// divide args into those for matching and those for adding to the match or creation
-    	
-    	Node addAlso = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#AddAlso");
-    	int addAlsoLocation = -1;
+    	// divide args into those for matching and those for adding to the match or creation, retaining the location of the  split
+    	Node plusInstance = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#Plus");
+    	int plusLocation = -1;
     	Node[] matchArgs = null;
     	Node[] toBeAddedArgs = null;
     	for (int i = 0; i < allArgs.length; i++) {
-    		if (allArgs[i].equals(addAlso)) {
-    			addAlsoLocation = i;
+    		if (allArgs[i].equals(plusInstance)) {
+    			plusLocation = i;
     			length = i;
     			matchArgs = new Node[i];
     			for (int j = 0; j < i; j++) {
@@ -74,15 +73,17 @@ public class ThereExists extends CancellableBuiltin {
     			toBeAddedArgs = new Node[allArgs.length - (i + 1)];
     		}
     		else if (toBeAddedArgs != null) {
-    			toBeAddedArgs[i - (addAlsoLocation + 1)] = allArgs[i];
+    			toBeAddedArgs[i - (plusLocation + 1)] = allArgs[i];
     		}
     	}
-    	if (addAlsoLocation < 0) {
+    	if (plusLocation < 0) {
     		matchArgs = allArgs;
     	}
     	
+    	// now do the matching to see if one or more matches exist
     	Object[] inst = null;
     	Node theInst = null;
+    	java.util.List<Node> multipleInst = null;
     	int numMatchSets = 0;
     	boolean forceNew = false;
     	getObjectValue = null;
@@ -161,6 +162,7 @@ public class ThereExists extends CancellableBuiltin {
 	    		}
     		}
     		
+    		// see if there are any tentative matches
     		Object tentative = null;
     		for (int i = 0; i < numMatchSets; i++) {
     			if (i == 0) {
@@ -173,27 +175,35 @@ public class ThereExists extends CancellableBuiltin {
     				}
     			}
     		}
-    		if (tentative != null && tentative instanceof Node) {
-    			theInst = (Node) tentative;
-    		}
-    		
-    		if (theInst != null) {
-    			for (int i = 0; i < numMatchSets; i++) {
-    				if (getObjectValue[i]) {
-    					obj[i] = theInst;
+    		if (tentative != null) {
+    			// we have a tentative match
+				multipleInst = new ArrayList<Node>();
+    			if (tentative instanceof Node) {
+    				// we have a single match
+    				theInst = (Node) tentative;
+    				multipleInst.add(theInst);
+    			}
+    			else if (tentative instanceof ArrayList<?>){
+    				// we have multiple matches
+    				for (int i = 0; i < ((ArrayList<?>)tentative).size(); i++) {
+    					Object tent = ((ArrayList<?>)tentative).get(i);
+    					if (tent instanceof Node) {
+    						multipleInst.add((Node)tent);
+    					}
     				}
-    				else {
-    					subj[i] = theInst;
-    				}
+    				theInst = multipleInst.get(0);
     			}
     		}
     	}
     	
+    	// there were no matches so we need to create one and insert the required matching triples
     	if (theInst == null) {
     		theInst = NodeFactory.createAnon();
 			if (_logger.isDebugEnabled()) {
 				_logger.debug("in Rule " + context.getRule().getName() + " created new bnode (" + theInst.toString() + " type will be " + pclass.toString());
 			}
+			multipleInst = new ArrayList<Node>();
+			multipleInst.add(theInst);
 			Triple t = new Triple(theInst, RDF.type.asNode(), pclass);
 			Utils.doAddTriple(t, context, true);		
     		if (pclass.equals(RDF.List.asNode())) {
@@ -224,23 +234,51 @@ public class ThereExists extends CancellableBuiltin {
     		}
     	}
     	else if (_logger.isDebugEnabled()) {
+    		// output matches to the logger
     		for (int i = 0; i < numMatchSets; i++) {
-    			_logger.debug("in Rule " + context.getRule().getName() + " instance found matches (" + (getObjectValue[i] ? 
-    					(subj[i].toString() + ", " + prop[i].toString() + ", " + theInst.toString()) :
-    						(theInst.toString() + ", " + prop[i].toString() + ", " + obj[i].toString())));
+    			for (int j = 0; j < multipleInst.size(); j++) {
+    				theInst = multipleInst.get(j);
+    				if (getObjectValue[i]) {
+    					obj[i] = theInst;
+    				}
+    				else {
+    					subj[i] = theInst;
+    				}
+	    			_logger.debug("in Rule " + context.getRule().getName() + " instance found matches (" + (getObjectValue[i] ? 
+	    					(subj[i].toString() + ", " + prop[i].toString() + ", " + theInst.toString()) :
+	    						(theInst.toString() + ", " + prop[i].toString() + ", " + obj[i].toString())));
+    			}
     		}
     	}
     	
-    	if (addAlsoLocation > 0) {
+    	// now add additional triples if there are any
+    	if (plusLocation > 0 && theInst != null) {
     		for (int i = 0; i < toBeAddedArgs.length; i=i+2) {
 	     		// these must be in pairs
-	    		Node pred = toBeAddedArgs[i+0];
-	    		Node val = toBeAddedArgs[i+1];
-	   			Triple t = new Triple(theInst, pred, val);
-    			Utils.doAddTriple(t, context, true);
-				if (_logger.isDebugEnabled()) {
-					_logger.debug("in Rule " + context.getRule().getName() + " created new add also triple (" + t.toString() + ")");
-				}
+	    		Node n1 = toBeAddedArgs[i+0];
+	    		Node n2 = toBeAddedArgs[i+1];
+	    		Triple t;
+	    		if (Utils.isObjectProperty(context, n1) || Utils.isDatatypeProperty(context, n1)) {
+	    			for (int j = 0; j < multipleInst.size(); j++) {
+	    				t = new Triple(multipleInst.get(j), n1, n2);
+		    			Utils.doAddTriple(t, context, true);
+						if (_logger.isDebugEnabled()) {
+							_logger.debug("in Rule " + context.getRule().getName() + " created new add also triple (" + t.toString() + ")");
+						}
+	    			}
+	    		}
+	    		else if (Utils.isObjectProperty(context, n2) || Utils.isDatatypeProperty(context, n2)) {
+	    			for (int j = 0; j < multipleInst.size(); j++) {
+	    				t = new Triple(n1, n2, multipleInst.get(j));
+		    			Utils.doAddTriple(t, context, true);
+						if (_logger.isDebugEnabled()) {
+							_logger.debug("in Rule " + context.getRule().getName() + " created new add also triple (" + t.toString() + ")");
+						}
+	    			}
+	    		}	    		
+	    		else {
+	    			throw new BuiltinException(this, context, "A pair-pattern passed to thereExists plus must have a property as one of the pair (" + n1.toString() + ", " + n2.toString() + ")");
+	    		}
     		}
     	}
 	}
