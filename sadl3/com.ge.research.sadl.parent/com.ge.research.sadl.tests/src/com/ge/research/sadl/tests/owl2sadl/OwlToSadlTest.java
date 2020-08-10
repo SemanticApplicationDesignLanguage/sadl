@@ -375,6 +375,88 @@ public class OwlToSadlTest {
 		assertEquals(expected.trim(), sadlModelContent.trim());
 	}
 	
+	@Test
+	public void test07() throws OwlImportException {
+		String owlModelContent = "<rdf:RDF\r\n" + 
+				"    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n" + 
+				"    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel\"\r\n" + 
+				"    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\r\n" + 
+				"    xmlns:sadlimplicitmodel=\"http://sadl.org/sadlimplicitmodel\"\r\n" + 
+				"    xmlns:builtinfunctions=\"http://sadl.org/builtinfunctions\"\r\n" + 
+				"    xmlns:OwlFileToTestOwl2Sadl=\"http://sadl.org/OwlFileToTestOwl2Sadl.sadl#\"\r\n" + 
+				"    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\r\n" + 
+				"    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\r\n" + 
+				"  xml:base=\"http://sadl.org/OwlFileToTestOwl2Sadl.sadl\">\r\n" + 
+				"  <owl:Ontology rdf:about=\"http://sadl.org/OwlFileToTestOwl2Sadl.sadl\">\r\n" + 
+				"    <owl:imports rdf:resource=\"builtinfunctions\"/>\r\n" + 
+				"    <owl:imports rdf:resource=\"sadlimplicitmodel\"/>\r\n" + 
+				"    <rdfs:comment xml:lang=\"en\">This ontology was created from a SADL file 'OwlFileToTestOwl2Sadl.sadl' and should not be directly edited.</rdfs:comment>\r\n" + 
+				"  </owl:Ontology>\r\n" + 
+				"  <owl:Class rdf:about=\"OwlFileToTestOwl2Sadl.sadl#Class1\"/>\r\n" + 
+				"  <owl:Class rdf:about=\"OwlFileToTestOwl2Sadl.sadl#Class2\"/>\r\n" + 
+				"  <owl:ObjectProperty rdf:about=\"OwlFileToTestOwl2Sadl.sadl#op\">\r\n" + 
+				"    <rdfs:domain rdf:resource=\"OwlFileToTestOwl2Sadl.sadl#Class1\"/>\r\n" + 
+				"    <rdfs:range rdf:resource=\"OwlFileToTestOwl2Sadl.sadl#Class2\"/>\r\n" + 
+				"  </owl:ObjectProperty>\r\n" + 
+				"  <owl:DatatypeProperty rdf:about=\"OwlFileToTestOwl2Sadl.sadl#dps\">\r\n" + 
+				"    <rdfs:domain rdf:resource=\"OwlFileToTestOwl2Sadl.sadl#Class1\"/>\r\n" + 
+				"    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n" + 
+				"  </owl:DatatypeProperty>\r\n" + 
+				"  <owl:DatatypeProperty rdf:about=\"OwlFileToTestOwl2Sadl.sadl#dpi\">\r\n" + 
+				"    <rdfs:domain rdf:resource=\"OwlFileToTestOwl2Sadl.sadl#Class1\"/>\r\n" + 
+				"    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\r\n" + 
+				"  </owl:DatatypeProperty>\r\n" + 
+				"  <owl:DatatypeProperty rdf:about=\"OwlFileToTestOwl2Sadl.sadl#dpf\">\r\n" + 
+				"    <rdfs:domain rdf:resource=\"OwlFileToTestOwl2Sadl.sadl#Class1\"/>\r\n" + 
+				"    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#float\"/>\r\n" + 
+				"  </owl:DatatypeProperty>\r\n" + 
+				"  <owl:DatatypeProperty rdf:about=\"OwlFileToTestOwl2Sadl.sadl#dpdt\">\r\n" + 
+				"    <rdfs:domain rdf:resource=\"OwlFileToTestOwl2Sadl.sadl#Class1\"/>\r\n" + 
+				"    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#dateTime\"/>\r\n" + 
+				"  </owl:DatatypeProperty>\r\n" + 
+				"  <OwlFileToTestOwl2Sadl:Class1 rdf:about=\"OwlFileToTestOwl2Sadl.sadl#Cls1Inst\">\r\n" + 
+				"    <OwlFileToTestOwl2Sadl:dpdt rdf:datatype=\"http://www.w3.org/2001/XMLSchema#dateTime\"\r\n" + 
+				"    >1951-07-19T00:00:00-04:00</OwlFileToTestOwl2Sadl:dpdt>\r\n" + 
+				"    <OwlFileToTestOwl2Sadl:dpi rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\r\n" + 
+				"    >23</OwlFileToTestOwl2Sadl:dpi>\r\n" + 
+				"    <OwlFileToTestOwl2Sadl:dpf rdf:datatype=\"http://www.w3.org/2001/XMLSchema#float\"\r\n" + 
+				"    >3.1416</OwlFileToTestOwl2Sadl:dpf>\r\n" + 
+				"    <OwlFileToTestOwl2Sadl:dps>Hello world</OwlFileToTestOwl2Sadl:dps>\r\n" + 
+				"    <OwlFileToTestOwl2Sadl:op>\r\n" + 
+				"      <OwlFileToTestOwl2Sadl:Class2 rdf:about=\"OwlFileToTestOwl2Sadl.sadl#Cls2Inst\"/>\r\n" + 
+				"    </OwlFileToTestOwl2Sadl:op>\r\n" + 
+				"  </OwlFileToTestOwl2Sadl:Class1>\r\n" + 
+				"</rdf:RDF>";
+		OwlToSadl o2s = new OwlToSadl(owlModelContent, "http://sadl.org/OwlFileToTestOwl2Sadl.sadl");
+//		o2s.setVerboseMode(true);
+		String sadlModelContent = o2s.getSadlModel();
+		String expected = "uri \"http://sadl.org/OwlFileToTestOwl2Sadl.sadl\" alias OwlFileToTestOwl2Sadl\r\n" + 
+				"    (note \"This ontology was created from a SADL file 'OwlFileToTestOwl2Sadl.sadl' and should not be directly edited.\").\r\n" + 
+				"\r\n" + 
+				"\r\n" + 
+				"\r\n" + 
+				"// Class definitions:\r\n" + 
+				"Class1 is a class,\r\n" + 
+				"    described by dpdt with values of type dateTime,\r\n" + 
+				"    described by dpf with values of type float,\r\n" + 
+				"    described by dpi with values of type int,\r\n" + 
+				"    described by dps with values of type string,\r\n" + 
+				"    described by op with values of type Class2 .\r\n" + 
+				"Class2 is a class.\r\n" + 
+				"\r\n" + 
+				"\r\n" + 
+				"// Individuals:\r\n" + 
+				"Cls1Inst is a Class1,\r\n" + 
+				"    has op Cls2Inst,\r\n" + 
+				"    has dps \"Hello world\",\r\n" + 
+				"    has dpf 3.1416,\r\n" + 
+				"    has dpi 23,\r\n" + 
+				"    has dpdt \"1951-07-19T00:00:00-04:00\".\r\n" + 
+				"Cls2Inst is a Class2 .\r\n";
+		System.out.print(sadlModelContent);
+		assertEquals(expected.trim(), sadlModelContent.trim());
+	}
+	
 	private void assertEquals(Object expected, Object actual) {
 		String s1 = expected.toString().replace("\r", "");
 		s1 = s1.replace("\n", "");
