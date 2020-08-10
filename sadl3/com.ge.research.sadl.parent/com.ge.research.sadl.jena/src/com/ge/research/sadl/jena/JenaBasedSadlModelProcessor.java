@@ -1396,19 +1396,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				throw new JenaProcessorException("onValidate for element of type '"
 						+ element.getClass().getCanonicalName() + "' not implemented");
 			}
-		} catch (JenaProcessorException e) {
-			addError(e.getMessage(), element);
-		} catch (InvalidNameException e) {
-			e.printStackTrace();
-		} catch (InvalidTypeException e) {
-			e.printStackTrace();
-		} catch (TranslationException e) {
-			e.printStackTrace();
-		} catch (CircularDefinitionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//		} catch (JenaProcessorException e) {
+//			addError(e.getMessage(), element);
+//		} catch (InvalidNameException e) {
+//			e.printStackTrace();
+//		} catch (InvalidTypeException e) {
+//			e.printStackTrace();
+//		} catch (TranslationException e) {
+//			e.printStackTrace();
+//		} catch (CircularDefinitionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
 		} catch (Throwable t) {
-			t.printStackTrace();
+			if (logger.isDebugEnabled()) {
+				t.printStackTrace();
+			}
+			addError(t.getMessage(), element);
 		}
 	}
 

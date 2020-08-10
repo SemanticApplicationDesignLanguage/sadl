@@ -845,7 +845,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			// this is OK? At least it shouldn't create the exception below... AWC 11/26/2018
 		}
 		else {
-			throw new TranslationException("Unexpected failure to find binary operation type checking type");
+			try {
+				getModelProcessor().addError("Unexpected failure to find binary operation type checking type", expression);
+			} catch (InvalidTypeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		if (type != null && type instanceof NamedNode && 
