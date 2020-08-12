@@ -2480,7 +2480,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					s = theJenaModel.getOntResource(declarationExtensions.getConceptUri((Name) subject));
 
 					if (s != null && p != null) {
-						checkPropertyDomain(theJenaModel, s, p, expression, true, null);
+						checkPropertyDomain(theJenaModel, s, p, expression, true, null, false, true);
 					}
 
 				}
@@ -5303,7 +5303,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, Expression target, boolean propOfSubjectCheck) throws InvalidTypeException, CircularDependencyException {
+	public void checkPropertyDomain(OntModel ontModel, Expression subject, SadlResource predicate, Expression target, boolean propOfSubjectCheck, boolean warnOnNoDomain) throws InvalidTypeException, CircularDependencyException {
 		OntConceptType ptype = null;
 		try {
 			ptype = declarationExtensions.getOntConceptType(predicate);
@@ -5359,7 +5359,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									if (subj != null) {
 										Property prop = ontModel.getProperty(preduri);
 										if (prop != null && checkDomain) {
-											checkPropertyDomain(ontModel, subj, prop, target, propOfSubjectCheck, varName);
+											checkPropertyDomain(ontModel, subj, prop, target, propOfSubjectCheck, varName, false, true);
 										}
 									}
 								}
@@ -5392,7 +5392,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							if (propsubj != null) {
 								Property prop = ontModel.getProperty(preduri);
 								if (prop != null && checkDomain) {
-									checkPropertyDomain(ontModel, propsubj, prop, target, propOfSubjectCheck, varName);
+									checkPropertyDomain(ontModel, propsubj, prop, target, propOfSubjectCheck, varName, false, true);
 								}
 							}
 						}
@@ -5413,7 +5413,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								else {
 									Property prop = ontModel.getProperty(preduri);
 									if (prop != null && checkDomain) {
-										checkPropertyDomain(ontModel, subj, prop, target, propOfSubjectCheck, varName);
+										checkPropertyDomain(ontModel, subj, prop, target, propOfSubjectCheck, varName, false, warnOnNoDomain);
 									}
 								}
 							}
@@ -5442,41 +5442,97 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 
-	public void checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression target, boolean propOfSubjectCheck, String varName) throws InvalidTypeException, CircularDependencyException {
+	/**
+	 * Method to check that the subj OntResource and the prop Property are aligned from a type checking perspective
+	 * @param ontModel
+	 * @param subj
+	 * @param prop
+	 * @param target
+	 * @param propOfSubjectCheck
+	 * @param varName
+	 * @return -- true if match found else false
+	 * @throws InvalidTypeException
+	 * @throws CircularDependencyException
+	 */
+	public boolean checkPropertyDomain(OntModel ontModel, OntResource subj, Property prop, Expression target, boolean propOfSubjectCheck, String varName, boolean recursing, boolean warnOnNoDomain) throws InvalidTypeException, CircularDependencyException {
 		if(subj == null || prop == null || prop.canAs(AnnotationProperty.class)){
-			return;
+			return true;
 		}
+		
+		// Find all of the classes in the domain of this property and any super-properties
 		StmtIterator stmtitr = ontModel.listStatements(prop, RDFS.domain, (RDFNode)null);
 		boolean matchFound = false;
+		List<Resource> domainResources = new ArrayList<Resource>();
+		
 		while (stmtitr.hasNext()) {
-			RDFNode obj = stmtitr.nextStatement().getObject();
-			if (obj.isResource()) {
-				matchFound = checkForPropertyDomainMatch(subj, prop, obj.asResource());
-			}
-			if (matchFound) {
-				stmtitr.close();
-				return;
+			RDFNode dmn = stmtitr.nextStatement().getObject();
+			if (dmn.isResource()) {
+				if (!domainResources.contains(dmn.asResource())) {
+					domainResources.add(dmn.asResource());
+				}
 			}
 		}
-		//Check for super properties
+		stmtitr.close();
+		
 		if (prop.canAs(OntProperty.class)) {
-			ExtendedIterator<? extends OntProperty> spropitr = prop.as(OntProperty.class).listSuperProperties();
+			ExtendedIterator<? extends OntProperty> spropitr = prop.as(OntProperty.class).listSuperProperties(true);
 			while (spropitr.hasNext()) {
 				OntProperty sprop = spropitr.next();
 				stmtitr = ontModel.listStatements(sprop, RDFS.domain, (RDFNode)null);
 				while (stmtitr.hasNext()) {
-					RDFNode obj = stmtitr.nextStatement().getObject();
-					if (obj.isResource()) {
-						matchFound = checkForPropertyDomainMatch(subj, prop, obj.asResource());
+					RDFNode dmn = stmtitr.nextStatement().getObject();
+					if (dmn.isResource()) {
+						if (!domainResources.contains(dmn.asResource())) {
+							domainResources.add(dmn.asResource());
+						}
 					}
+				}
+			}
+			spropitr.close();
+		}
+		
+		// warn on no domain if enabled
+		if (warnOnNoDomain && domainResources.isEmpty()) {
+			EObject tgt = target != null ? target : getModelProcessor().getHostEObject();
+			getModelProcessor().addWarning("Can't check domain of property '" + prop.getLocalName() + "'; none specified", tgt);
+			return false;
+		}
+		
+		for (Resource dmn : domainResources) {
+			// Check for a direct match of the subj as class with the property domain
+			matchFound = checkForPropertyDomainMatch(subj, prop, dmn);
+			if (matchFound) {
+				return true;
+			}
+		}
+		
+		// handle Individuals
+		if (subj instanceof Individual) {
+			ExtendedIterator<Resource> clsitr = ((Individual)subj).listRDFTypes(true);
+			while (clsitr.hasNext()) {
+				Resource type = clsitr.next();
+				if (type.canAs(OntClass.class)) {
+					matchFound = checkPropertyDomain(ontModel, type.as(OntClass.class), prop, target, propOfSubjectCheck, varName, true, true);
 					if (matchFound) {
-						stmtitr.close();
-						break;
+						return matchFound;
 					}
 				}
 			}
 		}
-		if (subj != null && !matchFound) {
+		
+		// Check for super classes
+		if (subj instanceof OntClass) {
+			ExtendedIterator<OntClass> scitr = ((OntClass)subj).listSuperClasses(true);
+			while (scitr.hasNext()) {
+				matchFound = checkPropertyDomain(ontModel, scitr.next(), prop, target, propOfSubjectCheck, varName, true, true);
+				if (matchFound) {
+					return matchFound;
+				}
+			}
+		}
+		
+		// No match so generate report
+		if (!recursing && subj != null && !matchFound) {
 			EObject tgt = target != null ? target : getModelProcessor().getHostEObject();
 			if (varName != null) {
 				if(propOfSubjectCheck){
@@ -5505,6 +5561,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
+		return false;
 	}
 	
 	private boolean checkForPropertyDomainMatch(Resource subj, Property prop, Resource obj) throws InvalidTypeException, CircularDependencyException {
