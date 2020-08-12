@@ -4,8 +4,12 @@
  
  MyRock is a Rock.
  
- Ask: "select ?r where { ?r <rdf:type> <Rock>}".
+// Ask: "select ?r where { ?r <rdf:type> <Rock>}".
  
+ Ask: "
+PREFIX apf: <java:org.apache.jena.query.pfunction.library.>
+SELECT * where {?r <rdf:type> <Rock> . OPTIONAL{?r apf:splitIRI (?namespace ?localname) }
+}".
  Ask: "
 PREFIX apf: <java:org.apache.jena.query.pfunction.library.>
 SELECT * where {?r <rdf:type> <Rock> . OPTIONAL{?r apf:splitIRI (?namespace ?localname) }
@@ -14,5 +18,31 @@ SELECT * where {?r <rdf:type> <Rock> . OPTIONAL{?r apf:splitIRI (?namespace ?loc
 //Ask: "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 //PREFIX apf: <java:org.apache.jena.query.pfunction.library.>
 //SELECT ?namespace ?localname { 
+//    <xsd:string> apf:splitIRI (?namespace ?localname) 
+//}".
+//
+//Ask: "PREFIX apf: <java:org.apache.jena.sparql.pfunction.library.>
+//SELECT ?namespace ?localname { 
+//    <http://www.w3.org/2001/XMLSchema#string> apf:splitIRI (?namespace ?localname) 
+//}".
+
+Ask: "
+PREFIX apf: <java:org.apache.jena.sparql.pfunction.library.>
+SELECT * where {?r <rdf:type> <Rock> . OPTIONAL{?r apf:splitURI (?namespace ?localname) }
+}".
+Ask: "
+PREFIX apf: <java:org.apache.jena.sparql.pfunction.library.>
+SELECT * where {?r <rdf:type> <Rock> . OPTIONAL{?r apf:splitURI (?namespace ?localname) }
+}".
+
+//Ask: "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+//PREFIX apf: <java:org.apache.jena.sparql.pfunction.library.>
+//SELECT ?namespace ?localname { 
 //    xsd:string apf:splitIRI (?namespace ?localname) 
 //}".
+//
+//Ask: "PREFIX apf: <java:org.apache.jena.sparql.pfunction.library.>
+//SELECT ?namespace ?localname { 
+//    <http://www.w3.org/2001/XMLSchema#string> apf:splitIRI (?namespace ?localname) 
+//}". 
+// 

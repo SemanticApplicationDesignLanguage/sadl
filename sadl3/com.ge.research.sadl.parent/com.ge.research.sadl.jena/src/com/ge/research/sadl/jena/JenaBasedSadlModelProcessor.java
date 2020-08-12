@@ -712,21 +712,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (format.equals(SadlSerializationFormat.RDF_XML_FORMAT) || 
 				format.equals(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT)) {
 			RDFWriter w2 = model.getWriter(format);
-			w2.setProperty("xmlbase", SadlConstants.SADL_BASE_MODEL_URI);
-			w2.write(model, out, SadlConstants.SADL_BASE_MODEL_URI);
+			w2.setProperty("xmlbase", modelName);
+			w2.write(model, out, modelName);
 		}
 		else {
 			getTheJenaModel().getBaseModel().setNsPrefix(prefix, modelName);
-			RDFDataMgr.write(out, getTheJenaModel().getBaseModel(), SadlSerializationFormat.getRDFFormat(format));
+			RDFDataMgr.write(out, model, SadlSerializationFormat.getRDFFormat(format));
 		}	
-//		if (format.equals(IConfigurationManager.JSON_LD_FORMAT)) {
-//			RDFDataMgr.write(out, getTheJenaModel().getBaseModel(), RDFFormat.JSONLD);
-//		}
-//		else {
-//			RDFWriter w2 = model.getWriter(format);
-//			w2.setProperty("xmlbase", SadlConstants.SADL_BASE_MODEL_URI);
-//			w2.write(model, out, SadlConstants.SADL_BASE_MODEL_URI);
-//		}
 		CharSequence seq = new String(out.toByteArray(), charset);
 		return seq;
 	}
@@ -4361,17 +4353,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			NamedNode plusNode = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#Plus");
 			plusNode.setNodeType(NodeType.InstanceNode);
 			tebi.addArgument(plusNode);
-			TripleElement rtr = null;
-			if (plusObj instanceof TripleElement) {
-				rtr = (TripleElement) plusObj;
+			List<TripleElement> plusObjs = new ArrayList<TripleElement>();
+			if (plusObj instanceof Junction) {
+				List<GraphPatternElement> plusGpes = getIfTranslator().junctionToList(((Junction)plusObj));
+				for (GraphPatternElement gpe : plusGpes) {
+					if (gpe instanceof TripleElement) {
+						plusObjs.add((TripleElement) gpe);
+					}
+					else {
+						addError("Non-graph pattern found in plus statements", plusExpr);
+					}
+				}
+			}
+			else if (plusObj instanceof TripleElement) {
+				plusObjs.add((TripleElement) plusObj);
 			}
 			else if (plusObj instanceof Object[] && ((Object[])plusObj)[1] instanceof TripleElement) {
-				rtr = (TripleElement) ((Object[])plusObj)[1];
+				plusObjs.add((TripleElement) ((Object[])plusObj)[1]);
 			}
 			else {
 				addError("failed to find plus triple", matchExpr);
 			}
-			if (rtr != null) {
+			for (TripleElement rtr : plusObjs) {
 				if (rtr.getSubject().equals(thereExistsIdentity)) {
 					tebi.addArgument(rtr.getPredicate());
 					tebi.addArgument(rtr.getObject());
