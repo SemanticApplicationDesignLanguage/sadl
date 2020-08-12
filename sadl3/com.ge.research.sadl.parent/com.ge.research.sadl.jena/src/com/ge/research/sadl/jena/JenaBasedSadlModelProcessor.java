@@ -271,6 +271,7 @@ import com.ge.research.sadl.sADL.StringLiteral;
 import com.ge.research.sadl.sADL.SubjHasProp;
 import com.ge.research.sadl.sADL.Sublist;
 import com.ge.research.sadl.sADL.TestStatement;
+import com.ge.research.sadl.sADL.ThereExistsStatement;
 import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.sADL.UnitExpression;
 import com.ge.research.sadl.sADL.UpdateExpression;
@@ -711,21 +712,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (format.equals(SadlSerializationFormat.RDF_XML_FORMAT) || 
 				format.equals(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT)) {
 			RDFWriter w2 = model.getWriter(format);
-			w2.setProperty("xmlbase", SadlConstants.SADL_BASE_MODEL_URI);
-			w2.write(model, out, SadlConstants.SADL_BASE_MODEL_URI);
+			w2.setProperty("xmlbase", modelName);
+			w2.write(model, out, modelName);
 		}
 		else {
 			getTheJenaModel().getBaseModel().setNsPrefix(prefix, modelName);
-			RDFDataMgr.write(out, getTheJenaModel().getBaseModel(), SadlSerializationFormat.getRDFFormat(format));
+			RDFDataMgr.write(out, model, SadlSerializationFormat.getRDFFormat(format));
 		}	
-//		if (format.equals(IConfigurationManager.JSON_LD_FORMAT)) {
-//			RDFDataMgr.write(out, getTheJenaModel().getBaseModel(), RDFFormat.JSONLD);
-//		}
-//		else {
-//			RDFWriter w2 = model.getWriter(format);
-//			w2.setProperty("xmlbase", SadlConstants.SADL_BASE_MODEL_URI);
-//			w2.write(model, out, SadlConstants.SADL_BASE_MODEL_URI);
-//		}
 		CharSequence seq = new String(out.toByteArray(), charset);
 		return seq;
 	}
@@ -1395,19 +1388,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				throw new JenaProcessorException("onValidate for element of type '"
 						+ element.getClass().getCanonicalName() + "' not implemented");
 			}
-		} catch (JenaProcessorException e) {
-			addError(e.getMessage(), element);
-		} catch (InvalidNameException e) {
-			e.printStackTrace();
-		} catch (InvalidTypeException e) {
-			e.printStackTrace();
-		} catch (TranslationException e) {
-			e.printStackTrace();
-		} catch (CircularDefinitionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+//		} catch (JenaProcessorException e) {
+//			addError(e.getMessage(), element);
+//		} catch (InvalidNameException e) {
+//			e.printStackTrace();
+//		} catch (InvalidTypeException e) {
+//			e.printStackTrace();
+//		} catch (TranslationException e) {
+//			e.printStackTrace();
+//		} catch (CircularDefinitionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
 		} catch (Throwable t) {
-			t.printStackTrace();
+			if (logger.isDebugEnabled()) {
+				t.printStackTrace();
+			}
+			addError(t.getMessage(), element);
 		}
 	}
 
@@ -2049,6 +2045,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					} else {
 						addError("Right of SubjHasProp not a Name (" + pexpr.getClass().toString() + ")",
 								defnContainer);
+					}
+				} else if (((SubjHasProp) defnContainer).getProp().equals(decl) && 
+						((SubjHasProp) defnContainer).getLeft() instanceof Declaration) {
+					// this is an in-line variable declaration
+					Declaration expr = (Declaration) ((SubjHasProp) defnContainer).getLeft();
+					SadlTypeReference type = expr.getType();
+					Object typenode = processExpression(type);
+					if (typenode instanceof Node) {
+						setVarType(var, (Node) typenode, false, expr);
+					}
+					else {
+						addError("Unexpected type", expr);
 					}
 				} else if (((SubjHasProp) defnContainer).isComma()
 						&& ((SubjHasProp) defnContainer).getRight() == null) {
@@ -4177,7 +4185,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (SadlASTUtils.isUnitExpression(expr)) {
 				return processSubjHasPropUnitExpression((SubjHasProp) expr);
 			}
-			return processExpression((SubjHasProp) expr);
+			try {
+				return processExpression((SubjHasProp) expr);
+			} catch (TranslationException e) {
+				throw e;
+			}
+			catch (Exception e) {
+				addError(e.getMessage(), expr);
+			} 
 		} else if (expr instanceof SadlResource) {
 			return processExpression((SadlResource) expr);
 		} else if (expr instanceof UnaryExpression) {
@@ -4198,6 +4213,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return processExpression((ElementInList) expr);
 		} else if (expr instanceof UpdateExpression) {
 			return processExpression((UpdateExpression) expr);
+		} else if (expr instanceof ThereExistsStatement) {
+			return processExpression((ThereExistsStatement) expr);
 		} else if (expr != null) {
 			throw new TranslationException("Unhandled rule expression type: " + expr.getClass().getCanonicalName());
 		}
@@ -4235,6 +4252,141 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return convertToValueTableNode(rowObjects);
 		}
+	}
+	
+	public Object processExpression(ThereExistsStatement expr) throws InvalidTypeException, InvalidNameException, TranslationException {
+		Expression matchExpr = expr.getMatch();
+		// the first expression in the match should be the class and may be:
+		//	a Declaration as subject and a complete SubjHasProp (derived from "there exists a <Class> with <pred> <obj> ....)
+		//	a Declaration wrapped in a SubjHasProp with null right (derived from "there exists a <Class> <varName> and ...)
+		Expression first = matchExpr;
+		List<Expression> restExpressions = new ArrayList<Expression>();
+		while (first instanceof BinaryOperation) {
+			Expression rest = ((BinaryOperation)first).getRight();
+			if (rest != null) {
+				restExpressions.add(0, rest);
+			}
+			else {
+				addError("Unexpected null right-hand side of binary operation", first);
+			}
+			first = ((BinaryOperation)first).getLeft();
+		}
+		
+		Object cls = processExpression(first);
+		List<Object> restObjs = new ArrayList<Object>();
+		for (Expression rexpr : restExpressions) {
+			restObjs.add(processExpression(rexpr));
+		}
+		NamedNode thereExistsIdentity = null;
+		if (cls instanceof VariableNode) {
+			thereExistsIdentity = (VariableNode) cls;
+			cls = ((VariableNode)cls).getType();
+		}
+		else {
+			if (cls instanceof Object[] && 
+					((Object[])cls)[0] instanceof NamedNode &&
+					((Object[])cls)[1] instanceof GraphPatternElement) {
+				if (((Object[])cls)[1] instanceof TripleElement) {
+					restObjs.add(0, ((Object[])cls)[1]);
+				}
+				else if (((Object[])cls)[1] instanceof Junction) {
+					List<GraphPatternElement> expanded = IntermediateFormTranslator.junctionToList((Junction)((Object[])cls)[1]);
+					int insertAt = 0;
+					for (GraphPatternElement gpe : expanded) {
+						if (gpe instanceof TripleElement) {
+							restObjs.add(insertAt++, gpe);
+						}
+						else {
+							addError("Expected a triple pattern but found '" + gpe.toString(), matchExpr);
+						}
+					}
+				}
+				cls = ((Object[])cls)[0];
+				thereExistsIdentity = (NamedNode) cls;
+				if (cls instanceof VariableNode) {
+					cls = ((VariableNode)cls).getType();
+				}
+			}
+			else {
+				addError("Did not find expected beginning of there exists.", first);
+			}
+		}
+		Expression plusExpr = expr.getPlus();
+		Object plusObj = null;
+		if (plusExpr != null) {
+			plusObj = processExpression(plusExpr);
+		}
+		BuiltinElement tebi = new BuiltinElement();
+		tebi.setFuncName("thereExists");
+		tebi.addArgument(nodeCheck(cls));
+		for (Object robj : restObjs) {
+			TripleElement rtr = null;
+			if (robj instanceof TripleElement) {
+				rtr = (TripleElement) robj;
+			}
+			else if (robj instanceof Object[] && ((Object[])robj)[1] instanceof TripleElement) {
+				rtr = (TripleElement) ((Object[])robj)[1];
+			}
+			else {
+				addError("failed to find match triple", matchExpr);
+			}
+			if (rtr != null) {
+				if (rtr.getSubject().equals(thereExistsIdentity)) {
+					tebi.addArgument(rtr.getPredicate());
+					tebi.addArgument(rtr.getObject());
+				}
+				else if (rtr.getObject() != null && rtr.getObject().equals(thereExistsIdentity)){
+					tebi.addArgument(rtr.getSubject());
+					tebi.addArgument(rtr.getPredicate());
+				}
+				else {
+					String msg ="It appears that there is a triple in 'there exists' that does not reference the matching instance.";
+					if (!useArticlesInValidation) {
+						msg += " Are you using articles in translation?";
+					}
+					msg += " Does the triple belong in the 'plus' portion?";
+					addError(msg, rtr.getContext() != null ? (EObject)rtr.getContext() : expr);
+				}
+			}
+		}
+		if (plusObj != null) {
+			NamedNode plusNode = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#Plus");
+			plusNode.setNodeType(NodeType.InstanceNode);
+			tebi.addArgument(plusNode);
+			List<TripleElement> plusObjs = new ArrayList<TripleElement>();
+			if (plusObj instanceof Junction) {
+				List<GraphPatternElement> plusGpes = getIfTranslator().junctionToList(((Junction)plusObj));
+				for (GraphPatternElement gpe : plusGpes) {
+					if (gpe instanceof TripleElement) {
+						plusObjs.add((TripleElement) gpe);
+					}
+					else {
+						addError("Non-graph pattern found in plus statements", plusExpr);
+					}
+				}
+			}
+			else if (plusObj instanceof TripleElement) {
+				plusObjs.add((TripleElement) plusObj);
+			}
+			else if (plusObj instanceof Object[] && ((Object[])plusObj)[1] instanceof TripleElement) {
+				plusObjs.add((TripleElement) ((Object[])plusObj)[1]);
+			}
+			else {
+				addError("failed to find plus triple", matchExpr);
+			}
+			for (TripleElement rtr : plusObjs) {
+				if (rtr.getSubject().equals(thereExistsIdentity)) {
+					tebi.addArgument(rtr.getPredicate());
+					tebi.addArgument(rtr.getObject());
+				}
+				else {
+					tebi.addArgument(rtr.getSubject());
+					tebi.addArgument(rtr.getPredicate());
+				}
+			}
+		}
+		
+		return tebi;
 	}
 
 	private ValueTableNode convertToValueTableNode(List<Object> rowObjects) throws TranslationException {
@@ -4981,10 +5133,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private boolean isDeclInThereExists(Declaration decl) {
 		EObject eobj = decl.eContainer();
 		while (eobj != null) {
-			if (eobj instanceof UnaryExpression && ((UnaryExpression)eobj).getOp().equals("there exists")) {
+			if (eobj instanceof ThereExistsStatement) {
 				return true;
 			}
-			else if (eobj instanceof SubjHasProp) {
+			else if (eobj.eContainer() != null) {
 				eobj = eobj.eContainer();
 			}
 			else {
@@ -7530,7 +7682,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				subjNode = new ProxyNode((GraphPatternElement) trSubj);
 			}
 			if (subjNode == null) {
-				throw new TranslationException("Subject is neither Node nor GraphPatternElement");
+				addError("Subject is neither Node nor GraphPatternElement", subject);
 			}
 			if (predNode != null && predNode instanceof Node) {
 				//Add range information to predNode based on domain restriction
@@ -7956,12 +8108,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	public Object processExpression(SubjHasProp expr)
-			throws InvalidNameException, InvalidTypeException, TranslationException {
+			throws InvalidNameException, InvalidTypeException, TranslationException, CircularDefinitionException, IOException, PrefixNotFoundException, ConfigurationException {
 		// System.out.println("processing " + expr.getClass().getCanonicalName() + ": "
 		// + expr.getProp().toString());
 		if (expr.isComma() && expr.getRight() == null) {
 			addError("This is an invalid subject-has-property construct using a comma", expr);
 			return null;
+		}
+		if (expr.getRight() == null && expr.getLeft() instanceof Declaration &&
+				getDeclarationExtensions().getOntConceptType(expr.getProp()).equals(OntConceptType.VARIABLE)) {
+			// this is an in-line variable declaration
+			String vname = getDeclarationExtensions().getConcreteName(expr.getProp());
+			VariableNode vn = getVariable(vname);
+			if (vn == null) {
+				vn = createVariable(expr.getProp());
+			}
+			return vn;
 		}
 		Expression subj = expr.getLeft();
 		SadlResource pred = expr.getProp();
@@ -7983,6 +8145,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Object predObj = processExpression(pred);
 		TripleElement tr = new TripleElement();
 		tr.setPredicate(nodeCheck(predObj));
+		tr.setContext(pred.eContainer());
 
 		// check for negation
 		boolean negatedSubject = subj instanceof UnaryExpression && ((UnaryExpression) subj).getOp().equals("not");
@@ -8106,7 +8269,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					return shpTriples;
 				}
 				else {
-					throw new TranslationException("Object for triple is null, which was not expected.");
+					addError("Object for triple is null, which was not expected.", obj);
 				}
 			} else {
 				Object objObj = processExpression(obj);
@@ -8133,8 +8296,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			if (!objectFound) {
-				throw new TranslationException(
-						"Unable to find object for triple: " + obj.getClass().getCanonicalName());
+				addError("Unable to find object for triple", obj);
 			}
 		}
 		try {
@@ -13994,7 +14156,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				VariableNode var = new VariableNode(name);
 				var.setCRulesVariable(true);
 				var.setType(validateNode(type));
-				var.setHostObject(getHostEObject());
+				var.setHostObject(host != null ? host : getHostEObject());
 				existingList.add(var);
 				return var;
 			} else {

@@ -383,7 +383,7 @@ public class JenaReasonerPlugin extends Reasoner{
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
 					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
-					schemaModel.read(tbox, format);
+					schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
 				}
 			}
 		} catch (Exception e1) {

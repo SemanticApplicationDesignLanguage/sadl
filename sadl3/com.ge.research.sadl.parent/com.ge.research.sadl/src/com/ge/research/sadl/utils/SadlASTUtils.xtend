@@ -30,6 +30,7 @@ import org.eclipse.xtext.resource.XtextResource
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.getContainerOfType
+import com.ge.research.sadl.sADL.Declaration
 
 /**
  * Static utility class for SADL AST elements.
@@ -56,7 +57,7 @@ class SadlASTUtils {
 	 */
 	static def boolean isUnitExpression(EObject it) {
 		if (it instanceof SubjHasProp) {
-			return right === null && !it.comma && prop.unit;
+			return right === null && !(left instanceof Declaration) && !it.comma && prop.unit;
 		}
 		return it instanceof UnitExpression;
 	}

@@ -648,6 +648,7 @@ public class OwlToSadl {
 				"last",
 				"level",
 				"count",
+				"plus",
 				"most",
 				"base64Binary",
 				"Print:",
@@ -704,7 +705,7 @@ public class OwlToSadl {
 				"PI",
 				"Deductions",
 				"time",
-				"gYearMonth");	
+				"gYearMonth");
 	}
 	
 	/**
@@ -2910,7 +2911,13 @@ public class OwlToSadl {
 	private String rdfNodeToSadlString(ModelConcepts concepts, RDFNode object, boolean forceQuotes) throws OwlImportException {
 		if (object.isURIResource()) {
 			String objStr = uriToSadlString(concepts, object.asResource());
-			return makeStringDoubleQuoted(objStr);
+			// when would you want to quote a URI?
+			if (forceQuotes) {
+				return makeStringDoubleQuoted(objStr);
+			}
+			else {
+				return objStr;
+			}
 		}
 		else if (object.isLiteral()) {
 			String dturi = object.asLiteral().getDatatypeURI();

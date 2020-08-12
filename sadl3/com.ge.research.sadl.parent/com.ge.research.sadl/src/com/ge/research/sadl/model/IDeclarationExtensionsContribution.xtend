@@ -21,6 +21,8 @@ import com.ge.research.sadl.sADL.Name
 import com.google.inject.ImplementedBy
 import com.google.inject.Singleton
 import org.eclipse.emf.ecore.EObject
+import com.ge.research.sadl.sADL.SubjHasProp
+import com.ge.research.sadl.sADL.Declaration
 
 /**
  * Contribution for the {@link DeclarationExtensions declaration extensions}.
@@ -55,6 +57,11 @@ interface IDeclarationExtensionsContribution {
 	 * By default, returns with {@code null}.
 	 */
 	def OntConceptType getOntConceptType(EObject namedElementContainer) {
+		if (namedElementContainer instanceof SubjHasProp &&
+			(namedElementContainer as SubjHasProp).right === null &&
+			(namedElementContainer as SubjHasProp).left instanceof Declaration) {
+			return OntConceptType.VARIABLE;
+		}
 		return null;
 	}
 

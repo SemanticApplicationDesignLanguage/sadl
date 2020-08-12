@@ -50,6 +50,7 @@ import static com.ge.research.sadl.preferences.SadlPreferences.SHOW_TIMING_INFOR
 import static com.ge.research.sadl.preferences.SadlPreferences.TABULAR_DATA_IMPORTER_CLASS;
 import static com.ge.research.sadl.preferences.SadlPreferences.TRIG;
 import static com.ge.research.sadl.preferences.SadlPreferences.TRIX;
+import static com.ge.research.sadl.preferences.SadlPreferences.RDF_BINARY;
 import static com.ge.research.sadl.preferences.SadlPreferences.TURTLE_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED;
 import static com.ge.research.sadl.preferences.SadlPreferences.TYPE_CHECKING_WARNING_ONLY;
@@ -171,7 +172,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 					{ TRIG.getId(), TRIG.getId() },
 					{ N_QUAD.getId(), N_QUAD.getId() },
 					{ TRIX.getId(), TRIX.getId() },
-//					{ RDF_BINARY.getId(), RDF_BINARY.getId() },		// AWC 7/22/2020: This isn't working. Posted question on Jena users mailing list
+					{ RDF_BINARY.getId(), RDF_BINARY.getId() },		// AWC 7/22/2020: This isn't working. Posted question on Jena users mailing list
 					{ JENA_TDB.getId(), JENA_TDB.getId() },
 				}, generalSettings));
 		addField(new RadioGroupFieldEditorExt("importBy", "Show import model list as:", 2,

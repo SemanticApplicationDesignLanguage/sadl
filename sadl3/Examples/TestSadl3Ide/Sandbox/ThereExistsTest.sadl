@@ -1,26 +1,40 @@
  uri "http://sadl.org/ThereExistsTest.sadl" alias ThereExistsTest.
  
- Person is a class described by age with values of type int, described by iq with values of type int.
+ Person is a class described by age with values of type int, 
+ 	described by iq with values of type int.
  Parent is a type of Person.
  A Person is a Parent only if child has at least 1 value.
  
  child describes Parent with values of type Person.
  commentary describes Person with values of type string.
+ knows describes Person with values of type Person.
+ 
+ A Parent Hillary has child (a Person Chelsea).
  
 // Rule YP if x is a Parent and age of x < 30 then there exists a Person y such that x has child y and y has commentary "This is the child of a young parent".
 // Rule YP2 if a Parent has age < 30 then there exists a Person such that the Parent has child the Person and the Person has commentary "This is the child of a young parent".
- Rule YP if x is a Parent and age of x < 30 then there exists a Person y and x has child y and y has commentary "This is the child of a young parent".
- Rule YP2 if age of a Parent < 30 then there exists a Person and the Parent has child the Person and the Person has commentary "This is the child of a young parent".
- Rule YP3 if x is Parent and age of x < 30 then thereExists(Person, x, child, AddAlso, commentary, "This is the child of a young parent").
+ Rule YP if x is a Parent and age of x < 30 then there exists a Person y and x has child y plus y has commentary "This is the child of a young parent". 
+ Rule YP2 if age of a Parent < 30 then there exists a Person and the Parent has child the Person plus the Person has commentary "This is the child of a young parent".
+ Rule YP3 if x is Parent and age of x < 30 then thereExists(Person, x, child, Plus, commentary, "This is the child of a young parent").
  
- Rule OP if x is a Parent and age of x >= 30 then thereExists(Person, x, child, AddAlso, commentary, "This is the child of an older parent").
+ Rule OP if x is a Parent and age of x >= 30 then thereExists(Person, x, child, Plus, commentary, "This is the child of an older parent").
+ Rule OP2 if age of a Parent >= 30 then there exists a Person and the Parent child the Person plus the Person commentary "This is the child of an older parent".
+ Rule OP3: if x is a Parent and age of x >= 30 then there exists a Person y and x has child y plus y has commentary "This is the child of an older parent".
  
- Rule SP if x is a Parent and iq of x >= 120 then thereExists(Person, x, child, AddAlso, commentary, "This is the child of a smart parent").
+// Rule S2p if x is a Parent then there exists a Person y and x has child y and there exists a Person z and z has child y plus x knows z. 
+// Rule S2p2 if x is a Parent then thereExists(Person, x, child) and thereExists(Person, y, child, Plus, x, knows).
+
+ Rule SP if x is a Parent and iq of x >= 120 then thereExists(Person, x, child, Plus, commentary, "This is the child of a smart parent").
+ Rule SP2 if iq of a Parent >= 120 then there exists A Person and the Parent has child the Person plus the Person has commentary "This is the child of a smart parent".
+ Rule SP3 if x is a Parent and iq of x >= 120 then there exists a Person y and x has child y plus y has commentary "This is the child of a smart parent".
  
- Rule LSP if x is a Parent and iq of x <120 then thereExists(Person, x, child, AddAlso, commentary, "This is the child of a less smart parent").
+ Rule LSP if x is a Parent and iq of x <120 then thereExists(Person, x, child, Plus, commentary, "This is the child of a less smart parent").
+ Rule LSP2 if iq of a Parent < 120 then there exists a Person and the Parent has child the Person plus the Person has commentary "This is the child of a less smart parent".
+ Rule LSP3 if x is a Parent and iq of x <120 then there exists a Person y and x has child y plus y has commentary "This is the child of a less smart parent".
  
- Eve is a Parent with age 40, with iq 160.
- Cain is a Parent with age 20, with iq 80.
+ Eve is a Parent with age 40, with iq 160, with child Cain, has child Abel.
+ Cain is a Parent with age 20, with iq 80. 
+ Abel is a Person.
  
- Ask: select p, ch, c where p has child ch and ch has commentary c.
-  
+ Ask: select p, ch, c where p has child ch and ch has commentary c. 
+    

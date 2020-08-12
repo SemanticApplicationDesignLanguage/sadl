@@ -52,6 +52,7 @@ import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement
 import com.ge.research.sadl.utils.SadlProjectHelper
 import java.net.URI
+import com.ge.research.sadl.sADL.ThereExistsStatement
 
 /**
  * This class contains custom validation rules. 
@@ -309,7 +310,7 @@ class SADLValidator extends AbstractSADLValidator {
 		if (eContainer instanceof BinaryOperation && comma) {
 			val bop = eContainer as BinaryOperation
 			val op = bop.op
-			if (op.equals("and") || op.equals("or")) {
+			if ((op.equals("and") || op.equals("or")) && EcoreUtil2.getContainerOfType(eContainer, ThereExistsStatement) === null) {
 				 warning("Is this a declaration that should be nested in parentheses?", it, SUBJ_HAS_PROP__LEFT)	
 			}
 		}
