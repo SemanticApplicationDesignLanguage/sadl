@@ -977,7 +977,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					return;
 				}
 				try {
-					modelValidator.checkPropertyDomain(ontModel, subject, candidate, candidate, true);
+					modelValidator.checkPropertyDomain(ontModel, subject, candidate, candidate, true, false);
 				} catch (CircularDependencyException e) {
 					addError(e.getMessage(), subject);
 				}
@@ -1002,7 +1002,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //					System.out.println("Restriction: " + getDeclarationExtensions().getConceptUri(ritr.next()));
 //				}
 				try {
-					modelValidator.checkPropertyDomain(ontModel, subject, prop, subject, true);
+					modelValidator.checkPropertyDomain(ontModel, subject, prop, subject, true, false);
 				} catch (CircularDependencyException e) {
 					// TODO Auto-generated catch block
 					addError(e.getMessage(), subject);
@@ -1031,7 +1031,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if ((candtype.equals(OntConceptType.CLASS) || candtype.equals(OntConceptType.INSTANCE))
 						&& isProperty(subjtype)) {
 					try {
-						modelValidator.checkPropertyDomain(ontModel, candidate, subject, candidate, true);
+						modelValidator.checkPropertyDomain(ontModel, candidate, subject, candidate, true, false);
 					} catch (CircularDependencyException e) {
 						addError(e.getMessage(), candidate);
 					}
@@ -1047,7 +1047,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if ((candtype.equals(OntConceptType.CLASS) || candtype.equals(OntConceptType.INSTANCE))
 						&& isProperty(subjtype)) {
 					try {
-						modelValidator.checkPropertyDomain(ontModel, candidate, subject, candidate, true);
+						modelValidator.checkPropertyDomain(ontModel, candidate, subject, candidate, true, false);
 					} catch (CircularDependencyException e) {
 						addError(e.getMessage(), candidate);
 					}
@@ -6104,6 +6104,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
+	/**
+	 * Method to type check a triple's type relative to other triples with variable connections
+	 * @param subjeo
+	 * @param predeo
+	 * @param objeo
+	 * @param tr
+	 * @param expr
+	 * @throws TranslationException
+	 * @throws InvalidTypeException
+	 * @throws CircularDependencyException
+	 * @throws InvalidNameException
+	 */
 	private void validateTripleTypes(EObject subjeo, EObject predeo, EObject objeo, TripleElement tr, Expression expr)
 			throws TranslationException, InvalidTypeException, CircularDependencyException, InvalidNameException {
 		if (getModelValidator() != null) {
@@ -6162,7 +6174,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (!(tr.getSubject() instanceof VariableNode) || !isContainedByQuery(expr)) {
 				try {
 					getModelValidator().checkPropertyDomain(getTheJenaModel(), subj, pred, expr, true,
-							isCrVar ? varName : null);
+							isCrVar ? varName : null, false, true);
 				} 
 				catch (CircularDependencyException e) {
 					addError(e.getMessage(), subjeo);
@@ -8137,6 +8149,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return shpTriples;
 	}
 
+	/**
+	 * Method to process SubjHasProp expression in the context of a possible list of triples
+	 * @param subj--subject expression
+	 * @param pred--predicate expression
+	 * @param obj--object expression
+	 * @param objUnit--unit on the object if a unitted quatity
+	 * @param shpTriples--the list of triples
+	 * @param expr--the host expression for error reporting
+	 * @return
+	 * @throws InvalidNameException
+	 * @throws InvalidTypeException
+	 * @throws TranslationException
+	 */
 	private List<GraphPatternElement> processSubjHasProp(Expression subj, SadlResource pred, Expression obj,
 			String objUnit, List<GraphPatternElement> shpTriples, Expression expr)
 					throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -11130,7 +11155,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addExpandedPropertyClass(inst);
 		}
 		try {
-			getModelValidator().checkPropertyDomain(getTheJenaModel(), inst, prop, null, false, null);
+			
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), inst, prop, null, false, null, false, true);
 		} catch (InvalidTypeException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -11179,6 +11205,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				getTheJenaModel().createTypedLiteral(literalNumber));
 		unittedVal.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI),
 				getTheJenaModel().createTypedLiteral(unit));
+		try {
+			
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), inst, oprop, null, false, null, false, true);
+		} catch (InvalidTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CircularDependencyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		inst.addProperty(oprop, unittedVal);
 	}
 

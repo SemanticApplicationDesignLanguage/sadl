@@ -621,4 +621,44 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  		]
 	}
 
+	@Test
+	def void testNoDomainObjectProperty() {
+		val sadlModel = '''
+			 uri "http://sadl.org/Test1.sadl" alias Test1.
+			 PhysicalThing is a class.
+			 weight with values of type UnittedQuantity.
+			 
+			 MyPetRock is a PhysicalThing with weight 10 lbs.
+			 
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+	 		for (issue:issues) {
+				println(issue.toString)
+			}
+			assertNotNull(issues)
+ 			assertTrue(issues.size == 1)
+ 			assertTrue(issues.get(0).toString.contains("Can't check domain of property 'weight'"))
+ 		]
+	}
+	
+	@Test
+	def void testNoDomainAnnotationProperty() {
+		val sadlModel = '''
+			 uri "http://sadl.org/Test1.sadl" alias Test1.
+			 PhysicalThing is a class.
+			 moreInfo is a type of annotation.
+			 
+			 MyPetRock is a PhysicalThing with moreInfo "more info".
+			 
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+	 		for (issue:issues) {
+				println(issue.toString)
+			}
+			assertNotNull(issues)
+ 			assertTrue(issues.size == 0)
+ 		]
+	}
 }
