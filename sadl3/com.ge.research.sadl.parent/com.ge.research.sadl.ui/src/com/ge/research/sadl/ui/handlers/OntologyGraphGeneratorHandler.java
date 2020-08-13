@@ -83,10 +83,11 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 							targetFile = sb.toString();
 						}
 						else if (sf != null) {
-							String fmt = SadlSerializationFormat.getSadlSerializationFormatFromFilename(sf);
-							if (selection.size() > 3 && selection.get(4).equals(fmt)) {
-							}
 							StringBuilder sb = new StringBuilder();
+							if (selection.size() >= 2 && !selection.get(2).equals("OwlModels")) {
+								// this is outside the OwlModels folder so put a leading "/" on it
+								sb.append("/");
+							}
 							for (int i = 2; i < selection.size(); i++) {
 								if (i > 2) {
 									sb.append("/");
@@ -246,20 +247,20 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 
 	private void generateOntologyFileGraph(String ontfilename, String owlFileName, IProgressMonitor monitor, boolean graphImports, boolean openGraph)
 			throws ConfigurationException, URISyntaxException, IOException, Exception {
-		Map<String,String> prefMap = getPreferences(URI.createFileURI(ontfilename));
+		String fullFileName = null;
+		if (owlFileName.indexOf('/') >= 0 || owlFileName.indexOf('\\') >= 0) {
+			// this is the path of an OWL file not in the OwlModels folder
+			File omfolder = new File(modelFolderUri);
+			if (omfolder.exists()) {
+				fullFileName = omfolder.getParentFile() + "/" + owlFileName;
+			}
+		}
+		else {
+			fullFileName = modelFolderUri + "/" + owlFileName;
+		}
+		Map<String,String> prefMap = getPreferences(URI.createFileURI(fullFileName));
 		visualizer = getVisualizer(getConfigMgr(), prefMap);
 		if (visualizer != null) {
-			String fullFileName = null;
-			if (owlFileName.indexOf('/') > 0 || owlFileName.indexOf('\\') > 0) {
-				// this is the path of an OWL file not in the OwlModels folder
-				File omfolder = new File(modelFolderUri);
-				if (omfolder.exists()) {
-					fullFileName = omfolder.getParentFile() + "/" + owlFileName;
-				}
-			}
-			else {
-				fullFileName = modelFolderUri + "/" + owlFileName;
-			}
 			String publicUri;
 			String prefix = null;
 			try {

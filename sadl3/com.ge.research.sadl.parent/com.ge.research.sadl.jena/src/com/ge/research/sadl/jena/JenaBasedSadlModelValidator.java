@@ -845,7 +845,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			// this is OK? At least it shouldn't create the exception below... AWC 11/26/2018
 		}
 		else {
-			throw new TranslationException("Unexpected failure to find binary operation type checking type");
+			try {
+				getModelProcessor().addError("Unexpected failure to find binary operation type checking type", expression);
+			} catch (InvalidTypeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		if (type != null && type instanceof NamedNode && 
@@ -3345,7 +3350,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 						else {
 							SadlResource nor = ((SadlInstance)qnmDecl.eContainer()).getNameOrRef();
-							if (!nor.equals(qnmDecl)) {
+							if (nor != null && !nor.equals(qnmDecl)) {
 								return getType(nor);
 							}
 						}
@@ -4132,7 +4137,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else if (refContainer instanceof PropOfSubject) {
 			Expression pred = ((PropOfSubject)refContainer).getLeft();
-			if (pred instanceof SadlResource && ((PropOfSubject)refContainer).getRight().equals(name)) {
+			if (pred instanceof SadlResource && ((PropOfSubject)refContainer).getRight() != null && 
+					((PropOfSubject)refContainer).getRight().equals(name)) {
 				return getPropertyDomainType((SadlResource) pred, reference);
 			}
 		}

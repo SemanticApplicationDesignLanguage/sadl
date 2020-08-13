@@ -1198,6 +1198,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //			}
 		]
 	}
+	
 	@Test
 	def void testRuleIndefiniteArticles() {
 		val forTest = newArrayList(
@@ -1382,6 +1383,35 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				}
 			}
 //			assertTrue(rules.size==1)
+			for (rule:rules) {
+				println(rule.toString)
+			}
+//			var idx = 0
+//			for (t:forTest) {
+//				assertEquals(results.get(idx++).toString, t.toString)
+//			}
+		]
+	}
+	
+	@Test
+	def void testRuleFlexibleArgumentNumber() {
+		val forTest = newArrayList(
+"[and(rdf(v0, SubjHasProp:prop1, v1)), and(rdf(v1, SubjHasProp:prop2, v2)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4)), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3)))))))))))]"
+		)
+		'''
+			    uri "http://sadl.org/StrConcatTest.sadl" alias sct.
+			    
+			    Shape is a class described by area with values of type UnittedQuantity.
+			    		    
+			    Rule StrConcatTest: if x is a Shape and str = strConcat("hello ", "world", ".", " Glad", "to ", "be ", "here.") then print(str).
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults()
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(issues.empty)
 			for (rule:rules) {
 				println(rule.toString)
 			}

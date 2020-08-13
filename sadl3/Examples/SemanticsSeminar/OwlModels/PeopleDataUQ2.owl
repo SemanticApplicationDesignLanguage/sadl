@@ -1,0 +1,29 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:j.0="http://sadl.org/PeopleModelUQ.sadl#"
+    xmlns:PeopleDataUQ2="http://sadl.org/PeopleDataUQ2.sadl#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:j.1="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:PeopleModelUQ="http://sadl.org/PeopleModelUQ.sadl"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="PeopleDataUQ2.sadl">
+    <owl:imports rdf:resource="PeopleModelUQ.sadl"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource=""/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'PeopleDataUQ2.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <j.0:Person rdf:about="PeopleDataUQ2.sadl#Adam">
+    <j.0:age>
+      <j.1:UnittedQuantity>
+        <j.1:unit>yrs</j.1:unit>
+        <j.1:value>50</j.1:value>
+      </j.1:UnittedQuantity>
+    </j.0:age>
+  </j.0:Person>
+</rdf:RDF>

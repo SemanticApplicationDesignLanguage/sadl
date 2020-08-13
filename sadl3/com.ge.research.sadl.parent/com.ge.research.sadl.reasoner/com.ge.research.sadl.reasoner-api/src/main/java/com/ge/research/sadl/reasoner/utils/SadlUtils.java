@@ -1204,6 +1204,9 @@ public class SadlUtils {
 							eitr.close();
 							return true;
 						}
+						else {
+							previousClasses.remove(subClsOfCls);
+						}
 					}
 				}
 				eitr.close();

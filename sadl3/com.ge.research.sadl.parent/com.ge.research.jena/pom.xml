@@ -15,6 +15,12 @@
 	    <groupId>com.ge.research.sadl</groupId>
 	    <artifactId>reasoner-api</artifactId>
 	    <version>${project.version}</version>
+	    <exclusions>
+		<exclusion>
+		    <groupId>javax.activation</groupId>
+		    <artifactId>activation</artifactId>
+		</exclusion>
+	    </exclusions>
 	</dependency>
 	<dependency>
 	    <groupId>com.ge.research.sadl</groupId>

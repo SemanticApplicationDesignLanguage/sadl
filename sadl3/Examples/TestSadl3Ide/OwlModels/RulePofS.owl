@@ -8,14 +8,14 @@
     xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/RulePofS.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="RulePofS.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RulePofS.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <rdfs:Datatype rdf:ID="SL">
+  <rdfs:Datatype rdf:about="RulePofS.sadl#SL">
     <owl:equivalentClass>
       <rdfs:Datatype>
         <owl:withRestrictions rdf:parseType="Collection">
@@ -28,11 +28,11 @@
       </rdfs:Datatype>
     </owl:equivalentClass>
   </rdfs:Datatype>
-  <owl:Class rdf:ID="Cls"/>
-  <owl:DatatypeProperty rdf:ID="prop">
-    <rdfs:domain rdf:resource="#Cls"/>
-    <rdfs:range rdf:resource="#SL"/>
+  <owl:Class rdf:about="RulePofS.sadl#Cls"/>
+  <owl:DatatypeProperty rdf:about="RulePofS.sadl#prop">
+    <rdfs:domain rdf:resource="RulePofS.sadl#Cls"/>
+    <rdfs:range rdf:resource="RulePofS.sadl#SL"/>
   </owl:DatatypeProperty>
-  <j.0:Rule rdf:ID="ClsProp"/>
-  <j.0:Rule rdf:ID="ClsProp2"/>
+  <j.0:Rule rdf:about="RulePofS.sadl#ClsProp"/>
+  <j.0:Rule rdf:about="RulePofS.sadl#ClsProp2"/>
 </rdf:RDF>

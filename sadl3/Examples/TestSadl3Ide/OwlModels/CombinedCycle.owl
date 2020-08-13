@@ -7,43 +7,43 @@
     xmlns:cc="http://sadl.org/CombinedCycle.sadl#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/CombinedCycle.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="CombinedCycle.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'CombinedCycle.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Equipment">
+  <owl:Class rdf:about="CombinedCycle.sadl#Equipment">
     <rdfs:subClassOf>
-      <owl:Class rdf:ID="Subsystem"/>
+      <owl:Class rdf:about="CombinedCycle.sadl#Subsystem"/>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:ID="System"/>
-  <owl:Class rdf:ID="PowerPlant">
-    <rdfs:subClassOf rdf:resource="#System"/>
+  <owl:Class rdf:about="CombinedCycle.sadl#System"/>
+  <owl:Class rdf:about="CombinedCycle.sadl#PowerPlant">
+    <rdfs:subClassOf rdf:resource="CombinedCycle.sadl#System"/>
   </owl:Class>
-  <owl:Class rdf:about="#Subsystem">
-    <rdfs:subClassOf rdf:resource="#System"/>
+  <owl:Class rdf:about="CombinedCycle.sadl#Subsystem">
+    <rdfs:subClassOf rdf:resource="CombinedCycle.sadl#System"/>
   </owl:Class>
-  <owl:Class rdf:ID="SteamTurbine">
-    <rdfs:subClassOf rdf:resource="#Equipment"/>
+  <owl:Class rdf:about="CombinedCycle.sadl#SteamTurbine">
+    <rdfs:subClassOf rdf:resource="CombinedCycle.sadl#Equipment"/>
   </owl:Class>
-  <owl:Class rdf:ID="CombinedCycle">
+  <owl:Class rdf:about="CombinedCycle.sadl#CombinedCycle">
     <rdfs:subClassOf>
       <owl:Restriction>
-        <owl:onClass rdf:resource="#SteamTurbine"/>
+        <owl:onClass rdf:resource="CombinedCycle.sadl#SteamTurbine"/>
         <owl:minQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#long"
         >1</owl:minQualifiedCardinality>
         <owl:onProperty>
-          <owl:ObjectProperty rdf:ID="part"/>
+          <owl:ObjectProperty rdf:about="CombinedCycle.sadl#part"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
-    <rdfs:subClassOf rdf:resource="#PowerPlant"/>
+    <rdfs:subClassOf rdf:resource="CombinedCycle.sadl#PowerPlant"/>
   </owl:Class>
-  <owl:ObjectProperty rdf:about="#part">
-    <rdfs:range rdf:resource="#Subsystem"/>
-    <rdfs:domain rdf:resource="#System"/>
+  <owl:ObjectProperty rdf:about="CombinedCycle.sadl#part">
+    <rdfs:range rdf:resource="CombinedCycle.sadl#Subsystem"/>
+    <rdfs:domain rdf:resource="CombinedCycle.sadl#System"/>
   </owl:ObjectProperty>
 </rdf:RDF>

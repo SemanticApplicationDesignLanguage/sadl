@@ -10,22 +10,21 @@
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:j.1="http://sadl.org/Polygons.sadl#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/Test.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="Test.sadl">
     <owl:imports rdf:resource="Polygons.sadl"/>
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Test.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <j.1:Rectangle rdf:ID="MyRect">
+  <j.1:Rectangle rdf:about="Test.sadl#MyRect">
     <j.1:width rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
     >4.0</j.1:width>
     <j.1:height rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
     >2.0</j.1:height>
   </j.1:Rectangle>
-  <j.0:NamedQuery rdf:ID="Q1">
-    <rdfs:isDefinedBy rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >select ?v0 ?v1 where {?v0 &lt;http://sadl.org/Shapes.sadl#area&gt; ?v1}</rdfs:isDefinedBy>
+  <j.0:NamedQuery rdf:about="Test.sadl#Q1">
+    <rdfs:isDefinedBy>select ?v0 ?v1 where {?v0 &lt;http://sadl.org/Shapes.sadl#area&gt; ?v1}</rdfs:isDefinedBy>
   </j.0:NamedQuery>
 </rdf:RDF>

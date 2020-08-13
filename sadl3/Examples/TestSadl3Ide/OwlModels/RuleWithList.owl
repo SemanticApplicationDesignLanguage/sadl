@@ -10,18 +10,18 @@
     xmlns:sadllistmodel="http://sadl.org/sadllistmodel"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
     xmlns:RuleWithList="http://sadl.org/RuleWithList.sadl#"
-  xml:base="http://sadl.org/RuleWithList.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="RuleWithList.sadl">
     <owl:imports rdf:resource="sadllistmodel"/>
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'RuleWithList.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Scores">
+  <owl:Class rdf:about="RuleWithList.sadl#Scores">
     <rdfs:subClassOf>
       <owl:Restriction>
-        <owl:allValuesFrom rdf:resource="#Scores"/>
+        <owl:allValuesFrom rdf:resource="RuleWithList.sadl#Scores"/>
         <owl:onProperty rdf:resource="sadllistmodel#rest"/>
       </owl:Restriction>
     </rdfs:subClassOf>
@@ -33,8 +33,8 @@
     </rdfs:subClassOf>
     <rdfs:subClassOf rdf:resource="sadllistmodel#List"/>
   </owl:Class>
-  <j.1:Rule rdf:ID="testListVar"/>
-  <RuleWithList:Scores rdf:ID="MyScores">
+  <j.1:Rule rdf:about="RuleWithList.sadl#testListVar"/>
+  <RuleWithList:Scores rdf:about="RuleWithList.sadl#MyScores">
     <j.0:rest>
       <RuleWithList:Scores>
         <j.0:rest>

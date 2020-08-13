@@ -1,0 +1,7 @@
+ uri "http://sadl.org/testimport.sadl" alias testimport.
+ 
+ import "http://sadl.org/tabimport/blanks".
+ 
+ Ask: select t, v where t has bdprop v.
+  
+  

@@ -8,20 +8,20 @@
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:tgpb="http://sadl.org/TestGraphPatternBuiltins.sadl#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/TestGraphPatternBuiltins.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="TestGraphPatternBuiltins.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TestGraphPatternBuiltins.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Student">
+  <owl:Class rdf:about="TestGraphPatternBuiltins.sadl#Student">
     <rdfs:subClassOf>
       <owl:Restriction>
         <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >1</owl:cardinality>
         <owl:onProperty>
-          <owl:DatatypeProperty rdf:ID="sumOfScores"/>
+          <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#sumOfScores"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
@@ -30,7 +30,7 @@
         <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >1</owl:cardinality>
         <owl:onProperty>
-          <owl:DatatypeProperty rdf:ID="prodOfScores"/>
+          <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#prodOfScores"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
@@ -39,7 +39,7 @@
         <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >1</owl:cardinality>
         <owl:onProperty>
-          <owl:DatatypeProperty rdf:ID="maxScore"/>
+          <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#maxScore"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
@@ -48,7 +48,7 @@
         <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >1</owl:cardinality>
         <owl:onProperty>
-          <owl:DatatypeProperty rdf:ID="minScore"/>
+          <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#minScore"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
@@ -57,41 +57,41 @@
         <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
         >1</owl:cardinality>
         <owl:onProperty>
-          <owl:DatatypeProperty rdf:ID="averageScore"/>
+          <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#averageScore"/>
         </owl:onProperty>
       </owl:Restriction>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:Class rdf:ID="Test"/>
-  <owl:ObjectProperty rdf:ID="test">
-    <rdfs:domain rdf:resource="#Student"/>
-    <rdfs:range rdf:resource="#Test"/>
+  <owl:Class rdf:about="TestGraphPatternBuiltins.sadl#Test"/>
+  <owl:ObjectProperty rdf:about="TestGraphPatternBuiltins.sadl#test">
+    <rdfs:domain rdf:resource="TestGraphPatternBuiltins.sadl#Student"/>
+    <rdfs:range rdf:resource="TestGraphPatternBuiltins.sadl#Test"/>
   </owl:ObjectProperty>
-  <owl:DatatypeProperty rdf:about="#maxScore">
+  <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#maxScore">
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-    <rdfs:domain rdf:resource="#Student"/>
+    <rdfs:domain rdf:resource="TestGraphPatternBuiltins.sadl#Student"/>
   </owl:DatatypeProperty>
-  <owl:DatatypeProperty rdf:about="#prodOfScores">
+  <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#prodOfScores">
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#long"/>
-    <rdfs:domain rdf:resource="#Student"/>
+    <rdfs:domain rdf:resource="TestGraphPatternBuiltins.sadl#Student"/>
   </owl:DatatypeProperty>
-  <owl:DatatypeProperty rdf:about="#sumOfScores">
+  <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#sumOfScores">
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-    <rdfs:domain rdf:resource="#Student"/>
+    <rdfs:domain rdf:resource="TestGraphPatternBuiltins.sadl#Student"/>
   </owl:DatatypeProperty>
-  <owl:DatatypeProperty rdf:about="#averageScore">
+  <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#averageScore">
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
-    <rdfs:domain rdf:resource="#Student"/>
+    <rdfs:domain rdf:resource="TestGraphPatternBuiltins.sadl#Student"/>
   </owl:DatatypeProperty>
-  <owl:DatatypeProperty rdf:about="#minScore">
+  <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#minScore">
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-    <rdfs:domain rdf:resource="#Student"/>
+    <rdfs:domain rdf:resource="TestGraphPatternBuiltins.sadl#Student"/>
   </owl:DatatypeProperty>
-  <owl:DatatypeProperty rdf:ID="score">
-    <rdfs:domain rdf:resource="#Test"/>
+  <owl:DatatypeProperty rdf:about="TestGraphPatternBuiltins.sadl#score">
+    <rdfs:domain rdf:resource="TestGraphPatternBuiltins.sadl#Test"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
   </owl:DatatypeProperty>
-  <tgpb:Student rdf:ID="George">
+  <tgpb:Student rdf:about="TestGraphPatternBuiltins.sadl#George">
     <tgpb:test>
       <tgpb:Test>
         <tgpb:score rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
@@ -123,9 +123,9 @@
       </tgpb:Test>
     </tgpb:test>
   </tgpb:Student>
-  <j.0:Rule rdf:ID="prodRule"/>
-  <j.0:Rule rdf:ID="sumRule"/>
-  <j.0:Rule rdf:ID="avgRule"/>
-  <j.0:Rule rdf:ID="maxRule"/>
-  <j.0:Rule rdf:ID="minRule"/>
+  <j.0:Rule rdf:about="TestGraphPatternBuiltins.sadl#prodRule"/>
+  <j.0:Rule rdf:about="TestGraphPatternBuiltins.sadl#sumRule"/>
+  <j.0:Rule rdf:about="TestGraphPatternBuiltins.sadl#avgRule"/>
+  <j.0:Rule rdf:about="TestGraphPatternBuiltins.sadl#maxRule"/>
+  <j.0:Rule rdf:about="TestGraphPatternBuiltins.sadl#minRule"/>
 </rdf:RDF>

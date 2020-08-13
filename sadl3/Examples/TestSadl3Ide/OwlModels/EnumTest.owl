@@ -7,11 +7,11 @@
     xmlns:EnumTest="http://sadl.org/EnumTest.sadl#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/EnumTest.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="EnumTest.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'EnumTest.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
 </rdf:RDF>

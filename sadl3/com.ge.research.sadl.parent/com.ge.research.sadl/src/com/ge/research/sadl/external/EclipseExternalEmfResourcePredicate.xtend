@@ -17,13 +17,12 @@
  ***********************************************************************/
 package com.ge.research.sadl.external
 
-import com.ge.research.sadl.external.ExternalEmfResourcePredicate
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory
+import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.google.common.base.Preconditions
-import org.eclipse.core.resources.IFile
-import org.eclipse.core.resources.IResource
+import com.google.inject.Singleton
 import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.emf.common.util.URI
-import com.google.inject.Singleton
 
 /**
  * External EMF resource that uses the Eclipse workspace.
@@ -52,6 +51,7 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 		if (!project.accessible) {
 			return false;
 		}
+		
 		// This is a hack here.
 		// it considers all {@code .owl|nt|n3} files inside the {@code YOUR_PROJECT/ExtractedModels} folder as an external EMF resource.
 		val extractedModelFolder = project.findMember(EXTRACTED_MODELS);
@@ -61,25 +61,62 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 				return true;
 			}
 		}
-		val cgModelsFolder = project.findMember(com.ge.research.sadl.external.EclipseExternalEmfResourcePredicate.CG_MODELS);
+		val cgModelsFolder = project.findMember(EclipseExternalEmfResourcePredicate.CG_MODELS);
 		if (cgModelsFolder !== null && cgModelsFolder.accessible) {
 			// The current file is an external file and is inside the `ExtractedModels` folder.
 			if (cgModelsFolder.getFullPath().isPrefixOf(file.getFullPath())) {
 				return true;
 			}
 		}
-		val externalDefinitions = newArrayList;
-		project.accept([
-			if (it instanceof IFile) {
-				if (name.endsWith(EXTERNAL_EXTENSION)) {
-					externalDefinitions.add(it.location.removeFileExtension)
+		
+		if (segments.size < 3 || 
+			(!segments.get(2).equals("OwlModels") &&
+				!segments.get(2).equals(EXTRACTED_MODELS) &&
+				!segments.get(2).equals(EclipseExternalEmfResourcePredicate.CG_MODELS))) {
+			// this isn't something in the OwlModels folder
+			val prjuri = project.locationURI
+			if (prjuri !== null) {
+				val prjpath = prjuri.path
+				val owlmodelfolder = prjpath + "/OwlModels"
+				val cmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(owlmodelfolder, null);
+				if (cmgr !== null) {
+					var cntr = 0;
+					var sb = new StringBuilder()
+					for (seg : segments) {
+						if (cntr > 1) {
+							sb.append("/")
+							sb.append(seg)
+						}
+						cntr++
+					}
+					val su = new SadlUtils()
+					val fnuri = su.fileNameToFileUrl(prjpath + "/" + sb.toString)
+					try {
+						// if we succeed in getting a public URI then there is a mapping and we should import the OWL file
+						val puri = cmgr.getPublicUriFromActualUrl(fnuri)
+//						println("Index non-SADL-generated OWL model '" + puri + "' located at '" + fnuri + "' returning true");
+						return true;
+					}
+					catch (Throwable t) {
+						// this just means that there's no mapping provided so don't process the file.
+					}
 				}
-				return false;
-			} else {
-				return true;
-			};
-		], IResource.DEPTH_INFINITE, false);
-		return externalDefinitions.exists[folderPath | file.location.toString.startsWith(folderPath.toString)];
+			}
+		}
+		
+//		val externalDefinitions = newArrayList;
+//		project.accept([
+//			if (it instanceof IFile) {
+//				if (name.endsWith(EXTERNAL_EXTENSION)) {
+//					externalDefinitions.add(it.location.removeFileExtension)
+//				}
+//				return false;
+//			} else {
+//				return true;
+//			};
+//		], IResource.DEPTH_INFINITE, false);
+//		return externalDefinitions.exists[folderPath | file.location.toString.startsWith(folderPath.toString)];
+		return false;
 	}
 
 }

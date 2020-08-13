@@ -499,6 +499,8 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
             }
         } catch (CoreException e) {
             errorTable.add(e.getStatus());
+        } catch (Throwable t) {
+        	System.err.println(t.getMessage());
         } finally {
             monitor.done();
         }

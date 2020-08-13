@@ -383,7 +383,7 @@ public class JenaReasonerPlugin extends Reasoner{
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
 					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
-					schemaModel.read(tbox, format);
+					schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
 				}
 			}
 		} catch (Exception e1) {
@@ -3131,7 +3131,7 @@ public class JenaReasonerPlugin extends Reasoner{
 							"notLiteral(string)boolean", 
 							"now()dateTime", 
 							"regex(string,string)string", 
-							"strConcat(string,string)string", 
+							"strConcat(string,...)string", 
 							"uriConcat(string,string)string",
 							"pow(decimal,decimal)decimal",
 							"sqrt(decimal)decimal",

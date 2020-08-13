@@ -1,0 +1,32 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:Issue471="http://sadl.org/Issue471.sadl#"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="Issue471.sadl">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource=""/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Issue471.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:about="Issue471.sadl#Person"/>
+  <owl:Class rdf:about="Issue471.sadl#Man">
+    <rdfs:subClassOf rdf:resource="Issue471.sadl#Person"/>
+  </owl:Class>
+  <owl:Class rdf:about="Issue471.sadl#Woman">
+    <rdfs:subClassOf rdf:resource="Issue471.sadl#Person"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="Issue471.sadl#sibling">
+    <rdfs:domain rdf:resource="Issue471.sadl#Person"/>
+    <rdfs:range rdf:resource="Issue471.sadl#Person"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="Issue471.sadl#sister">
+    <rdfs:range rdf:resource="Issue471.sadl#Woman"/>
+    <rdfs:subPropertyOf rdf:resource="Issue471.sadl#sibling"/>
+  </owl:ObjectProperty>
+</rdf:RDF>

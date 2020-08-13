@@ -278,9 +278,17 @@ NamedStructureAnnotation :
 
 RuleStatement returns ExpressionScope :
 	{RuleStatement}
-	('Stage' stage=NUMBER)? 'Rule' name=SadlResource (annotations+=NamedStructureAnnotation)* ':'? ('given' ifs+=Expression)? ('if' ifs+=Expression)? // (','? ifs+=Expression)*
-						   'then' thens +=Expression // (','? thens+=Expression)*
+	('Stage' stage=NUMBER)? 'Rule' name=SadlResource (annotations+=NamedStructureAnnotation)* ':'? 
+		('given' ifs+=Expression)? 
+		('if' ifs+=Expression)?
+		'then' thens += (Expression | ThereExistsStatement)
 ;
+
+ThereExistsStatement returns Expression : 
+	{ThereExistsStatement}
+	('there' 'exists') match=Expression ('plus' plus=Expression)?
+;
+
 
 QueryStatement returns ExpressionScope :
 	{QueryStatement}
@@ -430,11 +438,7 @@ UnitExpression<EnabledWith, EnableComma> returns Expression:
 
 UnaryExpression<EnabledWith, EnableComma> returns Expression:
 	PrimaryExpression<EnabledWith, EnableComma> |
-   {UnaryExpression} op=('not' | '!' | 'only' | '-' | ThereExists) expr=PrimaryExpression<EnabledWith, EnableComma>
-;
-
-ThereExists : 
-	('there' 'exists')
+   {UnaryExpression} op=('not' | '!' | 'only' | '-') expr=PrimaryExpression<EnabledWith, EnableComma>
 ;
 
 // primary expressions are the atom units of expression in the grammar	

@@ -7,24 +7,24 @@
     xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://ge.com/coreality/example">
-  <owl:Ontology rdf:about="">
-    <owl:imports rdf:resource="http://sadl.org/builtinfunctions"/>
-    <owl:imports rdf:resource="http://sadl.org/sadlimplicitmodel"/>
-    <owl:imports rdf:resource="http://sadl.org/sadlbasemodel"/>
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="http://ge.com/coreality/example">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Baljit.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Location"/>
-  <owl:Class rdf:ID="Galaxy">
-    <rdfs:subClassOf rdf:resource="#Location"/>
+  <owl:Class rdf:about="http://ge.com/coreality/example#Location"/>
+  <owl:Class rdf:about="http://ge.com/coreality/example#Galaxy">
+    <rdfs:subClassOf rdf:resource="http://ge.com/coreality/example#Location"/>
   </owl:Class>
-  <owl:ObjectProperty rdf:ID="within">
-    <rdfs:domain rdf:resource="#Location"/>
-    <rdfs:range rdf:resource="#Location"/>
+  <owl:ObjectProperty rdf:about="http://ge.com/coreality/example#within">
+    <rdfs:domain rdf:resource="http://ge.com/coreality/example#Location"/>
+    <rdfs:range rdf:resource="http://ge.com/coreality/example#Location"/>
   </owl:ObjectProperty>
-  <Galaxy rdf:ID="MilkyWay">
+  <Galaxy rdf:about="http://ge.com/coreality/example#MilkyWay">
     <within>
-      <Location rdf:ID="Universe"/>
+      <Location rdf:about="http://ge.com/coreality/example#Universe"/>
     </within>
   </Galaxy>
 </rdf:RDF>

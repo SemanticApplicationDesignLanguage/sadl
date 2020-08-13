@@ -7,18 +7,18 @@
     xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/InstancesOf.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="InstancesOf.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'InstancesOf.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Dog"/>
-  <io:Dog rdf:ID="Lassie">
+  <owl:Class rdf:about="InstancesOf.sadl#Dog"/>
+  <io:Dog rdf:about="InstancesOf.sadl#Lassie">
     <rdfs:comment xml:lang="en">an awesome TV star</rdfs:comment>
   </io:Dog>
-  <io:Dog rdf:ID="Spot">
+  <io:Dog rdf:about="InstancesOf.sadl#Spot">
     <rdfs:label xml:lang="en">spot</rdfs:label>
   </io:Dog>
 </rdf:RDF>

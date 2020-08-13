@@ -1,0 +1,41 @@
+<rdf:RDF
+    xmlns:MustVsCan="http://sadl.org/MustVsCan.sadl#"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="MustVsCan.sadl">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource=""/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'MustVsCan.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:about="MustVsCan.sadl#Season">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <MustVsCan:Season rdf:about="MustVsCan.sadl#Fall"/>
+          <MustVsCan:Season rdf:about="MustVsCan.sadl#Winter"/>
+          <MustVsCan:Season rdf:about="MustVsCan.sadl#Spring"/>
+          <MustVsCan:Season rdf:about="MustVsCan.sadl#Summer"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:about="MustVsCan.sadl#Season2">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:oneOf rdf:parseType="Collection">
+          <MustVsCan:Season2 rdf:about="MustVsCan.sadl#Fall2"/>
+          <MustVsCan:Season2 rdf:about="MustVsCan.sadl#Winter2"/>
+          <MustVsCan:Season2 rdf:about="MustVsCan.sadl#Spring2"/>
+          <MustVsCan:Season2 rdf:about="MustVsCan.sadl#Summer2"/>
+        </owl:oneOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+</rdf:RDF>

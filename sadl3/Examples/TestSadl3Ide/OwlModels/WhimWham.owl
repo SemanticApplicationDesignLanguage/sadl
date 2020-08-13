@@ -7,28 +7,27 @@
     xmlns:builtinfunctions="http://sadl.org/builtinfunctions"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/WhimWham.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="WhimWham.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'WhimWham.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Whim"/>
-  <owl:Class rdf:ID="Foo"/>
-  <owl:ObjectProperty rdf:ID="bar">
-    <rdfs:domain rdf:resource="#Foo"/>
-    <rdfs:range rdf:resource="#Whim"/>
+  <owl:Class rdf:about="WhimWham.sadl#Whim"/>
+  <owl:Class rdf:about="WhimWham.sadl#Foo"/>
+  <owl:ObjectProperty rdf:about="WhimWham.sadl#bar">
+    <rdfs:domain rdf:resource="WhimWham.sadl#Foo"/>
+    <rdfs:range rdf:resource="WhimWham.sadl#Whim"/>
   </owl:ObjectProperty>
-  <owl:DatatypeProperty rdf:ID="wham">
-    <rdfs:domain rdf:resource="#Whim"/>
+  <owl:DatatypeProperty rdf:about="WhimWham.sadl#wham">
+    <rdfs:domain rdf:resource="WhimWham.sadl#Whim"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
   </owl:DatatypeProperty>
-  <WhimWham:Foo rdf:ID="F1">
+  <WhimWham:Foo rdf:about="WhimWham.sadl#F1">
     <WhimWham:bar>
-      <WhimWham:Whim rdf:ID="W1">
-        <WhimWham:wham rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-        >hi</WhimWham:wham>
+      <WhimWham:Whim rdf:about="WhimWham.sadl#W1">
+        <WhimWham:wham>hi</WhimWham:wham>
       </WhimWham:Whim>
     </WhimWham:bar>
   </WhimWham:Foo>

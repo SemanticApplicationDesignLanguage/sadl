@@ -82,23 +82,16 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 			// *** NOTE: Copied from com.ge.research.sadl.ui.handlers.RunInference.execute(ExecutionEvent) *** 
 			String frmt = properties.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
 			if (frmt != null) {
-				if (frmt.equals("N3")) {
-					frmt = ".n3";
-				}
-				else if (frmt.equals("N-TRIPLE")) {
-					frmt = ".nt";
-				}
-				else if (frmt.equals("TURTLE")) {
-					frmt = ".turtle";
-				}
-				else if (frmt.equals("JSON-LD")) {
-					frmt = ".jsonld";
+				String ext = SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(frmt));
+				if (ext != null) {
+					frmt = "." + ext;
 				}
 				else {
-					frmt = ".owl";
+					console.error("File extension for format '" + frmt + "' not found.");
 				}
 			}
 			else {
+				console.error("No OWL serialization format found.");
 				frmt = ".owl";
 			}
 			

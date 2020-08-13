@@ -21,8 +21,7 @@ Require-Bundle: org.eclipse.xtext;bundle-version="[2.21.0,2.22.0)",
  org.apache.log4j,
  com.ge.research.jena,
  com.ge.research.sadl.errorgenerator,
- org.jsoup,
- javax.activation;visibility:=reexport
+ org.jsoup
 Eclipse-BuddyPolicy: registered
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl,

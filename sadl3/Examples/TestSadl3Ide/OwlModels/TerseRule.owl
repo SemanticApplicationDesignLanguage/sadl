@@ -8,28 +8,28 @@
     xmlns:j.0="http://sadl.org/sadlimplicitmodel#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
-  xml:base="http://sadl.org/TerseRule.sadl">
-  <owl:Ontology rdf:about="">
+  xml:base="http://sadl.org/sadlbasemodel">
+  <owl:Ontology rdf:about="TerseRule.sadl">
     <owl:imports rdf:resource="builtinfunctions"/>
     <owl:imports rdf:resource="sadlimplicitmodel"/>
-    <owl:imports rdf:resource="sadlbasemodel"/>
+    <owl:imports rdf:resource=""/>
     <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'TerseRule.sadl' and should not be directly edited.</rdfs:comment>
   </owl:Ontology>
-  <owl:Class rdf:ID="Circle">
+  <owl:Class rdf:about="TerseRule.sadl#Circle">
     <rdfs:subClassOf>
-      <owl:Class rdf:ID="Shape"/>
+      <owl:Class rdf:about="TerseRule.sadl#Shape"/>
     </rdfs:subClassOf>
   </owl:Class>
-  <owl:DatatypeProperty rdf:ID="radius">
-    <rdfs:domain rdf:resource="#Circle"/>
+  <owl:DatatypeProperty rdf:about="TerseRule.sadl#radius">
+    <rdfs:domain rdf:resource="TerseRule.sadl#Circle"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
   </owl:DatatypeProperty>
-  <owl:DatatypeProperty rdf:ID="area">
-    <rdfs:domain rdf:resource="#Shape"/>
+  <owl:DatatypeProperty rdf:about="TerseRule.sadl#area">
+    <rdfs:domain rdf:resource="TerseRule.sadl#Shape"/>
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
   </owl:DatatypeProperty>
-  <j.0:Rule rdf:ID="TerseCircleArea"/>
-  <terserule:Circle rdf:ID="MyCircle">
+  <j.0:Rule rdf:about="TerseRule.sadl#TerseCircleArea"/>
+  <terserule:Circle rdf:about="TerseRule.sadl#MyCircle">
     <terserule:radius rdf:datatype="http://www.w3.org/2001/XMLSchema#float"
     >3.0</terserule:radius>
   </terserule:Circle>
