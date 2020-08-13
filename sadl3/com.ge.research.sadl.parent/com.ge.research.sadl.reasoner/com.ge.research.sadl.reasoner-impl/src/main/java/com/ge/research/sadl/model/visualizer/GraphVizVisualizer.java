@@ -2,6 +2,7 @@ package com.ge.research.sadl.model.visualizer;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -308,7 +309,8 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 		sb.append("}\n");
 		File dotFile = new java.io.File(tmpdir.getAbsolutePath() + File.separator + 
 				((bfn != null ? bfn : "") + ".dot"));
-		new SadlUtils().stringToFile(dotFile, sb.toString(), false);
+		//AG: UTF_8 works on both Windows and MacOS
+		new SadlUtils().stringToFile(dotFile, sb.toString(), false, StandardCharsets.UTF_8);
 		return dotFile;
 	}
 	
@@ -324,7 +326,7 @@ public class GraphVizVisualizer implements IGraphVisualizer {
 	}
 
 	private void createGraphTriple(Object s, String edgeLbl, Object o, Map<Integer, String> headAttributes, Map<Integer, String> edgeAttributes, Map<Integer, 
-			String> tailAttributes, Object[] row, String anchorNodeLabel, String subjectNode) {
+			String> tailAttributes, Object[] row, String anchorNodeLabel, String subjectNode)  {
 		String slbl = subjectNode;
 		String olbl;
 		if (slbl == null) {
