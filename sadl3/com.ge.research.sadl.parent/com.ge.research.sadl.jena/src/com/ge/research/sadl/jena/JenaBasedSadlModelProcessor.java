@@ -11205,6 +11205,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				getTheJenaModel().createTypedLiteral(literalNumber));
 		unittedVal.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI),
 				getTheJenaModel().createTypedLiteral(unit));
+		try {
+			
+			getModelValidator().checkPropertyDomain(getTheJenaModel(), inst, oprop, null, false, null, false, true);
+		} catch (InvalidTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (CircularDependencyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		inst.addProperty(oprop, unittedVal);
 	}
 
