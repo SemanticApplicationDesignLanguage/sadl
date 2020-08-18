@@ -10,6 +10,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.ge.research.sadl,
  org.apache.log4j,
  com.ge.research.jena,
+ javax.activation,
  org.junit;bundle-version="4.12.0";resolution:=optional
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

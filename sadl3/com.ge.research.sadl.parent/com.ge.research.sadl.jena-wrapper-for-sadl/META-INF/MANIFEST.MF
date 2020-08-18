@@ -8,6 +8,7 @@ Bundle-Vendor: GE Global Research
 Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
  com.ge.research.sadl.jena,
+ javax.activation,
  org.eclipse.core.runtime,
  org.eclipse.osgi,
  org.apache.log4j,
