@@ -1867,6 +1867,45 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						done = true;
 					}
 				}
+				else if (testtrans instanceof Query) {
+					GraphPatternElement lp = ((Query)testtrans).getLastPattern();
+					GraphPatternElement realLp = null;
+					if (lp instanceof Junction) {
+						getIfTranslator();
+						List<GraphPatternElement> plst = IntermediateFormTranslator.junctionToList((Junction)lp);
+						if (plst.size() > 0) {
+							realLp = plst.get(plst.size() - 1);
+							if (realLp instanceof BuiltinElement && 
+									isComparisonBuiltin(((BuiltinElement)realLp).getFuncName())) {
+								if (((BuiltinElement)realLp).getArguments().get(0) instanceof VariableNode) {
+									GraphPatternElement prior = plst.get(plst.size() - 2);
+									if (prior instanceof TripleElement && 
+											((TripleElement)prior).getObject().equals(((BuiltinElement)realLp).getArguments().get(0))) {
+										plst.remove(plst.size() - 1);
+										plst.remove(plst.size() - 1);
+										plst.add(prior);
+										test.setRhs(((BuiltinElement)realLp).getArguments().get(1));
+										((Query)testtrans).setPatterns(plst);
+									}
+								}
+								else if (((BuiltinElement)realLp).getArguments().get(0) instanceof ProxyNode && 
+										((ProxyNode)((BuiltinElement)realLp).getArguments().get(0)).getProxyFor() instanceof TripleElement) {
+									plst.remove(plst.size() - 1);
+									plst.add(((ProxyNode) ((BuiltinElement)realLp).getArguments().get(0)).getProxyFor());
+									test.setRhs(((BuiltinElement)realLp).getArguments().get(1));
+									((Query)testtrans).setPatterns(plst);
+								}
+								test.setCompName(((BuiltinElement)realLp).getFuncType());
+							}
+						}
+					}
+					if (!done) {
+						test.setLhs(testtrans);
+						done = true;
+					}
+					generatedTests = new Test[1];
+					generatedTests[0] = test;
+				}
 
 				if (!done) {
 					// expand ProxyNodes and see what we can do with the expanded form
@@ -2766,6 +2805,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		else if (trgt instanceof Test) {
 			query = new Query();
+			setTarget(query);
 			addInfo("Creating query as part of test", expr);
 		}
 		else {
@@ -3008,6 +3048,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			query.setSparqlQueryString(((Literal) pattern).getValue().toString());
 		}
 		logger.debug("Ask translation: {}", query);
+		if (trgt != null && !(trgt.equals(query))) {
+			setTarget(trgt);
+		}
 		return query;
 	}
 

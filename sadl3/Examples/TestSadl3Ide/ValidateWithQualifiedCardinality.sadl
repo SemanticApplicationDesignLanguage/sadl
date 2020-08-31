@@ -1,0 +1,59 @@
+uri "http://com.ge.energy/storage/ValidateWithQualifiedCardinality" alias vwqc version "$Revision: 1.1 $ Last modified on   $Date: 2014/02/20 15:56:46 $".
+
+import "http://www.w3.org/2002/07/owl".
+import "http://www.w3.org/1999/02/22-rdf-syntax-ns".
+
+CardinalityViolation is a class,
+	described by violatingInstance with a single value of type string,
+	described by violatedProperty with a single value of type string,
+	described by violatedValueType with a single value of type string,
+	described by expectedNumber with a single value of type int,
+	described by actualNumber with a single value of type int.
+
+Bicycle is a class,
+	described by component with values of type Wheel,
+	described by component with a single value of type Seat.
+
+Seat is a class.
+Wheel is a class described by diameter with a single value of type float.
+
+component of Bicycle has exactly 2 values of type Wheel.
+component of Bicycle has at most 1 value of type Seat.
+
+Rule ValidateQualifiedCardinality:
+	if 	x is a y and
+		y is a type of r and
+		notBNode(y) and
+		r is an owl:Restriction and
+		p is owl:onProperty of r and
+		c is owl:qualifiedCardinality of r and
+		qcls is owl:onClass of r and
+		n is countMatches(x, p, z, z, rdf:^type, qcls) and
+		n != c
+	then getInstance(CardinalityViolation, violatingInstance, x, violatedProperty, p, violatedValueType, qcls, expectedNumber, c, actualNumber, n) and
+		print(x, " is a ", y, " and all instances of ", y, " must have ", c, " values of ", p, " of type ", qcls, ", but ", x, " has ", n). 
+
+Rule ValidateMaxQualifiedCardinality:
+	if 	x is a y and
+		y is a type of r and
+		notBNode(y) and
+		r is an owl:Restriction and
+		p is owl:onProperty of r and
+		mc is owl:maxQualifiedCardinality of r and
+		qcls is owl:onClass of r and
+		n is countMatches(x, p, z, z, rdf:^type, qcls) and
+		n > mc
+	then getInstance(CardinalityViolation, violatingInstance, x, violatedProperty, p, violatedValueType, qcls, expectedNumber, mc, actualNumber, n) and
+		print(x, " is a ", y, 
+		" and all instances of ", y, " must have no more than ", mc, " values of ", p, " of type ", qcls,
+		", but ", x, " has ", n).
+		
+MyBicycle is a Bicycle with component (a Wheel with diameter 24.0)
+	, with component (a Seat), with component (a Seat).
+
+Ask: select x, p, qc, exp, act where v is a CardinalityViolation and v has violatingInstance x and v has violatedProperty p 
+	and v has violatedValueType qc and v has expectedNumber exp and v has actualNumber act.
+
+Test: select x, p, qc, exp, act where v is a CardinalityViolation and v has violatingInstance x and v has violatedProperty p 
+	and v has violatedValueType qc and v has expectedNumber exp and v has actualNumber act is {[MyBicycle, component, Wheel, 2, 1], [MyBicycle, component, Seat, 1, 2]}.
+ 

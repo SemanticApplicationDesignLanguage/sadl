@@ -1,0 +1,7 @@
+ uri "http://www.w3.org/2002/07/owl" alias owl.
+ 
+ Restriction is a class described by onProperty with values of type class,
+ described by onClass with values of type class,
+ described by qualifiedCardinality with values of type int,
+ described by maxQualifiedCardinality with values of type int.
+ 
