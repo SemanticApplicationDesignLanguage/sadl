@@ -1,5 +1,5 @@
 The primary location for user access to SADL documentation remains on http://sadl.sourceforge.net with links to various parts of the documentation 
 appearing in the sadlos2 Wiki (https://github.com/crapo/sadlos2/wiki). However, this project is the source of SADL 3 documenation. 
 
-Please make all editing changes to documentation in this github folder, https://github.com/crapo/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl3.documentation. 
+Please make all editing changes to documentation in this github folder, https://github.com/crapo/sadlos2/tree/development/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl3.documentation. 
 Documentation files, both HTML and images, can then be uploaded to sourceforge.net.
