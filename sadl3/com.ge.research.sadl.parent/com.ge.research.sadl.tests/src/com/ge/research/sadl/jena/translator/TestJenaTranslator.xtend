@@ -279,6 +279,8 @@ then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulev
 					if (cmd instanceof Query) {
 						val query = getTranslator(processor).translateQuery(jenaModel, "http://sadl.org/Issue442.sadl", cmd as Query)
 						println(query)
+						val expected = "select ?p where {?p <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.org/Issue442.sadl#Person> . OPTIONAL {?p <http://sadl.org/Issue442.sadl#age> ?v1} . FILTER (!bound(?v1))}"
+						assertEquals(expected.trim, query.toString.trim)
 					}
 				}
 			}

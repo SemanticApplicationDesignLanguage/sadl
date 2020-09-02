@@ -1041,6 +1041,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		sb.append(nodeToString(pred, target));
 		sb.append(" ");
 		String newVar = null;
+		boolean boundUsed = false;
 		if (rulePart.equals(RulePart.PREMISE) && target.equals(TranslationTarget.RULE_TRIPLE) && tripleHasDecimalObject(gpe)) {
 			// this would be a triple match on a float or double value, which is not reliable
 			//	move the object to a separate equality test
@@ -1064,6 +1065,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 							sbfilter.append("!bound(");
 							sbfilter.append(newVar);
 							sbfilter.append(")");
+							boundUsed = true;
 						}
 					}
 					else {
@@ -1101,8 +1103,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 		if (target.equals(TranslationTarget.RULE_TRIPLE)) {
 			sb.append(")");
 		}
-		else {
+		else if (!boundUsed) {
 			// this is a query
+			// awc 9/2/2020: not sure under what conditions we would want this rather than !bound...
 			if (gpe.getModifierType() != null && gpe.getModifierType().equals(TripleModifierType.Not)) {
 				// this is negation--translate into a filter on !exits
 				sb.insert(0, "!EXISTS { ");
