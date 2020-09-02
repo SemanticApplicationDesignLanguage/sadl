@@ -6,15 +6,15 @@ Bundle-Vendor: General Electric Company
 Bundle-Version: 3.4.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.testsuite; singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.xtext;bundle-version="[2.21.0,2.22.0)",
- org.eclipse.xtext.xbase;bundle-version="[2.21.0,2.22.0)",
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
  org.eclipse.equinox.common,
  com.ge.research.jena,
  com.ge.research.sadl,
- org.eclipse.xtext.xbase.lib;bundle-version="[2.21.0,2.22.0)",
+ org.eclipse.xtext.xbase.lib,
  org.antlr.runtime;bundle-version="[3.2.0,3.2.1)",
- org.eclipse.xtext.util;bundle-version="[2.21.0,2.22.0)",
- org.eclipse.xtend.lib;bundle-version="[2.21.0,2.22.0)",
+ org.eclipse.xtext.util,
+ org.eclipse.xtend.lib,
  org.eclipse.emf.ecore,
  org.eclipse.emf.common,
  org.apache.commons.logging,
