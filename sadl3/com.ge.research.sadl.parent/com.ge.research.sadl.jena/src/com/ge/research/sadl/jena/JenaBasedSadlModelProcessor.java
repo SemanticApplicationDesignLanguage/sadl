@@ -7629,6 +7629,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				((NamedNode)trPred).setContext(predicate);
 				((NamedNode)trPred).setNodeType(NodeType.ObjectProperty);
 				return new TripleElement((Node)null, (Node)trPred, (Node)trSubj);
+			} else if (cnstval.equals("value") && getTarget() instanceof Query) {
+				// this is to be a delayed evaluation: don't use the expression as the query but evaluate
+				// the expression at runtime and use the value as the query
+				Query qry = (Query) getTarget();
+				qry.setToBeEvaluated(true);
+				return processExpression(subject);
 			} else {
 				System.err.println("Unhandled constant property in translate PropOfSubj: " + cnstval);
 			}

@@ -1363,6 +1363,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		q.setGraph(cmd.isGraph());
 		q.setFqName(cmd.getFqName());
 		q.setParameterizedValues(cmd.getParameterizedValues());
+		q.setToBeEvaluated(cmd.isToBeEvaluated());
 		SadlCommandResult result = new SadlCommandResult(q);
 		result.setResults(processAdhocQuery(translator, q));
 		result.setErrors(getInitializedReasoner().getErrors());
@@ -1388,6 +1389,23 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		IReasoner reasoner = getInitializedReasoner();
 		queryString = reasoner.prepareQuery(queryString);
 		ResultSet results =  reasoner.ask(queryString);
+		if (q.isToBeEvaluated()) {
+			if (results != null && results.getColumnCount() == 1) {
+				if (results.getRowCount() == 1) {
+					String evaluatedQueryStr = results.getResultAt(0, 0).toString();
+					evaluatedQueryStr = reasoner.prepareQuery(evaluatedQueryStr);
+					results = reasoner.ask(evaluatedQueryStr);
+				}
+				else {
+					// error
+					reasoner.getErrors().add(new ModelError("Delayed evaluation query returned multiple values", ErrorType.ERROR));
+				}
+			}
+			else {
+				// error
+				reasoner.getErrors().add(new ModelError("Delayed evaluation query returned multiple columns, expeced 1", ErrorType.ERROR));
+			}
+		}
 		return results;
 	}
 

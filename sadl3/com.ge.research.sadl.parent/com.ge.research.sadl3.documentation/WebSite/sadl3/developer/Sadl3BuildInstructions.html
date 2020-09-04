@@ -5,12 +5,15 @@
 <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
 <meta name="ProgId" content="FrontPage.Editor.Document">
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>New Page 1</title>
+<title>Instructions for Building a SADL 3 Development Environment</title>
 </head>
 
 <body>
 
 <h1>SADL Version 3 Build Instructions</h1>
+
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/03/2020<!--webbot bot="Timestamp" endspan i-checksum="12544" -->.</h5>
 <h2>Introduction</h2>
 <p>
 <span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">
@@ -39,16 +42,28 @@ Setup Steps</span></h2>
     <li>Copy the URL for cloning by clicking on the button &quot;Clone or download&quot;</li>
     <li>Using the Git Bash client, type &quot;git clone &quot; and then paste in the URL 
     copied in the previous step</li>
-    <li>&nbsp;</li>
-  </ul>
-  </li>
-  <li>Clone the DARPA-ASKE-TA1 github repository under DEV-HOME/git.<ul>
-    <li>Using Git Bash client, change directory so that the DEV-HOME/git is the 
-    current directory</li>
   </ul>
   </li>
   <li>Download and install (if not already present) the Java 9 or later <u><b>
-  JDK</b></u> (see&nbsp;<a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html" rel="nofollow" style="box-sizing: border-box; background-color: initial">https://www.oracle.com/technetwork/java/javase/downloads/index.html</a>).</li>
+  JDK</b></u> (see&nbsp;<a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html" rel="nofollow" style="box-sizing: border-box; background-color: initial">https://www.oracle.com/technetwork/java/javase/downloads/index.html</a>).<ul>
+    <li>Note that if you are behind a firewall and your organization is using a 
+    private certificat authority, you may need to replace your Java security 
+    cacerts file (see
+    <a href="https://docs.microfocus.com/SM/9.60/Codeless/Content/security/tasks/update_the_cacerts_keystore_file.htm">
+    https://docs.microfocus.com/SM/9.60/Codeless/Content/security/tasks/update_the_cacerts_keystore_file.htm</a>)</li>
+  </ul>
+  </li>
+  <li>Install Maven so that builds can be run from the command line<ul>
+    <li>Download and install Maven 3.5 or later from
+    <span style="font-family: Times New Roman; font-size: 12pt">
+    <a href="http://maven.apache.org/download.html">
+    http://maven.apache.org/download.html</a>.</span></li>
+    <li><span style="font-family: Times New Roman">Configure proxies if 
+    necessary by editing .../.m2/settings.xml under your user folder</span></li>
+    <li><span style="font-family: Times New Roman">Make sure Maven is on the 
+    classpath. Check in a cmd window with &quot;mvn -version&quot;.</span></li>
+  </ul>
+  </li>
   <li>Install Eclipse 2020-03 by one of the methods below.</li>
 </ol>
 <h2>Method 1: Install Eclipse by Direct Download</h2>
@@ -68,6 +83,17 @@ Setup Steps</span></h2>
   <li>Select 2020-03 or later as version</li>
   <li>Finish</li>
 </ol>
+<h2>Build the Projects</h2>
+<ol>
+  <li>In a command line window, change directory to the folder in which the SADL 
+  source code was installed from github (.../git/sadlos2).</li>
+  <li>Change directory to sadl3 (.../git/sadlos2/sadl3).</li>
+  <li>Change directory to the parent project (.../git/sadlos2/sadl3/com.ge.research.sadl.parent)</li>
+  <li>Do a clean by typing the commend &quot;mvn clean&quot;. Let it finish and verify 
+  that there are no errors.</li>
+  <li>Do a build by typing the command &quot;mvn install -U&quot;. Let it finish and 
+  verify that there are no errors.</li>
+</ol>
 <h2>Configure Eclipse</h2>
 <p>Start Eclipse and configure as follows:</p>
 <ol>
@@ -76,10 +102,10 @@ Setup Steps</span></h2>
   is installed, select. Once added, check to make default.)</li>
   <li>Switch workspace to DEV-HOME/ws (File -&gt; Switch Workspace -&gt; Other..., 
   then Browse to and create folder &quot;ws&quot;.</li>
-  <li>Import as Maven projects the following SADL and DARPA-ASKE-TA1 projects 
+  <li>Import as Maven projects  
   (File -&gt; Import... -&gt; Maven -&gt; Existing Maven Projects):<ul>
-    <li>sadlos2/sadl3/com.ge.research.sadl.parent and all projects under it 
-    except</li>
+    <li>Browse to .../git/sadlos2/sadl3/com.ge.research.sadl.parent</li>
+    <li>Select the parent project and all projects under it</li>
   </ul>
   </li>
   <li>Select all imported projects in the Package Explorer window and do a Maven 
@@ -87,8 +113,8 @@ Setup Steps</span></h2>
   Project...)</li>
   <li>Set the target platform to com.ge.research.sadl.target
   <ul>
-    <li>Window -&gt; Preferences -&gt; Plug-in Development -&gt; Target Platform, check &quot;com.ge.research.sdl.target, 
-    then click &quot;Apply and Close&quot;</li>
+    <li>Window -&gt; Preferences -&gt; Plug-in Development -&gt; Target Platform, check &quot;com.ge.research.sadl.target 
+    (if two appear chose the one in the target, not parent, project), then click &quot;Apply and Close&quot;</li>
     <li>or</li>
     <li>Open the file &quot;com.ge.research.sadl.target&quot; in the project &quot;com.ge.research.sadl.target&quot;, 
     click on &quot;Load Target Platform&quot; in the upper-right corner.</li>
