@@ -1409,5 +1409,17 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			{<I>,<J>} are not the same.
 		'''.assertLinking[sadl]
 	}
+	
+	// https://github.com/crapo/sadlos2/issues/511
+	@Test
+	def void testTripleBeforeTripleSubjectDecl() {
+		'''
+		uri "https://github.com/crapo/sadlos2/issues/511".
+		[Cls] is a class described by [objProp] with values of type Cls.
+		[i1] is a <Cls>.
+		<i2> has <objProp> <i1>.
+		[i2] is a <Cls>.
+		'''.assertLinking[sadl]
+	}
 
 }

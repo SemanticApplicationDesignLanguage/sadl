@@ -10288,6 +10288,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		OntClass cls = null;
 		if (!isActuallyClass) {
+			if (type == null && subjType != null && subjType.equals(OntConceptType.INSTANCE)) {
+				SadlResource theDecl = getDeclarationExtensions().getDeclaration(element.getNameOrRef());
+				if (theDecl.eContainer() != null && theDecl.eContainer() instanceof SadlInstance) {
+					type = ((SadlInstance)theDecl.eContainer()).getType();
+				}
+				if (type == null && element.getPropertyInitializers() != null) {
+					addTypeCheckingError("No type is declared", element);
+				}
+			}
 			if (type != null) {
 				if (type instanceof SadlPrimitiveDataType) {
 					org.apache.jena.rdf.model.Resource rsrc = sadlTypeReferenceToResource(type);

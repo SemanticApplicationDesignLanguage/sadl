@@ -146,7 +146,9 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	val LocalScopeProvider localScope_05 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
-				return eContainer instanceof SadlInstance && eContainingFeature == SADL_INSTANCE__NAME_OR_REF;
+				return eContainer instanceof SadlInstance && 
+					eContainingFeature == SADL_INSTANCE__NAME_OR_REF &&
+					(eContainer as SadlInstance).type !== null;
 			} 
 			return false;
 		];
