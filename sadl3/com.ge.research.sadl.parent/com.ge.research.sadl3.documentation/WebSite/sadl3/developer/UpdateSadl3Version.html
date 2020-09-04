@@ -1,6 +1,6 @@
 <h1>Update Version Number in SADL 3</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/03/2020<!--webbot bot="Timestamp" endspan i-checksum="12544" -->.</h5>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/04/2020<!--webbot bot="Timestamp" endspan i-checksum="12560" -->.</h5>
 <p>To update the version number, e.g., from SADL 3.3.0-SNAPSHOT to SADL 
 3.4.0-SNAPSHOT, do the following:</p>
 <ul>
@@ -21,8 +21,11 @@
   </li>
   <font FACE="Calibri,Times New Roman" SIZE="3">
   <li>update the version in feature.xml in the SADL feature project 
-  com.ge.research.sadl.feature..</li>
+  com.ge.research.sadl.feature.</li>
 </ul>
+<p>It's not a bad idea to do a search for the old version number in .xml and .MF 
+files to make sure that nothing has been missed. (Note that references under the 
+target directory won't be updated until a clean/build is performed.)</p>
 <p ALIGN="LEFT">Note, updating the </font><font FACE="Courier New" SIZE="2">
 category.xml</font><font FACE="Calibri,Times New Roman" SIZE="3"> for the p2 is 
 not required as it is set to </font><font FACE="Courier New" SIZE="2">0.0.0</font><font FACE="Calibri,Times New Roman" SIZE="3">.</font></p>

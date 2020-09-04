@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Xtextgenerator
 Bundle-SymbolicName: com.ge.research.sadl.xtextgenerator
-Bundle-Version: 3.4.0.qualifier
+Bundle-Version: 3.4.1.qualifier
 Export-Package: com.ge.research.sadl.xtextgenerator
 Require-Bundle: org.eclipse.xtext.xtext.generator;bundle-version="[2.21.0,2.22.0)",
  org.apache.log4j,
