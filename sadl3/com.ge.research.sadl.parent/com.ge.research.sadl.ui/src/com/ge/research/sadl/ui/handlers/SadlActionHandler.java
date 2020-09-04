@@ -334,7 +334,13 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			else {
 				map.put(SadlPreferences.NAMESPACE_IN_QUERY_RESULTS.getId(), "false");
 			}
-//			preferenceValues.getPreference(SadlPreferences.)
+			String sval = preferenceValues.getPreference(SadlPreferences.OWL_MODEL_FORMAT);
+			if (sval != null) {
+				map.put(SadlPreferences.OWL_MODEL_FORMAT.getId(), sval);
+			}
+			else {
+				map.put(SadlPreferences.OWL_MODEL_FORMAT.getId(), "owl");
+			}
 			return map;
 		}
 		return null;

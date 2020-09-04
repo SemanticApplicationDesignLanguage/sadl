@@ -106,24 +106,26 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 
 			Map<String,String> prefMap = getPreferences(trgtFile);
 			boolean derivedFN = false;
-			if (trgtFile.getName().endsWith("owl")) {
+			String fmt = prefMap.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
+			String fileExt = SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(fmt));
+			if (trgtFile.getName().endsWith(fileExt)) {
 				owlFileName = trgtFile.getFullPath().lastSegment();
 			}
 			else {
-				owlFileName = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment()).toPortableString());
+				owlFileName = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().removeFileExtension().addFileExtension(fileExt).lastSegment()).toPortableString());
 				if (!(new File(owlFileName).exists())) {
-					String owlFileName2 = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().addFileExtension("owl").lastSegment()).toPortableString());
+					String owlFileName2 = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).append(trgtFile.getFullPath().addFileExtension(fileExt).lastSegment()).toPortableString());
 					if (!(new File(owlFileName2).exists())) {
 						console.error("Selected file is '" + trgtFile.getName() + "' but corresponding OWL file (" + owlFileName + ") not found.\n");
 						return event;
 					}
 					else {
-						owlFileName = trgtFile.getFullPath().addFileExtension("owl").lastSegment();
+						owlFileName = trgtFile.getFullPath().addFileExtension(fileExt).lastSegment();
 						derivedFN = true;
 					}
 				}
 				else {
-					owlFileName = trgtFile.getFullPath().removeFileExtension().addFileExtension("owl").lastSegment();
+					owlFileName = trgtFile.getFullPath().removeFileExtension().addFileExtension(fileExt).lastSegment();
 					derivedFN = true;
 				}
 			}	
