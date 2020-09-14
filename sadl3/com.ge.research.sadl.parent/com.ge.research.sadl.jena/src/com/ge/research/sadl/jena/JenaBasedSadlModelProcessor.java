@@ -27,8 +27,11 @@ import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContext
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -616,17 +619,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				else {
 					getConfigMgr().cleanTdbFolder();
-					ByteArrayOutputStream out = new ByteArrayOutputStream();
-					Charset charset = Charset.forName("UTF-8");
-					CharSequence seq = serializeModelToString(getTheJenaModel().getBaseModel(), getModelAlias(), getModelName(), format, charset);
-					fsa.generateFile(owlFN, seq);
+					generateOwlFile(fsa, modelFolder, owlFN, getTheJenaModel().getBaseModel(), getModelName(), getModelAlias(), format);
 	
 					String fn = SadlConstants.SADL_BASE_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
 					if (!fileExists(fsa, fn)) {
 						sadlBaseModel = OntModelProvider.getSadlBaseModel();
 						if (sadlBaseModel != null) {
-							CharSequence seq2 = serializeModelToString(sadlBaseModel.getBaseModel(), SadlConstants.SADL_BASE_MODEL_PREFIX, SadlConstants.SADL_BASE_MODEL_URI, format, charset);
-							fsa.generateFile(fn, seq2);
+							generateOwlFile(fsa, modelFolder, fn, sadlBaseModel.getBaseModel(), SadlConstants.SADL_BASE_MODEL_URI, SadlConstants.SADL_BASE_MODEL_PREFIX, format);
 							String[] mapping = new String[3];
 							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
 							mapping[1] = SadlConstants.SADL_BASE_MODEL_URI;
@@ -638,8 +637,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (!fileExists(fsa, fn)) {
 						sadlListModel = OntModelProvider.getSadlListModel();
 						if (sadlListModel != null) {
-							CharSequence seq2 = serializeModelToString(sadlListModel.getBaseModel(), SadlConstants.SADL_LIST_MODEL_PREFIX, SadlConstants.SADL_LIST_MODEL_URI, format, charset);
-							fsa.generateFile(fn, seq2);
+							generateOwlFile(fsa, modelFolder, fn, sadlListModel.getBaseModel(), SadlConstants.SADL_LIST_MODEL_URI, SadlConstants.SADL_LIST_MODEL_PREFIX, format);
 							String[] mapping = new String[3];
 							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
 							mapping[1] = SadlConstants.SADL_LIST_MODEL_URI;
@@ -651,8 +649,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (!fileExists(fsa, fn)) {
 						sadlDefaultsModel = OntModelProvider.getSadlDefaultsModel();
 						if (sadlDefaultsModel != null) {
-							CharSequence seq2 = serializeModelToString(sadlDefaultsModel.getBaseModel(), SadlConstants.SADL_DEFAULTS_MODEL_PREFIX, SadlConstants.SADL_DEFAULTS_MODEL_URI, format, charset);
-							fsa.generateFile(fn, seq2);
+							generateOwlFile(fsa, modelFolder, fn, sadlDefaultsModel.getBaseModel(), SadlConstants.SADL_DEFAULTS_MODEL_URI, SadlConstants.SADL_DEFAULTS_MODEL_PREFIX, format);
 							String[] mapping = new String[3];
 							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
 							mapping[1] = SadlConstants.SADL_DEFAULTS_MODEL_URI;
@@ -664,8 +661,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (!fileExists(fsa, fn)) {
 						sadlServicesConfigConceptModel = OntModelProvider.getSadlServicesConfigConceptsModel();
 						if (sadlServicesConfigConceptModel != null) {
-							CharSequence seq2 = serializeModelToString(sadlServicesConfigConceptModel.getBaseModel(),SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX, SadlConstants.SADL_SERIVCES_CONFIGURATION_URI, format, charset);
-							fsa.generateFile(fn, seq2);
+							generateOwlFile(fsa, modelFolder, fn, sadlServicesConfigConceptModel.getBaseModel(), SadlConstants.SADL_SERIVCES_CONFIGURATION_URI, SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX, format);
 							String[] mapping = new String[3];
 							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
 							mapping[1] = SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI;
@@ -705,6 +701,31 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		generationInProgress = false;
 		logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
+	}
+
+	private void generateOwlFile(IFileSystemAccess2 fsa, String modelFolder, String owlFN, Model model, String modelName, String modelAlias, String format) throws TranslationException {
+		if (isBinary(format)) {
+			String fs = modelFolder + "/" + owlFN;
+	         try ( OutputStream out = new FileOutputStream(fs) ) {
+	             RDFDataMgr.write(out, model, SadlSerializationFormat.getRDFFormat(format));
+	         } catch (FileNotFoundException e) {
+				System.err.println(e.getMessage());
+			} catch (IOException e) {
+				System.err.println(e.getMessage());
+			}
+		}
+		else {
+			Charset charset = Charset.forName("UTF-8");
+			CharSequence seq = serializeModelToString(model, modelAlias, modelName, format, charset);
+			fsa.generateFile(owlFN, seq);
+		}
+	}
+
+	private boolean isBinary(String format) {
+		if (format.equals("RDF Binary")) {
+			return true;
+		}
+		return false;
 	}
 
 	private CharSequence serializeModelToString(Model model, String prefix, String modelName, String format, Charset charset) throws TranslationException {
@@ -12384,7 +12405,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (onDatatype != null) {
 			equivClass.addProperty(OWL2.onDatatype, onDatatype);
 			if (facet != null) {
-				org.apache.jena.rdf.model.Resource restrictions = facetsToRestrictionNode(newDatatypeUri, facet);
+				org.apache.jena.rdf.model.Resource restrictions = facetsToRestrictionNode(newDatatypeUri, facet, onDatatype);
 				// Create a list containing the restrictions
 				RDFList list = getTheJenaModel().createList(new RDFNode[] { restrictions });
 				equivClass.addProperty(OWL2.withRestrictions, list);
@@ -12405,12 +12426,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return datatype;
 	}
 
-	private org.apache.jena.rdf.model.Resource facetsToRestrictionNode(String newName, SadlDataTypeFacet facet) {
+	private org.apache.jena.rdf.model.Resource facetsToRestrictionNode(String newName, SadlDataTypeFacet facet, org.apache.jena.rdf.model.Resource onDatatype) {
 		org.apache.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
-
-		anon.addProperty(xsdProperty(facet.isMinInclusive() ? "minInclusive" : "minExclusive"), "" + facet.getMin());
-		anon.addProperty(xsdProperty(facet.isMaxInclusive() ? "maxInclusive" : "maxExclusive"), "" + facet.getMax());
-
+		if (facet.getMin() != null) {
+			Literal minlit;
+			if (onDatatype.isURIResource()) {
+				minlit = getTheJenaModel().createTypedLiteral(facet.getMin(), onDatatype.getURI());
+			}
+			else {
+				minlit = getTheJenaModel().createLiteral(facet.getMin());
+			}
+			anon.addProperty(xsdProperty(facet.isMinInclusive() ? "minInclusive" : "minExclusive"), minlit); // "" +  facet.getMin());
+		}
+		if (facet.getMax() != null) {
+			Literal maxlit;
+			if (onDatatype.isURIResource()) {
+				maxlit = getTheJenaModel().createTypedLiteral(facet.getMax(), onDatatype.getURI());
+			}
+			else {
+				maxlit = getTheJenaModel().createLiteral(facet.getMax());
+			}
+			anon.addProperty(xsdProperty(facet.isMaxInclusive() ? "maxInclusive" : "maxExclusive"), maxlit); // "" + facet.getMax());
+		}
+		
 		if (facet.getLen() != null) {
 			anon.addProperty(xsdProperty("length"), "" + facet.getLen());
 		}

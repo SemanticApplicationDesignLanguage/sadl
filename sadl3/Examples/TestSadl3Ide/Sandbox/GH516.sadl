@@ -1,0 +1,4 @@
+ uri "http://sadl.org/GH516.sadl" alias GH516.
+ 
+ Probabilitiy is a type of float [0,1].
+  
