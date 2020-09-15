@@ -11,12 +11,189 @@ overview of the SADL Version 3 codebase. This document provides an overview of
 the plug-ins, their functions, and their major components.</p>
 <h2>SADL Plug-ins</h2>
 <p>The screenshot below shows the Eclipse plug-in development Package Explorer 
-view of the SADL codebase. All of the projects are Maven projects. The 
-com.ge.research.sadl.parent project is the Maven parent of all of the projects 
-below it. The top-level com.ge.research.sadl3.documentation project contains the 
-Github Pages documentation.</p>
-  <p><img border="0" src="images/Archit1.jpg" width="592" height="737"></p>
+view of the SADL codebase. The com.ge.research.sadl.parent project and all of 
+the projects under it are Maven projects. As discussed in SADL V3 Build 
+Instructions, the everything can be build with Maven. The top-level com.ge.research.sadl3.documentation project contains the Github Pages documentation. 
+Note that this documentation project is on a special branch (gh-pages) in the 
+repository.</p>
 <blockquote>
-  <p>&nbsp;</p>
+<p><img border="0" src="images/Archit1.jpg" width="592" height="737"></p>
 </blockquote>
-<p>&nbsp;</p>
+<p>Note that two of the projects, com.ge.research.sadl.reasoner and 
+com.ge.research.sadl.server have their own sub-projects.</p>
+<p>SADL uses Xtext, which dictates some of the architecture. The code base also 
+seeks to keep the Eclipse dependencies isolated to UI components so that the 
+Eclipse version of the IDE and the browser-interfaced WebSADL can share as much 
+code as possible. In addition, there are three separate Xtext grammars present, 
+each of which has associated backend and ui components. </p>
+<ol>
+  <li>The SADL grammar defined in com.ge.research.sadl </li>
+  <li>The Tabular Import Template grammar defined in 
+  com.ge.research.sadl.importer</li>
+  <li>The Test Suite grammar defined in com.ge.research.sadl.testsuite </li>
+</ol>
+<p>The second two grammars are quite simple and their supporting files are not 
+complex. Most projects and files are in support of SADL.</p>
+<h3>SADL Projects</h3>
+<blockquote>
+  <h4>Project com.ge.research.jena</h4>
+  <p>This project contains third party jar files. Maven build places the 
+  necessary jars in the lib folder. Note that these include the reasoner-api.jar 
+  and reasoner-impl.jar files, created in the associated projects below. These 
+  jars are handled in this way because there are also needed by the server 
+  implementation.</p>
+  <h4>Project com.ge.research.sadl</h4>
+  <p>This project contains the SADL grammar and most of the backend files. 
+  (Jena-specific backend files are in the com.ge.research.sadl.jena project.) 
+  The project must contain an ANTLR generator file (&quot;.antlr-generator....jar&quot;) 
+  and a JFlex scanner generator file (&quot;.jflex.jar&quot;). The GenerateSADL.mwe2 file 
+  processes the SADL.xtext grammar definition file to auto-generate code across 
+  multiple projects.</p>
+  <h4>Project com.ge.research.sadl.applications</h4>
+  <p>This project is used to provide a headless version for programmatic 
+  processing of SADL projects.</p>
+  <h4>Project com.ge.research.sadl.errorgenerator</h4>
+  <p>This project is used to process SADL messages stored in the 
+  sadlMessages.properties file into the class SadlErrorMessages. This class is 
+  then used within other SADL classes, e.g., the Jena-BasedSadlModelProcessor, 
+  to generate error messages with optional parameters. The purpose is to 
+  separate the messages from the code.</p>
+  <h4>Project com.ge.research.externalmodels</h4>
+  <p>This project provides an editor for a .url file that can contain URLs of 
+  external OWL models. When the Download External Models button on the Download 
+  tab of the wizard is clicked, the external OWL models are copied into the 
+  project and their mappings is added to the OwlModels folder's ont-policy.rdf 
+  file so that they can be imported into SADL models.</p>
+  <h4>Project com.ge.research.sadl.feature</h4>
+  <p>This project defines the SADL feature.</p>
+  <h4>Project com.ge.research.sadl.ide</h4>
+  <p>This project factors IDE-agnostic code out of the Eclipse SADL UI project's 
+  code to isolate UI functionality that can be reused by WebSADL.</p>
+  <h4>Project com.ge.research.sadl.jena</h4>
+  <p>This project contains the bulk of the backend processing code and uses 
+  Apache Jena for an OWL API. Important classes within this project include:</p>
+  <ol>
+    <li>IntermediateFormTranslator: converts the raw results of SADL model 
+    processing of rules, queries, and tests to the Intermediate Form by 
+    expanding nested triples, providing missing variables, etc. The Intermediate 
+    Form is then translated to the target representation by the translator of 
+    the chosen reasoner/translator pair.</li>
+    <li>JenaBasedSadlImportProcessor: processes an OWL file or OWL file content 
+    to generate a SADL file using the OwlToSadl class.</li>
+    <li>JeanBasedSadlInferenceProcessor: processes requests to run inference on 
+    a SADL model, executing the queries and tests contained in the model.</li>
+    <li>JenaBasedSadlModelProcessor: the onValidate method of this class takes 
+    the SadlModel generated by the parser on composed of EFM EObjects and 
+    generates an in-memory OWL model and commands in Intermediate Form; the 
+    onGenerate method of this class saves the OWL model to the specified format 
+    and saves the commands to the appropriate target, e.g., for Jena-based 
+    reasoner/translator the rules go to a .rules file and named queries go to 
+    the OWL file.</li>
+    <li>JenaBasedSadlModelValidator: called by the model processor, this class 
+    does type checking and other validation functions.</li>
+    <li>MetricsProcessor: gather metrics on the SADL model being processed.</li>
+    <li>PathFinder: where partial graph paths are supported, find the missing 
+    parts of the paths to generate complete graph patterns.</li>
+    <li>OwlToSadl: takes an OWL file or OWL model serialized content and 
+    generates a SADL model. Can convert elements of an OWL model to their SADL 
+    equivalent.</li>
+  </ol>
+  <h4>Project com.ge.research.sadl.jena-wrapper-for-sadl</h4>
+  <p>This project contains the reasoner and translator pair for Jena-based 
+  inferencing.</p>
+  <h4>Project com.ge.research.sadl.persective</h4>
+  <p>This project contains the SADL perspective factory.</p>
+  <h4>Project com.ge.research.sadl.reasoner</h4>
+  <p>This project contains two subprojects.</p>
+  <ol>
+    <li>reasoner-api: this project contains the Java Interface classes IReasoner 
+    and ITranslator. It also contains all of the classes defining the 
+    Intermediate Form for rules, queries, tests, etc., and the Java Interface 
+    classes ITabularDataImporter for importing tabular data and IGraphVisualizer 
+    for graphical visualizations of OWL models and SADL projects.</li>
+    <li>reasoner-impl: this project contains configuration manager classes and 
+    the GraphViz implementation of IGraphVisualizer.</li>
+  </ol>
+  <h4>Project com.ge.research.sadl.server</h4>
+  <p>This project contains two subprojects.</p>
+  <ol>
+    <li>sadlserver-api: this project contains the Java Interface classes 
+    ISadlServer, ISadlServerPE, and ISadlServerMD for the basic SADL Server, the 
+    extended SADL Server supporting editing and persistence, and the more 
+    extended SADL Server supporting model-based development via a Server API.</li>
+    <li>sadlserver-impl: this project contains implementations of the above 
+    three Interface classes and a sample Java client.</li>
+  </ol>
+  <h4>Project com.ge.research.sadl.target</h4>
+  <p>This project contains the file com.ge.research.sadl.target.target which 
+  must be set as the Plut-in Development Target Platform in Preferences.</p>
+  <h4>Project com.ge.research.sadl.tests</h4>
+  <p>This project contains JUnit tests of the backend SADL components.</p>
+  <h4>Project com.ge.research.sadl.ui</h4>
+  <p>This project contains the Eclipse-based IDE components.</p>
+  <h4>Project com.ge.research.sadl..ui.tests</h4>
+  <p>This project contains JUnit Plugin Tests for the Eclipse-based SADL UI.</p>
+  <h4>Project com.ge.research.sadl.update</h4>
+  <p>This project contains, after a successful Maven build, the SADL update file 
+  in the target folder.</p>
+  <h4>Project com.ge.research.sadl.xtextgenerator</h4>
+  <p>This project contains Xtext supporting files for JFlex.</p>
+  <h4>Project theia-sadl-extensions</h4>
+  <p>This project contains code supporting WebSADL.</p>
+</blockquote>
+<h3>Tabular Importer Projects</h3>
+<blockquote>
+  <h4>Project com.ge.research.sadl.importer</h4>
+  <p>This project contains the grammar and backend for the tabular importer 
+  template.</p>
+  <h4>Project com.ge.research.sadl.importer.ide</h4>
+  <p>This project contains a small amount of setup code for the template editor 
+  UI.</p>
+  <h4>Project com.ge.research.sadl.importer.tests</h4>
+  <p>This project is meant to contain template editor backend tests.</p>
+  <h4>Project com.ge.research.sadl.importer.ui</h4>
+  <p>This project contains the Eclipse UI components for the template editor.</p>
+  <h4>Project com.ge.research.sadl.importer.ui.tests</h4>
+  <p>This project is meant to contain template editor UI tests.</p>
+</blockquote>
+<h3>Test Suite Projects</h3>
+<blockquote>
+  <h4>Project com.ge.research.sadl.testsuite</h4>
+  <p>This project contains the grammar and backend for the test suite editor.</p>
+  <h4>Project com.ge.research.sadl.testsuite.ide</h4>
+  <p>This project contains a small amount of setup code for the test suite 
+  editor UI.</p>
+  <h4>Project com.ge.research.sadl.testsuite.tests</h4>
+  <p>This project is meant to contain test suite editor backend tests.</p>
+  <h4>Project com.ge.research.sadl.testsuite.ui</h4>
+  <p>This project contains the Eclipse UI components for the test suite editor.</p>
+  <h4>Project com.ge.research.sadl.testsuite.ui.tests</h4>
+  <p>This project is meant to contain test suite editor UI tests.</p>
+</blockquote>
+<h3>SWI Prolog Reasoner Projects</h3>
+<blockquote>
+  <h4>Project com.ge.research.sadl.swi_prolog.feature</h4>
+  <p>This project contains the feature for the SWI-Prolog reasoner/translator 
+  pair. </p>
+  <h4>Project com.ge.research.sadl.swi_prolog-plugin</h4>
+  <p>This project contains the implementation of the SWI-Prolog reasoner/translator 
+  pair.</p>
+  <h4>Project com.ge.research.sadl.swi_prolog.update</h4>
+  <p>This project is intended to contain the update file for separate 
+  installation of the SWI-Prolog reasoner/translator pair. Currently it is 
+  included in the SADL update. </p>
+</blockquote>
+<h3>Miscellaneous Projects</h3>
+<blockquote>
+  <h4>Project com.ge.research.sadl.jena.sorted-owl-ntriples</h4>
+  <p>This project contains some exploratory code to translate an OWL file to 
+  N-triple format and order the triples alphabetically.</p>
+  <h4>Project com.ge.research.sadl3.documentation</h4>
+  <p>There are two projects with this name in the figure at the beginning of 
+  this document. The one under com.ge.research.sadl.parent contains old 
+  documentation which was deployed to <a href="http://sadl.sourceforge.net">
+  http://sadl.sourceforge.net</a>. The other, sibling to 
+  com.ge.research.sadl.parent, and which should always be on the gh-pages 
+  branch, is the new documentation automatically deployed as Github Pages on 
+  github.com. </p>
+</blockquote>

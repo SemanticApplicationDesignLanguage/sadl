@@ -13,7 +13,7 @@
 <h1>SADL Version 3 Build Instructions</h1>
 
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/03/2020<!--webbot bot="Timestamp" endspan i-checksum="12544" -->.</h5>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/15/2020<!--webbot bot="Timestamp" endspan i-checksum="12584" -->.</h5>
 <h2>Introduction</h2>
 <p>
 <span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">
@@ -36,12 +36,14 @@ Setup Steps</span></h2>
   <li>Clone the SADL github repository under DEV-HOME/git.<ul>
     <li>Using the Git Bash client, change directory so that the DEV-HOME/git is 
     the current directory</li>
-    <li>Make a folder named &quot;sadlos2&quot;; change directory to this folder 
-    (DEV-HOME/git/sadlos2)</li>
     <li>Go to SADL project on github.com:&nbsp;<a href="https://github.com/crapo/sadlos2/" style="box-sizing: border-box; background-color: initial">https://github.com/crapo/sadlos2/</a></li>
     <li>Copy the URL for cloning by clicking on the button &quot;Clone or download&quot;</li>
     <li>Using the Git Bash client, type &quot;git clone &quot; and then paste in the URL 
-    copied in the previous step</li>
+    copied in the previous step<ul>
+    <li>Note: if you are behind a firewall it may be necessary to set proxies 
+    with a command like &quot;export https_proxy=http://...:80&quot;.</li>
+  </ul>
+    </li>
   </ul>
   </li>
   <li>Download and install (if not already present) the Java 9 or later <u><b>
