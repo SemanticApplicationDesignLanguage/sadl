@@ -106,34 +106,67 @@ Setup Steps</span></h2>
   then Browse to and create folder &quot;ws&quot;.</li>
   <li>Import as Maven projects  
   (File -&gt; Import... -&gt; Maven -&gt; Existing Maven Projects):<ul>
-    <li>Browse to .../git/sadlos2/sadl3/com.ge.research.sadl.parent</li>
-    <li>Select the parent project and all projects under it</li>
+    <li>Browse to .../git/sadlos2/sadl3/com.ge.research.sadl.parent, select the 
+    folder.</li>
+    <li>Select the parent project and all projects under it, then click Finish</li>
+    <li>You should get a modal dialog during the course of the import that is 
+    something like this:<ul>
+    <li><img border="0" src="images/Sadl3B1.jpg" width="512" height="535"></li>
+    <li>There should be no errors in this dialog box. </li>
+    <li>If there are errors, ??</li>
+    <li>Click Finish</li>
+  </ul>
+    </li>
+    <li>You may be prompted to install Tycho Project Configuratiors:<ul>
+    <li><img border="0" src="images/Sadl3B2.jpg" width="867" height="523"></li>
+    <li>Leave the item checked and click Next until you can accept the license 
+    and click Finish.</li>
+  </ul>
+    </li>
+    <li>The content is unsigned so to install you must &quot;click Install anyway&quot;<ul>
+    <li><img border="0" src="images/Sadl3B3.jpg" width="533" height="147"></li>
+  </ul>
+    </li>
+    <li>Restart Eclipse to apply software updates<ul>
+    <li><img border="0" src="images/Sadl3B4.jpg" width="516" height="138"></li>
+  </ul>
+    </li>
   </ul>
   </li>
   <li>Select all imported projects in the Package Explorer window and do a Maven 
   Project Update (right-click on the selected projects, select Maven -&gt; Update 
   Project...)</li>
-  <li>Set the target platform to com.ge.research.sadl.target
-  <ul>
+  <li>Set the target platform to com.ge.research.sadl.target and let all builds 
+  resulting from the change complete<ul>
     <li>Window -&gt; Preferences -&gt; Plug-in Development -&gt; Target Platform, check &quot;com.ge.research.sadl.target 
     (if two appear chose the one in the target, not parent, project), then click &quot;Apply and Close&quot;</li>
-    <li>or</li>
+  </ul>
+  or<ul>
     <li>Open the file &quot;com.ge.research.sadl.target&quot; in the project &quot;com.ge.research.sadl.target&quot;, 
     click on &quot;Load Target Platform&quot; in the upper-right corner.</li>
   </ul>
   </li>
-  <li>Make sure that Build Automatically... is checked (on the toolbar's Project 
+  <li>If there are any errors remaining, do a clean/build:<ul>
+    <li>Make sure that Build Automatically... is checked (on the toolbar's Project 
   dropdown menu, &quot;Build Automatically should be checked; if not check it)</li>
-  <li>With all projects selected, clean and build all projects (Project -&gt; 
+    <li>With all projects selected, clean and build all projects (Project -&gt; 
   Clean...)</li>
+  </ul>
+  </li>
 </ol>
 <h2>Validating the Build Environment</h2>
 <p>At this point there should be no errors in any of the projects. </p>
 <ol>
-  <li>Right-click on any of the projects and select Run As -&gt; Run 
-  Configurations... or Debug As -&gt; Debug Configurations.</li>
-  <li>Create a new configuration under Eclipse Application.</li>
-  <li>Click on Run or Debug.</li>
+  <li>Right-click on any of the projects and select Run As -&gt; Eclipse 
+  Application. or Debug As -&gt; Eclipse Application<ul>
+    <li>If you wish to create a configuration to customize<ul>
+      <li>Do Run As -&gt; Run Configurations... or Debug As -&gt; Debug Configurations</li>
+      <li>Create a new configuration under Eclipse Application</li>
+      <li>Click on Run or Debug.</li>
+    </ul>
+    </li>
+  </ul>
+  </li>
   <li>A new instance of Eclipse should start with the SADL plug-ins installed.</li>
 </ol>
 
