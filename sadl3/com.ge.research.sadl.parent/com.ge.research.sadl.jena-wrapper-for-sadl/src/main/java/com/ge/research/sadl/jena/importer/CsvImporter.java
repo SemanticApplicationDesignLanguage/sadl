@@ -17,6 +17,8 @@
  ***********************************************************************/
 package com.ge.research.sadl.jena.importer;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -52,6 +54,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.activation.DataSource;
 import javax.activation.FileDataSource;
@@ -581,58 +584,112 @@ public class CsvImporter implements ITabularDataImporter {
 			super(_importer, ident, resultIdent);
 			urlEncode = _urlEncode;
 			if (replacementText != null && replacementText.length() > 1) {
-				InputStream is = new ByteArrayInputStream(replacementText.getBytes()); 
-				//    public CSVReader(Reader reader, char separator, char quotechar, char escape, int line, boolean strictQuotes, boolean ignoreLeadingWhiteSpace) {
-				CSVReader reader = null;
-				try {
-					reader = new CSVReader(new InputStreamReader(is), 
-						CSVParser.DEFAULT_SEPARATOR,					// comma
-						CSVParser.DEFAULT_QUOTE_CHARACTER, 				// double quote
-						//    		    		CSVParser.DEFAULT_ESCAPE_CHARACTER, 0, 			// back slash
-						'\'', 0,
-						false, 											// strict quotes
-						false);											// ignore leading whitespace
-					String [] tokens = reader.readNext();
-					int numReplacements = (tokens != null ? tokens.length : 0);
-					if (numReplacements > 0) {
-						boolean parserUnbalancedQuotes = false;
-						for (int i = 0; i < numReplacements; i++) {
-							String repl = tokens[i];
-							String[] parts = repl.split(":");
-							if (parts != null && parts.length == 2) {
-								if (replacements == null) {
-									replacements = new HashMap<String, String>();
-								}
-								if (i == 0 && replacementText.startsWith("\"") && !parts[0].startsWith("\"") && parts[0].endsWith("\"")) {
-									parserUnbalancedQuotes = true;
-								}
-								if (parserUnbalancedQuotes) {
-									parts[0] = "\"" + parts[0];
-									parts[1] = "\"" + parts[1];
-								}
-								replacements.put(getSadlUtils().stripQuotes(parts[0].trim()).trim(), getSadlUtils().stripQuotes(parts[1].trim()).trim());
-							}
-							else if (repl.endsWith(":")) {
-								if (replacements == null) {
-									replacements = new HashMap<String, String>();
-								}
-								replacements.put(getSadlUtils().stripQuotes(parts[0]), "");
-	
-							}
-							else {
-								throw new IOException("Failed to parse '" + replacementText + "' into a set of colon-separated pairs of replace-replacewith tokens in row " + rowNum + ".");
-							}
-						}
+//				InputStream is = new ByteArrayInputStream(replacementText.getBytes()); 
+//				//    public CSVReader(Reader reader, char separator, char quotechar, char escape, int line, boolean strictQuotes, boolean ignoreLeadingWhiteSpace) {
+//				CSVReader reader = null;
+//				try {
+//					reader = new CSVReader(new InputStreamReader(is), 
+//						CSVParser.DEFAULT_SEPARATOR,					// comma
+//						CSVParser.DEFAULT_QUOTE_CHARACTER, 				// double quote
+//						//    		    		CSVParser.DEFAULT_ESCAPE_CHARACTER, 0, 			// back slash
+//						'\'', 0,
+//						false, 											// strict quotes
+//						false);											// ignore leading whitespace
+//					String [] tokens = reader.readNext();
+//					int numReplacements = (tokens != null ? tokens.length : 0);
+//					if (numReplacements > 0) {
+//						boolean parserUnbalancedQuotes = false;
+//						int lastComma = -1;
+//						for (int i = 0; i < numReplacements; i++) {
+//							String orig;
+//							int nextComma = -1;
+//							if (numReplacements > 1) {
+//								int start = lastComma < 0 ? 0 : lastComma + 1;
+//								char chbefore = ' ';	// anything but '\'', the escape char
+//								for (int j = start; j < replacementText.length(); j++) {
+//									char c = replacementText.charAt(j);
+//									if (c == ',' && chbefore != '\'') {
+//										nextComma = j;
+//										break;
+//									}
+//									else {
+//										chbefore = c;
+//									}
+//								}
+//								if (nextComma > 0) {
+//									orig = replacementText.substring(lastComma + 1, nextComma);
+//								}
+//								else {
+//									orig = replacementText.substring(lastComma + 1);
+//								}
+//								lastComma = nextComma;
+//							}
+//							else {
+//								orig = replacementText;
+//							}
+//
+//							String repl = tokens[i];
+//							String[] parts = repl.split(":");
+//							if (parts != null && parts.length == 2) {
+//								if (replacements == null) {
+//									replacements = new HashMap<String, String>();
+//								}
+//								if (i == 0 && replacementText.startsWith("\"") && !parts[0].startsWith("\"") && parts[0].endsWith("\"")) {
+//									parserUnbalancedQuotes = true;
+//								}
+//								if (parserUnbalancedQuotes) {
+//									parts[0] = "\"" + parts[0];
+//									parts[1] = "\"" + parts[1];
+//								}
+//								// if parts[0] is quoted in the original, don't trim
+//								String part0;
+//								String part1;
+//								if (orig.startsWith("\"")) {
+//									part0 = parts[0];
+//								}
+//								else {
+//									part0 = parts[0].trim();
+//								}
+//								if (orig.endsWith("\"")) {
+//									part1 = parts[1];
+//								}
+//								else {
+//									part1 = parts[1].trim();
+//								}
+//								replacements.put(getSadlUtils().stripQuotes(part0), getSadlUtils().stripQuotes(part1));
+//							}
+//							else if (repl.endsWith(":")) {
+//								if (replacements == null) {
+//									replacements = new HashMap<String, String>();
+//								}
+//								replacements.put(getSadlUtils().stripQuotes(parts[0]), "");
+//	
+//							}
+//							else {
+//								throw new IOException("Failed to parse '" + replacementText + "' into a set of colon-separated pairs of replace-replacewith tokens in row " + rowNum + ".");
+//							}
+//						}
+//					}
+//					else if (urlEncode) {
+//						// can't have an Encode with no urlEncoding (a "replace") and no replacement
+//						throw new IOException("Can't have a 'replace' with no replacement text");
+//					}
+//				}
+//				finally {
+//					if (reader != null) {
+//						reader.close();
+//					}
+//				}
+				
+				// trying new approach that doesn't use CSVReader
+				String str = replacementText;
+				String[] split1 = CsvImporter.splitStringWithEscape(",", "'", str);
+				for (String s : split1) {
+					String[] split1a = CsvImporter.splitStringWithEscape(":", "'", s);
+					if (replacements == null) {
+						replacements = new HashMap<String, String>();
 					}
-					else if (urlEncode) {
-						// can't have an Encode with no urlEncoding (a "replace") and no replacement
-						throw new IOException("Can't have a 'replace' with no replacement text");
-					}
-				}
-				finally {
-					if (reader != null) {
-						reader.close();
-					}
+					replacements.put(CsvImporter.removeDelimiters(split1a[0],"'"), CsvImporter.removeDelimiters(split1a[1],"'"));
 				}
 			}
 		}
@@ -659,6 +716,9 @@ public class CsvImporter implements ITabularDataImporter {
 										logger.debug("Encode (" + getInputIdentifier() + ")(" + replace + ":" + repWith + ") transformed '" + input + "' -> '" + transformed + "' (before URL encoding)");
 									}
 								}
+								if (triplesLoggerOut != null && transformed != null && !transformed.equals(input)) {
+									logTransformAction(rowNum, input, transformed);
+								}
 								input = transformed;
 							}
 						}
@@ -668,6 +728,9 @@ public class CsvImporter implements ITabularDataImporter {
 								if (transformed == null || !transformed.equals(input)) {
 									logger.debug("Encode (" + getInputIdentifier() + ")(" + replace + ":" + repWith + ") transformed '" + input + "' -> '" + transformed + "' (before URL encoding)");
 								}
+							}
+							if (triplesLoggerOut != null && transformed != null && !transformed.equals(input)) {
+								logTransformAction(rowNum, input, transformed);
 							}
 							input = transformed;
 						}
@@ -888,6 +951,68 @@ public class CsvImporter implements ITabularDataImporter {
 
 	public CsvImporter(IConfigurationManager configurationMgr) {
 		configMgr = configurationMgr;
+	}
+	
+	/**
+	 * Method to split a string on a delimiter but ignoring escaped delimiter characters.
+	 * @param delim
+	 * @param esc
+	 * @param str
+	 * @return
+	 */
+	public static String[] splitStringWithEscape(String delim, String esc, String str) {
+		String regex = "(?<!" + Pattern.quote(esc) + ")" + Pattern.quote(delim);
+		String[] splitstr = str.split(regex);
+		for (int i = 0; i < splitstr.length; i++) {
+			String s = splitstr[i];
+			if (isDoubleQuoted(s.trim(), esc)) {
+				splitstr[i] = stripDoubleQuotes(s.trim());
+			}
+			else {
+				splitstr[i] = s.trim();
+			}
+		}
+		return splitstr;
+	}
+	
+	/**
+	 * Method to determine if a string, which may be padded with white space, is double quoted but
+	 * checks to make sure an ending quote isn't escaped.
+	 * @param s
+	 * @return
+	 */
+	public static boolean isDoubleQuoted(String s, String delim) {
+		String sp = s.trim();
+		
+		if (sp.startsWith("\"") && sp.endsWith("\"") && !sp.endsWith(delim + "\"")) {
+			return true;
+		}
+		return false;
+	}
+	
+	public static String removeDelimiters(String s, String delim) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < s.length(); i++) {
+			if (s.substring(i).startsWith(delim)) {
+				i += delim.length() - 1;
+			}
+			else {
+				sb.append(s.charAt(i));
+			}
+		}
+		return sb.toString();
+	}
+	
+	/**
+	 * Method to remove leading and trailing double quotes, assumes string is trimmed.
+	 * @param str
+	 * @return
+	 */
+	public static String stripDoubleQuotes(String str) {
+		if (str.startsWith("\"") && str.endsWith("\"")) {
+			return str.substring(1, str.length() - 1);
+		}
+		return str;
 	}
 
 	/* (non-Javadoc)
@@ -1204,6 +1329,9 @@ public class CsvImporter implements ITabularDataImporter {
 							throw new ConfigurationException("Found duplicate transform result name '" + values[0] + "' in transform '" + rawTemplate + "'");
 						}
 						transforms.put((String)values[0], (Transform)values[1]);
+						if (triplesLoggerOut != null) {
+							logTransformCreation((String)values[0], (Transform)values[1]);
+						}
 					}
 					else if (isIncremental(rawTemplate)) {
 						if (rawTemplate != null && rawTemplate.length() >= 11 && rawTemplate.substring(0, 11).toLowerCase().equals("incremental")) {
@@ -1857,7 +1985,8 @@ public class CsvImporter implements ITabularDataImporter {
 			if (indirectImportNamespaces != null) {
 				for (int i = 0; i < indirectImportNamespaces.size(); i++) {
 					String indirectNS = toNamespace(indirectImportNamespaces.get(i));
-					cn = findConceptInModel(modelArrayPosition, indirectNS, token);
+					OntModel idm = getModel(modelArrayPosition);
+					cn = findConceptInImportedModel(idm, indirectNS, token);
 					if (cn != null) {
 						return cn;
 					}
@@ -1887,6 +2016,26 @@ public class CsvImporter implements ITabularDataImporter {
 			return cn;
 		}
 		return null;
+	}
+	
+	/**
+	 * Method to find a concept in an imported model
+	 * @param model
+	 * @param ns
+	 * @param ln
+	 * @return
+	 */
+	private ConceptName findConceptInImportedModel(OntModel model, String ns, String ln) {
+		ExtendedIterator<OntModel> mitr = model.listSubModels(false);
+		while (mitr.hasNext()) {
+			OntModel submodel = mitr.next();
+			ConceptName cn = findConceptInImportedModel(submodel, ns, ln);
+			if (cn != null) {
+				mitr.close();
+				return cn;
+			}
+		}
+		return getSadlUtils().getConceptByUri(model, ns + ln);
 	}
 
 	/* (non-Javadoc)
@@ -2497,6 +2646,32 @@ public class CsvImporter implements ITabularDataImporter {
 				triplesLoggerOut.write("Skipping triple on blank for '" + cd + "' in triple '" + tr.toShortString());
 			}
 			triplesLoggerOut.write("\n");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void logTransformCreation(String string, Transform transform) {
+		try {
+			triplesLoggerOut.write("Created transform from '" + transform.getInputIdentifier() + "' to '" + transform.getOutputIdentifier() + "'\n");
+			if (transform instanceof Encode) {
+				Iterator<String> repkeyitr = ((Encode)transform).replacements.keySet().iterator();
+				while (repkeyitr.hasNext()) {
+					String key = repkeyitr.next();
+					String val = ((Encode)transform).replacements.get(key);
+					triplesLoggerOut.write("   replace '" + key + "' with '" + val + "'\n");
+				}
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private void logTransformAction(int rowNum, String input, String output) {
+		try {
+			triplesLoggerOut.write("" + (rowNum + 1) + ": transformed '" + input + "' to '" + output + "'\n");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,0 +1,74 @@
+uri "http://sadl.org/tabimport/blanks" alias blks
+    (note "This ontology was created from a CSV data source.").
+
+// This ontology was created from a CSV data source.@en.
+import "http://sadl.org/TransBlank.sadl" as tbm.
+
+
+// No Errors
+
+
+// No Warnings
+
+
+// No Info output
+
+
+// Ontologies:
+//    http://sadl.org/TransBlank.sadl
+//    http://sadl.org/tabimport/blanks
+
+
+// Datatype Declarations:
+
+
+// Annotation Properties:
+
+
+// RDF Properties:
+
+
+// Object properties without specified range:
+
+
+// Datatype properties without specified range:
+
+
+// Class definitions:
+
+
+// Other object Properties:
+
+
+// Other datatype Properties:
+
+
+// Individuals:
+Thing1 is a tbm:Thingy,
+    has tbm:bdprop true.
+Thing2 is a tbm:Thingy,
+    has tbm:bdprop false.
+Thing3 is a tbm:Thingy,
+    has tbm:bdprop false.
+Thing_4 is a tbm:Thingy,
+    has tbm:bdprop false.
+
+
+// Other restrictions:
+
+
+// Processed statement: [http://sadl.org/tabimport/blanks, http://www.w3.org/2002/07/owl#imports, http://sadl.org/TransBlank.sadl]
+// Processed statement: [http://sadl.org/tabimport/blanks, http://www.w3.org/2000/01/rdf-schema#comment, "This ontology was created from a CSV data source."@en]
+// Processed statement: [http://sadl.org/tabimport/blanks, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://www.w3.org/2002/07/owl#Ontology]
+// Processed statement: [http://sadl.org/tabimport/blanks#Thing3, http://sadl.org/TransBlank.sadl#bdprop, "false"^^http://www.w3.org/2001/XMLSchema#boolean]
+// Processed statement: [http://sadl.org/tabimport/blanks#Thing3, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://sadl.org/TransBlank.sadl#Thingy]
+//     object resource not added to processing list: ": http://sadl.org/TransBlank.sadl#Thingy
+// Processed statement: [http://sadl.org/tabimport/blanks#Thing_4, http://sadl.org/TransBlank.sadl#bdprop, "false"^^http://www.w3.org/2001/XMLSchema#boolean]
+// Processed statement: [http://sadl.org/tabimport/blanks#Thing_4, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://sadl.org/TransBlank.sadl#Thingy]
+//     object resource not added to processing list: ": http://sadl.org/TransBlank.sadl#Thingy
+// Processed statement: [http://sadl.org/tabimport/blanks#Thing1, http://sadl.org/TransBlank.sadl#bdprop, "true"^^http://www.w3.org/2001/XMLSchema#boolean]
+// Processed statement: [http://sadl.org/tabimport/blanks#Thing1, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://sadl.org/TransBlank.sadl#Thingy]
+//     object resource not added to processing list: ": http://sadl.org/TransBlank.sadl#Thingy
+// Processed statement: [http://sadl.org/tabimport/blanks#Thing2, http://sadl.org/TransBlank.sadl#bdprop, "false"^^http://www.w3.org/2001/XMLSchema#boolean]
+// Processed statement: [http://sadl.org/tabimport/blanks#Thing2, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://sadl.org/TransBlank.sadl#Thingy]
+//     object resource not added to processing list: ": http://sadl.org/TransBlank.sadl#Thingy
