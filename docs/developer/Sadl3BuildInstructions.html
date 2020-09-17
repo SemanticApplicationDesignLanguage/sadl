@@ -18,12 +18,10 @@
 <p>
 <span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">
 This document provides step-by-step instructions for creating an Eclipse Plug-in 
-Development Environment for the SADL grammar and IDE. Below are described setup 
-steps, followed by two different ways of installing Eclipse, followed by steps 
+Development Environment for the SADL grammar and IDE. It includes two different ways of installing Eclipse, followed by steps 
 to be taken after installing Eclipse, regardless of which method of installation 
 was followed. These instructions are for setting up a development environment on 
-a local machine. This development environment can then be used to generate new 
-SADL updates, to make modifications/extensions to the SADL code, or to create 
+a local machine. This development environment can then be used to generate new SADL updates, to make modifications/extensions to the SADL code, or to create 
 new Eclipse plug-ins to create extensions to the SADL grammar/IDE.</span></p>
 <h2>
 <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'; color: #24292E; letter-spacing: normal; background-color: #FFFFFF">
@@ -49,7 +47,7 @@ Setup Steps</span></h2>
   <li>Download and install (if not already present) the Java 9 or later <u><b>
   JDK</b></u> (see&nbsp;<a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html" rel="nofollow" style="box-sizing: border-box; background-color: initial">https://www.oracle.com/technetwork/java/javase/downloads/index.html</a>).<ul>
     <li>Note that if you are behind a firewall and your organization is using a 
-    private certificat authority, you may need to replace your Java security 
+    private certificate authority, you may need to replace your Java security 
     cacerts file (see
     <a href="https://docs.microfocus.com/SM/9.60/Codeless/Content/security/tasks/update_the_cacerts_keystore_file.htm">
     https://docs.microfocus.com/SM/9.60/Codeless/Content/security/tasks/update_the_cacerts_keystore_file.htm</a>)</li>
@@ -66,44 +64,53 @@ Setup Steps</span></h2>
     classpath. Check in a cmd window with &quot;mvn -version&quot;.</span></li>
   </ul>
   </li>
-  <li>Install Eclipse 2020-03 by one of the methods below.</li>
-</ol>
-<h2>Method 1: Install Eclipse by Direct Download</h2>
-<ol>
-  <li>Download and install &quot;Eclipse IDE for Java and DSL Developers&quot; (see&nbsp;<a href="https://www.eclipse.org/downloads/packages/" rel="nofollow" style="box-sizing: border-box; background-color: initial; color: rgb(3, 102, 214); text-decoration: none;">https://www.eclipse.org/downloads/packages/</a>). 
+  <li>Install Eclipse 2020-03 by <b>one</b> of the methods below.<ul>
+    <li>Method 1: Install Eclipse by Direct Download<ul>
+      <li>Download and install &quot;Eclipse IDE for Java and DSL Developers&quot; (see&nbsp;<a href="https://www.eclipse.org/downloads/packages/" rel="nofollow" style="box-sizing: border-box; background-color: initial; color: rgb(3, 102, 214); text-decoration: none;">https://www.eclipse.org/downloads/packages/</a>). 
   Eclipse 2020-03 is recommended but newer versions should work.</li>
-  <li>Configure proxies if behind a firewall (Preferences -&gt; General -&gt; Network 
-  Connections)</li>
-</ol>
-<h2>Method 2: Install Eclipse Using the Eclipse Installer</h2>
-<ol>
-  <li>Download the Eclipse Installer</li>
-  <li>Change to Advanced Mode</li>
-  <li>Configure proxies if behind a firewall (mouse over icons on lower left 
+    </ul>
+    </li>
+    <li>Method 2: Install Eclipse Using the Eclipse Installer<ul>
+      <li>Download the Eclipse Installer</li>
+      <li>Change to Advanced Mode</li>
+      <li>Configure proxies if behind a firewall (mouse over icons on lower left 
   corner until the one for Network Proxies settings is found)</li>
-  <li>Select Eclipse DSL Tools as Platform</li>
-  <li>Select 2020-03 or later as version</li>
-  <li>Finish</li>
+      <li>Select Eclipse DSL Tools as Platform</li>
+      <li>Select 2020-03 or later as version</li>
+      <li>Finish</li>
+    </ul>
+    </li>
+  </ul>
+  </li>
+  <li>Start and configure Eclipse<ul>
+    <li>Start Eclipse (on Windows, run Eclipse.exe in the &quot;eclipse&quot; folder under 
+    your installation folder)</li>
+    <li>Switch your workspace to DEV-HOME/ws (or whatever you wish to name your 
+    workspace, File -&gt; Switch Workspace -&gt; Other..., 
+  then Browse to and create folder &quot;ws&quot; (or whatever you chose) under 
+    DEV-HOME)</li>
+    <li>Configure proxies if necessary if behind a firewall (Preferences -&gt; General -&gt; Network 
+  Connections)</li>
+  <li>Make the Java JDK installed above the default JRE (Window -&gt; Preferences 
+  -&gt; Java -&gt; Installed JREs -&gt; Add, then browse to the folder where the Java JDK 
+  is installed, select. Once added, check to make default.)</li>
+    <li>&nbsp;</li>
+  </ul>
+  </li>
+  <li>&nbsp;</li>
 </ol>
 <h2>Build the Projects</h2>
 <ol>
-  <li>In a command line window, change directory to the folder in which the SADL 
-  source code was installed from github (.../git/sadlos2).</li>
-  <li>Change directory to sadl3 (.../git/sadlos2/sadl3).</li>
-  <li>Change directory to the parent project (.../git/sadlos2/sadl3/com.ge.research.sadl.parent)</li>
+  <li>In a command line window, change directory to the this folder in local 
+  SADLsource code repository, the SADL parent project:.../git/sadlos2/sadl3/com.ge.research.sadl.parent</li>
   <li>Do a clean by typing the commend &quot;mvn clean&quot;. Let it finish and verify 
   that there are no errors.</li>
   <li>Do a build by typing the command &quot;mvn install -U&quot;. Let it finish and 
   verify that there are no errors.</li>
 </ol>
-<h2>Configure Eclipse</h2>
-<p>Start Eclipse and configure as follows:</p>
+<h2>Import Maven Projects into Eclipse</h2>
 <ol>
-  <li>Make the Java JDK installed above the default JRE (Window -&gt; Preferences 
-  -&gt; Java -&gt; Installed JREs -&gt; Add, then browse to the folder where the Java JDK 
-  is installed, select. Once added, check to make default.)</li>
-  <li>Switch workspace to DEV-HOME/ws (File -&gt; Switch Workspace -&gt; Other..., 
-  then Browse to and create folder &quot;ws&quot;.</li>
+  <li>Start Eclipse if not already running</li>
   <li>Import as Maven projects  
   (File -&gt; Import... -&gt; Maven -&gt; Existing Maven Projects):<ul>
     <li>Browse to .../git/sadlos2/sadl3/com.ge.research.sadl.parent, select the 
@@ -113,7 +120,7 @@ Setup Steps</span></h2>
     something like this:<ul>
     <li><img border="0" src="images/Sadl3B1.jpg" width="512" height="535"></li>
     <li>There should be no errors in this dialog box. </li>
-    <li>If there are errors, ??</li>
+    <li>If there are errors they must be resolved before you continue.</li>
     <li>Click Finish</li>
   </ul>
     </li>
