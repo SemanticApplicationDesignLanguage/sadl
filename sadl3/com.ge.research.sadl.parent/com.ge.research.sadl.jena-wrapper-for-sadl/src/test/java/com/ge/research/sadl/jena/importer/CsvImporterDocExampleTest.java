@@ -147,4 +147,35 @@ public class CsvImporterDocExampleTest {
 		assertTrue(CsvImporter.removeDelimiters(split1a[0],"'").equals(" "));
 		assertTrue(CsvImporter.removeDelimiters(split1a[1],"'").equals("_"));
 	}
+	
+	@Test
+	public void testStringSplitter07() {
+		String str = "'\"1'\" : true,\"\" : false";
+		String[] split1 = CsvImporter.splitStringWithEscape(",", "'", str);
+		assertTrue(split1.length == 2);
+		assertTrue(split1[0].equals("'\"1'\" : true"));
+		assertTrue(split1[1].equals("\"\" : false"));
+		String[] split1a = CsvImporter.splitStringWithEscape(":", "'", split1[0]);
+		assertTrue(split1a.length == 2);
+		assertTrue(CsvImporter.removeDelimiters(split1a[0],"'").equals("\"1\""));
+		assertTrue(CsvImporter.removeDelimiters(split1a[1],"'").equals("true"));
+		String[] split1b = CsvImporter.splitStringWithEscape(":", "'", split1[1]);
+		assertTrue(split1b.length == 2);
+		assertTrue(CsvImporter.removeDelimiters(split1b[0], "'").equals(""));
+		assertTrue(CsvImporter.removeDelimiters(split1b[1], "'").equals("false"));
+	}
+
+	@Test
+	public void testStringSplitter08() {
+		String str = "\"''\":_";		// replace a single quote with an underscore
+		String[] split1 = CsvImporter.splitStringWithEscape(",", "'", str);
+		assertTrue(split1.length == 1);
+		assertTrue(split1[0].equals("\"''\":_"));
+		String[] split1a = CsvImporter.splitStringWithEscape(":", "'", split1[0]);
+		assertTrue(split1a.length == 2);
+		String split1ap = CsvImporter.removeDelimiters(split1a[0],"'");
+		assertTrue(split1ap.equals("'"));
+		assertTrue(CsvImporter.removeDelimiters(split1a[1],"'").equals("_"));
+	}
+	
 }

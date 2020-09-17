@@ -984,7 +984,8 @@ public class CsvImporter implements ITabularDataImporter {
 	public static boolean isDoubleQuoted(String s, String delim) {
 		String sp = s.trim();
 		
-		if (sp.startsWith("\"") && sp.endsWith("\"") && !sp.endsWith(delim + "\"")) {
+		if (sp.startsWith("\"") && sp.endsWith("\"") && 
+				(!sp.endsWith(delim + "\"") || sp.endsWith(delim + delim + "\""))) {
 			return true;
 		}
 		return false;
@@ -992,13 +993,17 @@ public class CsvImporter implements ITabularDataImporter {
 	
 	public static String removeDelimiters(String s, String delim) {
 		StringBuilder sb = new StringBuilder();
+		char lastC = 0;
 		for (int i = 0; i < s.length(); i++) {
-			if (s.substring(i).startsWith(delim)) {
+			char c = s.charAt(i);
+			if (s.substring(i).startsWith(delim) &&
+					(lastC == 0 || lastC != delim.charAt(0))) {
 				i += delim.length() - 1;
 			}
 			else {
-				sb.append(s.charAt(i));
+				sb.append(c);
 			}
+			lastC = c;
 		}
 		return sb.toString();
 	}
