@@ -5,7 +5,7 @@
  Rectangle is a type of Shape, described by height with values of type float,
  	described by width with values of type float.
  	
- Polygons:area (note "URI is 'http://sadl.org/Polygons.sadl#area'") is a type of Shapes:area. 	
+ Polygons:area (note "URI is 'http://sadl.org/Polygons.sadl#area'") is a type of shp:area. 	
  	
  Rule AreaOfRectangle
  	given x is any Rectangle

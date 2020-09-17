@@ -8,9 +8,10 @@ Ask Q1: area.
 
 Ask Q1.
 
-Ask: Shapes:Q1.
+Ask: shp:Q1.
 
 Ask: x is a ^Rule.
 
 Ask: "select ?s where {?s <rdf:type> <Shape>}".
 Ask: "select ?s ?a where {?s <area> ?a}".
+
