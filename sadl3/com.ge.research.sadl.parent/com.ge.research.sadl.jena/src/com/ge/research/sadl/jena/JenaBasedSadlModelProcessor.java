@@ -2155,7 +2155,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (PropertyWithoutRangeException e) {
-			addTypeCheckingError("Property does not have a range", defnContainer);
+			addPropertyWithoutRangeError(defnContainer, null, e);
 		}
 		return var;
 	}
@@ -4742,7 +4742,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (PropertyWithoutRangeException e) {
-					addTypeCheckingError("Property does not have a range", leftVariableDefn);
+					addPropertyWithoutRangeError(leftVariableDefn, null, e);
 				} catch (PrefixNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -8132,11 +8132,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			try {
 				addLocalizedTypeToNode(n,getModelValidator().getType(expr));
 			} catch (CircularDefinitionException | InvalidNameException | URISyntaxException
-					| IOException | ConfigurationException | InvalidTypeException | CircularDependencyException
-					| PropertyWithoutRangeException e) {
+					| IOException | ConfigurationException | InvalidTypeException | CircularDependencyException e) {
 				e.printStackTrace();
+			} catch (PropertyWithoutRangeException e) {
+				addPropertyWithoutRangeError(expr, null, e);
 			} catch (DontTypeCheckException e) {
-				//this is acceptable
+				//this is acceptablee
 			}
 			return n;
 		}
@@ -10512,13 +10513,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					String propUri = getDeclarationExtensions().getConceptUri(prop);
 					if (propUri != null) {
 						if (!propUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI)) {
-							String msg = "";
-							if (e.getPropID() != null) {
-								msg = e.getPropID() + " ";
-							}
-							msg += SadlErrorMessages.PROPERTY_WITHOUT_RANGE
-									.get(getDeclarationExtensions().getConcreteName(prop));
-							addTypeCheckingError(msg, propinit);
+							addPropertyWithoutRangeError(propinit, prop, e);
 						}
 					}
 				} catch (Exception e) {
@@ -10564,6 +10559,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		return inst;
+	}
+
+	private void addPropertyWithoutRangeError(EObject host, SadlResource prop,
+			PropertyWithoutRangeException e) {
+		String propID = e.getPropID();
+		String msg = "";
+		if (propID == null) {
+			if (prop != null) {
+				propID = getDeclarationExtensions().getConcreteName(prop);
+			}
+			else {
+				propID = "<unknown>";
+			}
+		}
+		msg += SadlErrorMessages.PROPERTY_WITHOUT_RANGE
+				.get(propID);
+		addTypeCheckingError(msg, host);
 	}
 
 	private void addColumnDescriptorsToTable(Individual inst, List<DataDescriptor> columns, EObject context) throws TranslationException {

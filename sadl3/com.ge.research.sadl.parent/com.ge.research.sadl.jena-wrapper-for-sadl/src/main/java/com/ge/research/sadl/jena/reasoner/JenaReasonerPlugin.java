@@ -662,26 +662,33 @@ public class JenaReasonerPlugin extends Reasoner{
 	public boolean loadRules(String ruleFileName) throws IOException {
 		if (ruleFileName != null) {
 			try {
-				InputStream in = configurationMgr.getJenaDocumentMgr().getFileManager().open(ruleFileName);
-				if (in != null) {
-				    try {
-				    	InputStreamReader isr = new InputStreamReader(in);
-				    	BufferedReader br = new BufferedReader(isr);
-						List<Rule> rules = Rule.parseRules(Rule.rulesParserFromReader(br));
-						if (rules != null) {
-							ruleList.addAll(rules);
-							newInputFlag = true;
-							return true;
-						}
-				    } catch (ParserException e) {
-				    	String msg = "Error reading rule file '" + ruleFileName + "': " + e.getMessage();
-				    	logger.error(msg);
-				    	addError(new ModelError(msg, ErrorType.ERROR));
-				    }
-				    finally {
-				    	in.close();
-				    }
-				}
+		    	File f = new File((new SadlUtils()).fileUrlToFileName(ruleFileName));
+		    	if (f.exists()) {
+		    		logger.debug(ruleFileName + " exists");
+					InputStream in = configurationMgr.getJenaDocumentMgr().getFileManager().open(ruleFileName);
+					if (in != null) {
+					    try {
+					    	InputStreamReader isr = new InputStreamReader(in);
+					    	BufferedReader br = new BufferedReader(isr);
+							List<Rule> rules = Rule.parseRules(Rule.rulesParserFromReader(br));
+							if (rules != null) {
+								ruleList.addAll(rules);
+								newInputFlag = true;
+								return true;
+							}
+					    } catch (ParserException e) {
+					    	String msg = "Error reading rule file '" + ruleFileName + "': " + e.getMessage();
+					    	logger.error(msg);
+					    	addError(new ModelError(msg, ErrorType.ERROR));
+					    }
+					    finally {
+					    	in.close();
+					    }
+					}
+		    	}
+		    	else {
+		    		logger.debug(ruleFileName + " does not exit");
+		    	}
 			}
 			catch (RulesetNotFoundException e) {
 				// ok if not found
@@ -2313,8 +2320,12 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 
 			if (altUrl != null) {
+				logger.debug("modelName: " + modelName);
+				logger.debug("altUrl: " + altUrl);
 				String altFN = new SadlUtils().fileUrlToFileName(altUrl);
+				logger.debug("altFN: " + altFN);
 				String rulefn = altFN.substring(0, altFN.lastIndexOf(".")) + ".rules";
+				logger.debug("rulefn: " + rulefn);
 				if (!ruleFilesLoaded.contains(rulefn)) {
 					if (loadRules(rulefn)) {
 						ruleFilesLoaded.add(rulefn);
