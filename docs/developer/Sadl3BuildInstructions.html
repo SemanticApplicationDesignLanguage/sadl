@@ -118,7 +118,17 @@ Setup Steps</span></h2>
     something like this:<ul>
     <li><img border="0" src="images/Sadl3B1.jpg" width="512" height="535"></li>
     <li>There should be no errors in this dialog box. </li>
-    <li>If there are errors they must be resolved before you continue.</li>
+    <li>If there are errors they must be resolved before you continue.<ul>
+    <li>If the Maven plug-in connectors are not found, it may be due to a 
+    connectivity issue</li>
+    <li>To check connectivity, you can click on Help -&gt; Eclipse Marketplace... 
+    The Marketplace dialog should populate with information from the Internet</li>
+    <li>One potential problem that may occur behind a firewall has to do with 
+    the Java &quot;cacerts&quot; files. You may need files that are created for your 
+    organization. If so, be sure to replace the cacerts files for both the JRE 
+    and the JDK installations.</li>
+  </ul>
+    </li>
     <li>Click Finish</li>
   </ul>
     </li>
@@ -162,8 +172,9 @@ Setup Steps</span></h2>
 <h2>Validating the Build Environment</h2>
 <p>At this point there should be no errors in any of the projects. </p>
 <ol>
-  <li>Right-click on any of the projects and select Run As -&gt; Eclipse 
-  Application. or Debug As -&gt; Eclipse Application<ul>
+  <li>Right-click on the com.ge.research.sadl project and select Run As -&gt; 
+  Eclipse Application. or Debug As -&gt; Eclipse Application. Note that you may 
+  need to select Run Configurations... to get to Eclipse Application.<ul>
     <li>If you wish to create a configuration to customize<ul>
       <li>Do Run As -&gt; Run Configurations... or Debug As -&gt; Debug Configurations</li>
       <li>Create a new configuration under Eclipse Application</li>
