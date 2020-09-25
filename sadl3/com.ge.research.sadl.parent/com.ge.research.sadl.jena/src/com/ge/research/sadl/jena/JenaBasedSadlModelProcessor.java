@@ -670,10 +670,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 					}
 				}
-				String[] mapping = new String[3];
+				String[] mapping = new String[4];
 				mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + owlFN);
 				mapping[1] = getModelName();
 				mapping[2] = getModelAlias();
+				mapping[3] = resource.getURI().toString();
 
 				newMappings.add(mapping);
 
@@ -1753,7 +1754,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				e.printStackTrace();
 			}
 		}
-		if (importPrefix != null) {
+		if (importPrefix != null && importPrefix.length() > 0) {
 			getTheJenaModel().setNsPrefix(importPrefix, importUri);
 		}
 		org.apache.jena.rdf.model.Resource importedOntology = getTheJenaModel().createResource(importUri);
@@ -14404,7 +14405,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				} else if (eResource instanceof ExternalEmfResource) {
 					ExternalEmfResource emfResource = (ExternalEmfResource) eResource;
-					addImportToJenaModel(modelName, importUri, importPrefix, emfResource.getOntModel());
+					OntModel impcmom;
+					try {
+//						impcmom = getConfigMgr().getOntModel(importUri, Scope.INCLUDEIMPORTS);
+						OntModel rsrcom = emfResource.getOntModel();
+//						impcmom.write(System.out, "N3");
+//						rsrcom.write(System.err, "N3");
+						addImportToJenaModel(modelName, importUri, importPrefix, rsrcom);
+					} catch (Exception e1) {
+						logger.debug("JenaBasedSadlModelProcessor failed to find OWL model '"
+								+ importUri + "' while processing Resource '" + importingResourceUri + "'");
+						addError("Unable to import indirect import with URI '" + importUri + "'", simport);
+					}
 					
 					// we need to load any imports of the external resource
 					ExtendedIterator<Ontology> ontologyItr = emfResource.getOntModel().listOntologies();
@@ -14414,12 +14426,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						while (imports.hasNext()) {
 							OntResource imprsrc = imports.next();
 							String imprsrcuri = imprsrc.getURI();
-//							System.out.println(imprsrcuri);
 							try {
-								OntModel impom = getConfigMgr().getOntModel(imprsrcuri, Scope.INCLUDEIMPORTS);
-								getTheJenaModel().addSubModel(impom);
-								getTheJenaModel().addLoadedImport(imprsrcuri);
-								addOrderedImport(imprsrcuri);
+								URI impUri = URI.createURI(imprsrcuri);
+								URI impSadlUri = getConfigMgr().getSadlUriFromPublicUri(getCurrentResource().getResourceSet(), impUri);
+								if (impSadlUri != null) {
+									// according to the mapping file, this should be a SADL model so get it as such so it will be built if necessary
+									Resource impRsrc = getCurrentResource().getResourceSet().getResource(impSadlUri, true);
+									if (impRsrc instanceof XtextResource) {
+										XtextResource xtrsrc = (XtextResource) impRsrc;
+										URI importedResourceUri = xtrsrc.getURI();
+										OntModel importedOntModel = OntModelProvider.find(xtrsrc);
+										if (importedOntModel == null) {
+											logger.debug("JenaBasedSadlModelProcessor failed to find OntModel for SADL Resource '"
+													+ importedResourceUri + "' while processing Resource '" + importingResourceUri + "'");
+											addError("Unable to import model with URI '" + importUri + "'", simport);
+										} else {
+											addImportToJenaModel(modelName, importUri, importPrefix, importedOntModel);
+										}
+									}
+									else {
+										logger.debug("JenaBasedSadlModelProcessor failed to find import for SADL resource '"
+												+ imprsrcuri + "' (mapping SADL URI '" + impSadlUri + "') while processing Resource '" + importingResourceUri + "'");
+										addError("Unable to import indirect import with URI '" + impUri + "'", simport);
+									}
+								}
+								else {
+									OntModel impom = getConfigMgr().getOntModel(imprsrcuri, Scope.INCLUDEIMPORTS);
+									if (impom == null) {
+										logger.debug("JenaBasedSadlModelProcessor failed to find import for non-SADL OWL resource '"
+												+ imprsrcuri + "' while processing Resource '" + importingResourceUri + "'");
+										addError("Unable to import indirect import with URI '" + impUri + "'", simport);
+									}
+									else {
+										getTheJenaModel().addSubModel(impom);
+										getTheJenaModel().addLoadedImport(imprsrcuri);
+										addOrderedImport(imprsrcuri);
+									}
+								}
 							} catch (ConfigurationException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();

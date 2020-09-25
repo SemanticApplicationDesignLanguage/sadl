@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -179,6 +180,15 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 		}
 	}
 
+	private DataSource lastDerivation = null;
+	private DataSource getLastDerivation() {
+		return lastDerivation;
+	}
+
+	private void setLastDerivation(DataSource lastDerivation) {
+		this.lastDerivation = lastDerivation;
+	}
+
 	protected void displayInferenceResults(Object[] retvals, Path trgtFile, String owlModelPath, String modelFolderPath, Map<String, String> prefMap) throws ConfigurationException, IOException {
 		if (retvals == null || retvals.length < 1) {
 			console.error("There are no inference results.");
@@ -201,6 +211,9 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
     		}
     		Object resultObj = retvals[idx];
     		SadlCommandResult result = (SadlCommandResult) resultObj;
+			if (result != null && result.getDerivations() != null) {
+				setLastDerivation(result.getDerivations());
+			}
     		SadlCommand cmd = result != null ? result.getCmd() : null;
     		Object infresults = result != null ? result.getResults() : null;
     		List<ModelError> errors = result != null ? result.getErrors() : null;
@@ -309,12 +322,12 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 	    			}
 	    			console.info("\n");
 	    		}
-	    		if (result.getDerivations() != null) {
-	    			DataSource ds = result.getDerivations();
-	    			console.info(writeDerivationsToFile(trgtFile, ds));
-	    		}
     		}
     	}
+		if (getLastDerivation() != null) {
+			DataSource ds = getLastDerivation();
+			console.info(writeDerivationsToFile(trgtFile, ds));
+		}
     	if (numTests > 0) {
     		String msg = "Test summary: ";
     		msg += numTestsPassed;
@@ -331,25 +344,46 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 	}
 	
 	private String writeDerivationsToFile(Path path, DataSource ds) throws IOException {
- 		String tempFolderPath = projectHelper.getRoot(projectHelper.toUri(path)).resolve("Temp").toString();
+		URI pathUri = projectHelper.toUri(path);
+		URI phRoot = projectHelper.getRoot(pathUri);
+		String phStr = projectHelper.toString();
+ 		String tempFolderPath = phRoot.getPath() + "/Temp"; //phRoot.resolve("Temp").toString();
  		String baseName = path.getFileName().toString();
  		if (baseName.endsWith(ResourceManager.SADLEXT)) {
  			baseName = baseName.substring(0,
  					baseName.length() - 5);
  		}
- 		String outputfilename = tempFolderPath + File.separator + baseName + ".Derivations.log";
+ 		String outputfilename = (new SadlUtils()).fileUrlToFileName(tempFolderPath + File.separator + baseName + ".Derivations.log");
  		String msg = "Derivations written to '" + outputfilename + "'\n";
  		File f = new File(outputfilename);
- 		f.createNewFile();
- 		OutputStream os = new FileOutputStream(f);
- 		InputStream is = ds.getInputStream();
- 		byte[] buf = new byte[1024];
- 		int i = 0;
- 		while ((i = is.read(buf)) != -1) {
- 			os.write(buf, 0, i);
+ 		f.mkdirs();
+ 		if (f.exists()) {
+ 			f.delete();
  		}
- 		is.close();
- 		os.close();
+ 		f.createNewFile();
+ 		if (f.canWrite()) {
+	 		OutputStream os = new FileOutputStream(f);
+	 		InputStream is = ds.getInputStream();
+	 		byte[] buf = new byte[1024];
+	 		int i = 0;
+	 		while ((i = is.read(buf)) != -1) {
+	 			os.write(buf, 0, i);
+	 		}
+	 		is.close();
+	 		os.close();
+ 		}
+ 		else {
+ 			console.error("Unable to write to derivation file '" + f.getCanonicalPath() + "'; writing derivations to console.");;
+ 			StringBuilder sb = new StringBuilder();
+	 		InputStream is = ds.getInputStream();
+	 		byte[] buf = new byte[1024];
+	 		int i = 0;
+	 		while ((i = is.read(buf)) != -1) {
+	 			sb.append(buf);
+	 		}
+	 		is.close();
+	 		console.info(sb.toString());
+ 		}
  		return msg;
  	}
 

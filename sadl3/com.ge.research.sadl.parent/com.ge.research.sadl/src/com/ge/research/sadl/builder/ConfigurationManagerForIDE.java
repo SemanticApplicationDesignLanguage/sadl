@@ -116,6 +116,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	private SadlUtils sadlUtils = new SadlUtils();
 	@Inject
 	private ResourceDescriptionsProvider resourceDescriptionsProvider;
+
+	private Property sadlSourceURLProp = null;;
 	
 	// TODO: Do not use directly
 	public ConfigurationManagerForIDE(String modelFolderPathname, String _repoType) throws ConfigurationException {	
@@ -157,6 +159,16 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			if (addMapping(mapping[0], mapping[1], mapping[2], bKeepPrefix, source, false)) {
 				bChanged = true;
 			}
+			if (mapping.length > 3) {
+				if (addSadlSourceUri(mapping[1], mapping[3])) {
+					bChanged = true;
+				}
+			}
+			else {
+				if (removeSadlSourceUri(mapping[1])) {
+					bChanged = true;
+				}
+			}
 		}
 		if (bChanged) {
 			logger.debug("saving mapping file on change after add");
@@ -169,6 +181,11 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	public synchronized boolean addMapping(String altUrl, String publicUri,
 			String globalPrefix, boolean bKeepPrefix, String source) throws ConfigurationException, IOException, URISyntaxException {
 		boolean bChanged = super.addMapping(altUrl, publicUri, globalPrefix, bKeepPrefix, source);
+		if (!source.equals(SADL)) {
+			if (removeSadlSourceUri(publicUri)) {
+				bChanged = true;
+			}
+		}
 		if (bChanged) {
 			logger.debug("saving mapping file on change after add");
 			super.saveOntPolicyFile();
@@ -188,6 +205,82 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return bChanged;
 	}
 	
+	/**
+	 * Method to add the sadlSourceURL information to the mapping
+	 * @param string
+	 * @param string2
+	 */
+	private boolean addSadlSourceUri(String pubUri, String sadlSourceURL) {
+		logger.debug("adding sadlSourcURL to mapping: " + pubUri + " --> " + sadlSourceURL);
+    	StmtIterator pubitr = getMappingModel().listStatements(null, publicUrlProp, getMappingModel().getResource(pubUri));
+    	if (pubitr.hasNext()) {
+    		Statement s = pubitr.next();
+    		StmtIterator ssuitr = getMappingModel().listStatements(s.getSubject(), getSadlSourceURLProp(), (RDFNode)null);
+    		if (ssuitr.hasNext()) {
+    			Statement ssustmt = ssuitr.next();
+    			ssuitr.close();
+    			getMappingModel().remove(ssustmt);
+    		}
+    		getMappingModel().add(s.getSubject(), getSadlSourceURLProp(), getMappingModel().createTypedLiteral(sadlSourceURL));
+    		pubitr.close();
+    		return true;
+    	}
+		return false;
+	}
+	
+	/**
+	 * Method to remove a sadlSourceURL property value from a mapping
+	 * @param pubUri
+	 * @return
+	 */
+	private boolean removeSadlSourceUri(String pubUri) {
+		logger.debug("removing sadlSourcURL from mapping: " + pubUri);
+    	StmtIterator pubitr = getMappingModel().listStatements(null, publicUrlProp, getMappingModel().getResource(pubUri));
+    	if (pubitr.hasNext()) {
+    		Statement s = pubitr.next();
+    		StmtIterator ssuitr = getMappingModel().listStatements(s.getSubject(), getSadlSourceURLProp(), (RDFNode)null);
+    		if (ssuitr.hasNext()) {
+    			Statement ssustmt = ssuitr.next();
+    			ssuitr.close();
+    			getMappingModel().remove(ssustmt);
+         		pubitr.close();
+        		return true;
+    		}
+    	}
+		return false;
+	}
+	
+	/**
+	 * Method to get the SADL source URL from the mapping file
+	 * @param pubUri
+	 * @return
+	 */
+	private String getSadlSourceUriFromMappings(String pubUri) {
+		logger.debug("getting sadlSourcURL from mapping: " + pubUri );
+    	StmtIterator pubitr = getMappingModel().listStatements(null, publicUrlProp, getMappingModel().getResource(pubUri));
+    	if (pubitr.hasNext()) {
+     		List<Statement> pendingDeletions = null;
+    		Statement s = pubitr.next();
+    		StmtIterator ssuitr = getMappingModel().listStatements(s.getSubject(), getSadlSourceURLProp(), (RDFNode)null);
+    		if (ssuitr.hasNext()) {
+    			Statement ssustmt = ssuitr.next();
+    			return ssustmt.getObject().toString();
+    		}
+    	}
+    	return null;
+	}
+	
+	/**
+	 * Method to get the sadlSourceURL property
+	 * @return
+	 */
+	private Property getSadlSourceURLProp() {
+		if (sadlSourceURLProp == null) {
+    		sadlSourceURLProp = getMappingModel().createProperty(ONT_MANAGER_SADL_SOURCE);
+		}
+		return sadlSourceURLProp;
+	}
+
 	/**
 	 * Call this method to add a new mapping or update an existing one for a given altURL. (The assumption is that
 	 * the file name will not change but the model name (uri) may be easily changed.)
@@ -342,6 +435,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
         	if (sadlNode == null) {
         		sadlNode = getMappingModel().createTypedLiteral(SADL);
         		createdBy = getMappingModel().createProperty(ONT_MANAGER_CREATED_BY);
+        		sadlSourceURLProp = getMappingModel().createProperty(ONT_MANAGER_SADL_SOURCE);
         		altUrlProp = getMappingModel().createProperty(ONT_MANAGER_ALT_URL);
         		publicUrlProp = getMappingModel().createProperty(ONT_MANAGER_PUBLIC_URI);
         		prefixProp = getMappingModel().createProperty(ONT_MANAGER_PREFIX);
@@ -847,6 +941,10 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	public URI getSadlUriFromPublicUri(ResourceSet resourceSet, URI publicUri)
 			throws ConfigurationException, IOException {
 		if (isSadlDerivedPublicUri(publicUri.toString())) {
+			String ssUrl = getSadlSourceUriFromMappings(publicUri.toString());
+			if (ssUrl != null) {
+				return URI.createURI(ssUrl);
+			}
 			// TODO: Use ResourceManager#sadlFileNameOfOwlAltUrl
 			IResourceDescriptions descriptions = resourceDescriptionsProvider.getResourceDescriptions(resourceSet);
 			Iterable<IEObjectDescription> matchingModels = descriptions.getExportedObjects(SADLPackage.Literals.SADL_MODEL, QualifiedName.create(publicUri.toString()), false);

@@ -444,6 +444,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 			int cntr = 0;
 			while (pubitr.hasNext()) {
 				Statement s = pubitr.nextStatement();
+				Resource subj = s.getSubject();
 				if (cntr > 0) {
 					// there are multiple entries for this public URI
 					if (pendingDeletions == null) {
@@ -451,7 +452,6 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 					}
 					pendingDeletions.add(s);
 				} else {
-					Resource subj = s.getSubject();
 					// find the corresponding altURL
 					Statement s2 = subj.getProperty(altUrlProp);
 					if (s2 != null) {
@@ -488,10 +488,29 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 								bChanged = true;
 							}
 						}
-					} else if (prefix != null) {
+					} else if (prefix != null && prefix.toString().length() > 0) {
 						subj.addProperty(prefixProp, prefix);
 						bChanged = true;
 					}
+				}
+				boolean sameSourceFound = false;
+				StmtIterator stmtitr = subj.listProperties(createdBy);
+				while (stmtitr.hasNext()) {
+					Statement stmt = stmtitr.nextStatement();
+					String existingSrc = stmt.getObject().toString();
+					if (source != null && existingSrc.equals(source)) {
+						sameSourceFound = true;
+					}
+					else {
+						if (pendingDeletions == null) {
+							pendingDeletions = new ArrayList<Statement>();
+						}
+						pendingDeletions.add(stmt);
+					}
+				}
+				if (!sameSourceFound && source != null) {
+					subj.addProperty(createdBy, source);
+					bChanged = true;
 				}
 				cntr++;
 			}
@@ -616,7 +635,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 				bChanged = true;
 			}
 			// add prefix to global prefixes
-			if (prefix != null) {
+			if (prefix != null && prefix.getString().length() > 0) {
 				addGlobalPrefix(pubv.getURI(), prefix.getString());
 			}
 		} catch (URISyntaxException e) {

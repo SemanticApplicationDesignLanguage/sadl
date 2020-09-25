@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.activation.DataSource;
+
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.datatypes.xsd.XSDDuration;
 import org.apache.jena.ontology.Individual;
@@ -93,6 +95,7 @@ import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
+import com.ge.research.sadl.reasoner.InvalidDerivationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.ModelError;
@@ -155,7 +158,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		}
 		OntModel om = OntModelProvider.find(resource);
 		if (om == null) {
-			throw new SadlInferenceException("Unable to find OWL model for Resource '" + resource.getURI().toString() + "'");
+			System.err.println("Unable to find OWL model for Resource '" + resource.getURI().toString() + "'. Does the file have errors?");
 		}
 		List<SadlCommand> cmds = OntModelProvider.getSadlCommands(resource);
 		if (cmds == null || cmds.size() < 1) {
@@ -226,7 +229,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					results.add(scr);
 				}
 				else if (cmd instanceof Read) {
-					results.add(processRead((Read)cmd));
+					SadlCommandResult scr = processRead((Read)cmd);
+					results.add(scr);
 				}
 				else if (cmd instanceof Test) {
 					SadlCommandResult scr = processTest((Test)cmd);
@@ -1367,6 +1371,19 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		SadlCommandResult result = new SadlCommandResult(q);
 		result.setResults(processAdhocQuery(translator, q));
 		result.setErrors(getInitializedReasoner().getErrors());
+		try {
+			result.setDerivations(getInitializedReasoner().getDerivations());
+			
+		} catch (InvalidDerivationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ReasonerNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 		return result;
 	}
 	
@@ -1846,4 +1863,5 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		}
 		return null;
 	}
+
 }
