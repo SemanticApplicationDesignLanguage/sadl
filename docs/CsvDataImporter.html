@@ -1490,6 +1490,12 @@ folder&quot; setting identified the Eclipse project and possibly subfolder into 
 the import output file is to be written. Finally the Options section allows 
 selection of the output file format, OWL or SADL.</p>
 
+<p><b>Note</b>: if you Import as a SADL file and later change to Import as an 
+OWL file, you must delete the SADL file or you will have two models with the 
+same URI, which will be an error. The same is true if switching from OWL to SADL--you 
+will need to delete the OWL file. You may need to clean/build the project after 
+switching import file type to rebuild the mapping file.</p>
+
 </body>
 
 </html>
