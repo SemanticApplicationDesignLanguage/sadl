@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
@@ -285,6 +286,7 @@ public class JenaReasonerPlugin extends Reasoner{
 //		addBuiltin("sqrt", pkg + "Sqrt");
 //		addBuiltin("subtractDates", pkg + "SubtractDates");
 //		addBuiltin("sum", pkg + "Sum");
+//		PropertyConfigurator.configure("c:/sadlalt2/log4j2.xml");
 	}
 	
 	/**
@@ -534,16 +536,49 @@ public class JenaReasonerPlugin extends Reasoner{
 		return 1;
 	}
 	
-	private void dumpModelToLogger(OntModel model) {
-		ByteArrayOutputStream os = new ByteArrayOutputStream(); 
-		model.write(os); 
+	private void dumpModelToLogger(OntModel model, OutputStream os) throws IOException {
+		Model baseModel = model.getBaseModel();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		baseModel.write(bos, "N3"); 
 		try {
-			String aString = new String(os.toByteArray(),"UTF-8");
-			logger.debug(aString);
+			String aString = new String(bos.toByteArray(),"UTF-8");
+			if (os != null) {
+				os.write(aString.getBytes());
+				os.write("\n\n".getBytes());
+			}
+			else {		
+				logger.debug(aString);
+			}
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
+		String msg = "Imports of model above:";
+		if (os != null) {
+			os.write(msg.getBytes());
+			os.write("\n".getBytes());
+		}
+		else {
+			logger.debug(msg);
+		}
+		Set<String> impUris = model.listImportedOntologyURIs(false);
+		if (impUris != null) {
+			Iterator<String> impuriitr = impUris.iterator();
+			while (impuriitr.hasNext()) {
+				msg = "   imports '" + impuriitr.next() + "'";
+				if (os != null) {
+					os.write(msg.getBytes());
+					os.write("\n".getBytes());
+				}
+				else {
+					logger.debug(msg);
+				}
+			}
+		}
+		ExtendedIterator<OntModel> smitr = model.listSubModels(false);
+		while (smitr.hasNext()) {
+			dumpModelToLogger(smitr.next(), os);
+		}
 	}
 
 	private void loadImports() {
@@ -2261,6 +2296,20 @@ public class JenaReasonerPlugin extends Reasoner{
 				generateTboxModelWithSpec();
 				logger.debug("In prepareInfModel, modelSpec: "+modelSpec.toString());
 				logger.debug("In prepareInfModel, reasoner rule count: "+getReasonerOnlyWhenNeeded().getRules().size());
+//				if (logger.isDebugEnabled()) {
+					FileOutputStream fos;
+					try {
+						fos = new FileOutputStream(new File("c://sadlalt2/logs/tboxDump.log"));
+						dumpModelToLogger(tboxModelWithSpec, fos);
+						fos.close();
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+//				}
 				infModel = ModelFactory.createInfModel(reasoner, tboxModelWithSpec);
 //		        InfGraph graph = reasoner.bind(tboxModelWithSpec.getGraph());
 //		        infModel = new InfModelImpl(graph);
