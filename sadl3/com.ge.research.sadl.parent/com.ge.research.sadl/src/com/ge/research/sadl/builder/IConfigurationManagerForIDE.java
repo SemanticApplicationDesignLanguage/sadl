@@ -352,6 +352,14 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract String getBaseUriFromOwlFile(String owlFilename);
 	
 	/**
+	 * Call this method to find the base URI that is identified in an OWL model. Normally this will be the 
+	 * namespace that has an empty string as the prefix.
+	 * @param owlFilename--the complete path and filename of the OWL model
+	 * @return the base URI identified in the file if found else null
+	 */
+	public abstract String getBaseUriFromOwlModel(String owlFilename, OntModel om);
+
+	/**
 	 * Call this method to load an OWL file and return the resulting Jena OntModel
 	 * @param owlFilename
 	 * @return Jena OntModel
@@ -402,4 +410,5 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @return
 	 */
 	public abstract boolean cleanTdbFolder();
+
 }

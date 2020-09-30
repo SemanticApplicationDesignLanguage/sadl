@@ -416,7 +416,9 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		Resource pubv = getMappingModel().createResource(publicUri);
 		Resource altv = getMappingModel().createResource(altUrl);
 		Literal pref = null;
-		if (globalPrefix != null) {
+		if (globalPrefix != null && globalPrefix.length() > 0) {
+			// don't put a prefix of "" (empty string) into the global mappings.
+			//	(it may go into the OntModel prefixes for the current model, but not the mapping file)
 			pref = getMappingModel().createTypedLiteral(globalPrefix);
 		}
 		return addMapping(altv, pubv, pref, bKeepPrefix, source);

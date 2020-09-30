@@ -1,5 +1,6 @@
 package com.ge.research.sadl.builder;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +38,11 @@ public class ConfigurationManagerForIdeFactory {
 	public static ConfigurationManagerForIDE getConfigurationManagerForIDE(String modelFolder, String format) throws ConfigurationException {
 		if (configManagers == null) {
 			configManagers = new HashMap<String, ConfigurationManagerForIDE>();
+		}
+		// this next section makes sure that leading "/" on Windows is removed so that modelFolder is always the saem
+		File mff = new File(modelFolder);
+		if (mff.exists() && mff.isDirectory()) {
+			modelFolder = mff.getAbsolutePath();
 		}
 		modelFolder = modelFolder != null ? formatPathRemoveBackslashes(modelFolder) : null;
 		if (!configManagers.containsKey(modelFolder)) {

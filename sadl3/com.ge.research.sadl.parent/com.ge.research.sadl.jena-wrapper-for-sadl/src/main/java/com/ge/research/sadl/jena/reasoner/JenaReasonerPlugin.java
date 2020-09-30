@@ -118,6 +118,7 @@ import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin;
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
@@ -537,9 +538,17 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 	
 	private void dumpModelToLogger(OntModel model, OutputStream os) throws IOException {
+		String baseUri = getBaseUriOfModel(model);
+		String msg = "\n\nDump of model '" + baseUri + "':\n";
+		if (os != null) {
+			os.write(msg.getBytes());
+		}
+		else {
+			logger.debug(msg);
+		}
 		Model baseModel = model.getBaseModel();
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
-		baseModel.write(bos, "N3"); 
+		baseModel.write(bos, "RDF/XML-ABBREV"); 
 		try {
 			String aString = new String(bos.toByteArray(),"UTF-8");
 			if (os != null) {
@@ -553,10 +562,9 @@ public class JenaReasonerPlugin extends Reasoner{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
-		String msg = "Imports of model above:";
+		msg = "\n\nImports of model '" + baseUri + "':\n";
 		if (os != null) {
 			os.write(msg.getBytes());
-			os.write("\n".getBytes());
 		}
 		else {
 			logger.debug(msg);
@@ -916,8 +924,14 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 	
 	private String getBaseUriOfModel(OntModel model) {
+		if (configurationMgr instanceof ConfigurationManagerForIDE) {
+			String baseuri = ((ConfigurationManagerForIDE)configurationMgr).getBaseUriFromOwlModel(null, model);
+			if (baseuri != null) {
+				return baseuri;
+			}
+		}
 		String modelBaseUri = null;
-		Set<String> importuris = model.listImportedOntologyURIs(true);
+		Set<String> importuris = model.listImportedOntologyURIs(false);
 		ExtendedIterator<Ontology> ontItr = model.listOntologies();
 		if (ontItr.hasNext()) {
 			while (ontItr.hasNext()) {
@@ -927,7 +941,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				}
 				if (!importuris.contains(ont.getURI())) {
 					modelBaseUri = ont.getURI();
-					break;
+//					break;
 				}
 			}
 		}
@@ -2296,20 +2310,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				generateTboxModelWithSpec();
 				logger.debug("In prepareInfModel, modelSpec: "+modelSpec.toString());
 				logger.debug("In prepareInfModel, reasoner rule count: "+getReasonerOnlyWhenNeeded().getRules().size());
-//				if (logger.isDebugEnabled()) {
-					FileOutputStream fos;
-					try {
-						fos = new FileOutputStream(new File("c://sadlalt2/logs/tboxDump.log"));
-						dumpModelToLogger(tboxModelWithSpec, fos);
-						fos.close();
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-//				}
+//				dumpModelToLogger(tboxModelWithSpec);
 				infModel = ModelFactory.createInfModel(reasoner, tboxModelWithSpec);
 //		        InfGraph graph = reasoner.bind(tboxModelWithSpec.getGraph());
 //		        infModel = new InfModelImpl(graph);
@@ -2338,6 +2339,23 @@ public class JenaReasonerPlugin extends Reasoner{
 		newInputFlag = false;			
 	}
 
+	private void dumpModelToLogger(OntModel model) {
+		if (logger.isDebugEnabled()) {
+			FileOutputStream fos;
+			try {
+				fos = new FileOutputStream(new File("c://sadlalt2/logs/tboxDump.log"));
+				dumpModelToLogger(model, fos);
+				fos.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
 	private void generateTboxModelWithSpec() {
 		if (schemaModelIsCachedInferredModel) {
 			// don't need a model spec, new OntModel; use the model on the TDB Dataset directly
@@ -2351,9 +2369,11 @@ public class JenaReasonerPlugin extends Reasoner{
 		else {
 			// use the data to create a new OntModel with the specified model spec
 			if (dataModel != null) {
+				dumpModelToLogger(dataModel);
 				tboxModelWithSpec = ModelFactory.createOntologyModel(modelSpec, dataModel);
 			}
 			else {
+				dumpModelToLogger(schemaModel);
 				tboxModelWithSpec = ModelFactory.createOntologyModel(modelSpec, schemaModel);
 			}
 

@@ -946,13 +946,15 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				return URI.createURI(ssUrl);
 			}
 			// TODO: Use ResourceManager#sadlFileNameOfOwlAltUrl
-			IResourceDescriptions descriptions = resourceDescriptionsProvider.getResourceDescriptions(resourceSet);
-			Iterable<IEObjectDescription> matchingModels = descriptions.getExportedObjects(SADLPackage.Literals.SADL_MODEL, QualifiedName.create(publicUri.toString()), false);
-			Iterator<IEObjectDescription> it = matchingModels.iterator();
-			if (it.hasNext()) {
-				IEObjectDescription description = it.next();
-				// This will be the URI of the SADL file
-				return description.getEObjectURI().trimFragment();
+			if (resourceDescriptionsProvider != null) {
+				IResourceDescriptions descriptions = resourceDescriptionsProvider.getResourceDescriptions(resourceSet);
+				Iterable<IEObjectDescription> matchingModels = descriptions.getExportedObjects(SADLPackage.Literals.SADL_MODEL, QualifiedName.create(publicUri.toString()), false);
+				Iterator<IEObjectDescription> it = matchingModels.iterator();
+				if (it.hasNext()) {
+					IEObjectDescription description = it.next();
+					// This will be the URI of the SADL file
+					return description.getEObjectURI().trimFragment();
+				}
 			}
 		}
 		return null;
@@ -1074,20 +1076,28 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	@Override
 	public String getBaseUriFromOwlFile(String owlFilename) {
 		OntModel om = loadOntModel(owlFilename);
+		return getBaseUriFromOwlModel(owlFilename, om);
+	}
+
+	
+	@Override
+	public String getBaseUriFromOwlModel(String owlFilename, OntModel om) {
 		String uriForEmptyString = om.getNsPrefixURI("");
 		if (uriForEmptyString != null && uriForEmptyString.endsWith("#")) {
 			return uriForEmptyString.substring(0, uriForEmptyString.length() - 1);
 		}
-		try {
-			Optional<String> buri = new XMLHelper().tryReadBaseUri(new SadlUtils().fileToString(new File(owlFilename)));
-			if (buri.isPresent()) {
-				uriForEmptyString = buri.get();
-				return uriForEmptyString.endsWith("#") ? uriForEmptyString.substring(0, uriForEmptyString.length() - 1) : uriForEmptyString;
-
+		if (owlFilename != null) {
+			try {
+				Optional<String> buri = new XMLHelper().tryReadBaseUri(new SadlUtils().fileToString(new File(owlFilename)));
+				if (buri.isPresent()) {
+					uriForEmptyString = buri.get();
+					return uriForEmptyString.endsWith("#") ? uriForEmptyString.substring(0, uriForEmptyString.length() - 1) : uriForEmptyString;
+	
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return uriForEmptyString;
 	}

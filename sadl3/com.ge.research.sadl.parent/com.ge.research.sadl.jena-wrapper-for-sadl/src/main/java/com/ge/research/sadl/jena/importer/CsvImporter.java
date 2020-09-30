@@ -3831,7 +3831,7 @@ public class CsvImporter implements ITabularDataImporter {
 				}
 				
 				String prefix = getConfigMgr().getGlobalPrefix(publicUri);
-				if (prefix != null) {
+				if (prefix != null && prefix.length() > 0) {
 					importModel.setNsPrefix(prefix, toNamespace(publicUri));
 				}
 				importModel.getDocumentManager().addAltEntry(publicUri, altUrl);

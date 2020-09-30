@@ -44,6 +44,7 @@ import org.apache.jena.util.iterator.ExtendedIterator
 import org.apache.jena.vocabulary.OWL
 import org.apache.jena.vocabulary.RDF
 import org.apache.jena.vocabulary.RDFS
+import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl
@@ -62,6 +63,7 @@ import org.eclipse.xtext.validation.IResourceValidator
 
 import static com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory.*
 import static org.eclipse.emf.common.util.URI.createURI
+import com.ge.research.sadl.reasoner.utils.SadlUtils
 
 @Log
 class ExternalEmfResource extends ResourceImpl {
@@ -87,6 +89,16 @@ class ExternalEmfResource extends ResourceImpl {
 		ontModel = initOntModel(content);
 		val baseUri = ontModel.getBaseUri(content);
 		val altBaseUri = baseUri.altBaseUri;
+		val prefix = ontModel.getNsURIPrefix(baseUri);
+		val cmgr = getConfigurationManager(options);
+		var altUrl = cmgr.getAltUrlFromPublicUri(altBaseUri)
+		if (altUrl === null || altUrl.equals(altBaseUri)) {
+			// there's no mapping so add one
+			val afp = ResourceManager.toAbsoluteFilePath(uri)
+			altUrl = (new SadlUtils()).fileNameToFileUrl(afp)
+			cmgr.addMapping(altUrl, altBaseUri, prefix, false, "ExternalEmfResource")
+		}
+		
 		ontModel.listSubjects.filter[URIResource].map[it -> createURI(URI)].filter[key.localName == value.fragment].
 			forEach [
 				val model = getOrCreateSadlModel(altBaseUri);

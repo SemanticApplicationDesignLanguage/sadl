@@ -73,35 +73,38 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 			(!segments.get(2).equals("OwlModels") &&
 				!segments.get(2).equals(EXTRACTED_MODELS) &&
 				!segments.get(2).equals(EclipseExternalEmfResourcePredicate.CG_MODELS))) {
-			// this isn't something in the OwlModels folder
-			val prjuri = project.locationURI
-			if (prjuri !== null) {
-				val prjpath = prjuri.path
-				val owlmodelfolder = prjpath + "/OwlModels"
-				val cmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(owlmodelfolder, null);
-				if (cmgr !== null) {
-					var cntr = 0;
-					var sb = new StringBuilder()
-					for (seg : segments) {
-						if (cntr > 1) {
-							sb.append("/")
-							sb.append(seg)
-						}
-						cntr++
-					}
-					val su = new SadlUtils()
-					val fnuri = su.fileNameToFileUrl(prjpath + "/" + sb.toString)
-					try {
-						// if we succeed in getting a public URI then there is a mapping and we should import the OWL file
-						val puri = cmgr.getPublicUriFromActualUrl(fnuri)
-//						println("Index non-SADL-generated OWL model '" + puri + "' located at '" + fnuri + "' returning true");
-						return true;
-					}
-					catch (Throwable t) {
-						// this just means that there's no mapping provided so don't process the file.
-					}
-				}
-			}
+			// this isn't something in the OwlModels folder or one of the exempted folders so apply
+			return true;
+//			val prjuri = project.locationURI
+//			if (prjuri !== null) {
+//				val prjpath = prjuri.path
+//				val owlmodelfolder = prjpath + "/OwlModels"
+//				val cmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(owlmodelfolder, null);
+//				if (cmgr !== null) {
+//					var cntr = 0;
+//					var sb = new StringBuilder()
+//					for (seg : segments) {
+//						if (cntr > 1) {
+//							sb.append("/")
+//							sb.append(seg)
+//						}
+//						cntr++
+//					}
+//					val su = new SadlUtils()
+//					val fnuri = su.fileNameToFileUrl(prjpath + "/" + sb.toString)
+//					try {
+//						// if we succeed in getting a public URI then there is a mapping and we should import the OWL file
+//						val puri = cmgr.getPublicUriFromActualUrl(fnuri)
+////						println("Index non-SADL-generated OWL model '" + puri + "' located at '" + fnuri + "' returning true");
+//						return true;
+//					}
+//					catch (Throwable t) {
+//						// this just means that there's no mapping provided so don't process the file.
+//						// well, it isn't in the OwlModels folder so why not process?
+//						return true;
+//					}
+//				}
+//			}
 		}
 		
 //		val externalDefinitions = newArrayList;
