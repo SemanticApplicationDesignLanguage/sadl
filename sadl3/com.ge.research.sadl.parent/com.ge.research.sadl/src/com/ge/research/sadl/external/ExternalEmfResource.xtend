@@ -91,12 +91,19 @@ class ExternalEmfResource extends ResourceImpl {
 		val altBaseUri = baseUri.altBaseUri;
 		val prefix = ontModel.getNsURIPrefix(baseUri);
 		val cmgr = getConfigurationManager(options);
-		var altUrl = cmgr.getAltUrlFromPublicUri(altBaseUri)
+		var String altUrl = null
+		try {
+			altUrl = cmgr.getAltUrlFromPublicUri(altBaseUri)
+		}
+		catch (Exception e) {}
+		
 		if (altUrl === null || altUrl.equals(altBaseUri)) {
 			// there's no mapping so add one
-			val afp = ResourceManager.toAbsoluteFilePath(uri)
-			altUrl = (new SadlUtils()).fileNameToFileUrl(afp)
-			cmgr.addMapping(altUrl, altBaseUri, prefix, false, "ExternalEmfResource")
+			if (!"synthetic".equals(uri.scheme())) {
+				val afp = ResourceManager.toAbsoluteFilePath(uri)
+				altUrl = (new SadlUtils()).fileNameToFileUrl(afp)
+				cmgr.addMapping(altUrl, altBaseUri, prefix, false, "ExternalEmfResource")
+			}
 		}
 		
 		ontModel.listSubjects.filter[URIResource].map[it -> createURI(URI)].filter[key.localName == value.fragment].

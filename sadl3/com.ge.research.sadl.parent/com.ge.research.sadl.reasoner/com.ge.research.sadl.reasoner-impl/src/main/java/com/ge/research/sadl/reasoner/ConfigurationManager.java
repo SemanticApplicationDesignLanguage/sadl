@@ -1544,11 +1544,13 @@ public class ConfigurationManager implements IConfigurationManager {
 				return mappings.get(publicUri);
 			}
 		}
-		String alt = getJenaDocumentMgr().doAltURLMapping(publicUri);
-		if (alt != null) {
-			return alt;
+		OntDocumentManager jdm = getJenaDocumentMgr();
+		if (jdm != null) {
+			String alt = getJenaDocumentMgr().doAltURLMapping(publicUri);
+			if (alt != null) {
+				return alt;
+			}
 		}
-		
 		throw new ConfigurationException("PublicURI '" + publicUri + "' not found in mappings.");
 	}
 	
