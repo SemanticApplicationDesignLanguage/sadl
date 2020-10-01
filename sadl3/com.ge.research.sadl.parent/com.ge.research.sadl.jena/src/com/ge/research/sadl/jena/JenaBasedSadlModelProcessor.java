@@ -7114,6 +7114,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else if (article.equals("another")) {
 				ordNum = 2;
 			}
+			
+			if (!isUseArticlesInValidation() && 
+					(ordNum > 1 || isDefiniteArticle(article))) {
+				// grammar has content only valid if article use is turned on in preferences
+				addError("The use of articles is not enabled in preferences but the content is only valid when enabled.", expr);
+			}
 
 			if (isUseArticlesInValidation() && !isDefiniteArticle(article) && typenode instanceof NamedNode
 					&& (((NamedNode) typenode).getNodeType().equals(NodeType.ClassNode)
