@@ -2,6 +2,7 @@ package com.ge.research.sadl.jena.reasoner.builtin;
 
 import java.io.InvalidObjectException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -113,7 +114,9 @@ public class ThereExists extends CancellableBuiltin {
 		    					}
 		    					matches.add(sn);
 	    					}
-    						_logger.debug("in Rule " + context.getRule().getName() + " thereExists match failed because '" + sn.toString() + "' is not of type '" + pclass.toString() + "'");
+	    					else {
+	    						_logger.debug("in Rule " + context.getRule().getName() + " thereExists match failed because '" + sn.toString() + "' is not of type '" + pclass.toString() + "'");
+	    					}
 	    				}
 	    				if (matches != null) {
 	    					if (matches.size() > 1) {
@@ -169,9 +172,16 @@ public class ThereExists extends CancellableBuiltin {
     				tentative = inst[i];
     			}
     			else {
-    				if (tentative == null || (tentative = compareMatchSets(context, tentative, inst[i])) == null) {
+    				if (tentative == null) {
     					theInst = null;
     					break;
+    				}
+    				else {
+    					tentative = compareMatchSets(context, tentative, inst[i]);
+    					if (tentative == null) {
+    						theInst = null;
+    						break;
+    					}
     				}
     			}
     		}
@@ -185,6 +195,28 @@ public class ThereExists extends CancellableBuiltin {
     			}
     			else if (tentative instanceof ArrayList<?>){
     				// we have multiple matches
+    				_logger.error("Duplicate matches (" + (((List<?>) tentative).size()) + ") found in rule " + context.getRule().getName() + ": ");
+    				if (getObjectValue != null && getObjectValue.length > 0) {
+    					for (int i = 0; i < ((List<?>) tentative).size(); i++) {
+    						_logger.error("  Match " + (i + 1) + ":");
+    						for (int j = 0; j < getObjectValue.length; j++) {
+    							if (getObjectValue[j]) {
+    			    				ClosableIterator<Triple> citr = context.find(subj[j], prop[j], (Node) ((List<Node>) tentative).get(i));
+    			    				while (citr.hasNext()) {
+    			    					Triple tr = (Triple) citr.next();
+    			    					_logger.error("   Triple: " + tr.toString());
+    			    				}
+    							}
+    							else {
+    			    				ClosableIterator<Triple> citr = context.find((Node) ((List<Node>) tentative).get(i), prop[j], obj[j]);
+    			    				while (citr.hasNext()) {
+    			    					Triple tr = (Triple) citr.next();
+    			    					_logger.error("   Triple: " + tr.toString());
+    			    				}
+    							}
+    						}
+    					}
+    				}
     				for (int i = 0; i < ((ArrayList<?>)tentative).size(); i++) {
     					Object tent = ((ArrayList<?>)tentative).get(i);
     					if (tent instanceof Node) {
@@ -335,30 +367,7 @@ public class ThereExists extends CancellableBuiltin {
 				if (matches.size() == 1) {
 					return matches.get(0);
 				}
-//				throw new BuiltinException(this, context, "More than one instance matches the thereExists criteria; unable to return unique value.");
-				_logger.error("Duplicate matches (" + (matches.size()) + ") found in rule " + context.getRule().getName() + ": ");
-				if (getObjectValue != null && getObjectValue.length > 0) {
-					for (int i = 0; i < matches.size(); i++) {
-						_logger.error("  Match " + (i + 1) + ":");
-						for (int j = 0; j < getObjectValue.length; j++) {
-							if (getObjectValue[j]) {
-			    				ClosableIterator<Triple> citr = context.find(subj[j], prop[j], (Node) matches.get(i));
-			    				while (citr.hasNext()) {
-			    					Triple tr = (Triple) citr.next();
-			    					_logger.error("   Triple: " + tr.toString());
-			    				}
-							}
-							else {
-			    				ClosableIterator<Triple> citr = context.find((Node) matches.get(i), prop[j], obj[j]);
-			    				while (citr.hasNext()) {
-			    					Triple tr = (Triple) citr.next();
-			    					_logger.error("   Triple: " + tr.toString());
-			    				}
-							}
-						}
-					}
-				}
-				return matches.get(0);
+				return matches;
 			}
 		}
 		else {
