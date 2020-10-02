@@ -6259,12 +6259,51 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					addTypeCheckingError("Property '" + ((VariableNode) tr.getPredicate()).toDescriptiveString()
 							+ "' is a variable, unable to validate", expr);
 				} else if (tr.getPredicate() != null){
-					addTypeCheckingError("Unexpected error finding property '" + tr.getPredicate().toDescriptiveString()
+					if (tr.getPredicate() instanceof NamedNode && 
+							((NamedNode)tr.getPredicate()).getContext() != null && 
+							((NamedNode)tr.getPredicate()).getContext() instanceof SadlResource) {
+						NamedNode prnode = (NamedNode)tr.getPredicate();
+						SadlResource predDecl = getDeclarationExtensions().getDeclaration((SadlResource)((NamedNode)tr.getPredicate()).getContext());
+						EObject container = predDecl.eContainer();
+						while (container.eContainer() != null && !(container.eContainer() instanceof SadlModel)) {
+							container = container.eContainer();
+						}
+						if (container instanceof SadlModelElement) {
+							processModelElement((SadlModelElement) container);
+						}
+						else {
+							processExpression(container);
+						}
+						eobjectPreprocessed(container);
+//						if (prnode != null && prnode instanceof NamedNode) {
+//							NodeType propType = ((NamedNode)prnode).getNodeType();
+//							if (propType.equals(NodeType.ObjectProperty)) {
+//								pred = getOrCreateObjectProperty(prnode.getURI());
+//							} else if (propType.equals(NodeType.DataTypeProperty)) {
+//								try {
+//									pred = getOrCreateDatatypeProperty(prnode.getURI());
+//								} catch (JenaProcessorException e) {
+//									// TODO Auto-generated catch block
+//									e.printStackTrace();
+//								}
+//							} else if (propType.equals(NodeType.PropertyNode)) {
+//								pred = getOrCreateRdfProperty(prnode.getURI());
+//							} else if (propType.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+//								return; 	// anything is OK for an annotation (OWL 1)
+//							}				
+//						}
+						pred = tr.getPredicate() != null ? getTheJenaModel().getOntProperty(tr.getPredicate().toFullyQualifiedString()) : null;
+					}
+					if (pred == null) {
+						addTypeCheckingError("Unexpected error finding property '" + tr.getPredicate().toDescriptiveString()
 							+ "' in ontology, cannot validate", expr);
+					}
 				} else {
 					addTypeCheckingError("Property not identified", expr);
 				}
-				return;
+				if (pred == null) {
+					return;
+				}
 			}
 			if (!(tr.getSubject() instanceof VariableNode) || !isContainedByQuery(expr)) {
 				try {

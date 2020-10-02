@@ -78,8 +78,12 @@ public class TestJenaTranslator extends AbstractSADLModelProcessorTest {
 					System.out.println(issue.message)
 				}
 			}
-			assertTrue(issues.size == 1)
-			assertTrue(issues.get(0).toString.contains("does not reference the matching instance"));
+			assertTrue(issues.size == 2)
+			assertTrue(issues.get(0).toString.contains("does not reference the matching instance") ||
+				issues.get(1).toString.contains("does not reference the matching instance"))
+			assertTrue(issues.size == 2)
+			assertTrue(issues.get(0).toString.contains("The use of articles is not enabled in preferences but the content is only valid when enabled") ||
+				issues.get(1).toString.contains("The use of articles is not enabled in preferences but the content is only valid when enabled"))			
 		]
 
 	}
@@ -153,7 +157,7 @@ public class TestJenaTranslator extends AbstractSADLModelProcessorTest {
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 0)
+			assertTrue(issues.size == 3)		// construct requires articles to be enabled
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -189,7 +193,7 @@ rdf(v3, rulevars2:var2, v7) and rdf(v4, rulevars2:var3, v8) and +(v7,v8,v9) then
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 0)
+			assertTrue(issues.size == 1)	// content requires articles to be enabled
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),

@@ -3283,7 +3283,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 			else {
-				List<ConceptName> impliedProps = getImpliedProperties(theJenaModel.getResource(conceptUri));
+				OntClass ctcls = null;
+				if (conceptType.equals(OntConceptType.CLASS) || conceptType.equals(OntConceptType.CLASS_LIST)) {
+					ctcls = theJenaModel.getOntClass(conceptUri);
+					if (ctcls == null) {
+						ctcls = theJenaModel.createClass(conceptUri);
+					}
+				}
+				List<ConceptName> impliedProps = getImpliedProperties(ctcls);
 				TypeCheckInfo tci = new TypeCheckInfo(conceptName, tctype, this, impliedProps, reference);
 				if (conceptType.equals(OntConceptType.CLASS)) {
  					tci.setTypeToExprRelationship("self");
