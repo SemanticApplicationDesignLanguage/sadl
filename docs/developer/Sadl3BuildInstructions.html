@@ -13,7 +13,7 @@
 <h1>SADL Version 3 Build Instructions</h1>
 
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/15/2020<!--webbot bot="Timestamp" endspan i-checksum="12584" -->.</h5>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/08/2020<!--webbot bot="Timestamp" endspan i-checksum="12607" -->.</h5>
 <h2>Introduction</h2>
 <p>
 <span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">
@@ -34,7 +34,7 @@ Setup Steps</span></h2>
   <li>Clone the SADL github repository under DEV-HOME/git.<ul>
     <li>Using the Git Bash client, change directory so that the DEV-HOME/git is 
     the current directory</li>
-    <li>Go to SADL project on github.com:&nbsp;<a href="https://github.com/crapo/sadlos2/" style="box-sizing: border-box; background-color: initial">https://github.com/crapo/sadlos2/</a></li>
+    <li>Go to SADL project on github.com:&nbsp;<a href="https://github.com/crapo/sadlos2/">https://github.com/SemanticApplicationDesignLanguage/sadl</a> </li>
     <li>Copy the URL for cloning by clicking on the button &quot;Clone or download&quot;</li>
     <li>Using the Git Bash client, type &quot;git clone &quot; and then paste in the URL 
     copied in the previous step<ul>
@@ -45,7 +45,8 @@ Setup Steps</span></h2>
   </ul>
   </li>
   <li>Download and install (if not already present) the Java 9 or later <u><b>
-  JDK</b></u> (see&nbsp;<a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html" rel="nofollow" style="box-sizing: border-box; background-color: initial">https://www.oracle.com/technetwork/java/javase/downloads/index.html</a>).<ul>
+  JDK</b></u> (see&nbsp;<a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html" rel="nofollow" style="box-sizing: border-box; background-color: initial">https://www.oracle.com/technetwork/java/javase/downloads/index.html</a> 
+  or <a href="https://adoptopenjdk.net/">https://adoptopenjdk.net/</a>).<ul>
     <li>Note that if you are behind a firewall and your organization is using a 
     private certificate authority, you may need to replace your Java security 
     cacerts file (see
@@ -87,7 +88,7 @@ Setup Steps</span></h2>
     <li>Start Eclipse (on Windows, run Eclipse.exe in the &quot;eclipse&quot; folder under 
     your installation folder)</li>
     <li>Switch your workspace to DEV-HOME/ws (or whatever you wish to name your 
-    workspace, File -&gt; Switch Workspace -&gt; Other..., 
+    workspace), File -&gt; Switch Workspace -&gt; Other..., 
   then Browse to and create folder &quot;ws&quot; (or whatever you chose) under 
     DEV-HOME)</li>
     <li>Configure proxies if necessary if behind a firewall (Preferences -&gt; General -&gt; Network 
@@ -101,7 +102,7 @@ Setup Steps</span></h2>
 <h2>Build the Projects</h2>
 <ol>
   <li>In a command line window, change directory to the this folder in local 
-  SADLsource code repository, the SADL parent project:.../git/sadlos2/sadl3/com.ge.research.sadl.parent</li>
+  SADLsource code repository, the SADL parent project:.../git/sadl/sadl3/com.ge.research.sadl.parent</li>
   <li>Do a clean by typing the commend &quot;mvn clean&quot;. Let it finish and verify 
   that there are no errors.</li>
   <li>Do a build by typing the command &quot;mvn install -U&quot;. Let it finish and 
@@ -112,7 +113,7 @@ Setup Steps</span></h2>
   <li>Start Eclipse if not already running</li>
   <li>Import as Maven projects  
   (File -&gt; Import... -&gt; Maven -&gt; Existing Maven Projects):<ul>
-    <li>Browse to .../git/sadlos2/sadl3/com.ge.research.sadl.parent, select the 
+    <li>Browse to .../git/sadl/sadl3/com.ge.research.sadl.parent, select the 
     folder.</li>
     <li>Select the parent project and all projects under it, then click Finish</li>
     <li>You should get a modal dialog during the course of the import that is 
