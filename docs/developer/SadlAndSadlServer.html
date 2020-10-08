@@ -1,0 +1,78 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>SADL and SadlServer</title>
+</head>
+
+<body>
+
+<h1>Knowledge as a Service: SADL and SadlServer</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/08/2020<!--webbot bot="Timestamp" endspan i-checksum="12607" -->.</h5>
+<h5>See also <a href="ArchitectureOverview.html">An Overview of the SADL IDE Architecture</a>.</h5>
+<h2>Introduction</h2>
+
+<p>SADL is both a controlled-English language and an integrated development 
+environment (IDE). The IDE provides an editing environment in which to create, 
+test, and maintain OWL-based knowledge bases. However, it is often the case that 
+the actual application of the knowledge base--its achievement of its 
+purpose--requires access to the knowledge in a very different environment from 
+the one in which it was developed. For this reason SadlServer exists--to provide 
+access to knowledge bases as a service. Figure 1 illustrates these two ways of 
+accessing knowledge.</p>
+
+<p><img border="0" src="images/SadlAn1.jpg" width="843" height="637"></p>
+
+<p><b>&nbsp;&nbsp;&nbsp; Figure 1: Knowledge Base Development and Delivery</b></p>
+
+<p>Figure 1 shows a third role besides expert developers and end users--the IT 
+folks who standup the server environments that provide the knowledge as a 
+service (KaaS).</p>
+
+<p>The knowledge base created and maintained in the SADL IDE consists of OWL 
+models and rule files in some target representation. These are not SADL-dependent 
+and can be used by any compatible software. The unique aspect of SadlServer is 
+that it takes the knowledge base exactly as created in the SADL IDE (the 
+OwlModels folder in specific) and delivers it to the server environment with all 
+of the configuration information necessary to identify what reasoner to use and 
+how to configure it. This is illustrated in Figure 2.</p>
+
+<p><img border="0" src="images/SadlAn2.jpg" width="905" height="542"></p>
+
+<p>&nbsp;&nbsp;&nbsp; <b>Figure 2: A Knowledge Base's OWL and Rules Content and 
+the Configuration Information Passes from the IDE to the Server (on the Right).</b></p>
+
+<p>SADL is architected to support any reasoner that is wrapped in a Java API 
+conforming to the IReasoner Interface. To persist knowledge (OWL models and 
+rules) in a format that can be consumed by that reasoner, a corresponding 
+translator conforming to the ITranslator Interface class must also be provided. 
+The translator takes input in the SADL in-memory Intermediate Form and outputs 
+the knowledge in the format required by the reasoner. A reasoner and a 
+compatible translator are referred to as a reasoner/translator pair. Because 
+both the reasoner and the translator are invoked through the Java ServiceLoader, 
+additional reasoner/translator pairs can be added to the SADL IDE by adding them 
+to the Java classpath. The configuration file contains the information necessary 
+for the server environment to load the reasoner and translator. More detail on 
+this plug-in architecture is shown in Figure 3.</p>
+
+<p><img border="0" src="images/SadlAn3.jpg" width="923" height="687"></p>
+
+<p>&nbsp;&nbsp;&nbsp; <b>Figure 3: The Reasoner/Translator Plug-in Architecture.</b></p>
+
+<p>It is highly desirable to maintain the knowledge base in some kind of source 
+code or version control system and Figure 3 shows such a system system between 
+the development and server environments. Of course this is not required but no 
+serious knowledge development effort should ever proceed without this safeguard 
+on loss of artifacts.</p>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+</body>
+
+</html>
