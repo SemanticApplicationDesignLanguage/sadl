@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.activation.DataSource;
-
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.datatypes.xsd.XSDDuration;
 import org.apache.jena.ontology.Individual;
