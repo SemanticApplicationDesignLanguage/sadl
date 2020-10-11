@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.emf.common.notify.Notifier;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -131,6 +132,16 @@ public class SADLCliAppRuntimeModule extends SADLRuntimeModule {
                 return eclipseHelper.toPath(uri);
             }
         }
+
+        @Override
+        public List<URI> getReferencedProjectURIs(URI uri) {
+            if (usesFileScheme(uri)) {
+                return ideHelper.getReferencedProjectURIs(uri);
+            } else {
+                return eclipseHelper.getReferencedProjectURIs(uri);
+            }
+        }
+
     }
 
     public Class<? extends SadlGraphVisualizerHandler> bindSadlGraphVisualizerHandler() {

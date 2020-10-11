@@ -17,7 +17,6 @@
  ***********************************************************************/
 package com.ge.research.sadl.utils
 
-import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.common.base.Preconditions
 import java.net.URI
 import java.nio.file.Path
@@ -78,6 +77,18 @@ class EclipseSadlProjectHelper implements SadlProjectHelper {
 			throw new IllegalArgumentException('''The resource does not exits for the «uri» URI. Converted path was: «path».''');
 		}
 		return Paths.get(resource.locationURI);
+	}
+
+	override getReferencedProjectURIs(URI uri) {
+		val emfRootUri = uri.toEmfUri
+		if (emfRootUri.segmentCount < 2) {
+			return emptyList
+		}
+		val project = getProject(emfRootUri.trimSegments(emfRootUri.segmentCount() - 2))
+		if (project === null || !project.accessible) {
+			return emptyList
+		}
+		return project.description.referencedProjects.filterNull.filter[accessible].map[locationURI].filterNull.toList
 	}
 
 	protected def checkUri(URI uri) {

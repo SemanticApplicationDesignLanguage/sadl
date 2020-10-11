@@ -22,7 +22,9 @@ import com.google.inject.Inject
 import com.google.inject.Singleton
 import java.net.URI
 import java.nio.file.Path
+import java.util.List
 import org.eclipse.emf.common.EMFPlugin
+import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.util.internal.Log
 
 import static extension com.google.common.base.Strings.nullToEmpty
@@ -58,6 +60,16 @@ interface SadlProjectHelper {
 	 */
 	def Path toPath(URI uri);
 
+	/**
+	 * Returns the URI of the projects referenced by the project give project URI.
+	 * The URIs point to accessible projects. If the project does not reference any projects,
+	 * returns an empty list.
+	 */
+	def List<URI> getReferencedProjectURIs(URI uri);
+	def List<URI> getReferencedProjectURIs(Resource resource) {
+		return getReferencedProjectURIs(new URI(resource.URI.toString()));
+	}
+
 	@Log
 	@Singleton
 	class DispatchingProjectHelper implements SadlProjectHelper {
@@ -81,6 +93,10 @@ interface SadlProjectHelper {
 
 		override toPath(URI uri) {
 			return uri.dispatch.toPath(uri);
+		}
+		
+		override getReferencedProjectURIs(URI uri) {
+			return uri.dispatch.getReferencedProjectURIs(uri);
 		}
 
 		override toUri(Path path) {
@@ -121,6 +137,13 @@ interface SadlProjectHelper {
 
 		override toPath(URI uri) {
 			return null;
+		}
+
+		/**
+		 * Always empty. Project dependencies are not supported in headless mode.
+		 */
+		override getReferencedProjectURIs(URI uri) {
+			return newArrayList;
 		}
 
 	}

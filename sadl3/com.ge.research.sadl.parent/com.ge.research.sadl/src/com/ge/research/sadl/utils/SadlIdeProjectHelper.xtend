@@ -17,12 +17,16 @@
  ***********************************************************************/
 package com.ge.research.sadl.utils
 
-import com.ge.research.sadl.utils.ResourceManager
-import com.ge.research.sadl.utils.SadlProjectHelper
 import com.google.common.base.Preconditions
+import java.io.ByteArrayInputStream
+import java.io.InputStream
 import java.net.URI
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.List
+import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * Helper class for validating and locating SADL projects on the file system.
@@ -86,4 +90,56 @@ class SadlIdeProjectHelper implements SadlProjectHelper {
 		return uri;
 	}
 
+	override getReferencedProjectURIs(URI uri) {
+		val rootUri = uri.getRoot
+		val rootPath = rootUri.toPath
+		val dotProjectPath = rootPath.resolve(DOT_PROJECT)
+		val projectNames = new ReferencedProjectsParser().parse(dotProjectPath)
+		projectNames.map[rootPath.resolve(it)].map[toFile].filter[exists && directory && canRead].map[toURI].toList
+	}
+
+}
+
+class ReferencedProjectsParser {
+
+	def List<String> parse(Path path) {
+		var InputStream is = null
+		try {
+			is = path.toUri.toURL.openStream
+			return parse(is)
+		} finally {
+			if (is !== null) {
+				is.close
+			}
+		}
+	}
+
+	def List<String> parse(CharSequence content) {
+		return parse(new ByteArrayInputStream(content.toString().getBytes(StandardCharsets.UTF_8)))
+	}
+
+	def List<String> parse(InputStream is) {
+		try {
+			val projectNames = newLinkedHashSet;
+			val factory = DocumentBuilderFactory.newInstance()
+			val builder = factory.newDocumentBuilder()
+			val doc = builder.parse(is)
+			doc.getDocumentElement().normalize()
+			val projectNode = doc.getElementsByTagName('project')
+			for (var i = 0; i < projectNode.length; i++) {
+				val project = projectNode.item(i)
+				val children = project.childNodes
+				for (var j = 0; j < children.length; j++) {
+					val projectName = children.item(j).nodeValue
+					if (!projectName.nullOrEmpty) {
+						projectNames.add(projectName)
+					}
+				}
+			}
+			return projectNames.toList
+		} catch (Exception e) {
+			e.printStackTrace
+			return newArrayList
+		}
+	}
 }

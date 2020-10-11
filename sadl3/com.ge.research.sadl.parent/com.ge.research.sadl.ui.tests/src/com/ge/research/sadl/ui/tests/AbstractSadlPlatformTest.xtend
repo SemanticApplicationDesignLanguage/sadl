@@ -137,12 +137,19 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	 */
 	protected def void createProject() {
 		createProject(projectName);
+	}
+
+	/**
+	 * Creates the test project with the given name.
+	 */
+	protected def void createProject(String projectName) {
+		val project = IResourcesSetupUtil.createProject(projectName);
 		addNature(project, XtextProjectHelper.NATURE_ID);
 		addBuilder(project, XtextProjectHelper.BUILDER_ID);
 		waitForBuild;
 		configurePreferences();
 		// This is used to trigger the implicit model creation before the tests.
-		val file = createFile('Dummy.sadl', 'uri "http://sadl.org/Dummy.sadl."');
+		val file = createFile(project.name, 'Dummy.sadl', 'uri "http://sadl.org/Dummy.sadl."');
 		fullBuild();
 		file.delete(true, monitor);
 		fullBuild();
@@ -268,9 +275,13 @@ abstract class AbstractSadlPlatformTest extends Assert {
 	}
 
 	/**
-	 * Creates a file with the given file name and content. 
+	 * Creates a file with the given file name and content.
 	 */
 	protected def createFile(String fileName, String content) {
+		createFile(projectName, fileName, content)
+	}
+
+	protected def createFile(String projectName, String fileName, String content) {
 		val file = IResourcesSetupUtil.createFile('''«projectName»«SEPARATOR»«fileName»''', content);
 		assertNotNull('''Cannot create '«fileName»' file in the workspace.''', file);
 		assertTrue('''Cannot access '«fileName»' file project in the workspace.''', file.accessible);
