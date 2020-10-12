@@ -1,0 +1,171 @@
+{
+  "name": "SADL",
+  "scopeName": "source.sadl",
+  "fileTypes": [
+    "sadl"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#comments-inline"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "name": "keyword.sadl",
+      "match": "\\b(?<!\\-)(uri|alias|version|note|import|as|Equation|External|located|at|returns|is|a|top-level|class|type|of|property|the|same|not|and|are|disjoint|relationship|only|if|with|has|length|or|List|described|by|describes|single|value|values|inverse|transitive|symmetrical|annotation|default|subject|must|be|one|can|always|least|most|exactly|each|types|PI|true|false|known|A|An|an|The|Expr|Rule|given|then|Ask|Graph|select|distinct|asc|desc|construct|where|ask|Test|Print|Deductions|Model|Explain|Write|data|Read|using|from|sublist|matching|unique|in|contains|does|contain|element|before|after|e|None|count|index|first|last|order by|string|boolean|decimal|int|long|float|double|duration|dateTime|time|date|gYearMonth|gYear|gMonthDay|gDay|gMonth|hexBinary|base64Binary|anyURI|integer|negativeInteger|nonNegativeInteger|positiveInteger|nonPositiveInteger|unsignedByte|unsignedInt|anySimpleType)\\b(?!-)"
+    },
+    {
+      "name": "string.quoted.single.sadl",
+      "begin": "'",
+      "end": "'"
+    }
+  ],
+  "repository": {
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.sadl",
+          "match": "\\b(?<!\\$)0(x|X)[0-9a-fA-F][0-9a-fA-F_]*\\b(?!\\$)"
+        },
+        {
+          "name": "constant.numeric.binary.sadl",
+          "match": "\\b(?<!\\$)0(b|B)[01][01_]*\\b(?!\\$)"
+        },
+        {
+          "name": "constant.numeric.octal.sadl",
+          "match": "\\b(?<!\\$)0(o|O)?[0-7][0-7_]*\\b(?!\\$)"
+        },
+        {
+          "match": "(?x)\n(?<!\\$)(?:\n  (?:\\b[0-9][0-9_]*(\\.)[0-9][0-9_]*[eE][+-]?[0-9][0-9_]*\\b)| # 1.1E+3\n  (?:\\b[0-9][0-9_]*(\\.)[eE][+-]?[0-9][0-9_]*\\b)|             # 1.E+3\n  (?:\\B(\\.)[0-9][0-9_]*[eE][+-]?[0-9][0-9_]*\\b)|             # .1E+3\n  (?:\\b[0-9][0-9_]*[eE][+-]?[0-9][0-9_]*\\b)|                 # 1E+3\n  (?:\\b[0-9][0-9_]*(\\.)[0-9][0-9_]*\\b)|                      # 1.1\n  (?:\\b[0-9][0-9_]*(\\.)\\B)|                                  # 1.\n  (?:\\B(\\.)[0-9][0-9_]*\\b)|                                  # .1\n  (?:\\b[0-9][0-9_]*\\b(?!\\.))                                 # 1\n)(?!\\$)",
+          "captures": {
+            "0": {
+              "name": "constant.numeric.decimal.sadl"
+            },
+            "1": {
+              "name": "meta.delimiter.decimal.period.sadl"
+            },
+            "2": {
+              "name": "meta.delimiter.decimal.period.sadl"
+            },
+            "3": {
+              "name": "meta.delimiter.decimal.period.sadl"
+            },
+            "4": {
+              "name": "meta.delimiter.decimal.period.sadl"
+            },
+            "5": {
+              "name": "meta.delimiter.decimal.period.sadl"
+            },
+            "6": {
+              "name": "meta.delimiter.decimal.period.sadl"
+            }
+          }
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "begin": "\"",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.sadl"
+            }
+          },
+          "end": "\"",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.sadl"
+            }
+          },
+          "name": "string.quoted.double.sadl",
+          "patterns": [
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.sadl"
+            }
+          ]
+        },
+        {
+          "begin": "'",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.sadl"
+            }
+          },
+          "end": "'",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.sadl"
+            }
+          },
+          "name": "string.quoted.single.sadl",
+          "patterns": [
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.sadl"
+            }
+          ]
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.sadl"
+            }
+          },
+          "match": "/\\*\\*/",
+          "name": "comment.block.empty.sadl"
+        },
+        {
+          "include": "#comments-inline"
+        }
+      ]
+    },
+    "comments-inline": {
+      "patterns": [
+        {
+          "begin": "/\\*",
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.sadl"
+            }
+          },
+          "end": "\\*/",
+          "name": "comment.block.sadl"
+        },
+        {
+          "begin": "(^[ \\t]+)?(?=//)",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.whitespace.comment.leading.sadl"
+            }
+          },
+          "end": "(?!\\G)",
+          "patterns": [
+            {
+              "begin": "//",
+              "beginCaptures": {
+                "0": {
+                  "name": "punctuation.definition.comment.sadl"
+                }
+              },
+              "end": "\\n",
+              "name": "comment.line.double-slash.sadl"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

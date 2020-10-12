@@ -17,26 +17,19 @@
  ***********************************************************************/
 
 import { ContainerModule, interfaces } from 'inversify';
-import { ThemeService } from '@theia/core/lib/browser/theming';
 import { WebSocketConnectionProvider } from '@theia/core/lib/browser/messaging/ws-connection-provider';
-import { MonacoEditorProvider } from '@theia/monaco/lib/browser/monaco-editor-provider'
 import { FrontendApplicationContribution } from '@theia/core/lib/browser/frontend-application';
 import { LanguageClientContribution } from '@theia/languages/lib/browser/language-client-contribution';
 import { CommandContribution, MenuContribution } from '@theia/core/lib/common';
+import { LanguageGrammarDefinitionContribution } from '@theia/monaco/lib/browser/textmate/textmate-contribution';
 import { FileSystemExt, FileSystemExtPath } from '../common/filesystem-ext';
 import { bindSadlPreferences } from './sadl-preferences';
 import { SadlMenuContribution } from './sadl-menu-contribution';
 import { SadlCommandContribution } from './sadl-command-contribution';
-import { SadlEditorColoringService } from './sadl-editor-coloring-service';
 import { configuration, monarchLanguage } from './sadl-monaco-language';
 import { SadlLanguageClientContribution } from './sadl-language-client-contribution';
-import { SadlMonacoEditorProvider, SadlMonacoEditorTheme } from './sadl-monaco-editor-provider';
 import { SadlHideHiddenFilesContribution } from './sadl-hide-hidden-files-contribution';
-
-import '../../src/browser/style/index.css';
-
-// Force the `light` theme to be the default one.
-ThemeService.get().setCurrentTheme('light');
+import { SadlTextmateContribution } from './sadl-textmate-contribution';
 
 export default new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Unbind, isBound: interfaces.IsBound, rebind: interfaces.Rebind) => {
     monaco.languages.register({
@@ -49,11 +42,9 @@ export default new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Un
         monaco.languages.setLanguageConfiguration('sadl', configuration)
         monaco.languages.setMonarchTokensProvider('sadl', monarchLanguage)
     });
-    [SadlMonacoEditorTheme.LIGHT, SadlMonacoEditorTheme.DARK].forEach(theme => monaco.editor.defineTheme(theme[0], theme[1]));
-    rebind(MonacoEditorProvider).to(SadlMonacoEditorProvider).inSingletonScope()
+    bind(LanguageGrammarDefinitionContribution).to(SadlTextmateContribution).inSingletonScope();
 
     bindSadlPreferences(bind);
-    bind(SadlEditorColoringService).toSelf().inSingletonScope();
     bind(SadlLanguageClientContribution).toSelf().inSingletonScope();
     bind(LanguageClientContribution).toDynamicValue(ctx => ctx.container.get(SadlLanguageClientContribution));
     bind(CommandContribution).to(SadlCommandContribution).inSingletonScope();
