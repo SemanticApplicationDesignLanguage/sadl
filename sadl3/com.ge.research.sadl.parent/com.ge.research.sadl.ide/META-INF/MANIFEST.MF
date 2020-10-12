@@ -23,6 +23,7 @@ Export-Package: com.ge.research.sadl.ide,
  com.ge.research.sadl.ide.contentassist.antlr.internal,
  com.ge.research.sadl.ide.contentassist.antlr.lexer,
  com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex,
+ com.ge.research.sadl.ide.editor.coloring,
  com.ge.research.sadl.ide.editor.contentassist,
  com.ge.research.sadl.ide.handlers
 Import-Package: org.apache.log4j,
