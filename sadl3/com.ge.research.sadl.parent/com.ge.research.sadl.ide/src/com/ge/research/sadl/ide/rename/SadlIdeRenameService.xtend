@@ -52,8 +52,7 @@ class SadlIdeRenameService extends RenameService2 {
 				val document = context.document
 				val cancelIndicator = options.cancelIndicator
 
-				val prepareRenameResult = doPrepareRename(resource, document,
-					positionParams as TextDocumentPositionParams, cancelIndicator)
+				val prepareRenameResult = doPrepareRename(resource, document, positionParams, cancelIndicator)
 				if (!mayPerformRename(prepareRenameResult, options.renameParams)) {
 					return null
 				}
