@@ -17,24 +17,14 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.syntaxcoloring
 
+import com.ge.research.sadl.ide.editor.coloring.SadlIdeHighlightingConfiguration
 import org.eclipse.swt.SWT
 import org.eclipse.swt.graphics.RGB
 import org.eclipse.xtext.ui.editor.syntaxcoloring.DefaultHighlightingConfiguration
 import org.eclipse.xtext.ui.editor.syntaxcoloring.IHighlightingConfigurationAcceptor
 import org.eclipse.xtext.ui.editor.utils.TextStyle
 
-class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration {
-	public static final String URI_ID = "uri"
-	public static final String CLASS_ID = "class"
-	public static final String INSTANCE_ID = "instance"
-	public static final String STRUCTURE_NAME_ID = "structureName"
-	public static final String VARIABLE_ID = "variable"
-	public static final String DATA_PROPERTY_ID = "dataProperty"
-	public static final String OBJECT_PROPERTY_ID = "objectProperty"
-	public static final String ANNOTATION_PROPERTY_ID = "annotationProperty"
-	public static final String RDF_PROPERTY_ID = "rdfProperty"
-	public static final String RDFDATATYPE_ID = "rdfDataType"
-	public static final String FUNCTION_NAME_ID = "functionName"
+class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration implements SadlIdeHighlightingConfiguration {
 
 	override void configure(IHighlightingConfigurationAcceptor acceptor) {
 		super.configure(acceptor)

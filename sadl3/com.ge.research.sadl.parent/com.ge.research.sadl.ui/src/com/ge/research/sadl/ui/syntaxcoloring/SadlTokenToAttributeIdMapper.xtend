@@ -17,8 +17,9 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.syntaxcoloring
 
-import org.eclipse.xtext.ide.editor.syntaxcoloring.DefaultAntlrTokenToAttributeIdMapper
 import com.ge.research.sadl.ide.contentassist.antlr.internal.InternalSADLParser
+import org.eclipse.xtext.ide.editor.syntaxcoloring.DefaultAntlrTokenToAttributeIdMapper
+import org.eclipse.xtext.ide.editor.syntaxcoloring.HighlightingStyles
 
 class SadlTokenToAttributeIdMapper extends DefaultAntlrTokenToAttributeIdMapper {
 	// Sadl.xtext defines only two new token terminals: NUMBER and EOS.
@@ -32,7 +33,7 @@ class SadlTokenToAttributeIdMapper extends DefaultAntlrTokenToAttributeIdMapper 
 			InternalSADLParser.tokenNames.get(_rdIndx_tmpNode)
 		}
 		if (ruleNumber.equals(tokenName)) {
-			return SadlHighlightingConfiguration.NUMBER_ID
+			return HighlightingStyles.NUMBER_ID
 		}
 		return super.calculateId(tokenName, tokenType)
 	}
