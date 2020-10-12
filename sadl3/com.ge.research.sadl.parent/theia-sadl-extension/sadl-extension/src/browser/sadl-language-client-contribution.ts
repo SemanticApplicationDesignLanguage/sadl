@@ -17,12 +17,12 @@
  ***********************************************************************/
 
 import { inject, injectable } from 'inversify';
+import { MessageConnection } from 'vscode-jsonrpc';
 import { DidChangeWatchedFilesNotification, FileChangeType } from '@theia/languages/lib/browser';
 import { DisposableCollection } from '@theia/core/lib/common/disposable';
 import { FileSystemWatcher } from '@theia/filesystem/lib/browser/filesystem-watcher';
+import { SemanticHighlightingService } from '@theia/editor/lib/browser/semantic-highlight/semantic-highlighting-service';
 import { BaseLanguageClientContribution, LanguageClientFactory, Languages, Workspace, ILanguageClient, FileSystemWatcher as ServicesFileSystemWatcher, FileEvent } from '@theia/languages/lib/browser';
-import { SadlEditorColoringService } from './sadl-editor-coloring-service';
-import { SadlColoring } from './protocol/sadl-coloring';
 
 @injectable()
 export class SadlLanguageClientContribution extends BaseLanguageClientContribution {
@@ -37,8 +37,8 @@ export class SadlLanguageClientContribution extends BaseLanguageClientContributi
         @inject(Workspace) protected workspace: Workspace,
         @inject(Languages) protected languages: Languages,
         @inject(LanguageClientFactory) protected languageClientFactory: LanguageClientFactory,
-        @inject(SadlEditorColoringService) protected editorColoringService: SadlEditorColoringService,
-        @inject(FileSystemWatcher) protected readonly fileSystemWatcher: FileSystemWatcher
+        @inject(FileSystemWatcher) protected readonly fileSystemWatcher: FileSystemWatcher,
+        @inject(SemanticHighlightingService) protected readonly semanticHighlightingService: SemanticHighlightingService
     ) {
         super(workspace, languages, languageClientFactory)
     }
@@ -50,8 +50,13 @@ export class SadlLanguageClientContribution extends BaseLanguageClientContributi
         ];
     }
 
+    createLanguageClient(connection: MessageConnection): ILanguageClient {
+        const client: ILanguageClient & Readonly<{ languageId: string }> = Object.assign(super.createLanguageClient(connection), { languageId: this.id });
+        client.registerFeature(SemanticHighlightingService.createNewFeature(this.semanticHighlightingService, client));
+        return client;
+    }
+
     protected onReady(languageClient: ILanguageClient): void {
-        languageClient.onNotification(SadlColoring.TYPE, this.editorColoringService.updateColoringInformation.bind(this.editorColoringService));
         // Notify the LS about any file changes that happened during the initialization.
         if (this.queuedFileEvents.length > 0) {
             languageClient.sendNotification(DidChangeWatchedFilesNotification.type, {

@@ -10,6 +10,7 @@
     "languageserver",
     "lib",
     "src",
+    "data",
     "example-projects"
   ],
   "dependencies": {
