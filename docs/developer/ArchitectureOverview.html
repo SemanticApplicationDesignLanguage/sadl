@@ -4,19 +4,43 @@
 <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/08/2020<!--webbot bot="Timestamp" endspan i-checksum="12607" -->.</h5>
 <h5>See also <a href="SadlAndSadlServer.html">Knowledge as a Service: SADL and SadlServer</a>.</h5>
 <h2>Introduction</h2>
+<p>This document gives an 
+overview of the SADL Version 3 architecture, flow of information, project 
+structure, and the codebase with some of its major components.</p>
+<h2>Information Flow</h2>
+<p>The figure below shows how the model, which is captured as SADL statements 
+conforming to the SADL grammar as defined in Sadl.xtext, is parsed to create an 
+abstract syntax tree (AST) expressed in terms of the Eclipse Modeling Framework 
+(EMF). This model, whose root is the EObject subclass SadlModel, is passed to 
+the JenaBasedSadlModelProcessor, which fits into the Xtext model processor 
+framework. This model processor invokes the JenaBasedSadlModelValidator to do 
+semantic validation, including type checking. Errors, warnings, or informational 
+messages are added to the editor window as markers with mouse-over content 
+display. Note that syntax checking is done by the underlying Xtext components. </p>
+<p>As a SADL model is processed by the JenaBasedSadlModelProcessor, an in-memory 
+OWL model is generated which is equivalent to the class, property, instance, and 
+axiomatic contents of the SADL model. At the same time, the rules, queries, 
+tests, etc., are translated to the in-memory IntermediateForm. Once a SADL model 
+can be processed without errors, a save operation will result in the creation of 
+an OWL model in the specified format and the translation of rules and queries 
+into a format compatible with the selected target reasoner through calls to the 
+companion target translator. In the figure, the target reasoner and target 
+translator are also shown inside of the dotted rectangle labeled 
+JenaBasedSadlInferenceProcessor. The reasoner and translator are used by this 
+processor when the user asks that a model be &quot;tested&quot;, that is inference run on 
+the model and queries and/or tests executed. Query/test results are displayed in 
+the console window. </p>
+<p><img border="0" src="images/Archit4.jpg" width="811" height="619"></p>
+<h2>SADL Plug-ins</h2>
 <p>The SADL IDE consists of a number of interdependent Eclipse plug-ins that may 
 be installed in an instance of Eclipse to provide a rich knowledge base editing 
 environment. The plug-ins are installed together as the SADL feature. The same 
-code base also generates the servers for WebSADL. This document gives an 
-overview of the SADL Version 3 codebase. This document provides an overview of 
-the plug-ins, their functions, and their major components.</p>
-<h2>SADL Plug-ins</h2>
-<p>The screenshot below shows the Eclipse plug-in development Package Explorer 
+code base also generates the servers for WebSADL. The screenshot below shows the Eclipse plug-in development Package Explorer 
 view of the SADL codebase. The com.ge.research.sadl.parent project and all of 
 the projects under it are Maven projects. As discussed in 
 <a href="SADL3BuildInstructions.html">SADL V3 Build 
-Instructions</a>, the everything can be build with Maven. The top-level com.ge.research.sadl3.documentation project contains the Github Pages documentation. 
-Note that this documentation project is on a special branch (gh-pages) in the 
+Instructions</a>,  everything can be build with Maven. The top-level com.ge.research.sadl3.documentation project contains the Github Pages documentation. 
+Note that this documentation project is and should remain on a special branch (gh-pages) in the 
 repository.</p>
 <p><img border="0" src="images/Archit1.jpg" width="592" height="737"></p>
 <p>Note that two of the projects, com.ge.research.sadl.reasoner and 
