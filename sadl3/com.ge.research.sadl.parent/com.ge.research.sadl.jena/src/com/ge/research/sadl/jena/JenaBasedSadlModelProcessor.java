@@ -525,7 +525,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 */
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
-				
+		// test ability to get project dependencies
+		List<java.net.URI> projectDependencies = projectHelper.getReferencedProjectURIs(resource);
+		for (java.net.URI pduri : projectDependencies) {
+			System.err.println("Project '" + resource.getURI().toString() + "' depends on '" + pduri.toString());
+		}
+		
 		generationInProgress = true;
 		setCurrentResource(resource);
 		setProcessorContext(context);
