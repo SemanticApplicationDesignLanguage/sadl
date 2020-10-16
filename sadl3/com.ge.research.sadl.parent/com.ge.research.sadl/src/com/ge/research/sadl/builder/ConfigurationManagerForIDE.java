@@ -68,6 +68,7 @@ import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
@@ -87,6 +88,9 @@ import com.google.inject.Inject;
  */
 public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing implements IConfigurationManagerForIDE {
 	
+	private static final String[] PROJECT_DEPENDENCIES_CATEGORY = {"ProjectDependencies"};
+	private static final String pdependsOn = "pDependsOn";
+
 	public static class Provider implements javax.inject.Provider<IConfigurationManagerForIDE> {
 		private String modelFolder;
 		private String repoType = ConfigurationManagerForIDE.getOWLFormat();
@@ -1300,4 +1304,72 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		}
 	}
 
+	@Override
+	public boolean addProjectDependencies(List<java.net.URI> projectDependencies) throws ConfigurationException {
+		File mfp = getModelFolderPath();
+		String thisProjPath = mfp.getParent();
+		for (java.net.URI pduri : projectDependencies) {
+			System.err.println("Project '" + thisProjPath + "' depends on '" + pduri.toString());
+		}
+		String[] categoryHierarchy = PROJECT_DEPENDENCIES_CATEGORY;
+		
+		List<ConfigurationItem> configItems = getConfiguration(categoryHierarchy, false);
+		ConfigurationItem configItem;
+		if (configItems != null) {
+			configItem = configItems.get(0);
+		}
+		else {
+			configItem = new ConfigurationItem(categoryHierarchy);
+		}
+		configItem.clearNameValuePairs();
+		if (projectDependencies != null) {
+			for (java.net.URI pduri : projectDependencies) {
+				ConfigurationItem.NameValuePair nv = configItem.new NameValuePair(pdependsOn, pduri.getPath());
+				configItem.addNameValuePair(nv);
+			}
+		}
+		updateConfiguration(configItem);;
+		saveConfiguration();
+		return true;
+	}
+	
+	private List<String> getProjectDependencies() throws ConfigurationException {
+		List<ConfigurationItem> config = getConfiguration(PROJECT_DEPENDENCIES_CATEGORY, false);
+		List<Object> previousQueries = null;
+		if (config != null && config.size() > 0) {
+			previousQueries  = config.get(0).getAllValuesOfName(pdependsOn);
+		}
+		if (previousQueries != null && previousQueries.size() >= 1) {
+			List<String> dependsOnProjects = new ArrayList<String>();
+			for (Object dependsOn : previousQueries) {
+				dependsOnProjects.add(dependsOn.toString());
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public String getAltUrlFromPublicUri(String publicUri) throws ConfigurationException {
+		try {
+			return super.getAltUrlFromPublicUri(publicUri);
+		}
+		catch (ConfigurationException e) {
+			List<String> pds = getProjectDependencies();
+			if (pds != null) {
+				for (String pd : pds) {
+					String dpModelFolderPath = pd + "/OwlModels";
+					ConfigurationManagerForIDE pdConfigMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(dpModelFolderPath, null);
+					if (pdConfigMgr != null) {
+						try {
+							return pdConfigMgr.getAltUrlFromPublicUri(publicUri);
+						}
+						catch (ConfigurationException e2) {
+							// do nothing so loop continues
+						}
+					}
+				}
+			}
+			throw e;
+		}
+	}
 }

@@ -119,6 +119,14 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 */
 	public abstract boolean addJenaMapping(String publicUri, String altUrl)
 			throws IOException, URISyntaxException, ConfigurationException;
+	
+	/**
+	 * Method to record dependencies of this Project (KBase) on other Projects (KBases)
+	 * @param dependencies
+	 * @return
+	 * @throws ConfigurationException 
+	 */
+	public abstract boolean addProjectDependencies(List<java.net.URI> dependencies) throws ConfigurationException;
 
 	public abstract boolean deleteModel(String publicUri)
 			throws ConfigurationException, IOException, URISyntaxException;
