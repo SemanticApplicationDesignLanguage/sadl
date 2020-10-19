@@ -1567,15 +1567,33 @@ public class ConfigurationManager implements IConfigurationManager {
 	public static final String[] PROJECT_DEPENDENCIES_CATEGORY = {"ProjectDependencies"};
 	public static final String pdependsOn = "pDependsOn";
 
-	private String getOtherProjectAltUrlFromPubliceUri(String publicUri) throws ConfigurationException {
-		String[] categoryHierarchy = PROJECT_DEPENDENCIES_CATEGORY;
-		List<ConfigurationItem> configItems = getConfiguration(categoryHierarchy, false);
-		if (configItems != null && configItems.size() > 0) {
-			ConfigurationItem configItem = configItems.get(0);
-			String dp = configItem.getNamedValue(pdependsOn).toString();
-			
-			IConfigurationManager dpCM = ConfigurationManagerFactory.getConfigurationManager(dp + "/OwlModels", null);
-			return dpCM.getAltUrlFromPublicUri(publicUri);
+	@Override
+	public List<String> getProjectDependencies() throws ConfigurationException {
+		List<ConfigurationItem> config = getConfiguration(PROJECT_DEPENDENCIES_CATEGORY, false);
+		List<Object> previousQueries = null;
+		if (config != null && config.size() > 0) {
+			previousQueries  = config.get(0).getAllValuesOfName(pdependsOn);
+		}
+		if (previousQueries != null && previousQueries.size() >= 1) {
+			List<String> dependsOnProjects = new ArrayList<String>();
+			for (Object dependsOn : previousQueries) {
+				dependsOnProjects.add(dependsOn.toString());
+			}
+			return dependsOnProjects;
+		}
+		return null;
+	}
+
+	protected String getOtherProjectAltUrlFromPubliceUri(String publicUri) throws ConfigurationException {
+		List<String> dps = getProjectDependencies();
+		if (dps != null) {
+			for (String dp : dps) {
+				IConfigurationManager dpCM = ConfigurationManagerFactory.getConfigurationManager(dp + "/OwlModels", null);
+				String dpAltUrl = dpCM.getAltUrlFromPublicUri(publicUri);
+				if (dpAltUrl != null) {
+					return dpAltUrl;
+				}
+			}
 		}
 		return null;
 	}

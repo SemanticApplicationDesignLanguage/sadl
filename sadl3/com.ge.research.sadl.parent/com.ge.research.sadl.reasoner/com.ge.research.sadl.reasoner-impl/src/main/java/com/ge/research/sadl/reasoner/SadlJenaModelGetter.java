@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -192,6 +193,18 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     	}
     	if (m == null && loadIfAbsent != null) {
             String altUrl = configurationManager.getJenaDocumentMgr().doAltURLMapping(uri);
+            if (altUrl != null && altUrl.equals(uri)) {
+            	// try for a dependent project
+            	try {
+					String dpAltUrl = configurationManager.getAltUrlFromPublicUri(uri);
+					if (dpAltUrl != null) {
+						altUrl = dpAltUrl;
+					}
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            }
             if (altUrl != null && altUrl.endsWith(".TDB/")) {
             	try {
             		SadlUtils su = new SadlUtils();

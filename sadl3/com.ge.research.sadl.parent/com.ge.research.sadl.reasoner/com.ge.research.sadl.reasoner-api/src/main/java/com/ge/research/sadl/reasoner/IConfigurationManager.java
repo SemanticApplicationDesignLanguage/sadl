@@ -301,9 +301,16 @@ public interface IConfigurationManager {
 	public abstract String fileUrlToFileName(String url) throws MalformedURLException;
 	
 	/**
-	 * Metod to convert a File-compatible tring to a file URL string
+	 * Method to convert a File-compatible tring to a file URL string
 	 * @param fn
 	 * @return
 	 */
 	public abstract String fileNameToFileUrl(String fn);
+
+	/**
+	 * Method to get a list of projects (kbases) upon which the project (kbase) for this ConfigurationManager depends
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	public abstract List<String> getProjectDependencies() throws ConfigurationException;
 }

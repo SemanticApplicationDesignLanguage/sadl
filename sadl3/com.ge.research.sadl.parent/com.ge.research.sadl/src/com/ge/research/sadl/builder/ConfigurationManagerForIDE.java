@@ -1304,10 +1304,12 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 
 	@Override
 	public boolean addProjectDependencies(List<java.net.URI> projectDependencies) throws ConfigurationException {
-		File mfp = getModelFolderPath();
-		String thisProjPath = mfp.getParent();
-		for (java.net.URI pduri : projectDependencies) {
-			System.err.println("Project '" + thisProjPath + "' depends on '" + pduri.toString());
+		if (logger.isDebugEnabled()) {
+			File mfp = getModelFolderPath();
+			String thisProjPath = mfp.getParent();
+			for (java.net.URI pduri : projectDependencies) {
+				logger.debug("Project '" + thisProjPath + "' depends on '" + pduri.toString());
+			}
 		}
 		String[] categoryHierarchy = PROJECT_DEPENDENCIES_CATEGORY;
 		
@@ -1351,43 +1353,4 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return true;
 	}
 	
-	private List<String> getProjectDependencies() throws ConfigurationException {
-		List<ConfigurationItem> config = getConfiguration(PROJECT_DEPENDENCIES_CATEGORY, false);
-		List<Object> previousQueries = null;
-		if (config != null && config.size() > 0) {
-			previousQueries  = config.get(0).getAllValuesOfName(pdependsOn);
-		}
-		if (previousQueries != null && previousQueries.size() >= 1) {
-			List<String> dependsOnProjects = new ArrayList<String>();
-			for (Object dependsOn : previousQueries) {
-				dependsOnProjects.add(dependsOn.toString());
-			}
-		}
-		return null;
-	}
-
-	@Override
-	public String getAltUrlFromPublicUri(String publicUri) throws ConfigurationException {
-		try {
-			return super.getAltUrlFromPublicUri(publicUri);
-		}
-		catch (ConfigurationException e) {
-			List<String> pds = getProjectDependencies();
-			if (pds != null) {
-				for (String pd : pds) {
-					String dpModelFolderPath = pd + "/OwlModels";
-					ConfigurationManagerForIDE pdConfigMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(dpModelFolderPath, null);
-					if (pdConfigMgr != null) {
-						try {
-							return pdConfigMgr.getAltUrlFromPublicUri(publicUri);
-						}
-						catch (ConfigurationException e2) {
-							// do nothing so loop continues
-						}
-					}
-				}
-			}
-			throw e;
-		}
-	}
 }
