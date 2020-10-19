@@ -1548,12 +1548,38 @@ public class ConfigurationManager implements IConfigurationManager {
 		if (jdm != null) {
 			String alt = getJenaDocumentMgr().doAltURLMapping(publicUri);
 			if (alt != null) {
+				if (alt.equals(publicUri)) {
+					String otherProjectAlt = getOtherProjectAltUrlFromPubliceUri(publicUri);
+					if (otherProjectAlt != null) {
+						return otherProjectAlt;
+					}
+				}
 				return alt;
 			}
+		}
+		String otherProjectAlt = getOtherProjectAltUrlFromPubliceUri(publicUri);
+		if (otherProjectAlt != null) {
+			return otherProjectAlt;
 		}
 		throw new ConfigurationException("PublicURI '" + publicUri + "' not found in mappings.");
 	}
 	
+	public static final String[] PROJECT_DEPENDENCIES_CATEGORY = {"ProjectDependencies"};
+	public static final String pdependsOn = "pDependsOn";
+
+	private String getOtherProjectAltUrlFromPubliceUri(String publicUri) throws ConfigurationException {
+		String[] categoryHierarchy = PROJECT_DEPENDENCIES_CATEGORY;
+		List<ConfigurationItem> configItems = getConfiguration(categoryHierarchy, false);
+		if (configItems != null && configItems.size() > 0) {
+			ConfigurationItem configItem = configItems.get(0);
+			String dp = configItem.getNamedValue(pdependsOn).toString();
+			
+			IConfigurationManager dpCM = ConfigurationManagerFactory.getConfigurationManager(dp + "/OwlModels", null);
+			return dpCM.getAltUrlFromPublicUri(publicUri);
+		}
+		return null;
+	}
+
 	/**
 	 * Method to determine if a URI (could be public URI or alt URL) is mapped in this ConfigurationManager (project)
 	 * @param uri

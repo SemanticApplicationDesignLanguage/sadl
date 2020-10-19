@@ -39,9 +39,12 @@ import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
@@ -172,7 +175,19 @@ public class GraphGenerator {
 		setVisualizer(visualizer);
 		setProject(project);
 		if (publicUri != null) {
-			setTheJenaModel(configMgr.getOntModel(publicUri, Scope.LOCALONLY));
+			boolean processImports = false;
+			String[] categoryHierarchy = ConfigurationManager.PROJECT_DEPENDENCIES_CATEGORY;
+			List<ConfigurationItem> configItems = getConfigMgr().getConfiguration(categoryHierarchy, false);
+			ConfigurationItem configItem;
+			if (configItems != null) {
+				configItem = configItems.get(0);
+				List<NameValuePair> nvps = configItem.getNameValuePairs();
+				if (nvps != null && nvps.size() > 0) {
+					processImports = true;
+				}
+			}
+			
+			setTheJenaModel(configMgr.getOntModel(publicUri, processImports ? Scope.INCLUDEIMPORTS : Scope.LOCALONLY));
 			setTheJenaModelWithImports(configMgr.getOntModel(publicUri, Scope.INCLUDEIMPORTS));
 		}
 		setAnchor(startNode);

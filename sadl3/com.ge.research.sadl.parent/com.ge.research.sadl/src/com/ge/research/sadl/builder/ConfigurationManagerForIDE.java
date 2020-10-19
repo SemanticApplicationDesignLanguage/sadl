@@ -69,6 +69,7 @@ import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
+import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
@@ -88,9 +89,6 @@ import com.google.inject.Inject;
  */
 public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing implements IConfigurationManagerForIDE {
 	
-	private static final String[] PROJECT_DEPENDENCIES_CATEGORY = {"ProjectDependencies"};
-	private static final String pdependsOn = "pDependsOn";
-
 	public static class Provider implements javax.inject.Provider<IConfigurationManagerForIDE> {
 		private String modelFolder;
 		private String repoType = ConfigurationManagerForIDE.getOWLFormat();
@@ -1321,15 +1319,35 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		else {
 			configItem = new ConfigurationItem(categoryHierarchy);
 		}
-		configItem.clearNameValuePairs();
-		if (projectDependencies != null) {
-			for (java.net.URI pduri : projectDependencies) {
-				ConfigurationItem.NameValuePair nv = configItem.new NameValuePair(pdependsOn, pduri.getPath());
-				configItem.addNameValuePair(nv);
+		boolean bChanged = false;
+		List<NameValuePair> nvps = configItem.getNameValuePairs();
+		if (nvps.size() != projectDependencies.size()) {
+			bChanged = true;
+		}
+		if (!bChanged) {
+			List<String> dpStrings = new ArrayList<String>();
+			for (java.net.URI pd : projectDependencies) {
+				dpStrings.add(pd.toString());
+			}
+			for (NameValuePair nvp : nvps) {
+				String nvpv = nvp.getValue().toString();
+				if (!dpStrings.contains(nvpv)) {
+					bChanged = true;
+					break;
+				}
 			}
 		}
-		updateConfiguration(configItem);;
-		saveConfiguration();
+		if (bChanged) {
+			configItem.clearNameValuePairs();
+			if (projectDependencies != null) {
+				for (java.net.URI pduri : projectDependencies) {
+					ConfigurationItem.NameValuePair nv = configItem.new NameValuePair(pdependsOn, pduri.toString());
+					configItem.addNameValuePair(nv);
+				}
+			}
+			updateConfiguration(configItem);;
+			saveConfiguration();
+		}
 		return true;
 	}
 	
