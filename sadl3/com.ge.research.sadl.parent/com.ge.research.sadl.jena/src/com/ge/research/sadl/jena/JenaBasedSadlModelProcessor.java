@@ -526,10 +526,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	@Override
 	public void onGenerate(Resource resource, IFileSystemAccess2 fsa, ProcessorContext context) {
 		// update project dependencies
-		List<java.net.URI> projectDependencies = projectHelper.getReferencedProjectURIs(resource);
 		try {
+			List<java.net.URI> projectDependencies = projectHelper.getReferencedProjectURIs(resource);
 			getConfigMgr().addProjectDependencies(projectDependencies);
-		} catch (ConfigurationException e2) {
+		} catch (Exception e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
