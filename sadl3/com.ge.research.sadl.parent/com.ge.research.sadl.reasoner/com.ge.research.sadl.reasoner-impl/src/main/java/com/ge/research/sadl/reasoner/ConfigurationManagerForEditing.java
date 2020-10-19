@@ -1154,6 +1154,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 */
 	public void updateConfiguration(ConfigurationItem newItem)
 			throws ConfigurationException {
+		boolean bChanged = false;
 		if (getConfigModel() != null) {
 			Resource type = getConfigModel().createResource(CATEGORY_KW);
 			Property subcatprop = getConfigModel().createProperty(
@@ -1166,6 +1167,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 						CONFIG_NAMESPACE + categoryHierarchy[i], type);
 				if (i > 0) {
 					getConfigModel().add(lastCategory, subcatprop, newCategory);
+					bChanged = true;
 				}
 				lastCategory = newCategory;
 			}
@@ -1191,6 +1193,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 															+ nvp.getName()));
 							updateStmt.changeObject(getConfigModel()
 									.createTypedLiteral(nvp.getValue()));
+							bChanged = true;
 						}
 					} else {
 						getConfigModel().add(
@@ -1198,11 +1201,14 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 								prop,
 								getConfigModel().createTypedLiteral(
 										nvp.getValue()));
+						bChanged = true;
 					}
 				}
 			}
-			clearReasoner();
-			setConfigChanged(true);
+			if (bChanged) {
+				clearReasoner();
+				setConfigChanged(true);
+			}
 		}
 	}
 
