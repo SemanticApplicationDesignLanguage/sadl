@@ -1,13 +1,20 @@
 <title>Architecture Overview</title>
 <h1>An Overview of the SADL IDE Architecture</h1>
 <h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/14/2020<!--webbot bot="Timestamp" endspan i-checksum="12551" -->.</h5>
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/20/2020<!--webbot bot="Timestamp" endspan i-checksum="12495" -->.</h5>
 <h5>See also <a href="SadlAndSadlServer.html">Knowledge as a Service: SADL and SadlServer</a>.</h5>
-<h2>Introduction</h2>
+<h2>Table of Contents</h2>
+<ul>
+  <li><a href="#Introduction">Introduction</a></li>
+  <li><a href="#InformationFlow">Information Flow</a></li>
+  <li><a href="#TwoModelingWorlds">The Two Model Worlds of the SADL IDE</a></li>
+  <li><a href="#SADLPlugins">SADL Plug-ins</a></li>
+</ul>
+<h2><a name="Introduction">Introduction</a></h2>
 <p>This document gives an 
 overview of the SADL Version 3 architecture, flow of information, project 
 structure, and the codebase with some of its major components.</p>
-<h2>Information Flow</h2>
+<h2><a name="InformationFlow">Information Flow</a></h2>
 <p>The figure below shows how the model, which is captured as SADL statements 
 conforming to the SADL grammar as defined in Sadl.xtext, is parsed to create an 
 abstract syntax tree (AST) expressed in terms of the Eclipse Modeling Framework 
@@ -31,7 +38,32 @@ processor when the user asks that a model be &quot;tested&quot;, that is inferen
 the model and queries and/or tests executed. Query/test results are displayed in 
 the console window. </p>
 <p><img border="0" src="images/Archit4.jpg" width="811" height="619"></p>
-<h2>SADL Plug-ins</h2>
+<h2><a name="TwoModelingWorlds">The Two Modeling Worlds of the SADL IDE</a></h2>
+<p>The SADL grammar is written as an Xtext grammar in SADL.xtext. The MWE2 
+workflow defined in GenerateSADL.mwe2 controls how the grammar is processed and 
+the workflow creates a class for each construct in the grammar. The ANTLR-based 
+Xtext parser creates an AST consisting of these grammar-based classes with 
+SadlModel at the root. Xtext handles many useful IDE functions including 
+hyperlinking, renaming, etc. A great deal of information is encoded in the Xtext 
+layer of the software.</p>
+<p>The other modeling world is the one to which we wish to translate the SADL 
+model--the semantic web world of OWL, rules, queries, tests, etc. When the AST 
+is processed by the JenaBasedSadlModelProcessor to convert SADL statements to 
+OWL or to IntermediateForm, the model processor needs access to the information 
+in the Xtext layer in order to construct the information in the Semantic Web 
+world. Access to the Xtext layer is provided by the class 
+com.ge.research.sadl.model.DeclarationExtensions. It has useful methods that 
+extract the needed information, such as:</p>
+<ol>
+  <li><font SIZE="2">getConcreteName</li>
+  </font>
+  <li><font SIZE="2">getConceptUri</font></li>
+  <li><font SIZE="2">getConceptQualifiedName</font></li>
+  <li><font SIZE="2">getDeclaration</font></li>
+  <li><font SIZE="2">getOntConceptType</font></li>
+</ol>
+<p>These and other classes allow us to construct the semantic world model.</p>
+<h2><a name="SADLPlugins">SADL Plug-ins</a></h2>
 <p>The SADL IDE consists of a number of interdependent Eclipse plug-ins that may 
 be installed in an instance of Eclipse to provide a rich knowledge base editing 
 environment. The plug-ins are installed together as the SADL feature. The same 
