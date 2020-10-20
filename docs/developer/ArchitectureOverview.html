@@ -43,9 +43,11 @@ the console window. </p>
 workflow defined in GenerateSADL.mwe2 controls how the grammar is processed and 
 the workflow creates a class for each construct in the grammar. The ANTLR-based 
 Xtext parser creates an AST consisting of these grammar-based classes with 
-SadlModel at the root. Xtext handles many useful IDE functions including 
-hyperlinking, renaming, etc. A great deal of information is encoded in the Xtext 
-layer of the software.</p>
+SadlModel at the root. All of the classes in this AST are subclasses of the 
+Eclipse Modeling Framework's(EMF's) EObject class. Hence EMF is the modeling 
+world in which the Xtext processing lives. Xtext provides many useful IDE 
+functions including hyperlinking, renaming, etc. A great deal of information is 
+encoded in the Xtext layer of the software.</p>
 <p>The other modeling world is the one to which we wish to translate the SADL 
 model--the semantic web world of OWL, rules, queries, tests, etc. When the AST 
 is processed by the JenaBasedSadlModelProcessor to convert SADL statements to 
