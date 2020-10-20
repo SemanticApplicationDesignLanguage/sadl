@@ -1,0 +1,71 @@
+<h1>Making Changes to the SADL Grammar</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/20/2020<!--webbot bot="Timestamp" endspan i-checksum="12495" -->.</h5>
+<h2>About the SADL Grammar</h2>
+<p>The SADL grammar is defined in the SADL.xtext file in the 
+com.ge.research.sadl project, com.ge.research.sadl package. This grammar is a 
+complete rework of the SADL V2 grammar by
+<a href="https://github.com/svenefftinge">Sven Efftinge</a> of
+<a href="https://www.typefox.io/">TypeFox</a>.</p>
+<p>To make extensions or modifications to the grammar, one must have some 
+understanding of
+<a href="https://www.eclipse.org/Xtext/documentation/301_grammarlanguage.html">
+Xtext grammar</a>. No attempt will be made in this document to provide basic 
+training. Rather some noteworthy things about the grammar will be mentioned.</p>
+<ol>
+  <li>The SADL grammar imports &quot;http://www.eclipse.org/emf/2002/Ecore&quot;, an 
+  Eclipse Model Framework (EMF) basis.</li>
+  <li>White space, multi-line comments, and single-line comments are &quot;hidden, 
+  meaning that they are not present in the parse tree (AST). (Note: a good 
+  reason to use the grammar's annotations, &quot;note&quot;, &quot;alias&quot;, &quot;see&quot;, to capture 
+  comments that are of importance to the generated OWL model.)</li>
+  <li>The concept definitions, e.g., the declarations of classes, properties, 
+  individuals, etc., are made using the grammar element SadlStatement. A variety 
+  of grammar elements are defined in support of SadlStatement.</li>
+  <li>Expression is a grammar element that is used in rules, queries, etc. 
+  &quot;Real&quot; expressions start with ExpressionParameterized, which is at the root of 
+  a variety of expressions s in a precedence-defining hierarchy, from lowest 
+  precedence to highest precedent, the highest being PrimaryExpression.</li>
+  <li>The grammar of SadlStatement and Expression do not intersect. This 
+  dichotomy creates some constraints on the consistency of the grammar but is 
+  not easily overcome while keeping some degree of backwards compatibility with 
+  SADL V2.</li>
+</ol>
+<h2>Building After Grammar Changes</h2>
+<p>Running an MWE2 Workflow on the &quot;GenerateSADL.mwe2&quot; file, which is equivalent 
+to running &quot;Generate Xtext Artifacts&quot; on the SADL.xtext file, will result in the 
+generation of all of the classes associated with grammar elements and the 
+generation of the contents of the &quot;src-gen&quot; and &quot;xtend-gen&quot; folders. If, after 
+an change to the SADL grammar, this workflow completes without error, the 
+grammar is usable and the model processor (JenaBasedSadlModelProcessor) can be 
+changed or extended to process the new grammar elements. If, however, there are 
+errors in the MWE2 workflow, the grammar problems must be diagnosed and the 
+grammar modified until it is valid. Most problems will have to do with multiple 
+paths that the parser could take, which are not allowed since the parser does 
+not do backtracking. Backtracking is slow and makes content assistance much more 
+difficult.</p>
+<h2>Debugging Grammar Problems</h2>
+<p>An ANTLR grammar file is created from the SADL grammar and can be found in 
+the com.ge.research.sadl project, src-gen/com.ge.research.sadl.parser.antlr.intern/DebugInternalSADL.g. 
+This file can be loaded into <a href="https://www.antlr3.org/works/">ANTLRWorks</a> 
+to provide insights into grammar issues. Here are the steps involved.</p>
+<ol>
+  <li>Download the ANTLRWorks jar file from
+  <a href="https://www.antlr3.org/works/">https://www.antlr3.org/works/</a>. 
+  This Web site also provides documentation on ANTLRWorks.</li>
+  <li>Run ANTLRWorks using an appropriate Java environment.</li>
+  <li>Click on File -&gt; Open and browse to the file com.ge.research.sadl/src-gen/com.ge.research.sadl.parser.antlr.intern/DebugInternalSADL.g</li>
+  <li>The grammar &quot;rule&quot; elements will be shown in a list on the left-hand side. 
+  You can click on one of these to see a syntax diagram of the rule.</li>
+  <li>Click on Grammar -&gt; Check Grammar to validate the grammar. </li>
+  <li>If there are no errors you will see the dialog
+  <img border="0" src="images/Making1.jpg" align="absmiddle" width="265" height="170"></li>
+  <li>If there are errors, the grammar rules affected will be marked in the list 
+  on the left. You can pick one or more of the marked rule(s) to see&nbsp; the 
+  syntax diagram.</li>
+  <li>The syntax diagram should help you to understand how your grammar is 
+  ambiguous, or the cause of other problems.</li>
+</ol>
+<p>The figure below shows the syntax diagram for ruleSadlStatement, as a 
+relatively complex example.</p>
+<p><img border="0" src="images/Making2.jpg" width="1839" height="718"></p>
