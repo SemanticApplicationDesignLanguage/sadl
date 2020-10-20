@@ -1,0 +1,30 @@
+<h1>Extending the SADL Grammar and IDE</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/20/2020<!--webbot bot="Timestamp" endspan i-checksum="12495" -->.</h5>
+<p>It is possible to extend the SADL grammar and IDE to provide additional 
+language and editor capabilities on top of SADL. Examples of this include GE 
+Aviations SADL Requirements Language (SRL), part of the ASSERT<sup>(TM)</sup> 
+Requirements Capture Environment (RCE) (see
+<a href="https://ieeexplore.ieee.org/document/8049134">
+https://ieeexplore.ieee.org/document/8049134</a>,
+<a href="https://ieeexplore.ieee.org/document/8102059">
+https://ieeexplore.ieee.org/document/8102059</a>) and the
+<a href="https://github.com/GEGlobalResearch/DARPA-ASKE-TA1/blob/master/StatusReports/Phase2/M11/M11_ANSWER_Report_Part1.pdf">
+DARPA ASKE Dialog grammar and ANSWER IDE</a>. </p>
+<p>The basic process for accomplishing such an extension is as follows:</p>
+<ol>
+  <li>Create a new Xtext project.</li>
+  <li>Make the resulting Eclipse plugin development projects Maven projects.</li>
+  <li>Make the new grammar import the SADL grammar as shown in this example from 
+  Dialog<p><img border="0" src="images/Extend3.gif" width="604" height="577"></p>
+  <p>Note especially lines 40, 43, 47-48. References to SADL gramamr elements 
+  are expressed&nbsp; as, for example, &quot;sadl::SadlModel&quot;. Note that &quot;sadl::SadlModelElement&quot; 
+  includes some elements from the SADL grammar, lines 53-55, and new model 
+  elements, lines 56-72.</li>
+  <li>Many of the classes, such as the model processor and model validators, can 
+  be extensions of the SADL project classes. For example;<p>
+  <img border="0" src="images/Extend4.gif" width="652" height="17"></li>
+</ol>
+<p>The Dialog project should provide many useful examples of how SADL can be 
+extended.</p>
+<p>&nbsp;</p>
