@@ -12,6 +12,7 @@ Export-Package: com.ge.research.sadl.applications;
    org.eclipse.ui.plugin"
 Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
+ javax.activation,
  com.ge.research.sadl.ide,
  com.ge.research.sadl.jena,
  com.ge.research.sadl.ui,
