@@ -6,7 +6,8 @@
       provider-name="GE Global Research">
 
    <description url="http://www.example.com/description">
-      The SADL Prlog Plug-in is a Prolog-based reasoner for the Semantic Application Design Language (SADL), which is a controlled
+      The SADL Prolog Plug-in is a Prolog-based reasoner for the Semantic
+Application Design Language (SADL), which is a controlled
 English grammar and Eclipse IDE for building, testing, and deploying
 semantic models.
    </description>

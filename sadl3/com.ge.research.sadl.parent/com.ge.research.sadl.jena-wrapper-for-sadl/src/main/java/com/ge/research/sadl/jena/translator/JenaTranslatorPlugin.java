@@ -1272,7 +1272,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 			Builtin bltin = BuiltinRegistry.theRegistry.getImplementation(builtinName);
 			if (bltin == null) {
 				logger.error("Something went wrong finding/loading Builtin '" + builtinName + "'");
-				addError("Unable to resolve built-in '" + builtinName + "'");
+				addError("Unable to resolve built-in '" + builtinName + "' in rule '" + getRuleInTranslation().getRuleName() + "'");
 			}
 			else {
 				String uri = bltin.getURI();
@@ -1466,11 +1466,14 @@ public class JenaTranslatorPlugin implements ITranslator {
 			return "?" + getNewVariableForRule();
 		}
 		else if (node == null) {
-			throw new TranslationException("Encountered null node in nodeToString; this indicates incorrect intermediate form and should not happen");
+//			throw new TranslationException("Encountered null node in nodeToString; this indicates incorrect intermediate form and should not happen");
+			addError(new ModelError("Encountered null node in nodeToString; this indicates incorrect intermediate form and should not happen", ErrorType.ERROR));
 		}
 		else {
-			throw new TranslationException("Nnode '" + node.toString() + "' cannot be translated to Jena format.");
+//			throw new TranslationException("Nnode '" + node.toString() + "' cannot be translated to Jena format.");
+			addError(new ModelError("Nnode '" + node.toString() + "' cannot be translated to Jena format.", ErrorType.ERROR));
 		}
+		return "<null>";
 	}
 
 	private Literal constantToLiteral(ConstantNode node) throws TranslationException {

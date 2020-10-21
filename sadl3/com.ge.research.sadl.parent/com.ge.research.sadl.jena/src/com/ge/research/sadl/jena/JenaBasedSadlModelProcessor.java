@@ -7664,6 +7664,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
         boolean specialCntIdxProcessing = false;
         boolean lIsConstantExpression = false;
         
+        boolean predicateIsNegatedType = false;
+        if (predicate instanceof UnaryExpression && 
+        		((UnaryExpression)predicate).getOp().contentEquals("not") &&
+        		((UnaryExpression)predicate).getExpr() instanceof Constant &&
+        		((Constant)((UnaryExpression)predicate).getExpr()).getConstant().equals("a type")) {
+        	// negated
+        	predicateIsNegatedType = true;
+        	predicate = ((UnaryExpression)predicate).getExpr();
+        }
+        
+        	
 		if (predicate instanceof Constant) {
 			// this is a pseudo PropOfSubject; the predicate is a constant
 			lIsConstantExpression = true;
@@ -7733,7 +7744,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				trPred = new NamedNode(RDFS.subClassOf.getURI());  // new RDFTypeNode();
 				((NamedNode)trPred).setContext(predicate);
 				((NamedNode)trPred).setNodeType(NodeType.ObjectProperty);
-				return new TripleElement((Node)null, (Node)trPred, (Node)trSubj);
+				TripleElement tr = new TripleElement((Node)null, (Node)trPred, (Node)trSubj);
+				if (predicateIsNegatedType) {
+					tr.setType(TripleModifierType.Not);
+				}
+				return tr;
 			} else if (cnstval.equals("value") && getTarget() instanceof Query) {
 				// this is to be a delayed evaluation: don't use the expression as the query but evaluate
 				// the expression at runtime and use the value as the query
