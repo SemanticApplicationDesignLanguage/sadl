@@ -1,0 +1,63 @@
+<style>
+<!--
+a:link	     { color: #0066cc; }a:link.header    { text-decoration: none; color: #000000 }
+-->
+</style>
+<h1>Creating New Reasoner/Translator Pairs</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/21/2020<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.</h5>
+<p>As described <a href="SadlAndSadlServer.html#RTPairs">here</a>, the SADL 
+architecture supports pluggable reasoner/translator pairs. This document 
+describes the creation of such a reasoner/translator pair.</p>
+<h2>Requirements</h2>
+<p>In order to work correctly in the SADL IDE, a reasoner/translator pair must 
+meet the following requirements. The SADL project <i>
+com.ge.research.sadl.swi-prolog-plugin</i> implements such a pair and may be 
+used as an example.</p>
+<ol>
+  <li>There must be a reasoner class that implements the <i>
+  <a class="header" href="eclipse-javadoc:â??=com.ge.research.jena/lib\/reasoner-api.jar%3Ccom">
+  com</a>.<a class="header" href="eclipse-javadoc:â??=com.ge.research.jena/lib\/reasoner-api.jar%3Ccom.ge">ge</a>.<a class="header" href="eclipse-javadoc:â??=com.ge.research.jena/lib\/reasoner-api.jar%3Ccom.ge.research">research</a>.<a class="header" href="eclipse-javadoc:â??=com.ge.research.jena/lib\/reasoner-api.jar%3Ccom.ge.research.sadl">sadl</a>.<a class="header" href="eclipse-javadoc:â??=com.ge.research.jena/lib\/reasoner-api.jar%3Ccom.ge.research.sadl.reasoner">reasoner</a>.IReasoner</i> 
+  Java interface class or which extends the <i>
+  com.ge.research.sadl.reasoner.Reasoner</i> class which implements that 
+  interface.</li>
+  <li>There must be a translator class that implements the <i>
+  <a class="header" href="eclipse-javadoc:â??=com.ge.research.jena/lib\/reasoner-api.jar%3Ccom">
+  com</a>.<a class="header" href="eclipse-javadoc:â??=com.ge.research.jena/lib\/reasoner-api.jar%3Ccom.ge">ge</a>.<a class="header" href="eclipse-javadoc:â??=com.ge.research.jena/lib\/reasoner-api.jar%3Ccom.ge.research">research</a>.<a class="header" href="eclipse-javadoc:â??=com.ge.research.jena/lib\/reasoner-api.jar%3Ccom.ge.research.sadl">sadl</a>.<a class="header" href="eclipse-javadoc:â??=com.ge.research.jena/lib\/reasoner-api.jar%3Ccom.ge.research.sadl.reasoner">reasoner</a>.ITranslator</i> 
+  Java interface class </li>
+  <li>The reasoner class and the translator class must be compatible in that the 
+  translator produces output of a type and syntax which can be used by the 
+  reasoner.</li>
+  <li>The Eclipse project for the translator/reasoner pair should have a 
+  META-INF folder with:<ul>
+    <li>a MANIFEST.MF file that has &quot;Eclipse-RegisteredBuddy: 
+    com.ge.research.sadl (this ensures that the class loader will find the right 
+    class)</li>
+    <li>a MANIFEST.MF file that has &quot;Export-Package&quot; that include the translator 
+    and reasoner packages</li>
+    <li>a &quot;services&quot; folder that contains these files:<ul>
+      <li>com.ge.research.sadl.reasoner.IReasoner containing the full package 
+      and name of the reasoner class</li>
+      <li>com.ge.research.sadl.reasoner.ITranslator containing the full package 
+      and name of the translator class</li>
+    </ul>
+    </li>
+  </ul>
+  </li>
+</ol>
+<p>It is recommended that the Eclipse project be a Maven project and that the 
+pom.xml file create the &quot;services&quot; folder and its content on build, as 
+illustrated in the <i>com.ge.research.sadl.swi-prolog-plugin </i>project. The 
+result of a Maven build should be a jar file that includes everything needed for 
+the reasoner/translator pair to be found and used by a Java Service Provider and 
+a Java class loader. When this is the case the jar need only be placed on the 
+class path for the reasoner/translator pair to appear in a SADL project's SADL 
+properties and selected as the active reasoner/translator pair.</p>
+<p>For easier distribution and installation, it is recommended that the project 
+be a Eclipse plug-in project with an Activator class. An associated feature 
+project and update project can make the reasoner/translator pair easy to 
+download and install in Eclipse.</p>
+<p>For use in the SadlServer knowledge delivery environment, the jar file need 
+only be on the Java classpath. The reasoner/translator pair to be used by 
+SadlServer are identified by ReasonerFamily and ReasonerCategory attributes in 
+the &quot;configuration.rdf&quot; file in the OwlModels knowledge base folder.</p>
