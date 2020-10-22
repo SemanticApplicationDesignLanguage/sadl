@@ -24,6 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
+import javax.activation.DataSource;
+
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.tdb.TDB;
@@ -739,7 +741,8 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
 					}
 	        	}
 	    		else {
-	    			contentStream = csvImporter.getOwlModel(null).getInputStream();
+	    			DataSource ds = csvImporter.getOwlModel(null);
+	    			contentStream = ds.getInputStream();
 	    		}
         	} 
 		} catch (Exception e1) {

@@ -2073,12 +2073,12 @@ public class OwlToSadl {
 		return strIn.replace("\"", "\\\"");
 	}
 	
-	private String individualToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) throws OwlImportException {
+	private String individualToSadl(ModelConcepts concepts, Resource inst, boolean embeddedBNode) throws OwlImportException {
 		StringBuilder sb = new StringBuilder();
 		boolean bnode = false;
 		boolean isEquation = false;
 		if (inst.isURIResource()) {
-			isEquation = isEquationType(inst);
+			isEquation = isEquationType(inst.as(Individual.class));
 			if (isEquation) {
 				String[] sds = equationToSadl(inst.getURI(), false, getConfigurationManager());
 				for (String sd : sds) {
@@ -2087,7 +2087,7 @@ public class OwlToSadl {
 				}
 			}
 			else {
-				sb.append(individualNameAndAnnotations(concepts, inst));
+				sb.append(individualNameAndAnnotations(concepts, inst.as(Individual.class)));
 				if (isNewLineAtEndOfBuffer(sb)) {
 					sb.append("    ");
 				}
@@ -2941,19 +2941,21 @@ public class OwlToSadl {
 				return object.asLiteral().getLexicalForm();
 			}
 		}
-		else if (object.canAs(Individual.class)){
+		else if (object.canAs(Individual.class) || 
+				(object.isResource() && !object.isURIResource() && 
+						object.asResource().hasProperty(RDF.type))){
 			// a bnode
 			if (concepts.getInstances().contains(object)) {
 				concepts.getInstances().remove(object);
 			}
 			// is it a list?
-			if (object.as(Individual.class).getProperty(RDF.first) != null) {
+			if (object.asResource().getProperty(RDF.first) != null) {
 				return listToSadl(concepts, object.as(Individual.class), true);
 			}
-			else if (isaSadlList(object.as(Individual.class))) { 
+			else if (object.asResource().canAs(Individual.class) && isaSadlList(object.as(Individual.class))) { 
 				return sadlListToSadl(concepts, object.as(Individual.class), true);
 			}
-			return individualToSadl(concepts, object.as(Individual.class), true);
+			return individualToSadl(concepts, object.asResource(), true);
 		}
 		else {
 			return object.toString();
