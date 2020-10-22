@@ -14,4 +14,3 @@ Ask: x is a ^Rule.
 
 Ask: "select ?s where {?s <rdf:type> <Shape>}".
 Ask: "select ?s ?a where {?s <area> ?a}".
-
