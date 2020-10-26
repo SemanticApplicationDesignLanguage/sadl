@@ -1,0 +1,126 @@
+{
+  "tokenColors": [
+    {
+      "name": "uri",
+      "scope": [
+        "keyword.control"
+      ],
+      "settings": {
+        "foreground": "#000000"
+      }
+    },
+    {
+      "name": "class",
+      "scope": [
+        "beginning.punctuation.definition.list.markdown"
+      ],
+      "settings": {
+        "foreground": "#303B93",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "instance",
+      "scope": [
+        "support.type.property-name"
+      ],
+      "settings": {
+        "foreground": "#2948f6"
+      }
+    },
+    {
+      "name": "structure-name",
+      "scope": [
+        "punctuation.definition.tag"
+      ],
+      "settings": {
+        "foreground": "#0000FF"
+      }
+    },
+    {
+      "name": "variable",
+      "scope": [
+        "emphasis"
+      ],
+      "settings": {
+        "foreground": "#FF00FF"
+      }
+    },
+    {
+      "name": "data-property",
+      "scope": [
+        "strong"
+      ],
+      "settings": {
+        "foreground": "#008000"
+      }
+    },
+    {
+      "name": "keyword",
+      "scope": [
+        "keyword"
+      ],
+      "settings": {
+        "foreground": "#801480",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "strings",
+      "scope": [
+        "string.quoted.double"
+      ],
+      "settings": {
+        "foreground": "#000000"
+      }
+    },
+    {
+      "name": "object-property",
+      "scope": [
+        "support.type.property-name"
+      ],
+      "settings": {
+        "foreground": "#008000"
+      }
+    },
+    {
+      "name": "annotation-property",
+      "scope": [
+        "constant.regexp"
+      ],
+      "settings": {
+        "foreground": "#008000"
+      }
+    },
+    {
+      "name": "rdf-property",
+      "scope": [
+        "keyword.other.unit"
+      ],
+      "settings": {
+        "foreground": "#00CC00"
+      }
+    },
+    {
+      "name": "rdf-datatype",
+      "scope": [
+        "keyword.operator"
+      ],
+      "settings": {
+        "foreground": "#303B93",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "function-name",
+      "scope": [
+        "string.regexp"
+      ],
+      "settings": {
+        "foreground": "#801480"
+      }
+    }
+  ],
+  "type": "light",
+  "name": "SADL"
+}
