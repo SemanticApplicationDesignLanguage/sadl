@@ -37,7 +37,7 @@
   "theia": {
     "frontend": {
       "config": {
-        "defaultTheme": "light"
+        "defaultTheme": "sadlTheme"
       }
     }
   }

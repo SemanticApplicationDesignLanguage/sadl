@@ -17,9 +17,10 @@
  ***********************************************************************/
 
 import { ContainerModule, interfaces } from 'inversify';
+import { MonacoThemingService } from '@theia/monaco/lib/browser/monaco-theming-service';
+import { LanguageClientContribution } from '@theia/languages/lib/browser/language-client-contribution';
 import { WebSocketConnectionProvider } from '@theia/core/lib/browser/messaging/ws-connection-provider';
 import { FrontendApplicationContribution } from '@theia/core/lib/browser/frontend-application';
-import { LanguageClientContribution } from '@theia/languages/lib/browser/language-client-contribution';
 import { CommandContribution, MenuContribution } from '@theia/core/lib/common';
 import { LanguageGrammarDefinitionContribution } from '@theia/monaco/lib/browser/textmate/textmate-contribution';
 import { FileSystemExt, FileSystemExtPath } from '../common/filesystem-ext';
@@ -30,6 +31,13 @@ import { configuration, monarchLanguage } from './sadl-monaco-language';
 import { SadlLanguageClientContribution } from './sadl-language-client-contribution';
 import { SadlHideHiddenFilesContribution } from './sadl-hide-hidden-files-contribution';
 import { SadlTextmateContribution } from './sadl-textmate-contribution';
+
+MonacoThemingService.register({
+    id: 'sadlTheme',
+    label: 'Light (SADL)',
+    uiTheme: 'vs',
+    json: require('../../data/themes/sadl.color-theme.json')
+});
 
 export default new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Unbind, isBound: interfaces.IsBound, rebind: interfaces.Rebind) => {
     monaco.languages.register({
