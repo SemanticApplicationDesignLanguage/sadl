@@ -1,7 +1,0 @@
-<xsd:schema xmlns:xsd ="http://www.w3.org/2001/XMLSchema">
-<xsd:simpleType name="over12">
- <xsd:restriction base="xsd:int">
-<xsd:minInclusive value="12"/>
-  </xsd:restriction>
-</xsd:simpleType>
-</xsd:schema>

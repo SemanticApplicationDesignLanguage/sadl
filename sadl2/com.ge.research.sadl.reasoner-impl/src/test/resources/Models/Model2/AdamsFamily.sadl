@@ -1,7 +1,0 @@
-uri "http://sadl.org/SadlLinking2/AdamsFamily" alias adams version "$Revision:$ Last modified on   $Date:$". 
-
-import "http://sadl.org/SadlLinking1/Extended". 
-
-JohnAdams is a Man with wife (a Woman Abigail).
-
-JohnQuincyAdams is a Man, has father JohnAdams, has mother Abigail.

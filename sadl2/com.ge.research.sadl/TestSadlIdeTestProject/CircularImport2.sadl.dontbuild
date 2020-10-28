@@ -1,5 +1,0 @@
-uri "http://sadl.imp/CircularImport2".
-
-import "file://CircularImport1.sadl" as CircularImport1.
-
-Cat is a top-level class.

@@ -1,8 +1,0 @@
-uri "http://sadl.org/TestSadlIde/SparqlMatchText" alias spqrqltextmatch version "$Revision:$ Last modified on   $Date:$". 
-
-Thingy is a class described by foo with values of type string.
-
-MyThingy is a Thingy with foo "red".
-
-Ask: "select ?x where {?x <foo> 'red'}".
-

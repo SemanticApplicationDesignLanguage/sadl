@@ -1,4 +1,0 @@
-uri "http://sadl.org/TestSadlIde/OntologyComments" alias Name version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:39 $"
-	(note "This is a comment on the ontology", "This is a second comment") (note "This is a third comment"). 
-	
-// check the OWL file generated and make sure it has the three ontology comments.	

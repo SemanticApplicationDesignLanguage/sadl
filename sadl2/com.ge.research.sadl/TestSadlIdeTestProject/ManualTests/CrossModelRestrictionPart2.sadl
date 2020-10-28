@@ -1,5 +1,0 @@
-uri "http://sadl.org/TestSadlIde/CrossModelRestrictionPart2" alias cmrp2 version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:38 $". 
-
-import "http://sadl.org/TestSadlIde/CrossModelRestrictionPart1". 
-
-myprop describes Thingy with a single value of type string.
