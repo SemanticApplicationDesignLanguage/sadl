@@ -38,8 +38,6 @@
             <unit id="org.apache.xerces" version="2.9.0.v201101211617"/>
             <unit id="org.jsoup" version="1.7.2.v201411291515"/>
             <unit id="org.jsoup.source" version="1.7.2.v201411291515"/>
-            <unit id="javax.activation" version="1.1.0.v201211130549"/>
-            <unit id="javax.activation.source" version="1.1.0.v201211130549"/>
             <repository location="https://download.eclipse.org/tools/orbit/downloads/2020-03"/>
         </location>
     </locations>
