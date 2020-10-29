@@ -1,9 +1,0 @@
-<http://com.ge.research.sadl/Bug3434542#Ac> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://com.ge.research.sadl/Bug3434542#Aa> .
-<http://com.ge.research.sadl/Bug3434542#Ac> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<http://com.ge.research.sadl/Bug3434542#Aa> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<http://com.ge.research.sadl/Bug3434542#_one_> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/Bug3434542#Ab> .
-<http://com.ge.research.sadl/Bug3434542#_two_> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://com.ge.research.sadl/Bug3434542#Ac> .
-<http://com.ge.research.sadl/Bug3434542> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'Bug3434542.sadl' and should not be edited."@en .
-<http://com.ge.research.sadl/Bug3434542> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
-<http://com.ge.research.sadl/Bug3434542#Ab> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://com.ge.research.sadl/Bug3434542#Aa> .
-<http://com.ge.research.sadl/Bug3434542#Ab> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .

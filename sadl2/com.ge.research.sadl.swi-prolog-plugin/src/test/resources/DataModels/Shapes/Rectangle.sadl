@@ -1,8 +1,0 @@
-uri "http://sadl.org/Shapes/Rectangle" alias rect version "$Revision:$ Last modified on   $Date:$". 
-
-import "http://sadl.org/Shapes/Shapes". 
-
-Rectangle is a type of Shape,
-	described by height with values of type float,
-	described by width with values of type float.
-	

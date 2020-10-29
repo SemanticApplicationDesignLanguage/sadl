@@ -1,6 +1,0 @@
-uri "http://sadl.imp/CircularImportB".
-
-// This is the companion file to CircularImportA
-
-import "ManualTests/CircularImportA.sadl" as CircularImportA.
-

@@ -1,6 +1,0 @@
-<http://sadl.imp/RDFSTransitiveClosure#NewThingy> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.imp/RDFSTransitiveClosure#Thingy> .
-<http://sadl.imp/RDFSTransitiveClosure#NewThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<http://sadl.imp/RDFSTransitiveClosure> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'RDFSTransitiveClosure.sadl' and should not be edited."@en .
-<http://sadl.imp/RDFSTransitiveClosure> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
-<http://sadl.imp/RDFSTransitiveClosure#SomeNewThingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/RDFSTransitiveClosure#NewThingy> .
-<http://sadl.imp/RDFSTransitiveClosure#Thingy> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .

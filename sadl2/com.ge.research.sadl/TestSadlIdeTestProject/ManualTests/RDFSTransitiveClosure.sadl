@@ -1,8 +1,0 @@
-uri "http://sadl.imp/RDFSTransitiveClosure".
-
-Thingy is a top-level class.
-NewThingy is a type of Thingy.
-
-SomeNewThingy is a NewThingy.
-
-Test: SomeNewThingy is a Thingy.

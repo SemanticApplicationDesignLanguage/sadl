@@ -1,5 +1,0 @@
-uri "http://sadl.imp/CircularImport1".
-
-import "file://CircularImport2.sadl" as CircularImport2.
-
-Dog is a top-level class.

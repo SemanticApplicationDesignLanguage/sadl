@@ -1,6 +1,0 @@
-uri "http://sadl.imp/DuplicateImportPrefixLevel2".
-
-import "file://ManualTests/DuplicateImportPrefixLevel3.sadl" as DuplicateImportPrefix.
-
-^A is a class, described by property2 with values of type string.
-

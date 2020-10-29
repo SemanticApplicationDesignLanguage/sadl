@@ -1,5 +1,0 @@
-<http://sadl.imp/shapes-rules-alt#areaSqIn> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/shapes-rules-alt#Shape> .
-<http://sadl.imp/shapes-rules-alt#areaSqIn> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#float> .
-<http://sadl.imp/shapes-rules-alt#areaSqIn> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
-<http://sadl.imp/shapes-rules-alt> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'shapes-rules-alt.sadl' and should not be edited."@en .
-<http://sadl.imp/shapes-rules-alt> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .

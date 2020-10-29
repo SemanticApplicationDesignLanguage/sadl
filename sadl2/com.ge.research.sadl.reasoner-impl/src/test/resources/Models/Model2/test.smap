@@ -1,7 +1,0 @@
-uri "http://org.sadl/sadllinking2test" alias maptst.
-
-//import "http://sadl.org/SadlLinking1/Extended".
-//import "http://sadl.org/SadlLinking1/GenealogyBase".
-import "http://sadl.org/SadlLinking2/AdamsFamily".
-
-Person husband JohnAdams.

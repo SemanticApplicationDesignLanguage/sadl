@@ -1,7 +1,0 @@
-uri "http://com.ge.research.sadl/OverlappingEnumeration" alias ole version "$Revision: 1.1 $ Last modified on   $Date: 2014/11/26 17:19:36 $". 
-
-PortProtocol is a class, must be one of {tcp, udp}.
-RuleIPProtocol is a class, must be one of {ip, tcp, icmp}.
-
-Test: tcp is a PortProtocol.
-Test: tcp is a RuleIPProtocol.

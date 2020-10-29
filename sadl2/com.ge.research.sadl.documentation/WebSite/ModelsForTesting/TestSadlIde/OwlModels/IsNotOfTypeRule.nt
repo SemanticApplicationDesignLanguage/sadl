@@ -1,9 +1,0 @@
-<http://sadl.imp/IsNotOfTypeRule#passed> <http://www.w3.org/2000/01/rdf-schema#domain> <http://sadl.imp/IsNotOfTypeRule#Exam> .
-<http://sadl.imp/IsNotOfTypeRule#passed> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/2001/XMLSchema#boolean> .
-<http://sadl.imp/IsNotOfTypeRule#passed> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#DatatypeProperty> .
-<http://sadl.imp/IsNotOfTypeRule> <http://www.w3.org/2000/01/rdf-schema#comment> "This ontology was created from a SADL file 'IsNotOfTypeRule.sadl' and should not be edited."@en .
-<http://sadl.imp/IsNotOfTypeRule> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Ontology> .
-<http://sadl.imp/IsNotOfTypeRule#Exam> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<http://sadl.imp/IsNotOfTypeRule#NotAnExam> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://sadl.imp/IsNotOfTypeRule#Exam> .
-<http://sadl.imp/IsNotOfTypeRule#NotAnExam> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
-<http://sadl.imp/IsNotOfTypeRule#TheExam> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.imp/IsNotOfTypeRule#Exam> .

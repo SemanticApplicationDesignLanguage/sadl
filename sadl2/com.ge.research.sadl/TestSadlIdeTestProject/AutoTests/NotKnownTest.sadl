@@ -1,7 +1,0 @@
-uri "http://sadl.imp/NotKnownTest".
-
-Thingy is a top-level class, described by disposable with values of type boolean.
-
-MyThingy is a Thingy.
-
-Test: "select ?v where {<MyThingy> <disposable> ?v}" is not known.
