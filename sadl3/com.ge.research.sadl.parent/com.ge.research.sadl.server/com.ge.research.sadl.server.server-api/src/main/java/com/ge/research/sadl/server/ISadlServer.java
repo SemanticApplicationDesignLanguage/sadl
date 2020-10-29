@@ -331,6 +331,15 @@ public interface ISadlServer {
     		throws TemplateException, ConfigurationException, IOException, InvalidNameException, SessionNotFoundException;
 
     /**
+     * Method to receive a Knowledge Base Data Object as an identified object. The underlying implementation will, depending on reasoner/translator pair, make sense of the  input Object.
+     * @param dataObject
+     * @return
+     * @throws ConfigurationException 
+     * @throws ReasonerNotFoundException 
+     */
+    abstract public boolean sendDataObject(Object dataObject) throws ConfigurationException, ReasonerNotFoundException;
+
+    /**
      * This method sets the default instance data namespace. Instance data nodes without a specified namespace will use this namespace.
      * 
      * @param namespace -- the default instance data namespace

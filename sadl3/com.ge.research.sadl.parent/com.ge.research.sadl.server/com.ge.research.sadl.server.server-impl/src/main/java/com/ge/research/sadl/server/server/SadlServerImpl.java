@@ -365,6 +365,7 @@ public class SadlServerImpl implements ISadlServer {
     	}
 	}
 	
+	@Override
     public boolean sendData(DataSource dataSrc)
             throws IOException, ReasonerNotFoundException, ConfigurationException {
         logger.info("Calling sendData({})", dataSrc);
@@ -387,6 +388,7 @@ public class SadlServerImpl implements ISadlServer {
 		throw new ReasonerNotFoundException("No reasoner found.");
     }
 
+	@Override
     public boolean sendData(DataSource dataSrc, String inputFormat)
             throws IOException, ReasonerNotFoundException, ConfigurationException {
         logger.info("Calling sendData({},{})", dataSrc,inputFormat);
@@ -396,6 +398,16 @@ public class SadlServerImpl implements ISadlServer {
 		throw new ReasonerNotFoundException("No reasoner found.");
     }
 
+	@Override
+	public boolean sendDataObject(Object dataObject) throws ConfigurationException, ReasonerNotFoundException {
+        logger.info("Calling sendData({})", dataObject.toString());
+        if (reasoner != null) {
+        	return reasoner.loadInstanceData(dataObject);
+        }
+		throw new ReasonerNotFoundException("No reasoner found.");
+	}
+
+	@Override
 	public boolean sendCsvData(DataSource csvDataSrc, boolean includesHeader, String csvTemplate)
 			throws ConfigurationException, IOException, InvalidNameException, TemplateException {
 		String csvTemplateString;
