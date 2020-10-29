@@ -1,0 +1,572 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Quick Start Tutorial</title>
+</head>
+
+<body>
+
+<h1>A Mini-Tutorial in SADL Version 3</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/29/2020<!--webbot bot="Timestamp" endspan i-checksum="12639" --> 
+by <a href="mailto:crapo@research.ge.com?subject=SADL">A. W. Crapo</a>.</h5>
+<h2>Introduction</h2>
+<p>This mini-tutorial will lead you through some of the basic features of SADL 
+Version 3. It will familiarize you with the basics of SADL and introduce you to 
+some of the authoring environment helps such as statement completion by leading you through the construction of a simple genealogical 
+model. This example domain is chosen so that the concepts will be familiar and 
+you can focus on the modeling process and language.</p>
+<h2>Build a Simple Model</h2>
+<h3>Build a New Resources Project</h3>
+<ol>
+  <li>Select File-&gt;New-&gt;Project... from the menu bar (or use the toolbar icon 
+  dropdown menu)</li>
+  <li>In the New Project dialog, open General and select Project, then click 
+  Next&gt;</li>
+  <li>Enter a Project name, e.g., MyFamily, and click Finish</li>
+</ol>
+<h3>Create a New SADL File</h3>
+<ol>
+  <li>Right-click on your new project in the Package Explorer or select File 
+  from the menu bar. In either case select New-&gt;File. </li>
+  <li>In the resulting dialog box, enter a new file name ending in &quot;.sadl&quot;, 
+  e.g., &quot;Concepts.sadl&quot;. Note that the &quot;.sadl&quot; extension is necessary 
+  for the SADL nature to be given to the project and the SADL editor to be used.</li>
+  <li>The first time you create a SADL file in a new project you will be asked 
+  if you wish to add the Xtext nature to the project. Say Yes.</li>
+</ol>
+<h3>Important Note</h3>
+<p>Each statement in a SADL model ends with a period. However, the period is 
+also used for other things such as the decimal in a decimal number. Therefore 
+the period at the end of a statement must be followed by white space (space, 
+tab, newline, ...) or an error will be generated.</p>
+<h3>Every SADL Model File Needs a Unique Name (Content Assistance)</h3>
+<ol>
+  <li>To see how content assist works, hold down the Ctrl key and press the 
+  space bar. This is the request for content assist. (The focus must be in the 
+  editor window.) In this case the only thing that can start a valid model is 
+  the keyword &quot;uri&quot; so you can select &quot;uri&quot; or you can use the 
+  template for &quot;model name&quot;. Either choice will lead you through naming the 
+  model. The default is derived from the file name given. If you choose &quot;uri&quot; 
+  from the menu, add a space to indicate 
+  that the word is complete before asking for content assistance again</li>
+  <li>.<br>
+  <img border="0" src="images/QSTuto3.gif" width="156" height="74"></li>
+  <li>Ask for completion assistance again (Ctrl-space). This time there is more 
+  than one choice so a pop-up menu appears. Select the Uri option with a double 
+  click or a single click and the Enter key.<br>
+  <img border="0" src="images/QSTuto4.gif" width="344" height="239"></li>
+  <li>Make the URI unique to this model by adding some model-specific ending, 
+  e.g, &quot;.../myfamily/concepts&quot;.</li>
+  <li>At this point you can end the statement with a period or you may again 
+  request assistance (Ctrl-space), in which case your choices will be to add an 
+  End of Sentence (period) or to add version. <br>
+  <img border="0" src="images/QSTuto5.gif" width="499" height="105"><br>
+  For now, let's end this sentence with a period.</li>
+  <li>Press the Enter key to go to the next line. <b>Note</b>: a SADL model must 
+  always end in a space, a tab,&nbsp; or a New Line. This is because the period 
+  is a legal part of a name and the language parser does not know if the period 
+  is an end-of-sentence marker unless it is followed by white space.</li>
+</ol>
+<h3>The Model Name Can Have Version Information (Quick Fix)</h3>
+<ol>
+  <li>At this point you will have a warning marker, identified by a yellow 
+  exclamation point and a light bulb (<img border="0" src="images/QSTuto2.gif" width="17" height="20">), 
+  in the margin to the left of the first statement in your model.<br>
+  <img border="0" src="images/QSTuto6.gif" width="375" height="71"><br>
+  This small light bulb behind the exclamation point indicates that there are 
+  one or more Quick Fixes available for the warning.</li>
+  <li>Placing the mouse cursor over the marker will cause the cursor to change 
+  to a hand and an explanation of the warning to be displayed.<br>
+  <img border="0" src="images/QSTuto7.gif" width="388" height="73"><br>
+  (The cursor isn't shown in this screen shot.) This message indicates that 
+  while it isn't required (this is not an error), including model version 
+  information may be desirable.</li>
+  <li>Clicking on the marker will cause a list of fixes to the warning to be 
+  displayed.<br>
+  <img border="0" src="images/QSTuto8.gif" width="565" height="82"></li>
+  <li>Double-clicking a fix will cause the action to be taken. Double-click on 
+  Add Model Version.<br>
+  <img border="0" src="images/QSTuto9.gif" width="451" height="87"><br>
+  The CVS keywords ($Revision: 1.1 $, $Date: 2013/08/06 17:06:20 $) will be augmented with revision number and last modification date 
+  as soon as the model is checked into CVS. For example, the version information 
+  in this case becomes a string like &quot;$Revision: 1.1 $ Last modified on $Date: 
+  2010/08/06 14:00:16 $&quot;.<br>
+  <br>
+  Note: In SVN, keywords are not necessarily automatically enabled. You may need 
+  to modify the SVN properties of a project or, if you prefer, specific files in 
+  the project to set the SVN keywords you wish to enable. You can do this from 
+  within Eclipse.</li>
+</ol>
+<h3>Defining Classes and Properties</h3>
+<ol>
+  <li>Let's begin by declaring the Person concept. <br>
+  <br>
+  <img border="0" src="images/QSTuto14.gif" width="362" height="71"></li>
+  <li>Let's think about the attributes and relationships that might be important 
+  for the Person class. We will call properties that take data values (numbers, 
+  strings, dates) attributes. We will call properties that relate one instance 
+  to another instance relationships. A Person can have a birthdate, and usually only 
+  one, so that would make it a single-valued attribute. The 
+  resulting class declaration should look like this:<br>
+  <img border="0" src="images/QSTuto17.gif" width="742" height="72"></li>
+  <li>Let's add two new subclasses of Person. <br>
+  <img border="0" src="images/QSTuto19.gif" width="739" height="88"></li>
+  <li>Now let's go back and add some more information to the Person class. Place 
+  the cursor after &quot;date&quot; and before the period and add the mother 
+  property. We'll take a biological 
+  view in the tutorial and select single-valued relationship. The range of 
+  &quot;mother&quot; will be Woman and the range of &quot;father&quot; will be Man. We'll also 
+  insert a comma, a new-line, and a tab before each of the added clauses to 
+  make it more readable and to avoid very long lines.<br>
+  <img border="0" src="images/QSTuto21.gif" width="740" height="122"><br>
+  Note that you may click on the
+  <img border="0" src="images/QSTuto22.gif" width="13" height="19"> icon front 
+  of Person to hide the detail and make more of the model visible in a given 
+  window. If you do so you can still see the complete definition of Person by 
+  moving the mouse cursor over the icon in front of Person.<br>
+  <img border="0" src="images/QSTuto23.gif" width="630" height="86"></li>
+  <li>Finally, let's add some more classes and properties to round out our basic 
+  model. Create a class named Gender. Using the &quot;must be one of&quot; construct, fill in Male as the first name, 
+  fill in Female as the second name.<br>
+  <font SIZE="2" COLOR="#000080"><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Gender</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">must</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">be</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">one</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#0000ff">Male</font><font SIZE="2">,</font><font SIZE="2" COLOR="#0000ff">Female</font><font SIZE="2">}.</font></li>
+</ol>
+<h3>More SADL Constructs for Classes</h3>
+<ol>
+  <li>Now lets add a restriction that Man and Woman are disjoint, meaning that 
+  an single instance of Person cannot be a member of both classes. <br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#000080"><b>Man</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">and</font><font SIZE="2">
+  <font color="#000080"><b>Woman</b></font> </font>
+  <font SIZE="2" COLOR="#800080">are</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">disjoint</font><font SIZE="2">.<br>
+&nbsp;</font></li>
+  <li>Define {Parent, Father, Mother} as types of Person. Further define a 
+  Parent as a Person with at least one child. We can then define Father as the 
+  intersection of Man and Parent and Mother as the intersection of Woman and 
+  Parent. <br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">{</font><font SIZE="2" COLOR="#000080"><b>Parent</b></font><font SIZE="2">,
+  </font><font SIZE="2" COLOR="#000080"><b>Father</b></font><font SIZE="2">,
+  </font><font SIZE="2" COLOR="#000080"><b>Mother</b></font><font SIZE="2">}
+  </font><font SIZE="2" COLOR="#800080">are</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">types</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#800080"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Parent</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">only</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">if</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">at</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">least</font><font SIZE="2"> 1 </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2">.</font><font SIZE="2" COLOR="#000080"><b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Father</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">same</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Man</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Parent</b></font><font SIZE="2">}.</font><font SIZE="2" COLOR="#000080"><b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Mother</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">same</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#000080"><b>Woman</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">and</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Parent</b></font><font SIZE="2">}.<br>
+&nbsp;</font></li>
+  <li>Define {Child, Adult} as types of Person. Now you can define Child as 
+  anyone who is not an Adult. <br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2">{</font><font SIZE="2" COLOR="#000080"><b>Child</b></font><font SIZE="2">,</font><font SIZE="2" COLOR="#000080"><b> 
+  Adult</b></font><font SIZE="2">} </font><font SIZE="2" COLOR="#800080">are</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">types</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#000080"><b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Child</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">same</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">not</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Adult</b></font><font SIZE="2">.</font></li>
+</ol>
+<h3>More SADL Constructs for Properties</h3>
+<ol>
+  <li>Let's define a new relationship called &quot;spouse&quot;. Use the 
+  &quot;relationship-single-valued&quot; template, filling in Person as the domain and the 
+  range of the relationship. With the cursor before the ending period of the 
+  statement (and after a comma perhaps), request help and select the &quot;symmetric&quot; 
+  template.<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#008000"><b>
+  spouse</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+  describes</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>
+  Person</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> <font color="#800080">
+  symmetric</font>.<br>
+  <br>
+  </font>By making &quot;spouse&quot; symmetric, we allow an OWL reasoner to conclude 
+  that if Eve is the spouse of Adam then Adam is the spouse of Eve. Note that 
+  the &quot;with a single value&quot; phrase places a maximum cardinality restriction on 
+  the spouse property on class Person. To say that spouse is functional (can 
+  only have a single value regardless of the subject class), one would say:<br>
+&nbsp;&nbsp;&nbsp; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#008000"><b>
+  spouse</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">
+  describes</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>
+  Person</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> <font color="#800080">
+  symmetric, has a single value</font>.</font><br>
+&nbsp;</li>
+  <li>Another useful relationship type in OWL is the &quot;inverse of&quot; relationship 
+  between two properties. At the beginning of a new line, ask for help and 
+  select the &quot;inverse of&quot; template. This relationship allows an OWL reasoner to 
+  conclude that if Adam is the parent of Cain, then Cain is the child of Adam, 
+  and vice versa.<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#008000"><b>parent</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">describes</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">.</font><font SIZE="2" COLOR="#008000"><b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; parent</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">inverse</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2">.<br>
+&nbsp;</font></li>
+  <li>Yet another useful relationship type in OWL is the transitive property. 
+  Consider this addition to our model.<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#000080"><b>
+  Location</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">double</font><font SIZE="2">, <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>longitude</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">double</font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>description</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">string</font><font SIZE="2">.</font><font SIZE="2" COLOR="#008000"><b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; locatedIn</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">describes</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Location</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Location</b></font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">transitive</font><font SIZE="2">.<br>
+  <br>
+  </font>By making &quot;locatedIn&quot; a transitive property, we allow an OWL reasoner 
+  to conclude that if Atlanta is locatedIn Georgia, and Georgia is locatedIn the 
+  USA, then Atlanta is locatedIn the USA.</li>
+</ol>
+<h3>More SADL Constructs for Instances</h3>
+<ol>
+  <li>To better illustrate some of the new instance support in SADL V2, we will 
+  first refactor our model (not an uncommon practice in the early stages of a 
+  modeling project). We will move information which was previously associated 
+  directly with a Person, specifically the &quot;birthdate&quot; and &quot;mother&quot;, into a 
+  subtype of Event called Birth. Here's the revised definition of Person:<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#000080"><b>
+  Person</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>birth</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>father</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Man</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>gender</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Gender</b></font><font SIZE="2">.<br>
+  <br>
+  </font>Here's the Event and Birth definitions:<font SIZE="2"><br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <font SIZE="2" COLOR="#000080"><b>Event</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Location</b></font><font SIZE="2">,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>when</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">date</font><font SIZE="2">.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+  <font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Event</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>mother</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">single</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">value</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">, <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>child</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">. </font>
+  </font>
+  <p>Note that our definition of &quot;parent&quot; as the inverse of &quot;child&quot; no longer 
+  makes sense so we remove it from the model. Since we didn't do anything with 
+  &quot;parent&quot; other than illustrate the concept of an inverse relationship, we also 
+  remove it. Note also that since Birth is a type of Event, Birth is also 
+  described by &quot;location&quot; and &quot;when&quot; properties. Note that 
+  &quot;child&quot; is not restricted to a single value--a Birth can have multiple 
+  children.</li>
+  <li>We will create a new file (model) to populate with instance data relating 
+  to a particular group of people. (It wouldn't make much sense to define the 
+  general concepts of a genealogy model and put some very specific instance data 
+  in the same model.) We create a new file George.sadl with this initial 
+  content:<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#800080">uri</font><font SIZE="2">
+  <b>&quot;http://sadl.org/myfamily/george&quot;</b> </font>
+  <font SIZE="2" COLOR="#800080">version</font><font SIZE="2"> &quot;$Revision: 1.1 $ Last 
+  modified on $Date: 2013/08/06 17:06:20 $&quot; .<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+  <font SIZE="2" COLOR="#800080">import</font><font SIZE="2"> <b>&quot;Concepts.sadl&quot;</b>
+  </font><font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> cpt.<br>
+  <br>
+  </font>Note that our new model imports our Concepts model so that we can use 
+  the classes and properties we've already defined.</li>
+  <li>Now we are ready to illustrate one of the new instance data features of 
+  Version 2. Note that many (most) of the instances of things in the real world 
+  are not given unique names. This is even more true of instances of 
+  non-physical concepts. We identify these by their relationship to something 
+  else: &quot;Mary's car&quot;, &quot;John's party&quot;, &quot;my address&quot;. Even when something has a 
+  name, we may wish to identify it in the context of something else. Consider 
+  this instance declaration.<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>birth</b></font><font SIZE="2"> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Birth</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>mother</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#0000ff">Mary</font><font SIZE="2">), </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>location</b></font><font SIZE="2"> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+  (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#000080"><b>Location</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>latitude</b></font><font SIZE="2"> 
+  38.186111, </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>longitude</b></font><font SIZE="2"> 
+  -76.930556, </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>description</b></font><font SIZE="2"> 
+  &quot;Pope's Creek Estate&quot;),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>when</b></font><font SIZE="2"> 
+  &quot;1732-02-22&quot;).<br>
+  <br>
+  </font>Note that we have not had to give a name to the Birth--it's George's 
+  Birth; we have not had to give a name to the Location, although it has a 
+  human-readable description which is not a legal URI name; and note that Mary 
+  is defined as a Person in-line rather than somewhere else in the model.</li>
+  <li>SADL V2 allows instance data statements to be in several different 
+  formats. For example, the following are all equivalent statements:<br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#0000ff">Martha</font><font SIZE="2">.</font><font SIZE="2" COLOR="#0000ff"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; George</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Martha</font><font SIZE="2">.</font><font SIZE="2" COLOR="#0000ff"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Martha</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2">.</font><font SIZE="2" COLOR="#800080"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; The</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Martha</font><font SIZE="2">.</font><font SIZE="2" COLOR="#0000ff"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; George</font><font SIZE="2">
+  </font><font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#008000"><b>spouse</b></font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Martha</font><font SIZE="2">.<br>
+  <br>
+  </font>Furthermore, these various orderings of subject, predicate, and object 
+  and various optional connective words are consistently available in rules, 
+  queries, and tests as well as in instance data declarations.</li>
+  <li>OWL assumes an Open World, meaning that just because I don't know 
+  something is true doesn't mean that I can conclude that it is false. In other words, I don't 
+  assume that I know everything there is to know. Therefore  we may sometimes 
+  wish to express that we know that two instances are not the same instance. For 
+  example, <font size="2"><br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+  <font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">not</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">same</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">Mary</font><font SIZE="2">.<br>
+&nbsp;</font></li>
+  <li>Similarly, we might wish to state that two instances are, in fact, the 
+  same instance, meaning that the instance has two different names. This is 
+  particularly useful if we are using two ontologies that have different 
+  names for the identical instance. For example, <font size="2"><br>
+  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
+  <font SIZE="2" COLOR="#0000ff">GeorgeWashington</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">the</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">same</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> </font>
+  <font SIZE="2" COLOR="#0000ff">George</font><font SIZE="2">.<br>
+  <br>
+  </font>Note that we can also say a similar thing about two classes or two 
+  properties. In SADL &quot;is the same as&quot; is used for instances, classes, and 
+  properties although the OWL translation is to different OWL constructs.</li>
+</ol>
+<h2>Summary and Conclusion</h2>
+
+<p>This version of the SADL V2 Quick Start Tutorial does not cover all of SADL 
+functionality. Rather it is meant to illustrate two key additions to SADL V2 and 
+assumes some familiarity with SADL V1. These key additions are: 1) much richer 
+assistance for model authors including statement completion, templates, hyper 
+linking to definitions, etc., and 2) full support of OWL-DL. The tutorial will 
+be expanded as the rest of SADL functionality is implemented in V2. Yet to be 
+implemented and included are:</p>
+
+<ol>
+  <li>Rules and expressions</li>
+  <li>Queries</li>
+  <li>Explanations</li>
+  <li>Tests and test suites</li>
+</ol>
+
+</body>
+
+</html>
