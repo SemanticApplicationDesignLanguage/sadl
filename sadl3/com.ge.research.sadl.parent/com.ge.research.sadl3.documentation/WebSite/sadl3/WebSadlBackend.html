@@ -112,7 +112,7 @@ https://docs.docker.com/docker-for-windows/#test-your-installation</a>. </p>
 
 <p>In the cmd or terminal window, run <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<span style="font-family: Courier New">docker pull theiaide/sadl</span></p>
+<span style="font-family: Courier New">docker pull sadl/sadl</span></p>
 
 <p>Note that if you are behind a firewall, you may need to configure proxies 
 before you will be able to execute the pull. For information on docker proxy 
@@ -122,9 +122,9 @@ https://docs.docker.com/config/daemon/systemd/#httphttps-proxy</a>.</p>
 
 <p>Note also that if you have previously pulled the docker image, you may need 
 to specify a tag to pull the latest, e.g.,
-<span style="font-family: Courier New">docker pull theiaide/sadl:next</span>. 
-See <a href="https://hub.docker.com/r/theiaide/sadl/tags">
-https://hub.docker.com/r/theiaide/sadl/tags</a> for tags.</p>
+<span style="font-family: Courier New">docker pull sadl/sadl:next</span>. 
+See <a href="https://hub.docker.com/r/sadl/sadl/tags">
+https://hub.docker.com/r/sadl/sadl/tags</a> for tags.</p>
 
 <h3>Run the WebSADL Image</h3>
 
@@ -133,20 +133,20 @@ you wish to create SADL projects. This is the host's <i>current directory</i> (c
 
 <p>In a cmd or terminal window, run<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-family: Courier New">docker 
-run -it -p &lt;host_port&gt;:&lt;container_port&gt; -v &quot;&lt;host_location&gt;:&lt;container_location&quot;&nbsp;theiaide/sadl</span></p>
+run -it -p &lt;host_port&gt;:&lt;container_port&gt; -v &quot;&lt;host_location&gt;:&lt;container_location&quot;&nbsp;sadl/sadl</span></p>
 
 <p>For example, in a Windows environment one might run one of the following, 
 depending up the type of input window.</p>
 <ol>
   <li>cmd.exe window:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-family: Courier New">docker 
-  run -it -p 3000:3000 -v &quot;%cd%:/home/project&quot;&nbsp;theiaide/sadl</span></li>
+  run -it -p 3000:3000 -v &quot;%cd%:/home/project&quot;&nbsp;sadl/sadl</span></li>
   <li>PowerShell window:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-family: Courier New">docker 
-  run -it -p 3000:3000 -v &quot;${PWD}:/home/project&quot;&nbsp;theiaide/sadl</span></li>
+  run -it -p 3000:3000 -v &quot;${PWD}:/home/project&quot;&nbsp;sadl/sadl</span></li>
   <li class="MsoNormal">Git Bash window:&nbsp;<br>
   <span style="font-family: Courier New">&nbsp;&nbsp;&nbsp; <font size="3">winpty&nbsp;docker 
-  run -it -p 3000:3000 -v &quot;/$(pwd&nbsp;-W):/home/project&quot;&nbsp;theiaide/sadl</font></span></li>
+  run -it -p 3000:3000 -v &quot;/$(pwd&nbsp;-W):/home/project&quot;&nbsp;sadl/sadl</font></span></li>
 </ol>
 
 <p>This would mean that the service is running on host port 3000, container port 
@@ -155,7 +155,7 @@ run), container location &quot;/home/project&quot;.</p>
 
 <p>In a Linux environment, the command would be:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span style="font-family: Courier New">docker 
-run -it -p 3000:3000 -v &quot;$(pwd):/home/project&quot;&nbsp;theiaide/sadl</span></p>
+run -it -p 3000:3000 -v &quot;$(pwd):/home/project&quot;&nbsp;sadl/sadl</span></p>
 
 <p>You can see a list of the images that are locally available with the command:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -186,7 +186,7 @@ e.g. &quot;angry_fermat&quot; in the output below: <br>
     </tr>
     <tr>
       <td width="14%" align="center">9ce78044d643</td>
-      <td width="14%" align="center">theiaide/sadl</td>
+      <td width="14%" align="center">sadl/sadl</td>
       <td width="14%" align="center">&nbsp;&quot;yarn theia start /h…&quot;</td>
       <td width="14%" align="center">7 minutes ago</td>
       <td width="14%" align="center">Up 7 minutes</td>

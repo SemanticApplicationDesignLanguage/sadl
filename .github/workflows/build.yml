@@ -1,0 +1,100 @@
+# Builds SADL and WebSADL on every pull request/push to main branch:
+#  - Builds SADL sources
+#  - Builds WebSADL extension
+#  - Publishes WebSADL npm package
+#  - Pushes WebSADL image to Docker Hub
+
+name: SADL continuous build
+
+on:
+  pull_request:
+    branches: [ development ]
+  push:
+    branches: [ development ]
+    # Ignore tag-only pushes
+    tags-ignore: [ '*' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        - os: [ macos-latest, ubuntu-latest, windows-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Check out SADL source
+      uses: actions/checkout@v2
+
+    - name: Build SADL source
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: mvn -B package --file sadl3/com.ge.research.sadl.parent/pom.xml
+
+    - name: Upload SADL Language Server
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v2
+      with:
+        name: languageserver
+        path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/target/languageserver
+
+  web:
+    needs: build
+    strategy:
+      matrix:
+        - os: [ ubuntu-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Check out SADL source
+      uses: actions/checkout@v2
+
+    - name: Download SADL Language Server
+      uses: actions/download-artifact@v2
+      with:
+        name: languageserver
+        path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/target/languageserver
+
+    - name: Set up Node.js 10.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10.15.3'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Set up Python 2.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: '2.7'
+
+    - name: Build WebSADL extension
+      env:
+        PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension
+
+    - name: Publish WebSADL npm package
+      if: github.ref == 'refs/heads/development'
+      env:
+        NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      run: |
+        printf "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n" >> ~/.npmrc
+        yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension run publish:next
+
+    - name: Build WebSADL Docker image
+      if: github.ref == 'refs/heads/development'
+      run: |
+        npm install --global node-gyp@6.0.1
+        npm config set node_gyp "`npm prefix -g`/lib/node_modules/node-gyp/bin/node-gyp.js"
+        echo "npm config get node_gyp -> `npm config get node_gyp`"
+        sadl3/com.ge.research.sadl.parent/theia-sadl-extension/scripts/build-docker.sh
+
+    - name: Publish WebSADL Docker image
+      if: github.ref == 'refs/heads/development'
+      uses: elgohr/Publish-Docker-Github-Action@2.22
+      with:
+        name: sadl/sadl
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        workdir: sadl3/com.ge.research.sadl.parent/theia-sadl-extension/browser-app

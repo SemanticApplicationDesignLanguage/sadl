@@ -26,50 +26,56 @@ The language server `sadl-language-server` is available under the `bin` folder a
 
 # Docker - SADL Web
 
-### Pull the most recent `next` version
+## Pull the most recent `next` version
+
 ```
-docker pull theiaide/sadl:next
+docker pull sadl/sadl:next
 ```
 
-### Build without caches
+## Build without caches
+
 ```
-docker build --no-cache . -t theiaide/sadl:${VERSION}
+docker build --no-cache . -t sadl/sadl:${VERSION}
 ```
 
-### Run the most recent `next` locally on UNIX
+## Run the most recent `next` locally on UNIX
+
 ```
-docker run -it -p 3000:3000 -v "$(pwd):/home/project" theiaide/sadl:next
+docker run -it -p 3000:3000 -v "$(pwd):/home/project" sadl/sadl:next
 ```
 
-### Run the most recent `next` locally on Windows<sup>[1](#foot-note-1)</sup>
- - CMD.EXE:
+## Run the most recent `next` locally on Windows<sup>[1](#foot-note-1)</sup>
+
+- CMD.EXE:
    ```
-   docker run -it -p 3000:3000 -v "%cd%:/home/project" theiaide/sadl:next
+   docker run -it -p 3000:3000 -v "%cd%:/home/project" sadl/sadl:next
    ```
 
  - PowerShell:
    ```
-   docker run -it -p 3000:3000 -v "${PWD}:/home/project" theiaide/sadl:next
+   docker run -it -p 3000:3000 -v "${PWD}:/home/project" sadl/sadl:next
    ```
 
  - Git Bash:
    ```
-   winpty docker run -it -p 3000:3000 -v "/$(pwd -W):/home/project" theiaide/sadl:next
+   winpty docker run -it -p 3000:3000 -v "/$(pwd -W):/home/project" sadl/sadl:next
    ```
 
 <a name="foot-note-1">1</a>: Running on Windows requires enabled [Hyper-V](https://en.wikipedia.org/wiki/Hyper-V) on the host environment.
 
 If you want to use the `latest` version, just drop the `:next` tag from each command.
 
-### Push to Docker Hub
+## Push to Docker Hub
+
 ```
 docker login
-docker push theiaide/sadl:${VERSION}
+docker push sadl/sadl:${VERSION}
 ```
 
-### Pull the image from Docker Hub
+## Pull the image from Docker Hub
+
 ```
-docker pull theiaide/sadl:${VERSION}
+docker pull sadl/sadl:${VERSION}
 ```
 
 # Release Engineering - Manual Steps
@@ -77,6 +83,7 @@ docker pull theiaide/sadl:${VERSION}
 The language server has to be manually updated inside the `bin` folder before publishing to NPM each time when the underlying Java implementation changes.
 
 The following script will create a new version of LS and copies into the `bin` folder of the Theia `sadl-extension`. 
+
 ```
 rm -rf sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ \
 && rm -rf ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/ \
@@ -90,7 +97,7 @@ Publishing to NPM should be with the `next` tag: `npm publish --tag next`. Hints
 ```
 docker rm $(docker ps -a -q) \
 && docker rmi $(docker images -q) \
-&& docker build --no-cache . -t theiaide/sadl:${VERSION} \
-&& docker tag theiaide/sadl:${VERSION} theiaide/sadl:latest \
-&& docker push theiaide/sadl:latest
+&& docker build --no-cache . -t sadl/sadl:${VERSION} \
+&& docker tag sadl/sadl:${VERSION} sadl/sadl:latest \
+&& docker push sadl/sadl:latest
 ```
