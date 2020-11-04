@@ -16,10 +16,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  test:
     strategy:
       matrix:
-        os: [ macos-latest, ubuntu-latest, windows-latest ]
+        java-version: [ 11 ]
+        os: [ macos-latest, windows-latest ]
 
     runs-on: ${{ matrix.os }}
 
@@ -27,22 +28,26 @@ jobs:
     - name: Check out SADL source
       uses: actions/checkout@v2
 
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java-version }}
+
+    - name: Cache local Maven repository
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ matrix.os }}-m2-${{ hashFiles('**/pom.xml') }}
+
     - name: Build SADL source
       uses: GabrielBB/xvfb-action@v1
       with:
         run: mvn -B package --file sadl3/com.ge.research.sadl.parent/pom.xml
 
-    - name: Upload SADL Language Server
-      if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v2
-      with:
-        name: languageserver
-        path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/target/languageserver
-
   web:
-    needs: build
     strategy:
       matrix:
+        java-version: [ 11 ]
         os: [ ubuntu-latest ]
 
     runs-on: ${{ matrix.os }}
@@ -51,11 +56,21 @@ jobs:
     - name: Check out SADL source
       uses: actions/checkout@v2
 
-    - name: Download SADL Language Server
-      uses: actions/download-artifact@v2
+    - name: Set up Java
+      uses: actions/setup-java@v1
       with:
-        name: languageserver
-        path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/target/languageserver
+        java-version: ${{ matrix.java-version }}
+
+    - name: Cache local Maven repository
+      uses: actions/cache@v2
+      with:
+        path: ~/.m2/repository
+        key: ${{ matrix.os }}-m2-${{ hashFiles('**/pom.xml') }}
+
+    - name: Build SADL source
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: mvn -B package --file sadl3/com.ge.research.sadl.parent/pom.xml
 
     - name: Set up Node.js 10.x
       uses: actions/setup-node@v1
