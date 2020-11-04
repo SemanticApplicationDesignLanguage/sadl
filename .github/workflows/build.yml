@@ -1,8 +1,8 @@
 # Builds SADL and WebSADL on every pull request/push to main branch:
-#  - Builds SADL sources
+#  - Builds SADL source
 #  - Builds WebSADL extension
-#  - Publishes WebSADL npm package
-#  - Pushes WebSADL image to Docker Hub
+#  - Publishes WebSADL npm package (main branch only)
+#  - Pushes WebSADL image to Docker Hub (main branch only)
 
 name: SADL continuous build
 
