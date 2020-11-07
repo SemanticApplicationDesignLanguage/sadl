@@ -26,23 +26,27 @@ The language server `sadl-language-server` is available under the `bin` folder a
 
 # Docker - SADL Web
 
-### Pull the most recent `next` version
+## Pull the most recent `next` version
+
 ```
 docker pull theiaide/sadl:next
 ```
 
-### Build without caches
+## Build without caches
+
 ```
 docker build --no-cache . -t theiaide/sadl:${VERSION}
 ```
 
-### Run the most recent `next` locally on UNIX
+## Run the most recent `next` locally on UNIX
+
 ```
 docker run -it -p 3000:3000 -v "$(pwd):/home/project" theiaide/sadl:next
 ```
 
-### Run the most recent `next` locally on Windows<sup>[1](#foot-note-1)</sup>
- - CMD.EXE:
+## Run the most recent `next` locally on Windows<sup>[1](#foot-note-1)</sup>
+
+- CMD.EXE:
    ```
    docker run -it -p 3000:3000 -v "%cd%:/home/project" theiaide/sadl:next
    ```
@@ -61,13 +65,15 @@ docker run -it -p 3000:3000 -v "$(pwd):/home/project" theiaide/sadl:next
 
 If you want to use the `latest` version, just drop the `:next` tag from each command.
 
-### Push to Docker Hub
+## Push to Docker Hub
+
 ```
 docker login
 docker push theiaide/sadl:${VERSION}
 ```
 
-### Pull the image from Docker Hub
+## Pull the image from Docker Hub
+
 ```
 docker pull theiaide/sadl:${VERSION}
 ```
@@ -77,6 +83,7 @@ docker pull theiaide/sadl:${VERSION}
 The language server has to be manually updated inside the `bin` folder before publishing to NPM each time when the underlying Java implementation changes.
 
 The following script will create a new version of LS and copies into the `bin` folder of the Theia `sadl-extension`. 
+
 ```
 rm -rf sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.ide/build/install/ \
 && rm -rf ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension/sadl-extension/bin/ \
