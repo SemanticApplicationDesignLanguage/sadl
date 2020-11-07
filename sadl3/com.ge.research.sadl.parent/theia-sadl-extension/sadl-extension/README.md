@@ -29,36 +29,36 @@ The language server `sadl-language-server` is available under the `bin` folder a
 ## Pull the most recent `next` version
 
 ```
-docker pull sadl/sadl:next
+docker pull theiaide/sadl:next
 ```
 
 ## Build without caches
 
 ```
-docker build --no-cache . -t sadl/sadl:${VERSION}
+docker build --no-cache . -t theiaide/sadl:${VERSION}
 ```
 
 ## Run the most recent `next` locally on UNIX
 
 ```
-docker run -it -p 3000:3000 -v "$(pwd):/home/project" sadl/sadl:next
+docker run -it -p 3000:3000 -v "$(pwd):/home/project" theiaide/sadl:next
 ```
 
 ## Run the most recent `next` locally on Windows<sup>[1](#foot-note-1)</sup>
 
 - CMD.EXE:
    ```
-   docker run -it -p 3000:3000 -v "%cd%:/home/project" sadl/sadl:next
+   docker run -it -p 3000:3000 -v "%cd%:/home/project" theiaide/sadl:next
    ```
 
  - PowerShell:
    ```
-   docker run -it -p 3000:3000 -v "${PWD}:/home/project" sadl/sadl:next
+   docker run -it -p 3000:3000 -v "${PWD}:/home/project" theiaide/sadl:next
    ```
 
  - Git Bash:
    ```
-   winpty docker run -it -p 3000:3000 -v "/$(pwd -W):/home/project" sadl/sadl:next
+   winpty docker run -it -p 3000:3000 -v "/$(pwd -W):/home/project" theiaide/sadl:next
    ```
 
 <a name="foot-note-1">1</a>: Running on Windows requires enabled [Hyper-V](https://en.wikipedia.org/wiki/Hyper-V) on the host environment.
@@ -69,13 +69,13 @@ If you want to use the `latest` version, just drop the `:next` tag from each com
 
 ```
 docker login
-docker push sadl/sadl:${VERSION}
+docker push theiaide/sadl:${VERSION}
 ```
 
 ## Pull the image from Docker Hub
 
 ```
-docker pull sadl/sadl:${VERSION}
+docker pull theiaide/sadl:${VERSION}
 ```
 
 # Release Engineering - Manual Steps
@@ -97,7 +97,7 @@ Publishing to NPM should be with the `next` tag: `npm publish --tag next`. Hints
 ```
 docker rm $(docker ps -a -q) \
 && docker rmi $(docker images -q) \
-&& docker build --no-cache . -t sadl/sadl:${VERSION} \
-&& docker tag sadl/sadl:${VERSION} sadl/sadl:latest \
-&& docker push sadl/sadl:latest
+&& docker build --no-cache . -t theiaide/sadl:${VERSION} \
+&& docker tag theiaide/sadl:${VERSION} theiaide/sadl:latest \
+&& docker push theiaide/sadl:latest
 ```

@@ -109,7 +109,7 @@ jobs:
       if: github.ref == 'refs/heads/development'
       uses: elgohr/Publish-Docker-Github-Action@2.22
       with:
-        name: sadl/sadl
+        name: theiaide/sadl
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         workdir: sadl3/com.ge.research.sadl.parent/theia-sadl-extension/browser-app
