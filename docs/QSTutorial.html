@@ -22,7 +22,7 @@
       are running in an Eclipse environment, but can easily be applied to the
       Web environment as well.</p>
     <h2>Build a Simple Model</h2>
-    <h3>Build a New Project</h3>
+    <h3>Create a New Project</h3>
     <ol>
       <li>Select File -&gt; New -&gt; Project... from the menu bar (or use the
         toolbar icon dropdown menu)</li>
@@ -44,7 +44,8 @@
         Yes.</li>
     </ol>
     <h3><em>Important Note</em></h3>
-    <p>Each valid statement in a SADL model must end with a period.</p>
+    <p><i><b>&nbsp;&nbsp;&nbsp; Each valid statement in a SADL model must end
+          with a period.</b></i></p>
     <h3>Every SADL Model Needs a Unique Name (Introducing Content Assist)</h3>
     <p>Content assist is the ability of the editing environment to offer
       suggestions of what could be added to the model at the current cursor
@@ -58,8 +59,10 @@
         it will be when you first create the file) and request content assist.
         The keyword "uri" will be automatically inserted since that is the only
         entry that can start a valid model. (There could be comments before the
-        "uri" keyword, but there is no content assist for comments.)<br>
-        <img src="images/QSTuto3.gif" height="74" border="0" width="156"></li>
+        "uri" keyword, but there is no content assist for comments. Single-line
+        comments begin with "//". Multi-line comments begin with "/*" and and
+        with "*/".)<br>
+        <img src="images/QSTuto3.gif" border="0" height="74" width="156"></li>
       <li>Requesting content assist again will insert a default name (URI) for
         the model. The default is derived from the file name given and the
         preference setting for Base URI. You may edit the URI to any valid URI
@@ -122,7 +125,7 @@
         granularity in a given window. This is called folding. If you do so you
         can still see the complete definition of Person by moving the mouse
         cursor over the "+" icon in front of Person.<br>
-        <img src="images/QSTuto23.gif" height="86" border="0" width="630"></li>
+        <img src="images/QSTuto23.gif" border="0" height="86" width="630"></li>
       <li>Finally, let's add some more classes and properties to round out our
         basic model. Create a class named <em>Gender</em>. Using the "must be
         one of" construct, fill in <em>Male</em> and <em>Female</em> as the
@@ -1286,7 +1289,8 @@
         the contents of the file will be the same as those displayed to the
         console window by the "Explain:" statement above. However, if there are
         multiple rules and a larger data set, the derivation log will contain
-        more derivations--the derivations of all rule-based inferences.<br>
+        more derivations--the derivations of all inferences drawn by knowledge
+        base rules.<br>
         <p></p>
       </li>
     </ol>
@@ -1296,6 +1300,7 @@
     <h2>Summary and Conclusion</h2>
     <p>This version of the SADL V3 Quick Start Tutorial does not cover all of
       SADL functionality. Rather, it is meant to illustrate key capabilities of
-      SADL in an introductory example.</p>
+      SADL in an introductory example. See the <a href="TopicalIndex.html">SADL
+        Topical Index</a>.</p>
   </body>
 </html>
