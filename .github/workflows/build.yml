@@ -96,6 +96,8 @@ jobs:
       run: |
         printf "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n" >> ~/.npmrc
         yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension run publish:next
+        ls -al ~/.npm/logs
+        cat ~/.npm/logs/*
 
     - name: Build WebSADL Docker image
       if: github.ref == 'refs/heads/development'
