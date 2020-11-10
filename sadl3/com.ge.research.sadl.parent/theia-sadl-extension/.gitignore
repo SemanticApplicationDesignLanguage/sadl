@@ -6,3 +6,10 @@ lib
 !*-app/package.json
 !*-app/Dockerfile
 sadl-language-server.zip
+!.project
+*webpack.config.js
+languageserver
+# SADL project-specific resources
+ImplicitModel
+OwlModels
+externals/externals/*/*owl

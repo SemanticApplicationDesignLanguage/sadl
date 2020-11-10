@@ -1,7 +1,0 @@
-node_modules
-.browser_modules
-lib
-languageserver
-*.log
-*-app/*
-!*-app/package.json

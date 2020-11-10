@@ -1,7 +1,7 @@
 #!/bin/sh
 
 cd "$(dirname "$0")" \
-&& cd ../browser-app \
+&& cd ../apps/browser-app \
 && cp -rf ../yarn.lock . \
 && NEXT_VERSION=`npm view sadl-extension@next version` \
 && mv -f ./package.json ./package.json.original \

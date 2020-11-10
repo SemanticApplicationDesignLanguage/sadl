@@ -33,7 +33,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "install:languageserver": "rimraf -rf languageserver && yarn copy:languageserver",
-    "copy:languageserver": "cpr ../../com.ge.research.sadl.ide/target/languageserver ./languageserver -o"
+    "copy:languageserver": "cpr ../../../com.ge.research.sadl.ide/target/languageserver ./languageserver -o"
   },
   "theiaExtensions": [
     {

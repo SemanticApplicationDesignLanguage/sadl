@@ -22,6 +22,6 @@
         "src"
     ],
     "files": [
-        "../node_modules/@theia/monaco/src/typings/monaco/index.d.ts"
+        "../../node_modules/@theia/monaco/src/typings/monaco/index.d.ts"
     ]
 }

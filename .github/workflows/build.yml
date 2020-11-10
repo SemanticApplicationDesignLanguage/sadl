@@ -92,12 +92,9 @@ jobs:
     - name: Publish WebSADL npm package
       if: github.ref == 'refs/heads/development'
       env:
-        NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       run: |
-        printf "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n" >> ~/.npmrc
         yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension run publish:next
-        ls -al ~/.npm/_logs
-        cat ~/.npm/_logs/*
 
     - name: Build WebSADL Docker image
       if: github.ref == 'refs/heads/development'
@@ -114,4 +111,4 @@ jobs:
         name: theiaide/sadl
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-        workdir: sadl3/com.ge.research.sadl.parent/theia-sadl-extension/browser-app
+        workdir: sadl3/com.ge.research.sadl.parent/theia-sadl-extension/apps/browser-app
