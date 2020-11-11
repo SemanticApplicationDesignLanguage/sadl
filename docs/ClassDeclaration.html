@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Class Declaration</title>
+  </head>
+  <body>
+    <h1>Class Declarations in SADL</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/11/2020<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p>The meaning of a class in SADL derives from set theory. A class is a set
+      of members that are similar in some way meaningful to the modeling
+      objective. A class is an abstraction, a construct of the mind. </p>
+    <p>The simplest form of class declaration in SADL simply states that
+      something is a class. </p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">class</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <p>This definition is not well-defined because there is no unambiguous way
+      to determine if something does or does not belong to the class.</p>
+    <p>A well-defined class may be declared in one of two important ways.</p>
+    <ol>
+      <li>A class may be defined extensionally, that is by enumerating all of
+        the members of the class. In SADL, an extensional class definition looks
+        like either of the following, which have identical translations to OWL.</li>
+      <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font color="#4c4c4c">
+        </font> </p>
+      <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#000080"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"><b>Season</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">class</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">must</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">be</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">one</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> {</font></font></font><font
+          color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">Spring</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+            </font></font></font><font color="#0000ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">Summer</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+            </font></font></font><font color="#0000ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">Fall</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+          color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">Winter</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">}.</font></font></font></p>
+      <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#000080"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"><b>Season</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">class</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">can</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">only</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">be</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">one</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+              {</font></font></font><font color="#0000ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">Spring</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+            </font></font></font><font color="#0000ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">Summer</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+            </font></font></font><font color="#0000ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">Fall</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+          color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">Winter</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">}.</font></font></font></p>
+      <p style="margin-bottom: 0in; line-height: 100%"><br>
+      </p>
+      <li>A class may be defined intensionally, that is by describing the
+        characteristics common to all members of the class. This is done by
+        defining the requirements for class membership. If those requirements
+        are unambiguous the class is well-defined. There are a variety of ways
+        to express axioms about class membership. This example uses necessary
+        and sufficient conditions. The <em>Parent</em> class is defined as
+        those members of the <i>Person</i> class who have at least 1 value of
+        the property <em>child</em>.</li>
+      <ol>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#800080"><font
+              face="Monospace"><font style="font-size: 10pt" size="2">A</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#000080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">a</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"> </font></font></font><font color="#000080"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><b>Parent</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">only</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#008000"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><b>child</b></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">has</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"> </font></font></font><font color="#800080"><font
+              face="Monospace"><font style="font-size: 10pt" size="2">at</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">least</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><span style="background: #e6f0ff">1</span></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">value</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">.</font></font></font></p>
+      </ol>
+      <p style="margin-bottom: 0in; line-height: 100%" align="left"><br>
+      </p>
+    </ol>
+  </body>
+</html>
