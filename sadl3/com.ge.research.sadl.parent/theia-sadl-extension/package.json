@@ -12,7 +12,7 @@
     "**/**/moment": "2.24.0"
   },
   "workspaces": [
-    "sadl-extension",
-    "browser-app"
+    "packages/*",
+    "apps/*"
   ]
 }
