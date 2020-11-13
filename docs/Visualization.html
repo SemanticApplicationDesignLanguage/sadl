@@ -1,0 +1,151 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+    <meta name="ProgId" content="FrontPage.Editor.Document">
+    <title>Model Visualization</title>
+  </head>
+  <body>
+    <h1>Model Visualization in the Eclipse-Based SADL-IDE</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/11/2020<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <h2>Visualization in SADL Version 3</h2>
+    <p>In SADL Version 3, the graphing package is a plug-in accessed as a
+      service implementing the Java Interface class<i>
+        com.ge.research.sadl.model.visualizer.IGraphVisualizer. </i>The
+      SADL-IDE's SADL preference "Graph renderer package and class" setting is,
+      by default, the GraphViz implementation in <i>
+        com.ge.research.sadl.model.visualizer.GraphVizVisualizer</i>. Any
+      visualizer implementing the <i>IGraphVisualizer</i> Interface class can
+      be placed on the Java classpath and specified in this preference.</p>
+    <h3>Generating Graphs with GraphViz</h3>
+    <p>GraphViz can be downloaded from <a href="http://www.graphviz.org/">
+        http://www.graphviz.org/</a> and should be placed on a path without
+      spaces or other "difficult" path characters. Once installed, there should
+      be a "bin" folder under the installation directory with "dot" and "dotty"
+      executables.</p>
+    <p>GraphViz creates graphs as SVG files in the Graphs project subfolder.
+      Generating a graph also results in an attempt to open the graph file using
+      the application associated with the SVG file type in Eclipse. With an
+      appropriate file association, graphs will automatically be opened in an
+      appropriate viewer, e.g., a Web browser such as Chrome or the internal Web
+      browser.</p>
+    <p>When the GraphVizVisualizer is used, the location of the GraphViz bin
+      folder must be specified in the OS environment variable GraphVizPath, e.g,
+    </p>
+    <p>&nbsp;&nbsp;&nbsp; GraphVizPath<i>=C:\Apps\graphviz-2.36\release\bin</i></p>
+    <p>Also, when the GraphVizVisualizer is used, the dot file can be retained
+      (not automatically deleted after the SVG file is created) by setting the
+      OS environment variable GraphVizKeepDot to true: </p>
+    <p>&nbsp;&nbsp;&nbsp; GraphVizKeepDot =true.</p>
+    <p>Note that Eclipse must be restarted after setting environment variables
+      for them to become visible to Eclipse. (For some reason, a reboot has
+      sometimes been found to be necessary to make the environment variable
+      visible in Eclipse.)</p>
+    <h4>Adding GraphViz Attributes</h4>
+    <p>GraphViz has many node and edge attributes that can be used to give
+      shape, color, tooltips, and more to graphs. For detailed information see <a
+        href="https://graphviz.org/doc/info/attrs.html">
+        https://graphviz.org/doc/info/attrs.html</a>. </p>
+    <p>SPARQL queries can be constructed that will generate ResultSets that
+      provide attribute values to nodes and edges in the resulting graph. This
+      is accomplished as follows. The names of the first three columns of the
+      ResultSet are the names of the variables for the directed graph's
+      head-node, edge label, and tail-node, respectively. More columns can be
+      included in the result set to provide additional attribute information by
+      giving a column a name composed of one of the name of one of the first
+      three columns concatenated with an underscore and the name of an attribute
+      that is meaningful for the column with the prefixed name. For example,
+      consider a query with this beginning:</p>
+    <font color="#2a00ff" size="2">
+      <blockquote>
+        <p>"select distinct ?N1 ?link ?N2 ?N1_style ?N1_fillcolor ?N2_style
+          ?N2_fillcolor (?cplist as ?N1_tooltip) where </p>
+      </blockquote>
+    </font>
+    <p>The first column, the head-node, is named "N1". The edge label is named
+      "link". The tail-node is named "N2". The 4th column sets the style of the
+      head-node, the 5th column sets the fill color of the head-node. The 6th
+      column sets the style of the tail-node. The 7th column sets the fill color
+      of the tail-node. The 8th column, which is called "cplist" in the query
+      but renamed to "N1_tooltip", sets a tooltip for the head-node. The header
+      and first row of this ResultSet might look like this:</p>
+    <font size="2">
+      <p align="LEFT">
+"N1","link","N2","N1_style","N1_fillcolor","N2_style","N2_fillcolor","N1_tooltip"<br>
+        "HeadNode","link-label","TailNode","filled",:yellow","filled","red","I'm
+        a tooltip; I show up when you mouse over my node"</p>
+    </font>
+    <h3>On-Demand Graph Generation Options</h3>
+    <p>There are two basic graphing commands available on the SADL dropdown
+      menu: "Show Graph" and "Graph Ontology". (In the SADL perspective, "SADL"
+      appears in the top menu bar; the SADL (gear) icon on the tool bar also has
+      this dropdown menu.) </p>
+    <h4>Show Graph</h4>
+    <p>The result of "Show Graph" depends upon what is selected before invoking
+      the command. The answer to the "How many edges from anchor?" question will
+      determine the size of the graph generated around the "anchor" concept or
+      model.</p>
+    <table style="border-collapse: collapse" bordercolor="#111111" border="1" cellspacing="0"
+      cellpadding="0" width="49%">
+      <tbody>
+        <tr>
+          <td width="44%"><b>Selected Object Given Focus</b></td>
+          <td width="56%"><b>Results</b></td>
+        </tr>
+        <tr>
+          <td width="44%">A SADL model file, either selected in the Project
+            Explorer or because the focus is in the editor window where the SADL
+            model is open, but nothing is selected in the editor</td>
+          <td width="56%">A graph of imports of the selected SADL model</td>
+        </tr>
+        <tr>
+          <td width="44%">A class is selected in the SADL editor</td>
+          <td width="56%">Two graphs, a class hierarchy including the class and
+            domains and ranges that include the class</td>
+        </tr>
+        <tr>
+          <td width="44%">A property is selected in the SADL editor</td>
+          <td width="56%">A graph showing the domain and range of the property,
+            and extending on following domains and ranges</td>
+        </tr>
+        <tr>
+          <td width="44%">An instance is selected in the SADL editor</td>
+          <td width="56%">A graph showing all of the connections of that
+            instance in the graph</td>
+        </tr>
+      </tbody>
+    </table>
+    <h4>Graph Ontology</h4>
+    <table style="border-collapse: collapse" bordercolor="#111111" border="1" cellspacing="0"
+      cellpadding="0" width="50%">
+      <tbody>
+        <tr>
+          <td width="43%"><b>Selected Object Given Focus</b></td>
+          <td width="57%"><b>Results</b></td>
+        </tr>
+        <tr>
+          <td width="43%">A SADL file selected in the Project Explorer</td>
+          <td width="57%">A graph of the model contained in the SADL file</td>
+        </tr>
+        <tr>
+          <td width="43%">A SADL project selected in the Project Explorer</td>
+          <td width="57%">A graph of the project showing models as nodes and
+            arcs showing imports</td>
+        </tr>
+      </tbody>
+    </table>
+    <h3>Graphing by SADL Statement</h3>
+    <p>Graphs can also be generated from SADL statements within a .sadl file.</p>
+    <ol>
+      <li>Ask: "construct ....".&nbsp;&nbsp;&nbsp; // will generate a graph for
+        a valid SPARQL construct statement (see <a href="http://www.w3.org/TR/sparql11-query/#construct">
+          http://www.w3.org/TR/sparql11-query/#construct</a> )</li>
+      <li>Graph: "select ?s ?p ?v where {....}".&nbsp;&nbsp;&nbsp; // will
+        construct a graph; requires a result with 3 columns (3 variables in the
+        select)</li>
+    </ol>
+  </body>
+</html>
