@@ -18,7 +18,9 @@
 package com.ge.research.sadl.ui.visualize;
 
 
+import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,10 +31,12 @@ import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
@@ -48,6 +52,9 @@ import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
+import com.ge.research.sadl.utils.SadlConsole;
+import com.google.inject.Inject;
+
 import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.ObjectProperty;
 import org.apache.jena.ontology.OntClass;
@@ -90,6 +97,10 @@ import org.apache.jena.vocabulary.XSD;
  * */
 public class GraphGenerator {
 	private static final Logger logger = LoggerFactory.getLogger(GraphGenerator.class);
+
+	@Inject
+	protected SadlConsole console;
+	
 	protected static final String COLOR = "color";
 	protected static final String BLUE = "blue";
 	protected static final String INSTANCE_BLUE = "blue";
@@ -1078,6 +1089,9 @@ public class GraphGenerator {
 	}
 
 	public String getBaseFilenameFromPublicUri(String publicUri) throws Exception {
+		if (getConfigMgr().isNamespaceImplicit(publicUri)) {
+			return null;
+		}
 		String altUrl = getConfigMgr().getAltUrlFromPublicUri(publicUri);
 		if (altUrl != null) {
 			int lastSlash = altUrl.lastIndexOf('/');
@@ -1086,6 +1100,18 @@ public class GraphGenerator {
 			}
 		}
 		throw new Exception("Unable to find actual URL for public URI '" + publicUri + "'");
+	}
+	
+	protected boolean altUrlInOtherProject(String altUrl) throws URISyntaxException {
+		if (!altUrl.startsWith(configMgr.getProjectFolderPath())) {
+			// this is another project
+			return true;
+		}
+		return false;
+	}
+	
+	protected boolean publicUriInOtherProject(String publicUri) throws URISyntaxException, ConfigurationException {
+		return getConfigMgr().isNamespaceInProjectDependency(publicUri);
 	}
 
 	protected void annotateEdge(GraphSegment gs, String color, String style1, String style2) {
@@ -1386,11 +1412,18 @@ public class GraphGenerator {
 		}
 		String baseFilename = getBaseFilenameFromPublicUri(ns);
 		//get the graph folder file path
-		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
-		
-		if(baseFilename != null){
-			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
+		boolean inOtherProject = publicUriInOtherProject(ns);
+		String tempDir;
+		if (inOtherProject) {
+			// this must be in another project
+			return generateAndValidateFileLinkUrl(ns, baseFilename);
 		}
+		else {
+			if(baseFilename != null){
+				tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
+				return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
+			}
+		}	
 		return null;
 	}
 
@@ -1522,4 +1555,39 @@ public class GraphGenerator {
 		
 		return false;
 	}
+
+	protected void safeWriteToConsole(MessageType mType, String message) {
+		Display.getDefault().asyncExec(new Runnable(){
+			@Override
+			public void run() {
+				if (console != null) {
+					console.print(mType, message);
+				}
+				else if (mType.equals(MessageType.INFO)){
+					System.out.println(message);
+				}
+				else {
+					System.err.println(message);
+				}
+			}
+		});
+	}
+
+	protected String generateAndValidateFileLinkUrl(String parentUri, String baseFilename)
+			throws ConfigurationException, IOException, MalformedURLException, Exception, URISyntaxException {
+				String altUrl = getConfigMgr().getAltUrlFromPublicUri(parentUri);
+				SadlUtils su = new SadlUtils();
+				String tempDirFN = (new File(su.fileUrlToFileName(altUrl))).getParentFile().getParentFile().getCanonicalPath() + "/Graphs/";
+				if (!tempDirFN.endsWith("/")) {
+					tempDirFN += "/";
+				}
+				String graphFilename = tempDirFN + baseFilename + getGraphFilenameExtension();
+				File gf = new File(graphFilename);
+				if (!gf.exists()) {
+					safeWriteToConsole(MessageType.ERROR, "Graph file '" + graphFilename + "' in other project not found. Do you need to graph a referenced project?");
+				}
+				graphFilename = su.fileNameToFileUrl(graphFilename);
+			
+				return "\"" + graphFilename + "\"";
+			}
 }

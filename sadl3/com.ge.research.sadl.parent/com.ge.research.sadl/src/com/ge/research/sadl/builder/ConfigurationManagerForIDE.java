@@ -69,8 +69,10 @@ import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
+import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
@@ -1340,6 +1342,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			}
 		}
 		if (bChanged) {
+			clearOtherProjectConfigMgrs();
 			configItem.clearNameValuePairs();
 			if (projectDependencies != null) {
 				for (java.net.URI pduri : projectDependencies) {

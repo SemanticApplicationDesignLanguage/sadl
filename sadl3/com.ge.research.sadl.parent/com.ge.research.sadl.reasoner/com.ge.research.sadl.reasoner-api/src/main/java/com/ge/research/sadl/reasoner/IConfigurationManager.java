@@ -313,4 +313,19 @@ public interface IConfigurationManager {
 	 * @throws ConfigurationException
 	 */
 	public abstract List<String> getProjectDependencies() throws ConfigurationException;
+
+	/**
+	 * Method to determine if a given namespace is found in a project on which this project depends
+	 * @param ns
+	 * @return
+	 * @throws ConfigurationException 
+	 */
+	boolean isNamespaceInProjectDependency(String ns) throws ConfigurationException;
+
+	/**
+	 * Method to determine if this namespace is implicit (not associated with an actual OntModel in SADL)
+	 * @param uri
+	 * @return
+	 */
+	boolean isNamespaceImplicit(String uri);
 }

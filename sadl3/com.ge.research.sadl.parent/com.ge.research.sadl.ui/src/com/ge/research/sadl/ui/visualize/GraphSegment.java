@@ -887,7 +887,7 @@ public class GraphSegment {
 			if (localName != null) {
 				return localName; 
 			}
-			else if (prefix != null) {
+			else if (prefix != null && prefix.length() > 0) {
 				return prefix;
 			}
 		}
