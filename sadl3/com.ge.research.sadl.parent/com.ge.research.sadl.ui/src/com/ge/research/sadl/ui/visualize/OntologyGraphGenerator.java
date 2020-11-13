@@ -25,23 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
-import com.ge.research.sadl.preferences.SadlPreferences;
-import com.ge.research.sadl.processing.SadlConstants;
-import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
-import com.ge.research.sadl.reasoner.IReasoner;
-import com.ge.research.sadl.reasoner.InvalidNameException;
-import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.ui.handlers.SadlActionHandler;
-import com.ge.research.sadl.utils.SadlConsole;
-import com.google.inject.Inject;
-
 import org.apache.jena.ontology.AnnotationProperty;
 import org.apache.jena.ontology.DatatypeProperty;
 import org.apache.jena.ontology.EnumeratedClass;
@@ -57,6 +40,19 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
+import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.ResultSet;
 
 /**
  * @author Tyler Dicks
