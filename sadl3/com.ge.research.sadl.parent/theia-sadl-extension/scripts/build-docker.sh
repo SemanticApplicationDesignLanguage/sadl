@@ -2,7 +2,7 @@
 
 cd "$(dirname "$0")" \
 && cd ../apps/browser-app \
-&& cp -rf ../yarn.lock . \
+&& cp -rf ../../yarn.lock . \
 && NEXT_VERSION=`npm view sadl-extension@next version` \
 && mv -f ./package.json ./package.json.original \
 && cat ./package.json.original | jq .version=\"$NEXT_VERSION\" | jq .dependencies.\"sadl-extension\"=\"$NEXT_VERSION\" > package.json \
