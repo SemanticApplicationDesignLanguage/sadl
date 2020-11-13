@@ -39,12 +39,6 @@ import java.util.Map.Entry;
 import java.util.ServiceLoader;
 import java.util.StringTokenizer;
 
-import org.pojava.datetime.DateTimeConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ge.research.sadl.model.ImportMapping;
-
 import org.apache.jena.ext.xerces.util.XMLChar;
 import org.apache.jena.ontology.OntDocumentManager;
 import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
@@ -70,6 +64,11 @@ import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
+import org.pojava.datetime.DateTimeConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ge.research.sadl.model.ImportMapping;
 
 /**
  * This is a general purpose configuration manager suitable for model deployment environments.
@@ -111,6 +110,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	protected Model mappingModel = null;
 	protected HashMap<String, String> mappings = null;	// HashMap<publicURI, altURL>
 	protected HashMap<String, String> globalPrefixes = null;	// HashMap<publicURI, prefix>
+	private HashMap<String, IConfigurationManager> otherProjectConfigurationManagers = null;	// HashMap<publicUri, otherProjectConfigMgr>
 	private ITranslator translator = null;
 	private IReasoner reasoner = null;
 	protected OntDocumentManager jenaDocumentMgr;
@@ -1058,6 +1058,38 @@ public class ConfigurationManager implements IConfigurationManager {
 				return prefix;
 			}
 		}
+		String insp = getImplicitNamespacePrefix(uri);
+		if (insp != null) {
+			return insp;
+		}
+		try {
+			if (isNamespaceInProjectDependency(uri)) {
+				return getOtherProjectPrefixFromPubliceUri(uri);
+			}
+		} catch (ConfigurationException e) {
+			// it's OK if there isn't one from a depends-on project
+			return null;
+		}
+		return null;
+	}
+	
+	@Override
+	public boolean isNamespaceImplicit(String uri) {
+		if (getImplicitNamespacePrefix(uri) != null) {
+			return true;
+		}
+		return false;
+	}
+	
+	/** 
+	 * Method to get the prefix for a publicUri if it is an implicitly imported namespace
+	 * @param uri
+	 * @return
+	 */
+	protected String getImplicitNamespacePrefix(String uri) {
+		if (!uri.endsWith("#")) {
+			uri += "#";
+		}
 		if (uri.equals(RDF.getURI())) {
 			return "rdf";
 		}
@@ -1539,6 +1571,10 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @throws ConfigurationException
 	 */
 	public String getAltUrlFromPublicUri(String publicUri) throws ConfigurationException {
+		if (getImplicitNamespacePrefix(publicUri) != null) {
+			// this is implicit--it will not have an altUrl
+			return null;
+		}
 		if (mappings != null) {
 			if (mappings.containsKey(publicUri)) {
 				return mappings.get(publicUri);
@@ -1557,9 +1593,11 @@ public class ConfigurationManager implements IConfigurationManager {
 				return alt;
 			}
 		}
-		String otherProjectAlt = getOtherProjectAltUrlFromPubliceUri(publicUri);
-		if (otherProjectAlt != null) {
-			return otherProjectAlt;
+		if (isNamespaceInProjectDependency(publicUri)) {
+			String otherProjectAlt = getOtherProjectAltUrlFromPubliceUri(publicUri);
+			if (otherProjectAlt != null) {
+				return otherProjectAlt;
+			}
 		}
 		throw new ConfigurationException("PublicURI '" + publicUri + "' not found in mappings.");
 	}
@@ -1583,21 +1621,7 @@ public class ConfigurationManager implements IConfigurationManager {
 		}
 		return null;
 	}
-
-	protected String getOtherProjectAltUrlFromPubliceUri(String publicUri) throws ConfigurationException {
-		List<String> dps = getProjectDependencies();
-		if (dps != null) {
-			for (String dp : dps) {
-				IConfigurationManager dpCM = ConfigurationManagerFactory.getConfigurationManager(dp + "/OwlModels", null);
-				String dpAltUrl = dpCM.getAltUrlFromPublicUri(publicUri);
-				if (dpAltUrl != null) {
-					return dpAltUrl;
-				}
-			}
-		}
-		return null;
-	}
-
+	
 	/**
 	 * Method to determine if a URI (could be public URI or alt URL) is mapped in this ConfigurationManager (project)
 	 * @param uri
@@ -1852,4 +1876,85 @@ public class ConfigurationManager implements IConfigurationManager {
     	return map;
 	}
 
+	@Override
+	public boolean isNamespaceInProjectDependency(String ns) throws ConfigurationException {
+		if (getOtherProjectConfigMgr(ns) != null) {
+			return true;
+		}
+		if (getOtherProjectAltUrlFromPubliceUri(ns) != null) {
+			Object opcm = getOtherProjectConfigMgr(ns);
+			if (opcm != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Method to get an altUrl for a publicUri from a project upon which this project depends
+	 * @param publicUri
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	protected String getOtherProjectAltUrlFromPubliceUri(String publicUri) throws ConfigurationException {
+		IConfigurationManager opcm = getOtherProjectConfigMgr(publicUri);
+		if (opcm != null) {
+			return opcm.getAltUrlFromPublicUri(publicUri);
+		}
+		List<String> dps = getProjectDependencies();
+		if (dps != null) {
+			for (String dp : dps) {
+				String projectUrl = dp + "/OwlModels";
+				IConfigurationManager dpCM = ConfigurationManagerFactory.getConfigurationManager(projectUrl, null);
+				String dpAltUrl = dpCM.getAltUrlFromPublicUri(publicUri);
+				if (dpAltUrl != null && !dpAltUrl.equals(publicUri)) {
+					addOtherProjectConfigMgr(publicUri, dpCM);
+					return dpAltUrl;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Method to get a global prefix for a publicUri from a project upon which this project depends
+	 * @param publicUri
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	protected String getOtherProjectPrefixFromPubliceUri(String publicUri) throws ConfigurationException {
+		IConfigurationManager opcm = getOtherProjectConfigMgr(publicUri);
+		if (opcm != null) {
+			return opcm.getGlobalPrefix(publicUri);
+		}
+		if (getOtherProjectAltUrlFromPubliceUri(publicUri) != null) {
+			opcm = getOtherProjectConfigMgr(publicUri);
+			if (opcm != null) {
+				return opcm.getGlobalPrefix(publicUri);
+			}
+		}
+		return null;
+	}
+
+	protected IConfigurationManager getOtherProjectConfigMgr(String publicUri) {
+		if (otherProjectConfigurationManagers != null) {
+			return otherProjectConfigurationManagers.get(publicUri);
+		}
+		return null;
+	}
+
+	protected void addOtherProjectConfigMgr(String publicUri, IConfigurationManager otherProjectConfigMgr) {
+		if (otherProjectConfigurationManagers == null) {
+			otherProjectConfigurationManagers = new HashMap<String, IConfigurationManager>();
+		}
+		if (!otherProjectConfigurationManagers.containsKey(publicUri)) {
+			otherProjectConfigurationManagers.put(publicUri, otherProjectConfigMgr);
+		}
+	}
+
+	protected void clearOtherProjectConfigMgrs() {
+		if (otherProjectConfigurationManagers != null) {
+			otherProjectConfigurationManagers.clear();
+		}
+	}
 }

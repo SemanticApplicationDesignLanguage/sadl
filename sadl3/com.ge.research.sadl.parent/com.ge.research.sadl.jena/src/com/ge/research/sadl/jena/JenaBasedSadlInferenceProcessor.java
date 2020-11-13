@@ -461,7 +461,10 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			_repoType = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
 			if (preferenceMap != null) {
 				if (preferenceMap.containsKey(SadlPreferences.OWL_MODEL_FORMAT.getId())) {
-					_repoType = preferenceMap.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
+					String rt = preferenceMap.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
+					if (rt != null && rt.length() > 0) {
+						_repoType = rt; 
+					}
 				}
 			}
 		}

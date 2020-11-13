@@ -1340,6 +1340,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			}
 		}
 		if (bChanged) {
+			clearOtherProjectConfigMgrs();
 			configItem.clearNameValuePairs();
 			if (projectDependencies != null) {
 				for (java.net.URI pduri : projectDependencies) {

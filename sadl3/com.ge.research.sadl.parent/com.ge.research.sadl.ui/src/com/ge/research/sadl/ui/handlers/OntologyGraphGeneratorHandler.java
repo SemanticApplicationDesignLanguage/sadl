@@ -42,6 +42,10 @@ public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 
 	private List<GraphSegment> imports;
 	private IGraphVisualizer visualizer;
+	
+	public OntologyGraphGeneratorHandler() {
+		
+	}
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {

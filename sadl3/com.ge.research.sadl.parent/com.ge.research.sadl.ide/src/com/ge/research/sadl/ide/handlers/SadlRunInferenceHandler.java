@@ -82,7 +82,7 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 		try {
 			// *** NOTE: Copied from com.ge.research.sadl.ui.handlers.RunInference.execute(ExecutionEvent) *** 
 			String frmt = properties.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
-			if (frmt != null) {
+			if (frmt != null && frmt.length() > 0) {	// awc 2020/11/10: in some cases this is an empty string, treat same as null
 				String ext = SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(frmt));
 				if (ext != null) {
 					frmt = "." + ext;

@@ -25,20 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
-import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
-import com.ge.research.sadl.preferences.SadlPreferences;
-import com.ge.research.sadl.processing.SadlConstants;
-import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
-import com.ge.research.sadl.reasoner.IReasoner;
-import com.ge.research.sadl.reasoner.InvalidNameException;
-import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.ui.handlers.SadlActionHandler;
 import org.apache.jena.ontology.AnnotationProperty;
 import org.apache.jena.ontology.DatatypeProperty;
 import org.apache.jena.ontology.EnumeratedClass;
@@ -54,15 +40,25 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
+import com.ge.research.sadl.model.ConceptName.ConceptType;
+import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
+import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
+import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.ResultSet;
 
 /**
  * @author Tyler Dicks
  *
  */
 public class OntologyGraphGenerator extends GraphGenerator {
-
-	
-	
 	
 //	public enum Orientation {TD, LR, BD, RL}
 	
@@ -513,17 +509,21 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	
 	public String getCurrentFileLink(String parentUri) throws Exception{
 		String baseFilename = getBaseFilenameFromPublicUri(parentUri);
-		
+		boolean inOtherProject = publicUriInOtherProject(parentUri);
+
 		// get the prefix and if there is one generate qname
-		String tempDir = SadlActionHandler.convertProjectRelativePathToAbsolutePath(SadlActionHandler.getGraphDir(getProject())); 
-		
-		if(baseFilename!=null){
-//			return "\"file:///" + tempDir + "/" + baseFilename + getGraphFilenameExtension() + "\"";
-			return "\"./" + baseFilename + getGraphFilenameExtension() + "\"";		// relative paths allow folder to be copied, moved.
+		if (inOtherProject) {
+			// this must be in another project
+			return generateAndValidateFileLinkUrl(parentUri, baseFilename);
 		}
-		throw new Exception("Cannot find graph file in getCurrentFileLink()");
+		else {
+			if(baseFilename!=null){
+				return "\"./" + baseFilename + getGraphFilenameExtension() + "\"";		// relative paths allow folder to be copied, moved.
+			}
+			throw new Exception("Cannot find graph file in getCurrentFileLink()");
+		}		
 	}
-	
+
 	private void addInstanceIsAClassToGraph(String publicUri, Individual or, RDFNode classInst, List<GraphSegment> data)
 			throws ConfigurationException, IOException, URISyntaxException, Exception {
 		GraphSegment gs = new GraphSegment(publicUri, or, "is a", classInst, getConfigMgr());
@@ -638,7 +638,7 @@ public class OntologyGraphGenerator extends GraphGenerator {
 						headTooltip = "\"" + key + "\"";
 //						System.out.println("found import for '" + publicUri + "': key = '" + key + "', value = '" + value + "'");
 						GraphSegment gs = new GraphSegment(publicUri, (value != null ? value : key), pred, 
-																(prefix != null ? prefix : publicUri), configMgr);
+																((prefix != null && prefix.length() > 0) ? prefix : publicUri), configMgr);
 						gs.addTailAttribute("URL", getCurrentFileLink(publicUri));
 						String str = "\"" + publicUri + "\"";
 						gs.addTailAttribute("tooltip", str);

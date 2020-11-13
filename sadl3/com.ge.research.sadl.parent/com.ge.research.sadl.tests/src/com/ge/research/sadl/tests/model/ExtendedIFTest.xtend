@@ -279,7 +279,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
  			assertNotNull(jenaModel)
 // 			jenaModel.write(System.out)
  			issues.assertHasIssues(1);
-			assertEquals(issues.head.message,"constantValue, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot operate (+) with int, an RDF datatype  xsd:int.")
+			assertEquals("constantValue, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot operate (+) with xsd:int, an RDF datatype  xsd:int.", issues.head.message)
 		]
 	}
 	
