@@ -75,13 +75,13 @@ jobs:
     - name: Set up Node.js 10.x
       uses: actions/setup-node@v1
       with:
-        node-version: '10.15.3'
-        registry-url: 'https://registry.npmjs.org'
+        node-version: 10.15.3
+        registry-url: https://registry.npmjs.org
 
     - name: Set up Python 2.7
       uses: actions/setup-python@v2
       with:
-        python-version: '2.7'
+        python-version: 2.7
 
     - name: Build WebSADL extension
       env:
@@ -104,11 +104,13 @@ jobs:
         echo "npm config get node_gyp -> `npm config get node_gyp`"
         sadl3/com.ge.research.sadl.parent/theia-sadl-extension/scripts/build-docker.sh
 
-    - name: Publish WebSADL Docker image
+    - name: Login to Docker Hub
       if: github.ref == 'refs/heads/development'
-      uses: elgohr/Publish-Docker-Github-Action@2.22
+      uses: docker/login-action@v1
       with:
-        name: theiaide/sadl
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-        workdir: sadl3/com.ge.research.sadl.parent/theia-sadl-extension/apps/browser-app
+
+    - name: Push WebSADL image to Docker Hub
+      if: github.ref == 'refs/heads/development'
+      run: docker push theiaide/sadl
