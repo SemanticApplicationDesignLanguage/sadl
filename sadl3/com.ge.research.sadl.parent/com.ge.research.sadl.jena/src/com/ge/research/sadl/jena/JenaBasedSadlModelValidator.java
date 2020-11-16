@@ -42,6 +42,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +92,7 @@ import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.QueryStatement;
+import com.ge.research.sadl.sADL.RuleStatement;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf;
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
@@ -731,6 +733,21 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					if (createErrorMessage(errorMessageBuilder, leftTypeCheckInfo, rightTypeCheckInfo, op, false, null)) {
 						setEObjectInError(expression);
 						return false;
+					}
+				}
+			}
+			if (rightTypeCheckInfo == null && 
+					(EcoreUtil2.getContainerOfType(expression, QueryStatement.class) != null) ||
+					EcoreUtil2.getContainerOfType(expression, RuleStatement.class) != null) {
+				// there is no rightTypeCheckInfo and this is in a query
+				if (op.equals("is") && leftExpression instanceof Name && rightExpression instanceof Declaration) {
+					// this is an "is a" -- is the rightExpression wrapping a variable?
+					SadlTypeReference typeRef = ((Declaration)rightExpression).getType();
+					if (typeRef instanceof SadlSimpleTypeReference) {
+						SadlResource typeSR = ((SadlSimpleTypeReference)typeRef).getType();
+						if (declarationExtensions.getOntConceptType(typeSR).equals(OntConceptType.VARIABLE)) {
+							return true;
+						}
 					}
 				}
 			}
