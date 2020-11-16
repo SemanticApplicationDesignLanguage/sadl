@@ -1,92 +1,90 @@
 <html>
-
-<head>
-<meta http-equiv="Content-Language" content="en-us">
-<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
-<meta name="ProgId" content="FrontPage.Editor.Document">
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>A Brief History of SADL</title>
-</head>
-
-<body>
-
-<h1>A Brief History of SADL</h1>
-
-<h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/28/2020<!--webbot bot="Timestamp" endspan i-checksum="12623" -->.&nbsp;
-<a href="contact.html">Contact us</a>.</h5>
-<p class="MsoNormal">The Semantic &nbsp;Application Design Language (SADL) began 
-at the end of 2007 at GE Research (GR). Andy Crapo had been working on a project with Mike Graham to 
-capture knowledge for equipment overhaul. He had suggested the use of the Web Ontology Language (OWL) to 
-capture a model of the domain, but Mike felt that  engineers would never 
-be comfortable using Protégé, which was the free editor of choice for OWL at 
-that time. Andy attended the Automated Software Engineering 
-Conference in Atlanta, GA in November and sat behind Stanley Sutton of IBM 
-Research Center. During a break Stan showed Andy Eclipse IMP, a set of Eclipse 
-plug-ins generalizing the Eclipse Java Development Tool Kit (JDK) in order to 
-support defining the grammar of a domain-specific language (DSL) and providing 
-an integrated development environment (IDE) for the language with content 
-assist, outlining, hyperlinking, error checking, quick fix, etc. (see :
-<a href="http://www.eclipse.org/proposals/imp/IMP_Creation-Review.pdf" style="color: blue; text-decoration: underline; text-underline: single">
-http://www.eclipse.org/proposals/imp/IMP_Creation-Review.pdf</a> ). A light bulb 
-came on and Andy envisioned a DSL that allowed subject matter experts to write 
-controlled-English statements that mapped directly to OWL. Upon returning to GR, 
-he proposed capturing knowledge in OWL by providing such a DSL and Mike was 
-supportive. Significant work went into defining a grammar that, when a model 
-snippet expressed in the language was shown to a domain engineer, would be 
-immediately understandable. Amy Aragones provided consulting on font and 
-coloring for the semantic highlighting. Thus was born SADL Version 1 in early 
-2008.</p>
-<p class="MsoNormal">SADL Version 1 was built on top of Jena from HP Labs in 
-Bristol, England. Besides model statements translated to OWL, SADL supported 
-rules, which were translated either to Jena Rules for a Jena-based reasoner or 
-Semantic Web Rules Language (SWRL) rules for the Pellet reasoner. It also 
-supported queries written in the W3C graph query language SPARQL. By the end of 
-2008 Aviation had given approval and SADL was released to Open Source on 
-SourceForge (see
-<a href="http://sadl.sourceforge.net" style="color: blue; text-decoration: underline; text-underline: single">
-http://sadl.sourceforge.net</a>). Concurrent with SADL 1 development was the 
-development of a knowledge server which ran independent of Eclipse and could be 
-invoked by clients either using a Java API or a Web Service implementation using 
-SOAP messaging. This knowledge server came to be known as SadlServer because 
-deploying knowledge bases from the SADL IDE to the server was accomplished by 
-simply copying the knowledge base folder to the server file system. Both the 
-Java API and the Web Service API implemented the same Java Interface class, 
-making it easy to move from one to the other.</p>
-<p class="MsoNormal">When John Interrante started working on the project he 
-identified Xtext as a more mature DSL development suite than IBM’s IMP and SADL 
-Version 2 was built on top of Xtext (see <a href="https://eclipse.org/Xtext/">
-https://eclipse.org/Xtext/</a>). In Version 2 the grammar of SADL was expanded 
-to provide support for all of OWL 1 and qualified cardinality from OWL 2. This 
-scope was primarily defined by what Jena supported as the OWL translation still 
-used the Jena API. The architecture of SADL 2 was improved to support use of any 
-reasoner provided that a) it was wrapped  so as to operate behind the IReasoner 
-API and b) it had at least one associated translator that operated behind the 
-ITranslator API. A user could select and configure the desired reasoner and 
-select a supporting translator via the project properties interface, with those 
-configuration settings being passed directly to the SadlServer kbase folder so that 
-SadlServer would operate as specified in the IDE. Supported reasoners for SADL 2 
-included Jena and two flavors of Prolog. SADL 2 had an Open Source release and a 
-GE-Only release with additional functionality. </p>
-<p class="MsoNormal">SADL 3  was developed 
-to better support the Aviation ASSERT™ Verification and Validation tool (see
-<a href="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwi0v_HDh9LTAhVCJ5oKHQEsDi0QFggjMAA&url=http://www.mys5.org/Proceedings/2016/Day_2/2016-S5-Day2_0845_Durling.pdf&usg=AFQjCNEwhOft2yvW1Tx8AtHNbnX1Gojw_Q&s">
-Safety Critical Software and Systems Research @ General Electric</a>). The 
-grammar was re-implemented in a much cleaner manner with extensive help from 
-Sven Efftinge at
-<a href="http://sadl.sourceforge.net/sadl3/FoundationalConcepts.htmlhttps:/www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&sqi=2&ved=0ahUKEwj1lsHzh9LTAhWjA5oKHWlNBxEQFggjMAA&url=https://typefox.io/&usg=AFQjCNHZXY6hkmUNNOkCJWzALl6CHt">
-TypeFox</a> and the architecture enhanced to support 
-two important functions. a) Model processors are plug-ins, opening the way for a 
-model processor that uses the OWL API rather than Jena, which would facilitate 
-moving from OWL 1 to OWL 2. b) The SADL grammar is extensible by other grammars, 
-e.g., the SADL Requirements Language (SRL) grammar used in ASSERT™ and the 
-Dialog grammar used in
-<a href="https://github.com/GEGlobalResearch/DARPA-ASKE-TA1/wiki">GE's ASKE TA1 
-ANSWER system</a>. This makes extensions 
-possible with very little additional grammar. SADL 3 also has extensive graphing 
-capability, allowing ontology models and concept neighborhoods to be visualized 
-as well as perceived in the controlled-English format.</p>
-
-</body>
-
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+    <meta name="ProgId" content="FrontPage.Editor.Document">
+    <title>A Brief History of SADL</title>
+  </head>
+  <body>
+    <h1>A Brief History of SADL</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/28/2020<!--webbot bot="Timestamp" endspan i-checksum="12623" -->.&nbsp;
+      <a href="contact.html">Contact us</a>.</h5>
+    <p class="MsoNormal">The Semantic &nbsp;Application Design Language (SADL)
+      began at the end of 2007 at GE Research (GR). Andy Crapo had been working
+      on a project with Mike Graham to capture knowledge for equipment overhaul.
+      He had suggested the use of the Web Ontology Language (OWL) to capture a
+      model of the domain, but Mike felt that engineers would never be
+      comfortable using Protégé, which was the free editor of choice for OWL at
+      that time. Andy attended the Automated Software Engineering Conference in
+      Atlanta, GA in November and sat behind Stanley Sutton of IBM Research
+      Center. During a break Stan showed Andy Eclipse IMP, a set of Eclipse
+      plug-ins generalizing the Eclipse Java Development Tool Kit (JDK) in order
+      to support defining the grammar of a domain-specific language (DSL) and
+      providing an integrated development environment (IDE) for the language
+      with content assist, outlining, hyperlinking, error checking, quick fix,
+      etc. (see :
+      <a href="http://www.eclipse.org/proposals/imp/IMP_Creation-Review.pdf" style="color: blue; text-decoration: underline; text-underline: single">
+        http://www.eclipse.org/proposals/imp/IMP_Creation-Review.pdf</a> ). A
+      light bulb came on and Andy envisioned a DSL that allowed subject matter
+      experts to write controlled-English statements that mapped directly to
+      OWL. Upon returning to GR, he proposed capturing knowledge in OWL by
+      providing such a DSL and Mike was supportive. Significant work went into
+      defining a grammar that, when a model snippet expressed in the language
+      was shown to a domain engineer, would be immediately understandable. Amy
+      Aragones provided consulting on font and coloring for the semantic
+      highlighting. Thus was born SADL Version 1 in early 2008.</p>
+    <p class="MsoNormal">SADL Version 1 was built on top of Jena from HP Labs in
+      Bristol, England. Besides model statements translated to OWL, SADL
+      supported rules, which were translated either to Jena Rules for a
+      Jena-based reasoner or Semantic Web Rules Language (SWRL) rules for the
+      Pellet reasoner. It also supported queries written in the W3C graph query
+      language SPARQL. By the end of 2008 Aviation had given approval and SADL
+      was released to Open Source on SourceForge (see
+      <a href="http://sadl.sourceforge.net" style="color: blue; text-decoration: underline; text-underline: single">
+        http://sadl.sourceforge.net</a>). Concurrent with SADL 1 development was
+      the development of a knowledge server which ran independent of Eclipse and
+      could be invoked by clients either using a Java API or a Web Service
+      implementation using SOAP messaging. This knowledge server came to be
+      known as SadlServer because deploying knowledge bases from the SADL IDE to
+      the server was accomplished by simply copying the knowledge base folder to
+      the server file system. Both the Java API and the Web Service API
+      implemented the same Java Interface class, making it easy to move from one
+      to the other.</p>
+    <p class="MsoNormal">When John Interrante started working on the project he
+      identified Xtext as a more mature DSL development suite than IBM's IMP and
+      SADL Version 2 was built on top of Xtext (see <a href="https://eclipse.org/Xtext/">
+        https://eclipse.org/Xtext/</a>). In Version 2 the grammar of SADL was
+      expanded to provide support for all of OWL 1 and qualified cardinality
+      from OWL 2. This scope was primarily defined by what Jena supported as the
+      OWL translation still used the Jena API. The architecture of SADL 2 was
+      improved to support use of any reasoner provided that a) it was wrapped so
+      as to operate behind the IReasoner API and b) it had at least one
+      associated translator that operated behind the ITranslator API. A user
+      could select and configure the desired reasoner and select a supporting
+      translator via the project properties interface, with those configuration
+      settings being passed directly to the SadlServer kbase folder so that
+      SadlServer would operate as specified in the IDE. Supported reasoners for
+      SADL 2 included Jena and two flavors of Prolog. SADL 2 had an Open Source
+      release and a GE-Only release with additional functionality. </p>
+    <p class="MsoNormal">SADL 3 was developed to better support the Aviation
+      ASSERT™ Verification and Validation tool (see
+      <a href="https://www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;cad=rja&amp;uact=8&amp;ved=0ahUKEwi0v_HDh9LTAhVCJ5oKHQEsDi0QFggjMAA&amp;url=http://www.mys5.org/Proceedings/2016/Day_2/2016-S5-Day2_0845_Durling.pdf&amp;usg=AFQjCNEwhOft2yvW1Tx8AtHNbnX1Gojw_Q&amp;s">
+        Safety Critical Software and Systems Research @ General Electric</a>).
+      The grammar was re-implemented in a much cleaner manner with extensive
+      help from Sven Efftinge at
+      <a href="http://sadl.sourceforge.net/sadl3/FoundationalConcepts.htmlhttps:/www.google.com/url?sa=t&amp;rct=j&amp;q=&amp;esrc=s&amp;source=web&amp;cd=1&amp;cad=rja&amp;uact=8&amp;sqi=2&amp;ved=0ahUKEwj1lsHzh9LTAhWjA5oKHWlNBxEQFggjMAA&amp;url=https://typefox.io/&amp;usg=AFQjCNHZXY6hkmUNNOkCJWzALl6CHt">
+        TypeFox</a> and the architecture enhanced to support two important
+      functions. a) Model processors are plug-ins, opening the way for a model
+      processor that uses the OWL API rather than Jena, which would facilitate
+      moving from OWL 1 to OWL 2. b) The SADL grammar is extensible by other
+      grammars, e.g., the SADL Requirements Language (SRL) grammar used in
+      ASSERT™ and the Dialog grammar used in
+      <a href="https://github.com/GEGlobalResearch/DARPA-ASKE-TA1/wiki">GE's
+        ASKE TA1 ANSWER system</a>. This makes extensions possible with very
+      little additional grammar. SADL 3 also has extensive graphing capability,
+      allowing ontology models and concept neighborhoods to be visualized as
+      well as perceived in the controlled-English format.</p>
+  </body>
 </html>

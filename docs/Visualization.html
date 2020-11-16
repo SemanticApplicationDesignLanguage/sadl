@@ -9,7 +9,7 @@
   <body>
     <h1>Model Visualization in the Eclipse-Based SADL-IDE</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/11/2020<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/16/2020<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <h2>Visualization in SADL Version 3</h2>
     <p>In SADL Version 3, the graphing package is a plug-in accessed as a
@@ -88,8 +88,8 @@
       the command. The answer to the "How many edges from anchor?" question will
       determine the size of the graph generated around the "anchor" concept or
       model.</p>
-    <table style="border-collapse: collapse" bordercolor="#111111" border="1" cellspacing="0"
-      cellpadding="0" width="49%">
+    <table style="border-collapse: collapse" cellspacing="0" cellpadding="0" bordercolor="#111111"
+      border="1" width="49%">
       <tbody>
         <tr>
           <td width="44%"><b>Selected Object Given Focus</b></td>
@@ -119,8 +119,8 @@
       </tbody>
     </table>
     <h4>Graph Ontology</h4>
-    <table style="border-collapse: collapse" bordercolor="#111111" border="1" cellspacing="0"
-      cellpadding="0" width="50%">
+    <table style="border-collapse: collapse" cellspacing="0" cellpadding="0" bordercolor="#111111"
+      border="1" width="50%">
       <tbody>
         <tr>
           <td width="43%"><b>Selected Object Given Focus</b></td>
@@ -133,12 +133,16 @@
         <tr>
           <td width="43%">A SADL project selected in the Project Explorer</td>
           <td width="57%">A graph of the project showing models as nodes and
-            arcs showing imports</td>
+            arcs showing imports. Each import node with an associated OWL model
+            in the project or in a referenced project will be a link to a graph
+            of the imported model.</td>
         </tr>
       </tbody>
     </table>
     <h3>Graphing by SADL Statement</h3>
-    <p>Graphs can also be generated from SADL statements within a .sadl file.</p>
+    <p>Graphs can also be generated from SADL statements within a .sadl file.
+      This can be done either with a SPARQL <i>construct</i> query or with the
+      <i>Graph</i> SADL keyword.</p>
     <ol>
       <li>Ask: "construct ....".&nbsp;&nbsp;&nbsp; // will generate a graph for
         a valid SPARQL construct statement (see <a href="http://www.w3.org/TR/sparql11-query/#construct">
