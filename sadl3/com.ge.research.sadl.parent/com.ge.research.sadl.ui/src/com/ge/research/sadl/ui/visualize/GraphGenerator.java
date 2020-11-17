@@ -1087,6 +1087,15 @@ public class GraphGenerator {
 		this.visualizer = visualizer;
 	}
 
+	/**
+	 * Method to get the base filename from the public URI for files that should have
+	 * file links. If it is an implicit model (not actually a model in the project)
+	 * null will be returned, indicating that no link should be generated.
+	 * 
+	 * @param publicUri
+	 * @return
+	 * @throws Exception
+	 */
 	public String getBaseFilenameFromPublicUri(String publicUri) throws Exception {
 		if (getConfigMgr().isNamespaceImplicit(publicUri)) {
 			return null;

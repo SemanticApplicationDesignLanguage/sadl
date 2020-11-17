@@ -507,8 +507,18 @@ public class OntologyGraphGenerator extends GraphGenerator {
 		return listtype;
 	}
 	
+	/**
+	 * Method to get the file link for a given public URI.
+	 * @param parentUri
+	 * @return
+	 * @throws Exception
+	 */
 	public String getCurrentFileLink(String parentUri) throws Exception{
 		String baseFilename = getBaseFilenameFromPublicUri(parentUri);
+		if (baseFilename == null) {
+			return null;
+		}
+		
 		boolean inOtherProject = publicUriInOtherProject(parentUri);
 
 		// get the prefix and if there is one generate qname
