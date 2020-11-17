@@ -661,4 +661,35 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  			assertTrue(issues.size == 0)
  		]
 	}
+	
+	@Test
+	def void testFormsOfSPV() {
+		val model = '''
+			uri "http://sadl.org/testformsofspv" alias tspv.
+			Person is a class described by spouse with values of type Person.
+			{George, Martha} are instances of Person.
+			 George has spouse Martha.
+			 
+			{Jane, Jack} are instances of Person.
+			 Jane spouse Jack.
+			 
+			{Bill, Bonnie} are instances of Person.
+			 The spouse of Bill is Bonnie.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			val ns = "ttp://sadl.org/testformsofspv#"
+			assertTrue(
+				jenaModel.listStatements(jenaModel.getIndividual(ns + "George"),
+					jenaModel.getOntProperty(ns + "spouse"), jenaModel.getIndividual(ns + "Martha")).next() !== null)
+			assertTrue(
+				jenaModel.listStatements(jenaModel.getIndividual(ns + "Jane"), jenaModel.getOntProperty(ns + "spouse"),
+					jenaModel.getIndividual(ns + "Jack")).next() !== null)
+			assertTrue(
+				jenaModel.listStatements(jenaModel.getIndividual(ns + "Bill"), jenaModel.getOntProperty(ns + "spouse"),
+					jenaModel.getIndividual(ns + "Bonnie")).next() !== null)
+		]
+	}
+	
+	
 }
