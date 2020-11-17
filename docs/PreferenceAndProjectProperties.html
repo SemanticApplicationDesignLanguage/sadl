@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Preference (and Project Properties)</title>
+  </head>
+  <body>
+    <h1><a id="mozTocId229112" class="mozTocH1"></a>Preferences (and Project
+      Properties)</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/17/2020<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <h2>Table of Contents</h2>
+    <ul id="mozToc">
+      <li><a href="#Introduction">Introduction</a></li>
+      <li><a href="#PrefByCategory">SADL Preferences by Category</a>
+        <ul>
+          <li><a href="#GeneralSettings">General SADL Settings</a></li>
+          <li><a href="#GraphingSettings">Graphing Settings</a></li>
+          <li><a href="#InferQuerySettings">Inference and Querying Settings</a></li>
+          <li><a href="#MetricsSettings">Metrics Settings</a></li>
+          <li><a href="#TranslationSettings">Translation Settings</a></li>
+          <li><a href="#ContentAssistSettings">Content Assist Settings</a></li>
+        </ul>
+      </li>
+    </ul>
+    <p><br>
+    </p>
+    <h2><a id="Introduction">Introduction</a></h2>
+    <p>Preferences are user-settable parameters that control the way the SADL
+      environment behaves during editing and during inference. In the Eclipse
+      environment, preferences can be set at the workspace level or at the
+      project level. Workspace preferences are set from the <i>Windows</i>
+      dropdown menu.</p>
+    <p style="margin-left: 40px;"><img src="images/WindowPrefMenu.png" alt=""></p>
+    <p>To set preferences in Eclipse at the project level, select the desired
+      project and request <i>Project Properties</i>, either from the <i>Project</i>
+      dropdown menu or from the project context menu in <i>Project Explorer</i>.</p>
+    <div style="margin-left: 40px;"><img src="images/ProjectPropertiesMenu.png"
+        alt=""></div>
+    <p>The SADL preference page in Eclipse looks like this.</p>
+    <div style="margin-left: 40px;"><img src="images/ProjectPropertiesMenu2.png"
+        alt=""></div>
+    <p>By default everything is disabled and the link in the upper-right takes
+      the user to the workspace preferences. To enable project-specific
+      preferences, check the checkbox with the label "Enable project specific
+      settings". Note that the project preferences are initially set to the
+      workspace preferences.</p>
+    <p>If <i>SADL</i> in the left-side navigation menu of project properties is
+      expanded, <i>Reasoner Preferences</i> becomes visible as a menu choice
+      and, if selected, allows a reasoner and an associated translator to be
+      specified for the project. Note that <i>Reasoner Preferences</i> can only
+      be specified at the project level. <i>Reasoner Preferences</i> are NOT
+      Eclipse preferences and are sometimes referred to as project properties.
+      These are stored in the project's <i>OwlModels</i> folder in the <i>configuration.rdf</i>
+      file. This file will carry the <i>Reasoner Preferences</i> forward to the
+      <a href="KaaS.html">Knowledge as a Service (KaaS)</a> environment.<br>
+    </p>
+    <p style="margin-left: 40px;"><img src="images/ProjectPropertiesMenu3.png" alt=""></p>
+    <p>By clicking on a reasoner (not on the checkbox in front of the reasoner,
+      but on the name of the reasoner) the reasoner is highlighted and the <i>Edit</i>
+      button is made active. Clicking the <i>Edit</i> button takes one to the
+      reasoner-specific settings available for the particular reasoner selected.
+      For example, the default <i>Jena</i> reasoner has the following settings.</p>
+    <p style="margin-left: 40px;"><img src="images/JenaConfigOptions.png" alt=""></p>
+    <p>Configuration settings for a specific reasoner are discussed in the
+      documentation for that reasoner.</p>
+    <h2><a id="PrefByCategory">SADL Preferences by Category</a></h2>
+    <h3><a id="GeneralSettings">General SADL Settings</a></h3>
+    <p>In the Eclipse environment, <i>General SADL Settings</i> include the
+      following.</p>
+    <p style="margin-left: 40px;"><img src="images/GeneralSadlSettings.png" alt=""></p>
+    <ul>
+      <li><i>Base URI:</i> this should be a valid URI (starting with "http://")
+        and will be used if content assistance is requested after the <i>uri</i>
+        keyword. The name of the SADL file will be appended to create the
+        inserted URI for the model.</li>
+      <li><i>Saved OWL model format:</i>&nbsp; this preference specifies the
+        serialization format to be used for the OWL models translated from the
+        SADL models. All but the last, <i>Jena TDB</i>, are formats for OWL
+        files saved in the <i>OwlModels</i> folder. <i>Jena TDB</i> is a
+        binary triple store format and, if selected, will result in a triple
+        store of this type being created under the <i>OwlModels</i> folder. The
+        triple store will contain a named graph for each SADL model in the
+        project.</li>
+      <li><i>Show import model list as:</i> if content assistance is requested
+        after the <i>import</i> keyword, this preference determines whether the
+        resulting list will display model namespaces or SADL file names for
+        selection.</li>
+      <li><i>Show prefixes for imported concepts only when needed for
+          disambiguation </i>-- if checked, lists of model concepts shown as a
+        result of a request for content assistance will only show a prefix
+        before the name if the name would otherwise be ambiguous, i.e., there
+        are multiple models in the project that define concepts with that name.</li>
+      <li><i>Show Timing Information (Build, Reasoning)</i> -- if checked, the
+        amount of time required to build or do reasoning will be displayed in
+        the console window.</li>
+      <li><i>Interpret Date 10/11/2012 as: </i>this preference controls whether
+        dates using this format are interpreted as month first or day first.</li>
+      <li><i>Check for ambiguous names</i> --&nbsp; if checked, names will be
+        checked to see if they are ambiguous, meaning that more than one
+        namespace known to the current model contains a concept with that name.</li>
+    </ul>
+    <h3><a id="GraphingSettings">Graphing Settings</a></h3>
+    <p><img src="images/GraphingSettings.png" alt=""></p>
+    <ul>
+      <li>Graph renderer package and class: specifies the implementation of the
+        IGraphVisualizer Java Interface class to be used to render graphs. The
+        value shown is the renderer distributed with the SADL IDE and requires
+        download of GraphViz, see <a href="Visualization.html">Visualization</a>.</li>
+      <li><i>Include Implicit Elements in Graph</i> -- if checked, concepts from
+        the implicit models SadlImplicitModel.sadl, SadlBuiltinFunctions.sadl,
+        SadlListModel.owl, and SadlBaseModel.owl will be included in rendered
+        graphs.</li>
+      <li><i>Include Implicit Element Instances in Graph</i> -- if checked,
+        instances of concepts from the implicit models SadlImplicitModel.sadl,
+        SadlBuiltinFunctions.sadl, SadlListModel.owl, and SadlBaseModel.owl will
+        be included in rendered graphs.</li>
+    </ul>
+    <h3><a id="InferQuerySettings">Inference and Querying Settings</a></h3>
+    <p><img src="images/InferenceAndQuerySettings.png" alt=""></p>
+    <ul>
+      <li><i>Validate before Testing</i> -- if checked AND if the specified
+        reasoner is capable of doing model validation, the current model and
+        imported models will be validated before doing inference.</li>
+      <li><i>Show Namespaces in Query Results </i>-- if checked, concepts found
+        in query results will include namespaces (will be shown as complete
+        URIs).</li>
+      <li><i>Disable Deep Validation of Model </i>-- for reasoners capable of
+        doing validation, checking this preference disables deep validation,
+        thus improving performance.</li>
+      <li><i>Tabular data importer package and class:</i> SADL includes the
+        capability to provide a mapping to import tabular data into an OWL
+        model. Importers must implement the ITabularDataImporter Java Interface
+        class. The importer shown is for comma-separated-values (CSV) data. </li>
+    </ul>
+    <h3><a id="MetricsSettings">Metrics Settings</a></h3>
+    <p><img src="images/MetricsSettings.png" alt=""></p>
+    <ul>
+      <li><i>Enable Metrics Collection</i> -- if checked, metrics will be
+        generated as models are being built.</li>
+      <li><i>Generate metrics report during project clean/build</i> -- if
+        checked, a metrics report will be generated (provided valid queries are
+        provided) during clean/build.</li>
+      <li><i>File containing metric queries:</i> identifies a file containing
+        SPARQL queries to be used to generate metrics reports. The <i>Browse</i>
+        button can be used to locate the query file.</li>
+    </ul>
+    <p>Note: metrics generation and reporting is not completely implemented in
+      SADL at present.</p>
+    <h3><a id="TranslationSettings">Translation Settings</a></h3>
+    <p><img src="images/TranslationSettings.png" alt=""></p>
+    <ul>
+      <li><i>Use indefinite and definite articles in validation and translation</i>
+        -- if checked, rules and queries can be written without explicit
+        variables. Rather, an implicit variable is created by an indefinite
+        article in front of a class name and references to the variable are
+        written with a definite article. Ordinals are used if multiple variables
+        of the same type are needed. See <a href="DefiniteAndIndefiniteArticles.html">Definite
+          and Indefinite Article</a>s.</li>
+      <li><i>Find and expand missing patterns in translation</i> -- if checked,
+        graph patterns in rules and queries will be checked to see if they are
+        incomplete but unambiguous. If so, they will be expanded to complete
+        graph patterns in translation. See Implied and Expanded Properties.</li>
+      <li><i>Ignore Unitted Quantities (treat as numeric only) during
+          translation</i> -- if checked, numbers followed by units will be
+        treated as if they were numbers only, rather than being translated into
+        an instance of UnittedQuanitity.</li>
+      <li><i>Translate multiple-class domain or range as union class
+          (owl:unionOf) </i>-- if checked, domains and ranges that are unions
+        of multiple classes will be translated to explicit owl:unionOf
+        constructs. Otherwise they will be translated to multiple <i>&lt;property&gt;
+          rdfs:domain &lt;domain-class&gt;</i> statement. Similarly for range.</li>
+    </ul>
+    <h3>Type Checking Settings</h3>
+    <p><img src="images/TypeCheckingSettings.png" alt=""></p>
+    <ul>
+      <li><i>Check for cardinality of property on specific domain</i> -- if
+        checked, properties for a given domain class, or a subclass thereof,
+        will be expected to have a cardinality restriction on that class for
+        that property. If not a warning will be issued.</li>
+      <li><i>Property range specification required </i>-- if checked, the lack
+        of a specified range for a property will be considered an error.</li>
+      <li><i>Type checking issues as warning only</i> -- if checked, any type
+        checking issues will be reported as warnings and not errors. This allows
+        OWL models to be build even if type errors are reported.</li>
+    </ul>
+    <h3><a id="ContentAssistSettings">Content Assist Settings</a></h3>
+    <p> <img src="images/ContentAssistSettings.png" alt=""></p>
+    <ul>
+      <li><i>Filter SADL implicit model</i> -- if checked, content assistance
+        will not include any concepts from the SadlImplicitModel.</li>
+    </ul>
+    <p><br>
+    </p>
+    <p></p>
+  </body>
+</html>
