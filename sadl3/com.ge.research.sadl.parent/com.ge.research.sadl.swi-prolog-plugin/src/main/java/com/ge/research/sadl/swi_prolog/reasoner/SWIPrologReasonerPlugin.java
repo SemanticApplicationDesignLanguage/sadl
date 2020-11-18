@@ -981,4 +981,10 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		return null;
 	}
 
+	@Override
+	public String getReasonerConfigurationItem(String itemKey) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
