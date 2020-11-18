@@ -10414,7 +10414,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (theDecl.eContainer() != null && theDecl.eContainer() instanceof SadlInstance) {
 					type = ((SadlInstance)theDecl.eContainer()).getType();
 				}
-				if (type == null && element.getPropertyInitializers() != null) {
+				if (type == null && theDecl != null && theDecl.equals(sr)) { // element.getPropertyInitializers() != null) {
+					// this is the declaration but it has no type
 					addTypeCheckingError("No type is declared", element);
 				}
 			}
@@ -10529,7 +10530,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						cls = or.asClass();
 					} else if (or instanceof Individual) {
 						inst = (Individual) or;
-					}
+					} else if (or instanceof Property) {
+						isActuallyProperty = true;
+						sr = ((SadlSimpleTypeReference)type).getType();
+					}				
 				}
 			}
 			if (!isActuallyProperty) {
