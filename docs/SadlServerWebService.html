@@ -1,0 +1,191 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+
+
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>SadlServer Web Service</title></head><body>
+
+<h1>The SadlServer Service</h1>
+<h5>Last revised
+<!--webbot bot="Timestamp" s-type="EDITED" s-format="%m/%d/%Y" startspan -->06/26/2015<!--webbot bot="Timestamp" endspan i-checksum="12611" --> 
+by<a href="mailto:crapo@research.ge.com?subject=SADL%20V2%20for%20GE"> A. W. Crapo</a></h5>
+<h2>Introduction</h2>
+<p>SadlServer provides access to semantic models represented in OWL (which may 
+be generated from SADL model files) and in rules (rule file format depends on 
+reasoner selected) in a client/server architecture. The client/server interface 
+is defined by the Java Interface class
+<a href="http://sadl.home.openge.ge.com/SadlServer/JavaDocs/com/ge/research/sadl/sadlserver/server/ISadlServer.html">
+com.ge.research.sadl.sadlserver.server.ISadlServer</a>. SadlServer can be used 
+as a local or a remote service accessible in one of the following three ways:</p>
+<ol>
+  <li>Local service via <b>Java API</b>: invoke ISadlServer-defined class methods 
+  through Java API calls using the SadlServer jar file (see
+  <a href="#LocalJavaService">below</a> for details)</li>
+  <li>Remote Web service in an <b>Axis2 </b>container: invoke SadlServer through 
+  Web methods accessed through SOAP messaging using Axis2 (see <a href="SadlServerAxis2.html">SadlServer Axis 2 Download and 
+  Installation Instructions</a>). Note that the Web client class
+  <a href="SadlServer/JavaDocs/com/ge/research/sadl/sadlserver/cxf/client/SadlServerClient.html">com.ge.research.sadl.sadlserver.cxf.client.SadlServerClient
+  </a>is available and 
+  implements the ISadlServer interface for easy switching between local and 
+  remote services. (Note: the Axis2 implementation is deprecated, please use CXF.)</li>
+  <li>Remote Web service in a <b>CXF </b>container:&nbsp; invoke SadlServer 
+  through Web methods accessed through SOAP messaging using CXF (see <a href="SadlServerCxf.html">SadlServer CXF Download and 
+  Installation Instructions</a>). Note that a Web client class
+  <a href="SadlServer/JavaDocs/com/ge/research/sadl/sadlserver/axis/client/SadlServerClient.html">com.ge.research.sadl.sadlserver.axis.client.SadlServerClient
+  </a>is available and 
+  implements the ISadlServer interface for easy switching between local and 
+  remote services.</li>
+</ol>
+<h2>Service Definition</h2>
+<p>For a semantic model or set of semantic models to provide a service via SadlServer, the server must know 1) the model folder 
+or HTTP source (knowledge base identifier) 
+containing the OWL models and rules, and 2) the specific OWL&nbsp; model, 
+identified by its public URI, to be loaded as the entry point for the schema 
+model (t-box). This entry-point model may and normally will, of course, import other models. 
+While the models identified by this entry point may contain instance data, it is 
+more common for the client to provide or specify the location of the instance data of a particular 
+situation via the ISadlServer interface.</p>
+<p>A client can invoke a SadlServer service in one of two ways.</p>
+<ol>
+  <li>By calling the <i>selectServiceModel</i> method that takes a single 
+  argument which is the name of a named service. This named service identifies a 
+  knowledge base and an entry module. The client must of course know the name of a service 
+  which is available. The named services available can be retrieved from the 
+  service. The specification of named services is described below in 
+  the "Named Services" section.</li>
+  <li>By calling the <i>selectServiceModel</i> method that takes two arguments: 
+  1) knowledge base identifier and 2) model name. There are two ways that this 
+  method can be used:<ul>
+    <li>the knowledge 
+  base identifier is a URL, either file-based or http. Note that this is not 
+  supported from a Web service as knowledge of the server file system is not 
+    expected to be known to the client</li>
+    <li>the knowledge 
+  base identifier is the name of a named service and this named service does not 
+    specify a model name. The given model name then identifies a model in the 
+    identified kbase.</li>
+  </ul>
+  </li>
+</ol>
+<h2><a name="NamedServices">Named Services</a></h2>
+<p>A semantic model exposed in SadlServer as a named service is generally 
+described by three pieces of information:</p>
+<ol>
+  <li>The name of the named service</li>
+  <li>The model folder (knowledge base) containing the OWL and rule files</li>
+  <li>The public URI (model name) of the specific model (OWL file) serving as 
+  the top-level entry point (t-box) for the service. This is not specified for a 
+  named service that allows the client to specify the model name to be used. </li>
+</ol>
+<p>This information provides a mapping from the service name to the service 
+definition by knowledge base and entry-point model. </p>
+<p>The option to define named services from within the SADL-IDE has
+been implemented using the conceptual model in the top pane of the
+figure below. The developer of a SADL project can add a SADL file named
+"ServicesConfig.sadl" anywhere in the project and have it import this
+conceptual model (http://com.ge.research.sadl/sadlserver/Services). A
+ServicesConfig.sadl model should define a single instance of
+KnowledgeBase (corresponding to this SADL project) and provide one or
+more NamedService instances as "entryPoint" values with their
+associated "modelName" values. The name of the named service is the
+local name of the instance, e.g., "InScope-CFM56-7" in the figure below.</p>
+<p><img src="images/SadlSe1.jpg" border="0" height="579" width="993"></p>
+<h2><a name="KBaseRoot">KBase Root</a></h2>
+<p>To activate named services within SadlServer, a call is made to the method <i>
+setKbaseRoot</i> with an argument which identifies a folder located on the 
+server's file system. For SadlServer running as a Web Service, this call is made 
+by the container with the kbase root supplied by the application server context. 
+SadlServer will scan the kbase root folder and all subfolders looking for 
+instances of "ServicesConfig.owl" files containing instances of KnowledgeBase 
+and associated NamedService instances. When such are found they are added to the 
+set of known named services which the instance of SadlServer will support.</p>
+<p>There are several possible configurations and content for the kbase root 
+folder and subfolders.</p>
+<ol>
+  <li>If a kbase (the collection of OWL and rule files) is located on the local 
+  file system of the server and the ServicesConfig.owl file is part of this 
+  collection (as it would be if generated from within the SADL-IDE as described 
+  above), then the KnowledgeBase "url" is the path to the folder containing 
+  the ServicesConfig.owl file. In this case the "url" value of the KnowledgeBase 
+  instance should NOT be 
+  specified in the configuration file as it is implicit in the location of the 
+  ServicesConfig.owl file.</li>
+  <li>If a kbase (the collection of OWL and rule files) is located on the local 
+  file system of the server but the ServicesConfig.owl file is not in the same 
+  location, then the KnowledgeBase "url" for the kbase can either be an absolute 
+  path on the server's local file system (starting with "file:/") or it can be a 
+  relative path--relative to the kbase root. For example, the entire 
+  configuration could be consolidated into a single ServicesConfig.owl file 
+  located in the kbase root folder, in which case the "url" value for this kbase 
+  would have to be either an absolute "file:/" URL or a path relative to the 
+  kbase root.</li>
+  <li>If a kbase is not located on the local file system but is to be accessed 
+  via HTTP from a Web server, then the KnowledgeBase "url" should be an HTTP URL 
+  which the HTTP server will resolve as the folder on the HTTP server containing an "ont-policy.rdf" file 
+  with the mappings from the model public URIs (model names of the form 
+  http://..) to actual HTTP URLs from which to retrieve the model OWL files from 
+  an HTTP server. Note that the base URL of the actual model URLs will be 
+  assumed to be the same for the ont-policy.rdf file so the ont-policy.rdf file 
+  does not have to be edited when moved from the SADL development environment.</li>
+</ol>
+<h2>Configuration Overrides in ServicesConfig (Not Yet Implemented)</h2>
+<p>Per the schema in the top of the figure above, a ServicesConfig.owl file can 
+also override configuration information in a knowledge base's configuration.rdf 
+file. The "category" value is one or more comma-separated values that provide 
+the category heirarchy of the configuration item. The "item" value(s) provide 
+NameValuePairs that provide the configuration information.</p>
+<h2><a name="LocalJavaService">Using SadlServer as a Local Java Service</a></h2>
+<h3>Installation of SadlServer as a Local Service</h3>
+<p>These instructions are for running SadlService as a local service.</p>
+<ol>
+  <li>Go to the Artifactory Repository
+  <a href="https://devcloud.swcoe.ge.com/artifactory">
+  https://devcloud.swcoe.ge.com/artifactory</a>. </li>
+  <li>Search for &quot;sadl&quot; </li>
+  <li>Download sadlserver-api-&lt;version&gt;.jar and sadlserver-impl-&lt;version&gt;.jar 
+  files..</li>
+  <li>Place the  jar files on your Java classpath.</li>
+  <li>Client Java code may  call methods in SadlServerImpl, which implements 
+  ISadlServer, to receive knowledge services.</li>
+</ol>
+<h3>Testing SadlServer as a Local Java Service</h3>
+<p>Source code for SadlServer is included in the ...-sources.jar files which can 
+also be downloaded per instructions above. This source includes
+clients that provide examples. One of the clients is
+<a href="SadlServer/JavaDocs/com/ge/research/sadl/sadlserver/client/CmdLineSadlSampleClient.html">com.ge.research.sadl.sadlserver.client.CmdLineSadlSampleClient.java</a>, which can 
+be used to test SadlServer as a local service. </p>
+<p>Assuming that you have a Java JRE, version 7 or later, on your execution 
+path, you may test SadlServer as a local service by doing the following:</p>
+<ol>
+  <li>Download the sample knowledge base ShapesDemo.zip from&nbsp;
+  <a href="https://openge.ge.com/gf/project/sadl/frs/">
+  https://openge.ge.com/gf/project/sadl/frs/</a>. </li>
+  <li>Unzip the file to a folder on a local drive. The folder into which you 
+  unzip this file will hereafter be referred to as KB_ROOT.</li>
+  <li>Execute the script runCmdlineClient.bat (Windows) or runClient.sh (UNIX) 
+  in the folder where SadlServerStandalone.zip was unzipped. Respond to 
+  questions as described below:<ul>
+    <li>Kbase root (KB_ROOT): &lt;enter the complete path to the folder where you 
+    unzipped the ShapesDemo.zip file&gt;</li>
+    <li>Service Name: <b>Shapes</b></li>
+    <li>Input data file name or...: &lt;KB_ROOT&gt;<b>/ShapesDemo/shapes-test.owl </b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+    (enter the complete path to the shapes-test.owl file unzipped at KB_ROOT 
+    from ShapesDemo.zip)</li>
+    <li>SPARQL query: <b>select ?s ?a where {?s &lt;area&gt; ?a}</b></li>
+    <li>You should get back the following information:<br>
+&nbsp;&nbsp;&nbsp; "s","a"<br>
+&nbsp;&nbsp;&nbsp; "http://sadl.imp/shapes_test#MyRect",15.75<br>
+&nbsp;&nbsp;&nbsp; "http://sadl.imp/shapes_test#MyCircle",38.48<br>
+    with additional output information including timing for various operations 
+    of the service.</li>
+  </ul>
+  </li>
+  <li>To use other knowledge bases, copy your actual kbase(s) (OwlModels folder(s) from  SADL 
+  projects in Eclipse) to folders under your KB_ROOT. Make sure that each kbase is configured in a ServicesConfig.owl file 
+  (see <a href="SadlServerWebService.html#KBase%20Root">KBase Root</a>).</li>
+</ol>
+<p>&nbsp;</p>
+
+</body></html>
