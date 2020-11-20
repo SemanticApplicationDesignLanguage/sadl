@@ -242,7 +242,7 @@ class SadlTestHelper {
 		"org.apache.jena.reasoner.rulesys.builtins#table".
 		
 		External tableAll(--) returns --:
-		"org.apache.jena.reasoner.rulesys.builtins#tableAll".Ï
+		"org.apache.jena.reasoner.rulesys.builtins#tableAll".
 	'''
 
 }
