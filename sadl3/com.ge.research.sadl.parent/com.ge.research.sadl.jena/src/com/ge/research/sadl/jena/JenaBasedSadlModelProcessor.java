@@ -38,6 +38,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -715,18 +716,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private void generateOwlFile(IFileSystemAccess2 fsa, String modelFolder, String owlFN, Model model, String modelName, String modelAlias, String format) throws TranslationException {
 		if (isBinary(format)) {
 			String fs = modelFolder + "/" + owlFN;
-	         try ( OutputStream out = new FileOutputStream(fs) ) {
-	             RDFDataMgr.write(out, model, SadlSerializationFormat.getRDFFormat(format));
-	         } catch (FileNotFoundException e) {
-				System.err.println(e.getMessage());
-			} catch (IOException e) {
-				System.err.println(e.getMessage());
-			}
+	         writeOwlModelWithRDFDataMgr(model, format, fs);
 		}
 		else {
 			Charset charset = Charset.forName("UTF-8");
 			CharSequence seq = serializeModelToString(model, modelAlias, modelName, format, charset);
 			fsa.generateFile(owlFN, seq);
+		}
+	}
+
+	/**
+	 * Method to write an OWL model to the designated file using the Jena RDFDataMgr
+	 * @param model -- the Jena Model
+	 * @param format -- the format (must be a valid format, e.g., RDF_XML_ABBREV_FORMAT; see getRDFFormat)
+	 * @param outputFilename -- the output filename
+	 * @throws TranslationException
+	 */
+	private void writeOwlModelWithRDFDataMgr(Model model, String format, String outputFilename) throws TranslationException {
+		try ( OutputStream out = new FileOutputStream(outputFilename) ) {
+		     RDFDataMgr.write(out, model, SadlSerializationFormat.getRDFFormat(format));
+		     out.close();
+		 } catch (FileNotFoundException e) {
+			System.err.println(e.getMessage());
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
 		}
 	}
 
@@ -1206,15 +1219,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 			}
 			if (modelActualUrl.equals(ResourceManager.ServicesConf_SFN)) {
-				try {
-					importSadlServicesConfigConceptsModel(resource);
-				} catch (JenaProcessorException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ConfigurationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				addSadlServicesConfigConceptsModelImportToJenaModel(resource, context);
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -1523,69 +1528,31 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	/**
-	 * 
-	 * @param anyResource
-	 *            any resource is just to
-	 * @param resourcePath
-	 *            the Java NIO path of the resource to load as a
-	 *            `platform:/resource/` if the Eclipse platform is running,
-	 *            otherwise loads it as a file resource.
-	 */
-	private URI getUri(Resource anyResource, java.nio.file.Path resourcePath) {
-		Preconditions.checkArgument(anyResource instanceof XtextResource,
-				"Expected an Xtext resource. Got: " + anyResource);
-		final String resourceFileName = resourcePath.getFileName().toString();
-		Preconditions.checkArgument(
-				resourceFileName.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)
-				|| resourceFileName.equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME),
-				"Expected the resource path of either the implicit model or the built-in function model. Got " + resourcePath + " instead.");
-
-		if (EMFPlugin.IS_ECLIPSE_RUNNING) {
-			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-			java.nio.file.Path containerProjectPath = resourcePath.getParent().getParent();
-			IProject containerProject = Arrays.stream(workspaceRoot.getProjects())
-				.filter(p -> p.isAccessible())
-				.filter((p -> Paths.get(p.getLocationURI()).equals(containerProjectPath)))
-				.findFirst()
-				.orElseThrow(() -> new RuntimeException("Cannot locate container project for " + resourcePath + "."));
-			IPath relativeResourcePath = new Path(containerProject.getName()).append(containerProjectPath.relativize(resourcePath).toString());
-			return URI.createPlatformResourceURI(relativeResourcePath.toOSString(), true);
-		} else {
-			final PathToFileUriConverter uriConverter = getUriConverter(anyResource);
-			return uriConverter.createFileUri(resourcePath);
+	private void addSadlServicesConfigConceptsModelImportToJenaModel(Resource resource, ProcessorContext context) {
+		if (isSyntheticUri(null, resource)) {
+			return;	// no tests currently so don't need to create
 		}
-
-	}
-
-	private java.nio.file.Path checkImplicitBuiltinFunctionModelExistence(Resource resource, ProcessorContext context)
-			throws IOException, ConfigurationException {
-		UtilsForJena ufj = new UtilsForJena();
-		String policyFileUrl = ufj.getPolicyFilename(resource);
-		String policyFilename = policyFileUrl != null ? ufj.fileUrlToFileName(policyFileUrl) : null;
-		if (policyFilename != null) {
-			File projectFolder = new File(policyFilename).getParentFile().getParentFile();
-			if (projectFolder == null) {
-				return null;
+		try {
+			String content = getSadlServicesConfigConceptsModel();
+			String desiredPath = getModelFolderPath(resource) + File.separator + ResourceManager.ServicesConfigurationConcepts_FN;
+			File file = new File(desiredPath);
+			if (file.exists()) {
+				return;
 			}
-			String relPath = SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/"
-					+ SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME;
-			String platformPath = projectFolder.getName() + "/" + relPath;
-			String implicitSadlModelFN = projectFolder + "/" + relPath;
-			File implicitModelFile = new File(implicitSadlModelFN);
-			if (!implicitModelFile.exists()) {
-				createBuiltinFunctionImplicitModel(projectFolder.getAbsolutePath());
-				try {
-					Resource newRsrc = resource.getResourceSet()
-							.createResource(URI.createPlatformResourceURI(platformPath, false));
-					newRsrc.load(resource.getResourceSet().getLoadOptions());
-					refreshResource(newRsrc);
-				} catch (Throwable t) {
-				}
+			org.eclipse.xtext.util.Files.writeStringIntoFile(Files.createFile(file.toPath()).toString(), content);
+
+			String platformPath = (new File(getModelFolderPath(resource)).getParentFile().getName() + "/OwlModels/" + ResourceManager.ServicesConfigurationConcepts_FN);
+			try {
+				Resource newRsrc = resource.getResourceSet()
+						.createResource(URI.createPlatformResourceURI(platformPath, false)); // createFileURI(implicitSadlModelFN));
+				newRsrc.load(resource.getResourceSet().getLoadOptions());
+				refreshResource(newRsrc);
+			} catch (Throwable t) {
 			}
-			return implicitModelFile.getAbsoluteFile().toPath();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return null;
 	}
 
 	protected void addImplicitSadlModelImportToJenaModel(Resource resource, ProcessorContext context)
@@ -1649,6 +1616,71 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		addImportToJenaModel(getModelName(), SadlConstants.SADL_BASE_MODEL_URI, SadlConstants.SADL_BASE_MODEL_PREFIX,
 				sadlBaseModel);
+	}
+
+	/**
+	 * 
+	 * @param anyResource
+	 *            any resource is just to
+	 * @param resourcePath
+	 *            the Java NIO path of the resource to load as a
+	 *            `platform:/resource/` if the Eclipse platform is running,
+	 *            otherwise loads it as a file resource.
+	 */
+	private URI getUri(Resource anyResource, java.nio.file.Path resourcePath) {
+		Preconditions.checkArgument(anyResource instanceof XtextResource,
+				"Expected an Xtext resource. Got: " + anyResource);
+		final String resourceFileName = resourcePath.getFileName().toString();
+		Preconditions.checkArgument(
+				resourceFileName.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME)
+				|| resourceFileName.equals(SadlConstants.SADL_IMPLICIT_MODEL_FILENAME),
+				"Expected the resource path of either the implicit model or the built-in function model. Got " + resourcePath + " instead.");
+
+		if (EMFPlugin.IS_ECLIPSE_RUNNING) {
+			IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+			java.nio.file.Path containerProjectPath = resourcePath.getParent().getParent();
+			IProject containerProject = Arrays.stream(workspaceRoot.getProjects())
+				.filter(p -> p.isAccessible())
+				.filter((p -> Paths.get(p.getLocationURI()).equals(containerProjectPath)))
+				.findFirst()
+				.orElseThrow(() -> new RuntimeException("Cannot locate container project for " + resourcePath + "."));
+			IPath relativeResourcePath = new Path(containerProject.getName()).append(containerProjectPath.relativize(resourcePath).toString());
+			return URI.createPlatformResourceURI(relativeResourcePath.toOSString(), true);
+		} else {
+			final PathToFileUriConverter uriConverter = getUriConverter(anyResource);
+			return uriConverter.createFileUri(resourcePath);
+		}
+
+	}
+
+	private java.nio.file.Path checkImplicitBuiltinFunctionModelExistence(Resource resource, ProcessorContext context)
+			throws IOException, ConfigurationException {
+		UtilsForJena ufj = new UtilsForJena();
+		String policyFileUrl = ufj.getPolicyFilename(resource);
+		String policyFilename = policyFileUrl != null ? ufj.fileUrlToFileName(policyFileUrl) : null;
+		if (policyFilename != null) {
+			File projectFolder = new File(policyFilename).getParentFile().getParentFile();
+			if (projectFolder == null) {
+				return null;
+			}
+			String relPath = SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/"
+					+ SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME;
+			String platformPath = projectFolder.getName() + "/" + relPath;
+			String implicitSadlModelFN = projectFolder + "/" + relPath;
+			File implicitModelFile = new File(implicitSadlModelFN);
+			if (!implicitModelFile.exists()) {
+				createBuiltinFunctionImplicitModel(projectFolder.getAbsolutePath());
+				try {
+					Resource newRsrc = resource.getResourceSet()
+							.createResource(URI.createPlatformResourceURI(platformPath, false));
+					newRsrc.load(resource.getResourceSet().getLoadOptions());
+					refreshResource(newRsrc);
+				} catch (Throwable t) {
+				}
+			}
+			return implicitModelFile.getAbsoluteFile().toPath();
+		}
+		return null;
 	}
 
 	protected void addAnnotationsToResource(OntResource resource, EList<SadlAnnotation> anns) {
@@ -13421,6 +13453,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		rules = rls;
 	}
 
+	static public File createBuiltinFunctionImplicitModel(String projectRootPath)
+			throws IOException, ConfigurationException {
+		// First, obtain proper translator for project
+		SadlUtils su = new SadlUtils();
+		if (projectRootPath.startsWith("file")) {
+			projectRootPath = su.fileUrlToFileName(projectRootPath);
+		}
+		final File mfFolder = new File(projectRootPath + "/" + ResourceManager.OWLDIR);
+		final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+		String fixedModelFolderName = mfFolder.getCanonicalPath().replace("\\", "/");
+		IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory
+				.getConfigurationManagerForIDE(fixedModelFolderName, format);
+		ITranslator translator = configMgr.getTranslator();
+		// Second, obtain built-in function implicit model contents
+		String builtinFunctionModel = translator.getBuiltinFunctionModel(getSadlKeywords());
+		// Third, create built-in function implicit model file
+		File builtinFunctionFile = new File(projectRootPath + "/" + SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/"
+				+ SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME);
+		su.stringToFile(builtinFunctionFile, builtinFunctionModel, true);
+
+		return builtinFunctionFile;
+	}
+
 	private java.nio.file.Path checkImplicitSadlModelExistence(Resource resource, ProcessorContext context)
 			throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
 		UtilsForJena ufj = new UtilsForJena();
@@ -13450,29 +13505,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
-	static public File createBuiltinFunctionImplicitModel(String projectRootPath)
-			throws IOException, ConfigurationException {
-		// First, obtain proper translator for project
-		SadlUtils su = new SadlUtils();
-		if (projectRootPath.startsWith("file")) {
-			projectRootPath = su.fileUrlToFileName(projectRootPath);
-		}
-		final File mfFolder = new File(projectRootPath + "/" + ResourceManager.OWLDIR);
-		final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
-		String fixedModelFolderName = mfFolder.getCanonicalPath().replace("\\", "/");
-		IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory
-				.getConfigurationManagerForIDE(fixedModelFolderName, format);
-		ITranslator translator = configMgr.getTranslator();
-		// Second, obtain built-in function implicit model contents
-		String builtinFunctionModel = translator.getBuiltinFunctionModel(getSadlKeywords());
-		// Third, create built-in function implicit model file
-		File builtinFunctionFile = new File(projectRootPath + "/" + SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/"
-				+ SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME);
-		su.stringToFile(builtinFunctionFile, builtinFunctionModel, true);
-
-		return builtinFunctionFile;
-	}
-
 	public static List<String> getSadlKeywords() {
 		return OwlToSadl.getSadlKeywords();
 	}
@@ -13491,20 +13523,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		sb.append(
 				"	    <rdfs:comment xml:lang=\"en\">Base model for SADL. These concepts can be used without importing.</rdfs:comment>\n");
 		sb.append("	  </owl:Ontology>\n");
-//		sb.append("	  <owl:Class rdf:ID=\"Equation\"/>\n");
-//		sb.append("	  <owl:Class rdf:ID=\"ExternalEquation\"/>\n");
-//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"expression\">\n");
-//		sb.append("	    <rdfs:domain rdf:resource=\"#Equation\"/>\n");
-//		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
-//		sb.append("	  </owl:DatatypeProperty>\n");
-//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"externalURI\">\n");
-//		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
-//		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#anyURI\"/>\n");
-//		sb.append("	  </owl:DatatypeProperty>\n");
-//		sb.append("	  <owl:DatatypeProperty rdf:ID=\"location\">\n");
-//		sb.append("	    <rdfs:domain rdf:resource=\"#ExternalEquation\"/>\n");
-//		sb.append("	    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n");
-//		sb.append("	  </owl:DatatypeProperty>\n");
 		sb.append("</rdf:RDF>\n");
 		return sb.toString();
 	}
@@ -13555,94 +13573,109 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	static public String getSadlServicesConfigConceptsModel() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("<rdf:RDF\r\n"); 
-		sb.append("    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\r\n"); 
-		sb.append("    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\r\n"); 
-		sb.append("    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\r\n"); 
-		sb.append("  xml:base=\"http://com.ge.research.sadl/sadlserver/Services\">\r\n"); 
-		sb.append("  <owl:Ontology rdf:about=\"http://com.ge.research.sadl/sadlserver/Services\">\r\n"); 
-		sb.append("    <owl:versionInfo>$Revision: 1.1 $ Last modified on   $Date: 2012/12/03 19:04:44 $</owl:versionInfo>\r\n"); 
-		sb.append("    <rdfs:comment xml:lang=\"en\">This ontology was created from a SADL file 'Services.sadl' and should not be edited.</rdfs:comment>\r\n"); 
-		sb.append("  </owl:Ontology>\r\n"); 
-		sb.append("  <owl:Class rdf:ID=\"NameValuePairs\">\r\n"); 
-		sb.append("    <rdfs:subClassOf>\r\n"); 
-		sb.append("      <owl:Restriction>\r\n"); 
-		sb.append("        <owl:maxCardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\r\n"); 
-		sb.append("        >1</owl:maxCardinality>\r\n"); 
-		sb.append("        <owl:onProperty>\r\n"); 
-		sb.append("          <owl:DatatypeProperty rdf:ID=\"name\"/>\r\n"); 
-		sb.append("        </owl:onProperty>\r\n"); 
-		sb.append("      </owl:Restriction>\r\n"); 
-		sb.append("    </rdfs:subClassOf>\r\n"); 
-		sb.append("  </owl:Class>\r\n"); 
-		sb.append("  <owl:Class rdf:ID=\"KnowledgeBase\">\r\n"); 
-		sb.append("    <rdfs:subClassOf>\r\n"); 
-		sb.append("      <owl:Restriction>\r\n"); 
-		sb.append("        <owl:maxCardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\r\n"); 
-		sb.append("        >1</owl:maxCardinality>\r\n"); 
-		sb.append("        <owl:onProperty>\r\n"); 
-		sb.append("          <owl:DatatypeProperty rdf:ID=\"url\"/>\r\n"); 
-		sb.append("        </owl:onProperty>\r\n"); 
-		sb.append("      </owl:Restriction>\r\n"); 
-		sb.append("    </rdfs:subClassOf>\r\n"); 
-		sb.append("  </owl:Class>\r\n"); 
-		sb.append("  <owl:Class rdf:ID=\"NamedService\">\r\n"); 
-		sb.append("    <rdfs:subClassOf>\r\n"); 
-		sb.append("      <owl:Restriction>\r\n"); 
-		sb.append("        <owl:maxCardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\r\n"); 
-		sb.append("        >1</owl:maxCardinality>\r\n"); 
-		sb.append("        <owl:onProperty>\r\n"); 
-		sb.append("          <owl:DatatypeProperty rdf:ID=\"modelName\"/>\r\n"); 
-		sb.append("        </owl:onProperty>\r\n"); 
-		sb.append("      </owl:Restriction>\r\n"); 
-		sb.append("    </rdfs:subClassOf>\r\n"); 
-		sb.append("  </owl:Class>\r\n"); 
-		sb.append("  <owl:Class rdf:ID=\"ConfigurationItem\">\r\n"); 
-		sb.append("    <rdfs:subClassOf>\r\n"); 
-		sb.append("      <owl:Restriction>\r\n"); 
-		sb.append("        <owl:maxCardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\r\n"); 
-		sb.append("        >1</owl:maxCardinality>\r\n"); 
-		sb.append("        <owl:onProperty>\r\n"); 
-		sb.append("          <owl:DatatypeProperty rdf:ID=\"category\"/>\r\n"); 
-		sb.append("        </owl:onProperty>\r\n"); 
-		sb.append("      </owl:Restriction>\r\n"); 
-		sb.append("    </rdfs:subClassOf>\r\n"); 
-		sb.append("  </owl:Class>\r\n"); 
-		sb.append("  <owl:ObjectProperty rdf:ID=\"item\">\r\n"); 
-		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#ConfigurationItem\"/>\r\n"); 
-		sb.append("    <rdfs:range rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NameValuePairs\"/>\r\n"); 
-		sb.append("  </owl:ObjectProperty>\r\n"); 
-		sb.append("  <owl:ObjectProperty rdf:ID=\"entryPoint\">\r\n"); 
-		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#KnowledgeBase\"/>\r\n"); 
-		sb.append("    <rdfs:range rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NamedService\"/>\r\n"); 
-		sb.append("  </owl:ObjectProperty>\r\n"); 
-		sb.append("  <owl:ObjectProperty rdf:ID=\"configurationOverride\">\r\n"); 
-		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NamedService\"/>\r\n"); 
-		sb.append("    <rdfs:range rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#ConfigurationItem\"/>\r\n"); 
-		sb.append("  </owl:ObjectProperty>\r\n"); 
-		sb.append("  <owl:DatatypeProperty rdf:about=\"http://com.ge.research.sadl/sadlserver/Services#url\">\r\n"); 
-		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#KnowledgeBase\"/>\r\n"); 
-		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n"); 
-		sb.append("  </owl:DatatypeProperty>\r\n"); 
-		sb.append("  <owl:DatatypeProperty rdf:about=\"http://com.ge.research.sadl/sadlserver/Services#name\">\r\n"); 
-		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NameValuePairs\"/>\r\n"); 
-		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n"); 
-		sb.append("  </owl:DatatypeProperty>\r\n"); 
-		sb.append("  <owl:DatatypeProperty rdf:about=\"http://com.ge.research.sadl/sadlserver/Services#category\">\r\n"); 
-		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#ConfigurationItem\"/>\r\n"); 
-		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n"); 
-		sb.append("  </owl:DatatypeProperty>\r\n"); 
-		sb.append("  <owl:DatatypeProperty rdf:about=\"http://com.ge.research.sadl/sadlserver/Services#modelName\">\r\n"); 
-		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NamedService\"/>\r\n"); 
-		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n"); 
-		sb.append("  </owl:DatatypeProperty>\r\n"); 
-		sb.append("  <owl:DatatypeProperty rdf:ID=\"value\">\r\n"); 
-		sb.append("    <rdfs:domain rdf:resource=\"http://com.ge.research.sadl/sadlserver/Services#NameValuePairs\"/>\r\n"); 
-		sb.append("    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\r\n"); 
-		sb.append("  </owl:DatatypeProperty>\r\n"); 
-		sb.append("</rdf:RDF>\r\n"); 
-		return sb.toString();
+		String ssccContent = 
+				"<rdf:RDF\n" + 
+				"    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" + 
+				"    xmlns:builtinfunctions=\"http://sadl.org/builtinfunctions#\"\n" + 
+				"    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n" + 
+				"    xmlns:sadlimplicitmodel=\"http://sadl.org/sadlimplicitmodel#\"\n" + 
+				"    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n" + 
+				"    xmlns:sscc=\"http://com.ge.research.sadl/sadlserver/Services#\"\n" + 
+				"    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel#\"\n" + 
+				"    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n" + 
+				"  xml:base=\"http://com.ge.research.sadl/sadlserver/Services\">\n" + 
+				"  <owl:Ontology rdf:about=\"\">\n" + 
+				"    <rdfs:comment xml:lang=\"en\">This ontology contains the concepts for Services Configuration in SADL and should not be edited.</rdfs:comment>\n" + 
+				"  </owl:Ontology>\n" + 
+				"  <owl:Class rdf:ID=\"NamedValuePair\">\n" + 
+				"    <rdfs:subClassOf>\n" + 
+				"      <owl:Restriction>\n" + 
+				"        <owl:cardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\n" + 
+				"        >1</owl:cardinality>\n" + 
+				"        <owl:onProperty>\n" + 
+				"          <owl:DatatypeProperty rdf:about=\"#sscc:value\"/>\n" + 
+				"        </owl:onProperty>\n" + 
+				"      </owl:Restriction>\n" + 
+				"    </rdfs:subClassOf>\n" + 
+				"    <rdfs:subClassOf>\n" + 
+				"      <owl:Restriction>\n" + 
+				"        <owl:cardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\n" + 
+				"        >1</owl:cardinality>\n" + 
+				"        <owl:onProperty>\n" + 
+				"          <owl:DatatypeProperty rdf:ID=\"name\"/>\n" + 
+				"        </owl:onProperty>\n" + 
+				"      </owl:Restriction>\n" + 
+				"    </rdfs:subClassOf>\n" + 
+				"  </owl:Class>\n" + 
+				"  <owl:Class rdf:ID=\"ConfigurationItem\">\n" + 
+				"    <rdfs:subClassOf>\n" + 
+				"      <owl:Restriction>\n" + 
+				"        <owl:cardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\n" + 
+				"        >1</owl:cardinality>\n" + 
+				"        <owl:onProperty>\n" + 
+				"          <owl:DatatypeProperty rdf:ID=\"category\"/>\n" + 
+				"        </owl:onProperty>\n" + 
+				"      </owl:Restriction>\n" + 
+				"    </rdfs:subClassOf>\n" + 
+				"  </owl:Class>\n" + 
+				"  <owl:Class rdf:ID=\"KnowledgeBase\">\n" + 
+				"    <rdfs:subClassOf>\n" + 
+				"      <owl:Restriction>\n" + 
+				"        <owl:cardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\n" + 
+				"        >1</owl:cardinality>\n" + 
+				"        <owl:onProperty>\n" + 
+				"          <owl:DatatypeProperty rdf:ID=\"url\"/>\n" + 
+				"        </owl:onProperty>\n" + 
+				"      </owl:Restriction>\n" + 
+				"    </rdfs:subClassOf>\n" + 
+				"  </owl:Class>\n" + 
+				"  <owl:Class rdf:ID=\"NamedService\">\n" + 
+				"    <rdfs:subClassOf>\n" + 
+				"      <owl:Restriction>\n" + 
+				"        <owl:cardinality rdf:datatype=\"http://www.w3.org/2001/XMLSchema#int\"\n" + 
+				"        >1</owl:cardinality>\n" + 
+				"        <owl:onProperty>\n" + 
+				"          <owl:DatatypeProperty rdf:ID=\"modelName\"/>\n" + 
+				"        </owl:onProperty>\n" + 
+				"      </owl:Restriction>\n" + 
+				"    </rdfs:subClassOf>\n" + 
+				"  </owl:Class>\n" + 
+				"  <owl:ObjectProperty rdf:ID=\"item\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#ConfigurationItem\"/>\n" + 
+				"    <rdfs:range rdf:resource=\"#NamedValuePair\"/>\n" + 
+				"  </owl:ObjectProperty>\n" + 
+				"  <owl:ObjectProperty rdf:ID=\"configurationOverride\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#NamedService\"/>\n" + 
+				"    <rdfs:range rdf:resource=\"#ConfigurationItem\"/>\n" + 
+				"  </owl:ObjectProperty>\n" + 
+				"  <owl:ObjectProperty rdf:ID=\"entryPoint\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#KnowledgeBase\"/>\n" + 
+				"    <rdfs:range rdf:resource=\"#NamedService\"/>\n" + 
+				"  </owl:ObjectProperty>\n" + 
+				"  <owl:DatatypeProperty rdf:about=\"#modelName\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#NamedService\"/>\n" + 
+				"    <rdfs:comment xml:lang=\"en\">public URI of model</rdfs:comment>\n" + 
+				"    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#anyURI\"/>\n" + 
+				"  </owl:DatatypeProperty>\n" + 
+				"  <owl:DatatypeProperty rdf:about=\"#name\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#NamedValuePair\"/>\n" + 
+				"    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n" + 
+				"  </owl:DatatypeProperty>\n" + 
+				"  <owl:DatatypeProperty rdf:about=\"#category\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#ConfigurationItem\"/>\n" + 
+				"    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n" + 
+				"  </owl:DatatypeProperty>\n" + 
+				"  <owl:DatatypeProperty rdf:about=\"#url\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#KnowledgeBase\"/>\n" + 
+				"    <rdfs:comment xml:lang=\"en\">only needed for absolute URLs</rdfs:comment>\n" + 
+				"    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#anyURI\"/>\n" + 
+				"  </owl:DatatypeProperty>\n" + 
+				"  <owl:DatatypeProperty rdf:about=\"#sscc:value\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#NamedValuePair\"/>\n" + 
+				"    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n" + 
+				"  </owl:DatatypeProperty>\n" + 
+				"</rdf:RDF>\n";
+		return ssccContent;
 	}
 
 	static public String getSadlDefaultsModel() {

@@ -33,15 +33,16 @@ import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.sADL.SubjHasProp
 import com.ge.research.sadl.services.SADLGrammarAccess
+import com.ge.research.sadl.utils.ResourceManager
 import com.google.common.base.Predicate
 import com.google.common.base.Predicates
 import com.google.inject.Inject
 import com.google.inject.Singleton
-import org.apache.jena.vocabulary.XSD
 import java.util.ArrayList
 import java.util.Collection
 import java.util.HashMap
 import java.util.List
+import org.apache.jena.vocabulary.XSD
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.xtext.Assignment
 import org.eclipse.xtext.CrossReference
@@ -59,15 +60,15 @@ import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.naming.QualifiedName
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.resource.IEObjectDescription
+import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.util.TextRegion
 
 import static com.ge.research.sadl.preferences.SadlPreferences.*
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
-import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
 import static com.ge.research.sadl.processing.SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME
+import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
-import org.eclipse.xtext.resource.XtextResource
 
 /**
  * Generic content proposal provider for the {@code SADL} language.
@@ -184,10 +185,26 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 	}
 
 	protected def completeBaseUri(ContentAssistContext ctx, IIdeContentProposalAcceptor it) {
-		val proposalText = '''"http://sadl.org/«ctx.resource.URI.lastSegment»"''';
-		val proposal = proposalCreator.createProposal(proposalText, ctx);
-		val priority = proposalPriorities.getDefaultPriority(proposal);
-		accept(proposal, priority);
+		val fn = ctx.resource.URI.lastSegment
+		if (fn.equals(ResourceManager.ServicesConf_SFN)) {
+			val proposalText = '''"''' + ResourceManager.ServicesConfigurationURI + 
+				'''" alias servicesconfig.
+				
+import "''' + ResourceManager.ServicesConfigurationConceptsURI + '''".
+
+A KnowledgeBase with entryPoint (A NamedService ServiceName
+     with modelName "<uri>").
+				'''
+			val proposal = proposalCreator.createProposal(proposalText, ctx);
+			val priority = proposalPriorities.getDefaultPriority(proposal);
+			accept(proposal, priority);
+		}
+		else {
+			val proposalText = '''"http://sadl.org/«ctx.resource.URI.lastSegment»"''';
+			val proposal = proposalCreator.createProposal(proposalText, ctx);
+			val priority = proposalPriorities.getDefaultPriority(proposal);
+			accept(proposal, priority);
+		}
 	}
 
 	protected def completeAlias(ContentAssistContext ctx, IIdeContentProposalAcceptor it) {
