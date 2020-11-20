@@ -39,9 +39,11 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +93,7 @@ import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.QueryStatement;
+import com.ge.research.sadl.sADL.RuleStatement;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf;
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
@@ -4173,12 +4176,54 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (tci == null) {
 				throw new DontTypeCheckException();
 			}
+			return tci;
+		}
+		else {
+			RuleStatement rule = EcoreUtil2.getContainerOfType(sr, RuleStatement.class);
+			if (rule != null) {
+				// this is in a rule
+				// try to find a statement containing the variable in the rule head
+				TypeCheckInfo tci = getTypeFromRuleHead(sr, conceptUri, rule);
+				if (tci != null) {
+					return tci;
+				}
+			}
 		}
 		NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(conceptUri, NodeType.VariableNode));
 		ConceptName declarationConceptName = getModelProcessor().namedNodeToConceptName(tctype);
 		return new TypeCheckInfo(declarationConceptName, tctype, this, reference);
 	}
 	
+	private TypeCheckInfo getTypeFromRuleHead(SadlResource sr, String conceptUri, RuleStatement rule) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
+		EList<Expression> ifs = rule.getIfs();
+		for (Expression anIf : ifs) {
+			TreeIterator<EObject> all = anIf.eAllContents();
+			while (all.hasNext()) {
+				EObject nxt = all.next();
+				TypeCheckInfo nxtTci = getVariableTypeFromDeclaration(sr, conceptUri, nxt);
+				if (nxtTci != null) {
+					return nxtTci;
+				}
+			}
+		}
+		return null;
+	}
+	
+	private TypeCheckInfo getVariableTypeFromDeclaration(SadlResource sr, String conceptUri, EObject expr) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
+		TreeIterator<EObject> all = expr.eAllContents();
+		while (all.hasNext()) {
+			EObject nxt = all.next();
+			if (nxt instanceof Declaration && ((Declaration)nxt).getType() instanceof SadlSimpleTypeReference 
+					&& ((SadlSimpleTypeReference)((Declaration)nxt).getType()).getType().equals(sr)) {
+				EObject nxtCntr = nxt.eContainer();
+				if (nxtCntr instanceof BinaryOperation && ((BinaryOperation)nxtCntr).getOp().equals("is")) {
+					return getType(((BinaryOperation)nxtCntr).getRight());
+				}
+			}
+		}
+		return null;
+	}
+
 	private TypeCheckInfo getTypeFromWhereExpression(SadlResource sr, String uri, Expression expr) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if (expr instanceof SubjHasProp) {
 			Expression sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getLeft());
@@ -4206,6 +4251,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (expr != null && !expr.equals(sr)  && !(expr instanceof Name && ((Name)expr).getName().equals(sr))) {
 				return getType(expr);
 			}
+		}
+		else {
+			return getVariableTypeFromDeclaration(sr, uri, expr);
 		}
 		return null;
 	}

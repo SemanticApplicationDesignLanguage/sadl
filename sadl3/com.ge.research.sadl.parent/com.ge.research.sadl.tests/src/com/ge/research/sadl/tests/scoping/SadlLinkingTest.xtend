@@ -1228,6 +1228,19 @@ class SadlLinkingTest extends AbstractLinkingTest {
 	}
 	
 	@Test
+	def void testQueryVariable_3() {
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Foo is a class described by bar with values of type Whim.
+			 Whim is a class described by wham with values of type string.
+			 MyFoo is a Foo with bar (a Whim MyWhim with wham "too bad").
+			 Ask: select <x> where MyFoo is an [x].
+			 Ask: select <c> where MyFoo bar [b] and <b> is a [c].
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
 	def void testRuleVariable_1() {
 		'''
 			uri "http://sadl.org/rulevars.sadl" alias rulevars.

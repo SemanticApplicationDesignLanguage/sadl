@@ -75,6 +75,9 @@ import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension com.ge.research.sadl.utils.SadlASTUtils.*
 import com.ge.research.sadl.sADL.SadlDifferentFrom
+import java.util.function.BinaryOperator
+import com.ge.research.sadl.sADL.Declaration
+import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 
 /**
  * This class contains custom scoping description.
@@ -157,8 +160,19 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	val LocalScopeProvider localScope_06 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
-				return (eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADL_MUST_BE_ONE_OF__VALUES) ||
-				(eContainer instanceof SadlCanOnlyBeOneOf && eContainingFeature == SADL_CAN_ONLY_BE_ONE_OF__VALUES);
+				val queryOrRule = EcoreUtil2.getContainerOfType(it, QueryStatement) !== null ||
+						  EcoreUtil2.getContainerOfType(it, RuleStatement) !== null
+				val binOp = (queryOrRule && eContainer instanceof BinaryOperation) ? (eContainer as BinaryOperation) : null
+				val right = (binOp !== null && binOp.op.equals("is")) ? binOp.right : null
+				val rightDeclType = (right !== null && right instanceof Declaration) ? (right as Declaration).type
+				val sstype = (rightDeclType !== null && rightDeclType instanceof SadlSimpleTypeReference) ? (rightDeclType as SadlSimpleTypeReference) : null
+//				val type = (sstype !== null) ? sstype.type : null
+				return 
+					((sstype !== null)
+					|| 
+					(eContainer instanceof SadlMustBeOneOf && eContainingFeature == SADL_MUST_BE_ONE_OF__VALUES) ||
+					(eContainer instanceof SadlCanOnlyBeOneOf && eContainingFeature == SADL_CAN_ONLY_BE_ONE_OF__VALUES));
+				
 			} 
 			return false;
 		];
