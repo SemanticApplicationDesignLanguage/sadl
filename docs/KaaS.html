@@ -6,6 +6,689 @@
   </head>
   <body>
     <h1>Knowledge as a Service (KaaS)</h1>
-    <p>Coming soon!</p>
+    <p> </p>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/20/2020<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <h2>Table of Contents</h2>
+    <ul id="mozToc">
+      <!--mozToc h2 2 h3 3 h4 4-->
+      <li><a href="#mozTocId73372"></a>
+        <ul>
+          <li><a href="#mozTocId514431">Introduction</a></li>
+          <li><a href="#mozTocId308081">Basic Services via a Java API</a>
+            <ul>
+              <li><a href="#mozTocId482714">Outline of Usage: Initial Steps</a>
+                <ul>
+                  <li><a href="#mozTocId629290">Creation</a></li>
+                  <li><a href="#mozTocId918430">Initialization</a></li>
+                </ul>
+              </li>
+              <li><a href="#mozTocId704007">Outline of Usage: Next Steps</a></li>
+            </ul>
+          </li>
+          <li><a href="#mozTocId750672">ISadlServer: Functionality</a>
+            <ul>
+              <li><a href="#mozTocId463770">Pushing Scenario Data from Client to
+                  Server</a>
+                <ul>
+                  <li><a href="#mozTocId333253">Sending Data to the Service</a></li>
+                  <li><a href="#mozTocId86285">Creating a New Instance of a
+                      KBase Class</a></li>
+                  <li><a href="#mozTocId304713">Adding a Triple to the KBase</a></li>
+                  <li><a href="#mozTocId28737">Using SPARQL Update</a></li>
+                  <li><a href="#mozTocId465646">Loading a File Containing RDF
+                      Triples</a></li>
+                  <li><a href="#mozTocId306557">Loading a File containing Comma
+                      Separated Values (CSV)</a></li>
+                  <li><a href="#mozTocId204165">Sending Data from a Client File
+                      Containing RDF Triples</a></li>
+                  <li><a href="#mozTocId685662">Sending Data from a Client CSV
+                      File</a></li>
+                </ul>
+              </li>
+              <li><a href="#mozTocId269416">Retrieving Information from the
+                  Service</a>
+                <ul>
+                  <li><a href="#mozTocId464613">Ask</a></li>
+                  <li><a href="#mozTocId806443">Query</a></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><a href="#mozTocId865995">ISadlServerPE: Modifying and Saving
+              Models to the Knowledge Base</a>
+            <ul>
+              <li><a href="#mozTocId644804">Extended Services Applied to
+                  Specific Models</a></li>
+              <li><a href="#mozTocId437598">Extended Services to Edit and
+                  Persist Changes</a>
+                <ul>
+                  <li><a href="#mozTocId619186">Create Classes and Properties</a></li>
+                  <li><a href="#mozTocId283391">Adding Property Restrictions</a></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><a href="#mozTocId263576">ISadlServerMD: Supporting Model-Driven
+              Development</a></li>
+          <li><a href="#mozTocId379557">Named Services</a></li>
+          <li><a href="#mozTocId468963"></a>
+            <ul>
+              <li><a href="#mozTocId987935">Service Definition</a></li>
+              <li><a href="#mozTocId707149">Specifying Named Services</a></li>
+            </ul>
+          </li>
+          <li><a href="#mozTocId742261"></a><br>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <h2><a id="mozTocId514431" class="mozTocH2"></a>Introduction</h2>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Traditionally
+      knowledge has been captured in some kind of knowledge development
+      interface which is akin to an integrated development environment (IDE) for
+      software development. For example, the SADL IDE is a knowledge capture or
+      knowledge development interface. Usually such an interface is not
+      well-suited to fielding the knowledge base in the environment in which it
+      is useful either as part of a software solution or as a decision support
+      tool to people working to solve problems. For delivery, the knowledge base
+      is often more usefully exposed through some kind of programmatic interface
+      in which specific scenario data is passed to a knowledge service,
+      inference is perhaps performed, and questions are asked to expose both the
+      knowledge, the scenario data, and the inferences drawn for this particular
+      scenario.<span class="Apple-converted-space">&nbsp;</span></p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">The
+      knowledge services provided by the Knowledge Server are divided into three
+      levels of service: 1) basic scenario data push, query pull, 2) basic plus
+      the ability to make modifications to the knowledge base and persist both
+      knowledge base changes and data pushed (persist and edit, PE), and 3)
+      basic plus PE plus a number of convenience methods that facilitate
+      model-driven (MD) applications.<span class="Apple-converted-space">&nbsp;</span></p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">The
+      names of the knowledge server Java Interface classes for each level of
+      service is shown in the table below.</p>
+    <blockquote style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">
+      <table style="border-collapse: collapse;" bordercolor="#111111" border="1"
+        cellspacing="0" cellpadding="0" width="33%">
+        <tbody>
+          <tr>
+            <td width="22%">&nbsp;</td>
+            <td align="center" width="18%"><b>Java API</b></td>
+          </tr>
+          <tr>
+            <td width="22%"><b>Basic push, query</b></td>
+            <td align="center" width="18%"><i><span style="color: rgb(0, 102, 204);">ISadlServer</span></i></td>
+          </tr>
+          <tr>
+            <td width="22%"><b>Persiste and Edit</b></td>
+            <td align="center" width="18%"><i><span style="color: rgb(0, 102, 204);">ISadlServerPE</span></i></td>
+          </tr>
+          <tr>
+            <td width="22%"><b>Model-Driven</b></td>
+            <td align="center" width="18%"><i><span style="color: rgb(0, 102, 204);">ISadlServerMD</span></i></td>
+          </tr>
+        </tbody>
+      </table>
+    </blockquote>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">In
+      the future this document will provide information and links to more
+      detailed information for the services provided by each of these three
+      classes. Each class in the table will be linked to the JavaDoc
+      documentation for that class. Complete JavaDoc for the knowledge server
+      Java API will be available at Java API classes.</p>
+    <h2><a id="mozTocId308081" class="mozTocH2"></a>Basic Services via a Java
+      API</h2>
+    <p>Regardless of which Interface class is used, the basic steps for usage
+      are the same.</p>
+    <h3><a id="mozTocId482714" class="mozTocH3"></a>Outline of Usage: Initial
+      Steps</h3>
+    <h4><a id="mozTocId629290" class="mozTocH4"></a>Creation</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">The
+      first step is to create an instance of a class implementing<span class="Apple-converted-space">&nbsp;</span><i>ISadlServer</i>,
+      e.g.,<span class="Apple-converted-space">&nbsp;</span><i>SadlServerImpl</i>.
+      This is done with a Java statement of the form:</p>
+    <p style="caret-color: black; color: black; font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration: none; margin-left: 40px;"><i>ISadlServer
+        srvr = new SadlServerImpl( );</i></p>
+    <p style="caret-color: black; color: black; font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration: none; margin-left: 40px;"><i>ISadlServerPE
+        srvr = new SadlServerPEImpl();<br>
+      </i></p>
+    <p style="caret-color: black; color: black; font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration: none; margin-left: 40px;"><i>ISadlServerMD
+        srvr = new SadlServerMDImpl();<br>
+      </i></p>
+    <h4><a id="mozTocId918430" class="mozTocH4"></a>Initialization</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Next
+      the server must be initialized by setting the folder on the file system
+      that is the kbase root folder, meaning all kbases are located under this
+      folder. This can be done by calling<span class="Apple-converted-space">&nbsp;</span><i>setKbaseRoot</i>:</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>srvr.setKbaseRoot("c:/someuser/kbaseroot");</i></p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Note
+      that this could have been done in a single call by passing the kbase root
+      to the constructor, e.g.,</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>&nbsp; ISadlServer srvr =
+        new SadlServerImpl( "c:/someuser/kbaseroot");</i></p>
+    <h3><a id="mozTocId704007" class="mozTocH3"></a>Outline of Usage: Next Steps</h3>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Once
+      an instance of a class implementing<span class="Apple-converted-space">
+        the appropriate Interface class</span><span class="Apple-converted-space">
+      </span>has been created and initialized, subsequent method calls can occur
+      in any order appropriate to the problem at hand. Functionalities of
+      potential interest are described in the next sections.</p>
+    <h2><a id="mozTocId750672" class="mozTocH2"></a>ISadlServer: Functionality</h2>
+    <h3><a id="mozTocId463770" class="mozTocH3"></a>Pushing Scenario Data from
+      Client to Server</h3>
+    <h4><a id="mozTocId333253" class="mozTocH4"></a>Sending Data to the Service</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">A
+      Knowledge Server knowledge base consists of a set of<span class="Apple-converted-space">&nbsp;</span><a
+        href="https://www.w3.org/OWL/" style="color: rgb(0, 102, 204);">OWL</a><span
+        class="Apple-converted-space">&nbsp;</span>models. An OWL model consists
+      of a set of RDF triples. Scenario-specific information can be added to a
+      knowledge base by adding RDF triples to the knowledge base. There are
+      multiple ways that data can be added to the server's knowledge base. Note
+      that the services defined by<span class="Apple-converted-space">&nbsp;</span><i>ISadlserver</i><span
+        class="Apple-converted-space">&nbsp;</span>only allow adding data for
+      the current server session; the data is not persisted on the server.</p>
+    <h4><a id="mozTocId86285" class="mozTocH4"></a>Creating a New Instance of a
+      KBase Class</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>String newInstanceURI =
+        srvr.createInstance("http://some/scenario/namespace/uri#newInstanceName",
+        "http://some/kbase/namespace/uri#ExistingClassName");</i></p>
+    <h4><a id="mozTocId304713" class="mozTocH4"></a>Adding a Triple to the KBase</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">An
+      RDF triple consists of a subject, a property (or predicate), and a value.
+      The value can be a literal if the property is an<span class="Apple-converted-space">&nbsp;</span><i>owl:DatatypeProperty</i>,
+      or it can be a URI if the property is an<span class="Apple-converted-space">&nbsp;</span><i>owl:ObjectProperty</i><span
+        class="Apple-converted-space">&nbsp;</span>(see<span class="Apple-converted-space">&nbsp;</span><a
+        href="https://www.w3.org/TR/2004/REC-owl-guide-20040210/#SimpleProperties"
+        style="color: rgb(0, 102, 204);">https://www.w3.org/TR/2004/REC-owl-guide-20040210/#SimpleProperties</a>).
+      Thus for an owl:DatatypePropety one might have this call:</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>boolean status =
+        srvr.addTriple("http://some/uri#subjectInstanceName",
+        "http://some/kbase/uri#someDatatypePropertyName", 23.56);</i></p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">For
+      an owl:ObjectProperty, one would make this call:</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>boolean status =
+        srvr.addTriple("http://some/uri#subjectInstanceName",
+        "http://some/kbase/uri#someObjectPropertyName", "<a href="http://some/uri#objectInstanceName"
+          style="color: rgb(0, 102, 204);">http://some/uri#objectInstanceName</a>");</i></p>
+    <h4><a id="mozTocId28737" class="mozTocH4"></a>Using SPARQL Update</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;"><a
+        href="https://www.w3.org/TR/sparql11-overview/" style="color: rgb(0, 102, 204);">SPARQL</a><span
+        class="Apple-converted-space">&nbsp;</span>is a W3C graph query
+      language. SPARQL 1.1 includes<span class="Apple-converted-space">&nbsp;</span><a
+        href="https://www.w3.org/TR/2013/REC-sparql11-update-20130321/" style="color: rgb(0, 102, 204);">update
+        capability</a>. The ISadlServer interface includes a method to insert
+      triples into and/or delete triples from the server session's knowledge
+      base using an update statement.<span class="Apple-converted-space">&nbsp;</span></p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>srvr.query("delete
+        {?person &lt;foaf:givenName&gt; 'Bill'} insert {?person
+        &lt;foaf:givenName&gt; 'William'} where {?person &lt;foaf:givenName&gt;
+        'Bill'}");</i></p>
+    <h4><a id="mozTocId465646" class="mozTocH4"></a>Loading a File Containing
+      RDF Triples</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Data
+      can be loaded into the knowledge base from a file containing RDF triples
+      in several standard formats, e.g., XML, Notation3 (N3), N-Triples (see<span
+        class="Apple-converted-space">&nbsp;</span><a href="https://en.wikipedia.org/wiki/Resource_Description_Framework#Serialization_formats"
+        style="color: rgb(0, 102, 204);">https://en.wikipedia.org/wiki/Resource_Description_Framework#Serialization_formats</a>).
+      The caveat is that the file designation is on the server's file system and
+      must be known by the client.</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>boolean status =
+        srvr.loadData("file:///c:/tmp/instdata1.owl");</i></p>
+    <h4><a id="mozTocId306557" class="mozTocH4"></a>Loading a File containing
+      Comma Separated Values (CSV)</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">With
+      the additional information provided by a template file, RDF triples can
+      also be added to the session kbase from a CSV file. Once again, file paths
+      are on the server file system and must be known to the client.</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>boolean status =
+        srvr.loadCsvData(file:///c:/tmp/instdata1.csv", true, "<a href="file:///c:/kbases/mykbase/mytemplate.tmpl"
+          style="color: rgb(0, 102, 204);">file:///c:/kbases/mykbase/mytemplate.tmpl</a>");</i></p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">The
+      3rd argument could be a URL or it could be an actual template as a String.</p>
+    <h4><a id="mozTocId204165" class="mozTocH4"></a>Sending Data from a Client
+      File Containing RDF Triples</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">If
+      a file on the client file system contains RDF triples, the data can be
+      sent to the server using the class<span class="Apple-converted-space">&nbsp;</span><i><a
+          class="header" href="eclipse-javadoc:%EF%BF%BD??=com.ge.research.sadl.sadlserver-impl/C:%5C/Program%20Files%5C/Java%5C/jdk1.8.0_77%5C/jre%5C/lib%5C/rt.jar%3Cjavax"
+          style="color: rgb(0, 0, 0); text-decoration: none;">javax</a>.<a class="header"
+          href="eclipse-javadoc:%EF%BF%BD??=com.ge.research.sadl.sadlserver-impl/C:%5C/Program%20Files%5C/Java%5C/jdk1.8.0_77%5C/jre%5C/lib%5C/rt.jar%3Cjavax.activation"
+          style="color: rgb(0, 0, 0); text-decoration: none;">activation</a>.DataSource</i><span
+        class="Apple-converted-space">&nbsp;</span>or one of its subclasses.</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>DataSource fdsrc = new
+        FileDataSource(file:///c:/tmp/instdata1.owl);<br>
+        &nbsp;&nbsp;&nbsp; boolean status = srvr.sendData(fdsrc);</i></p>
+    <h4><a id="mozTocId685662" class="mozTocH4"></a>Sending Data from a Client
+      CSV File</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">A
+      client-side CSV file can also be sent, along with a template, to add
+      triples to a session's knowledge base.</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>DataSource fdsrc = new
+        FileDataSource(file:///c:/tmp/instdata1.csv);<br>
+        &nbsp;&nbsp;&nbsp; boolean status = srvr.sendCsvData(fdsrc, true, "<a href="file:///c:/kbases/mykbase/mytemplate.tmpl"
+          style="color: rgb(0, 102, 204);">file:///c:/kbases/mykbase/mytemplate.tmpl</a>");</i></p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">In
+      this case the 3rd argument could be an URL or it could be the actual
+      template as a String.</p>
+    <h3><a id="mozTocId269416" class="mozTocH3"></a>Retrieving Information from
+      the Service</h3>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">There
+      are two basic methods provided for retrieving information from a
+      KnowledgeServer model, whether the information is assertions (input data)
+      or inferences.<span class="Apple-converted-space">&nbsp;</span></p>
+    <h4><a id="mozTocId464613" class="mozTocH4"></a>Ask</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">The
+      "ask" method takes a triple pattern, subject, predicate, object, as input
+      arguments and returns a ResultSet containing all model data matching the
+      pattern. Any combination of the three arguments can be null, which creates
+      an unbound variable in that position of the triple pattern. The number of
+      columns in the returned ResultSet is the same as the number of null
+      arguments. If all arguments are non-null, the return will be true if the
+      triple exists in the kbase else false.</p>
+    <h4><a id="mozTocId806443" class="mozTocH4"></a>Query</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">The
+      "query" method takes a SPARQL query string as an input argument and
+      returns a ResultSet containing all model data satisfying the query
+      conditions.</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Note
+      that if the query string is a parameterized query, meaning that it has one
+      or more standalone question marks (just a "?" without a variable name,
+      e.g., not "?x"), then a call should be made to the method
+      "parameterizeQuery(String queryStr, List&lt;Object&gt; values)" to process
+      the parameterized query and return the resulting query string for use in
+      the call to the "query" method.</p>
+    <h2><a id="mozTocId865995" class="mozTocH2"></a>ISadlServerPE: Modifying and
+      Saving Models to the Knowledge Base</h2>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">The
+      extended services of ISadlServerPE allow both changes to existing model
+      files in the knowledge base and the addition of new model files. Consider
+      the knowledge base depicted in the figure below.</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space"> </span><img src="images/ISadlServerPE1.JPG"
+        alt=""></p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">The
+      models M1 through M7 are existing models within the knowledge base
+      represented by the green rectangle. When the service is invoked, either
+      directly or through a named service, a knowledge base and a model in the
+      knowledge base are specified. This "starting" model is indicated in the
+      figure. The methods of ISadlServerPE allow modification of any of the
+      existing models. They also allow the creation of one or more additional
+      models such as N1 in the figure. Furthermore, any changes, both to
+      existing and to new models may be persisted. Note that new models such as
+      N1 are assumed to import the starting model, tying them into the existing
+      knowledge base. Other imports can be added explicitly if needed.</p>
+    <h3><a id="mozTocId644804" class="mozTocH3"></a>Extended Services Applied to
+      Specific Models</h3>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">There
+      are a number of methods in <i>ISadlServerPE</i> that are similar to
+      methods in
+      <i> ISadlServer</i> except that an additional first argument is added to
+      indicate to which model the operation is to be applied. For example, in <i>ISadlServer</i>
+      we find the method</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>addTriple(subjectUri,
+        predicateUri, value)&nbsp;&nbsp;&nbsp; // add this triple to the default
+        model</i></p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">but
+      in <i>ISadlServerPE</i> we find the method</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+        class="Apple-converted-space">&nbsp;</span><i>addTriple(modelName,
+        subjectUri, predicateUri, value)&nbsp;&nbsp;&nbsp; // add this triple to
+        the specified model</i></p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Of
+      course, if the default model is the same as that identified by
+      "modelName", the operations will be identical.</p>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Methods
+      with counterparts in <i>ISadlServer</i> include the following. See<span class="Apple-converted-space">&nbsp;</span><span
+        style="color: rgb(0, 102, 204);">JavaDocs</span><span class="Apple-converted-space">&nbsp;</span>for
+      details.</p>
+    <ol style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">
+      <li>addTriple</li>
+      <li>ask</li>
+      <li>createInstance</li>
+      <li>deleteTriple</li>
+      <li>loadCsvData</li>
+      <li>loadData</li>
+      <li>parameterizeQuery</li>
+      <li>prepareQuery</li>
+      <li>query</li>
+      <li>sendCsvData</li>
+      <li>sendData</li>
+    </ol>
+    <h3><a id="mozTocId437598" class="mozTocH3"></a>Extended Services to Edit
+      and Persist Changes</h3>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;"><i>ISadlServerPE</i>
+      provides the following methods to edit and persist changes. See<span class="Apple-converted-space">&nbsp;</span><a
+        href="JavaDoc/JavaAPI/index.html" style="color: rgb(0, 102, 204);">JavaDocs</a><span
+        class="Apple-converted-space">&nbsp;</span>for details.</p>
+    <h4><a id="mozTocId619186" class="mozTocH4"></a>Create Classes and
+      Properties</h4>
+    <ul style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addClass(String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">className</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">superClassName</font><font size="2">)</font><font color="#7f0055"
+          size="2"><b></b></font></li>
+      <font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addClass(String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">modelName</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">className</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">superClassName</font><font size="2">)</font><font
+          color="#7f0055" size="2"><b></b></font></li>
+      <font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addExistingModel(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelPublicUri</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">modelAltUrl</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelPrefix</font><font size="2">)</font><font color="#7f0055"
+          size="2"><b></b></font></li>
+      <font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addImport(String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">modelName</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">importedModelUri</font><font size="2">)</font></li>
+      <font size="2"></font><font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addObjectPropertyRangeClass(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">propertyName</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">rangeClassName</font><font size="2">)</font> </li>
+      <font size="2"></font><font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addOntProperty(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">propertyName</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">superPropertyName</font><font size="2">)</font> </li>
+      <font size="2"></font><font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addOntPropertyDomainClass(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">propertyName</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">domainClassName</font><font size="2">)</font> </li>
+      <font size="2"></font><font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addRule(String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">modelName</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">ruleAsString</font><font size="2">)</font></li>
+      <font size="2"><font color="#7f0055" size="2"><b></b></font>
+        <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+              class="Apple-converted-space">&nbsp;</span>createServiceModel(String<span
+              class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+            size="2">kbid</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+            color="#6a3e3e" size="2">serviceName</font><font size="2">, String<span
+              class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+            size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+            color="#6a3e3e" size="2">owlFileName</font><font size="2">, String<span
+              class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+            size="2">prefix</font><font size="2">)</font> </li>
+        <font size="2"></font></font><font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>deleteModel(String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">modelName</font><font size="2">)</font></li>
+      <font size="2"></font>
+      <li><font size="2">String getUniqueInstanceUri(String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">namespace</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">baseLocalName</font><font size="2">)</font></li>
+      <font size="2"></font>
+      <li><font size="2">String getUniqueInstanceUri(String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">modelName</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">namespace</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">baseLocalName</font><font size="2">)</font></li>
+      <font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>public</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#7f0055"
+          size="2"><b>boolean</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span>persistChangesToServiceModels()</font></li>
+      <font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>public</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#7f0055"
+          size="2"><b>boolean</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span>persistInstanceModel(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">owlInstanceFileName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">globalPrefix</font><font size="2">)</font></li>
+      <font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>public</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#7f0055"
+          size="2"><b>boolean</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span>persistInstanceModel(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">owlInstanceFileName</font><font size="2">,
+          String<span class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">globalPrefix</font><font size="2">)</font></li>
+      <font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>setDatatypePropertyRange(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">propertyName</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">xsdRange</font><font size="2">)</font> </li>
+      <font size="2"></font><font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>updateRdfsLabel(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">uri</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">label</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">language</font><font size="2">)</font></li>
+      <font color="#7f0055" size="2"><b></b></font>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>updateRdfsLabel(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">uri</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">label</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">language</font><font size="2">)<span class="Apple-converted-space">&nbsp;</span></font></li>
+    </ul>
+    <h4><a id="mozTocId283391" class="mozTocH4"></a>Adding Property Restrictions</h4>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Methods
+      support adding all-values-from, some-values-from, has-value, and
+      cardinality restrictions. These methods are the following. See JavaDocs
+      for details.</p>
+    <ul style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addAllValuesFromRestriction(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">className</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">propertyName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">restrictionName</font><font size="2">)</font>
+      </li>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addCardinalityRestriction(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">className</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">propertyName</font><font size="2">,<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#7f0055" size="2"><b>int</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">cardValue</font><font size="2">)</font> </li>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addQualifiedCardinalityRestriction(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">className</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">propertyName</font><font size="2">,<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#7f0055" size="2"><b>int</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">cardValue</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">restrictedToType</font><font size="2">)</font> </li>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addHasValueRestriction(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">className</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">propertyName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">valueInstanceName</font><font size="2">)</font>
+      </li>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addMaxCardinalityRestriction(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">className</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">propertyName</font><font size="2">,<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#7f0055" size="2"><b>int</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">cardValue</font><font size="2">)</font> </li>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addMaxQualifiedCardinalityRestriction(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">className</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">propertyName</font><font size="2">,<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#7f0055" size="2"><b>int</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">cardValue</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">restrictedToType</font><font size="2">)</font> </li>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addMinCardinalityRestriction(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">className</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">propertyName</font><font size="2">,<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#7f0055" size="2"><b>int</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">cardValue</font><font size="2">)</font> </li>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addMinQualifiedCardinalityRestriction(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">className</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">propertyName</font><font size="2">,<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#7f0055" size="2"><b>int</b></font><font size="2"><span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">cardValue</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">restrictedToType</font><font size="2">)</font> </li>
+      <li><font color="#7f0055" size="2"><b>boolean</b></font><font size="2"><span
+            class="Apple-converted-space">&nbsp;</span>addSomeValuesFromRestriction(String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">modelName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">className</font><font size="2">, String<span
+            class="Apple-converted-space">&nbsp;</span></font><font color="#6a3e3e"
+          size="2">propertyName</font><font size="2">, String<span class="Apple-converted-space">&nbsp;</span></font><font
+          color="#6a3e3e" size="2">restrictionName</font><font size="2">)</font>
+      </li>
+    </ul>
+    <h2><a id="mozTocId263576" class="mozTocH2"></a>ISadlServerMD: Supporting
+      Model-Driven Development</h2>
+    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Not
+      yet documented here.</p>
+    <h2><a id="mozTocId379557" class="mozTocH2"></a>Named Services</h2>
+    <h2><a id="mozTocId468963" class="mozTocH2"></a> </h2>
+    <h3><a id="mozTocId987935" class="mozTocH3"></a>Service Definition</h3>
+    <p>For a semantic model or set of semantic models to provide a service via
+      ISadlServer or one of its extension classes, the server must know:</p>
+    <ol>
+      <li>the model folder or HTTP source (knowledge base identifier) containing
+        the OWL models and rules, and </li>
+      <li>the specific OWL model, identified by its public URI, to be loaded as
+        the entry point for the schema model (t-box). This entry-point model may
+        and normally will, of course, import other models. While the models
+        identified by this entry point may contain instance data, it is more
+        common for the client to provide or specify the location of the instance
+        data of a particular situation via the ISadlServer interface.</li>
+    </ol>
+    <p>A client can invoke a ISadlServer service in one of two ways.</p>
+    <ol>
+      <li>By calling the <i>selectServiceModel</i> method that takes a single
+        argument which is the name of a named service (see next section). This
+        named service identifies a knowledge base and an entry module. The
+        client must, of course, know the name of a service which is available.
+        The named services available can be retrieved from the service.</li>
+      <li>By calling the <i>selectServiceModel</i> method that takes two
+        arguments: </li>
+      <ol>
+        <li>knowledge base identifier and </li>
+        <li>model name. There are two ways that this method can be used:
+          <ul>
+            <li>the knowledge base identifier is a URL, either file-based or
+              http. Note that this is not supported from a Web service as
+              knowledge of the server file system is not expected to be known to
+              the client</li>
+            <li>the knowledge base identifier is the name of a named service and
+              this named service does not specify a model name. The given model
+              name then identifies a model in the identified kbase.</li>
+          </ul>
+        </li>
+      </ol>
+    </ol>
+    <h3><a id="mozTocId707149" class="mozTocH3"></a><a name="NamedServices">Specifying
+        Named Services<br>
+      </a></h3>
+    <h2><a id="mozTocId742261" class="mozTocH2"></a> </h2>
+    <p>A semantic model exposed in ISadlServer as a named service is generally
+      described by three pieces of information:</p>
+    <ol>
+      <li>The name of the named service</li>
+      <li>The model folder (knowledge base) containing the OWL and rule files</li>
+      <li>The public URI (model name) of the specific model (OWL file) serving
+        as the top-level entry point (t-box) for the service. This is not
+        specified for a named service that allows the client to specify the
+        model name to be used. </li>
+    </ol>
+    <p>This information provides a mapping from the service name to the service
+      definition by knowledge base and entry-point model. Since it is stored on
+      the server, the client need have no information about the server's file
+      system.</p>
+    <p>The option to define named services from within the SADL-IDE has been
+      implemented using the conceptual model in the figure below. </p>
+    <div style="margin-left: 40px;"><img src="images/ServicesConfigurationConcepts.png"
+        alt=""></div>
+    <p>The developer of a SADL project can add a SADL file named
+      "ServicesConfig.sadl" anywhere in the project. The easiest way to
+      configure such a file is to request content assist after the model's
+      initial <i>uri</i> keyword. This will produce the content below.</p>
+    <div style="margin-left: 40px;"><i><img src="images/ServicesConfigInitial.png"
+          alt=""></i></div>
+    <p>This content should then be modified to 1) replace" ServiceName" with the
+      desired name of the service, and 2) replace "&lt;uri&gt;" with the URI of
+      the desired model to be loaded for this named service (still inside double
+      quotes). These modifications will result in content like this.</p>
+    <div style="margin-left: 40px;"><img src="images/ServicesConfigEdited.png" alt=""></div>
+    <p>Additional instances of <i>NamedService</i> can be added as <i>entryPoint
+        </i>values as desired. For example, this <i>KnowledgeBase</i> has three
+      entry points<i></i> defined.</p>
+    <div style="margin-left: 40px;"><img src="images/ServicesConfig3NS.png" alt=""></div>
+    <p>In summary, a ServicesConfig.sadl model should:</p>
+    <ol>
+      <li>have as <i>uri</i> "http://com.ge.research.sadl/sadlserver/Services",</li>
+      <li>define a single instance of <i> KnowledgeBase</i> (corresponding to
+        this SADL project) and provide one or more <i>NamedService</i>
+        instances as <i>entryPoint</i> values with their associated <i>modelName</i>
+        values. The name of the named service is the local name of the <i>NamedService</i>
+        instance, e.g., <i>TestServiceName</i>.</li>
+    </ol>
+    <p><br>
+    </p>
+    <p></p>
   </body>
 </html>
