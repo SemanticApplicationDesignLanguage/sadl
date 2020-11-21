@@ -72,7 +72,8 @@
           </li>
           <li><a href="#mozTocId263576">ISadlServerMD: Supporting Model-Driven
               Development</a></li>
-          <li><a href="#mozTocId379557">Named Services</a></li>
+          <li><a href="#mozTocId379557">Named Services Using ServicesConfig.sadl<br>
+            </a></li>
           <li><a href="#mozTocId468963"></a>
             <ul>
               <li><a href="#mozTocId987935">Service Definition</a></li>
@@ -158,17 +159,32 @@
       </i></p>
     <h4><a id="mozTocId918430" class="mozTocH4"></a>Initialization</h4>
     <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Next
-      the server must be initialized by setting the folder on the file system
-      that is the kbase root folder, meaning all kbases are located under this
-      folder. This can be done by calling<span class="Apple-converted-space">&nbsp;</span><i>setKbaseRoot</i>:</p>
-    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
+      the server must be initialized. This can be done in multiple ways.</p>
+    <ul>
+      <li>One can identify the knowledge base and model to be loaded explicitly
+        by calling <i>selectServiceModel</i>. This requires that the client
+        have knowledge of the server's file system.</li>
+    </ul>
+    <div style="margin-left: 80px;"><i>srvr.selectServiceModel("c:/somepath/OwlModels",
+        "http://sadl.org/modeluri");</i></div>
+    <ul>
+      <li><span style="font-family: -webkit-standard;">One can identify</span>
+        the folder on the server file system that is the kbase root folder,
+        meaning all kbases are located under this folder. This can be done by
+        calling<span class="Apple-converted-space">&nbsp;</span><i>setKbaseRoot</i>.
+        This assumes that the kbases have at least one <i>NamedService</i>
+        identified, see below.</li>
+    </ul>
+    <p style="caret-color: black; color: black; font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration: none; margin-left: 40px;">&nbsp;&nbsp;&nbsp;<span
         class="Apple-converted-space">&nbsp;</span><i>srvr.setKbaseRoot("c:/someuser/kbaseroot");</i></p>
-    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Note
+    <div style="margin-left: 40px;"> </div>
+    <p style="caret-color: black; color: black; font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration: none; margin-left: 40px;">Note
       that this could have been done in a single call by passing the kbase root
       to the constructor, e.g.,</p>
-    <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
-        class="Apple-converted-space">&nbsp;</span><i>&nbsp; ISadlServer srvr =
-        new SadlServerImpl( "c:/someuser/kbaseroot");</i></p>
+    <br>
+    <div style="margin-left: 40px;">&nbsp;&nbsp;&nbsp;<span class="Apple-converted-space">&nbsp;</span><i>&nbsp;
+        ISadlServer srvr = new SadlServerImpl( "c:/someuser/kbaseroot");</i></div>
+    <p>For other variations see the JavaDocs.</p>
     <h3><a id="mozTocId704007" class="mozTocH3"></a>Outline of Usage: Next Steps</h3>
     <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Once
       an instance of a class implementing<span class="Apple-converted-space">
@@ -332,10 +348,9 @@
       Specific Models</h3>
     <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">There
       are a number of methods in <i>ISadlServerPE</i> that are similar to
-      methods in
-      <i> ISadlServer</i> except that an additional first argument is added to
-      indicate to which model the operation is to be applied. For example, in <i>ISadlServer</i>
-      we find the method</p>
+      methods in <i> ISadlServer</i> except that an additional first argument
+      is added to indicate to which model the operation is to be applied. For
+      example, in <i>ISadlServer</i> we find the method</p>
     <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">&nbsp;&nbsp;&nbsp;<span
         class="Apple-converted-space">&nbsp;</span><i>addTriple(subjectUri,
         predicateUri, value)&nbsp;&nbsp;&nbsp; // add this triple to the default
@@ -602,8 +617,8 @@
       Model-Driven Development</h2>
     <p style="caret-color: rgb(0, 0, 0); color: rgb(0, 0, 0); font-family: -webkit-standard; font-style: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: auto; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: auto; word-spacing: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0.4); -webkit-text-stroke-width: 0px; text-decoration: none;">Not
       yet documented here.</p>
-    <h2><a id="mozTocId379557" class="mozTocH2"></a>Named Services</h2>
-    <h2><a id="mozTocId468963" class="mozTocH2"></a> </h2>
+    <h2><a id="mozTocId468963" class="mozTocH2"></a>Named Services using
+      ServicesConfig.sadl</h2>
     <h3><a id="mozTocId987935" class="mozTocH3"></a>Service Definition</h3>
     <p>For a semantic model or set of semantic models to provide a service via
       ISadlServer or one of its extension classes, the server must know:</p>
