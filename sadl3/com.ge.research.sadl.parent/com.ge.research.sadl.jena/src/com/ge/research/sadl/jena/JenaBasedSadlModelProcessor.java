@@ -634,49 +634,63 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (!fileExists(fsa, fn)) {
 						sadlBaseModel = OntModelProvider.getSadlBaseModel();
 						if (sadlBaseModel != null) {
-							generateOwlFile(fsa, modelFolder, fn, sadlBaseModel.getBaseModel(), SadlConstants.SADL_BASE_MODEL_URI, SadlConstants.SADL_BASE_MODEL_PREFIX, format);
-							String[] mapping = new String[3];
-							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
-							mapping[1] = SadlConstants.SADL_BASE_MODEL_URI;
-							mapping[2] = SadlConstants.SADL_BASE_MODEL_PREFIX;
-							newMappings.add(mapping);
+							generateOwlFile(fsa, modelFolder, fn, sadlBaseModel.getBaseModel(), 
+									SadlConstants.SADL_BASE_MODEL_URI, 
+									SadlConstants.SADL_BASE_MODEL_PREFIX, format);
+							addMapping(newMappings, su, modelFolder, fn, 
+									SadlConstants.SADL_BASE_MODEL_URI, 
+									SadlConstants.SADL_BASE_MODEL_PREFIX);
 						}
+					}
+					else if (!mappingExists(SadlConstants.SADL_BASE_MODEL_URI)) {
+						addMapping(newMappings, su, modelFolder, fn, 
+								SadlConstants.SADL_BASE_MODEL_URI, 
+								SadlConstants.SADL_BASE_MODEL_PREFIX);
 					}
 					fn = SadlConstants.SADL_LIST_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
 					if (!fileExists(fsa, fn)) {
 						sadlListModel = OntModelProvider.getSadlListModel();
 						if (sadlListModel != null) {
 							generateOwlFile(fsa, modelFolder, fn, sadlListModel.getBaseModel(), SadlConstants.SADL_LIST_MODEL_URI, SadlConstants.SADL_LIST_MODEL_PREFIX, format);
-							String[] mapping = new String[3];
-							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
-							mapping[1] = SadlConstants.SADL_LIST_MODEL_URI;
-							mapping[2] = SadlConstants.SADL_LIST_MODEL_PREFIX;
-							newMappings.add(mapping);
+							addMapping(newMappings, su, modelFolder, fn, 
+									SadlConstants.SADL_LIST_MODEL_URI,
+									SadlConstants.SADL_LIST_MODEL_PREFIX);
 						}
+					}
+					else if (!mappingExists(SadlConstants.SADL_LIST_MODEL_URI)) {
+						addMapping(newMappings, su, modelFolder, fn, 
+								SadlConstants.SADL_LIST_MODEL_URI,
+								SadlConstants.SADL_LIST_MODEL_PREFIX);
 					}
 					fn = SadlConstants.SADL_DEFAULTS_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
 					if (!fileExists(fsa, fn)) {
 						sadlDefaultsModel = OntModelProvider.getSadlDefaultsModel();
 						if (sadlDefaultsModel != null) {
 							generateOwlFile(fsa, modelFolder, fn, sadlDefaultsModel.getBaseModel(), SadlConstants.SADL_DEFAULTS_MODEL_URI, SadlConstants.SADL_DEFAULTS_MODEL_PREFIX, format);
-							String[] mapping = new String[3];
-							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
-							mapping[1] = SadlConstants.SADL_DEFAULTS_MODEL_URI;
-							mapping[2] = SadlConstants.SADL_DEFAULTS_MODEL_PREFIX;
-							newMappings.add(mapping);
+							addMapping(newMappings, su, modelFolder, fn,
+									SadlConstants.SADL_DEFAULTS_MODEL_URI,
+								SadlConstants.SADL_DEFAULTS_MODEL_PREFIX);
 						}
+					}
+					else if (!mappingExists(SadlConstants.SADL_DEFAULTS_MODEL_URI)) {
+						addMapping(newMappings, su, modelFolder, fn,
+								SadlConstants.SADL_DEFAULTS_MODEL_URI,
+							SadlConstants.SADL_DEFAULTS_MODEL_PREFIX);
 					}
 					fn = SadlConstants.SADL_SERVICES_CONFIGURATION_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
 					if (!fileExists(fsa, fn)) {
 						sadlServicesConfigConceptModel = OntModelProvider.getSadlServicesConfigConceptsModel();
 						if (sadlServicesConfigConceptModel != null) {
 							generateOwlFile(fsa, modelFolder, fn, sadlServicesConfigConceptModel.getBaseModel(), SadlConstants.SADL_SERIVCES_CONFIGURATION_URI, SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX, format);
-							String[] mapping = new String[3];
-							mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
-							mapping[1] = SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI;
-							mapping[2] = SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX;
-							newMappings.add(mapping);
+							addMapping(newMappings, su, modelFolder, fn,
+									SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI,
+									SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX);
 						}
+					}
+					else if (!mappingExists(SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI)) {
+						addMapping(newMappings, su, modelFolder, fn,
+								SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI,
+								SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX);
 					}
 				}
 				String[] mapping = new String[4];
@@ -711,6 +725,40 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		generationInProgress = false;
 		logger.debug("onGenerate completed for Resource '" + resource.getURI() + "'");
+	}
+
+	/**
+	 * Method to add a simple mapping to the ConfiguationManager's mappings model.
+	 * @param newMappings
+	 * @param su
+	 * @param modelFolder
+	 * @param fn
+	 * @param publicUri
+	 * @param prefix
+	 * @throws URISyntaxException
+	 */
+	private void addMapping(List<String[]> newMappings, SadlUtils su, String modelFolder, String fn,
+			String publicUri, String prefix)
+			throws URISyntaxException {
+		String[] mapping = new String[3];
+		mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + fn);
+		mapping[1] = publicUri;
+		mapping[2] = prefix;
+		newMappings.add(mapping);
+	}
+
+	/**
+	 * Method to determine if a model URI is found in the mappings
+	 * @param modelUri
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	private boolean mappingExists(String modelUri) throws ConfigurationException {
+		String altUrl = getConfigMgr().getAltUrlFromPublicUri(modelUri);
+		if (altUrl == null || altUrl.equals(modelUri)) {
+			return false;
+		}
+		return true;
 	}
 
 	private void generateOwlFile(IFileSystemAccess2 fsa, String modelFolder, String owlFN, Model model, String modelName, String modelAlias, String format) throws TranslationException {
