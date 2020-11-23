@@ -23,6 +23,8 @@ import com.google.common.base.Preconditions
 import com.google.inject.Singleton
 import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.emf.common.util.URI
+import com.ge.research.sadl.processing.SadlConstants
+import com.ge.research.sadl.utils.ResourceManager
 
 /**
  * External EMF resource that uses the Eclipse workspace.
@@ -67,6 +69,10 @@ class EclipseExternalEmfResourcePredicate extends ExternalEmfResourcePredicate.D
 			if (cgModelsFolder.getFullPath().isPrefixOf(file.getFullPath())) {
 				return true;
 			}
+		}
+		
+		if (segments.size > 3 && segments.get(3).equals(ResourceManager.ServicesConfigurationConcepts_FN)) {
+			return true;
 		}
 		
 		if (segments.size < 3 || 

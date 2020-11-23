@@ -609,28 +609,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		}
 	}
 
-	/**
-	 * Call this method to set the mapping for the "SadServicesConfigurationConcepts.owl" model. This should be called if a default is added
-	 * to a model to make sure that the definition of default value concepts is available as an import model.
-	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws ConfigurationException 
-	 */
-	@Override
-	public void setServicesConfigurationAltUrlMapping() throws IOException, URISyntaxException, ConfigurationException {
-		if (getModelFolderPath() != null) {
-			String servicesConfigurationActual = getModelFolderPath().getAbsolutePath() + File.separator + ServicesConfigurationConcepts_FN;
-			addMapping(getSadlUtils().fileNameToFileUrl(servicesConfigurationActual), ServicesConfigurationURI, ServicesConfigurationPrefix, false, SADL);
-			File defact = new File(servicesConfigurationActual);
-			if (!defact.exists()) {
-				if (!ResourceManager.copyServicesConfigurationFileToOwlModelsDirectory(servicesConfigurationActual)) {
-					throw new ConfigurationException("Unable to copy a '" + ServicesConfigurationConcepts_FN + "' file from the plug-in to the OwlModels folder.");
-				}
-			}
-		}
-	}
-
 	public void setProjectFolderPath(String _projectFolderPath, String _modelFolderPath) throws ConfigurationException {
 		if (projectFolderPath != null && !projectFolderPath.equals(_projectFolderPath)) {
 			// we are changing projects; reset the mappings and cached models
