@@ -168,7 +168,6 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 * @throws URISyntaxException 
 	 * @throws IOException 
 	 * @throws AmbiguousNameException 
-	 * @throws InvalidClassDomainException, InvalidConfigurationException
 	 */
 	public String[] getAncestorClassesOfTaxonomy(String className)
 			 throws InvalidNameException, ReasonerNotFoundException, ConfigurationException,
@@ -192,7 +191,6 @@ public class SadlServerMDImpl extends SadlServerPEImpl implements ISadlServerMD 
 	 * @throws URISyntaxException 
 	 * @throws IOException 
 	 * @throws AmbiguousNameException 
-	 * @throws InvalidClassDomainException, InvalidConfigurationException
 	 */
 	public String[] getDirectSuperclassesOfTaxonomy(String className)
 			 throws InvalidNameException, ReasonerNotFoundException, ConfigurationException,

@@ -89,7 +89,6 @@ public interface ISadlServer {
 	 * 
 	 * @return -- class name
 	 * @throws SessionNotFoundException 
-	 * @throws com.ge.research.sadl.sadlserver.SessionNotFoundException 
 	 */
 	abstract public String getClassName() throws SessionNotFoundException;
 	
@@ -262,7 +261,6 @@ public interface ISadlServer {
      * @throws ConfigurationException 
      * @throws ReasonerNotFoundException 
      * @throws NamedServiceNotFoundException 
-     * @throws SessionNotFoundException 
      */
     abstract String selectServiceModel(String serviceName, List<ConfigurationItem> preferences) throws ConfigurationException, ReasonerNotFoundException, NamedServiceNotFoundException;
 
@@ -407,7 +405,6 @@ public interface ISadlServer {
      * reset to reflect those removals.
      * 
      * @return true if successful else false
-     * @throws TripleNotFoundException
      * @throws ReasonerNotFoundException 
      * @throws SessionNotFoundException 
      */
