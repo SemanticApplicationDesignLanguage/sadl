@@ -115,8 +115,8 @@ public class SadlServerMain {
 	 *
 	 * @param args -- an array of values as described below
 	 * 
-	 * @throws NameNotFoundException 
-	 * @throws InvalidDerivation 
+	 * @throws IOException
+	 * @throws NameNotFoundException
 	 */
 	public static void main(String[] args) throws IOException, NameNotFoundException {
 		logger.info("SadlServerMain main, version $Revision: 1.4 $");
@@ -143,7 +143,6 @@ public class SadlServerMain {
 	 * This method has the same meaning of args as for the main method but is not a static invocation and returns the session key.
 	 * @param args -- see main method documentation
 	 * @return the session key of the session established by this processing call
-	 * @throws ApplicationLaunchException
 	 * @throws IOException
 	 * @throws NameNotFoundException
 	 * @throws QueryParseException 
@@ -152,7 +151,6 @@ public class SadlServerMain {
 	 * @throws InvalidNameException 
 	 * @throws SessionNotFoundException 
 	 * @throws NamedServiceNotFoundException 
-	 * @throws InvalidDerivation 
 	 */
 	public String process(String[] args) throws IOException, NameNotFoundException, QueryParseException, ReasonerNotFoundException, InvalidNameException, ConfigurationException, SessionNotFoundException, NamedServiceNotFoundException {
 		// arg[0]: ISadlServer implementing class fully qualified name
@@ -1005,7 +1003,6 @@ public class SadlServerMain {
 	 * @param cls -- the localname, prefix:localname, or complete URI of the class
 	 * @return - an Object array of the allowed values, which will be of type Integer, String, Float, etc.
 	 * @throws IOException
-	 * @throws NameNotFoundException
 	 * @throws ReasonerNotFoundException 
 	 * @throws QueryParseException 
 	 * @throws ConfigurationException 

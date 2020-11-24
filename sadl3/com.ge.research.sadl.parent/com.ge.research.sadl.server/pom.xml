@@ -13,4 +13,18 @@
       <module>com.ge.research.sadl.server.server-impl</module>
   </modules>
 
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>3.2.0</version>
+              <configuration>
+                  <doclint>all,-missing</doclint>
+                  <quiet>true</quiet>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+
 </project>
