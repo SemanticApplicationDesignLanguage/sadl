@@ -56,6 +56,7 @@ import org.apache.jena.ontology.AllValuesFromRestriction;
 import org.apache.jena.ontology.AnnotationProperty;
 import org.apache.jena.ontology.CardinalityRestriction;
 import org.apache.jena.ontology.ComplementClass;
+import org.apache.jena.ontology.DataRange;
 import org.apache.jena.ontology.DatatypeProperty;
 import org.apache.jena.ontology.EnumeratedClass;
 import org.apache.jena.ontology.HasValueRestriction;
@@ -9212,6 +9213,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					
 				}
+				else {
+					addError("Invalid property restriction", rest);
+				}
 			}
 		}
 		for (int i = 0; i < rsrcList.size(); i++) {
@@ -9313,6 +9317,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				pr.addInverseOf(opr);
 			} else if (spr1 instanceof SadlRangeRestriction) {
 				SadlTypeReference rng = ((SadlRangeRestriction) spr1).getRange();
+				RDFNode rngNode = null;
+				OntResource rngRsrc = null;
 				if (rng != null) {
 					RangeValueType rngValueType = RangeValueType.CLASS_OR_DT; // default
 					boolean isList = typeRefIsList(rng);
@@ -9323,18 +9329,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					String rngName = null;
 					if (!isList && rng instanceof SadlPrimitiveDataType) {
 						rngName = ((SadlPrimitiveDataType) rng).getPrimitiveType().getName();
-						RDFNode rngNode = primitiveDatatypeToRDFNode(rngName);
+						rngNode = primitiveDatatypeToRDFNode(rngName);
 						if (!checkForExistingCompatibleDatatypeProperty(propUri, rngNode)) {
 							prop = createDatatypeProperty(propUri, null);
-							addPropertyRange(propType, prop, rngNode, rngValueType, rng);
 						} else {
 							prop = getTheJenaModel().getDatatypeProperty(propUri);
-							addPropertyRange(propType, prop, rngNode, rngValueType, rng);
 						}
 						addPropertyRange(propType, prop, rngNode, rngValueType, rng);
 						retProp = prop;
+						if (rngNode.isResource()) {
+							rngRsrc = getTheJenaModel().getOntResource(rngNode.asResource());
+						}
 					} else {
-						OntResource rngRsrc = null;
 						if (rng instanceof SadlUnionType || rng instanceof SadlIntersectionType) {
 							Object rngObj = sadlTypeReferenceToObject(rng);
 							if (rngObj instanceof OntResource) {
@@ -9375,12 +9381,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				if (((SadlRangeRestriction) spr1).isSingleValued()) {
 					// add cardinality restriction
-					addCardinalityRestriction(subject, retProp, 1);
+					if (rngRsrc !=  null) {
+						addQualifiedCardinalityRestrictionForSingleValue(retProp, propType, subject, rng, rngRsrc);
+					}					
+					else {
+						addCardinalityRestriction(subject, retProp, 1);
+					}
 				}
 			} else if (spr1 instanceof SadlCondition) {
 				OntProperty prop = getTheJenaModel().getOntProperty(propUri);
 				if (prop == null) {
-					prop = getOrCreateRdfProperty(propUri);
+					if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+						prop = getOrCreateObjectProperty(propUri);
+					}
+					else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+						prop = getOrCreateDatatypeProperty(propUri);
+					}
+					else {
+						prop = getOrCreateRdfProperty(propUri);
+					}
 				}
 				OntClass condCls = sadlConditionToOntClass((SadlCondition) spr1, prop, propType);
 				OntClass cls = null;
@@ -9468,12 +9487,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						OntResource torsrc = sadlTypeReferenceToOntResource(to);
 						throw new JenaProcessorException("What is 'to'?");
 					}
-
-					// RangeValueType rngValueType = RangeValueType.CLASS_OR_DT; // default
-					// SadlTypeReference rng = ((SadlRangeRestriction)spr2).getRange();
+					OntResource rngRsrc = null;
+					RDFNode rngNode = null;
 					if (rng instanceof SadlPrimitiveDataType && !rngValueType.equals(RangeValueType.LIST)) {
 						String rngName = ((SadlPrimitiveDataType) rng).getPrimitiveType().getName();
-						RDFNode rngNode = primitiveDatatypeToRDFNode(rngName);
+						rngNode = primitiveDatatypeToRDFNode(rngName);
 						DatatypeProperty prop2 = null;
 						if (!checkForExistingCompatibleDatatypeProperty(propUri, rngNode)) {
 							// TODO should this ever happen? spr1 should have created the property?
@@ -9482,9 +9500,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						} else {
 							prop2 = getTheJenaModel().getDatatypeProperty(propUri);
 						}
+						if (rngNode.isResource()) {
+							rngRsrc = getTheJenaModel().getOntResource(rngNode.asResource());
+						}
 						retProp = prop2;
 					} else if (((SadlRangeRestriction) spr2).getTypeonly() == null) {
-						OntResource rngRsrc = sadlTypeReferenceToOntResource(rng);
+						rngRsrc = sadlTypeReferenceToOntResource(rng);
 						if (rngRsrc == null) {
 							addError(SadlErrorMessages.RANGE_RESOLVE.toString(), rng);
 						} else {
@@ -9494,7 +9515,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						retProp = prop;
 					}
 					if (((SadlRangeRestriction) spr2).isSingleValued()) {
-						addCardinalityRestriction(domainrsrc, retProp, 1);
+						if (rngRsrc !=  null) {
+							addQualifiedCardinalityRestrictionForSingleValue(retProp, propType, domainrsrc,
+									rng, rngRsrc);
+						}					
+						else {
+							addCardinalityRestriction(domainrsrc, retProp, 1);
+						}
 					}
 				} else if (spr1 instanceof SadlTypeAssociation && spr2 instanceof SadlCondition) {
 					// this is case 4
@@ -9505,7 +9532,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						return null;
 					} else if (domainrsrc.canAs(OntClass.class)) {
 						OntClass cls = domainrsrc.as(OntClass.class);
-						Property prop = getTheJenaModel().getProperty(propUri);
+						Property prop;
+						if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+							prop = getOrCreateObjectProperty(propUri);
+						}
+						else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)) {
+							prop = getOrCreateDatatypeProperty(propUri);
+						}
+						else {
+							prop = getTheJenaModel().getProperty(propUri);
+						}
 						if (prop != null) {
 							OntClass condCls = sadlConditionToOntClass((SadlCondition) spr2, prop, propType);
 							if (condCls != null) {
@@ -9833,6 +9869,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addAnnotationsToResource(retProp.as(OntResource.class), sr.getAnnotations());
 		}
 		return retProp;
+	}
+
+	private void addQualifiedCardinalityRestrictionForSingleValue(Property retProp, OntConceptType propType,
+			OntResource domainrsrc, SadlTypeReference rng, OntResource rngRsrc) {
+		Property onProp = null;
+		CardinalityRestriction restrict = null;
+		if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+			onProp = OWL2.onClass;
+		}
+		else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)){	
+			onProp = OWL2.onDataRange;
+		}
+		else if (rngRsrc.canAs(DataRange.class)) {
+			onProp = OWL2.onDataRange;
+		}
+		else if (rngRsrc.canAs(OntClass.class)) {
+			onProp = OWL2.onClass;
+		}
+		else {
+			addError("Unable to determine whether qualified cardinality is to a class or a data range", rng);
+		}
+		if (onProp != null) {
+			restrict = createQualifiedCardinalityRestriction(retProp, rng, rngRsrc, OWL2.qualifiedCardinality, onProp, 1);
+		}
+		if (restrict != null && domainrsrc != null) {
+			domainrsrc.as(OntClass.class).addSuperClass(restrict);
+		}
+		else {
+			addError("Failed to create qualified cardinality restriction.", rng.eContainer());
+		}
 	}
 
 	private void addLengthRestrictionsToList(OntResource rngRsrc, SadlDataTypeFacet facet) {
@@ -12907,46 +12973,107 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				// cardinality restriction
 				int cardNum = Integer.parseInt(cardinality);
 				String op = ((SadlCardinalityCondition) cond).getOperator();
+				Property cardProp = null;
+				Property onProp = null;
+				if (propType.equals(OntConceptType.CLASS_PROPERTY)) {
+					onProp = OWL2.onClass;
+				}
+				else if (propType.equals(OntConceptType.DATATYPE_PROPERTY)){
+					onProp = OWL2.onDataRange;
+				}
+				else if (typersrc != null){
+					if (typersrc.canAs(DataRange.class)) {
+						onProp = OWL2.onDataRange;
+					}
+					else if (typersrc.canAs(OntClass.class)) {
+						onProp = OWL2.onClass;
+					}
+					else {
+						addError("Unable to determine whether qualified cardinality is to a class or a data range", type);
+					}
+				}
+				
 				if (op == null) {
-					CardinalityRestriction cr = getTheJenaModel().createCardinalityRestriction(null, prop, cardNum);
-					logger.debug("New cardinality restriction " + cardNum + " on '" + prop.getURI() + "' created");
 					if (type != null) {
-						cr.removeAll(OWL.cardinality);
-						cr.addLiteral(OWL2.qualifiedCardinality, cardNum);
-						cr.addProperty(OWL2.onClass, typersrc);
+						cardProp = OWL2.qualifiedCardinality;
 					}
-					retval = cr;
+					else {
+						cardProp = OWL.cardinality;
+					}
 				} else if (op.equals("least")) {
-					MinCardinalityRestriction cr = getTheJenaModel().createMinCardinalityRestriction(null, prop,
-							cardNum);
-					logger.debug("New min cardinality restriction " + cardNum + " on '" + prop.getURI() + "' created");
 					if (type != null) {
-						cr.removeAll(OWL.minCardinality);
-						cr.addLiteral(OWL2.minQualifiedCardinality, cardNum);
-						cr.addProperty(OWL2.onClass, typersrc);
+						cardProp = OWL2.minQualifiedCardinality;
 					}
-					retval = cr;
+					else {
+						cardProp = OWL.minCardinality;
+					}
 				} else if (op.equals("most")) {
-					logger.debug("New max cardinality restriction " + cardNum + " on '" + prop.getURI() + "' created");
-					MaxCardinalityRestriction cr = getTheJenaModel().createMaxCardinalityRestriction(null, prop,
-							cardNum);
 					if (type != null) {
-						cr.removeAll(OWL.maxCardinality);
-						cr.addLiteral(OWL2.maxQualifiedCardinality, cardNum);
-						cr.addProperty(OWL2.onClass, typersrc);
+						cardProp = OWL2.maxQualifiedCardinality;
 					}
-					retval = cr;
+					else {
+						cardProp = OWL.maxCardinality;
+					}
 				}
 				if (logger.isDebugEnabled()) {
 					if (type != null) {
 						logger.debug("   cardinality is qualified; values must be of type '" + typersrc + "'");
 					}
 				}
+				if (cardProp != null && onProp != null && type != null) {
+					retval = createQualifiedCardinalityRestriction(prop, type, typersrc, cardProp, onProp, cardNum);
+				}
+				else if (cardProp != null) {
+					retval = createCardinalityRestriction(prop, cardProp, cardNum);
+				}
+				else {
+					addError("Failed to set qualified cardinality", cond);
+				}
 			}
 		} else {
 			throw new JenaProcessorException("Unhandled SadlCondition type: " + cond.getClass().getCanonicalName());
 		}
 		return retval;
+	}
+
+	/**
+	 * Method to create a CardinalityRestriction
+	 * @param prop -- property restricted
+	 * @param cardProp -- cardinality restriction property
+	 * @param cardNum -- cardinality
+	 * @return
+	 */
+	private OntClass createCardinalityRestriction(Property prop, Property cardProp, int cardNum) {
+		if (cardProp.equals(OWL.cardinality)) {
+			return getTheJenaModel().createCardinalityRestriction(null, prop, cardNum);
+		}
+		else if (cardProp.equals(OWL.minCardinality)) {
+			return getTheJenaModel().createMinCardinalityRestriction(null, prop, cardNum);
+		}
+		else if (cardProp.equals(OWL.maxCardinality)) {
+			return getTheJenaModel().createMaxCardinalityRestriction(null, prop, cardNum);
+		}
+		return null;
+	}
+
+	/**
+	 * Method to create a QualifiedCardinalityRestriction
+	 * @param prop
+	 * @param typeRef
+	 * @param typeOntRsrc
+	 * @param cardNum
+	 * @return
+	 */
+	private CardinalityRestriction createQualifiedCardinalityRestriction(Property prop, SadlTypeReference typeRef,
+			OntResource typeOntRsrc, Property cardProperty, Property toProperty, int cardNum) {
+		CardinalityRestriction cr = getTheJenaModel().createCardinalityRestriction(null, prop, cardNum);
+		logger.debug("New cardinality restriction " + cardNum + " on '" + prop.getURI() + "' created");
+		if (typeRef != null) {
+			cr.removeAll(OWL.cardinality);
+			cr.addLiteral(cardProperty, cardNum);
+			cr.addProperty(toProperty, typeOntRsrc);
+		}
+		return cr;
 	}
 
 	private boolean valueInDatatypePropertyRange(OntProperty prop, Literal val, EObject cond) {

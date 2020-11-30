@@ -58,6 +58,7 @@ import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.util.internal.EmfAdaptable
+import com.ge.research.sadl.sADL.SadlCardinalityCondition
 
 class DeclarationExtensions {
 	
@@ -309,6 +310,9 @@ class DeclarationExtensions {
 					OntConceptType.DATATYPE_PROPERTY
 
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[!range.isDatatype]: 
+					OntConceptType.CLASS_PROPERTY
+					
+				SadlProperty case e.restrictions.filter(SadlCardinalityCondition).exists[type instanceof SadlSimpleTypeReference && (type as SadlSimpleTypeReference).type instanceof SadlResource]:
 					OntConceptType.CLASS_PROPERTY
 
 				SadlProperty case e.hasFromToRestriction:
