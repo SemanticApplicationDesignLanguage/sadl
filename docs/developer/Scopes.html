@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Xtext Scopes in the SADL IDE</title>
+  </head>
+  <body>
+    <h1>Xtext Scopes in the SADL IDE</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/23/2020<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <h2>Introduction</h2>
+    <p>Scoping defines the visibility rules inside of a SADL file and across
+      SADL file boundaries. For example, if a class <i>C1</i> is defined in a
+      SADL file with namespace (URI) <i>http://sadl.org/ns1</i>, the class <i>C1</i>
+      is visible anywhere in that SADL file and in any model that imports <i>http://sadl.org/ns1</i>.
+      On the other hand, if a variable <i>X</i> is defined in a rule, query, or
+      test in h<i>ttp://sadl.org/ns1</i>, <i>X</i> is visible only within that
+      rule, query, or test. If there is a variable <i>X</i> in another rule,
+      query, or test in h<i>ttp://sadl.org/ns1</i>, that <i>X</i> is entirely
+      independent and in its turn visible only within its rule, query, or test.</p>
+    <p>Furthermore, scoping must differentiate the location of the definition of
+      a class, property, instance, or variable from references to it. Consider
+      this small model.</p>
+    <div style="margin-left: 40px;"><img src="images/scoping1.png" alt=""></div>
+    <p>The instance <i>i2</i> appears in the statements on lines 5 and 6. Even
+      though the statement on line 5 appears first, it is the statement on line
+      6 that defines <i>i2</i>. Line 5 contains only a reference to <i>i2</i>.
+      In order for the hyperlinking to definition and to references to work
+      properly, scoping must correctly identify which occurrence is the
+      definition. </p>
+    <p>Xtext scoping is a complex topic. Some references that may prove useful
+      include the following.</p>
+    <ul>
+      <li><a href="https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#scoping">https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#scoping</a></li>
+      <li><span style="color: #0000ee;">https://www.eclipsecon.org/france2017/session/deep-dive-xtext-scoping-local-and-global-scopes-explained</span></li>
+    </ul>
+    <h2>Into the Caldron</h2>
+    <p>A scope describes the visible names, which depends on the context, and
+      maps names to the parse tree's EMF EObjects in a chain of scopes. Local
+      scopes have to do with references within a Resource (SADL file). Global
+      scopes have to do with those names that are visible from outside a
+      Resource (SADL or OWL file), assuming that the Resource is imported. </p>
+    <p>The IScope class represents an element of a linked list of scopes. A
+      scope can be nested within an outer scope. Each scope is like a symbol
+      table or map where the keys are strings and the values are
+      IEObjectDescription instances, abstract descriptions of real EObject
+      instances. </p>
+    In the SADL IDE, the following classes deal with scoping.
+    <ul>
+      <li>ErrorAndLinkingService</li>
+      <li>GlobalScopeProviderFilterProvider</li>
+      <li>SADLScopeProvider </li>
+      <ul>
+        <li>(extends AbstractGlobalScopeDelegatingScope:Provider)</li>
+        <li>public method getScope</li>
+      </ul>
+      <li>SilencedImportedNamesAdapter</li>
+      <li>TestScopeProvider</li>
+    </ul>
+    <ul>
+      <li>ExternalEmfResource</li>
+      <li>LazyResolvedSadlImport</li>
+    </ul>
+    <ul>
+      <li>SadlQueryHelper</li>
+    </ul>
+    <ul>
+      <li>SadlIdeContentProposalProvider</li>
+      <li>SadlIdeRenameService</li>
+      <li>SadlIdeGlobalScopeProviderFilterProvider</li>
+      <li>SadServerModule</li>
+    </ul>
+    <p>local scope providers:</p>
+    <ol>
+      <li>returns true for a SadlResource AND </li>
+      <ol>
+        <li>(eContainer instanceOf SadlClassOrPropertyDeclaration AND
+          eContainingFeature ==
+          SADL_CLASS_OR_PROPERTY_DECLARATION__CLASS_OR_PROPERTY AND
+          eContainer.eContainer NOT instanceof SadlDifferentFrom)</li>
+        <li>OR</li>
+        <li>(eContainer instanceof SadProperty AND
+          eContainer.isPrimaryDeclaration() AND eContainingFeature ==
+          SADL_ROPERTY__NAME_OR_REF)</li>
+      </ol>
+      <li>returns true for a SadlResource AND</li>
+      <ol>
+        <li>(eContainer instanceof SadlProperty AND eContainingFeature ==
+          SADL_PROPERTY__NAME_OR_REF)</li>
+        <li>OR</li>
+        <li>(eContainer instanceof SadlProperty AND eContainingFeature ==
+          SADL_PROPERTY__NAME_DECLARATION)</li>
+      </ol>
+      <li>returns true for a SadlResource AND</li>
+      <ol>
+        <li>eContainer instanceof SadlNecessaryAndSufficient AND eCF ==
+          SADL_NECESSARY_AND_SUFFICIENT__OBJECT)</li>
+      </ol>
+      <li>returns true for a SadlResource&nbsp; AND</li>
+      <ol>
+        <li>eC instanceof SadlNestedInstance AND eCF == SADL_INSTANCE__INSTANCE</li>
+      </ol>
+      <li>returns true for a SadlResource AND</li>
+      <ol>
+        <li>eC instanceof SadlInstance AND eCF == SADL_INSTANCE__NAME_OR_REF AND
+          eC.type != null // last condition is GH-511 addition</li>
+      </ol>
+      <li>returns true for a SadlResource AND </li>
+      <ol>
+        <li>(eC instanceof SadlMustBeOneOf&nbsp; AND eCF ==
+          SADL_MUST_BE_ONE_OF__VALUES)</li>
+        <li>OR</li>
+        <li>(eC instanceof SadlCanOnlyBeOneOf and eCF ==
+          SADL_CAN_ONLY_BE_ONE_OF__VALUES)</li>
+      </ol>
+    </ol>
+    <p><br>
+    </p>
+    <p>Notes: </p>
+    <ol>
+      <li>&nbsp;&nbsp;&nbsp; Shape</li>
+      <ol>
+        <li>call to getScope(EObject ctx, EReference ref), </li>
+        <ol>
+          <li>identifies a SadlResource, resulting in call to
+            getSadlResourceScope(ctx, ref),</li>
+          <ol>
+            <li>calls createResourceScope(Resource, alias, imports) // (s1.sadl,
+              null, [])</li>
+            <ol>
+              <li>calls createResourceScope(resource, alias, imports,
+                Predicates.alwaysTrue)</li>
+              <ol>
+                <li>newParent = createImportScope(resource, importedResources)
+                  returns a MapScope with 313 elements from sadlimplicitmodel,
+                  buildinfunctions, etc., and whose parent is the NULLSCOPE.</li>
+                <li>this newParent is wrapped into a
+                  SilenedImportedNamesAdapter$SilentWrappingScope</li>
+              </ol>
+              <li>call to getLocalScopeProviders returns localScope_01 thru
+                localScope_06.</li>
+              <li>these are all called by iterating through the list, passing in
+                newParent and assigning returned value to newParent</li>
+              <li>At end of each call MapBasedScope.createScope(parentScope,
+                map.values) is called.</li>
+            </ol>
+          </ol>
+        </ol>
+      </ol>
+    </ol>
+    <p>Within the JenaBasedSadlModelProcessor, the method getNewVar uses an
+      IScopeProvider to help determine whether to use an existing variable in
+      the local scope or create a new one.</p>
+    <p><br>
+    </p>
+    <p><br>
+    </p>
+    <p><br>
+    </p>
+  </body>
+</html>
