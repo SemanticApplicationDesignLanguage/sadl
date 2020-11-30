@@ -1,25 +1,59 @@
-<h1>SADL Documentation</h1>
-<h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/20/2020<!--webbot bot="Timestamp" endspan i-checksum="12495" -->.</h5>
-<p>The SADL documentation, both for users of SADL and developers of SADL, is 
-being migrated to GitHub Pages (see
-<a href="https://docs.github.com/en/free-pro-team@latest/github/working-with-github-pages/about-github-pages">
-https://docs.github.com/en/free-pro-team@latest/github/working-with-github-pages/about-github-pages</a>). 
-This replaces documentation previously hosted at
-<a href="http://sadl.sourceforge.net">http://sadl.sourceforge.net</a>. When the 
-migration is complete, nothing of other than historical significance will be 
-hosted on SourceForge. One clear advantage of use GitHub Pages is that, unlike 
-the github Wiki, one can construct any valid Web content in whatever form one 
-desires.</p>
-<p>The SADL documentation in GitHub Pages is sadl repo-specific. It is kept in a 
-branch, &quot;gh-pages&quot; intended only to contain documentation. In fact, this branch 
-has all other content deleted and so should never be merged with other branches. 
-The documentation root is the &quot;docs&quot; folder at the repo root level. This is 
-configured in the repo's Settings.</p>
-<p>The documentation intended for SADL users is in the root &quot;docs&quot; folder. Most 
-images used in the user documentation are in the &quot;images&quot; subfolder. </p>
-<p>The documentation intended for SADL developers is in the &quot;developers&quot; folder 
-under &quot;docs&quot;. This folder also has an &quot;images&quot; subfolder where most images used 
-in developer documentation can be found. The &quot;developer&quot; folder also has a &quot;SupportingMaterial&quot; 
-subfolder. This contains, for example, the MS PowerPoint file containing the 
-source for many of the images that are not screen shots.</p>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+  </head>
+  <body>
+    <h1>SADL Documentation</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/20/2020<!--webbot bot="Timestamp" endspan i-checksum="12495" -->.</h5>
+    <p>The SADL documentation, both for users of SADL and developers of SADL, is
+      being migrated to GitHub Pages (see <a href="https://docs.github.com/en/free-pro-team@latest/github/working-with-github-pages/about-github-pages">
+https://docs.github.com/en/free-pro-team@latest/github/working-with-github-pages/about-github-pages</a>).
+      This replaces documentation previously hosted at <a href="http://sadl.sourceforge.net">http://sadl.sourceforge.net</a>.
+      When the migration is complete, nothing of other than historical
+      significance will be hosted on SourceForge. One clear advantage of using
+      GitHub Pages is that, unlike the github Wiki, one can construct any valid
+      Web content in whatever form one desires including HTML and PDF and have
+      complete control of the location and hyperlinks.</p>
+    <p>The SADL documentation in GitHub Pages is sadl repo-specific. It is kept
+      in a branch, "gh-pages" intended only to contain documentation. In fact,
+      this branch has all other content deleted and so should never be merged
+      with other branches. The documentation root is the "docs" folder at the
+      repo root level. This is configured in the repo's Settings.</p>
+    <p>The documentation intended for SADL users is in the root "docs" folder.
+      Most images used in the user documentation are in the "images" subfolder.
+    </p>
+    <p>The documentation intended for SADL developers is in the "developers"
+      folder under "docs". This folder also has an "images" subfolder where most
+      images used in developer documentation can be found. The "developer"
+      folder also has a "SupportingMaterial" subfolder. This contains, for
+      example, the MS PowerPoint file containing the source for many of the
+      images that are not screen shots.</p>
+    <p>The "javadoc" folder under the "developer" folder contains JavaDocs
+      generated from source code. The JavaDocs content is divided into folders.
+      For example, the top-level JavaDoc documentation of SadlServer is in
+      "developer/javadoc/sadlserver" folder. To regenerate this content, do the
+      following in a command window.</p>
+    <ol>
+      <li>Change directory to
+        ".../sadl/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.server"</li>
+      <li>Run the Maven command "mvn package javadoc:javadoc javadoc:aggregate"</li>
+    </ol>
+    <p>The JavaDocs will be generated in the following directories:</p>
+    <ol>
+      <li> com.ge.research.sadl.server/target/site/apidocs (aggregating both
+        below) </li>
+      <li>com.ge.research.sadl.server/com.ge.research.sadl.server.server-api/target/site/apidocs
+        </li>
+      <li>com.ge.research.sadl.server/com.ge.research.sadl.server.server-impl/target/site/apidocs
+        </li>
+    </ol>
+    <p>Since the first location is the aggregation of the second two, it is
+      probably sufficient to copy the content of this folder to the GitHub Pages
+      content location "developer/javadoc/sadlserver". See GitHub issue <a href="https://github.com/SemanticApplicationDesignLanguage/sadl/issues/574">https://github.com/SemanticApplicationDesignLanguage/sadl/issues/574</a>
+      and GitHub pull request <a href="https://github.com/SemanticApplicationDesignLanguage/sadl/pull/575">https://github.com/SemanticApplicationDesignLanguage/sadl/pull/575</a>
+      for more information about generating JavaDocs.</p>
+    <ol>
+    </ol>
+  </body>
+</html>
