@@ -7,7 +7,6 @@ Bundle-SymbolicName: com.ge.research.sadl.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.sadl,
  com.ge.research.sadl.ide;visibility:=reexport,
- javax.activation,
  org.eclipse.xtext.ui,
  org.eclipse.ui.console,
  org.eclipse.ui.editors,

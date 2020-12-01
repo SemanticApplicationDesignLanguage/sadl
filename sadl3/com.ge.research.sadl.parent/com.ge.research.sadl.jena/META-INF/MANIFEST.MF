@@ -39,11 +39,11 @@ Export-Package: com.ge.research.sadl.jena;
    org.apache.jena.rdf.model,
    com.ge.research.sadl.jena",
  com.ge.research.sadl.owl2sadl;uses:="org.apache.jena.ontology,com.ge.research.sadl.reasoner,org.apache.jena.rdf.model"
+Import-Package: javax.activation
 Require-Bundle: com.ge.research.sadl.errorgenerator,
  com.ge.research.sadl,
  org.eclipse.emf.ecore,
  com.ge.research.jena,
- javax.activation,
  org.eclipse.xtext,
  org.eclipse.equinox.common,
  org.eclipse.core.runtime,
