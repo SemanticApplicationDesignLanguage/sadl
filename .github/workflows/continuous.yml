@@ -1,21 +1,20 @@
-# Builds SADL and WebSADL on every pull request/push to main branch:
-#  - Builds SADL source
-#  - Builds WebSADL extension
-#  - Publishes WebSADL npm package (main branch only)
-#  - Pushes WebSADL image to Docker Hub (main branch only)
+# Runs after every pull request or push (except tag-only pushes)
 
-name: SADL continuous build
-
+name: SADL Continuous Integration Workflow
 on:
   pull_request:
     branches: [ development ]
   push:
     branches: [ development ]
-    # Ignore tag-only pushes
     tags-ignore: [ '*' ]
   workflow_dispatch:
 
 jobs:
+
+# Test job:
+#  - Builds SADL source
+#  - Runs unit tests
+
   test:
     strategy:
       matrix:
@@ -44,7 +43,16 @@ jobs:
       with:
         run: mvn -B package --file sadl3/com.ge.research.sadl.parent/pom.xml
 
-  web:
+# Build job:
+#  - Builds SADL source
+#  - Runs unit tests
+#  - Uploads SADL update repository
+#  - Builds WebSADL extension
+#  - Publishes WebSADL npm package
+#  - Builds WebSADL Docker image
+#  - Pushes Docker image to Docker Hub
+
+  build:
     strategy:
       matrix:
         java-version: [ 11 ]
@@ -71,6 +79,17 @@ jobs:
       uses: GabrielBB/xvfb-action@v1
       with:
         run: mvn -B package --file sadl3/com.ge.research.sadl.parent/pom.xml
+
+    - name: Get SADL zip filename
+      run: |
+        cd sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target
+        echo "sadlzip=$(echo com.ge.research.sadl.update*.zip | sed 's/.zip//')" >> $GITHUB_ENV
+
+    - name: Upload SADL update repository
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.sadlzip }}
+        path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository
 
     - name: Set up Node.js 10.x
       uses: actions/setup-node@v1
