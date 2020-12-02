@@ -1357,7 +1357,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 	}
 	
 	@Test
-	def void noLinkingForUnits() {
+	def void testNoLinkingForUnits() {
 		'''
 		uri "http://sadl.org/testunits" alias tu.
 		Expr: (2 + 3) seconds.
@@ -1366,10 +1366,20 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		B is a type of <seconds>.
 		'''.assertLinking[sadl]
 	}
+	
+	@Test
+	def void testSameAsDefinition() {
+		'''
+		uri "http://sadl.org/testsameasdefn" alias tsd.
+		Man is a class.
+		Parent is a class.
+		[Father] is the same as {<Man> and <Parent>}.
+		'''.assertLinking[sadl]
+	}
 
 	// https://github.com/crapo/sadlos2/issues/423
 	@Test
-	def void canLinkToFQNWithMultipleSegments() {
+	def void testCanLinkToFQNWithMultipleSegments() {
 		'''
 			uri "http://sadl.org/STEM/BaseModel" alias base.
 			[Thing] (alias "super class of everything") is a class.
@@ -1400,7 +1410,7 @@ class SadlLinkingTest extends AbstractLinkingTest {
 
 	// https://github.com/crapo/sadlos2/issues/447
 	@Test
-	def void canLinkToAllDifferentStatement() {
+	def void testCanLinkToAllDifferentStatement() {
 		'''
 			uri "http://glguy.net/sadl/alldifferentexample".
 			[C] is a class.

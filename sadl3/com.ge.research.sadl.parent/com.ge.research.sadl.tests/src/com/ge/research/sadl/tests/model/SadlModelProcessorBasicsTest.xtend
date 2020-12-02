@@ -678,7 +678,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			assertTrue(issues.size == 0)
-			val ns = "ttp://sadl.org/testformsofspv#"
+			val ns = "http://sadl.org/testformsofspv#"
 			assertTrue(
 				jenaModel.listStatements(jenaModel.getIndividual(ns + "George"),
 					jenaModel.getOntProperty(ns + "spouse"), jenaModel.getIndividual(ns + "Martha")).next() !== null)
@@ -692,4 +692,20 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 	}
 	
 	
+	@Test
+	def void testSameAsDefinition() {
+		'''
+		uri "http://sadl.org/testsameasdefn" alias tsd.
+		Man is a class.
+		Parent is a class.
+		Father is the same as {Man and Parent}.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			assertTrue(issues.size == 0)
+			val ns = "http://sadl.org/testsameasdefn#"
+			assertNotNull(
+				jenaModel.getOntClass(ns + "Father"))
+		]
+	}
+
 }
