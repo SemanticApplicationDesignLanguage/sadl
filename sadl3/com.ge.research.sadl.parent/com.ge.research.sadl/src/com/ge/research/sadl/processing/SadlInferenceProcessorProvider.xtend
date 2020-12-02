@@ -79,6 +79,10 @@ class SadlInferenceProcessorProvider extends AbstractSadlProcessorProvider<ISadl
 			throw new UnsupportedOperationException("TODO: auto-generated method stub")
 		}
 		
+		override getReasonerConfigurationItem(String itemKey) {
+			throw new UnsupportedOperationException("TODO: auto-generated method stub")
+		}
+		
 	}
 
 	@Inject
