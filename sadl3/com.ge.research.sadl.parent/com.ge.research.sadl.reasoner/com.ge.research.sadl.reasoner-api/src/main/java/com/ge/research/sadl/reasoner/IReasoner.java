@@ -45,6 +45,11 @@ public interface IReasoner {
 
 	public final static String TotalReasoningTime = "TotalReasoningTime";
 	
+	// Reasoner-independent keys to configuration values
+	//	(getReasonerConfigurationItem should map from this key to the reasoner-specific key, if different)
+	public final static String DerivationsRequestedKey = "DerivationsRequested";
+	public final static String QueryTimeoutKey = "QueryTimeout";
+	
 	/**
 	 * Method to configure the reasoner properties
 	 * @param  preferences
@@ -415,5 +420,11 @@ public interface IReasoner {
 	 * @return
 	 */
 	public List<ModelError> getErrors();
+
+	/**
+	 * Method to obtain a reasoner configuration value
+	 * @param itemKey -- the key to the desired value
+	 */
+	public String getReasonerConfigurationItem(String itemKey);	
 
 }

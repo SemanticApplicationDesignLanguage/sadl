@@ -114,5 +114,10 @@ interface ISadlInferenceProcessor {
 	 * @param preferenceMap
 	 */
 	def void setPreferences(Map<String, String> preferenceMap)
-	
+
+	/**
+	 * Method to obtain a reasoner configuration value
+	 * @param itemKey -- the key to the desired value
+	 */
+	def String getReasonerConfigurationItem(String itemKey)	throws ConfigurationException, ReasonerNotFoundException
 }
