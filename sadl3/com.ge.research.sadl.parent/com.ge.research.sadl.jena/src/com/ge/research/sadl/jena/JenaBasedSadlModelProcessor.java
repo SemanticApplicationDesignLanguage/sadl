@@ -8882,7 +8882,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			OntClass cls = getTheJenaModel().getOntClass(uri);
 			if (cls == null) {
 				// this is OK--create class
-				cls = createOntClass(getDeclarationExtensions().getConcreteName(sr), (String) null, null);
+				cls = createOntClass(getDeclarationExtensions().getConceptUri(sr), (String) null, null);
 			}
 			if (element.isComplement()) {
 				ComplementClass cc = getTheJenaModel().createComplementClass(cls.getURI(), smasCls);
