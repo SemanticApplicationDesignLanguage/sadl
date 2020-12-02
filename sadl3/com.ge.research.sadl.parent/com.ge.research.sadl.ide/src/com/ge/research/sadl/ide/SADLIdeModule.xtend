@@ -19,7 +19,7 @@ package com.ge.research.sadl.ide
 
 import com.ge.research.sadl.external.ExternalEmfResourcePredicate
 import com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex.JFlexBasedInternalSADLLexer
-import com.ge.research.sadl.ide.editor.coloring.SadlColoringService
+import com.ge.research.sadl.ide.editor.coloring.SadlIdeSemanticHighlightingCalculator
 import com.ge.research.sadl.ide.editor.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlContentAssistContextFactory
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalPriorities
@@ -45,9 +45,10 @@ import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.IdeCrossrefProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
 import org.eclipse.xtext.ide.editor.contentassist.antlr.internal.Lexer
+import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ide.server.ILanguageServerExtension
-import org.eclipse.xtext.ide.server.coloring.IColoringService
 import org.eclipse.xtext.ide.server.rename.IRenameService2
+import org.eclipse.xtext.ide.server.semanticHighlight.ISemanticHighlightingStyleToTokenMapper
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.validation.ResourceValidatorImpl
 
@@ -68,8 +69,12 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 		return SadlIdeCrossrefProposalProvider;
 	}
 
-	def Class<? extends IColoringService> bindIColoringService() {
-		return SadlColoringService;
+	def Class<? extends ISemanticHighlightingCalculator> bindISemanticHighlightingCalculator() {
+		return SadlIdeSemanticHighlightingCalculator;
+	}
+
+	def Class<? extends ISemanticHighlightingStyleToTokenMapper> bindISemanticHighlightingStyleToTokenMapper() {
+		return SadlIdeSemanticHighlightingCalculator;
 	}
 
 	def Class<? extends ILanguageServerExtension> bindILanguageServerExtension() {

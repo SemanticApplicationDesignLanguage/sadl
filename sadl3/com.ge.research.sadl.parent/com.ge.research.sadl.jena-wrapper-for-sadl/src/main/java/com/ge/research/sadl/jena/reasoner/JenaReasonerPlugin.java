@@ -145,6 +145,7 @@ import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InferenceCanceledException;
 import com.ge.research.sadl.reasoner.InvalidDerivationException;
@@ -3658,6 +3659,22 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public String getReasonerConfigurationItem(String itemKey) {
+		if (configuration != null) {
+			if (itemKey.equals(IReasoner.DerivationsRequestedKey)) {
+				return configuration.get(pDerivationLogging).toString();
+			}
+			else if (itemKey.contentEquals(IReasoner.QueryTimeoutKey)) {
+				return configuration.get(pTimeOut).toString();
+			}
+			else {
+				return configuration.get(itemKey).toString();
+			}
+		}
+		return null;
 	}
 
 }

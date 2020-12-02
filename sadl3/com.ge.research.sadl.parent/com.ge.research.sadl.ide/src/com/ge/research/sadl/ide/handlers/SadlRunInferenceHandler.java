@@ -41,6 +41,7 @@ import org.eclipse.xtext.validation.Issue;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.jena.importer.CsvImporter;
+import com.ge.research.sadl.jena.reasoner.builtin.GetInstance;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.EndWrite;
@@ -55,8 +56,10 @@ import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlCommandResult;
@@ -327,6 +330,17 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 		if (getLastDerivation() != null) {
 			DataSource ds = getLastDerivation();
 			console.info(writeDerivationsToFile(trgtFile, ds));
+		}
+		else if (inferenceProcessor != null) {
+			String dl;
+			try {
+				dl = inferenceProcessor.getReasonerConfigurationItem(IReasoner.DerivationsRequestedKey);
+				if (dl != null && dl.length() > 0) {
+					console.info("Derivation information requested but none available.");
+				}
+			} catch (Exception e) {
+				console.error("Error getting reasoner configuration for derivations: " + e.getMessage());
+			}
 		}
     	if (numTests > 0) {
     		String msg = "Test summary: ";

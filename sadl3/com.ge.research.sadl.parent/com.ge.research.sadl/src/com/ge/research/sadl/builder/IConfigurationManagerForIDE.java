@@ -292,17 +292,6 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract boolean validateImport(String publicUri, String altUrl) throws MalformedURLException;
 
 	/**
-	 * Call this method to set the mapping for the "SadlServicesConfigurationConcepts.owl" model. This should be called if a default is added
-	 * to a model to make sure that the definition of default value concepts is available as an import model.
-	 * 
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws ConfigurationException 
-	 */
-	public abstract void setServicesConfigurationAltUrlMapping()
-			throws IOException, URISyntaxException, ConfigurationException;
-	
-	/**
 	 * Call this method to get a list of the actual URLs (as class URI) of all RDF and OWL
 	 * models that should be available to the project but are not actually in the project
 	 * or projects upon which this project depends.

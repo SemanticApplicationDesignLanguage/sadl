@@ -28,7 +28,7 @@ import com.ge.research.sadl.model.SadlSerializationFormat;
 public class SadlPreferences {
 	
 	public static final PreferenceKey SADL_BASE_URI= new PreferenceKey("baseUri", "http://sadl.org");
-	public static final PreferenceKey OWL_MODEL_FORMAT = new PreferenceKey("OWL_Format", "");
+	public static final PreferenceKey OWL_MODEL_FORMAT = new PreferenceKey("OWL_Format", SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
 	public static final PreferenceKey RDF_XML_FORMAT = new PreferenceKey(SadlSerializationFormat.RDF_XML_FORMAT, ""); // default
 	public static final PreferenceKey RDF_XML_ABBREV_FORMAT = new PreferenceKey(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, "");
 	public static final PreferenceKey N_TRIPLE_FORMAT = new PreferenceKey(SadlSerializationFormat.N_TRIPLE_FORMAT, "");

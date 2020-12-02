@@ -20,6 +20,7 @@ package com.ge.research.sadl.external
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.model.SadlSerializationFormat
+import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.sADL.SADLFactory
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.utils.ResourceManager
@@ -44,7 +45,6 @@ import org.apache.jena.util.iterator.ExtendedIterator
 import org.apache.jena.vocabulary.OWL
 import org.apache.jena.vocabulary.RDF
 import org.apache.jena.vocabulary.RDFS
-import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryImpl
@@ -63,7 +63,6 @@ import org.eclipse.xtext.validation.IResourceValidator
 
 import static com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory.*
 import static org.eclipse.emf.common.util.URI.createURI
-import com.ge.research.sadl.reasoner.utils.SadlUtils
 
 @Log
 class ExternalEmfResource extends ResourceImpl {
@@ -89,7 +88,7 @@ class ExternalEmfResource extends ResourceImpl {
 		ontModel = initOntModel(content);
 		val baseUri = ontModel.getBaseUri(content);
 		val altBaseUri = baseUri.altBaseUri;
-		val prefix = ontModel.getNsURIPrefix(baseUri);
+		val prefix = baseUri !== null ? ontModel.getNsURIPrefix(baseUri) : null;
 		val cmgr = getConfigurationManager(options);
 		var String altUrl = null
 		try {

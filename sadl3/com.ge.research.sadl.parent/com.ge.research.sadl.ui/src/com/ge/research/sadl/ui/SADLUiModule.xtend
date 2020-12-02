@@ -29,7 +29,7 @@ import com.ge.research.sadl.ide.editor.contentassist.SadlIdeCrossrefProposalProv
 import com.ge.research.sadl.ide.editor.contentassist.SadlOntologyContextProvider
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
 import com.ge.research.sadl.refactoring.RefactoringHelper
-import com.ge.research.sadl.ui.contentassist.SADLProposalProvider.SADLUiToIdeContentProposalProvider
+import com.ge.research.sadl.ui.contentassist.SADLUiToIdeContentProposalProvider
 import com.ge.research.sadl.ui.contentassist.SadlReferenceProposalCreator
 import com.ge.research.sadl.ui.editor.AlwaysAddXtextNatureCallback
 import com.ge.research.sadl.ui.editor.SadlCopyQualifiedNameService

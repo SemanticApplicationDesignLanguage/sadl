@@ -44,8 +44,9 @@ import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
  * the super classes SadlServer and SadlServerPE. These methods are 
  * primarily convenience functions to support model-driven application,
  * e.g., model-driven user-interface.
+ *
  * MD--model-driven
- * => SadlServerMD
+ * =&gt; SadlServerMD
  *  
  * @author Andy Crapo
  *
@@ -104,7 +105,7 @@ import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 	 * This method returns all of the ancestor classes given a starting class,
 	 *  "className", in a class hierarchy.
 	 * 
-	 * @param root, the starting class type name 
+	 * @param className the starting class type name 
 	 * @return class names of all of the ancestors, or null if none were found
 	 * @throws ConfigurationException 
 	 * @throws ReasonerNotFoundException 
@@ -123,7 +124,7 @@ import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 	 * This method returns all of the direct super classes (one level up) given
 	 * a starting class, "className", in a class hierarchy.
 	 * 
-	 * @param root, the starting class type name 
+	 * @param className the starting class type name 
 	 * @return class names of all of the direct ancestors, or null if none were found
 	 * @throws ConfigurationException 
 	 * @throws ReasonerNotFoundException 
@@ -339,7 +340,6 @@ import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 	 * @param cls -- the localname, prefix:localname, or complete URI of the class
 	 * @return - an Object array of the allowed values, which will be of type Integer, String, Float, etc.
 	 * @throws IOException
-	 * @throws NameNotFoundException
 	 * @throws ReasonerNotFoundException 
 	 * @throws QueryParseException 
 	 * @throws ConfigurationException 

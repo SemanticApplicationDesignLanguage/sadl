@@ -1865,4 +1865,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return null;
 	}
 
+	@Override
+	public String getReasonerConfigurationItem(String itemKey) throws ConfigurationException, ReasonerNotFoundException {
+		return getInitializedReasoner().getReasonerConfigurationItem(itemKey);
+	}
+
 }
