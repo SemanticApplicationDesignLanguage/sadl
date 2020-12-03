@@ -260,6 +260,29 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		]
  	}
  	
+	@Test
+	def void testModelContents() {
+		val sadlModel = '''
+		 uri "http://sadl.org/gh557.sadl" alias gh557.
+		 
+		 Person is a class.
+		 Man is a type of Person.
+		 George is a Man.
+		 
+		 Ask: select x where George is an x.
+		 '''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			for (issue:issues) {
+ 				println(issue.toString)
+ 			}
+  		]
+		val cnts = sadlModel.allContents
+		while (cnts.hasNext) {
+			val el = cnts.next
+			println(el.class.toString)
+		}
+	}
+	
  	@Test
  	def void testAmbiguousNamesInAparqlQuery() {
  		val sadlModel1 = '''
