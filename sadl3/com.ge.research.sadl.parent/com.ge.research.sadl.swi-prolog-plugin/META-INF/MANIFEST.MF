@@ -5,18 +5,20 @@ Bundle-SymbolicName: com.ge.research.sadl.swi-prolog-plugin;singleton:=true
 Bundle-Version: 3.4.1.qualifier
 Bundle-Activator: com.ge.research.sadl.swi_prolog.plugin.Activator
 Bundle-Vendor: GE Global Research
-Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.osgi,
+Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
  org.apache.log4j,
- com.ge.research.jena,
+ org.eclipse.core.runtime,
+ org.eclipse.osgi,
  org.junit;bundle-version="4.12.0";resolution:=optional
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.ge.research.sadl.swi_prolog.fileinterface,
- com.ge.research.sadl.swi_prolog.plinterface;uses:="org.slf4j",
- com.ge.research.sadl.swi_prolog.plugin;uses:="org.osgi.framework",
+ com.ge.research.sadl.swi_prolog.plinterface;
+  uses:="org.slf4j",
+ com.ge.research.sadl.swi_prolog.plugin;
+  uses:="org.osgi.framework",
  com.ge.research.sadl.swi_prolog.reasoner;
   uses:="org.slf4j,
    com.ge.research.sadl.swi_prolog.plinterface,
@@ -27,7 +29,7 @@ Export-Package: com.ge.research.sadl.swi_prolog.fileinterface,
 Bundle-ClassPath: .,
  target/classes/com/ge/research/sadl/swi-prolog/plinterface/
 Import-Package: com.ge.research.sadl.model,
- javax.activation,
  com.ge.research.sadl.model.gp,
- com.ge.research.sadl.reasoner
+ com.ge.research.sadl.reasoner,
+ javax.activation
 Automatic-Module-Name: com.ge.research.sadl.swi.prolog.plugin

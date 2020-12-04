@@ -8,10 +8,10 @@ Bundle-Vendor: GE Global Research
 Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
  com.ge.research.sadl.jena,
- org.eclipse.core.runtime,
- org.eclipse.osgi,
  org.apache.log4j,
  org.apache.xerces,
+ org.eclipse.core.runtime,
+ org.eclipse.osgi,
  org.junit;bundle-version="4.12.0";resolution:=optional
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -43,7 +43,7 @@ Export-Package: com.ge.research.sadl.jena.importer,
    org.apache.jena.ontology"
 Bundle-ClassPath: .
 Import-Package: com.ge.research.sadl.model,
- javax.activation,
  com.ge.research.sadl.model.gp,
- com.ge.research.sadl.reasoner
+ com.ge.research.sadl.reasoner,
+ javax.activation
 Automatic-Module-Name: com.ge.research.sadl.jena-wrapper-for-sadl

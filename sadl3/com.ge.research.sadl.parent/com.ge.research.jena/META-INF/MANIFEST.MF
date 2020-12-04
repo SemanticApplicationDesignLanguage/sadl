@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.ge.research.jena
 Bundle-Version: 3.4.1.qualifier
 Bundle-Vendor: GE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Eclipse-RegisterBuddy: com.ge.research.sadl
 Export-Package: au.com.bytecode.opencsv,
  com.ctc.wstx.api,
  com.ctc.wstx.cfg,
@@ -27,6 +28,8 @@ Export-Package: au.com.bytecode.opencsv,
  com.ge.research.sadl.model.visualizer,
  com.ge.research.sadl.reasoner,
  com.ge.research.sadl.reasoner.utils,
+ com.sun.activation.registries,
+ com.sun.activation.viewers;uses:="javax.activation",
  javax.activation,
  org.apache.jena,
  org.apache.jena.assembler,
@@ -145,8 +148,6 @@ Export-Package: au.com.bytecode.opencsv,
  org.pojava.transformation,
  org.pojava.util,
  org.slf4j
-Require-Bundle: org.apache.xerces
-Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-ClassPath: lib/collection.jar,
  lib/commons-cli.jar,
  lib/commons-codec.jar,
@@ -160,8 +161,8 @@ Bundle-ClassPath: lib/collection.jar,
  lib/jackson-annotations.jar,
  lib/jackson-core.jar,
  lib/jackson-databind.jar,
- lib/javax.annotation-api.jar,
  lib/jakarta.activation.jar,
+ lib/javax.annotation-api.jar,
  lib/jcl-over-slf4j.jar,
  lib/jena-arq.jar,
  lib/jena-base.jar,

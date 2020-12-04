@@ -38,17 +38,20 @@ Export-Package: com.ge.research.sadl.jena;
    org.slf4j,
    org.apache.jena.rdf.model,
    com.ge.research.sadl.jena",
- com.ge.research.sadl.owl2sadl;uses:="org.apache.jena.ontology,com.ge.research.sadl.reasoner,org.apache.jena.rdf.model"
-Import-Package: javax.activation
-Require-Bundle: com.ge.research.sadl.errorgenerator,
+ com.ge.research.sadl.owl2sadl;
+  uses:="org.apache.jena.ontology,
+   com.ge.research.sadl.reasoner,
+   org.apache.jena.rdf.model"
+Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
- org.eclipse.emf.ecore,
- com.ge.research.jena,
- org.eclipse.xtext,
- org.eclipse.equinox.common,
- org.eclipse.core.runtime,
+ com.ge.research.sadl.errorgenerator,
  org.apache.xerces,
  org.eclipse.core.resources,
+ org.eclipse.core.runtime,
+ org.eclipse.emf.ecore,
+ org.eclipse.equinox.common,
+ org.eclipse.xtext,
  org.eclipse.xtext.builder
+Import-Package: javax.activation
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Automatic-Module-Name: com.ge.research.sadl.jena
