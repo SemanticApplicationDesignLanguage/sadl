@@ -24,6 +24,12 @@ import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
 import org.apache.jena.ontology.OntResource
+import org.apache.jena.ontology.Restriction
+import org.apache.jena.vocabulary.OWL2
+import org.apache.jena.vocabulary.RDF
+import org.apache.jena.rdf.model.RDFList
+import org.eclipse.xtext.diagnostics.Severity
+import org.apache.jena.vocabulary.XSD
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -96,6 +102,25 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  			assertNotNull(jenaModel)
  			jenaModel.write(System.out)
  			assertTrue(issues.size == 0)		// just checking for errors, owl:AllDifferent doesn't query well
+ 			val sitr = jenaModel.listStatements(null, OWL.distinctMembers, null as RDFNode)
+ 			assertTrue(!sitr.empty)
+ 			while (sitr.hasNext) {
+ 				val stmt = sitr.nextStatement
+ 				val obj = stmt.object
+ 				if (obj.isResource) {
+ 					val rsrcObj = obj.asResource
+ 					if (rsrcObj.canAs(RDF.List.class)) {
+// 						val lst = rsrcObj.^as(RDF.List.class)
+// 						val hd = (lst as RDFList).head
+// 						assertTrue(hd.isResource)
+// 						assertTrue(hd.asResource.localName.equals("CodeFile") ||
+// 							hd.asResource.localName.equals("SomeModel"))
+ 					}
+ 					else {
+ 						fail
+ 					}
+ 				}
+ 			}
  		]
 	}
 	
@@ -115,6 +140,25 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  			assertNotNull(jenaModel)
  			jenaModel.write(System.out)
  			assertTrue(issues.size == 0)		// just checking for errors, owl:AllDifferent doesn't query well
+ 			val sitr = jenaModel.listStatements(null, OWL.distinctMembers, null as RDFNode)
+ 			assertTrue(!sitr.empty)
+ 			while (sitr.hasNext) {
+ 				val stmt = sitr.nextStatement
+ 				val obj = stmt.object
+ 				if (obj.isResource) {
+ 					val rsrcObj = obj.asResource
+ 					if (rsrcObj.canAs(RDF.List.class)) {
+// 						val lst = rsrcObj.^as(RDF.List.class)
+// 						val hd = (lst as RDFList).head
+// 						assertTrue(hd.isResource)
+// 						assertTrue(hd.asResource.localName.equals("CodeFile") ||
+// 							hd.asResource.localName.equals("SomeModel"))
+ 					}
+ 					else {
+ 						fail
+ 					}
+ 				}
+ 			}
  		]
 	}
 
@@ -132,10 +176,14 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  			val itr = pcls.listSuperClasses(true)
  			assertTrue(itr.hasNext)
  			val sprc = itr.next
- 			if (sprc instanceof CardinalityRestriction) {
- 				assertTrue((sprc as CardinalityRestriction).onProperty.URI.equals("http://sadl.org/test.sadl#age"))
- 				assertTrue((sprc as CardinalityRestriction).cardinality == 1)
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#age"))
+ 				assertTrue(rest.getPropertyValue(OWL2.onDataRange).asResource.URI.equals(XSD.xfloat.URI))
+ 				assertTrue(rest.getPropertyValue(OWL2.qualifiedCardinality).asLiteral.int == 1)
+  				return
  			}
+ 			fail()
  		]
 	}
 
@@ -154,10 +202,401 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  			val itr = pcls.listSuperClasses(true)
  			assertTrue(itr.hasNext)
  			val sprc = itr.next
- 			if (sprc instanceof CardinalityRestriction) {
- 				assertTrue((sprc as CardinalityRestriction).onProperty.URI.equals("http://sadl.org/test.sadl#age"))
- 				assertTrue((sprc as CardinalityRestriction).cardinality == 1)
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#age"))
+ 				assertTrue(rest.getPropertyValue(OWL2.onDataRange).asResource.URI.equals(XSD.xfloat.URI))
+ 				assertTrue(rest.getPropertyValue(OWL2.qualifiedCardinality).asLiteral.int == 1)
+ 				return
  			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertySingleValue3() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by friend with a single value of type Person.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#friend"))
+ 				assertTrue(rest.getPropertyValue(OWL2.onClass).asResource.URI.equals("http://sadl.org/test.sadl#Person"))
+ 				assertTrue(rest.getPropertyValue(OWL2.qualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertySingleValue4() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class.
+			 friend describes Person with a single value of type Person.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#friend"))
+ 				assertTrue(rest.getPropertyValue(OWL2.onClass).asResource.URI.equals("http://sadl.org/test.sadl#Person"))
+ 				assertTrue(rest.getPropertyValue(OWL2.qualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertySingleValue5() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by owns with a single value of type class.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#owns"))
+ 				assertTrue(rest.getPropertyValue(OWL2.cardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertySingleValue6() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class.
+			 owns describes Person with a single value of type class.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#owns"))
+ 				assertTrue(rest.getPropertyValue(OWL2.cardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertySingleValue7() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by attr with a single value of type data.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#attr"))
+ 				assertTrue(rest.getPropertyValue(OWL2.cardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertySingleValue8() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class.
+			 attr describes Person with a single value of type data.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#attr"))
+ 				assertTrue(rest.getPropertyValue(OWL2.cardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertyInLinePropertyRestriction_01() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by friend with exactly 1 value of type Person.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#friend"))
+ 				assertTrue(rest.getPropertyValue(OWL2.onClass).asResource.URI.equals("http://sadl.org/test.sadl#Person"))
+ 				assertTrue(rest.getPropertyValue(OWL2.qualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertyInLinePropertyRestriction_02() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by friend with at least 1 value of type Person.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#friend"))
+ 				assertTrue(rest.getPropertyValue(OWL2.onClass).asResource.URI.equals("http://sadl.org/test.sadl#Person"))
+ 				assertTrue(rest.getPropertyValue(OWL2.minQualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertyInLinePropertyRestriction_03() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by friend with at most 1 value of type Person.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#friend"))
+ 				assertTrue(rest.getPropertyValue(OWL2.onClass).asResource.URI.equals("http://sadl.org/test.sadl#Person"))
+ 				assertTrue(rest.getPropertyValue(OWL2.maxQualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertyInLinePropertyRestriction_04() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class.
+			 friend describes Person with exactly 1 value of type Person.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#friend"))
+ 				assertTrue(rest.getPropertyValue(OWL2.onClass).asResource.URI.equals("http://sadl.org/test.sadl#Person"))
+ 				assertTrue(rest.getPropertyValue(OWL2.qualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertyInLinePropertyRestriction_05() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class.
+			 friend describes Person with at least 1 value of type Person.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#friend"))
+ 				assertTrue(rest.getPropertyValue(OWL2.onClass).asResource.URI.equals("http://sadl.org/test.sadl#Person"))
+ 				assertTrue(rest.getPropertyValue(OWL2.minQualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertyInLinePropertyRestriction_06() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class.
+			 friend describes Person with at most 1 value of type Person.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#friend"))
+ 				assertTrue(rest.getPropertyValue(OWL2.onClass).asResource.URI.equals("http://sadl.org/test.sadl#Person"))
+ 				assertTrue(rest.getPropertyValue(OWL2.maxQualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertyInLinePropertyRestriction_07() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Gender is a class, can only be one of {Male, Female}.
+			 
+			 gender is a property with values of type Gender.
+			 
+			 Person is a class described by gender with exactly 1 value .
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Person")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#gender"))
+ 				assertTrue(rest.getPropertyValue(OWL.cardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertyInLinePropertyRestriction_08() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class.
+			 OrderedChildren is a Person List.
+			 Parent is a type of Person described by sortedChildren with exactly 1 value of type OrderedChildren.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Parent")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#sortedChildren"))
+ 				val onclass = rest.getPropertyValue(OWL2.onClass).asResource
+ 				assertTrue(onclass.URI.equals("http://sadl.org/test.sadl#OrderedChildren"))
+ 				assertTrue(rest.getPropertyValue(OWL2.qualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertyInLinePropertyRestriction_09() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class.
+			 OrderedChildren is a Person List.
+			 Parent is a type of Person.
+			 sortedChildren describes Parent with exactly 1 value of type OrderedChildren.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Parent")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/test.sadl#sortedChildren"))
+ 				val onclass = rest.getPropertyValue(OWL2.onClass).asResource
+ 				assertTrue(onclass.URI.equals("http://sadl.org/test.sadl#OrderedChildren"))
+ 				assertTrue(rest.getPropertyValue(OWL2.qualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
  		]
 	}
 
@@ -190,19 +629,24 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 	}
 	
 	@Test
+	def void testInvalidPropertyRestrictionError() {
+		val sadlModel = '''
+			 uri "http://sadl.org/gh576.sadl" alias gh576.
+			  
+			 Gender is a class, can only be one of {Male, Female}.
+			 
+			 Person is a class described by friend with exactly 1 value of type Person,
+			  	described by gender with exactly 1 value of type Gender.
+			  
+			 Woman is a type of Person, always has value Female.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+			assertTrue(issues.filter[severity === Severity.ERROR].size == 1)
+ 		]
+	}
+	
+	@Test
 	def void testNamedStructureAnnotationsRule() {
-//		val implicitModel = '''
-//			uri "http://sadl.org/sadlimplicitmodel" alias sadlimplicitmodel.
-//			
-//			impliedProperty is a type of annotation.
-//			expandedProperty is a type of annotation.
-//			UnittedQuantity is a class,
-//				described by ^value with values of type decimal,
-//				described by unit with values of type string.
-//			^Rule is a class.
-//			NamedQuery is a class.
-//		'''.assertValidatesTo[ jenaModel, rules, cmds, issues, processor |]
-//		
 		val sadlModel = '''
 			uri "http://sadl.org/Shapes.sadl" alias Shapes.
 			 
@@ -254,14 +698,17 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  				println(issue.toString)
  			}
   			assertTrue(issues.size == 0)
+  			assertNotNull(cmds)
+  			assertTrue(cmds.size == 4)
   			for (cmd:cmds) {
   				println(cmd.toString)
+  				assertTrue(cmd.toString.startsWith("select i"))
   			}
 		]
  	}
  	
  	@Test
- 	def void testAmbiguousNamesInAparqlQuery() {
+ 	def void testAmbiguousNamesInSparqlQuery() {
  		val sadlModel1 = '''
  		 uri "http://sadl.org/model1.sadl" alias model1.
  		 
