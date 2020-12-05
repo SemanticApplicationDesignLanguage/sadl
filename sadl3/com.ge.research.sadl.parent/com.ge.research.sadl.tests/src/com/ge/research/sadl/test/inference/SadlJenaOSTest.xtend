@@ -68,7 +68,7 @@ class SadlJenaOSTest extends AbstractSADLModelProcessorTest {
 		     	
 		 Rule example-1:
 		 	if var2 of a System is var3 of the System
-		 	then var1 of a System is  var2 of the System + var3 of the System.
+		 	then var1 of the System is  var2 of the System + var3 of the System.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			if (issues !== null) {
@@ -81,7 +81,7 @@ class SadlJenaOSTest extends AbstractSADLModelProcessorTest {
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 3)		// content requires articles to be enabled
+			assertTrue(issues.size == 5)		// content requires articles to be enabled, variable not assigned in premises
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -103,7 +103,7 @@ rdf(v3,rulevars2:var2,v7) and rdf(v4,rulevars2:var3,v8) and +(v7,v8,v9) then rdf
 		     	
 		 Rule example-1:
 		 	if var2 of a System is not var3 of the System
-		 	then var1 of a System is  var2 of the System + var3 of the System.
+		 	then var1 of the System is  var2 of the System + var3 of the System.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			if (issues !== null) {
@@ -116,7 +116,7 @@ rdf(v3,rulevars2:var2,v7) and rdf(v4,rulevars2:var3,v8) and +(v7,v8,v9) then rdf
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 3)	// content requires articles to be enabled
+			assertTrue(issues.size == 5)	// content requires articles to be enabled, variable not assigned in premises
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -139,7 +139,7 @@ rdf(v3, rulevars2:var2, v7) and rdf(v4, rulevars2:var3, v8) and +(v7,v8,v9) then
 		     	
 		 Rule example-3:
 		 	if var2 of a System is not Success
-		 	then var1 of a System is Failed and var3 of the System is Failed.
+		 	then var1 of the System is Failed and var3 of the System is Failed.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			if (issues !== null) {
@@ -152,7 +152,7 @@ rdf(v3, rulevars2:var2, v7) and rdf(v4, rulevars2:var3, v8) and +(v7,v8,v9) then
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 1)	// content requires articles to be enabled
+			assertTrue(issues.size == 4)	// content requires articles to be enabled, 2 var not bound in premises
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
