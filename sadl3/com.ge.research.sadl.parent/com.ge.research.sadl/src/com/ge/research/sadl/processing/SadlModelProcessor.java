@@ -43,6 +43,7 @@ import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Literal;
+import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
@@ -380,7 +381,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 //	}
 
 	protected Object processExpression(BooleanLiteral expr) {
-		Literal lit = new Literal();
+		Literal lit = new Literal(LiteralType.BooleanLiteral);
 		String val = expr.getValue();
 		if (val.equals("true")) {
 			lit.setValue(true);
@@ -393,7 +394,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	}
 
 	protected Object processExpression(NumberLiteral expr) {
-		Literal lit = new Literal();
+		Literal lit = new Literal(LiteralType.NumberLiteral);
 		BigDecimal val = expr.getValue();
 		lit.setValue(val);
 		lit.setOriginalText(expr.getValue().toPlainString());
@@ -401,7 +402,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	}
 
 	protected Object processExpression(StringLiteral expr) {
-		Literal lit = new Literal();
+		Literal lit = new Literal(LiteralType.StringLiteral);
 		lit.setValue(expr.getValue());
 		lit.setOriginalText(expr.getValue());
 		return lit;

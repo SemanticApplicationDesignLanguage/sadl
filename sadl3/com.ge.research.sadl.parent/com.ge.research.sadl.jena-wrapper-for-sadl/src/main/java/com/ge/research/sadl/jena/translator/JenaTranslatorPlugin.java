@@ -2165,6 +2165,11 @@ public class JenaTranslatorPlugin implements ITranslator {
 	
 	@Override
 	public String getBuiltinFunctionModel(List<String> reservedWords){
+		/*
+		 * Note that for the Jena Reasoner, there are two kinds of built-ins
+		 * 1. those that are called implicit built-ins, obtained by calling reasoner getImplicitBuiltinSignatures
+		 * 2. those that are added as implementations of the builtin class and obtained from Java service
+		 */
 		StringBuilder sb = new StringBuilder();
 		sb.append("uri \"");
 		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_URI);

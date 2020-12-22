@@ -243,7 +243,9 @@ public interface ITranslator {
 	public Enum isBuiltinFunctionTypeCheckingAvailable();
 	
 	/**
-	 * Method to obtain the implicit model for built-in functions for this reasoner/translator pair
+	 * Method to obtain the implicit model for built-in functions for this reasoner/translator pair.
+	 * Note that built-in functions model is obtained by calling method getBuildingFUnctionsModel in
+	 * the translator.
 	 * @param reservedWords -- a list of reserved words in the language that must be escaped with "^" prefix
 	 * @return -- Built-in Function Implicit model as a string
 	 */

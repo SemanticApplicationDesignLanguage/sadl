@@ -26,8 +26,27 @@ package com.ge.research.sadl.model.gp;
 public class Literal extends Node {
 	private Object value = null;
 	private String units = null;
+	private LiteralType literalType = null;
+	
+	public enum LiteralType {BooleanLiteral, StringLiteral, NumberLiteral}
 	
 	private String originalText = null;
+	
+	public Literal() {
+		super();
+	}
+	
+	public Literal(LiteralType type) {
+		super();
+		setLiteralType(type);
+	}
+	
+	public Literal(Object value, String units, LiteralType type) {
+		super();
+		setValue(value);
+		setUnits(units);
+		setLiteralType(type);
+	}
 
 	/**
 	 * Set the value of the Literal
@@ -125,6 +144,14 @@ public class Literal extends Node {
 	 */
 	public void setUnits(String units) {
 		this.units = units;
+	}
+
+	public LiteralType getLiteralType() {
+		return literalType;
+	}
+
+	private void setLiteralType(LiteralType literalType) {
+		this.literalType = literalType;
 	}
 
 }

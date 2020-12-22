@@ -1364,11 +1364,14 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			translator = getConfigMgr(getOwlFormat()).getTranslator();
 		}
 		Query q = processQuery(query);
+		q.setContext(cmd.getContext());
 		q.setUpdate(cmd.isUpdate());
 		q.setGraph(cmd.isGraph());
 		q.setFqName(cmd.getFqName());
+		q.setPatterns(cmd.getPatterns());
 		q.setParameterizedValues(cmd.getParameterizedValues());
 		q.setToBeEvaluated(cmd.isToBeEvaluated());
+		q.setVariables(cmd.getVariables());
 		SadlCommandResult result = new SadlCommandResult(q);
 		result.setResults(processAdhocQuery(translator, q));
 		result.setErrors(getInitializedReasoner().getErrors());
@@ -1401,7 +1404,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			ITranslator alttranslator = getConfigMgr(null).getTranslatorForReasoner(defaultReasoner);
 			queryString = alttranslator.translateQuery(getTheJenaModel(), getModelName(), q);
 		}
-		if (queryString == null && q.getSparqlQueryString() != null) {
+		if ((queryString == null || queryString.length() == 0) && q.getSparqlQueryString() != null) {
 			queryString = q.getSparqlQueryString();
 		}
 		IReasoner reasoner = getInitializedReasoner();

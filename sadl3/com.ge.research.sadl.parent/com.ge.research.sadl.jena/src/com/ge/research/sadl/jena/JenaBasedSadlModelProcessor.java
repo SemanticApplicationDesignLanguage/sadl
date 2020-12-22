@@ -721,6 +721,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					modelErrorsToOutput(resource, results);
 				}
 			} catch (Exception e) {
+				if (e.getMessage() == null) {
+					e.printStackTrace();
+				}
 				System.err.println(e.getMessage());
 			}
 		}
@@ -5804,12 +5807,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (simpleUnionOrIntersection) {
 				// this is a special case--union or intersection of two Nodes
-				JunctionNode ci;
-				if (op.equals("or")) {
-					ci = new JunctionNode(nodeCheck(lobj), nodeCheck(robj), JunctionType.Disj);
-				}
-				else {
-					ci = new JunctionNode(nodeCheck(lobj), nodeCheck(robj), JunctionType.Conj);
+				JunctionNode ci = null;
+				if (lobj != null && robj != null) {
+					if (op.equals("or")) {
+						ci = new JunctionNode(nodeCheck(lobj), nodeCheck(robj), JunctionType.Disj);
+					}
+					else {
+						ci = new JunctionNode(nodeCheck(lobj), nodeCheck(robj), JunctionType.Conj);
+					}
 				}
 				return ci;
 			}
@@ -13111,7 +13116,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					val = "-" + val;
 				}
 				if (rng != null && rng.getURI() != null) {
-					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+					try {
+						return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+					}
+					catch (TranslationException e) {
+						addTypeCheckingError(e.getMessage(), value);
+					}
 				} else {
 					if (val.contains(".")) {
 						return getTheJenaModel().createTypedLiteral(Double.parseDouble(val));
