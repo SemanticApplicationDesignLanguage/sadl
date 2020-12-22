@@ -1,12 +1,12 @@
  uri "http://sadl.org/WhimWham.sadl" alias WhimWham.
  
  Foo is a class described by bar with values of type Whim.
- Whim is a class described by wham with values of type string.
+ Whim is a class described by wham with values of type string, described by whim with values of type int.
  
- W1 is a Whim with wham "hi".
+ W1 is a Whim with wham "hi", with whim 8.
  F1 is a Foo with bar W1.
  
  Ask: select i where i is a Foo.
  Ask: select i where i is a Foo with bar (a Whim with wham "hi").
  Ask: select i where i is a Foo and i has bar x and x is a Whim and x has wham "hi".
- 
+   

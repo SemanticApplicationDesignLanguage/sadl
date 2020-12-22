@@ -1,4 +1,4 @@
-uri "http://sadl.org/tabimport/blanks" alias blks
+uri "http://sadl.org/tabimport/blanks/imp" alias blksimp
     (note "This ontology was created from a CSV data source.").
 
 // This ontology was created from a CSV data source.@en.

@@ -9,6 +9,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -124,47 +126,49 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		
 		setPrologServiceInstance(pl);
 		
-		String modelAltUrl = getConfigMgr().getAltUrlFromPublicUri(modelName);
-//		File plFilesFolder = new File(KBIdentifier);
-//		File[] files = plFilesFolder.listFiles(); 
-		/*
-		Map<String, String> envMap = System.getenv();
-		SortedMap<String, String> sortedEnvMap = new TreeMap<String, String>(envMap);
-		Set<String> keySet = sortedEnvMap.keySet();
-		for (String key : keySet) {
-			String value = envMap.get(key);
-			System.out.println("[" + key + "] " + value);
-		}*/
-		
 		StringBuffer sbLoad = new StringBuffer();
-		sbLoad.append(":- load_pl_file('");
-		String owlFile = null;
-		try {
-			owlFile = new SadlUtils().fileUrlToFileName(modelAltUrl);
-			sbLoad.append(createDerivedFilename(owlFile, "pl"));
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			succeeded = 0;
+		if (modelName != null) {
+			String modelAltUrl = getConfigMgr().getAltUrlFromPublicUri(modelName);
+	//		File plFilesFolder = new File(KBIdentifier);
+	//		File[] files = plFilesFolder.listFiles(); 
+			/*
+			Map<String, String> envMap = System.getenv();
+			SortedMap<String, String> sortedEnvMap = new TreeMap<String, String>(envMap);
+			Set<String> keySet = sortedEnvMap.keySet();
+			for (String key : keySet) {
+				String value = envMap.get(key);
+				System.out.println("[" + key + "] " + value);
+			}*/
+			
+			sbLoad.append(":- load_pl_file('");
+			String owlFile = null;
+			try {
+				owlFile = new SadlUtils().fileUrlToFileName(modelAltUrl);
+				sbLoad.append(createDerivedFilename(owlFile, "pl"));
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				succeeded = 0;
+			}
+			sbLoad.append("').\n");
+			sbLoad.append(":- load_rdf_file('");
+			sbLoad.append(fixWindowsPath(owlFile));
+			sbLoad.append("').\n");
 		}
-		sbLoad.append("').\n");
-		sbLoad.append(":- load_rdf_file('");
-		sbLoad.append(fixWindowsPath(owlFile));
-		sbLoad.append("').\n");
 		
 		StringBuffer sbUnload = new StringBuffer();
 		pl.clearPlRules();
 		if (sbLoad.length() > 0) {
 			pl.addPlRules(sbLoad.toString());
 		}
-		try {
-			//System.out.println(pl.runPlQueryNoArgs(url, "true", true));
-			pl.clearPlRules();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			succeeded = 0;
-		}
+//		try {
+//			//System.out.println(pl.runPlQueryNoArgs(url, "true", true));
+//			pl.clearPlRules();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			succeeded = 0;
+//		}
 		//SWIPrologInterface.initProlog(KBIdentifier);
 		// to get configuration options
 		//String derval = getStringConfigurationValue(preferences , plImport, null);
@@ -349,6 +353,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			String[] querySplit = askQuery.split("\\s+");
 			List<String> vars = new ArrayList<String>();
 			boolean varStart = false;
+			boolean allVars = false;
 			for (int index=0; index<querySplit.length; index++){
 				if (querySplit[index].toLowerCase().equals("select")){
 					varStart = true;
@@ -357,11 +362,18 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 				
 				if (querySplit[index].toLowerCase().equals("where")){
 					varStart = false;
-					continue;
+					break;
 				}
 				
-				if (varStart)
-					vars.add(removeLeadingQuestion(querySplit[index]));
+				if (varStart) {
+					String varName = removeLeadingQuestion(querySplit[index]);
+					if (varName.equals("*")) {
+						allVars = true;
+					}
+					else {
+						vars.add(varName);
+					}
+				}
 			}
 			
 			int whereIndex = askQuery.indexOf(" where ");
@@ -372,12 +384,44 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			else {
 				plQuery = askQuery;
 			}
+			
+			if (allVars) {
+				// get all vars, assume Prolog predicates, comma-separated arguments. Unquoted arguments are variables
+				String[] commaSplit = plQuery.split(",");
+				if (commaSplit != null) {
+					for (int i = 0; i < commaSplit.length; i++) {
+						String element = commaSplit[i];
+						element = element.trim();
+						if (element.endsWith(")")) {
+							element = element.substring(0, element.length() - 1);
+						}
+						if (!element.trim().endsWith("'")) {
+							StringBuilder sb = new StringBuilder();
+							int len = element.length();
+							while (len > 0) {
+								if (Character.isAlphabetic(element.charAt(len - 1)) ||
+										Character.isDigit(element.charAt(len - 1))) {
+									len--;
+								}
+								else {
+									break;
+								}
+							}
+							String varName = element.substring(len).trim();
+							if (!vars.contains(varName)) {
+								vars.add(varName);
+							}
+						}
+					}
+				}
+			}
+
 			try {
 				return prologQueryToResultSet(plQuery, vars);
 			} catch (Exception e) {
 				addError(new ModelError("Error processing query '" + plQuery + "': " + e.getMessage(), ErrorType.ERROR));
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+//				e.printStackTrace();
 			}
 		}
 		return null;
@@ -598,13 +642,79 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 
 	@Override
 	public List<BuiltinInfo> getImplicitBuiltins() {
-		// TODO Auto-generated method stub
+		// here we want to get the built-ins known to the reasoner
+		try {
+			ResultSet rs = ask("select X Y where current_predicate(X/Y)");
+			if (rs != null) {
+				// sort rows
+				Arrays.sort(rs.getData(), new Comparator<Object[]>(){  
+				    @Override  
+				    public int compare(Object[] row1, Object[] row2){  
+//				         return apple1.weight - apple2.weight;  
+				    	 return row1[0].toString().compareTo(row2[0].toString());
+				    }  
+				}); 
+				List<BuiltinInfo> bilst = new ArrayList<BuiltinInfo>();
+				String lastRowPredicate = rs.getResultAt(0, 0).toString();
+				int lastRowArity = Integer.parseInt(rs.getResultAt(0, 1).toString());
+				int dupCntr = 0; 
+				StringBuilder sb = new StringBuilder();
+				for (int i = 1; i < rs.getRowCount(); i++) {
+					String pred = rs.getResultAt(i, 0).toString();
+					int arity = Integer.parseInt(rs.getResultAt(i, 1).toString());
+					if (!pred.equals(lastRowPredicate) || i == rs.getRowCount() - 1) {
+						if (Character.isAlphabetic(lastRowPredicate.charAt(0)) && lastRowPredicate.matches("^[a-zA-Z_]+[a-zA-Z0-9_\\-%~]*")) {
+							// valid name
+							sb.append("(");
+							if (dupCntr > 0) {
+								sb.append("--");
+							}
+							else {
+								for (int j = 0; j <= lastRowArity; j++) {
+									if (j > 0) {
+										sb.append(",");
+									}
+									sb.append("string ");	// assume all arguments are strings for now
+									sb.append("PV" + j);
+								}
+							}
+							String className = "com.ge.research.sadl.swi-prolog.predicate#" + lastRowPredicate;
+							sb.append(") returns -- : \"com.ge.research.sadl.swi-prolog.predicate#");
+							sb.append(lastRowPredicate);
+							BuiltinInfo biinfo = new BuiltinInfo(lastRowPredicate, className, ReasonerFamily, dupCntr > 0 ? -9999 : lastRowArity);
+							biinfo.setSignature(sb.toString());
+							bilst.add(biinfo);
+							sb.setLength(0);
+						}
+						dupCntr = 0;
+					}
+					else {
+						dupCntr++;
+					}
+					lastRowPredicate = pred;
+					lastRowArity = arity;
+				}
+				return bilst;
+			}
+			
+		} catch (QueryParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (QueryCancelledException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return null;
 	}
 
 	@Override
 	public List<FunctionSignature> getImplicitBuiltinSignatures() {
-		// TODO Auto-generated method stub
+		List<BuiltinInfo> bilst = getImplicitBuiltins();
+		if (bilst != null) {
+			for (BuiltinInfo biinfo : bilst) {
+				System.out.println(biinfo.toString());
+			}
+		}
 		return null;
 	}
 
@@ -696,6 +806,8 @@ public class SWIPrologReasonerPlugin extends Reasoner {
     	
 		boolean serviceOK = false;
 		int errorNumber = 0;
+		int countOut = 20;
+		long waitInterval = 100L;	// ms
 		while (!serviceOK) {
 			// Step 3: execute query
 			try {
@@ -720,8 +832,16 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 				return e.getMessage();
 			}
 			errorNumber++;
-			if (errorNumber > 2000) {
-				return "Failed to prepare service after 1000 iterations.";
+			if (errorNumber > countOut) {
+				return "Failed to prepare service after " + countOut + " waits of " + waitInterval + " ms.";
+			}
+			else {
+				try {
+					Thread.sleep(waitInterval);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		return null;
@@ -740,7 +860,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		} else if ( isUnix() ) {
 			String runServiceFile = getConfigMgr().getModelFolder() + "/" + SWIPrologTranslatorPlugin.SWI_RUN_PROLOG_SERVICE_PL;
 			getPrologCommandLine(); //don't need the command, but it creates the temp folder.
-			String command = "/usr/local/bin/swipl -f " +  runServiceFile; 
+			String command = "swipl -f " +  runServiceFile; 
 			Runtime.getRuntime().exec(command); //for *NIX
 		} else {
 			throw new IOException("Unknown OS " + getOSIdent() + ", can't kill prolog service");
@@ -957,8 +1077,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 
 	@Override
 	public boolean isInitialized() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.initialized;
 	}
 
 	protected void setInitialized(boolean initialized) {

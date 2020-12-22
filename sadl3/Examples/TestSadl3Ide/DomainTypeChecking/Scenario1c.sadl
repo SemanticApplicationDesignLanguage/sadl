@@ -1,0 +1,51 @@
+ uri "http://sadl.org/Scenario1c.sadl" alias Scenario1c.
+ 
+ /*
+  *
+ 	  	 * 1. Subject is a class:
+		 *  	Note: this occurs in derivative grammars such as SRL in ASSERT(TM)
+...
+		 * 	c. Domain is an intersection class
+		 * 		i. Subject is a single class
+		 * 			if subject is the same or a subclass of EACH member of the domain intersection 
+		 * 			class it is	a MATCH else it is NOT
+		 * 		ii. Subject is a union class
+		 * 			--if each member of the subject union class is the same or a subclass
+		 * 			of EACH member of the domain intersection class it is a MATCH
+		 * 			--if some member of the subject union class is the same or a subclass
+		 * 			of EACH member of the domain intersection class, it is INDETERMINATE
+		 * 			--if no member of the subject union class is the same or a subclass
+		 * 			of EACH member of the domain intersection class, it is NOT a match
+		 * 		iii. Subject is an intersection class
+		 * 			if any member of the subject intersection class is the same or a subclass
+		 * 			of EACH member of the domain intersection class, it is a MATCH else it is NOT
+  
+  */
+  
+ PhysicalObject is a class.
+ Tool is a class.
+  
+ Hammer is a type of {PhysicalObject and Tool}.
+  
+ Nail is a class.
+ drives describes Hammer with values of type Nail.
+ 
+ MyScrewDriver is a Tool.
+ Screw is a class.
+ Screw123 is a Screw.
+ Nail456 is a Nail.
+ 
+ MyScrewDriver (note "1.c.i") drives Screw123.
+ MyScrewDriver drives Nail456.
+ 
+ YourBigScrewDriver is a {Tool or PhysicalObject}.
+ 
+ YourBigScrewDriver (note "1.c.ii") drives Nail456.
+ 
+ TheOtherScrewDriver is a {Tool and PhysicalObject}.
+ 
+ TheOtherScrewDriver (note "1.c.iii") drives Nail456.
+ 
+ 
+ 
+ 

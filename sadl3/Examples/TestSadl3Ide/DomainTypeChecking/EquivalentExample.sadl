@@ -1,0 +1,16 @@
+ uri "http://sadl.org/EquivalentExample.sadl" alias EquivalentExample.
+ 
+ Gender is a class, must be one of {Male, Female}.
+ Person is a class, described by age with values of type int, described by gender with values of type Gender.
+ 
+ child describes Person with values of type Person.
+ 
+ Scientist is a class.
+ 
+ a Person is a Mother only if gender always has value Female and child has at least 1 value. 
+ 
+ mother describes Person with values of type Mother.
+ 
+ Jane (note "subject belongs to a single class") is a Mother with age 24.
+ 
+ Debbie is a Mother with mother Jane.

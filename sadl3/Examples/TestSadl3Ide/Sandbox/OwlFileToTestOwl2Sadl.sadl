@@ -1,6 +1,6 @@
  uri "http://sadl.org/OwlFileToTestOwl2Sadl.sadl" alias OwlFileToTestOwl2Sadl.
  
- Class1 is a class described by op with values of type Class2,
+ Class1 is a class described by OwlFileToTestOwl2Sadl:op with values of type Class2,		// "op" is a builtin name in Prolog
  	described by dps with values of type string,
  	described by dpf with values of type float,
  	described by dpi with values of type int,
@@ -9,8 +9,9 @@
  Class2 is a class.
  Cls2Inst is a Class2.
  
- Cls1Inst is a Class1 with op Cls2Inst,
+ Cls1Inst is a Class1 with OwlFileToTestOwl2Sadl:op Cls2Inst,
  	with dps "Hello world",
  	with dpf 3.1416,
  	with dpi 23,
  	with dpdt "July 19, 1951".
+ 	

@@ -16,10 +16,13 @@ import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
+import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
+import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
+import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
@@ -32,6 +35,8 @@ import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
@@ -164,14 +169,21 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 				try {
 					String impUrl = configurationMgr.getAltUrlFromPublicUri(impUri);
 					String impName = impUrl.substring(impUrl.lastIndexOf('/') + 1);
-					String plImpName = createDerivedFilename(impName, "pl");
-					StringBuilder sb = new StringBuilder();
-					sb.append(":- rdf_load('");
-					sb.append(impName);
-					sb.append("').\n:- consult('");
-					sb.append(plImpName);
-					sb.append("').\n");
-					FileInterface.writeFile(fullyQualifiedRulesFilename, sb.toString(), true);
+					if (modelFolderFileExists(impName)) {
+						// if the OWL file doesn't exist, then the Prolog file can't exist
+						String plImpName = createDerivedFilename(impName, "pl");
+						StringBuilder sb = new StringBuilder();
+						sb.append(":- rdf_load('");
+						sb.append(impName);
+						sb.append("').\n");
+						if (modelFolderFileExists(plImpName)) {
+							// only try to load a pl file if it exists
+							sb.append(":- consult('");
+							sb.append(plImpName);
+							sb.append("').\n");
+						}
+						FileInterface.writeFile(fullyQualifiedRulesFilename, sb.toString(), true);
+					}
 				} catch (ConfigurationException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -191,6 +203,21 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		
 		//saveRuleFileAfterModelSave = false;	// reset
 		return (errors != null && errors.size() > 0) ? errors : null;
+	}
+
+	/** 
+	 * Method to determine if the given file exists in the OwlModels folder
+	 * @param plImpName
+	 * @return -- true if it exists else false
+	 */
+	private boolean modelFolderFileExists(String plImpName) {
+		File testFile;
+		try {
+			testFile = new File(configurationMgr.getModelFolder() + "/" + plImpName);
+		} catch (IOException e) {
+			return false;
+		}
+		return testFile.exists();
 	}
 
 	private void assureRequiredPrologFiles(String translationFolder) {
@@ -221,10 +248,11 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 			OntModel model, Object otherStructure, String translationFolder,
 			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException,
 			IOException, URISyntaxException {
-		if (otherStructure instanceof List<?> && ((List<?>)otherStructure).size() > 0) {
-			throw new TranslationException("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.");
+		if (!modelName.equals(IReasoner.SADL_BUILTIN_FUNCTIONS_URI) &&
+				otherStructure instanceof List<?> && ((List<?>)otherStructure).size() > 0) {
+			addError("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.",ErrorType.ERROR);
 		}
-		return null;
+		return errors;
 	}
 
 	@Override
@@ -337,6 +365,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	public String translateQuery(OntModel model, String modelName, Query query)
 			throws TranslationException, InvalidNameException {
 		setTheModel(model);
+		setQueryInTranslation(query);
 		
 		StringBuilder sb = new StringBuilder();
 		List<VariableNode> vars = query.getVariables();
@@ -365,6 +394,16 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 			sb2.append("where ");
 			sb.insert(0, sb2.toString());
 		}
+		else if (query.getSparqlQueryString() != null) {
+			if (query.getSparqlQueryString().indexOf("where ") > 0) {
+				sb.append(query.getSparqlQueryString());
+			}
+			else {
+				sb.append("select * where ");
+				sb.append(query.getSparqlQueryString());
+			}
+		}
+		setQueryInTranslation(null);
 		return sb.toString();
 		//System.out.println(query.toString());
 		
@@ -861,8 +900,11 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 						sb.append("\\+");
 						sb.append(tripleElementToRawPrologString((TripleElement) gpe, TranslationTarget.RULE_TRIPLE, rulePart, null));
 					}
+					else if (type.equals(TripleModifierType.Assignment)) {
+						sb.append(tripleElementToRawPrologString((TripleElement) gpe, TranslationTarget.RULE_TRIPLE, rulePart, null));
+					}
 					else {
-						throw new TranslationException("Unhandled triple pattern: " + gpe.toFullyQualifiedString());
+						addError("Unhandled triple pattern: " + gpe.toFullyQualifiedString(), ErrorType.ERROR);
 					}
 //					else if (type.equals(TripleModifierType.Only)) {
 //						sb.append("notOnlyValue(");
@@ -1001,6 +1043,9 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 				else if (lhs instanceof GraphPatternElement) {
 					sb.append(graphPatternElementToPrologRuleString((GraphPatternElement) lhs, rulePart));
 				}
+				else if (lhs instanceof ProxyNode) {
+					sb.append(graphPatternElementToPrologRuleString(((ProxyNode)lhs).getProxyFor(), rulePart));
+				}
 				else {
 					throw new TranslationException("Unexpected junction lhs type: " + lhs.getClass());
 				}
@@ -1013,6 +1058,9 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 				}
 				else if (rhs instanceof GraphPatternElement) {
 					sb.append(graphPatternElementToPrologRuleString((GraphPatternElement) rhs, rulePart));
+				}
+				else if (rhs instanceof ProxyNode) {
+					sb.append(graphPatternElementToPrologRuleString(((ProxyNode)rhs).getProxyFor(), rulePart));
 				}
 				else {
 					throw new TranslationException("Unexpected junction rhs type: " + rhs.getClass());					
@@ -1071,18 +1119,20 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 				//	move the object to a separate equality test
 				moveObjectToEqualityTest = true;
 				newVar = "PV" + getNewVariableForRule();
-				if (obj instanceof VariableNode && isDatatypePropertyWithXSDRange(gpe)) {
-					String littype = getNewPrologOnlyVariableForRule();
-					String litval = getNewPrologOnlyVariableForRule();
-					sb.append("literal(type(");
-					sb.append(littype);
-					sb.append(",");
-					sb.append(litval);
-					sb.append("))),");
-					if (tripleHasNumericObject(gpe)) {
-						sb.append(" atom_number(");
-						sb.append(litval);
+				if (obj instanceof VariableNode) {
+					String littype = getDatatypePropertyXSDRange(gpe);
+					if (littype != null) {
+						String litval = getNewPrologOnlyVariableForRule();
+						sb.append("literal(type(");
+						sb.append(littype);
 						sb.append(",");
+						sb.append(litval);
+						sb.append("))),");
+						if (tripleHasNumericObject(gpe)) {
+							sb.append(" atom_number(");
+							sb.append(litval);
+							sb.append(",");
+						}
 					}
 				}
 				sb.append(newVar);
@@ -1133,18 +1183,20 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 					}
 				}
 				else {
-					if (rulePart.equals(RulePart.PREMISE) && target.equals(TranslationTarget.RULE_TRIPLE) && obj instanceof VariableNode && isDatatypePropertyWithXSDRange(gpe)) {
-						String littype = getNewPrologOnlyVariableForRule();
-						String litval = getNewPrologOnlyVariableForRule();
-						sb.append("literal(type(");
-						sb.append(littype);
-						sb.append(",");
-						sb.append(litval);
-						sb.append("))),");
-						if (tripleHasNumericObject(gpe)) {
-							sb.append(" atom_number(");
+					if (rulePart.equals(RulePart.PREMISE) && target.equals(TranslationTarget.RULE_TRIPLE) && obj instanceof VariableNode) {
+						String littype = getDatatypePropertyXSDRange(gpe);
+						if (littype != null) {
+							String litval = getNewPrologOnlyVariableForRule();
+							sb.append("literal(type('");
+							sb.append(littype);
+							sb.append("',");
 							sb.append(litval);
-							sb.append(",");
+							sb.append("))),");
+							if (tripleHasNumericObject(gpe)) {
+								sb.append(" atom_number(");
+								sb.append(litval);
+								sb.append(",");
+							}
 						}
 					}
 					sb.append(nodeToString(obj, target));
@@ -1419,9 +1471,29 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		else if (node instanceof Literal) {
 			Object litObj = ((Literal)node).getValue();
 			if (((Literal)node).getOriginalText() != null) {
-				return singleQuoteString(((Literal)node).getOriginalText());
+				return wrapWithLiteralPredicate(singleQuoteString(((Literal)node).getOriginalText(), ((Literal) node).getLiteralType().equals(LiteralType.StringLiteral)));
 			}
-			return singleQuoteString(literalValueToString(litObj, target));
+			return wrapWithLiteralPredicate(singleQuoteString(literalValueToString(litObj, target), ((Literal) node).getLiteralType().equals(LiteralType.StringLiteral)));
+		}
+		else if (node instanceof ConstantNode) {
+			if (node.getName().equals("PI")) {
+				Literal lit = new Literal();
+				lit.setValue(Math.PI);
+				lit.setOriginalText(node.getName());
+				return "pi";
+			}
+			else if (node.getName().equals("e")) {
+				Literal lit = new Literal();
+				lit.setValue(Math.E);
+				lit.setOriginalText(node.getName());
+				return "e";
+			}
+			else {
+				String msg = "Constant '" + node.getName() + "' is not supported by the " + this.getClass().getName() + " reasoner.";
+				addError(msg, ErrorType.ERROR);
+				logger.error(msg);
+				return singleQuoteString(node.getName(), false);
+			}
 		}
 		else if (ITranslator.isKnownNode(node)) {
 			return "PV" + getNewVariableForRule();
@@ -1430,10 +1502,19 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 			throw new TranslationException("Encountered null node in nodeToString; this indicates incorrect intermediate form and should not happen");
 		}
 		else {
-			throw new TranslationException("Nnode '" + node.toString() + "' cannot be translated to Prolog format.");
+			throw new TranslationException("Node '" + node.toString() + "' cannot be translated to Prolog format.");
 		}
 	}
 	
+	/**
+	 * A literal in SWI-Prolog must be wrapped in the "literal/1" predicate
+	 * @param singleQuoteString
+	 * @return
+	 */
+	private String wrapWithLiteralPredicate(String singleQuoteString) {
+		return "literal(" + singleQuoteString + ")";
+	}
+
 	public static String hostToLowercase(String uri) {
 		boolean uppercaseInHost = false;
 		if (!uri.startsWith("http://")) {
@@ -1461,20 +1542,20 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		return uri;
 	}
 	
-	private String singleQuoteString(String strval) {
+	private String singleQuoteString(String strval, boolean forceQuotes) {
 		String trimmed = strval.trim();
 		if (trimmed.startsWith("\"")) {
 			trimmed = "'" + trimmed.substring(1);
 		}
-//		else if (!trimmed.startsWith("'")){
-//			trimmed = "'" + trimmed;
-//		}
+		else if (forceQuotes){
+			trimmed = "'" + trimmed;
+		}
 		if (trimmed.endsWith("\"")) {
 			trimmed = trimmed.substring(0, trimmed.length() - 1) + "'";
 		}
-//		else if (!trimmed.endsWith("'")){
-//			trimmed = trimmed + "'";
-//		}
+		else if (forceQuotes){
+			trimmed = trimmed + "'";
+		}
 		return trimmed;
 	}
 
@@ -1597,16 +1678,16 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		this.queryInTranslation = queryInTranslation;
 	}
 
-	private boolean isDatatypePropertyWithXSDRange(TripleElement gpe) {
+	private String getDatatypePropertyXSDRange(TripleElement gpe) {
 		Node pred = gpe.getPredicate();
 		OntProperty prop = getTheModel().getOntProperty(((NamedNode)pred).toFullyQualifiedString());
 		if (prop != null && prop.isDatatypeProperty()) {
 			Resource rng = prop.getRange();
-			if(rng.getNameSpace().equals(XSD.getURI())) {
-				return true;
+			if(rng != null && rng.getNameSpace().equals(XSD.getURI())) {
+				return rng.getURI();
 			}
 		}
-		return false;
+		return null;
 	}
 
 	private boolean tripleHasDecimalObject(TripleElement gpe) {
@@ -1727,6 +1808,10 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	
 	@Override
 	public String getBuiltinFunctionModel(List<String> reservedWords){
+		/*
+		 * Note that for the SWI-Prolog reasoner, all built-ins can be identified by
+		 * querying "listing." in the SWI-Prolog service
+		 */
 		StringBuilder sb = new StringBuilder();
 		sb.append("uri \"");
 		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_URI);
@@ -1734,9 +1819,36 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS);
 		sb.append(".\n\n");
 		
+		List<BuiltinInfo> bfinfolst;
+		try {
+			bfinfolst = getBuiltinFunctionInformation();
+			if (bfinfolst != null) {
+				for(BuiltinInfo bfinfo : bfinfolst){
+//					sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
+//					sb.append("\n\n");
+					sb.append("External ");
+					if (reservedWords.contains(bfinfo.getName())) {
+						sb.append("^");
+					}
+					sb.append(bfinfo.getName());
+					sb.append(bfinfo.getSignature());
+					sb.append("\".\n");
+				}
+			}
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ReasonerNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return sb.toString();
 	}
 	
+	private List<BuiltinInfo> getBuiltinFunctionInformation() throws ConfigurationException, ReasonerNotFoundException {
+		return getReasoner().getImplicitBuiltins();
+	}
+
 	//This method existed before built-in function type-checking was added to the interface.
 	@Override
 	public boolean isBuiltinFunction(String name) {
