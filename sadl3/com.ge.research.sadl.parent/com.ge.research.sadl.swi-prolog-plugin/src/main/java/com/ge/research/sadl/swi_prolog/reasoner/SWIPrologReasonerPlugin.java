@@ -53,6 +53,7 @@ import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.swi_prolog.plinterface.PlServiceFailedException;
 import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologServiceInterface;
 import com.ge.research.sadl.swi_prolog.translator.SWIPrologTranslatorPlugin;
 
@@ -68,6 +69,9 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	private IConfigurationManager configMgr;
 	private List<ModelError> newErrors = null;
 	private boolean initialized = false;
+	private String kbIdentifier;
+	private String modelName;
+	private String repoType;
 	
 	public SWIPrologReasonerPlugin() {
 		logger.debug("Creating new " + this.getClass().getName() + " reasoner.");
@@ -98,6 +102,9 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	public int initializeReasoner(String KBIdentifier, String modelName,
 			String repoType) throws ReasonerNotFoundException,
 			ConfigurationException {
+		this.setKbIdentifier(KBIdentifier);
+		this.setModelName(modelName);
+		this.setRepoType(repoType);
 		int succeeded = 1;
 		
 		//System.out.println("KB identifier is: " + KBIdentifier);
@@ -221,6 +228,17 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		}
 		try {
 			System.out.println(pl.runPlQueryNoArgs(getPlUrl(), "true", true));
+		} catch (PlServiceFailedException e) {
+			try {
+				initializeReasoner(getKbIdentifier(), getModelName(), getRepoType());
+				return loadRules(ruleFileName);
+			} catch (ReasonerNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (ConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -243,6 +261,17 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 					return true;
 				}
 			}
+		} catch (PlServiceFailedException e) {
+			try {
+				initializeReasoner(getKbIdentifier(), getModelName(), getRepoType());
+				return addRule(rule);
+			} catch (ReasonerNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (ConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -260,6 +289,17 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 					getPrologServiceInstance().clearPlRules();
 					return true;
 				}
+			}
+		} catch (PlServiceFailedException e) {
+			try {
+				initializeReasoner(getKbIdentifier(), getModelName(), getRepoType());
+				return deleteRule(rule);
+			} catch (ReasonerNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (ConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -431,33 +471,51 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		List<Hashtable> result = null;
 		Object[][] returnset = null;
 		
-		if (vars != null && vars.size() > 0) {
-			result = getPrologServiceInstance().runPlQueryMultipleArgs(getPlUrl(), plQuery, vars, true);
-			if (result != null && result.size() > 0) {
-				returnset = new Object[result.size()][vars.size()];
-				int row = 0; 
-				for (Hashtable hTable: result){
-					int col = 0;
-					for (String var: vars){ 
-						returnset[row][col] = hTable.get(var).toString();
-						col += 1;
-					}
-					row += 1;
-				}	
+		try {
+			if (vars != null && vars.size() > 0) {
+					result = getPrologServiceInstance().runPlQueryMultipleArgs(getPlUrl(), plQuery, vars, true);
+				if (result != null && result.size() > 0) {
+					returnset = new Object[result.size()][vars.size()];
+					int row = 0; 
+					for (Hashtable hTable: result){
+						int col = 0;
+						for (String var: vars){ 
+							returnset[row][col] = hTable.get(var).toString();
+							col += 1;
+						}
+						row += 1;
+					}	
+				}
+				String[] varArray = vars.toArray(new String[vars.size()]) ;
+				getPrologServiceInstance().clearPlRules();
+				return returnset != null ? new ResultSet(varArray, returnset) : null;
 			}
-			String[] varArray = vars.toArray(new String[vars.size()]) ;
-			getPrologServiceInstance().clearPlRules();
-			return returnset != null ? new ResultSet(varArray, returnset) : null;
+			else {
+				boolean r = getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), plQuery, true);
+				String[] colHeaders = new String[1];
+				colHeaders[0] = "X";
+				returnset = new Object[1][1];
+				returnset[0][0] = r;
+				getPrologServiceInstance().clearPlRules();
+				return new ResultSet(colHeaders, returnset);
+			}
+		} catch (PlServiceFailedException e) {
+			try {
+				initializeReasoner(getKbIdentifier(), getModelName(), getRepoType());
+				return prologQueryToResultSet(plQuery, vars);
+			} catch (ReasonerNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (ConfigurationException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw e;
 		}
-		else {
-			boolean r = getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), plQuery, true);
-			String[] colHeaders = new String[1];
-			colHeaders[0] = "X";
-			returnset = new Object[1][1];
-			returnset[0][0] = r;
-			getPrologServiceInstance().clearPlRules();
-			return new ResultSet(colHeaders, returnset);
-		}
+		return null;
 	}
 
 	private String removeLeadingQuestion(String var) {
@@ -1021,8 +1079,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	 * @return
 	 * @throws Exception 
 	 */
-	protected List<String> loadOwlFilesImports(String folder, String owlFile)
-			throws Exception {
+	protected List<String> loadOwlFilesImports(String folder, String owlFile) throws Exception {
 		File fldr = new File(folder);
 		if (!fldr.exists()) {
 			throw new TranslationException("Folder for which to load all OWL files (" + folder + ") doesn't exist.");
@@ -1037,8 +1094,29 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			for (int i = 0; i < files.size(); i++) {
 				File f = new File(new SadlUtils().fileUrlToFileName(files.get(i)));
 				if (f.exists()) {
-					getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "unload_rdf_file('" + fixWindowsPath(f.getCanonicalPath()) + "')", true);
-					getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "load_rdf_file('" + fixWindowsPath(f.getCanonicalPath()) + "')", true);
+					try {
+						getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "unload_rdf_file('" + fixWindowsPath(f.getCanonicalPath()) + "')", true);
+						getPrologServiceInstance().runPlQueryNoArgs(getPlUrl(), "load_rdf_file('" + fixWindowsPath(f.getCanonicalPath()) + "')", true);
+					} catch (PlServiceFailedException e) {
+						try {
+							initializeReasoner(getKbIdentifier(), getModelName(), getRepoType());
+							return loadOwlFilesImports(folder, owlFile);
+						} catch (ReasonerNotFoundException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						} catch (ConfigurationException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						throw e;
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						throw e;
+					}
 				}
 				else {
 					throw new TranslationException("OWL file '" + f.getCanonicalPath() + "' does not exist, can't be loaded.");
@@ -1104,6 +1182,30 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	public String getReasonerConfigurationItem(String itemKey) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	private String getKbIdentifier() {
+		return kbIdentifier;
+	}
+
+	private void setKbIdentifier(String kbIdentifier) {
+		this.kbIdentifier = kbIdentifier;
+	}
+
+	private String getModelName() {
+		return modelName;
+	}
+
+	private void setModelName(String modelName) {
+		this.modelName = modelName;
+	}
+
+	private String getRepoType() {
+		return repoType;
+	}
+
+	private void setRepoType(String repoType) {
+		this.repoType = repoType;
 	}
 
 }

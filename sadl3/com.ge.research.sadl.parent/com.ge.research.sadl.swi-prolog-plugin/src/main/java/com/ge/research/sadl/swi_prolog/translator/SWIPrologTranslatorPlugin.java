@@ -1471,7 +1471,13 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		else if (node instanceof Literal) {
 			Object litObj = ((Literal)node).getValue();
 			if (((Literal)node).getOriginalText() != null) {
-				return wrapWithLiteralPredicate(singleQuoteString(((Literal)node).getOriginalText(), ((Literal) node).getLiteralType().equals(LiteralType.StringLiteral)));
+				if ((!((Literal)node).getLiteralType().equals(LiteralType.StringLiteral) || !((Literal)node).getOriginalText().contains("http://")) && 
+						getQueryInTranslation() != null) {
+					return wrapWithLiteralPredicate(singleQuoteString(((Literal)node).getOriginalText(), ((Literal) node).getLiteralType().equals(LiteralType.StringLiteral)));
+				}
+				else {
+					return singleQuoteString(((Literal)node).getOriginalText(), ((Literal) node).getLiteralType().equals(LiteralType.StringLiteral));
+				}
 			}
 			return wrapWithLiteralPredicate(singleQuoteString(literalValueToString(litObj, target), ((Literal) node).getLiteralType().equals(LiteralType.StringLiteral)));
 		}
