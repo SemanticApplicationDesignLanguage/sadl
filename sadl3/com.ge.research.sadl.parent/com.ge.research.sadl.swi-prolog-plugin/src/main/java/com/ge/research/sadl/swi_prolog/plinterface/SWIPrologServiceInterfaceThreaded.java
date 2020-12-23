@@ -4,35 +4,43 @@ import java.net.ConnectException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class SWIPrologServiceInterface {
+public class SWIPrologServiceInterfaceThreaded implements ISWIPrologServiceInterface {
 	
 	private String rules = "";
 	private int usageCounter = 0;
 	private long sleepTime = 1L;
 	private long timeoutTime = 500L;
+	private PlServiceInterfaceRunnable plhttp = null;
+	private Thread thread = null;
+	private Iterator<String> remainingItr = null;
 	
-	public SWIPrologServiceInterface(){
+	public SWIPrologServiceInterfaceThreaded(){
 		rules = "";
 	}
 	
+	@Override
 	public boolean addPlRules(String inRules){
 		rules += inRules + "\n";
 		return true;
 	}
 	
+	@Override
 	public boolean clearPlRules(){
 		rules = "";
 		return true;
 	}
 	
 	
+	@Override
 	public String getPlRules(){
 		return rules;
 	}
 	
+	@Override
 	public boolean runPlQueryNoArgs(String url, String query, boolean defineQueryPred) throws Exception{
 		String urlParameters = "query=";
 		urlParameters += "targetVar(['" + "_DummyVar" + "'])." + "\n";
@@ -42,9 +50,9 @@ public class SWIPrologServiceInterface {
 			urlParameters += rules + query + "\n";
 		
 //		debugOutput(url, "NoArgs");
-		PlServiceInterface plhttp = new PlServiceInterface();
-		plhttp.sendPrologQuery(url, urlParameters);
-		String html = startAndMonitorPlService(plhttp);
+//		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
+//		plhttp.sendPrologQuery(url, urlParameters);
+		String html = startAndMonitorPlService(url, urlParameters);
 		if (html.startsWith("java.net.ConnectException")) {
 			throw new ConnectException(html);
 		}
@@ -59,6 +67,7 @@ public class SWIPrologServiceInterface {
 	}
 	
 	
+	@Override
 	public List<Hashtable> runPlQuery(String url, String query, String target, boolean defineQueryPred) throws Exception{
 		String urlParameters = "query=";
 		urlParameters += "targetVar(['" + target + "'])." + "\n";
@@ -68,9 +77,9 @@ public class SWIPrologServiceInterface {
 			urlParameters += rules + query + "\n";
 		
 //		debugOutput(url, "runPlQuery");
-		PlServiceInterface plhttp = new PlServiceInterface();
-		plhttp.sendPrologQuery(url, urlParameters);
-		String html = startAndMonitorPlService(plhttp);
+//		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
+//		plhttp.sendPrologQuery(url, urlParameters);
+		String html = startAndMonitorPlService(url, urlParameters);
 		
 		List<String> tList = new ArrayList<String>();
 		tList.add(target);
@@ -96,6 +105,7 @@ public class SWIPrologServiceInterface {
 //		System.out.println("\n");
 //	}
 
+	@Override
 	public List<Hashtable> runPlQueryMultipleArgs(String url, String query, List<String> tList, boolean defineQueryPred) throws Exception{
 		String urlParameters = "query=";
 		urlParameters += "targetVar([";
@@ -129,27 +139,54 @@ public class SWIPrologServiceInterface {
 		}
 		
 //		debugOutput(url, "MultipleArgs");
-		PlServiceInterface plhttp = new PlServiceInterface();
-		plhttp.sendPrologQuery(url, urlParameters);
-		String html = startAndMonitorPlService(plhttp);
+//		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
+//		plhttp.sendPrologQuery(url, urlParameters);
+		String html = startAndMonitorPlService(url, urlParameters);
 		
 		return htmlToHashtable(tList,html); 
 	}
 	
-	private String startAndMonitorPlService(PlServiceInterface plhttp) throws PlServiceFailedException, InterruptedException {
-		Thread t = new Thread(plhttp);
-		t.start();
+	private PlServiceInterfaceRunnable getPlServiceInterface(String url) {
+		if (this.plhttp  == null) {
+			this.plhttp = new PlServiceInterfaceRunnable(url);
+			setThread(plhttp);
+		}
+		return this.plhttp;
+	}
+	
+	private boolean setThread(PlServiceInterfaceRunnable plhttp) {
+		this.thread  = new Thread(plhttp);
+		this.thread.start();
+		return true;
+	}
+	
+	private Thread getThread() {
+		return this.thread;
+	}
+	
+	private String startAndMonitorPlService(String url, String urlParameters) throws PlServiceFailedException, InterruptedException {
+		PlServiceInterfaceRunnable pls = getPlServiceInterface(url);
 		long startTime = System.currentTimeMillis();
+		if (remainingItr != null) {
+			// add any remaining requests from a prior PlServiceInterfaceRunnable to queue
+			while (remainingItr.hasNext()) {
+				pls.queue.add(remainingItr.next());
+			}
+			remainingItr = null;
+		}
 //		TimeUnit.SECONDS.sleep(1);
 		
-		while (t.isAlive()) {
+		while (getThread().isAlive() && plhttp.getResponseString() == null) {
 			long nowTime = System.currentTimeMillis();
 			if (nowTime - startTime > timeoutTime) {
 				plhttp.interrupt();
-//				t.stop();
-//				t.join();
+				
+				// get any unprocessed requests out of the queue for re-requests
+				setRemainingItr(pls.queue.iterator());
+				
 				throw new PlServiceFailedException(nowTime - startTime);
 			}
+			pls.queue.add(urlParameters);
 //			t.sleep(sleepTime);
 			TimeUnit.SECONDS.sleep(1);
 		}
@@ -179,5 +216,13 @@ public class SWIPrologServiceInterface {
 		}while(curIndex >= 0);
 		
 		return result;
+	}
+
+	private Iterator<String> getRemainingItr() {
+		return remainingItr;
+	}
+
+	private void setRemainingItr(Iterator<String> remainingItr) {
+		this.remainingItr = remainingItr;
 	}
 }

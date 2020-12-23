@@ -53,8 +53,10 @@ import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.swi_prolog.plinterface.ISWIPrologServiceInterface;
 import com.ge.research.sadl.swi_prolog.plinterface.PlServiceFailedException;
 import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologServiceInterface;
+import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologServiceInterfaceThreaded;
 import com.ge.research.sadl.swi_prolog.translator.SWIPrologTranslatorPlugin;
 
 public class SWIPrologReasonerPlugin extends Reasoner {
@@ -64,7 +66,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 
 	private String translatorPrologFolder;
 	private String portNumber = null;
-	private SWIPrologServiceInterface prologServiceInstance;
+	private ISWIPrologServiceInterface prologServiceInstance;
 	private String plUrl;
 	private IConfigurationManager configMgr;
 	private List<ModelError> newErrors = null;
@@ -72,6 +74,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	private String kbIdentifier;
 	private String modelName;
 	private String repoType;
+	private boolean useThreadedService = true;
 	
 	public SWIPrologReasonerPlugin() {
 		logger.debug("Creating new " + this.getClass().getName() + " reasoner.");
@@ -122,7 +125,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		setPlUrl(url);
 		
 		// Step 1: create prolog instance
-		SWIPrologServiceInterface pl = new SWIPrologServiceInterface();
+		ISWIPrologServiceInterface pl = useThreadedService  ? new SWIPrologServiceInterfaceThreaded() : new SWIPrologServiceInterface();
 		
 		// initialize Prolog service
 		String errMsg = prepareService(pl, url, "true");
@@ -215,7 +218,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	public boolean loadRules(String ruleFileName) throws IOException {
 		// TODO Auto-generated method stub
 		//AG: is this implementation good?
-		SWIPrologServiceInterface pl = getPrologServiceInstance();
+		ISWIPrologServiceInterface pl = getPrologServiceInstance();
 		StringBuffer sbLoad = new StringBuffer();
 
 		
@@ -807,10 +810,10 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		return returning;
 	}
 
-	public String prepareService(SWIPrologServiceInterface pl, String url, String query) {
+	public String prepareService(ISWIPrologServiceInterface pl, String url, String query) {
 		// Step 1: create prolog instance
 		if (pl == null) {
-			pl = new SWIPrologServiceInterface();
+			pl = new SWIPrologServiceInterfaceThreaded();
 		}
 		
 		
@@ -1007,11 +1010,11 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		return portNumber;
 	}
 
-	private SWIPrologServiceInterface getPrologServiceInstance() {
+	private ISWIPrologServiceInterface getPrologServiceInstance() {
 		return prologServiceInstance;
 	}
 
-	private void setPrologServiceInstance(SWIPrologServiceInterface prologServiceInstance) {
+	private void setPrologServiceInstance(ISWIPrologServiceInterface prologServiceInstance) {
 		this.prologServiceInstance = prologServiceInstance;
 	}
 
