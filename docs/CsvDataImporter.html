@@ -1,1501 +1,1538 @@
 <html>
-
-<head>
-<meta http-equiv="Content-Language" content="en-us">
-<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
-<meta name="ProgId" content="FrontPage.Editor.Document">
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>CSV Tabular Data Importer</title>
-</head>
-
-<body>
-
-<h1>CSV Tabular Data Importer</h1>
-<h6>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/17/2020<!--webbot bot="Timestamp" endspan i-checksum="12616" -->.
-</h6>
-<p><font color="#CC0000">Note: the Xtext-based Template Editor for the Tabular 
-Data Importer does not coincide exactly with the actual Template grammar. Hence 
-there may be spurious errors, especially in transform statements, that are not 
-actual errors. Please understand and follow the grammar as described in this 
-document. A plain text editor can be used to create/edit template files to avoid 
-confusion by spurious errors in the Template Editor.</font></p>
-<ol>
-  <li><a href="#Introduction">Introduction</a></li>
-  <li><a href="#BasicConcept">The Basic Concept</a></li>
-  <li><a href="#Template">The Template Triples</a> </li>
-  <li><a href="#TemplateFile">The Template File</a></li>
-  <li><a href="#OtherRequiredInputs">Other Required Inputs</a></li>
-  <li><a href="#Output">The Output</a></li>
-  <li><a href="#AdvancedFeatures">Advanced Features</a><ol type="a">
-  <li><a href="#Validation">Validation</a></li>
-  <li><a href="#Transformation">Transformation</a><ol type="i">
-  <li><a href="#Split">Split</a></li>
-  <li><a href="#Replace">Replace</a></li>
-  <li><a href="#Encode">Encode</a></li>
-  <li><a href="#Find">Find</a></li>
-  <li><a href="#User-DefinedFunction">User-Defined Function</a></li>
-</ol>
-  </li>
-  <li><a href="#ScopeOfRepetition">Scope of Repetition</a></li>
-  <li><a href="#GroupTriplePatterns">Groups of Triple Patterns in a Template</a></li>
-  <li><a href="#IncrementalImport">Incremental Import</a></li>
-  <li><a href="#InferenceParallelization">Inference and Parallelization </a></li>
-</ol>
-  </li>
-  <li><a href="#InverseMappingWithAdvancedFeatures">Inverse Mapping with Advanced Features</a></li>
-  <li><a href="#DebuggingTemplateFile">Debugging the Template File</a></li>
-  <li><a href="#ImportCSVWizard">The SADL-IDE Import CSV Wizard</a></li>
-</ol>
-<h2><a name="Introduction">Introduction</a></h2>
-<p>It is very common to have data in a tabular format. For example, a 
-spreadsheet can contain a table--a two-dimensional array of data. Relational 
-databases contain &quot;tables&quot; of data, views create other &quot;tables&quot; of data, and SQL queries 
-against relational databases also generate data tables. Tabular data is often accessed by row and 
-column, e.g., the spreadsheet value in cell A3. The particular kind of data 
-addressed by this Tabular Data Importer is columnar data. Each column represents 
-a different set of data values, e.g., temperature in one column, pressure in 
-another column, etc. Each row represents a set of values across types that are 
-related in some way, e.g., each row is data about a different instance of 
-something or for a different time.</p>
-<p>The Tabular Data Importer enables the conversion of tabular data into an OWL 
-model or into a SADL model. In the case of SADL model generation, the conversion 
-of tabular data to OWL is 
-followed by a translation from OWL to SADL. Conversion of tabular data to an 
-OWL model is an ideal way to convert instance data in tabular format into an OWL input model for SadlServer. 
-The process can also be initiated in the SADL-IDE by using the 
-Eclipse File -&gt; Import Wizard and selecting the SADL option in the list of 
-kinds of imports followed by &quot;CSV Files&quot;. The conversion 
-mechanism is  flexible and powerful. The OWL model generated can further be 
-transformed into a SADL model if desired. A fundamental assumption underlying the Tabular 
-Data Importer is that each row in the data table can be mapped to a set of model 
-statements (graph nodes and edges) independent of the other rows in the data table. 
-The Tabular Data Importer is implemented in the Java class <i>
-com.ge.research.sadl.geonly.imports.<b>CsvImporter</b>.</i></p>
-<p>Note further that it is possible to do an inverse mapping from OWL (or SADL, 
-since it creates OWL) to tabular data. An appropriate pairing of mapping and 
-inverse mapping creates a round-trip capability and could be the basis of providing a 
-tabular editor for OWL models. The inverse mapping can take the form of a SPARQL 
-query. The detailed associations between mapping and inverse mapping are 
-discussed below.</p>
-<h2><a name="BasicConcept">The Basic Concept</a></h2>
-<p>An OWL model is a graph and can be represented as a set of RDF triples. 
-Consider the following meta-model for a turbine-generator with data sensors. 
-Sensor data will be read at multiple times creating time series of speed and 
-power.</p>
-<b><font SIZE="2" color="#C0C0C0">
-<blockquote>
-  <p>// Measurement Model</p>
-  </font><font SIZE="2" COLOR="#000080">
-  <p>Unit<font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">top-level</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">.</p>
-  </font>
-  <p>Amount</font></b><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">top-level</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, <br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>amount</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">float</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>unit</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Unit</b></font><font SIZE="2">, <br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>timestamp</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">dateTime</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>derived</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>CalculatedAmount</b></font><font SIZE="2">.</font></p>
-  <font SIZE="2">
-  <p></p>
-  <p>{</font><font SIZE="2" COLOR="#000080"><b>Speed</b></font><font SIZE="2">,
-  </font><font SIZE="2" COLOR="#000080"><b>Power</b></font><font SIZE="2">}
-  </font><font SIZE="2" COLOR="#800080">are</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">types</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Amount</b></font><font SIZE="2">. </font>
-  </p>
-  <font SIZE="2" COLOR="#000080"><b>
-  <p>Observation</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Amount</b></font><font SIZE="2">, </font>
-  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>observer</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">string</font><font SIZE="2">.</p>
-  <p></p>
-  </font><font SIZE="2" COLOR="#000080"><b>
-  <p>CalculatedAmount</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Amount</b></font><font SIZE="2">, </font>
-  <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>method</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">string</font><font SIZE="2">.</p>
-  </font><font SIZE="2" COLOR="#000080"><b>
-  <p ALIGN="LEFT">PowerUnit</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Unit</b></font><font SIZE="2">, </font>
-  <font SIZE="2" COLOR="#800080">must</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">be</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">one</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#0000ff">Watt</font><font SIZE="2">,
-  </font><font SIZE="2" COLOR="#0000ff">KW</font><font SIZE="2">, </font>
-  <font SIZE="2" COLOR="#0000ff">MW</font><font SIZE="2">, </font>
-  <font SIZE="2" COLOR="#0000ff">HP</font><font SIZE="2">}.</p>
-  <p ALIGN="LEFT"></p>
-  </font><font SIZE="2">
-  <p ALIGN="LEFT"></p>
-  </font><font SIZE="2" COLOR="#000080"><b>
-  <p>AngularSpeedUnit</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Unit</b></font><font SIZE="2">, </font>
-  <font SIZE="2" COLOR="#800080">must</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">be</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">one</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> {</font><font SIZE="2" COLOR="#0000ff">RPM</font><font SIZE="2">}.</p>
-  </font>
-  <p><font size="2" color="#C0C0C0">// Equipment Model</font></p>
-  <font SIZE="2" COLOR="#000080"><b>
-  <p ALIGN="LEFT">Turbine</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, <br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>drives</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">a single value</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Generator</b></font><font SIZE="2">, <br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>speed</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Speed</b></font><font SIZE="2">.</p>
-  </font><font SIZE="2" COLOR="#000080"><b>
-  <p ALIGN="LEFT">Generator</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">class</font><font SIZE="2">, <br>
-  </font>&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#800080">described</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>power</b></font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Power</b></font><font SIZE="2">.</font></p>
-  <p ALIGN="LEFT"><b><font size="2">Figure 1: Meta-Model for Measurement and 
-  Equipment for Example</font></b></p>
-</blockquote>
-<p ALIGN="LEFT">Figure 2 below shows some of the concepts from the models in 
-Figure 1, which will be used in the example tabular data import mapping. Class 
-names are in dark blue bold, property names are in green bold.</p>
-<blockquote>
-  <p><img border="0" src="images/TableD1.jpg" width="732" height="442"></p>
-  <p ALIGN="LEFT"><b><font size="2">Figure 2: Elements of the Models Relevant to 
-  Tabular Data Import</font></b></p>
-</blockquote>
-<p>It is common to place some but not all of the values for an instance data set 
-conforming to the above conceptual model in a data table. The data not 
-explicitly represented in the table is implied by a knowledge of the context or 
-domain of the data. Our objective is to provide an unambiguous mapping from the 
-data table to the model. The diagram below 
-shows one such mapping from concepts in the graph above to the columns of a data 
-table.</p>
-<blockquote>
-  <p><img border="0" src="images/TableD2.jpg" width="743" height="526"></p>
-  <p ALIGN="LEFT"><b><font size="2">Figure 3: Mappings from Tabular Data to 
-  Model Concepts</font></b></p>
-</blockquote>
-<p>To convert the tabular data to a valid graph, we must know two things:</p>
-<ol>
-  <li>the mapping from data table columns to model concepts</li>
-  <li>the identity of the missing elements of each model triple (node-edge-node in the 
-  graph) 
-  involved in the conversion.</li>
-</ol>
-<h2><a name="Template">The Template</a> Triples</h2>
-<p>The conversion of tabular data to a graph model can be based on a template. The template provides the mapping from columns to model concepts and supplies 
-the pattern of the RDF triples to actually be inserted into 
-the generated RDF model. These triple patterns, after appropriate substitution of 
-data from the table, become the statements to be added to the model. The mapping from 
-table columns to an element of a triple pattern uses a placeholder in the triple 
-pattern that identifies a table column. The placeholder is enclosed in angle 
-brackets so that it is delimited on both ends and can be embedded in a longer 
-name. The actual mapping from table value to part of a model statement can be 
-accomplished in one of two ways.</li> </p>
-  <ul>
-  <li>If the tabular data has header information in the first row, the column 
-  name as given in this header can be used as the name within the angle 
-  brackets, indicating that values from that column are to be substituted for 
-  the placeholder in the triple pattern in generating the output triples.</li>
-  <li>Whether or not the tabular data has header information in the first row, 
-  the placeholder within the angle brackets can be a column designation using 
-  one or more upper-case letters, e.g., A is the first column, B the second 
-  column, Z the 26th column, AA the 27th column, etc.</li>
-  </ul>
-<p>Graph edges and nodes not represented in the tabular data but necessary to 
-generated model statements are specified in the template triples as follows.</p>
-<ol>
-  <li>An edge in the graph (a property) is specified by naming the edge 
-  (property) in the triple pattern. Names can be fully qualified URIs, QNames 
-  (e.g., rdf:type), or local names only in which case an attempt will be made to 
-  find a model namespace containing the local name among the imported models, thus translating it into a fully 
-  qualified URI. Note that "is a" is allowed for "rdf:type" and "has" can appear before a
-  predicate in a triple pattern. This makes the template more like the SADL language. The
-  SADL-IDE provides a template editor (template files must end in ".tmpl") that validates
-  references to existing instances, classes, and properties in imported ontologies and
-  provides semantic coloration, name completion, etc.</li>
-  <li>A node in the graph which is a specified individual (instance) or class, either 
-  subject or object of the triple, is 
-  specified by name in the triple pattern. Names can be fully qualified URIs, 
-  QNames (e.g., rdf:type), or local names only in which case an attempt will be 
-  made to find a model namespace containing the local name, thus translating it into a fully 
-  qualified URI.</li>
-  <li>A node in the graph which is an unnamed instance of a specified class is 
-  an unnamed but typed blank node (bnode) in the triple pattern. Since the bnode 
-  can appear in multiple triple patterns in the template, it is necessary to 
-  distinguish one bnode in the template from another. This is accomplished by 
-  referring to bnodes by a simple integer within angle brackets, e.g. &quot;&lt;1&gt;&quot;. 
-  The same integer means the same bnode.</li>
-  <li>The row number (first row is row 1) of the data creating a set of triples 
-  from the template can be retrieved using the special variable name &quot;row()&quot; 
-  (&quot;row&quot; followed by an opening parenthesis followed by a closing parenthesis, 
-  no space). This can be useful, for example, in ordered time series data where 
-  one wishes to associate a sequence identifier with each time slice to more 
-  easily find the time slice before or after a given time slice.</li>
-</ol>
-<p>Each row of data is processed separately to create a set of model triples. Of 
-course triples added to the model in the course of processing one row of data 
-are now in the model and may be used in the processing of subsequent rows of 
-data.</p>
-<p>For the example in the figures above, the template triples are the following:</p>
-<blockquote>
-  <span LANG="EN"><font SIZE="2" color="#0000FF">
-  <p>T&lt;TurbineID&gt; rdf:type Turbine<br>
-  T&lt;TurbineID&gt; speed &lt;1&gt;<br>
-  &lt;1&gt; rdf:type Speed<br>
-  &lt;1&gt; amount &lt;Speed&gt;<br>
-  &lt;1&gt; unit RPM<br>
-  &lt;1&gt; timestamp &lt;Time&gt;<br>
-  T&lt;TurbineID&gt; drives Gen&lt;TurbineID&gt;<br>
-  Gen&lt;TurbineID&gt; rdf:type Generator<br>
-  Gen&lt;TurbineID&gt; power &lt;2&gt;<br>
-  &lt;2&gt; rdf:type Power<br>
-  &lt;2&gt; amount &lt;Power&gt;<br>
-  &lt;2&gt; unit MW<br>
-  &lt;2&gt; timestamp &lt;Time&gt;</p>
-  </font></span>
-</blockquote>
-<p>Note that there is a one-to-one correspondence between an instance of Turbine 
-and an instance of Generator so we do not want to create a bnode and a new 
-instance of Generator  for each row of data in the table. Rather we want to 
-create a named instance of Generator for each unique instance of Turbine. This is 
-accomplished by the 7th line in the template. On the other hand, we want to 
-create an instance of Speed and an instance of Power for each row of data so a bnode is appropriate for 
-the instances of Speed and Power.</p>
-<h2><a name="OtherRequiredInputs">Other Required Inputs</a></h2>
-<p>Besides the triple patterns discussed above several other pieces of 
-information are required before we can generate a valid OWL or SADL model.</p>
-<ol>
-  <li>We need to know the namespace of the model to be created. This namespace 
-  is set with the &quot;uri&quot; keyword as the first non-comment line in the template 
-  file and can optionally include an alias. When CsvImporter is 
-  used directly, as it is in SadlServer/SadlServerPlus, the template namespace 
-  setting may be omitted or overridden by 
-  calling the method setImportModelNamespace.</li>
-  <li>We need the URIs of any models that need to be imported into the generated 
-  model to define concepts used in the template. These imports may be specified in the 
-  template file, one import per line (see below) or they may be set by calling one of the CsvImporter's setImports 
-  methods and passing in either a list of import URI strings or a 
-  comma-separated list of URIs as a single string.</li>
-  <li>We need to know how to find the the imported URIs. It is assumed that the 
-  import is into a set of models in a folder that includes a policy file (ont-policy.rdf) 
-  capturing the mappings from model URIs to actual URLs for model loading. 
-  Any OwlModels folder generated by the SADL-IDE will contain such a policy 
-  file. Any set of models constituting a valid SadlServer kbase will likewise 
-  include a policy file. The folder containing the policy file is set by calling 
-  the CsvImporter method setModelFolder. Within the SADL-IDE the importing 
-  project's OwlModel folder's policy file is used.</li>
-  <li>In addition to the above, we need any applicable instructions on validating table 
-  values and doing transformations on table values before using them in the 
-  triple patterns. These validation and transformation statements can only be 
-  specified in a template file, as discussed below. They must come after the 
-  import statements and before the template triples.</li>
-</ol>
-<p>For our example above, we need to import two models: the measurement model 
-(e.g., &quot;<font SIZE="2">http://sadl.org/measurement</font>&quot;) and the equipment 
-model (e.g., &quot;<font SIZE="2">http://sadl.org/TGConcepts</font>&quot;). 
-(That is, unless the equipment model already imports the measurement model in 
-which case we can just import the equipment model.)</p>
-<h2><a name="TemplateFile">The Template File</a></h2>
-<p>The template file puts the template triples, the namespace of the generated 
-model, the imports, and any validation 
-and transformation statements into a persistent storage 
-so that it can be reused easily, and so that it may be  accessed and used in 
-the SadlServer environment. The uri and import statements and any validation and 
-transformation statements come before the template triples in the file layout. 
-Here is the template file for the example above. Note that the import statement 
-is similar to the one in a SADL model except that a period is not required at the end of the statement. Validation and transformation statements 
-as well as other options are discussed below 
-under <a href="#AdvancedFeatures">Advanced Features</a>.</p>
-<blockquote>
-<p><font size="2" color="#0000FF">uri &quot;http://com.ge.research.sadl/testimport&quot; 
-as tginst</font></p>
-<p><font size="2" color="#0000FF">import &quot;http://sadl.org/measurement&quot;<br>
-import &quot;<a href="http://sadl.org/TGConcepts">http://sadl.org/TGConcepts</a>&quot;</font></p>
-<p><font size="2" color="#0000FF">// this is a comment in a template file</font></p>
-<p>
-  <span LANG="EN"><font SIZE="2" color="#0000FF">
-  T&lt;TurbineID&gt; rdf:type Turbine<br>
-  T&lt;TurbineID&gt; speed &lt;1&gt;<br>
-  &lt;1&gt; rdf:type Speed<br>
-  &lt;1&gt; amount &lt;Speed&gt;<br>
-  &lt;1&gt; unit RPM<br>
-  &lt;1&gt; timestamp &lt;Time&gt;<br>
-  T&lt;TurbineID&gt; drives Gen&lt;TurbineID&gt;<br>
-  Gen&lt;TurbineID&gt; rdf:type Generator<br>
-  Gen&lt;TurbineID&gt; power &lt;2&gt;<br>
-  &lt;2&gt; rdf:type Power<br>
-  &lt;2&gt; amount &lt;Power&gt;<br>
-  &lt;2&gt; unit MW<br>
-  &lt;2&gt; timestamp &lt;Time&gt;</font></span></p>
-</blockquote>
-<h2><a name="Output">The Output</a></h2>
-<p>The output of the Tabular Data Importer is either an OWL model or a SADL 
-model. Within the SADL-IDE, the output folder is selected as part of the Import 
-CSV wizard and the output filename is derived from the input CSV file name. When 
-using CsvImporter directly or via SadlServer/SadlServerPlus, the model can either be written to a file by calling the method</p>
-<p>&nbsp;&nbsp;&nbsp; boolean saveOwlModel(String filename)</p>
-<p>or returned as a data stream by calling the method</p>
-<p>&nbsp;&nbsp;&nbsp; DataSource getOwlModel(String format).</p>
-<p>For calls to saveOwlModel, the extension of the filename determines the format as 
-follows:</p>
-<ul>
-  <li>.sadl&nbsp;&nbsp;&nbsp; -- save as a SADL model</li>
-  <li>.owl&nbsp;&nbsp;&nbsp; -- save as an OWL model in RDF/XML-ABBREV format</li>
-  <li>.n-triple -- save as an OWL model in N-TRIPLE format</li>
-  <li>.n3 -- save as an OWL model in N3 format</li>
-</ul>
-<p>For calls to getOwlModel, the format argument determines the syntax of the 
-the serialized model as follows:</p>
-<ol>
-  <li>RDF/XML -- return an OWL model in RDF/XML format</li>
-  <li>RDF/XML-ABBREV -- return an OWL model in RDF/XML-ABBREV format</li>
-  <li>N-TRIPLE -- return an OWL model in N-TRIPLE format</li>
-  <li>N3 -- return an OWL model in N3 format</li>
-</ol>
-<p>A serialized SADL model can be retrieved by calling getSadlModel( ).</p>
-<p>The Jena OntModel can also be exposed by calling getOwlModel with no arguments.</p>
-<p>The Tabular Data Importer is meant to be compatible with SadlServer and, in 
-fact, the most efficient way to use it is to call the SadlServer methods 
-loadCsvData or sendCsvData, which take all of the required inputs and pass 
-the resulting OWL model to the reasoner without intermediate serialization. See
-<a href="SadlServer/JavaDocs/com/ge/research/sadl/sadlserver/server/ISadlServer.html">
-ISadlServer JavaDocs</a> for details.</p>
-<p>Tabular 
-data, either as a named file or as a DataSource input stream can be passed to 
-the Importer, the OWL model returned as a DataSource output stream, and this 
-model passed to SadlServer as instance data input in the form of a DataSource. 
-However, this approach requires that the OWL model be serialized and then parsed 
-back into memory.</p>
-<p>To complete our example, suppose that we had the following data in a CSV 
-file.</p>
-<blockquote>
-  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111">
-    <tr>
-      <td width="25%">TurbineID</td>
-      <td width="25%">Speed</td>
-      <td width="25%">Power</td>
-      <td width="25%">Time</td>
-    </tr>
-    <tr>
-      <td width="25%">123456</td>
-      <td width="25%">23</td>
-      <td width="25%">0</td>
-      <td width="25%">&quot;2011-08-29T05:58:35&quot;</td>
-    </tr>
-    <tr>
-      <td width="25%">987654</td>
-      <td width="25%">5</td>
-      <td width="25%">0</td>
-      <td width="25%">&quot;2011-08-29T06:10:22&quot;</td>
-    </tr>
-    <tr>
-      <td width="25%">123456</td>
-      <td width="25%">100</td>
-      <td width="25%">50</td>
-      <td width="25%">&quot;2011-08-29T06:22:55&quot;</td>
-    </tr>
-    <tr>
-      <td width="25%">987654</td>
-      <td width="25%">65</td>
-      <td width="25%">0</td>
-      <td width="25%">&quot;2011-08-29T06:31:43&quot;</td>
-    </tr>
-  </table>
-</blockquote>
-<p>Importing this tabular data to the namespace 
-&quot;http://com.ge.research.sadl/testimport&quot; gives the following OWL model in N3 
-format.</p>
-<font SIZE="2"><span LANG="EN">
-<blockquote>
-  <p><font color="#0000FF">@prefix : 
-  &lt;http://com.ge.research/sadl/testcsvimport#&gt; .<br>
-  @prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .<br>
-  @prefix measure: &lt;http://com.ge.research.sadl/measurement#&gt; .<br>
-  @prefix owl: &lt;http://www.w3.org/2002/07/owl#&gt; .<br>
-  @prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .<br>
-  @prefix tgc: &lt;http://com.ge.research.sadl/TGConcepts#&gt; .<br>
-  @prefix rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .</font></p>
-  <p><font color="#0000FF">:Gen123456<br>
-&nbsp;&nbsp;&nbsp; a&nbsp;&nbsp;&nbsp;&nbsp; tgc:Generator ;<br>
-&nbsp;&nbsp;&nbsp; tgc:power<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font></span><font color="#0000FF">&nbsp;[ 
-  a&nbsp;&nbsp;&nbsp;&nbsp; measure:Power ;</font><span LANG="EN"><font color="#0000FF"><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:amount &quot;0.0&quot;^^xsd:float 
-  ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:timestamp 
-  &quot;2011-08-29T05:58:35&quot;^^xsd:dateTime ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:unit measure:MW<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] ;<br>
-&nbsp;&nbsp;&nbsp; tgc:power<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ </font></span>
-  <font color="#0000FF">a&nbsp;&nbsp;&nbsp;&nbsp; measure:Power ;</font><span LANG="EN"><font color="#0000FF"><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:amount &quot;50.0&quot;^^xsd:float 
-  ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:timestamp 
-  &quot;2011-08-29T06:22:55&quot;^^xsd:dateTime ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:unit measure:MW<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] .</font></p>
-  <p><font color="#0000FF">:T123456<br>
-&nbsp;&nbsp;&nbsp; a&nbsp;&nbsp;&nbsp;&nbsp; tgc:Turbine ;<br>
-&nbsp;&nbsp;&nbsp; tgc:drives :Gen123456 ;<br>
-&nbsp;&nbsp;&nbsp; tgc:speed<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ a&nbsp;&nbsp;&nbsp;&nbsp; 
-  measure:Speed ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:amount &quot;23.0&quot;^^xsd:float 
-  ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:timestamp 
-  &quot;2011-08-29T05:58:35&quot;^^xsd:dateTime ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:unit measure:RPM<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] ;<br>
-&nbsp;&nbsp;&nbsp; tgc:speed<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ a&nbsp;&nbsp;&nbsp;&nbsp; 
-  measure:Speed ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:amount &quot;100.0&quot;^^xsd:float 
-  ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:timestamp 
-  &quot;2011-08-29T06:22:55&quot;^^xsd:dateTime ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:unit measure:RPM<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] .</font></p>
-  <p><font color="#0000FF">&lt;http://com.ge.research/sadl/testcsvimport&gt;<br>
-&nbsp;&nbsp;&nbsp; a owl:Ontology ;<br>
-&nbsp;&nbsp;&nbsp; rdfs:comment &quot;This ontology was created from a CSV data 
-  source.&quot;@en ;<br>
-&nbsp;&nbsp;&nbsp; owl:imports &lt;http://com.ge.research.sadl/measurement&gt; , 
-  &lt;http://com.ge.research.sadl/TGConcepts&gt; .</font></p>
-  <p><font color="#0000FF">:T987654<br>
-&nbsp;&nbsp;&nbsp; a&nbsp;&nbsp;&nbsp;&nbsp; tgc:Turbine ;<br>
-&nbsp;&nbsp;&nbsp; tgc:drives :Gen987654 ;<br>
-&nbsp;&nbsp;&nbsp; tgc:speed<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ a&nbsp;&nbsp;&nbsp;&nbsp; 
-  measure:Speed ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:amount &quot;65.0&quot;^^xsd:float 
-  ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:timestamp 
-  &quot;2011-08-29T06:31:43&quot;^^xsd:dateTime ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:unit measure:RPM<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] ;<br>
-&nbsp;&nbsp;&nbsp; tgc:speed<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ a&nbsp;&nbsp;&nbsp;&nbsp; 
-  measure:Speed ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:amount &quot;5.0&quot;^^xsd:float 
-  ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:timestamp 
-  &quot;2011-08-29T06:10:22&quot;^^xsd:dateTime ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:unit measure:RPM<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] .</font></p>
-  <p><font color="#0000FF">:Gen987654<br>
-&nbsp;&nbsp;&nbsp; a&nbsp;&nbsp;&nbsp;&nbsp; tgc:Generator ;<br>
-&nbsp;&nbsp;&nbsp; tgc:power<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ a&nbsp;&nbsp;&nbsp;&nbsp; 
-  measure:Power ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:amount &quot;0.0&quot;^^xsd:float 
-  ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:timestamp 
-  &quot;2011-08-29T06:31:43&quot;^^xsd:dateTime ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:unit measure:MW<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] ;<br>
-&nbsp;&nbsp;&nbsp; tgc:power<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ a&nbsp;&nbsp;&nbsp;&nbsp; 
-  measure:Power ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:amount &quot;0.0&quot;^^xsd:float 
-  ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:timestamp 
-  &quot;2011-08-29T06:10:22&quot;^^xsd:dateTime ;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; measure:unit measure:MW<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] .</font></p>
-</blockquote>
-</span></font>
-<p>Importing to a SADL model gives the following. Note that importing into SADL 
-is actually a two-step process: first the tabular data is imported into an OWL model and 
-then the OWL model is translated to SADL. The OWL to SADL translator is a work 
-in-progress so generated OWL models may be correct while translation to SADL may 
-not be complete.</p>
-<blockquote>
-  <font SIZE="2" COLOR="#800080">
-  <p>uri</font><font SIZE="2"> <b>&quot;http://com.ge.research/sadl/testcsvimport&quot;</b>.</font><font SIZE="2" COLOR="#808080"><i><br>
-  // This ontology was created from a CSV data source..<br>
-  // This model was generated from an OWL model.<br>
-  // It is read-only by default. To edit first change the file properties.</p>
-  </i></font><font SIZE="2" COLOR="#800080">
-  <p>import</font><font SIZE="2"> <b>&quot;http://com.ge.research.sadl/TGConcepts&quot;</b>
-  </font><font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> tgc .</font><font SIZE="2" COLOR="#800080"><br>
-  import</font><font SIZE="2"> <b>&quot;http://com.ge.research.sadl/measurement&quot;</b>
-  </font><font SIZE="2" COLOR="#800080">as</font><font SIZE="2"> measure .</p>
-  </font><font SIZE="2" COLOR="#808080"><i>
-  <p>// Classes and class restrictions</p>
-  </i></font><font SIZE="2" COLOR="#808080"><i>
-  <p>// Properties</p>
-  </i></font><font SIZE="2" COLOR="#808080"><i>
-  <p>// Instance declarations</i></font><font SIZE="2" COLOR="#0000ff"><br>
-  Gen123456</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Generator</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>tgc:power</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#000080"><b>measure:Power</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:timestamp</b></font><font SIZE="2"> 
-  &quot;2011-08-29T06:22:55&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:unit</b></font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#0000ff">measure:MW</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:amount</b></font><font SIZE="2"> 
-  50.0),<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>tgc:power</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#000080"><b>measure:Power</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:timestamp</b></font><font SIZE="2"> 
-  &quot;2011-08-29T05:58:35&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:unit</b></font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#0000ff">measure:MW</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:amount</b></font><font SIZE="2"> 
-  0.0).</font><font SIZE="2" COLOR="#0000ff"><br>
-  Gen987654</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Generator</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>tgc:power</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#000080"><b>measure:Power</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:timestamp</b></font><font SIZE="2"> 
-  &quot;2011-08-29T06:31:43&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:unit</b></font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#0000ff">measure:MW</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:amount</b></font><font SIZE="2"> 
-  0.0),<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>tgc:power</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#000080"><b>measure:Power</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:timestamp</b></font><font SIZE="2"> 
-  &quot;2011-08-29T06:10:22&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:unit</b></font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#0000ff">measure:MW</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:amount</b></font><font SIZE="2"> 
-  0.0).</font><font SIZE="2" COLOR="#0000ff"><br>
-  T123456</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Turbine</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>tgc:drives</b></font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#0000ff">Gen123456</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>tgc:speed</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#000080"><b>measure:Speed</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:timestamp</b></font><font SIZE="2"> 
-  &quot;2011-08-29T06:22:55&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:unit</b></font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#0000ff">measure:RPM</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:amount</b></font><font SIZE="2"> 
-  100.0),<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>tgc:speed</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#000080"><b>measure:Speed</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:timestamp</b></font><font SIZE="2"> 
-  &quot;2011-08-29T05:58:35&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:unit</b></font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#0000ff">measure:RPM</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:amount</b></font><font SIZE="2"> 
-  23.0).</font><font SIZE="2" COLOR="#0000ff"><br>
-  T987654</font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#000080"><b>Turbine</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>tgc:drives</b></font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#0000ff">Gen987654</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>tgc:speed</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#000080"><b>measure:Speed</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:timestamp</b></font><font SIZE="2"> 
-  &quot;2011-08-29T06:31:43&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:unit</b></font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#0000ff">measure:RPM</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:amount</b></font><font SIZE="2"> 
-  65.0),<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>tgc:speed</b></font><font SIZE="2"> (</font><font SIZE="2" COLOR="#800080">a</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#000080"><b>measure:Speed</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:timestamp</b></font><font SIZE="2"> 
-  &quot;2011-08-29T06:10:22&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:unit</b></font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#0000ff">measure:RPM</font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>measure:amount</b></font><font SIZE="2"> 
-  5.0).</p>
-  </font><font FACE="Arial" SIZE="2"></font>
-</blockquote>
-<h2>The Inverse Mapping</h2>
-
-<p>Consider the mapping template file, repeated here for ease of viewing.</p>
-
-<blockquote>
-<p><font size="2" color="#0000FF">uri &quot;http://com.ge.research.sadl/testimport&quot; 
-as tginst</font></p>
-<p><font size="2" color="#0000FF">import http://sadl.org/measurement<br>
-import <a href="http://sadl.org/TGConcepts">http://sadl.org/TGConcepts</a></font></p>
-<p><font size="2" color="#0000FF">// this is a comment in a template file</font></p>
-<p>
-  <span LANG="EN"><font SIZE="2" color="#0000FF">
-  T&lt;TurbineID&gt; rdf:type Turbine<br>
-  T&lt;TurbineID&gt; speed &lt;1&gt;<br>
-  &lt;1&gt; rdf:type Speed<br>
-  &lt;1&gt; amount &lt;Speed&gt;<br>
-  &lt;1&gt; unit RPM<br>
-  &lt;1&gt; timestamp &lt;Time&gt;<br>
-  T&lt;TurbineID&gt; drives Gen&lt;TurbineID&gt;<br>
-  Gen&lt;TurbineID&gt; rdf:type Generator<br>
-  Gen&lt;TurbineID&gt; power &lt;2&gt;<br>
-  &lt;2&gt; rdf:type Power<br>
-  &lt;2&gt; amount &lt;Power&gt;<br>
-  &lt;2&gt; unit MW<br>
-  &lt;2&gt; timestamp &lt;Time&gt;</font></span></p>
-</blockquote>
-<p>
-  The inverse mapping is given by the following SPARQL query, which will 
-  generate a table </p>
-<blockquote>
-  <font SIZE="2">
-  <p><font color="#0000FF">prefix afn:&lt;<a href="http://jena.hpl.hp.com/ARQ/function#">http://jena.hpl.hp.com/ARQ/function#</a>&gt;
-  <br>
-&nbsp;&nbsp;&nbsp; select (afn:substring(afn:localname(?turbine),1) as ?TurbineID) 
-  ?Speed ?Power ?Time<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; where {?turbine &lt;rdf:type&gt; &lt;Turbine&gt; 
-  .<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ?turbine 
-  &lt;speed&gt; ?speed . ?speed &lt;rdf:type&gt; &lt;Speed&gt; . ?speed &lt;amount&gt; ?Speed . ?speed 
-  &lt;unit&gt; &lt;RPM&gt; . <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ?speed 
-  &lt;timestamp&gt; ?Time . <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ?turbine 
-  &lt;drives&gt; ?gen . ?gen &lt;rdf:type&gt; &lt;Generator&gt; . ?gen &lt;power&gt; ?power . ?power &lt;rdf:type&gt; 
-  &lt;Power&gt; . ?power &lt;amount&gt; ?Power . <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ?power 
-  &lt;timestamp&gt; ?Time}</font></p>
-  </font>
-</blockquote>
-<p>This query will generate a table of data with 0 or more rows and columns &quot;TurbineID&quot;, 
-&quot;Speed&quot;, &quot;Power&quot;, and &quot;Time&quot;. The first line in the mapping creates an instance 
-of a Turbine. The inverse mapping requires that we first get the localname of 
-each Turbine instance and then drop the first character (the &quot;T&quot;). It is 
-important to note that the timestamp for the Speed and Power must be the same 
-for a row of data, so both timestamps with the same value appear in the query 
-just as they did in the mapping file. For any given table of data mapped to the 
-semantic model by the mapping template, this query will generate a data table 
-identical to the original input, except of course that the rows may not be in 
-the same order.</p>
-
-<h2><a name="AdvancedFeatures">Advanced Features</a></h2>
-
-<p>The example above assumes that the tabular data is very nicely organized with 
-a single value per cell. Unfortunately data is not always so well-formed. 
-Consider the data in this CVS extract:</p>
-<blockquote>
-  <p><font size="2">CLAUSE NUMBER,CLAUSE TITLE,Clause Date,Workflow ID#,FUNCTION,POINT 
-  OF CONTACT,DETERMINATION,Month/Year of Determination, REVIEW FREQUENCY<br>
-  52.203-15,Whistleblower Protections Under the American Recovery and 
-  Reivestment Act of 2009,3/11/2011,51014178,Lefal,Jessica 
-  Wenzell,Accept,3/11/2011,Perpetual<br>
-  52.224-6,Subcontracts for Commerical Items,,,Production,Dick Mitchell/Frank 
-  Welch,,2/1/2000,<br>
-  52.232-9,Limitation on Withholding of payments,,,Legal / Finance,Jessica 
-  Wenzell / John Feeney,Accept,4/1/1984,Perpetual</font></p>
-</blockquote>
-<p>Here's the same data formatted as a table, for readability.</p>
-<table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="84%">
-  <tr>
-    <td width="13%"><b>CLAUSE NUMBER</b></td>
-    <td width="27%"><b>CLAUSE TITLE</b></td>
-    <td width="14%"><b>CLAUSE DATE</b></td>
-    <td width="11%"><b>FUNCTION</b></td>
-    <td width="31%"><b>POINT OF CONTACT</b></td>
-    <td width="45%"><b>DETERMINATION</b></td>
-    <td width="45%"><b>Month/Year of Determination</b></td>
-    <td width="45%"><b>REVIEW FREQUENCY</b></td>
-  </tr>
-  <tr>
-    <td width="13%">52.203-15</td>
-    <td width="27%">Whistleblower Protections Under the American Recovery and 
-    Reinvestment Act of 2009</td>
-    <td width="14%">3/11/2011</td>
-    <td width="11%">Legal</td>
-    <td width="31%">Jessica Wenzell</td>
-    <td width="45%">Accept</td>
-    <td width="45%"><font size="2">3/11/2011</font></td>
-    <td width="45%"><font size="2">Perpetual</font></td>
-  </tr>
-  <tr>
-    <td width="13%">52.224-6</td>
-    <td width="27%">Subcontracts for Commercial Items</td>
-    <td width="14%">&nbsp;</td>
-    <td width="11%">Production</td>
-    <td width="31%">Dick Mitchell/Frank Welch</td>
-    <td width="45%">&nbsp;</td>
-    <td width="45%"><font size="2">2/1/2000</font></td>
-    <td width="45%">&nbsp;</td>
-  </tr>
-  <tr>
-    <td width="13%">52.232-2</td>
-    <td width="27%">Payment Under Fixed-Price Research and Development 
-    Contracts.</td>
-    <td width="14%">&nbsp;</td>
-    <td width="11%">Finance/Legal</td>
-    <td width="31%">Cliff Conover / Jessica Wenzell</td>
-    <td width="45%">Accept</td>
-    <td width="45%"><font size="2">4/1/1984</font></td>
-    <td width="45%"><font size="2">Perpetual</font></td>
-  </tr>
-</table>
-<p>This data isn't as clean as the first example above. There are missing 
-values. There are what appear to be multiple values in some cells. In the case 
-of multiple values per cell, it is not always easy, desirable, or even possible 
-to transform such data&nbsp; into a simple one-value-per-cell table. Therefore 
-the Tabular Data Importer provides some additional features to help  
-specify how to handle missing values and multiple values in a cell. The 
-functionality is 
-complicated by the ambiguity involved in deciding how to handle the multiple 
-values--what is the scope of the multiplicity. </p>
-<h3><a name="Validation">Validation</a></h3>
-<p>The Tablular Data Importer supports template statements, before the template 
-triples, that begin with the keyword &quot;validate&quot; and which are used to validate 
-the data in a particular cell in a table row. By default, if a cell is blank 
-then any triple in the template that references that cell will simply not be 
-added to the model. (Note: as of 8/1/2014 this does not appear to be the actual 
-default behavior; rather an error occurs if a value is missing. See &quot;validate 
-all&quot; below.) This default behavior can be made explicit by the validation 
-statement, for a given element ID (column designator or transformation output):</p>
-<blockquote>
-<p>validate &lt;ElementID&gt; not blank skip triple</p>
-</blockquote>
-<p>or just</p>
-<blockquote>
-<p>validate &lt;ElementID&gt; not blank skip</p>
-</blockquote>
-<p>&nbsp;</p>
-<p>If we wish a blank cell to cause not just this triple but also the rest of 
-the triples in the group to be skipped (see Group discussion below), the 
-validate statement is:</p>
-<blockquote>
-<p>validate &lt;ElementID&gt; not blank skip group</p>
-</blockquote>
-<p>If we wish a blank cell to instead be considered an error, causing processing 
-to be aborted, we can specify a pre-check using a &quot;validate&quot; statement of the 
-form:</p>
-<blockquote>
-  <p>validate &lt;ElementID&gt; not blank abort</p>
-</blockquote>
-  <p>A third possible action to be taken when a cell is blank is to generate a 
-  unique URI fragment (localname) value (unique at the point of validation in 
-  the model which import is creating) and behave as if this generated value were 
-  in the cell. This form takes a baseName (last term in the statement). If the 
-  baseName ends in a series of digits (a number), this number will be used as a 
-  counter and incremented by 1 until the URI in the import model namespace with 
-  the generated URI fragment is unique. If it does not end in a number the 
-  counter will start at 1.</p>
-<blockquote>
-  <p>validate &lt;ElementID&gt; not blank generate baseName</p>
-</blockquote>
-<p>Looking at validate statements more generally, they have the following 
-syntax. The first word is &quot;validate&quot;. The second element  is the identity of a value, either a column in the table 
-in the same syntax used in the template (see above) or a value output by a 
-transformation of a value (see below). Just as in the template triples, there can be characters 
-immediately before and/or after the column designator, in which case the string 
- 
-constructed by inserting the cell value is what is being validated. </p>
-<p>The third element is the requirement placed on the values in the specified 
-column expressed using keywords from the SADL language. These include the 
-following which, except for the first two, are a subset of valid XSD datatypes:</p>
-<blockquote>
-  <p>not blank, exists, string, boolean, decimal, integer, dateTime, 
-  time, date, hexBinary, base64Binary, anyURI</p>
-</blockquote>
-<p>Here &quot;not blank&quot; means the cell is not empty and &quot;exists&quot;, short 
-for &quot;exists in model&quot; which can also be used, means that the cell contains the identity of a 
-pre-existing concept in the model. Here is an example of the use of &quot;exists&quot;.</p>
-<blockquote>
-  <p>validate Gen&lt;TurbineID&gt; exists</p>
-</blockquote>
-  <p>The optional fourth element of the validate statement can either &quot;skip&quot;, 
-  &quot;abort&quot;, or &quot;generate&quot;. If missing, the default consequence is &quot;skip&quot;.</p>
-  <p>Only if the fourth element is &quot;generate&quot; is a fifth element valid, in which 
-  case it is the base name of the unique name to be created.</p>
-<p>There is one additional form of validate used to make sure that a semantic 
-constraint is satisfied in the model. This is &quot;validate&quot; followed by a triple 
-pattern, e.g.:</p>
-<blockquote>
-  <p>validate Gen&lt;TurbineID&gt; rdf:type Generator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </p>
-</blockquote>
-<p dir="ltr">If a template included the two statements above, it would require 
-that the concept &quot;Gen&lt;TurbineID&gt;&quot; already exists in the model and that it 
-belong to the class &quot;Generator&quot;. In this case, of course, we would not have 
-this triple pattern in the template triples, as it is in the 
-complete template above, because it would be redundant with the validation 
-condition to then try to insert the triple into the model. This form may be 
-followed by &quot;skip&quot; or &quot;abort&quot; and the scope (??).</p>
-<p dir="ltr">As an additional example from the template above, if one wished to 
-make sure that the &quot;Speed&quot; column is a number, one might use the validate 
-statement below, which would cause the import to fail if the validate fails. </p>
-<blockquote>
-  <p>validate &lt;Speed&gt; decimal abort</p>
-</blockquote>
-<p>The actual conversion of values to Literals in the model will be done in 
-light of the range value of the property to which the value is to be assigned.</p>
-<h4>Validate All</h4>
-<p>Instead of specifying the columns to validate, it is possible to use the form</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; validate all ....</p>
-<p>This has the equivalent effect of creating a validate statement for each 
-column in the tabular data.</p>
-<h3><a name="Transformation">Transformation</a></h3>
-<p>The Tablular Data Importer supports template statements before the template 
-triples that begin with the keyword &quot;transform&quot;. The transform statement 
-manipulates the content of the data in a table cell in a variety of ways. All 
-transform statements must specify the identity of the input data and the 
-identity of the output data. The syntax is as follows.</p>
-<blockquote>
-<p>transform &lt;inputID&gt; to &lt;outputID&gt; ....</p>
-</blockquote>
-<p>&nbsp;Currently supported transformations include <i><b>split</b></i>, <i><b>
-encode</b></i>, and <i><b>find</b></i>.</p>
-<h4><a name="Split">Split</a></h4>
-<p>A split transformation specifies that the data being transformed contains 
-multiple values or parts. The data value is divided into tokens using the 
-specified set of delimiters. The behavior is that of the
-<a href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html#split(java.lang.String)">
-Java String's split function</a>. The split transformation has the following 
-form.</p>
-<blockquote>
-  <p>transform &lt;inputID&gt; to &lt;outputID[]&gt; split &quot;delimiter&quot;</p>
-</blockquote>
-<p>The inputID might be a column designator or it might be the output identifier 
-of another transformation. The square brackets in the outputID are optional but 
-serve as a reminder that the result of a split transformation is expected to be 
-an array of values. The &quot;delimiter&quot;&nbsp; is a regular expression which is 
-passed to the Java split function and therefore certain characters will need to 
-be escaped to be interpreted as characters. To split the values in the FUNCTION column of the data at 
-the beginning of this section, use a statement like</p>
-<blockquote>
-<p>transform &lt;FUNCTION&gt; to &lt;fct[]&gt; split &quot;/&quot;</p>
-</blockquote>
-<p>A specific array element of the output of a cell splitting transformation can be referenced by the 
-output name followed by the array element designation, starting with 1. Thus one 
-could reference the first output of the above transformation as &quot;fct[1]&quot;. When 
-this is used in another statement, the name and the array element designation 
-are all placed inside the 
-angle brackets. The array element designation can be one of the following.</p>
-<ol>
-  <li>An integer indicates a particular, specified split result.</li>
-  <li>An &quot;*&quot; indicates iteration over, or that the transformation 
-  apply to, all split results.</li>
-  <li>A  letter or name that is not used as any input or output identifier indicates that 
-  these split results are to be matched with 
-  other split results in an iteration over all split results within a triple 
-  grouping (see Scope of Repetition below).</li>
-</ol>
-<p>For example, if we wanted to separate the names in the POINT OF CONTACT 
-column above into separate persons and then into first name and last name, we 
-might do so with the following transform statements, where the second transform statement 
-splits the results of the first:</p>
-<blockquote>
-  <p>transform &lt;E&gt;&nbsp; to &lt;Es[]&gt; split &quot;/&quot;<br>
-  parse &lt;Es[1]&gt; to &lt;Nm1[]&gt; split &quot; &quot;<br>
-  parse &lt;Es[2]&gt; to &lt;Nm2[]&gt; split &quot; &quot;</p>
-</blockquote>
-<p>In this case the last row of the data above would yield these values:</p>
-<ol>
-  <li>&lt;Nm1[1]&gt; is &quot;Cliff&quot;</li>
-  <li>&lt;Nm1[2]&gt; is &quot;Conover&quot;</li>
-  <li>&lt;Nm2[1]&gt; is &quot;Jessica&quot;</li>
-  <li>&lt;Nm2[2]&gt; is &quot;Wenzell&quot;</li>
-</ol>
-<p>Of course we may not know the number of results from the split. Handling 
-iteration over split results is covered below in Scope of Repetition and Groups 
-of Triple Patterns in a Template.</p>
-<h4><a name="Replace">Replace</a></h4>
-<p>The replace transformation does character substitution within a value. A replacement is identified by two 
-colon-separated strings.  There may be multiple replacements separated by 
-commas, in which case the replacements will be done sequentially. These 
-colon-separated strings form the arguments to the
-<a href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html#replaceAll(java.lang.String, java.lang.String)">
-Java String replaceAll method</a> and are regular expressions. Suppose, for 
-example, that one wished to use the name(s) in the POINT OF CONTACT column to 
-create instances of the class Person in a model. The spaces between first name 
-and last name are not legal characters in a model instance URI but we might 
-replace the space with an underscore.</p>
-<blockquote>
-  <p>transform &lt;E&gt;&nbsp; to &lt;Es[]&gt; split &quot;/&quot;<br>
-  transform &lt;Es&gt; to &lt;Nm&gt; replace &quot; &quot;:_</p>
-</blockquote>
-<p>The result of this transformation on the data in the first row of the table 
-above would yield a value for Nm of &quot;Jessica_Wenzell&quot;. The result for the last 
-row in the table would yield for Nm an array of two values, &quot;Cliff_Conover&quot; and 
-&quot;Jessica_Wenzell&quot;.</p>
-<p>It is important to understand how the text following <i>replace</i> is parsed 
-and what special characters are involved. The special characters are comma, 
-colon, double quote, and single quote (not backquote):</p>
-<ol>
-  <li>The comma (,) separates multiple replacements for a series of replacements</li>
-  <li>The colon (:) separates the first argument for replacement, the regular 
-  expression, from the second argument, the replacement</li>
-  <li>The double quote (&quot;) is used to preserve white space and should always 
-  appear, when used for this purpose, in pairs as the first and last characters 
-  of a string</li>
-  <li>The single quote (') is the escape character. If a comma, a colon, a 
-  double quote, or a single quote is to be part of the regex or replacement 
-  text, then it should be preceded by a single quote to escape it.</li>
-</ol>
-<p>Note that white space around the comma and colon delimiters will be trimmed 
-and so is not significant. </p>
-<p>Examples of regular expressions and replacements which may be useful for creating legal URI 
-fragments include the following:</p>
-<blockquote>
-  <table border="1" cellpadding="0" cellspacing="0" style="border-collapse: collapse" bordercolor="#111111" width="764">
-    <tr>
-      <td width="213"><b>Sample transform snippet</b></td>
-      <td width="548"><b>What it does</b></td>
-    </tr>
-    <tr>
-      <td width="213">encode &quot; &quot;:_</td>
-      <td width="548">replace all spaces with underscores</td>
-    </tr>
-    <tr>
-      <td width="213">encode [^a-zA-Z0-9]:_</td>
-      <td width="548">replace all characters which are not letters or digits 
-      with an underscore</td>
-    </tr>
-    <tr>
-      <td width="213">encode &quot; &quot;:_,#:No,&amp;:_And_</td>
-      <td width="548">replace all spaces with underscores, replace &quot;#&quot; with 
-      &quot;No&quot;, replace &quot;&amp;&quot; with &quot;_And_&quot;</td>
-    </tr>
-  </table>
-</blockquote>
-<h4><a name="Encode">Encode</a></h4>
-<p>The encode transformation does optional character substitution within a value, 
-just like <i>replace</i>, 
-followed by URL encoding. If character substitution is to be done the syntax is 
-the same as the replace transformation. If not then there is nothing following 
-the &quot;encode&quot; keyword and the URL encoding is performed on the input to produce 
-the output.</p>
-<h4><a name="Find">Find</a></h4>
-<p>The find transformation uses Jena LARQ (SPARQL + Lucene) to find a match 
-within the existing model. Results that include Lucene full-text search results 
-can be ordered by match score to make the best match the first in the array of 
-returned results. For example, suppose that column A of our data is the serial 
-number of a particular part and B of our data is a textual description of the 
-type of the part, and suppose that we wished to create an instance in a model of 
-the part with a type, subclass of &quot;Part&quot; (if found), and that in any case the 
-instance is of type &quot;Part&quot;. Then our template would include:</p>
-<blockquote>
-  <p>transform &lt;B&gt; to &lt;Bf[]&gt; find &quot;select distinct ?doc ?score where {(?lit 
-  ?score) &lt;http://jena.hpl.hp.com/ARQ/property#textMatch&gt; '+&lt;B&gt;' . ?doc ?p ?lit 
-  . ?doc &lt;rdfs:subClassOf&gt;+ &lt;Part&gt;} order by DESC(?score)&quot;</p>
-  <p>validate &lt;Bf[1]&gt; exists skip</p>
-  <p>P&lt;A&gt; rdf:type Part<br>
-  P&lt;A&gt; rdf:type &lt;Bf[1]&gt;</p>
-</blockquote>
-<p>For details of how &quot;textMatch works, refer to
-<a href="http://jena.apache.org/documentation/larq/index.html">Apache LARQ</a> 
-and <a href="http://lucene.apache.org/core/">Apache Lucene</a> documentation.</p>
-<h4><a name="User-DefinedFunction">User-Defined Function</a></h4>
-<p>While the transformation capabilities of split, encode, and find are intended 
-to handle many common situations, not all transformation needs can be foreseen. 
-The CSVImporter will be extended to support user-defined functions encoded in 
-Java and with arbitrary argument lists. A user-defined function must be 
-implemented in a class which extends <i>
-com.ge.research.sadl.geonly.template.userdefined.Transform</i>. A user-defined 
-function might, for example, allow a user to enable a transformation involving 
-values from multiple columns in a row.</p>
-<h3><a name="ScopeOfRepetition">Scope of Repetition</a></h3>
-<p>When there are multiple values in a table cell, the issue arises as to the 
-scope of the multiplicity. For example, suppose census data put the family name 
-in the first column of a table, the given names of all family members in the 
-second column, separated by colons, and the birth dates of all family members, 
-in the same order as first names, in the third column, again separated by 
-colons.&nbsp; Suppose that we wished to create a Person instance for each unique 
-Person. Consider the following data and template.</p>
-<blockquote>
-  <p>Smith, George:Sue:Henry:George, 2/8/1978:3/5/1978:10/3/2001:1/30/2003</p>
-  <font SIZE="2">
-  <p><font color="#0000FF">import &quot;<a href="http://com.ge.research.sadl/contracts2">http://...</a>&quot;</font></p>
-  <p><font color="#0000FF">validate &lt;A&gt; not blank<br>
-  validate &lt;B&gt; not blank</font></p>
-  <p><font color="#0000FF">transform &lt;B&gt; to &lt;FN[]&gt; split &quot;:&quot;<br>
-  transform &lt;C&gt; to &lt;BD[]&gt; split &quot;:&quot;</font></p>
-  <p><font color="#0000FF">&lt;1&gt; rdf:type Person<br>
-  &lt;1&gt; lastName &lt;A&gt;<br>
-  &lt;1&gt; firstName &lt;FN[i]&gt;<br>
-  &lt;1&gt; dateOfBirth &lt;BD[i]&gt;</font></font></p>
-</blockquote>
-<p>In this data, there are two Persons named &quot;George Smith&quot; but they are not the 
-same person because they were born on different dates. How do we cause the 
-template to generate four distinct instances of Person rather than one instance 
-of Person with three firstName values and possibly four dateOfBirth values? (We 
-could add &quot;validate &lt;C&gt; not blank&quot; to require birth date to be known, thereby 
-making it more likely that there are four dateOfBirth values, but that would not 
-guarantee that there aren't just 3.) This question is answered by the use of 
-grouping of triple patterns within a template.</p>
-<h3><a name="GroupTriplePatterns">Groups of Triple Patterns in a Template</a></h3>
-<p>A template, as described above, can include any number of triple 
-patterns, each of which is handled by the importer in a manner independent of 
-all others. For reasons mentioned above and which will be illustrated by 
-examples, it may be 
-desirable to group triple patterns together in sets. This is done by surrounding 
-two or more triple patterns with curly brackets. For instance, in the example 
-above the grouping identifies a set of related 
-triples and uses a common index name in the transformation output of first names 
-and dates of birth to match firstName and dateOfBirth 
-values. Here's the last part of the template repeated but with the described 
-grouping modification:</p>
-<font SIZE="2">
-<blockquote>
-  <p><font color="#0000FF">{&lt;1&gt; rdf:type Person<br>
-&nbsp; &lt;1&gt; lastName &lt;A&gt;<br>
-&nbsp; &lt;1&gt; firstName &lt;FN[i]&gt;<br>
-&nbsp; &lt;1&gt; dateOfBirth &lt;BD[i]&gt;}</font></font></p>
-</blockquote>
-<p>The curly brackets tell us that if there are multiple values then we need to 
-repeat the entire set of triples identified with the brackets. The lower-case &quot;i&quot; 
-is an index name (any name not used for something else in the template will do) tells us that we need to match 
-each value in the split of a cell of column B with the 
-corresponding value in the split of a cell of column C (same row of course). If 
-the number of values in columns C and D for a given row are not the same then an 
-error occurs.</p>
-<p>As an example, here is the SADL model generated by applying this grouping to 
-the census data row above:</p>
-<blockquote>
-  <font SIZE="2" COLOR="#808080"><i>
-  <p ALIGN="LEFT">// Instance declarations</p>
-  </i></font><font SIZE="2" COLOR="#800080">
-  <p ALIGN="LEFT">A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080">
-  <b>Person</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>lastName</b></font><font SIZE="2"> 
-  &quot;Smith&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> 
-  &quot;George&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;1978-02-08&quot;.</p>
-  </font><font SIZE="2" COLOR="#800080">
-  <p ALIGN="LEFT">A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080">
-  <b>Person</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>lastName</b></font><font SIZE="2"> 
-  &quot;Smith&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> 
-  &quot;Henry&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;2001-10-03&quot;.</p>
-  </font><font SIZE="2" COLOR="#800080">
-  <p ALIGN="LEFT">A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080">
-  <b>Person</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>lastName</b></font><font SIZE="2"> 
-  &quot;Smith&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> 
-  &quot;Sue&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;1978-03-05&quot;.</p>
-  </font><font SIZE="2" COLOR="#800080">
-  <p ALIGN="LEFT">A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080">
-  <b>Person</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>lastName</b></font><font SIZE="2"> 
-  &quot;Smith&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> 
-  &quot;George&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;2003-01-30&quot;.</p>
-  </font>
-</blockquote>
-<p>By comparison, suppose that the grouping in the template triples were as 
-follows:</p>
-<blockquote>
-<p><font color="#0000FF" SIZE="2">&lt;1&gt; rdf:type Person<br>
-&lt;1&gt; lastName &lt;A&gt;<br>
-{ &lt;1&gt; firstName &lt;FN[i]&gt;<br>
-&nbsp; &lt;1&gt; dateOfBirth &lt;BD[i]&gt;}</font></p>
-</blockquote>
-<p>Then the generated data would look like this:</p>
-<blockquote>
-  <font SIZE="2" COLOR="#808080"><i>
-  <p ALIGN="LEFT">// Instance declarations</p>
-  </i></font><font SIZE="2" COLOR="#800080">
-  <p ALIGN="LEFT">A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080">
-  <b>Person</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>lastName</b></font><font SIZE="2"> 
-  &quot;Smith&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> 
-  &quot;George&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;1978-02-08&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> 
-  &quot;Sue&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;1978-03-05&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> 
-  &quot;Henry&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;2001-10-03&quot;,<br>
-&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#800080">has</font><font SIZE="2">
-  </font><font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;2003-01-30&quot;.</p>
-  </font>
-</blockquote>
-<p>Now let's apply all of the template concepts discussed to the data in the 
-table at the beginning of this section to create a complete template we might use to translate 
-some of the data to a semantic 
-model. If we wanted to create and populate Person instances from the data, we 
-might use the following template:</p>
-<font SIZE="2">
-<blockquote>
-  <p><font color="#0000FF">import &quot;<a href="http://com.ge.research.sadl/contracts2">http://com.ge.research.sadl/contracts2</a>&quot;</font></p>
-  <p><font color="#0000FF">validate &lt;A&gt; not blank abort<br>
-  validate &lt;C&gt; date<br>
-  validate &lt;G&gt; date<br>
-  validate &lt;fct&gt; exists</font></p>
-  <p><font color="#0000FF">transform &lt;D&gt; to &lt;fct[]&gt; split &quot;/&quot;<br>
-  transform &lt;E&gt; to &lt;poc[]&gt; split &quot;/&quot;<br>
-  transform &lt;poc&gt; to &lt;puri[]&gt; encode &quot;[ ]+&quot;:&quot;_&quot;<br>
-  transform &lt;poc&gt; to &lt;Nm[]&gt; split &quot; &quot;</font></p>
-  <p><font color="#0000FF">&lt;1&gt; rdf:type ReferenceClause<br>
-  &lt;1&gt; clauseNumber &lt;A&gt;<br>
-  &lt;1&gt; clauseTitle &quot;&lt;B&gt;&quot;<br>
-  &lt;1&gt; revisionDate &lt;C&gt;</font></p>
-  <p><font color="#0000FF">&lt;2&gt; rdf:type ClauseReviewSOP<br>
-  &lt;2&gt; appliesToClauseNumber &lt;A&gt;<br>
-  &lt;2&gt; appliesToRevisionDate &lt;C&gt;<br>
-  &lt;2&gt; function &lt;fct[*]&gt;<br>
-  &lt;2&gt; reviewFrequency &lt;I&gt;<br>
-  {<br>
-&nbsp; &lt;puri[i]&gt; rdf:Type Person<br>
-&nbsp; &lt;puri[i]&gt; firstName &lt;Nm[1]&gt;<br>
-&nbsp; &lt;puri[i]&gt; lastName &lt;Nm[2]&gt;<br>
-&nbsp; &lt;2&gt; pointOfContact &lt;puri[i]&gt;<br>
-&nbsp; &lt;2&gt; determinedBy &lt;puri[i]&gt;<br>
-  }<br>
-&nbsp;</font></p>
-</blockquote>
-</font>
-<p>This template requires that column A not have any blank cells or the data 
-import will fail, that columns C 
-and G contain values that can be converted to a date (if there are values; value 
-are not required), that the values in column FUNCTION (column D) be existing instances in 
-the model, that values in column D be parsed to multiple values by the delimiter 
-&quot;/&quot; (although multiple values are not required), and that values in column E be 
-first parsed by the &quot;/&quot; delimiter into multiple values and that each of these 
-values then be parsed by the space delimiter (actually any number of spaces 
-treated as a single space). The curly brackets around the last 
-5 triple patterns, along with the lower-case &quot;i&quot; in the split results of column 
-E, mean that we will iterate over all of the first split results on column E and 
-insert the entire set of triples into the model for each split result.</p>
-
-<h3><a name="IncrementalImport">Incremental Import</a></h3>
-<p>The &quot;incremental&quot; keyword may be placed on a line by itself after the import 
-statements and before any other statements. If &quot;incremental&quot; is not specified, 
-an import will create a new data model of the specified name (uri), replacing 
-any model by that name that might have previously existed. However, if the 
-&quot;incremental&quot; statement is present the CSVImporter will look for a mapping from 
-the specified model name (uri) to a file or TDB repository already existent and 
-if such is found will open it and add the triples from the import operation to 
-that file or repository.</p>
-<h3><a name="InferenceParallelization">Inference and Parallelization </a></h3>
-<p>The CSVImporter supports inferencing over the imported triples and the 
-inclusion of any inferred triples in the generated output. Additionally, a chunk 
-size may be specified which indicates the number of rows of data to be imported 
-and inferred over before output is generated and the process is repeated. When 
-inference with chunking is specified, the statement may also specify a 
-parallelization of the computation over a specified number of threads. For 
-inference on a single machine, this number should be no more than one less than 
-the number of CPUs available. The entire statement is of the form:</p>
-<p>&nbsp;&nbsp;&nbsp; infer [chunk &lt;n&gt; [parallel &lt;n&gt;]]</p>
-<p>where the square brackets indicate optional elements and are not part of the 
-syntax and &quot;&lt;n&gt;&quot; indicates an integer.</p>
-<p>If pre-computed inference is specified with an infer statement, the format of 
-the output is automatically changed to Jena TDB. There are several reasons for 
-using Jena TDB with pre-inferred models. If any inferencing is to occur with 
-currently supported reasoners at query time, an in-memory inferred model must be 
-created. This means that large models require large amounts of memory on the 
-host machine. However, when inference is pre-computed, a Jena TDB repository, 
-which is an indexed triple store, can be efficiently queried without generating 
-an in-memory model. This greatly increases scalability. In addition, the TDB 
-repository serves as a filter so that the same triple is not found more than 
-once in the model. If the CSVImporter were writing output to a file, so as to 
-avoid a large in-memory model, triples could be written multiple times.</p>
-
-<h2><a name="InverseMappingWithAdvancedFeatures">Inverse Mapping with Advanced Features</a></h2>
-
-<p>Validation, if it has any effect, reduces the amount of data that is mapped 
-from the tabular data to the OWL model. This reduction in data has no inverse 
-mapping as the data not mapped is not in the model to map back to tabular form. 
-Therefore the inverse mapping provides a subset of the original data.</p>
-
-<p>When the tabular data contains a column whose content is used to identify or 
-create the class (rdf:type) to which new instances identified in a another 
-column and/or attributed in other columns belong, the inverse mapping is usually 
-not possible because the query engine will return all types of an instance, not 
-just its direct type. Of course if there is no transitive reasoning over class 
-hierarchies, then the inverse transform may work. The inverse mapping query will 
-return the rdf:type(s) that exist in the model and unless the reasoner supports 
-specialized properties to identify direct types, it will not be possible to tell 
-which is the direct type.</p>
-
-<p>When a split transform is used to generate the semantic data model, possibly 
-with grouping, the inverse transformation becomes more complex. For example, the 
-CSV data</p>
-
-<blockquote>
-  <font SIZE="2">
-  <p>Smith, George:Sue:Henry:George, 2/8/1978:3/5/1978:10/3/2001:1/30/2003</p>
-  </font>
-</blockquote>
-<p>generates the SADL model</p>
-
-<blockquote>
-  <font SIZE="2" COLOR="#808080"><i>
-  <p ALIGN="LEFT">// Instance declarations</i></font><font SIZE="2" COLOR="#800080"><br>
-  A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080"><b>Person</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>lastName</b></font><font SIZE="2"> &quot;Smith&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> 
-  &quot;George&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;1978-02-08&quot;.</p>
-  </font><font SIZE="2" COLOR="#800080">
-  <p ALIGN="LEFT">A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080">
-  <b>Person</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>lastName</b></font><font SIZE="2"> &quot;Smith&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> &quot;Henry&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;2001-10-03&quot;.</p>
-  </font><font SIZE="2" COLOR="#800080">
-  <p ALIGN="LEFT">A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080">
-  <b>Person</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>lastName</b></font><font SIZE="2"> &quot;Smith&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> &quot;Sue&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;1978-03-05&quot;.</p>
-  </font><font SIZE="2" COLOR="#800080">
-  <p ALIGN="LEFT">A</font><font SIZE="2"> </font><font SIZE="2" COLOR="#000080">
-  <b>Person</b></font><font SIZE="2">,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>lastName</b></font><font SIZE="2"> &quot;Smith&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>firstName</b></font><font SIZE="2"> 
-  &quot;George&quot;,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>
-  <font SIZE="2" COLOR="#800080">has</font><font SIZE="2"> </font>
-  <font SIZE="2" COLOR="#008000"><b>dateOfBirth</b></font><font SIZE="2"> 
-  &quot;2003-01-30&quot;.</p>
-  </font>
-</blockquote>
-<p>but what SPARQL query would regenerate the CSV data row from the OWL 
-equivalent of the SADL model?</p>
-
-<h2><a name="DebuggingTemplateFile">Debugging the Template File</a></h2>
-<p>The template file constitutes a declarative mapping from the tabular data to 
-the graph of the ontology instance data model. It can be difficult to determine 
-exactly why the resulting OWL or SADL file isn't what was expected. To assist in 
-this, a log file containing an ordered record of each triple insertion into the 
-ontology model, along with information about each validation skip that occurred, 
-may be created by calling &quot;enableTriplesAddedInOrderLogging(String filename)&quot; 
-before doing the import. In the SADL-IDE, such a log file is created in the Temp folder of the project 
-if &quot;Debug output&quot; is checked on the CSV import wizard. Each line in the log is prefixed with 
-the row number in the CSV data input file being processed. This allows the user, for 
-any row in the input data, to see exactly how each triple in the template file 
-is processed. Additional information is available when importing to SADL because 
-opening the SADL file in the SADL-IDE will do some validation of the ontology, 
-providing warning or error markers in the editor.</p>
-
-<h2><a name="ImportCSVWizard">The SADL-IDE Import CSV Wizard</a></h2>
-<p>Figure 4 shows how one initiates importing of CSV data in the SADL-IDE. </p>
-<p><img border="0" src="images/CsvDat1.jpg" width="458" height="345"></p>
-<p><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Figure 4: Popup Menu for Import</b></p>
-<p>Selecting import on this popup menu leads to the dialog shown in Figure 5. 
-Under SADL, CSV Files should be selected, then click Next.</p>
-<p><img border="0" src="images/CsvDat2.jpg" width="558" height="550"></p>
-<p><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Figure 5: Import Popup Dialog</b></p>
-<p>Clicking Next leads to the Modal Dialog shown in Figure 6.</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img border="0" src="images/CsvDat3.jpg" width="525" height="639"></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>&nbsp;Figure 6: Final CSV Import 
-Wizard Dialog</b></p>
-<p>The First check box on the final Wizard dialog shown in Figure 6 controls 
-whether the data entered in the previous use of the dialog is auto-filled. The 
-next entry allows entry or browsing for the input CSV file. The 3rd line should 
-be checked if the first row in the CSV data file contains column headers. Check 
-&quot;Debug output&quot; to cause the CSVImporter to create a detailed log of each triple 
-generated from each input row. The 5th row will be auto-filled with the model 
-name (uri) in the template file. Editing this field will override the template 
-value. The next input field and browse button allow specification of the 
-template file to be used. Like the model name, imports is auto-filled from the 
-template file content but can be used to override these values. The &quot;Into 
-folder&quot; setting identified the Eclipse project and possibly subfolder into which 
-the import output file is to be written. Finally the Options section allows 
-selection of the output file format, OWL or SADL.</p>
-
-<p><b>Note</b>: if you Import as a SADL file and later change to Import as an 
-OWL file, you must delete the SADL file or you will have two models with the 
-same URI, which will be an error. The same is true if switching from OWL to SADL--you 
-will need to delete the OWL file. You may need to clean/build the project after 
-switching import file type to rebuild the mapping file.</p>
-
-</body>
-
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+    <meta name="ProgId" content="FrontPage.Editor.Document">
+    <title>CSV Tabular Data Importer</title>
+  </head>
+  <body>
+    <h1>CSV Tabular Data Importer</h1>
+    <h6>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->12/3/2020<!--webbot bot="Timestamp" endspan i-checksum="12616" -->.
+    <a href="contact.html">Contact us</a>.
+    </h6>
+    <p><font color="#CC0000">Note: the Xtext-based Template Editor for the
+        Tabular Data Importer does not coincide exactly with the actual Template
+        grammar. If you find constructs that are not supported in the Template
+        Editor but are valid in the actual import process, please report.<br>
+      </font></p>
+    <ol>
+      <li><a href="#Introduction">Introduction</a></li>
+      <li><a href="#BasicConcept">The Basic Concept</a></li>
+      <li><a href="#Template">The Template Triples</a> </li>
+      <li><a href="#TemplateFile">The Template File</a></li>
+      <li><a href="#OtherRequiredInputs">Other Required Inputs</a></li>
+      <li><span style="color: #0000ee;"><a href="The%20CSV%20Parser" title="#CSVParser">The
+            CSV Parser</a><br>
+        </span></li>
+      <li><a href="#Output">The Output</a></li>
+      <li><a href="#AdvancedFeatures">Advanced Features</a>
+        <ol type="a">
+          <li><a href="#Validation">Validation</a></li>
+          <li><a href="#Transformation">Transformation</a>
+            <ol type="i">
+              <li><a href="#Split">Split</a></li>
+              <li><a href="#Replace">Replace</a></li>
+              <li><a href="#Encode">Encode</a></li>
+              <li><a href="#Find">Find</a></li>
+              <li><a href="#User-DefinedFunction">User-Defined Function</a></li>
+            </ol>
+          </li>
+          <li><a href="#ScopeOfRepetition">Scope of Repetition</a></li>
+          <li><a href="#GroupTriplePatterns">Groups of Triple Patterns in a
+              Template</a></li>
+          <li><a href="#IncrementalImport">Incremental Import</a></li>
+          <li><a href="#InferenceParallelization">Inference and Parallelization
+            </a></li>
+        </ol>
+      </li>
+      <li><a href="#InverseMappingWithAdvancedFeatures">Inverse Mapping with
+          Advanced Features</a></li>
+      <li><a href="#DebuggingTemplateFile">Debugging the Template File</a></li>
+      <li><a href="#ImportCSVWizard">The SADL-IDE Import CSV Wizard</a></li>
+    </ol>
+    <h2><a name="Introduction">Introduction</a></h2>
+    <p>It is very common to have data in a tabular format. For example, a
+      spreadsheet can contain a table--a two-dimensional array of data.
+      Relational databases contain "tables" of data, views create other "tables"
+      of data, and SQL queries against relational databases also generate data
+      tables. Tabular data is often accessed by row and column, e.g., the
+      spreadsheet value in cell A3. The particular kind of data addressed by
+      this Tabular Data Importer is columnar data. Each column represents a
+      different set of data values, e.g., temperature in one column, pressure in
+      another column, etc. Each row represents a set of values across types that
+      are related in some way, e.g., each row is data about a different instance
+      of something or for a different time.</p>
+    <p>The Tabular Data Importer enables the conversion of tabular data into an
+      OWL model or into a SADL model. In the case of SADL model generation, the
+      conversion of tabular data to OWL is followed by a translation from OWL to
+      SADL. Conversion of tabular data to an OWL model is an ideal way to
+      convert instance data in tabular format into an OWL input model for
+      SadlServer. The process can also be initiated in the SADL-IDE by using the
+      Eclipse File -&gt; Import Wizard and selecting the SADL option in the list
+      of kinds of imports followed by "CSV Files". The conversion mechanism is
+      flexible and powerful. The OWL model generated can further be transformed
+      into a SADL model if desired. A fundamental assumption underlying the
+      Tabular Data Importer is that each row in the data table can be mapped to
+      a set of model statements (graph nodes and edges) independent of the other
+      rows in the data table. The Tabular Data Importer is implemented in the
+      Java class <i> com.ge.research.sadl.geonly.imports.<b>CsvImporter</b>.</i></p>
+    <p>Note further that it is possible to do an inverse mapping from OWL (or
+      SADL, since it creates OWL) to tabular data. An appropriate pairing of
+      mapping and inverse mapping creates a round-trip capability and could be
+      the basis of providing a tabular editor for OWL models. The inverse
+      mapping can take the form of a SPARQL query. The detailed associations
+      between mapping and inverse mapping are discussed below.</p>
+    <h2><a name="BasicConcept">The Basic Concept</a></h2>
+    <p>An OWL model is a graph and can be represented as a set of RDF triples.
+      Consider the following meta-model for a turbine-generator with data
+      sensors. Sensor data will be read at multiple times creating time series
+      of speed and power.</p>
+    <b><font color="#C0C0C0" size="2"> </font></b>
+    <blockquote><b><font color="#C0C0C0" size="2">
+          <p>// Measurement Model</p>
+        </font><font color="#000080" size="2">
+          <p>Unit<font size="2"> </font><font color="#800080" size="2">is</font><font
+              size="2"> </font><font color="#800080" size="2">a</font><font size="2">
+            </font> <font color="#800080" size="2">top-level</font><font size="2">
+            </font> <font color="#800080" size="2">class</font><font size="2">.</font></p>
+          <font size="2"> </font> </font></b>
+      <p><b><font color="#000080" size="2">Amount</font></b><font size="2"> </font><font
+          color="#800080" size="2">is</font><font size="2"> </font><font color="#800080"
+          size="2">a</font><font size="2"> </font> <font color="#800080" size="2">top-level</font><font
+          size="2"> </font> <font color="#800080" size="2">class</font><font size="2">,
+          <br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">described</font><font
+          size="2"> </font><font color="#800080" size="2">by</font><font size="2">
+        </font> <font color="#008000" size="2"><b>amount</b></font><font size="2">
+        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
+        <font color="#800080" size="2">values</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#800080" size="2">float</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">described</font><font
+          size="2"> </font><font color="#800080" size="2">by</font><font size="2">
+        </font> <font color="#008000" size="2"><b>unit</b></font><font size="2">
+        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
+        <font color="#800080" size="2">values</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#000080" size="2"><b>Unit</b></font><font
+          size="2">, <br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">described</font><font
+          size="2"> </font><font color="#800080" size="2">by</font><font size="2">
+        </font> <font color="#008000" size="2"><b>timestamp</b></font><font size="2">
+        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
+        <font color="#800080" size="2">values</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#800080" size="2">dateTime</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">described</font><font
+          size="2"> </font><font color="#800080" size="2">by</font><font size="2">
+        </font> <font color="#008000" size="2"><b>derived</b></font><font size="2">
+        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
+        <font color="#800080" size="2">values</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#000080" size="2"><b>CalculatedAmount</b></font><font
+          size="2">.</font></p>
+      <font size="2">
+        <p></p>
+      </font>
+      <p><font size="2">{</font><font color="#000080" size="2"><b>Speed</b></font><font
+          size="2">, </font><font color="#000080" size="2"><b>Power</b></font><font
+          size="2">} </font><font color="#800080" size="2">are</font><font size="2">
+        </font> <font color="#800080" size="2">types</font><font size="2"> </font>
+        <font color="#800080" size="2">of</font><font size="2"> </font> <font
+          color="#000080" size="2"><b>Amount</b></font><font size="2">. </font>
+      </p>
+      <font color="#000080" size="2"><b> </b></font>
+      <p><font color="#000080" size="2"><b>Observation</b></font><font size="2">
+        </font> <font color="#800080" size="2">is</font><font size="2"> </font>
+        <font color="#800080" size="2">a</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#800080" size="2">of</font><font
+          size="2"> </font> <font color="#000080" size="2"><b>Amount</b></font><font
+          size="2">, </font> <font color="#800080" size="2">described</font><font
+          size="2"> </font> <font color="#800080" size="2">by</font><font size="2">
+        </font> <font color="#008000" size="2"><b>observer</b></font><font size="2">
+        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
+        <font color="#800080" size="2">values</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#800080" size="2">string</font><font
+          size="2">.</font></p>
+      <font size="2">
+        <p></p>
+      </font><font color="#000080" size="2"><b> </b></font>
+      <p><font color="#000080" size="2"><b>CalculatedAmount</b></font><font size="2">
+        </font> <font color="#800080" size="2">is</font><font size="2"> </font>
+        <font color="#800080" size="2">a</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#800080" size="2">of</font><font
+          size="2"> </font> <font color="#000080" size="2"><b>Amount</b></font><font
+          size="2">, </font> <font color="#800080" size="2">described</font><font
+          size="2"> </font> <font color="#800080" size="2">by</font><font size="2">
+        </font> <font color="#008000" size="2"><b>method</b></font><font size="2">
+        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
+        <font color="#800080" size="2">values</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#800080" size="2">string</font><font
+          size="2">.</font></p>
+      <font size="2"> </font><font color="#000080" size="2"><b> </b></font>
+      <p align="LEFT"><font color="#000080" size="2"><b>PowerUnit</b></font><font
+          size="2"> </font> <font color="#800080" size="2">is</font><font size="2">
+        </font> <font color="#800080" size="2">a</font><font size="2"> </font>
+        <font color="#800080" size="2">type</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#000080"
+          size="2"><b>Unit</b></font><font size="2">, </font> <font color="#800080"
+          size="2">must</font><font size="2"> </font> <font color="#800080" size="2">be</font><font
+          size="2"> </font> <font color="#800080" size="2">one</font><font size="2">
+        </font> <font color="#800080" size="2">of</font><font size="2"> {</font><font
+          color="#0000ff" size="2">Watt</font><font size="2">, </font><font color="#0000ff"
+          size="2">KW</font><font size="2">, </font> <font color="#0000ff" size="2">MW</font><font
+          size="2">, </font> <font color="#0000ff" size="2">HP</font><font size="2">}.</font></p>
+      <font size="2">
+        <p align="LEFT"></p>
+      </font><font size="2">
+        <p align="LEFT"></p>
+      </font><font color="#000080" size="2"><b> </b></font>
+      <p><font color="#000080" size="2"><b>AngularSpeedUnit</b></font><font size="2">
+        </font> <font color="#800080" size="2">is</font><font size="2"> </font>
+        <font color="#800080" size="2">a</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#800080" size="2">of</font><font
+          size="2"> </font> <font color="#000080" size="2"><b>Unit</b></font><font
+          size="2">, </font> <font color="#800080" size="2">must</font><font size="2">
+        </font> <font color="#800080" size="2">be</font><font size="2"> </font>
+        <font color="#800080" size="2">one</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> {</font><font color="#0000ff"
+          size="2">RPM</font><font size="2">}.</font></p>
+      <font size="2"> </font>
+      <p><font color="#C0C0C0" size="2">// Equipment Model</font></p>
+      <font color="#000080" size="2"><b> </b></font>
+      <p align="LEFT"><font color="#000080" size="2"><b>Turbine</b></font><font
+          size="2"> </font> <font color="#800080" size="2">is</font><font size="2">
+        </font> <font color="#800080" size="2">a</font><font size="2"> </font>
+        <font color="#800080" size="2">class</font><font size="2">, <br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">described</font><font
+          size="2"> </font><font color="#800080" size="2">by</font><font size="2">
+        </font> <font color="#008000" size="2"><b>drives</b></font><font size="2">
+        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
+        <font color="#800080" size="2">a single value</font><font size="2"> </font>
+        <font color="#800080" size="2">of</font><font size="2"> </font> <font
+          color="#800080" size="2">type</font><font size="2"> </font> <font color="#000080"
+          size="2"><b>Generator</b></font><font size="2">, <br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">described</font><font
+          size="2"> </font><font color="#800080" size="2">by</font><font size="2">
+        </font> <font color="#008000" size="2"><b>speed</b></font><font size="2">
+        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
+        <font color="#800080" size="2">values</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#000080" size="2"><b>Speed</b></font><font
+          size="2">.</font></p>
+      <font size="2"> </font><font color="#000080" size="2"><b> </b></font>
+      <p align="LEFT"><font color="#000080" size="2"><b>Generator</b></font><font
+          size="2"> </font> <font color="#800080" size="2">is</font><font size="2">
+        </font> <font color="#800080" size="2">a</font><font size="2"> </font>
+        <font color="#800080" size="2">class</font><font size="2">, <br>
+        </font>&nbsp;&nbsp;&nbsp; <font color="#800080" size="2">described</font><font
+          size="2"> </font><font color="#800080" size="2">by</font><font size="2">
+        </font> <font color="#008000" size="2"><b>power</b></font><font size="2">
+        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
+        <font color="#800080" size="2">values</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#000080" size="2"><b>Power</b></font><font
+          size="2">.</font></p>
+      <p align="LEFT"><b><font size="2">Figure 1: Meta-Model for Measurement and
+            Equipment for Example</font></b></p>
+    </blockquote>
+    <p align="LEFT">Figure 2 below shows some of the concepts from the models in
+      Figure 1, which will be used in the example tabular data import mapping.
+      Class names are in dark blue bold, property names are in green bold.</p>
+    <blockquote>
+      <p><img src="images/TableD1.jpg" height="442" border="0" width="732"></p>
+      <p align="LEFT"><b><font size="2">Figure 2: Elements of the Models
+            Relevant to Tabular Data Import</font></b></p>
+    </blockquote>
+    <p>It is common to place some but not all of the values for an instance data
+      set conforming to the above conceptual model in a data table. The data not
+      explicitly represented in the table is implied by a knowledge of the
+      context or domain of the data. Our objective is to provide an unambiguous
+      mapping from the data table to the model. The diagram below shows one such
+      mapping from concepts in the graph above to the columns of a data table.</p>
+    <blockquote>
+      <p><img src="images/TableD2.jpg" height="526" border="0" width="743"></p>
+      <p align="LEFT"><b><font size="2">Figure 3: Mappings from Tabular Data to
+            Model Concepts</font></b></p>
+    </blockquote>
+    <p>To convert the tabular data to a valid graph, we must know two things:</p>
+    <ol>
+      <li>the mapping from data table columns to model concepts</li>
+      <li>the identity of the missing elements of each model triple
+        (node-edge-node in the graph) involved in the conversion.</li>
+    </ol>
+    <h2><a name="Template">The Template</a> Triples</h2>
+    <p>The conversion of tabular data to a graph model can be based on a
+      template. The template provides the mapping from columns to model concepts
+      and supplies the pattern of the RDF triples to actually be inserted into
+      the generated RDF model. These triple patterns, after appropriate
+      substitution of data from the table, become the statements to be added to
+      the model. The mapping from table columns to an element of a triple
+      pattern uses a placeholder in the triple pattern that identifies a table
+      column. The placeholder is enclosed in angle brackets so that it is
+      delimited on both ends and can be embedded in a longer name. The actual
+      mapping from table value to part of a model statement can be accomplished
+      in one of two ways. </p>
+    <ul>
+      <li>If the tabular data has header information in the first row, the
+        column name as given in this header can be used as the name within the
+        angle brackets, indicating that values from that column are to be
+        substituted for the placeholder in the triple pattern in generating the
+        output triples.</li>
+      <li>Whether or not the tabular data has header information in the first
+        row, the placeholder within the angle brackets can be a column
+        designation using one or more upper-case letters, e.g., A is the first
+        column, B the second column, Z the 26th column, AA the 27th column, etc.</li>
+    </ul>
+    <p>Graph edges and nodes not represented in the tabular data but necessary
+      to generated model statements are specified in the template triples as
+      follows.</p>
+    <ol>
+      <li>An edge in the graph (a property) is specified by naming the edge
+        (property) in the triple pattern. Names can be fully qualified URIs,
+        QNames (e.g., rdf:type), or local names only in which case an attempt
+        will be made to find a model namespace containing the local name among
+        the imported models, thus translating it into a fully qualified URI.
+        Note that "is a" is allowed for "rdf:type" and "has" can appear before a
+        predicate in a triple pattern. This makes the template more like the
+        SADL language. The SADL-IDE provides a template editor (template files
+        must end in ".tmpl") that validates references to existing instances,
+        classes, and properties in imported ontologies and provides semantic
+        coloration, name completion, etc.</li>
+      <li>A node in the graph which is a specified individual (instance) or
+        class, either subject or object of the triple, is specified by name in
+        the triple pattern. Names can be fully qualified URIs, QNames (e.g.,
+        rdf:type), or local names only in which case an attempt will be made to
+        find a model namespace containing the local name, thus translating it
+        into a fully qualified URI.</li>
+      <li>A node in the graph which is an unnamed instance of a specified class
+        is an unnamed but typed blank node (bnode) in the triple pattern. Since
+        the bnode can appear in multiple triple patterns in the template, it is
+        necessary to distinguish one bnode in the template from another. This is
+        accomplished by referring to bnodes by a simple integer within angle
+        brackets, e.g. "&lt;1&gt;". The same integer means the same bnode.</li>
+      <li>The row number (first row is row 1) of the data creating a set of
+        triples from the template can be retrieved using the special variable
+        name "row()" ("row" followed by an opening parenthesis followed by a
+        closing parenthesis, no space). This can be useful, for example, in
+        ordered time series data where one wishes to associate a sequence
+        identifier with each time slice to more easily find the time slice
+        before or after a given time slice.</li>
+    </ol>
+    <p>Each row of data is processed separately to create a set of model
+      triples. Of course triples added to the model in the course of processing
+      one row of data are now in the model and may be used in the processing of
+      subsequent rows of data.</p>
+    <p>For the example in the figures above, the template triples are the
+      following:</p>
+    <blockquote> <span lang="EN"><font color="#0000FF" size="2">
+          <p>T&lt;TurbineID&gt; rdf:type Turbine<br>
+            T&lt;TurbineID&gt; speed &lt;1&gt;<br>
+            &lt;1&gt; rdf:type Speed<br>
+            &lt;1&gt; amount &lt;Speed&gt;<br>
+            &lt;1&gt; unit RPM<br>
+            &lt;1&gt; timestamp &lt;Time&gt;<br>
+            T&lt;TurbineID&gt; drives Gen&lt;TurbineID&gt;<br>
+            Gen&lt;TurbineID&gt; rdf:type Generator<br>
+            Gen&lt;TurbineID&gt; power &lt;2&gt;<br>
+            &lt;2&gt; rdf:type Power<br>
+            &lt;2&gt; amount &lt;Power&gt;<br>
+            &lt;2&gt; unit MW<br>
+            &lt;2&gt; timestamp &lt;Time&gt;</p>
+        </font></span> </blockquote>
+    <p>Note that there is a one-to-one correspondence between an instance of
+      Turbine and an instance of Generator so we do not want to create a bnode
+      and a new instance of Generator for each row of data in the table. Rather
+      we want to create a named instance of Generator for each unique instance
+      of Turbine. This is accomplished by the 7th line in the template. On the
+      other hand, we want to create an instance of Speed and an instance of
+      Power for each row of data so a bnode is appropriate for the instances of
+      Speed and Power.</p>
+    <h2><a name="OtherRequiredInputs">Other Required Inputs</a></h2>
+    <p>Besides the triple patterns discussed above several other pieces of
+      information are required before we can generate a valid OWL or SADL model.</p>
+    <ol>
+      <li>We need to know the namespace of the model to be created. This
+        namespace is set with the "uri" keyword as the first non-comment line in
+        the template file and can optionally include an alias. When CsvImporter
+        is used directly, as it is in SadlServer/SadlServerPlus, the template
+        namespace setting may be omitted or overridden by calling the method
+        setImportModelNamespace.</li>
+      <li>We need the URIs of any models that need to be imported into the
+        generated model to define concepts used in the template. These imports
+        may be specified in the template file, one import per line (see below)
+        or they may be set by calling one of the CsvImporter's setImports
+        methods and passing in either a list of import URI strings or a
+        comma-separated list of URIs as a single string.</li>
+      <li>We need to know how to find the the imported URIs. It is assumed that
+        the import is into a set of models in a folder that includes a policy
+        file (ont-policy.rdf) capturing the mappings from model URIs to actual
+        URLs for model loading. Any OwlModels folder generated by the SADL-IDE
+        will contain such a policy file. Any set of models constituting a valid
+        SadlServer kbase will likewise include a policy file. The folder
+        containing the policy file is set by calling the CsvImporter method
+        setModelFolder. Within the SADL-IDE the importing project's OwlModel
+        folder's policy file is used.</li>
+      <li>In addition to the above, we need any applicable instructions on
+        validating table values and doing transformations on table values before
+        using them in the triple patterns. These validation and transformation
+        statements can only be specified in a template file, as discussed below.
+        They must come after the import statements and before the template
+        triples.</li>
+    </ol>
+    <p>For our example above, we need to import two models: the measurement
+      model (e.g., "<font size="2">http://sadl.org/measurement</font>") and the
+      equipment model (e.g., "<font size="2">http://sadl.org/TGConcepts</font>").
+      (That is, unless the equipment model already imports the measurement model
+      in which case we can just import the equipment model.)</p>
+    <h2><a name="TemplateFile">The Template File</a></h2>
+    <p>The template file puts the template triples, the namespace of the
+      generated model, the imports, and any validation and transformation
+      statements into a persistent storage so that it can be reused easily, and
+      so that it may be accessed and used in the SadlServer environment. The uri
+      and import statements and any validation and transformation statements
+      come before the template triples in the file layout. Here is the template
+      file for the example above. Note that the import statement is similar to
+      the one in a SADL model except that a period is not required at the end of
+      the statement. Validation and transformation statements as well as other
+      options are discussed below under <a href="#AdvancedFeatures">Advanced
+        Features</a>.</p>
+    <blockquote>
+      <p><font color="#0000FF" size="2">uri
+          "http://com.ge.research.sadl/testimport" as tginst</font></p>
+      <p><font color="#0000FF" size="2">import "http://sadl.org/measurement"<br>
+          import "<a href="http://sadl.org/TGConcepts">http://sadl.org/TGConcepts</a>"</font></p>
+      <p><font color="#0000FF" size="2">// this is a comment in a template file</font></p>
+      <p> <span lang="EN"><font color="#0000FF" size="2"> T&lt;TurbineID&gt;
+            rdf:type Turbine<br>
+            T&lt;TurbineID&gt; speed &lt;1&gt;<br>
+            &lt;1&gt; rdf:type Speed<br>
+            &lt;1&gt; amount &lt;Speed&gt;<br>
+            &lt;1&gt; unit RPM<br>
+            &lt;1&gt; timestamp &lt;Time&gt;<br>
+            T&lt;TurbineID&gt; drives Gen&lt;TurbineID&gt;<br>
+            Gen&lt;TurbineID&gt; rdf:type Generator<br>
+            Gen&lt;TurbineID&gt; power &lt;2&gt;<br>
+            &lt;2&gt; rdf:type Power<br>
+            &lt;2&gt; amount &lt;Power&gt;<br>
+            &lt;2&gt; unit MW<br>
+            &lt;2&gt; timestamp &lt;Time&gt;</font></span></p>
+    </blockquote>
+    <h2><a name="Output"></a></h2>
+    <h2><a name="CSVParser">The CSV Parser</a></h2>
+    <p>SADL uses CSVReader from <a href="https://sourceforge.net/projects/opencsv/">opencsv</a>
+      to parse the CSV input data. It uses the following CSVReader defaults:</p>
+    <ol>
+      <li>Separator: comma (,)</li>
+      <li>Quote character: double quote (")</li>
+      <li>Escape character: backslash (\)</li>
+    </ol>
+    <p>This means that a) values in a row of input data must be separated by
+      commas, b) that text values should be placed in double quotes, and c) if
+      there is a double quote in an input data string it must be preceded by a
+      backslash.</p>
+    <h2><a name="Output">The Output</a></h2>
+    <p>The output of the Tabular Data Importer is either an OWL model or a SADL
+      model. Within the SADL-IDE, the output folder is selected as part of the
+      Import CSV wizard and the output filename is derived from the input CSV
+      file name. When using CsvImporter directly or via
+      SadlServer/SadlServerPlus, the model can either be written to a file by
+      calling the method</p>
+    <p>&nbsp;&nbsp;&nbsp; boolean saveOwlModel(String filename)</p>
+    <p>or returned as a data stream by calling the method</p>
+    <p>&nbsp;&nbsp;&nbsp; DataSource getOwlModel(String format).</p>
+    <p>For calls to saveOwlModel, the extension of the filename determines the
+      format as follows:</p>
+    <ul>
+      <li>.sadl&nbsp;&nbsp;&nbsp; -- save as a SADL model</li>
+      <li>.owl&nbsp;&nbsp;&nbsp; -- save as an OWL model in RDF/XML-ABBREV
+        format</li>
+      <li>.n-triple -- save as an OWL model in N-TRIPLE format</li>
+      <li>.n3 -- save as an OWL model in N3 format</li>
+    </ul>
+    <p>For calls to getOwlModel, the format argument determines the syntax of
+      the the serialized model as follows:</p>
+    <ol>
+      <li>RDF/XML -- return an OWL model in RDF/XML format</li>
+      <li>RDF/XML-ABBREV -- return an OWL model in RDF/XML-ABBREV format</li>
+      <li>N-TRIPLE -- return an OWL model in N-TRIPLE format</li>
+      <li>N3 -- return an OWL model in N3 format</li>
+    </ol>
+    <p>A serialized SADL model can be retrieved by calling getSadlModel( ).</p>
+    <p>The Jena OntModel can also be exposed by calling getOwlModel with no
+      arguments.</p>
+    <p>The Tabular Data Importer is meant to be compatible with SadlServer and,
+      in fact, the most efficient way to use it is to call the SadlServer
+      methods loadCsvData or sendCsvData, which take all of the required inputs
+      and pass the resulting OWL model to the reasoner without intermediate
+      serialization. See <a href="SadlServer/JavaDocs/com/ge/research/sadl/sadlserver/server/ISadlServer.html">
+        ISadlServer JavaDocs</a> for details.</p>
+    <p>Tabular data, either as a named file or as a DataSource input stream can
+      be passed to the Importer, the OWL model returned as a DataSource output
+      stream, and this model passed to SadlServer as instance data input in the
+      form of a DataSource. However, this approach requires that the OWL model
+      be serialized and then parsed back into memory.</p>
+    <p>To complete our example, suppose that we had the following data in a CSV
+      file.</p>
+    <blockquote>
+      <table style="border-collapse: collapse" cellspacing="0" cellpadding="0" bordercolor="#111111"
+        border="1">
+        <tbody>
+          <tr>
+            <td width="25%">TurbineID</td>
+            <td width="25%">Speed</td>
+            <td width="25%">Power</td>
+            <td width="25%">Time</td>
+          </tr>
+          <tr>
+            <td width="25%">123456</td>
+            <td width="25%">23</td>
+            <td width="25%">0</td>
+            <td width="25%">"2011-08-29T05:58:35"</td>
+          </tr>
+          <tr>
+            <td width="25%">987654</td>
+            <td width="25%">5</td>
+            <td width="25%">0</td>
+            <td width="25%">"2011-08-29T06:10:22"</td>
+          </tr>
+          <tr>
+            <td width="25%">123456</td>
+            <td width="25%">100</td>
+            <td width="25%">50</td>
+            <td width="25%">"2011-08-29T06:22:55"</td>
+          </tr>
+          <tr>
+            <td width="25%">987654</td>
+            <td width="25%">65</td>
+            <td width="25%">0</td>
+            <td width="25%">"2011-08-29T06:31:43"</td>
+          </tr>
+        </tbody>
+      </table>
+    </blockquote>
+    <p>Importing this tabular data to the namespace
+      "http://com.ge.research.sadl/testimport" gives the following OWL model in
+      N3 format.</p>
+    <font size="2"><span lang="EN">
+        <blockquote>
+          <p><font color="#0000FF">@prefix :
+              &lt;http://com.ge.research/sadl/testcsvimport#&gt; .<br>
+              @prefix rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; .<br>
+              @prefix measure: &lt;http://com.ge.research.sadl/measurement#&gt;
+              .<br>
+              @prefix owl: &lt;http://www.w3.org/2002/07/owl#&gt; .<br>
+              @prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .<br>
+              @prefix tgc: &lt;http://com.ge.research.sadl/TGConcepts#&gt; .<br>
+              @prefix rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .</font></p>
+          <p><font color="#0000FF">:Gen123456<br>
+              &nbsp;&nbsp;&nbsp; a&nbsp;&nbsp;&nbsp;&nbsp; tgc:Generator ;<br>
+              &nbsp;&nbsp;&nbsp; tgc:power<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font><font color="#0000FF">&nbsp;[
+              a&nbsp;&nbsp;&nbsp;&nbsp; measure:Power ;</font><span lang="EN"><font
+                color="#0000FF"><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                measure:amount "0.0"^^xsd:float ;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                measure:timestamp "2011-08-29T05:58:35"^^xsd:dateTime ;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                measure:unit measure:MW<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] ;<br>
+                &nbsp;&nbsp;&nbsp; tgc:power<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [ </font></span> <font
+              color="#0000FF">a&nbsp;&nbsp;&nbsp;&nbsp; measure:Power ;</font><span
+              lang="EN"><font color="#0000FF"><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                measure:amount "50.0"^^xsd:float ;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                measure:timestamp "2011-08-29T06:22:55"^^xsd:dateTime ;<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                measure:unit measure:MW<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] .</font></span></p>
+          <p><font color="#0000FF">:T123456<br>
+              &nbsp;&nbsp;&nbsp; a&nbsp;&nbsp;&nbsp;&nbsp; tgc:Turbine ;<br>
+              &nbsp;&nbsp;&nbsp; tgc:drives :Gen123456 ;<br>
+              &nbsp;&nbsp;&nbsp; tgc:speed<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [
+              a&nbsp;&nbsp;&nbsp;&nbsp; measure:Speed ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:amount "23.0"^^xsd:float ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:timestamp "2011-08-29T05:58:35"^^xsd:dateTime ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:unit measure:RPM<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] ;<br>
+              &nbsp;&nbsp;&nbsp; tgc:speed<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [
+              a&nbsp;&nbsp;&nbsp;&nbsp; measure:Speed ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:amount "100.0"^^xsd:float ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:timestamp "2011-08-29T06:22:55"^^xsd:dateTime ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:unit measure:RPM<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] .</font></p>
+          <p><font color="#0000FF">&lt;http://com.ge.research/sadl/testcsvimport&gt;<br>
+              &nbsp;&nbsp;&nbsp; a owl:Ontology ;<br>
+              &nbsp;&nbsp;&nbsp; rdfs:comment "This ontology was created from a
+              CSV data source."@en ;<br>
+              &nbsp;&nbsp;&nbsp; owl:imports
+              &lt;http://com.ge.research.sadl/measurement&gt; ,
+              &lt;http://com.ge.research.sadl/TGConcepts&gt; .</font></p>
+          <p><font color="#0000FF">:T987654<br>
+              &nbsp;&nbsp;&nbsp; a&nbsp;&nbsp;&nbsp;&nbsp; tgc:Turbine ;<br>
+              &nbsp;&nbsp;&nbsp; tgc:drives :Gen987654 ;<br>
+              &nbsp;&nbsp;&nbsp; tgc:speed<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [
+              a&nbsp;&nbsp;&nbsp;&nbsp; measure:Speed ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:amount "65.0"^^xsd:float ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:timestamp "2011-08-29T06:31:43"^^xsd:dateTime ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:unit measure:RPM<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] ;<br>
+              &nbsp;&nbsp;&nbsp; tgc:speed<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [
+              a&nbsp;&nbsp;&nbsp;&nbsp; measure:Speed ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:amount "5.0"^^xsd:float ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:timestamp "2011-08-29T06:10:22"^^xsd:dateTime ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:unit measure:RPM<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] .</font></p>
+          <p><font color="#0000FF">:Gen987654<br>
+              &nbsp;&nbsp;&nbsp; a&nbsp;&nbsp;&nbsp;&nbsp; tgc:Generator ;<br>
+              &nbsp;&nbsp;&nbsp; tgc:power<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [
+              a&nbsp;&nbsp;&nbsp;&nbsp; measure:Power ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:amount "0.0"^^xsd:float ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:timestamp "2011-08-29T06:31:43"^^xsd:dateTime ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:unit measure:MW<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] ;<br>
+              &nbsp;&nbsp;&nbsp; tgc:power<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [
+              a&nbsp;&nbsp;&nbsp;&nbsp; measure:Power ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:amount "0.0"^^xsd:float ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:timestamp "2011-08-29T06:10:22"^^xsd:dateTime ;<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              measure:unit measure:MW<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ] .</font></p>
+        </blockquote>
+      </span></font>
+    <p>Importing to a SADL model gives the following. Note that importing into
+      SADL is actually a two-step process: first the tabular data is imported
+      into an OWL model and then the OWL model is translated to SADL. The OWL to
+      SADL translator is a work in-progress so generated OWL models may be
+      correct while translation to SADL may not be complete.</p>
+    <blockquote> <font color="#800080" size="2"> </font>
+      <p><font color="#800080" size="2">uri</font><font size="2"> <b>"http://com.ge.research/sadl/testcsvimport"</b>.</font><font
+          color="#808080" size="2"><i><br>
+            // This ontology was created from a CSV data source..<br>
+            // This model was generated from an OWL model.<br>
+            // It is read-only by default. To edit first change the file
+            properties.</i></font></p>
+      <font color="#808080" size="2"><i> </i></font><font color="#800080" size="2">
+      </font>
+      <p><font color="#800080" size="2">import</font><font size="2"> <b>"http://com.ge.research.sadl/TGConcepts"</b>
+        </font><font color="#800080" size="2">as</font><font size="2"> tgc .</font><font
+          color="#800080" size="2"><br>
+          import</font><font size="2"> <b>"http://com.ge.research.sadl/measurement"</b>
+        </font><font color="#800080" size="2">as</font><font size="2"> measure .</font></p>
+      <font size="2"> </font><font color="#808080" size="2"><i>
+          <p>// Classes and class restrictions</p>
+        </i></font><font color="#808080" size="2"><i>
+          <p>// Properties</p>
+        </i></font><font color="#808080" size="2"><i> </i></font>
+      <p><font color="#808080" size="2"><i>// Instance declarations</i></font><font
+          color="#0000ff" size="2"><br>
+          Gen123456</font><font size="2"> </font><font color="#800080" size="2">is</font><font
+          size="2"> </font><font color="#800080" size="2">a</font><font size="2">
+        </font> <font color="#000080" size="2"><b>Generator</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>tgc:power</b></font><font
+          size="2"> (</font><font color="#800080" size="2">a</font><font size="2">
+        </font><font color="#000080" size="2"><b>measure:Power</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:timestamp</b></font><font
+          size="2"> "2011-08-29T06:22:55",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:unit</b></font><font
+          size="2"> </font><font color="#0000ff" size="2">measure:MW</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:amount</b></font><font
+          size="2"> 50.0),<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>tgc:power</b></font><font
+          size="2"> (</font><font color="#800080" size="2">a</font><font size="2">
+        </font><font color="#000080" size="2"><b>measure:Power</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:timestamp</b></font><font
+          size="2"> "2011-08-29T05:58:35",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:unit</b></font><font
+          size="2"> </font><font color="#0000ff" size="2">measure:MW</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:amount</b></font><font
+          size="2"> 0.0).</font><font color="#0000ff" size="2"><br>
+          Gen987654</font><font size="2"> </font><font color="#800080" size="2">is</font><font
+          size="2"> </font><font color="#800080" size="2">a</font><font size="2">
+        </font> <font color="#000080" size="2"><b>Generator</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>tgc:power</b></font><font
+          size="2"> (</font><font color="#800080" size="2">a</font><font size="2">
+        </font><font color="#000080" size="2"><b>measure:Power</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:timestamp</b></font><font
+          size="2"> "2011-08-29T06:31:43",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:unit</b></font><font
+          size="2"> </font><font color="#0000ff" size="2">measure:MW</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:amount</b></font><font
+          size="2"> 0.0),<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>tgc:power</b></font><font
+          size="2"> (</font><font color="#800080" size="2">a</font><font size="2">
+        </font><font color="#000080" size="2"><b>measure:Power</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:timestamp</b></font><font
+          size="2"> "2011-08-29T06:10:22",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:unit</b></font><font
+          size="2"> </font><font color="#0000ff" size="2">measure:MW</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:amount</b></font><font
+          size="2"> 0.0).</font><font color="#0000ff" size="2"><br>
+          T123456</font><font size="2"> </font><font color="#800080" size="2">is</font><font
+          size="2"> </font><font color="#800080" size="2">a</font><font size="2">
+        </font> <font color="#000080" size="2"><b>Turbine</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>tgc:drives</b></font><font
+          size="2"> </font><font color="#0000ff" size="2">Gen123456</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>tgc:speed</b></font><font
+          size="2"> (</font><font color="#800080" size="2">a</font><font size="2">
+        </font><font color="#000080" size="2"><b>measure:Speed</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:timestamp</b></font><font
+          size="2"> "2011-08-29T06:22:55",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:unit</b></font><font
+          size="2"> </font><font color="#0000ff" size="2">measure:RPM</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:amount</b></font><font
+          size="2"> 100.0),<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>tgc:speed</b></font><font
+          size="2"> (</font><font color="#800080" size="2">a</font><font size="2">
+        </font><font color="#000080" size="2"><b>measure:Speed</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:timestamp</b></font><font
+          size="2"> "2011-08-29T05:58:35",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:unit</b></font><font
+          size="2"> </font><font color="#0000ff" size="2">measure:RPM</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:amount</b></font><font
+          size="2"> 23.0).</font><font color="#0000ff" size="2"><br>
+          T987654</font><font size="2"> </font><font color="#800080" size="2">is</font><font
+          size="2"> </font><font color="#800080" size="2">a</font><font size="2">
+        </font> <font color="#000080" size="2"><b>Turbine</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>tgc:drives</b></font><font
+          size="2"> </font><font color="#0000ff" size="2">Gen987654</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>tgc:speed</b></font><font
+          size="2"> (</font><font color="#800080" size="2">a</font><font size="2">
+        </font><font color="#000080" size="2"><b>measure:Speed</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:timestamp</b></font><font
+          size="2"> "2011-08-29T06:31:43",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:unit</b></font><font
+          size="2"> </font><font color="#0000ff" size="2">measure:RPM</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:amount</b></font><font
+          size="2"> 65.0),<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>tgc:speed</b></font><font
+          size="2"> (</font><font color="#800080" size="2">a</font><font size="2">
+        </font><font color="#000080" size="2"><b>measure:Speed</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:timestamp</b></font><font
+          size="2"> "2011-08-29T06:10:22",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:unit</b></font><font
+          size="2"> </font><font color="#0000ff" size="2">measure:RPM</font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">with</font><font size="2"> </font> <font color="#008000" size="2"><b>measure:amount</b></font><font
+          size="2"> 5.0).</font></p>
+      <font size="2"> </font><font face="Arial" size="2"></font> </blockquote>
+    <h2>The Inverse Mapping</h2>
+    <p>Consider the mapping template file, repeated here for ease of viewing.</p>
+    <blockquote>
+      <p><font color="#0000FF" size="2">uri
+          "http://com.ge.research.sadl/testimport" as tginst</font></p>
+      <p><font color="#0000FF" size="2">import http://sadl.org/measurement<br>
+          import <a href="http://sadl.org/TGConcepts">http://sadl.org/TGConcepts</a></font></p>
+      <p><font color="#0000FF" size="2">// this is a comment in a template file</font></p>
+      <p> <span lang="EN"><font color="#0000FF" size="2"> T&lt;TurbineID&gt;
+            rdf:type Turbine<br>
+            T&lt;TurbineID&gt; speed &lt;1&gt;<br>
+            &lt;1&gt; rdf:type Speed<br>
+            &lt;1&gt; amount &lt;Speed&gt;<br>
+            &lt;1&gt; unit RPM<br>
+            &lt;1&gt; timestamp &lt;Time&gt;<br>
+            T&lt;TurbineID&gt; drives Gen&lt;TurbineID&gt;<br>
+            Gen&lt;TurbineID&gt; rdf:type Generator<br>
+            Gen&lt;TurbineID&gt; power &lt;2&gt;<br>
+            &lt;2&gt; rdf:type Power<br>
+            &lt;2&gt; amount &lt;Power&gt;<br>
+            &lt;2&gt; unit MW<br>
+            &lt;2&gt; timestamp &lt;Time&gt;</font></span></p>
+    </blockquote>
+    <p> The inverse mapping is given by the following SPARQL query, which will
+      generate a table </p>
+    <blockquote> <font size="2">
+        <p><font color="#0000FF">prefix afn:&lt;<a href="http://jena.hpl.hp.com/ARQ/function#">http://jena.hpl.hp.com/ARQ/function#</a>&gt;
+            <br> &nbsp;&nbsp;&nbsp; select
+            (afn:substring(afn:localname(?turbine),1) as ?TurbineID) ?Speed
+            ?Power ?Time<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; where {?turbine
+            &lt;rdf:type&gt; &lt;Turbine&gt; .<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            ?turbine &lt;speed&gt; ?speed . ?speed &lt;rdf:type&gt;
+            &lt;Speed&gt; . ?speed &lt;amount&gt; ?Speed . ?speed &lt;unit&gt;
+            &lt;RPM&gt; . <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            ?speed &lt;timestamp&gt; ?Time . <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            ?turbine &lt;drives&gt; ?gen . ?gen &lt;rdf:type&gt;
+            &lt;Generator&gt; . ?gen &lt;power&gt; ?power . ?power
+            &lt;rdf:type&gt; &lt;Power&gt; . ?power &lt;amount&gt; ?Power . <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            ?power &lt;timestamp&gt; ?Time}</font></p>
+      </font> </blockquote>
+    <p>This query will generate a table of data with 0 or more rows and columns
+      "TurbineID", "Speed", "Power", and "Time". The first line in the mapping
+      creates an instance of a Turbine. The inverse mapping requires that we
+      first get the localname of each Turbine instance and then drop the first
+      character (the "T"). It is important to note that the timestamp for the
+      Speed and Power must be the same for a row of data, so both timestamps
+      with the same value appear in the query just as they did in the mapping
+      file. For any given table of data mapped to the semantic model by the
+      mapping template, this query will generate a data table identical to the
+      original input, except of course that the rows may not be in the same
+      order.</p>
+    <h2><a name="AdvancedFeatures">Advanced Features</a></h2>
+    <p>The example above assumes that the tabular data is very nicely organized
+      with a single value per cell. Unfortunately data is not always so
+      well-formed. Consider the data in this CVS extract:</p>
+    <blockquote>
+      <p><font size="2">CLAUSE NUMBER,CLAUSE TITLE,Clause Date,Workflow
+          ID#,FUNCTION,POINT OF CONTACT,DETERMINATION,Month/Year of
+          Determination, REVIEW FREQUENCY<br>
+          52.203-15,Whistleblower Protections Under the American Recovery and
+          Reivestment Act of 2009,3/11/2011,51014178,Lefal,Jessica
+          Wenzell,Accept,3/11/2011,Perpetual<br>
+          52.224-6,Subcontracts for Commerical Items,,,Production,Dick
+          Mitchell/Frank Welch,,2/1/2000,<br>
+          52.232-9,Limitation on Withholding of payments,,,Legal /
+          Finance,Jessica Wenzell / John Feeney,Accept,4/1/1984,Perpetual</font></p>
+    </blockquote>
+    <p>Here's the same data formatted as a table, for readability.</p>
+    <table style="border-collapse: collapse" cellspacing="0" cellpadding="0" bordercolor="#111111"
+      border="1" width="84%">
+      <tbody>
+        <tr>
+          <td width="13%"><b>CLAUSE NUMBER</b></td>
+          <td width="27%"><b>CLAUSE TITLE</b></td>
+          <td width="14%"><b>CLAUSE DATE</b></td>
+          <td width="11%"><b>FUNCTION</b></td>
+          <td width="31%"><b>POINT OF CONTACT</b></td>
+          <td width="45%"><b>DETERMINATION</b></td>
+          <td width="45%"><b>Month/Year of Determination</b></td>
+          <td width="45%"><b>REVIEW FREQUENCY</b></td>
+        </tr>
+        <tr>
+          <td width="13%">52.203-15</td>
+          <td width="27%">Whistleblower Protections Under the American Recovery
+            and Reinvestment Act of 2009</td>
+          <td width="14%">3/11/2011</td>
+          <td width="11%">Legal</td>
+          <td width="31%">Jessica Wenzell</td>
+          <td width="45%">Accept</td>
+          <td width="45%"><font size="2">3/11/2011</font></td>
+          <td width="45%"><font size="2">Perpetual</font></td>
+        </tr>
+        <tr>
+          <td width="13%">52.224-6</td>
+          <td width="27%">Subcontracts for Commercial Items</td>
+          <td width="14%">&nbsp;</td>
+          <td width="11%">Production</td>
+          <td width="31%">Dick Mitchell/Frank Welch</td>
+          <td width="45%">&nbsp;</td>
+          <td width="45%"><font size="2">2/1/2000</font></td>
+          <td width="45%">&nbsp;</td>
+        </tr>
+        <tr>
+          <td width="13%">52.232-2</td>
+          <td width="27%">Payment Under Fixed-Price Research and Development
+            Contracts.</td>
+          <td width="14%">&nbsp;</td>
+          <td width="11%">Finance/Legal</td>
+          <td width="31%">Cliff Conover / Jessica Wenzell</td>
+          <td width="45%">Accept</td>
+          <td width="45%"><font size="2">4/1/1984</font></td>
+          <td width="45%"><font size="2">Perpetual</font></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>This data isn't as clean as the first example above. There are missing
+      values. There are what appear to be multiple values in some cells. In the
+      case of multiple values per cell, it is not always easy, desirable, or
+      even possible to transform such data&nbsp; into a simple
+      one-value-per-cell table. Therefore the Tabular Data Importer provides
+      some additional features to help specify how to handle missing values and
+      multiple values in a cell. The functionality is complicated by the
+      ambiguity involved in deciding how to handle the multiple values--what is
+      the scope of the multiplicity. </p>
+    <h3><a name="Validation">Validation</a></h3>
+    <p>The Tablular Data Importer supports template statements, before the
+      template triples, that begin with the keyword "validate" and which are
+      used to validate the data in a particular cell in a table row. By default,
+      if a cell is blank then any triple in the template that references that
+      cell will simply not be added to the model. (Note: as of 8/1/2014 this
+      does not appear to be the actual default behavior; rather an error occurs
+      if a value is missing. See "validate all" below.) This default behavior
+      can be made explicit by the validation statement, for a given element ID
+      (column designator or transformation output):</p>
+    <blockquote>
+      <p>validate &lt;ElementID&gt; not blank skip triple</p>
+    </blockquote>
+    <p>or just</p>
+    <blockquote>
+      <p>validate &lt;ElementID&gt; not blank skip</p>
+    </blockquote>
+    <p>&nbsp;</p>
+    <p>If we wish a blank cell to cause not just this triple but also the rest
+      of the triples in the group to be skipped (see Group discussion below),
+      the validate statement is:</p>
+    <blockquote>
+      <p>validate &lt;ElementID&gt; not blank skip group</p>
+    </blockquote>
+    <p>If we wish a blank cell to instead be considered an error, causing
+      processing to be aborted, we can specify a pre-check using a "validate"
+      statement of the form:</p>
+    <blockquote>
+      <p>validate &lt;ElementID&gt; not blank abort</p>
+    </blockquote>
+    <p>A third possible action to be taken when a cell is blank is to generate a
+      unique URI fragment (localname) value (unique at the point of validation
+      in the model which import is creating) and behave as if this generated
+      value were in the cell. This form takes a baseName (last term in the
+      statement). If the baseName ends in a series of digits (a number), this
+      number will be used as a counter and incremented by 1 until the URI in the
+      import model namespace with the generated URI fragment is unique. If it
+      does not end in a number the counter will start at 1.</p>
+    <blockquote>
+      <p>validate &lt;ElementID&gt; not blank generate baseName</p>
+    </blockquote>
+    <p>Looking at validate statements more generally, they have the following
+      syntax. The first word is "validate". The second element is the identity
+      of a value, either a column in the table in the same syntax used in the
+      template (see above) or a value output by a transformation of a value (see
+      below). Just as in the template triples, there can be characters
+      immediately before and/or after the column designator, in which case the
+      string constructed by inserting the cell value is what is being validated.
+    </p>
+    <p>The third element is the requirement placed on the values in the
+      specified column expressed using keywords from the SADL language. These
+      include the following which, except for the first two, are a subset of
+      valid XSD datatypes:</p>
+    <blockquote>
+      <p>not blank, exists, string, boolean, decimal, integer, dateTime, time,
+        date, hexBinary, base64Binary, anyURI</p>
+    </blockquote>
+    <p>Here "not blank" means the cell is not empty and "exists", short for
+      "exists in model" which can also be used, means that the cell contains the
+      identity of a pre-existing concept in the model. Here is an example of the
+      use of "exists".</p>
+    <blockquote>
+      <p>validate Gen&lt;TurbineID&gt; exists</p>
+    </blockquote>
+    <p>The optional fourth element of the validate statement can either "skip",
+      "abort", or "generate". If missing, the default consequence is "skip".</p>
+    <p>Only if the fourth element is "generate" is a fifth element valid, in
+      which case it is the base name of the unique name to be created.</p>
+    <p>There is one additional form of validate used to make sure that a
+      semantic constraint is satisfied in the model. This is "validate" followed
+      by a triple pattern, e.g.:</p>
+    <blockquote>
+      <p>validate Gen&lt;TurbineID&gt; rdf:type
+        Generator&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </p>
+    </blockquote>
+    <p dir="ltr">If a template included the two statements above, it would
+      require that the concept "Gen&lt;TurbineID&gt;" already exists in the
+      model and that it belong to the class "Generator". In this case, of
+      course, we would not have this triple pattern in the template triples, as
+      it is in the complete template above, because it would be redundant with
+      the validation condition to then try to insert the triple into the model.
+      This form may be followed by "skip" or "abort" and the scope (??).</p>
+    <p dir="ltr">As an additional example from the template above, if one wished
+      to make sure that the "Speed" column is a number, one might use the
+      validate statement below, which would cause the import to fail if the
+      validate fails. </p>
+    <blockquote>
+      <p>validate &lt;Speed&gt; decimal abort</p>
+    </blockquote>
+    <p>The actual conversion of values to Literals in the model will be done in
+      light of the range value of the property to which the value is to be
+      assigned.</p>
+    <h4>Validate All</h4>
+    <p>Instead of specifying the columns to validate, it is possible to use the
+      form</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; validate all ....</p>
+    <p>This has the equivalent effect of creating a validate statement for each
+      column in the tabular data.</p>
+    <h3><a name="Transformation">Transformation</a></h3>
+    <p>The Tablular Data Importer supports template statements before the
+      template triples that begin with the keyword "transform". The transform
+      statement manipulates the content of the data in a table cell in a variety
+      of ways. All transform statements must specify the identity of the input
+      data and the identity of the output data. The syntax is as follows.</p>
+    <blockquote>
+      <p>transform &lt;inputID&gt; to &lt;outputID&gt; ....</p>
+    </blockquote>
+    <p>&nbsp;Currently supported transformations include <i><b>split</b></i>, <i><b>
+          replace, </b></i>and<i><b> encode</b></i>.</p>
+    <h4><a name="Split">Split</a></h4>
+    <p>A split transformation specifies that the data being transformed contains
+      multiple values or parts. The data value is divided into tokens using the
+      specified set of delimiters. The behavior is that of the <a href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html#split%28java.lang.String%29">
+        Java String's split function</a>. The split transformation has the
+      following form.</p>
+    <blockquote>
+      <p>transform &lt;inputID&gt; to &lt;outputID[]&gt; split "delimiter"</p>
+    </blockquote>
+    <p>The inputID might be a column designator or it might be the output
+      identifier of another transformation. The square brackets in the outputID
+      are optional but serve as a reminder that the result of a split
+      transformation is expected to be an array of values. The "delimiter"&nbsp;
+      is a regular expression which is passed to the Java split function and
+      therefore certain characters will need to be escaped to be interpreted as
+      characters. To split the values in the FUNCTION column of the data at the
+      beginning of this section, use a statement like</p>
+    <blockquote>
+      <p>transform &lt;FUNCTION&gt; to &lt;fct[]&gt; split "/"</p>
+    </blockquote>
+    <p>A specific array element of the output of a cell splitting transformation
+      can be referenced by the output name followed by the array element
+      designation, starting with 1. Thus one could reference the first output of
+      the above transformation as "fct[1]". When this is used in another
+      statement, the name and the array element designation are all placed
+      inside the angle brackets. The array element designation can be one of the
+      following.</p>
+    <ol>
+      <li>An integer indicates a particular, specified split result.</li>
+      <li>An "*" indicates iteration over, or that the transformation apply to,
+        all split results.</li>
+      <li>A letter or name that is not used as any input or output identifier
+        indicates that these split results are to be matched with other split
+        results in an iteration over all split results within a triple grouping
+        (see Scope of Repetition below).</li>
+    </ol>
+    <p>For example, if we wanted to separate the names in the POINT OF CONTACT
+      column above into separate persons and then into first name and last name,
+      we might do so with the following transform statements, where the second
+      transform statement splits the results of the first:</p>
+    <blockquote>
+      <p>transform &lt;E&gt;&nbsp; to &lt;Es[]&gt; split "/"<br>
+        parse &lt;Es[1]&gt; to &lt;Nm1[]&gt; split " "<br>
+        parse &lt;Es[2]&gt; to &lt;Nm2[]&gt; split " "</p>
+    </blockquote>
+    <p>In this case the last row of the data above would yield these values:</p>
+    <ol>
+      <li>&lt;Nm1[1]&gt; is "Cliff"</li>
+      <li>&lt;Nm1[2]&gt; is "Conover"</li>
+      <li>&lt;Nm2[1]&gt; is "Jessica"</li>
+      <li>&lt;Nm2[2]&gt; is "Wenzell"</li>
+    </ol>
+    <p>Of course we may not know the number of results from the split. Handling
+      iteration over split results is covered below in Scope of Repetition and
+      Groups of Triple Patterns in a Template.</p>
+    <h4><a name="Replace">Replace</a></h4>
+    <p>The replace transformation does character substitution within a value. A
+      replacement is identified by two colon-separated strings. There may be
+      multiple replacements separated by commas, in which case the replacements
+      will be done sequentially. These colon-separated strings form the
+      arguments to the <a href="http://docs.oracle.com/javase/6/docs/api/java/lang/String.html#replaceAll%28java.lang.String,%20java.lang.String%29">
+        Java String replaceAll method</a> and are regular expressions. Suppose,
+      for example, that one wished to use the name(s) in the POINT OF CONTACT
+      column to create instances of the class Person in a model. The spaces
+      between first name and last name are not legal characters in a model
+      instance URI but we might replace the space with an underscore.</p>
+    <blockquote>
+      <p>transform &lt;E&gt;&nbsp; to &lt;Es[]&gt; split "/"<br>
+        transform &lt;Es&gt; to &lt;Nm&gt; replace " ":_</p>
+    </blockquote>
+    <p>The result of this transformation on the data in the first row of the
+      table above would yield a value for Nm of "Jessica_Wenzell". The result
+      for the last row in the table would yield for Nm an array of two values,
+      "Cliff_Conover" and "Jessica_Wenzell".</p>
+    <p>It is important to understand how the text following <i>replace</i> is
+      parsed and what special characters are involved. The special characters
+      are comma, colon, double quote, and single quote (not backquote):</p>
+    <ol>
+      <li>The comma (,) separates multiple replacements for a series of
+        replacements</li>
+      <li>The colon (:) separates the first argument for replacement, the
+        regular expression, from the second argument, the replacement</li>
+      <li>The double quote (") is used to preserve white space and should always
+        appear, when used for this purpose, in pairs as the first and last
+        characters of a string</li>
+      <li>The single quote (') is the escape character. If a comma, a colon, a
+        double quote, or a single quote is to be part of the regex or
+        replacement text, then it should be preceded by a single quote to escape
+        it.</li>
+    </ol>
+    <p>Note that white space around the comma and colon delimiters will be
+      trimmed and so is not significant. </p>
+    <p>Examples of regular expressions and replacements which may be useful for
+      creating legal URI fragments include the following:</p>
+    <blockquote>
+      <table style="border-collapse: collapse" cellspacing="0" cellpadding="0" bordercolor="#111111"
+        border="1" width="764">
+        <tbody>
+          <tr>
+            <td width="213"><b>Sample transform snippet</b></td>
+            <td width="548"><b>What it does</b></td>
+          </tr>
+          <tr>
+            <td width="213">encode " ":_</td>
+            <td width="548">replace all spaces with underscores</td>
+          </tr>
+          <tr>
+            <td width="213">encode [^a-zA-Z0-9]:_</td>
+            <td width="548">replace all characters which are not letters or
+              digits with an underscore</td>
+          </tr>
+          <tr>
+            <td width="213">encode " ":_,#:No,&amp;:_And_</td>
+            <td width="548">replace all spaces with underscores, replace "#"
+              with "No", replace <br>
+              "&amp;" with "_And_"</td>
+          </tr>
+        </tbody>
+      </table>
+    </blockquote>
+    <p><span style="color: red;">Note: the Template Editor expects quoted
+        strings for both the regular expression before the colon (:) and for the
+        replacement after the colon.&nbsp; Quotes within quoted strings in the
+        editor grammar are escaped with a backslash (\), not to be confused with
+        the single quote escape character required by the transformation
+        processor. So, for example, to replace a quote in the input to a
+        transformation, one would Quotes within a string can be escaped with a
+        backslash (\). Thus the editor is more constraining than the above
+        description, but should what is legal in the editor should work in the
+        processing.</span></p>
+    <h4><a name="Encode">Encode</a></h4>
+    <p>The encode transformation does optional character substitution within a
+      value, just like <i>replace</i>, followed by URL encoding. If character
+      substitution is to be done the syntax is the same as the replace
+      transformation. If not then there is nothing following the "encode"
+      keyword and the URL encoding is performed on the input to produce the
+      output.</p>
+    <h4><a name="User-DefinedFunction">User-Defined Function</a> </h4>
+    <p>While the transformation capabilities of split, encode, and find are
+      intended to handle many common situations, not all transformation needs
+      can be foreseen. The CSVImporter will be extended to support user-defined
+      functions encoded in Java and with arbitrary argument lists. A
+      user-defined function must be implemented in a class which extends <i>
+        com.ge.research.sadl.geonly.template.userdefined.Transform</i>. A
+      user-defined function might, for example, allow a user to enable a
+      transformation involving values from multiple columns in a row.</p>
+    <h3><a name="ScopeOfRepetition">Scope of Repetition</a></h3>
+    <p>When there are multiple values in a table cell, the issue arises as to
+      the scope of the multiplicity. For example, suppose census data put the
+      family name in the first column of a table, the given names of all family
+      members in the second column, separated by colons, and the birth dates of
+      all family members, in the same order as first names, in the third column,
+      again separated by colons.&nbsp; Suppose that we wished to create a Person
+      instance for each unique Person. Consider the following data and template.</p>
+    <blockquote>
+      <p>Smith, George:Sue:Henry:George, 2/8/1978:3/5/1978:10/3/2001:1/30/2003</p>
+      <font size="2">
+        <p><font color="#0000FF">import "<a href="http://com.ge.research.sadl/contracts2">http://...</a>"</font></p>
+        <p><font color="#0000FF">validate &lt;A&gt; not blank<br>
+            validate &lt;B&gt; not blank</font></p>
+        <p><font color="#0000FF">transform &lt;B&gt; to &lt;FN[]&gt; split ":"<br>
+            transform &lt;C&gt; to &lt;BD[]&gt; split ":"</font></p>
+      </font>
+      <p><font size="2"><font color="#0000FF">&lt;1&gt; rdf:type Person<br>
+            &lt;1&gt; lastName &lt;A&gt;<br>
+            &lt;1&gt; firstName &lt;FN[i]&gt;<br>
+            &lt;1&gt; dateOfBirth &lt;BD[i]&gt;</font></font></p>
+    </blockquote>
+    <p>In this data, there are two Persons named "George Smith" but they are not
+      the same person because they were born on different dates. How do we cause
+      the template to generate four distinct instances of Person rather than one
+      instance of Person with three firstName values and possibly four
+      dateOfBirth values? (We could add "validate &lt;C&gt; not blank" to
+      require birth date to be known, thereby making it more likely that there
+      are four dateOfBirth values, but that would not guarantee that there
+      aren't just 3.) This question is answered by the use of grouping of triple
+      patterns within a template.</p>
+    <h3><a name="GroupTriplePatterns">Groups of Triple Patterns in a Template</a></h3>
+    <p>A template, as described above, can include any number of triple
+      patterns, each of which is handled by the importer in a manner independent
+      of all others. For reasons mentioned above and which will be illustrated
+      by examples, it may be desirable to group triple patterns together in
+      sets. This is done by surrounding two or more triple patterns with curly
+      brackets. For instance, in the example above the grouping identifies a set
+      of related triples and uses a common index name in the transformation
+      output of first names and dates of birth to match firstName and
+      dateOfBirth values. Here's the last part of the template repeated but with
+      the described grouping modification:</p>
+    <font size="2"> </font>
+    <blockquote><font size="2"> </font>
+      <p><font size="2"><font color="#0000FF">{&lt;1&gt; rdf:type Person<br>
+            &nbsp; &lt;1&gt; lastName &lt;A&gt;<br>
+            &nbsp; &lt;1&gt; firstName &lt;FN[i]&gt;<br>
+            &nbsp; &lt;1&gt; dateOfBirth &lt;BD[i]&gt;}</font></font></p>
+    </blockquote>
+    <p>The curly brackets tell us that if there are multiple values then we need
+      to repeat the entire set of triples identified with the brackets. The
+      lower-case "i" is an index name (any name not used for something else in
+      the template will do) tells us that we need to match each value in the
+      split of a cell of column B with the corresponding value in the split of a
+      cell of column C (same row of course). If the number of values in columns
+      C and D for a given row are not the same then an error occurs.</p>
+    <p>As an example, here is the SADL model generated by applying this grouping
+      to the census data row above:</p>
+    <blockquote> <font color="#808080" size="2"><i>
+          <p align="LEFT">// Instance declarations</p>
+        </i></font><font color="#800080" size="2"> </font>
+      <p align="LEFT"><font color="#800080" size="2">A</font><font size="2"> </font><font
+          color="#000080" size="2"> <b>Person</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>lastName</b></font><font
+          size="2"> "Smith",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "George",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "1978-02-08".</font></p>
+      <font size="2"> </font><font color="#800080" size="2"> </font>
+      <p align="LEFT"><font color="#800080" size="2">A</font><font size="2"> </font><font
+          color="#000080" size="2"> <b>Person</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>lastName</b></font><font
+          size="2"> "Smith",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "Henry",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "2001-10-03".</font></p>
+      <font size="2"> </font><font color="#800080" size="2"> </font>
+      <p align="LEFT"><font color="#800080" size="2">A</font><font size="2"> </font><font
+          color="#000080" size="2"> <b>Person</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>lastName</b></font><font
+          size="2"> "Smith",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "Sue",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "1978-03-05".</font></p>
+      <font size="2"> </font><font color="#800080" size="2"> </font>
+      <p align="LEFT"><font color="#800080" size="2">A</font><font size="2"> </font><font
+          color="#000080" size="2"> <b>Person</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>lastName</b></font><font
+          size="2"> "Smith",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "George",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "2003-01-30".</font></p>
+      <font size="2"> </font> </blockquote>
+    <p>By comparison, suppose that the grouping in the template triples were as
+      follows:</p>
+    <blockquote>
+      <p><font color="#0000FF" size="2">&lt;1&gt; rdf:type Person<br>
+          &lt;1&gt; lastName &lt;A&gt;<br>
+          { &lt;1&gt; firstName &lt;FN[i]&gt;<br>
+          &nbsp; &lt;1&gt; dateOfBirth &lt;BD[i]&gt;}</font></p>
+    </blockquote>
+    <p>Then the generated data would look like this:</p>
+    <blockquote> <font color="#808080" size="2"><i>
+          <p align="LEFT">// Instance declarations</p>
+        </i></font><font color="#800080" size="2"> </font>
+      <p align="LEFT"><font color="#800080" size="2">A</font><font size="2"> </font><font
+          color="#000080" size="2"> <b>Person</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>lastName</b></font><font
+          size="2"> "Smith",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "George",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "1978-02-08",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "Sue",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "1978-03-05",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "Henry",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "2001-10-03",<br>
+          &nbsp;&nbsp;&nbsp; </font><font color="#800080" size="2">has</font><font
+          size="2"> </font><font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "2003-01-30".</font></p>
+      <font size="2"> </font> </blockquote>
+    <p>Now let's apply all of the template concepts discussed to the data in the
+      table at the beginning of this section to create a complete template we
+      might use to translate some of the data to a semantic model. If we wanted
+      to create and populate Person instances from the data, we might use the
+      following template:</p>
+    <font size="2">
+      <blockquote>
+        <p><font color="#0000FF">import "<a href="http://com.ge.research.sadl/contracts2">http://com.ge.research.sadl/contracts2</a>"</font></p>
+        <p><font color="#0000FF">validate &lt;A&gt; not blank abort<br>
+            validate &lt;C&gt; date<br>
+            validate &lt;G&gt; date<br>
+            validate &lt;fct&gt; exists</font></p>
+        <p><font color="#0000FF">transform &lt;D&gt; to &lt;fct[]&gt; split "/"<br>
+            transform &lt;E&gt; to &lt;poc[]&gt; split "/"<br>
+            transform &lt;poc&gt; to &lt;puri[]&gt; encode "[ ]+":"_"<br>
+            transform &lt;poc&gt; to &lt;Nm[]&gt; split " "</font></p>
+        <p><font color="#0000FF">&lt;1&gt; rdf:type ReferenceClause<br>
+            &lt;1&gt; clauseNumber &lt;A&gt;<br>
+            &lt;1&gt; clauseTitle "&lt;B&gt;"<br>
+            &lt;1&gt; revisionDate &lt;C&gt;</font></p>
+        <p><font color="#0000FF">&lt;2&gt; rdf:type ClauseReviewSOP<br>
+            &lt;2&gt; appliesToClauseNumber &lt;A&gt;<br>
+            &lt;2&gt; appliesToRevisionDate &lt;C&gt;<br>
+            &lt;2&gt; function &lt;fct[*]&gt;<br>
+            &lt;2&gt; reviewFrequency &lt;I&gt;<br>
+            {<br>
+            &nbsp; &lt;puri[i]&gt; rdf:Type Person<br>
+            &nbsp; &lt;puri[i]&gt; firstName &lt;Nm[1]&gt;<br>
+            &nbsp; &lt;puri[i]&gt; lastName &lt;Nm[2]&gt;<br>
+            &nbsp; &lt;2&gt; pointOfContact &lt;puri[i]&gt;<br>
+            &nbsp; &lt;2&gt; determinedBy &lt;puri[i]&gt;<br>
+            }<br>
+            &nbsp;</font></p>
+      </blockquote>
+    </font>
+    <p>This template requires that column A not have any blank cells or the data
+      import will fail, that columns C and G contain values that can be
+      converted to a date (if there are values; value are not required), that
+      the values in column FUNCTION (column D) be existing instances in the
+      model, that values in column D be parsed to multiple values by the
+      delimiter "/" (although multiple values are not required), and that values
+      in column E be first parsed by the "/" delimiter into multiple values and
+      that each of these values then be parsed by the space delimiter (actually
+      any number of spaces treated as a single space). The curly brackets around
+      the last 5 triple patterns, along with the lower-case "i" in the split
+      results of column E, mean that we will iterate over all of the first split
+      results on column E and insert the entire set of triples into the model
+      for each split result.</p>
+    <h3><a name="IncrementalImport">Incremental Import</a></h3>
+    <p>The "incremental" keyword may be placed on a line by itself after the
+      import statements and before any other statements. If "incremental" is not
+      specified, an import will create a new data model of the specified name
+      (uri), replacing any model by that name that might have previously
+      existed. However, if the "incremental" statement is present the
+      CSVImporter will look for a mapping from the specified model name (uri) to
+      a file or TDB repository already existent and if such is found will open
+      it and add the triples from the import operation to that file or
+      repository.</p>
+    <h3><a name="InferenceParallelization">Inference and Parallelization </a></h3>
+    <p>The CSVImporter supports inferencing over the imported triples and the
+      inclusion of any inferred triples in the generated output. Additionally, a
+      chunk size may be specified which indicates the number of rows of data to
+      be imported and inferred over before output is generated and the process
+      is repeated. When inference with chunking is specified, the statement may
+      also specify a parallelization of the computation over a specified number
+      of threads. For inference on a single machine, this number should be no
+      more than one less than the number of CPUs available. The entire statement
+      is of the form:</p>
+    <p>&nbsp;&nbsp;&nbsp; infer [chunk &lt;n&gt; [parallel &lt;n&gt;]]</p>
+    <p>where the square brackets indicate optional elements and are not part of
+      the syntax and "&lt;n&gt;" indicates an integer.</p>
+    <p>If pre-computed inference is specified with an infer statement, the
+      format of the output is automatically changed to Jena TDB. There are
+      several reasons for using Jena TDB with pre-inferred models. If any
+      inferencing is to occur with currently supported reasoners at query time,
+      an in-memory inferred model must be created. This means that large models
+      require large amounts of memory on the host machine. However, when
+      inference is pre-computed, a Jena TDB repository, which is an indexed
+      triple store, can be efficiently queried without generating an in-memory
+      model. This greatly increases scalability. In addition, the TDB repository
+      serves as a filter so that the same triple is not found more than once in
+      the model. If the CSVImporter were writing output to a file, so as to
+      avoid a large in-memory model, triples could be written multiple times.</p>
+    <h2><a name="InverseMappingWithAdvancedFeatures">Inverse Mapping with
+        Advanced Features</a></h2>
+    <p>Validation, if it has any effect, reduces the amount of data that is
+      mapped from the tabular data to the OWL model. This reduction in data has
+      no inverse mapping as the data not mapped is not in the model to map back
+      to tabular form. Therefore the inverse mapping provides a subset of the
+      original data.</p>
+    <p>When the tabular data contains a column whose content is used to identify
+      or create the class (rdf:type) to which new instances identified in a
+      another column and/or attributed in other columns belong, the inverse
+      mapping is usually not possible because the query engine will return all
+      types of an instance, not just its direct type. Of course if there is no
+      transitive reasoning over class hierarchies, then the inverse transform
+      may work. The inverse mapping query will return the rdf:type(s) that exist
+      in the model and unless the reasoner supports specialized properties to
+      identify direct types, it will not be possible to tell which is the direct
+      type.</p>
+    <p>When a split transform is used to generate the semantic data model,
+      possibly with grouping, the inverse transformation becomes more complex.
+      For example, the CSV data</p>
+    <blockquote> <font size="2">
+        <p>Smith, George:Sue:Henry:George, 2/8/1978:3/5/1978:10/3/2001:1/30/2003</p>
+      </font> </blockquote>
+    <p>generates the SADL model</p>
+    <blockquote> <font color="#808080" size="2"><i> </i></font>
+      <p align="LEFT"><font color="#808080" size="2"><i>// Instance declarations</i></font><font
+          color="#800080" size="2"><br>
+          A</font><font size="2"> </font><font color="#000080" size="2"><b>Person</b></font><font
+          size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>lastName</b></font><font
+          size="2"> "Smith",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "George",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "1978-02-08".</font></p>
+      <font size="2"> </font><font color="#800080" size="2"> </font>
+      <p align="LEFT"><font color="#800080" size="2">A</font><font size="2"> </font><font
+          color="#000080" size="2"> <b>Person</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>lastName</b></font><font
+          size="2"> "Smith",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "Henry",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "2001-10-03".</font></p>
+      <font size="2"> </font><font color="#800080" size="2"> </font>
+      <p align="LEFT"><font color="#800080" size="2">A</font><font size="2"> </font><font
+          color="#000080" size="2"> <b>Person</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>lastName</b></font><font
+          size="2"> "Smith",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "Sue",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "1978-03-05".</font></p>
+      <font size="2"> </font><font color="#800080" size="2"> </font>
+      <p align="LEFT"><font color="#800080" size="2">A</font><font size="2"> </font><font
+          color="#000080" size="2"> <b>Person</b></font><font size="2">,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>lastName</b></font><font
+          size="2"> "Smith",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>firstName</b></font><font
+          size="2"> "George",<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font> <font color="#800080"
+          size="2">has</font><font size="2"> </font> <font color="#008000" size="2"><b>dateOfBirth</b></font><font
+          size="2"> "2003-01-30".</font></p>
+      <font size="2"> </font> </blockquote>
+    <p>but what SPARQL query would regenerate the CSV data row from the OWL
+      equivalent of the SADL model?</p>
+    <h2><a name="DebuggingTemplateFile">Debugging the Template File</a></h2>
+    <p>The template file constitutes a declarative mapping from the tabular data
+      to the graph of the ontology instance data model. It can be difficult to
+      determine exactly why the resulting OWL or SADL file isn't what was
+      expected. To assist in this, a log file containing an ordered record of
+      each triple insertion into the ontology model, along with information
+      about each validation skip that occurred, may be created by calling
+      "enableTriplesAddedInOrderLogging(String filename)" before doing the
+      import. In the SADL-IDE, such a log file is created in the Temp folder of
+      the project if "Debug output" is checked on the CSV import wizard. Each
+      line in the log is prefixed with the row number in the CSV data input file
+      being processed. This allows the user, for any row in the input data, to
+      see exactly how each triple in the template file is processed. Additional
+      information is available when importing to SADL because opening the SADL
+      file in the SADL-IDE will do some validation of the ontology, providing
+      warning or error markers in the editor.</p>
+    <h2><a name="ImportCSVWizard">The SADL-IDE Import CSV Wizard</a></h2>
+    <p>Figure 4 shows how one initiates importing of CSV data in the SADL-IDE. </p>
+    <p><img src="images/CsvDat1.jpg" height="345" border="0" width="458"></p>
+    <p><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Figure 4: Popup Menu for
+        Import</b></p>
+    <p>Selecting import on this popup menu leads to the dialog shown in Figure
+      5. Under SADL, CSV Files should be selected, then click Next.</p>
+    <p><img src="images/CsvDat2.jpg" height="550" border="0" width="558"></p>
+    <p><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Figure 5: Import Popup
+        Dialog</b></p>
+    <p>Clicking Next leads to the Modal Dialog shown in Figure 6.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="images/CsvDat3.jpg"
+        height="639" border="0" width="525"></p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>&nbsp;Figure 6: Final CSV Import
+        Wizard Dialog</b></p>
+    <p>The First check box on the final Wizard dialog shown in Figure 6 controls
+      whether the data entered in the previous use of the dialog is auto-filled.
+      The next entry allows entry or browsing for the input CSV file. The 3rd
+      line should be checked if the first row in the CSV data file contains
+      column headers. Check "Debug output" to cause the CSVImporter to create a
+      detailed log of each triple generated from each input row. The 5th row
+      will be auto-filled with the model name (uri) in the template file.
+      Editing this field will override the template value. The next input field
+      and browse button allow specification of the template file to be used.
+      Like the model name, imports is auto-filled from the template file content
+      but can be used to override these values. The "Into folder" setting
+      identified the Eclipse project and possibly subfolder into which the
+      import output file is to be written. Finally the Options section allows
+      selection of the output file format, OWL or SADL.</p>
+    <p><b>Note</b>: if you Import as a SADL file and later change to Import as
+      an OWL file, you must delete the SADL file or you will have two models
+      with the same URI, which will be an error. The same is true if switching
+      from OWL to SADL--you will need to delete the OWL file. You may need to
+      clean/build the project after switching import file type to rebuild the
+      mapping file.</p>
+  </body>
 </html>
