@@ -4,7 +4,6 @@ import java.net.ConnectException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -14,9 +13,6 @@ public class SWIPrologServiceInterfaceThreaded implements ISWIPrologServiceInter
 	private int usageCounter = 0;
 	private long sleepTime = 1L;
 	private long timeoutTime = 500L;
-	private PlServiceInterfaceRunnable plhttp = null;
-	private Thread thread = null;
-	private Iterator<String> remainingItr = null;
 	
 	public SWIPrologServiceInterfaceThreaded(){
 		rules = "";
@@ -50,9 +46,9 @@ public class SWIPrologServiceInterfaceThreaded implements ISWIPrologServiceInter
 			urlParameters += rules + query + "\n";
 		
 //		debugOutput(url, "NoArgs");
-//		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
-//		plhttp.sendPrologQuery(url, urlParameters);
-		String html = startAndMonitorPlService(url, urlParameters);
+		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
+		plhttp.sendPrologQuery(url, urlParameters);
+		String html = startAndMonitorPlService(plhttp);
 		if (html.startsWith("java.net.ConnectException")) {
 			throw new ConnectException(html);
 		}
@@ -77,9 +73,9 @@ public class SWIPrologServiceInterfaceThreaded implements ISWIPrologServiceInter
 			urlParameters += rules + query + "\n";
 		
 //		debugOutput(url, "runPlQuery");
-//		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
-//		plhttp.sendPrologQuery(url, urlParameters);
-		String html = startAndMonitorPlService(url, urlParameters);
+		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
+		plhttp.sendPrologQuery(url, urlParameters);
+		String html = startAndMonitorPlService(plhttp);
 		
 		List<String> tList = new ArrayList<String>();
 		tList.add(target);
@@ -139,56 +135,29 @@ public class SWIPrologServiceInterfaceThreaded implements ISWIPrologServiceInter
 		}
 		
 //		debugOutput(url, "MultipleArgs");
-//		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
-//		plhttp.sendPrologQuery(url, urlParameters);
-		String html = startAndMonitorPlService(url, urlParameters);
+		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
+		plhttp.sendPrologQuery(url, urlParameters);
+		String html = startAndMonitorPlService(plhttp);
 		
 		return htmlToHashtable(tList,html); 
 	}
 	
-	private PlServiceInterfaceRunnable getPlServiceInterface(String url) {
-		if (this.plhttp  == null) {
-			this.plhttp = new PlServiceInterfaceRunnable(url);
-			setThread(plhttp);
-		}
-		return this.plhttp;
-	}
-	
-	private boolean setThread(PlServiceInterfaceRunnable plhttp) {
-		this.thread  = new Thread(plhttp);
-		this.thread.start();
-		return true;
-	}
-	
-	private Thread getThread() {
-		return this.thread;
-	}
-	
-	private String startAndMonitorPlService(String url, String urlParameters) throws PlServiceFailedException, InterruptedException {
-		PlServiceInterfaceRunnable pls = getPlServiceInterface(url);
+	private String startAndMonitorPlService(PlServiceInterfaceRunnable plhttp) throws PlServiceFailedException, InterruptedException {
+		Thread t = new Thread(plhttp);
+		t.start();
 		long startTime = System.currentTimeMillis();
-		if (remainingItr != null) {
-			// add any remaining requests from a prior PlServiceInterfaceRunnable to queue
-			while (remainingItr.hasNext()) {
-				pls.queue.add(remainingItr.next());
-			}
-			remainingItr = null;
-		}
 //		TimeUnit.SECONDS.sleep(1);
 		
-		while (getThread().isAlive() && plhttp.getResponseString() == null) {
+		while (t.isAlive()) {
 			long nowTime = System.currentTimeMillis();
 			if (nowTime - startTime > timeoutTime) {
 				plhttp.interrupt();
-				
-				// get any unprocessed requests out of the queue for re-requests
-				setRemainingItr(pls.queue.iterator());
-				
+//				t.stop();
+//				t.join();
 				throw new PlServiceFailedException(nowTime - startTime);
 			}
-			pls.queue.add(urlParameters);
-//			t.sleep(sleepTime);
-			TimeUnit.SECONDS.sleep(1);
+			t.sleep(sleepTime);
+//			TimeUnit.SECONDS.sleep(1);
 		}
 		return plhttp.getResponseString();
 	}
@@ -216,13 +185,5 @@ public class SWIPrologServiceInterfaceThreaded implements ISWIPrologServiceInter
 		}while(curIndex >= 0);
 		
 		return result;
-	}
-
-	private Iterator<String> getRemainingItr() {
-		return remainingItr;
-	}
-
-	private void setRemainingItr(Iterator<String> remainingItr) {
-		this.remainingItr = remainingItr;
 	}
 }
