@@ -2,7 +2,7 @@
 <feature
       id="com.ge.research.sadl.swi_prolog.feature"
       label="SWI-Prolog Feature"
-      version="3.4.1.qualifier"
+      version="3.5.0.qualifier"
       provider-name="GE Global Research">
 
    <description url="http://www.example.com/description">
