@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.applications
 Bundle-SymbolicName: com.ge.research.sadl.applications;singleton:=true
-Bundle-Version: 3.4.1.qualifier
+Bundle-Version: 3.5.0.qualifier
 Bundle-Vendor: GE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ge.research.sadl.applications;

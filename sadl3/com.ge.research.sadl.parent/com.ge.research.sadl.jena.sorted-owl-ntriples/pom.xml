@@ -5,7 +5,7 @@
   <description>Sort OWL file by n-triples, ignoring blank nodes</description>
   <parent>
   	<groupId>com.ge.research.sadl</groupId>
-  	<version>3.4.1-SNAPSHOT</version>
+  	<version>3.5.0-SNAPSHOT</version>
   	<artifactId>com.ge.research.sadl.parent</artifactId>
   </parent>
 	<dependencyManagement>
