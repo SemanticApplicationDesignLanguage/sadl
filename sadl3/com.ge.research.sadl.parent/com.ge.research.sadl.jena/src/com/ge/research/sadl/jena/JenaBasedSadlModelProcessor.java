@@ -7554,7 +7554,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (typeobj instanceof NamedNode) {
 					((NamedNode) typeobj).setList(true);
 				} else {
-                    logger.error("Error:", new TranslationException("Unhandled case: type returned from simple type reference is not type NamedNode"));
+					if (typeobj != null) {
+						addError("Unhandled case: type returned from simple type reference is not type NamedNode", type);
+					}
                     return null;
 				}
 			}
@@ -11506,8 +11508,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (CircularDependencyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			addTypeCheckingError(e.getMessage(), ctx);
 		} catch (TranslationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
