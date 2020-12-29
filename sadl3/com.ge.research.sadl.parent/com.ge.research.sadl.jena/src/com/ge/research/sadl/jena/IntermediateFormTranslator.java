@@ -48,6 +48,7 @@ import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
+import com.ge.research.sadl.model.gp.JunctionList;
 import com.ge.research.sadl.model.gp.JunctionNode;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
@@ -951,9 +952,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvalidTypeException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (TranslationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
@@ -3122,9 +3120,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @return
 	 * @throws TranslationException 
 	 */
-	public static List<GraphPatternElement> junctionToList(Junction gpe)
+	public static JunctionList junctionToList(Junction gpe)
 	throws TranslationException {
-		List<GraphPatternElement> lResult = new ArrayList<>();
+		JunctionList lResult = new JunctionList();
+		lResult.setContext(gpe.getContext());
+		lResult.setJunctionType(gpe.getJunctionType());
 		List<Node> lProxies = junctionToNodeList(gpe);
 		for( Node lProxy : lProxies ) {
 			if( lProxy instanceof ProxyNode ) {
