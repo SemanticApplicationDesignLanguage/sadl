@@ -22,6 +22,7 @@ import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
+import com.ge.research.sadl.model.gp.JunctionList;
 import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
@@ -837,7 +838,14 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		if (elements != null && elements.size() > 0) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; elements != null && i < elements.size(); i++) {
-				if (cnt > 0) sb.append(", ");
+				if (cnt > 0) {
+					if (elements instanceof JunctionList && ((JunctionList)elements).getJunctionType().equals(JunctionType.Disj)) {
+						sb.append(";");
+					}
+					else {
+						sb.append(", ");
+					}
+				}
 				SpecialBuiltin spb = processSpecialBuiltins(elements, i);	// check for special handling required for some built-ins
 				if (spb != null) {
 					// get the triple in question

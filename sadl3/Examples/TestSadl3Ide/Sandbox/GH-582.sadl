@@ -1,0 +1,7 @@
+uri "http://sadl.org/GH-582.sadl" alias GH-582.
+ 
+AC is a class described by acprop with values of type boolean.
+BC is a type of AC.
+//Rule testr: if x is a AC or x is a BC then x acprop true.
+
+Ask: select x where x is an AC or x is a BC.

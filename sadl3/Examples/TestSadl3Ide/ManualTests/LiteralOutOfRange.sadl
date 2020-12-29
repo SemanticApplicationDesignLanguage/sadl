@@ -27,4 +27,4 @@
  
  Rule R15 if f is a Foo and bar of f <= -2147483648 then print("big").
  Rule R16 if f is a Foo then bar of f is -2147483648 .
-  
+         
