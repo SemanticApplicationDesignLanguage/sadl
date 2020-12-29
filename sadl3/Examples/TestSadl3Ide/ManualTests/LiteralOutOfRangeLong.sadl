@@ -18,4 +18,4 @@
 
  Rule R9 if f is a Foo and bar of f < 9223372036854775807 then print("bigger than long").
  Rule R10 if f is a Foo then bar of f is -9223372036854775808 .
-  
+   

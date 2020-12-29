@@ -193,7 +193,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			   [sosair,unt] is  sosfromalt(alt, "ft")
 			   then speedOfSound of air is sosair.
    		'''.sadl
-		sadlModel.assertNoErrors
+		sadlModel.assertError('''Object of conclusion triple 'rdf(air, sos:speedOfSound, sosair)' is not bound in rule premises''')
 	}
 	@Test
 	def void testLocalVsImportedNames_GH_226_15() {

@@ -26,6 +26,8 @@ package com.ge.research.sadl.model.gp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ge.research.sadl.model.gp.Junction.JunctionType;
+
 /**
  * A Query is an Expression with an optional list of variables to be returned
  * (which can either be explicit variable names of the names of properties
@@ -163,7 +165,12 @@ public class Query extends SadlCommand {
 		if (patterns != null) {
 			for (int i = 0; i < patterns.size(); i++) {
 				if (i > 0) {
-					sb.append(" . ");
+					if (patterns instanceof JunctionList && ((JunctionList)patterns).getJunctionType().equals(JunctionType.Disj)) {
+						sb.append(" or ");
+					}
+					{
+						sb.append(" . ");
+					}
 				}
 				if (fullyQualified) {
 					sb.append(patterns.get(i).toFullyQualifiedString());

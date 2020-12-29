@@ -1,34 +1,42 @@
 package com.ge.research.sadl.swi_prolog.plinterface;
 
+import java.net.ConnectException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-public class SWIPrologServiceInterface implements ISWIPrologServiceInterface {
+public class SWIPrologServiceInterfaceThreaded implements ISWIPrologServiceInterface {
 	
 	private String rules = "";
 	private int usageCounter = 0;
+	private long sleepTime = 1L;
+	private long timeoutTime = 500L;
 	
-	public SWIPrologServiceInterface(){
+	public SWIPrologServiceInterfaceThreaded(){
 		rules = "";
 	}
 	
+	@Override
 	public boolean addPlRules(String inRules){
 		rules += inRules + "\n";
 		return true;
 	}
 	
+	@Override
 	public boolean clearPlRules(){
 		rules = "";
 		return true;
 	}
 	
 	
+	@Override
 	public String getPlRules(){
 		return rules;
 	}
 	
+	@Override
 	public boolean runPlQueryNoArgs(String url, String query, boolean defineQueryPred) throws Exception{
 		String urlParameters = "query=";
 		urlParameters += "targetVar(['" + "_DummyVar" + "'])." + "\n";
@@ -37,10 +45,13 @@ public class SWIPrologServiceInterface implements ISWIPrologServiceInterface {
 		else
 			urlParameters += rules + query + "\n";
 		
-		debugOutput(url, "NoArgs");
-		PlServiceInterface plhttp = new PlServiceInterface();
-		String html = plhttp.sendPrologQuery(url, urlParameters);
-		
+//		debugOutput(url, "NoArgs");
+		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
+		plhttp.sendPrologQuery(url, urlParameters);
+		String html = startAndMonitorPlService(plhttp);
+		if (html.startsWith("java.net.ConnectException")) {
+			throw new ConnectException(html);
+		}
 		List<String> tList = new ArrayList<String>();
 		tList.add("_DummyVar");
 		
@@ -52,6 +63,7 @@ public class SWIPrologServiceInterface implements ISWIPrologServiceInterface {
 	}
 	
 	
+	@Override
 	public List<Hashtable> runPlQuery(String url, String query, String target, boolean defineQueryPred) throws Exception{
 		String urlParameters = "query=";
 		urlParameters += "targetVar(['" + target + "'])." + "\n";
@@ -60,9 +72,10 @@ public class SWIPrologServiceInterface implements ISWIPrologServiceInterface {
 		else
 			urlParameters += rules + query + "\n";
 		
-		debugOutput(url, "runPlQuery");
-		PlServiceInterface plhttp = new PlServiceInterface();
-		String html = plhttp.sendPrologQuery(url, urlParameters);
+//		debugOutput(url, "runPlQuery");
+		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
+		plhttp.sendPrologQuery(url, urlParameters);
+		String html = startAndMonitorPlService(plhttp);
 		
 		List<String> tList = new ArrayList<String>();
 		tList.add(target);
@@ -70,37 +83,25 @@ public class SWIPrologServiceInterface implements ISWIPrologServiceInterface {
 		return htmlToHashtable(tList,html); 
 	}
 	
-	private void debugOutput(String url, String srsc) {
-		System.out.println("Usage #(" + srsc + "): " + usageCounter++);
-		Runtime runtime = Runtime.getRuntime();
-		NumberFormat format = NumberFormat.getInstance();
+//	private void debugOutput(String url, String srsc) {
+//		System.out.println("Usage #(" + srsc + "): " + usageCounter++);
+//		Runtime runtime = Runtime.getRuntime();
+//		NumberFormat format = NumberFormat.getInstance();
+//
+//		StringBuilder sb = new StringBuilder();
+//		long maxMemory = runtime.maxMemory();
+//		long allocatedMemory = runtime.totalMemory();
+//		long freeMemory = runtime.freeMemory();
+//
+//		sb.append("free memory: " + format.format(freeMemory / 1024) + "<br/>");
+//		sb.append("allocated memory: " + format.format(allocatedMemory / 1024) + "<br/>");
+//		sb.append("max memory: " + format.format(maxMemory / 1024) + "<br/>");
+//		sb.append("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024) + "<br/>");
+//		System.out.println(sb.toString());
+//		System.out.println("\n");
+//	}
 
-		StringBuilder sb = new StringBuilder();
-		long maxMemory = runtime.maxMemory();
-		long allocatedMemory = runtime.totalMemory();
-		long freeMemory = runtime.freeMemory();
-
-		sb.append("free memory: " + format.format(freeMemory / 1024) + "<br/>");
-		sb.append("allocated memory: " + format.format(allocatedMemory / 1024) + "<br/>");
-		sb.append("max memory: " + format.format(maxMemory / 1024) + "<br/>");
-		sb.append("total free memory: " + format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024) + "<br/>");
-		System.out.println(sb.toString());
-		System.out.println("\n");
-		if (usageCounter == 50 ) {
-			String query = "garbage_collect, trim_stacks";
-			try {
-				PlServiceInterface plhttp = new PlServiceInterface();
-				String html = plhttp.sendPrologQuery(url, query);
-				if (html != null) {
-					System.out.println(html);
-				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
+	@Override
 	public List<Hashtable> runPlQueryMultipleArgs(String url, String query, List<String> tList, boolean defineQueryPred) throws Exception{
 		String urlParameters = "query=";
 		urlParameters += "targetVar([";
@@ -133,14 +134,34 @@ public class SWIPrologServiceInterface implements ISWIPrologServiceInterface {
 			urlParameters += rules + query + "\n";
 		}
 		
-		debugOutput(url, "MultipleArgs");
-		PlServiceInterface plhttp = new PlServiceInterface();
-		String html = plhttp.sendPrologQuery(url, urlParameters);
+//		debugOutput(url, "MultipleArgs");
+		PlServiceInterfaceRunnable plhttp = new PlServiceInterfaceRunnable();
+		plhttp.sendPrologQuery(url, urlParameters);
+		String html = startAndMonitorPlService(plhttp);
 		
 		return htmlToHashtable(tList,html); 
 	}
 	
-
+	private String startAndMonitorPlService(PlServiceInterfaceRunnable plhttp) throws PlServiceFailedException, InterruptedException {
+		Thread t = new Thread(plhttp);
+		t.start();
+		long startTime = System.currentTimeMillis();
+//		TimeUnit.SECONDS.sleep(1);
+		
+		while (t.isAlive()) {
+			long nowTime = System.currentTimeMillis();
+			if (nowTime - startTime > timeoutTime) {
+				plhttp.interrupt();
+//				t.stop();
+//				t.join();
+				throw new PlServiceFailedException(nowTime - startTime);
+			}
+			t.sleep(sleepTime);
+//			TimeUnit.SECONDS.sleep(1);
+		}
+		return plhttp.getResponseString();
+	}
+	
 	private List<Hashtable> htmlToHashtable(List<String> tList, String html){
 //		System.out.println(html);
 		List<Hashtable> result = new ArrayList<Hashtable>();

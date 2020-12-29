@@ -42,6 +42,7 @@ import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
+import com.ge.research.sadl.model.gp.JunctionList;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
@@ -377,7 +378,14 @@ public class JenaTranslatorPlugin implements ITranslator {
 					}
 				}
 				else {
-					sb.append(graphPatternElementToJenaRuleString(elements.get(idx), rulePart));
+					if (elements instanceof JunctionList && ((JunctionList)elements).getJunctionType().equals(JunctionType.Disj)) {
+						ModelError me = new ModelError("Disjunction not allowed in a Jena rule", ErrorType.ERROR);
+						me.setContext(((JunctionList)elements).getContext());
+						addError(me);
+					}
+					else {
+						sb.append(graphPatternElementToJenaRuleString(elements.get(idx), rulePart));
+					}
 				}
 				idx++;
 			}
@@ -979,7 +987,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 				}
 			}
 			else {
-				System.err.println("Encountered unhandled OR in rule '" + ruleInTranslation.getRuleName() + "'");
+				ModelError me = new ModelError("Encountered unhandled OR in rule '" + ruleInTranslation.getRuleName() + "'", ErrorType.ERROR);
+				me.setContext(gpe.getContext());
+				addError(me);
 //				throw new TranslationException("Jena rules do not currently support disjunction (OR).");
 			}
 		}
@@ -1953,8 +1963,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 
 	public List<ModelError> validateRule(com.ge.research.sadl.model.gp.Rule rule) {
-		List<ModelError> errors = null;
-		
 		// conclusion binding tests
 		List<GraphPatternElement> thens = rule.getThens();
 		for (int i = 0; thens != null && i < thens.size(); i++) {
@@ -1964,10 +1972,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 				if (args == null) {
 					ModelError me = new ModelError("Built-in '" + ((BuiltinElement)gpe).getFuncName() + 
 							"' with no arguments not legal in rule conclusion", ErrorType.ERROR);
-					if (errors == null) {
-						errors = new ArrayList<ModelError>();
-					}
-					errors.add(me);
+					me.setContext(gpe.getContext());
+					addError(me);
 				}
 				else {
 					for (int j = 0; j < args.size(); j++) {
@@ -1977,10 +1983,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 									!variableIsBoundInOtherElement(rule.getIfs(), 0, gpe, false, false, arg)) {
 								ModelError me = new ModelError("Conclusion built-in '" + ((BuiltinElement)gpe).getFuncName() + 
 										"', variable argument '" + arg.toString() + "' is not bound in rule premises", ErrorType.ERROR);
-								if (errors == null) {
-									errors = new ArrayList<ModelError>();
-								}
-								errors.add(me);
+								me.setContext(gpe.getContext());
+								addError(me);
 							}
 						}
 					}
@@ -1992,6 +1996,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 						&& !variableIsBoundInOtherElement(rule.getIfs(), 0, gpe, false, false, ((TripleElement)gpe).getSubject())) {
 					ModelError me = new ModelError("Subject of conclusion triple '" + gpe.toString() + 
 							"' is not bound in rule premises", ErrorType.ERROR);
+					me.setContext(gpe.getContext());
 					addError(me);
 				}
 				if (((TripleElement)gpe).getObject() instanceof VariableNode && 
@@ -1999,14 +2004,36 @@ public class JenaTranslatorPlugin implements ITranslator {
 						&& !variableIsBoundInOtherElement(rule.getIfs(), 0, gpe, false, false, ((TripleElement)gpe).getObject())) {
 					ModelError me = new ModelError("Object of conclusion triple '" + gpe.toString() + 
 							"' is not bound in rule premises", ErrorType.ERROR);
-					if (errors == null) {
-						errors = new ArrayList<ModelError>();
-					}
-					errors.add(me);
+					me.setContext(gpe.getContext());
+					addError(me);
 				}
 			}
+			else if (gpe instanceof Junction && ((Junction)gpe).getJunctionType().equals(JunctionType.Disj) ) {
+				ModelError me = new ModelError("Conclusion of a rule cannot contain a disjunction", ErrorType.ERROR);
+				me.setContext(gpe.getContext());
+				addError(me);
+			}
 		}
-		return errors;
+		List<GraphPatternElement> ifs = rule.getIfs();
+		if (ifs instanceof JunctionList && ((JunctionList)ifs).getJunctionType().equals(JunctionType.Disj)) {
+			ModelError me = new ModelError("Premises of a rule cannot contain a disjunction", ErrorType.ERROR);
+			me.setContext(((JunctionList)ifs).getContext());
+			addError(me);
+		}
+		for (int i = 0; ifs != null && i < ifs.size(); i++) {
+			GraphPatternElement gpe = ifs.get(i);
+			if (gpe instanceof Junction) {
+				ModelError me = new ModelError("Premises of a rule cannot contain a disjunction", ErrorType.ERROR);
+				me.setContext(gpe.getContext());
+				addError(me);
+			}
+		}
+		
+		List<ModelError> theseErrors = errors != null ? new ArrayList<ModelError>(errors) : null;
+		if (errors != null) {
+			errors.clear();
+		}
+		return theseErrors;
 	}
 	
 	private Map<String, NamedNode> getTypedVars(com.ge.research.sadl.model.gp.Rule rule) {
@@ -2051,7 +2078,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 				if (results.containsKey(varName)) {
 					NamedNode nn = results.get(varName);
 					if (!nn.equals(varType) && !(nn instanceof VariableNode || varType instanceof VariableNode)) {
-						addError(new ModelError("Variable '" + varName + "' is typed more than once in the rule.", ErrorType.WARNING));
+						ModelError me = new ModelError("Variable '" + varName + "' is typed more than once in the rule.", ErrorType.WARNING);
+						me.setContext(nn.getContext() != null ? nn.getContext() : gpe.getContext());
+						addError(me);
 					}
 				}
 				results.put(varName, varType);
@@ -2165,6 +2194,11 @@ public class JenaTranslatorPlugin implements ITranslator {
 	
 	@Override
 	public String getBuiltinFunctionModel(List<String> reservedWords){
+		/*
+		 * Note that for the Jena Reasoner, there are two kinds of built-ins
+		 * 1. those that are called implicit built-ins, obtained by calling reasoner getImplicitBuiltinSignatures
+		 * 2. those that are added as implementations of the builtin class and obtained from Java service
+		 */
 		StringBuilder sb = new StringBuilder();
 		sb.append("uri \"");
 		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_URI);

@@ -819,8 +819,17 @@ public class SadlUtils {
 			        		if (((String)vorig).trim().contains(".")) {
 			        			errMsg = "Value '" + v.toString() + "' doesn't match range " + rnguri;
 			        		}
-			        		if (rnguri.contains("int")) {
-			        			v = Integer.parseInt(stripQuotes((String)vorig));
+			        		try {
+				        		if (rnguri.contains("int")) {
+				        			v = Integer.parseInt(stripQuotes((String)vorig));
+				        		}
+				        		else {
+				        			// must be long
+				        			v = Long.parseLong(stripQuotes((String)vorig));
+				        		}
+			        		}
+			        		catch (NumberFormatException e) {
+			        			errMsg = "Value '" + vorig.toString() + "' doesn't match range " + rnguri;
 			        		}
 			         	}
 			        	if (v instanceof BigDecimal) {

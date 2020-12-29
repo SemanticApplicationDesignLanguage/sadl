@@ -21,6 +21,8 @@ package com.ge.research.sadl.model.gp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ge.research.sadl.model.gp.Junction.JunctionType;
+
 
 public class Rule {
 	private String ruleName = null;
@@ -96,14 +98,28 @@ public class Rule {
 			if (i == 0) {
 				sb.append("given ");				
 			}
-			if (i > 0) sb.append(" and ");
+			if (i > 0) {
+				if (givens instanceof JunctionList && ((JunctionList)givens).getJunctionType().equals(JunctionType.Disj) ) {
+					sb.append(" or ");
+				}
+				else {
+					sb.append(" and ");
+				}
+			}
 			sb.append(givens.get(i).toString());
 		}
 		for (int i = 0; ifs != null && i < ifs.size(); i++) {
 			if (i == 0) {
 				sb.append(" if ");				
 			}
-			if (i > 0) sb.append(" and ");
+			if (i > 0) {
+				if (ifs instanceof JunctionList && ((JunctionList)ifs).getJunctionType().equals(JunctionType.Disj) ) {
+					sb.append(" or ");
+				}
+				else {
+					sb.append(" and ");
+				}
+			}
 			sb.append(ifs.get(i).toString());
 		}
 		for (int i = 0; thens != null && i < thens.size(); i++) {

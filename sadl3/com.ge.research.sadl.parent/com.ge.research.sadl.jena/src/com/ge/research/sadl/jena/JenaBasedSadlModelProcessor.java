@@ -156,6 +156,7 @@ import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
+import com.ge.research.sadl.model.gp.JunctionList;
 import com.ge.research.sadl.model.gp.JunctionNode;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
@@ -718,9 +719,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				List<ModelError> results = translateAndSaveModel(resource, owlFN, format, newMappings, "SADL");
 				if (results != null) {
 					generationInProgress = false; // we need these errors to show up
-					modelErrorsToOutput(resource, results);
+					modelErrorsToOutput(resource, results, false);
 				}
 			} catch (Exception e) {
+				if (e.getMessage() == null) {
+					e.printStackTrace();
+				}
 				System.err.println(e.getMessage());
 			}
 		}
@@ -848,7 +852,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			List<ModelError> results = translator.translateAndSaveModel(getTheJenaModel(), getRules(),
 					modelFolderPathname, getModelName(), getImportsInOrderOfAppearance(), owlFN);
 			if (results != null) {
-				modelErrorsToOutput(resource, results);
+				modelErrorsToOutput(resource, results, false);
 			} else if (getOtherKnowledgeStructure(resource) != null) {
 				results = translator.translateAndSaveModelWithOtherStructure(getTheJenaModel(),
 						getOtherKnowledgeStructure(resource), modelFolderPathname, getModelName(),
@@ -943,24 +947,33 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return null;
 	}
 
-	protected void modelErrorsToOutput(Resource resource, List<ModelError> errors) {
-//		EObject sm = resource.getContents().get(0);
-//		if (sm instanceof SadlModel) {
-//			sm = ((SadlModel)sm).getElements().get(0);
-//		}
+	protected void modelErrorsToOutput(Resource resource, List<ModelError> errors, boolean useMarkersIfPossible) {
 		for (int i = 0; errors != null && i < errors.size(); i++) {
 			ModelError err = errors.get(i);
-//			if (sm != null) {
-//				addError(err.getErrorMsg(), sm);
-//			}
-//			else {
-				if (err.getErrorType().equals(ErrorType.ERROR)) {
+			if (err.getErrorType().equals(ErrorType.ERROR)) {
+				if (useMarkersIfPossible && err.getContext() != null && err.getContext() instanceof EObject) {
+					addError(err.getErrorMsg(), (EObject) err.getContext());
+				}
+				else {
 					System.err.println(err.getErrorMsg());
+				}
+			}
+			else if (err.getErrorType().equals(ErrorType.WARNING)){
+				if (useMarkersIfPossible && err.getContext() != null && err.getContext() instanceof EObject) {
+					addWarning(err.getErrorMsg(), (EObject) err.getContext());
 				}
 				else {
 					System.out.println(err.getErrorMsg());
 				}
-//			}
+			}
+			else {
+				if (useMarkersIfPossible && err.getContext() != null && err.getContext() instanceof EObject) {
+					addInfo(err.getErrorMsg(), (EObject) err.getContext());
+				}
+				else {
+					System.out.println(err.getErrorMsg());
+				}
+			}
 		}
 	}
 
@@ -2013,7 +2026,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					GraphPatternElement realLp = null;
 					if (lp instanceof Junction) {
 						getIfTranslator();
-						List<GraphPatternElement> plst = IntermediateFormTranslator.junctionToList((Junction)lp);
+						JunctionList plst = IntermediateFormTranslator.junctionToList((Junction)lp);
 						if (plst.size() > 0) {
 							realLp = plst.get(plst.size() - 1);
 							if (realLp instanceof BuiltinElement && 
@@ -4276,6 +4289,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addNamedStructureAnnotations(rl, annotations);
 			}
 		}
+		try {
+			List<ModelError> errlist = getConfigMgr().getTranslator().validateRule(rule);
+			if (errlist != null) {
+				modelErrorsToOutput(getCurrentResource(), errlist, true);
+			}
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		setTarget(null);
 	}
 
@@ -4474,7 +4496,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					restObjs.add(0, ((Object[])cls)[1]);
 				}
 				else if (((Object[])cls)[1] instanceof Junction) {
-					List<GraphPatternElement> expanded = IntermediateFormTranslator.junctionToList((Junction)((Object[])cls)[1]);
+					JunctionList expanded = IntermediateFormTranslator.junctionToList((Junction)((Object[])cls)[1]);
+					if (expanded.getJunctionType().equals(JunctionType.Disj)) {
+						addError("Disjunction in 'there exists' is not valid", matchExpr);
+					}
 					int insertAt = 0;
 					for (GraphPatternElement gpe : expanded) {
 						if (gpe instanceof TripleElement) {
@@ -4539,7 +4564,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			tebi.addArgument(plusNode);
 			List<TripleElement> plusObjs = new ArrayList<TripleElement>();
 			if (plusObj instanceof Junction) {
-				List<GraphPatternElement> plusGpes = getIfTranslator().junctionToList(((Junction)plusObj));
+				JunctionList plusGpes = getIfTranslator().junctionToList(((Junction)plusObj));
+				if (plusGpes.getJunctionType().equals(JunctionType.Disj)) {
+					addError("Disjunction in 'there exists' is not valid", plusExpr);
+				}
 				for (GraphPatternElement gpe : plusGpes) {
 					if (gpe instanceof TripleElement) {
 						plusObjs.add((TripleElement) gpe);
@@ -5356,6 +5384,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Object lobj = null;
 		if (lexpr != null) {
 			lobj = applyPulledUpOperations(processExpression(lexpr));
+			if (lobj instanceof NamedNode) {
+				((NamedNode)lobj).setContext(lexpr);
+			}
 		} else {
 			addError("Left side of '" + op + "' is null", lexpr); // TODO Add new error
 			return null;
@@ -5364,6 +5395,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Object rest = null;
 		if (rexpr != null) {
 			robj = applyPulledUpOperations(processExpression(rexpr));
+			if (robj instanceof NamedNode) {
+				((NamedNode)robj).setContext(rexpr);
+			}
 			if (robj instanceof Object[] && ((Object[]) robj).length == 2) {
 				rest = ((Object[]) robj)[1];
 				robj = ((Object[]) robj)[0];
@@ -5804,18 +5838,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			if (simpleUnionOrIntersection) {
 				// this is a special case--union or intersection of two Nodes
-				JunctionNode ci;
-				if (op.equals("or")) {
-					ci = new JunctionNode(nodeCheck(lobj), nodeCheck(robj), JunctionType.Disj);
-				}
-				else {
-					ci = new JunctionNode(nodeCheck(lobj), nodeCheck(robj), JunctionType.Conj);
+				JunctionNode ci = null;
+				if (lobj != null && robj != null) {
+					if (op.equals("or")) {
+						ci = new JunctionNode(nodeCheck(lobj), nodeCheck(robj), JunctionType.Disj);
+					}
+					else {
+						ci = new JunctionNode(nodeCheck(lobj), nodeCheck(robj), JunctionType.Conj);
+					}
 				}
 				return ci;
 			}
 			Junction jct = new Junction();
 			jct.setJunctionName(op);
-
+			jct.setContext(container);
+			
 			//check for implied properties on junctions with top level named nodes
 			if(robj instanceof NamedNode || robj instanceof BuiltinElement) {
 				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
@@ -5922,7 +5959,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (oldRsrc != null && newRsrc != null && !classIsSubclassOfCached(newRsrc, oldRsrc, true, null)) {
 						if (!(getTarget() instanceof Rule) || !getRulePart().equals(RulePart.CONCLUSION)) {
 							// this is not consistent	this is OK to have in a rule conclusion--it is concluding, not conditioning
-							addTypeCheckingError("Restriction on variable type must be a subclass of type from definition.", expr);
+// TODO need to allow "x ... and x ..." or "x... or x ...."
+							if (!variableRestrictionsInJunction(expr, vobj, restrictionType, (NamedNode) oldType)) {
+								addTypeCheckingError("Restriction on variable type must be a subclass of type from definition.", expr);
+							}
 						}
 					}
 //					else {
@@ -5934,6 +5974,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 	
+	private boolean variableRestrictionsInJunction(EObject expr, VariableNode vobj, NamedNode restrictionType, NamedNode oldType) {
+		BinaryOperation bocont = EcoreUtil2.getContainerOfType(expr, BinaryOperation.class);
+		List<Node> defns = vobj.getDefinitions();
+		if (defns != null) {
+			Node defn = defns.get(0);
+			if (defn instanceof ProxyNode) {
+				GraphPatternElement gpe = ((ProxyNode)defn).getProxyFor();
+				if (gpe instanceof TripleElement && 
+						((TripleElement)gpe).getSubject() instanceof VariableNode &&
+						((VariableNode)((TripleElement)gpe).getSubject()).equals(vobj)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public TypeCheckInfo getMatchingImpliedPropertyBaseTci(TypeCheckInfo aImpliedBaseTci, Property aPropertyToMatch, EObject aEObj) throws DontTypeCheckException, InvalidTypeException, TranslationException, InvalidNameException{
 		Iterator<ConceptName> litr = aImpliedBaseTci.getImplicitProperties().iterator();
 		TypeCheckInfo baseImpliedPropertyTci = null;
@@ -13112,7 +13169,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					val = "-" + val;
 				}
 				if (rng != null && rng.getURI() != null) {
-					return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+					try {
+						return SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), val);
+					}
+					catch (TranslationException e) {
+						addTypeCheckingError(e.getMessage(), value);
+					}
 				} else {
 					if (val.contains(".")) {
 						return getTheJenaModel().createTypedLiteral(Double.parseDouble(val));

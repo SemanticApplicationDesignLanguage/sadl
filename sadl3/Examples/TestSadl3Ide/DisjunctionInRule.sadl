@@ -1,0 +1,8 @@
+ uri "http://sadl.org/DisjunctionInRule.sadl" alias DisjunctionInRule.
+ 
+ Mammal is a class.
+ {Dog, Cat} are types of Mammal.
+ 
+// Rule R1: if x is a Dog or x is a Cat then x is a Mammal.
+ Rule R1: if x is a Dog or x is a Cat then x is a Mammal.
+  

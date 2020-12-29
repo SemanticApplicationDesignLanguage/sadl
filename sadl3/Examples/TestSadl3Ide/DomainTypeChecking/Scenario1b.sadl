@@ -1,0 +1,43 @@
+uri "http://sadl.org/Scenario1b.sadl" alias Scenario1b.
+ 
+/*
+		 * 1. Subject is a class:
+		 *  	Note: this occurs in derivative grammars such as SRL in ASSERT(TM)
+...
+		 * 	b. Domain is a union class
+		 * 		i. Subject is a single class 
+		 *  		if subject is the same or a subclass of any of member
+		 *			of the union class it is a MATCH else it is NOT
+		 *		ii. Subject is a union class
+		 * 			--if EACH member of the subject union class is the same or a subclass 
+		 * 			of some member of the domain union class it is a MATCH
+		 * 			--if some but not all members of the subject union class is the same or a
+		 * 			subclass of some member of the domain union class it is INDETERMINATE
+		 * 			-- if no member of the subject union class is the same or a subclass of
+		 * 			some member of the domain union class is is NOT a match
+		 * 		iii. Subject is an intersection class
+		 * 			if some member of the subject intersection class is the same or a subclass 
+		 * 			of some member of the domain union class it is a MATCH else it is NOT
+
+ */ 
+Food is a class.
+Drink is a class.
+
+Person is a class.
+consumedBy describes {Food or Drink} with values of type Person.
+
+Coke is a Drink.
+Pizza is a Food.
+RootBeerFloat is a {Food or Drink}.
+EggNog is a {Food or Drink}.
+
+George is a Person.
+John is a Person.
+Mary is a Person.
+
+Pizza (note "1.b.i") consumedBy George.
+RootBeerFloat (note "1.b.ii") consumedBy Mary.
+EggNog (note "1.b.iii") consumedBy John.
+
+
+

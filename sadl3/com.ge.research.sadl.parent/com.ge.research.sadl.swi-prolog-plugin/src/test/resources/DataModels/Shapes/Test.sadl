@@ -6,3 +6,4 @@ MyRect is a Rectangle with height 2.5, with width 5.5.
 
 Test: area of MyRect is 13.75 .
  
+Ask: select ar where MyRect has area ar.

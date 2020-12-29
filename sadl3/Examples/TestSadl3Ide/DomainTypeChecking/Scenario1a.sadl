@@ -1,0 +1,27 @@
+ uri "http://sadl.org/Scenario1a.sadl" alias Scenario1a.
+ 
+ /*
+		 * 1. Subject is a class:
+		 *  	Note: this occurs in derivative grammars such as SRL in ASSERT(TM)
+		 * 	a. Domain is a single class
+		 * 		i. Subject is a single class
+		 * 			if subject is the same or a subclass of domain it is a MATCH else it is NOT
+		 * 		ii. Subject is a union class
+		 * 			if NONE of the members of the subject union class is the same or a subclass of
+		 * 			the domain class then it is NOT a match else it is INDETERMINATE
+		 * 		iii. Subject is an intersection class
+		 * 			if some member of the subject intersection class is the same or a subclass of
+		 * 			the domain class it is a MATCH else NOT
+ */
+ 
+ Rock is a class.
+ polish describes Rock with values of type boolean.
+ 
+ PaperWeight is a class.
+ 
+ MyRock (note "1.a.i") is a Rock with polish false.
+ 
+ MyThing (note "1.a.ii") is a {Rock or PaperWeight} with polish true.
+ 
+ YourThing (note "1.a.iii") is a {Rock and PaperWeight} with polish true.
+ 

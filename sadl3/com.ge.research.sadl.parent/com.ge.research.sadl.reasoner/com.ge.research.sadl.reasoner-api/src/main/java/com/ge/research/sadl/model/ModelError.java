@@ -39,9 +39,10 @@ package com.ge.research.sadl.model;
 public class ModelError extends com.ge.research.sadl.reasoner.ModelError {
     public enum ExistingNamePart{PREFIX, NAME, BOTH, NOTAPPLICABLE}
 
+    private Object context;	// the object in the parser output that is host to this error
     private int lineNumber;
     private int lineLength;
-    private int offset;
+    private int offset = -1;
     
     private int argumentIndex;
     private int listIndex;
@@ -84,8 +85,16 @@ public class ModelError extends com.ge.research.sadl.reasoner.ModelError {
     
 	public boolean equals(Object me) {
 		if (super.equals(me)) {
-			if (me instanceof ModelError && offset == ((ModelError)me).offset) {
-				return true;
+			if (me instanceof ModelError) {
+				if (getContext() != null && ((ModelError)me).getContext() != null &&
+						getContext().equals(((ModelError)me).getContext())) {
+					// this is the V3 way of anchoring ModelError to the location in the editor
+					return true;
+				}
+				else if (offset >= 0 && offset == ((ModelError)me).offset) {
+					// this is the V2 way of anchoring ModelError to the location in the editor
+					return true;
+				}
 			}
 		}
 		return false;
@@ -137,5 +146,13 @@ public class ModelError extends com.ge.research.sadl.reasoner.ModelError {
 
 	public int getOffset() {
 		return offset;
+	}
+
+	public Object getContext() {
+		return context;
+	}
+
+	public void setContext(Object hostObject) {
+		this.context = hostObject;
 	}
 }

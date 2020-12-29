@@ -157,7 +157,7 @@ public class TestJenaTranslator extends AbstractSADLModelProcessorTest {
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 3)		// construct requires articles to be enabled
+			assertTrue(issues.size == 4)		// construct requires articles to be enabled (3 errors), v2 (mistranslation) not defined
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -193,7 +193,7 @@ rdf(v3, rulevars2:var2, v7) and rdf(v4, rulevars2:var3, v8) and +(v7,v8,v9) then
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 1)	// content requires articles to be enabled
+			assertTrue(issues.size == 3)	// content requires articles to be enabled, 2 concl var not bound
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),

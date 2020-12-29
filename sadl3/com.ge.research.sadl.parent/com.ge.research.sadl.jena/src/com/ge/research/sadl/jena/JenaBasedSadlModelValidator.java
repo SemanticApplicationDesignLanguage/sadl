@@ -1394,7 +1394,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					value = BigDecimal.valueOf(Double.parseDouble(strval));
 				}
 				else {
-					value = BigDecimal.valueOf(Long.parseLong(strval));
+					try {
+						value = BigDecimal.valueOf(Long.parseLong(strval));
+					}
+					catch(NumberFormatException e) {
+						value = BigDecimal.valueOf(Double.parseDouble(strval));
+						if (value.compareTo(BigDecimal.valueOf(MAX_LONG)) > 0 || value.compareTo(BigDecimal.valueOf(MIN_LONG)) < 0) {
+							getModelProcessor().addTypeCheckingError("Number is not in the range of xsd:long", expression);
+						}
+						else {
+							getModelProcessor().addError(e.getMessage(), expression);
+						}
+					}
 				}
 			}
 			if (expression.eContainer() != null && expression.eContainer() instanceof UnaryExpression && ((UnaryExpression)expression.eContainer()).getOp().equals("-")) {
