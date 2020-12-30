@@ -307,6 +307,28 @@ class DeclarationExtensionsTest {
 		assertEquals(OntConceptType.DATATYPE_PROPERTY, name2resource.get('foo').ontConceptType)
 	}
 	
+	@Test
+	def void testGH594() {
+		val model = '''
+		 uri "http://sadl.org/GH594.sadl" alias GH594.
+		 
+		 prop1 is a property.
+		 subprop1 is a type of prop1.
+		 
+		 prop2 is a property with values of type boolean.
+		 subprop2 is a type of prop2.
+		 
+		 C1 is a class, described by subprop1.
+		 C2 is a class, described by prop1.
+ 		'''.parse
+		
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		assertTrue(name2resource.containsKey('prop1'))
+		assertEquals(OntConceptType.RDF_PROPERTY, name2resource.get('prop1').ontConceptType)
+		assertTrue(name2resource.containsKey('subprop1'))
+		assertEquals(OntConceptType.RDF_PROPERTY, name2resource.get('subprop1').ontConceptType)
+	}
+	
 	protected def void assertIs(SadlResource it, OntConceptType type) {
 		assertNotNull(it)
 		val typ = try {
