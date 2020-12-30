@@ -9,7 +9,7 @@
   <body>
     <h2>Installation Instructions for SADL-IDE, Version 3</h2>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->12/26/2020<!--webbot bot="Timestamp" endspan i-checksum="12567" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->12/30/2020<!--webbot bot="Timestamp" endspan i-checksum="12567" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <p>To Install SADL Version 3 do the following:</p>
     <ol style="color: rgb(0, 0, 0); font-family: Times New Roman; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
@@ -31,7 +31,14 @@
           will probably not work as Xtext cannot be newer than 2.21.0.</li>
       </ol>
       <li>Download the latest SADL V3 installation ZIP file from <a href="https://github.com/SemanticApplicationDesignLanguage/sadl/releases">
-          https://github.com/SemanticApplicationDesignLanguage/sadl/releases</a>.</li>
+          https://github.com/SemanticApplicationDesignLanguage/sadl/releases</a>.
+      </li>
+      <ul>
+        <li>Note: to install the latest bleeding edge automated build, go to <a
+            href="https://github.com/SemanticApplicationDesignLanguage/sadl/actions">Actions</a>,
+          click on the latest (or any desired) result, scroll down to Artifacts,
+          and download the ZIP file for installation.</li>
+      </ul>
       <li>Start Eclipse, go to Help -&gt; Install New Software. Click on Add...
         to create a new update site. Then click on Archive and browse to the ZIP
         file downloaded in step 3. Click OK to install SADL. Select all
@@ -77,7 +84,7 @@
         </ul>
       </li>
       <li>The file should be opened in an editor window. There should be an
-        error marker <img src="images/SadlV31.gif" height="21" border="0" width="19">
+        error marker <img src="images/SadlV31.gif" border="0" height="21" width="19">
         on the first line of the file. Clicking on the error marker should
         display the message "mismatched input '&lt;EOF&gt;' expecting 'uri'.</li>
       <li>Click in the first line right after the error marker to place the
