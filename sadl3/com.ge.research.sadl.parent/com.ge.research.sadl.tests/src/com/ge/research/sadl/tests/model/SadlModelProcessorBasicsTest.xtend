@@ -30,6 +30,9 @@ import org.apache.jena.vocabulary.RDF
 import org.apache.jena.rdf.model.RDFList
 import org.eclipse.xtext.diagnostics.Severity
 import org.apache.jena.vocabulary.XSD
+import com.ge.research.sadl.model.OntConceptType
+import com.ge.research.sadl.sADL.SadlResource
+import com.ge.research.sadl.model.gp.Query
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -1138,7 +1141,83 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		]
 	}
 	
+	@Test
+	def void testGH557_01() {
+		val model = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Foo is a class described by bar with values of type Whim.
+			 Whim is a class described by wham with values of type string.
+			 MyFoo is a Foo with bar (a Whim MyWhim with wham "too bad").
+			 Ask: select x where MyFoo is an x.
+			 Ask: select c where MyFoo bar b and b is a c.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			val ask1 = cmds.get(0)
+			println(ask1.toString)
+			assertTrue(ask1 instanceof Query)
+			assertTrue((ask1 as Query).variables.size == 1)
+			assertTrue((ask1 as Query).variables.get(0).type.name.equals("Foo"))
+			val ask2 = cmds.get(1)
+			println(ask2.toString)
+			assertTrue(ask2 instanceof Query)
+			assertTrue((ask2 as Query).variables.size == 1)
+			assertTrue((ask2 as Query).variables.get(0).type.name.equals("Whim"))
+		]
+	}
 	
+	@Test
+	def void testGH557_02() {
+		val model = '''
+			 uri "http://sadl.imp/test_import_apvf" version "$Revision: 1.6 $ Last modified on $Date: 2015/06/30 21:27:34 $".
+			 
+			 Person is a class.
+			 
+			 Genius is a type of Person.
+			 iq describes Person has values of type string. 
+			 iq of Person must be one of {"low", "average", "high"}.
+			 
+			 a Person is a Genius only if iq always has value "high".
+			 
+			 //Rule GeniusRule: if p is a Person and p has iq "high" then p is a Genius.
+			 
+			 George is a Person, has iq "high".
+			 
+			 Test: George is a Genius.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			val ask1 = cmds.get(0)
+			println(ask1.toString)
+			assertTrue(ask1 instanceof com.ge.research.sadl.model.gp.Test)
+			assertTrue((ask1 as com.ge.research.sadl.model.gp.Test).toString.equals("rdf(George, rdf:type, Genius)"))
+		]
+	}
+		
+	@Test
+	def void testGH557_03() {
+		val model = '''
+			 uri "http://sadl.imp/test_import_apvf" version "$Revision: 1.6 $ Last modified on $Date: 2015/06/30 21:27:34 $".
+			 
+			 Person is a class.
+			 
+			 Genius is a type of Person.
+			 iq describes Person has values of type string. 
+			 iq of Person must be one of {"low", "average", "high"}.
+			 
+			 a Person is a Genius only if iq always has value "high".
+			 
+			 //Rule GeniusRule: if p is a Person and p has iq "high" then p is a Genius.
+			 
+			 George is a Person, has iq "high".
+			 
+			 Ask: George is a Genius.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			val ask1 = cmds.get(0)
+			println(ask1.toString)
+			assertTrue(ask1 instanceof Query)
+			assertTrue((ask1 as Query).variables === null)
+			assertTrue((ask1 as Query).toString.equals("rdf(George, rdf:type, Genius)"))
+		]
+	}
+		
 	@Test
 	def void testSameAsDefinition() {
 		'''

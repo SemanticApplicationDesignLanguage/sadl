@@ -329,6 +329,27 @@ class DeclarationExtensionsTest {
 		assertEquals(OntConceptType.RDF_PROPERTY, name2resource.get('subprop1').ontConceptType)
 	}
 	
+	@Test
+	def void testGH557() {
+		val model = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Foo is a class described by bar with values of type Whim.
+			 Whim is a class described by wham with values of type string.
+			 MyFoo is a Foo with bar (a Whim MyWhim with wham "too bad").
+			 Ask: select x where MyFoo is an x.
+			 Ask: select c where MyFoo bar b and b is a c.
+ 		'''.parse
+		
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		assertTrue(name2resource.containsKey('x'))
+		assertEquals(OntConceptType.VARIABLE, name2resource.get('x').ontConceptType)
+		assertTrue(name2resource.containsKey('b'))
+		assertEquals(OntConceptType.VARIABLE, name2resource.get('b').ontConceptType)
+		assertTrue(name2resource.containsKey('c'))
+		assertEquals(OntConceptType.VARIABLE, name2resource.get('c').ontConceptType)
+	}
+	
 	protected def void assertIs(SadlResource it, OntConceptType type) {
 		assertNotNull(it)
 		val typ = try {

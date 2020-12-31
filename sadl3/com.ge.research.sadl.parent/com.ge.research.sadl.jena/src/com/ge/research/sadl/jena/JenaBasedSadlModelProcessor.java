@@ -5548,26 +5548,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					addError("Something is going wrong with translation, please report", rexpr);
 				}
 			}
-			else if (rexpr instanceof Declaration && !(robj instanceof VariableNode)) {
-				if (lobj instanceof Node && robj instanceof Node) {
+			else if (op.equals("is") && rexpr instanceof Declaration) {
+				if (robj instanceof VariableNode && lobj instanceof NamedNode && 
+						(((NamedNode)lobj).getNodeType().equals(NodeType.InstanceNode) ||
+								((NamedNode)lobj).getNodeType().equals(NodeType.VariableNode))) {
+					// this is a Declaration with a variable on the right and an individual on the left
 					TripleElement trel = new TripleElement((Node) lobj, new RDFTypeNode(), (Node) robj);
 					trel.setSourceType(TripleSourceType.ITC);
-					if (lobj instanceof VariableNode && robj instanceof NamedNode && ((NamedNode)robj).getNodeType().equals(NodeType.ClassNode)) {
-						// this is a restriction on the variable type
-						((VariableNode)lobj).addDefinition(nodeCheck(trel));
-						try {
-							applyRestrictionToVariableType((VariableNode)lobj, (NamedNode) robj, rexpr);
-						} catch (CircularDependencyException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
 					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
-				} else {
-					// throw new TranslationException("Unhandled binary operation condition: left
-					// and right are not both nodes.");
-					addError(SadlErrorMessages.UNHANDLED.get("binary operation condition. ",
-							"Left and right are not both nodes."), container);
+				}
+				else if (!(robj instanceof VariableNode)) {
+					if (lobj instanceof Node && robj instanceof Node) {
+						TripleElement trel = new TripleElement((Node) lobj, new RDFTypeNode(), (Node) robj);
+						trel.setSourceType(TripleSourceType.ITC);
+						if (lobj instanceof VariableNode && robj instanceof NamedNode && ((NamedNode)robj).getNodeType().equals(NodeType.ClassNode)) {
+							// this is a restriction on the variable type
+							((VariableNode)lobj).addDefinition(nodeCheck(trel));
+							try {
+								applyRestrictionToVariableType((VariableNode)lobj, (NamedNode) robj, rexpr);
+							} catch (CircularDependencyException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
+					} else {
+						// throw new TranslationException("Unhandled binary operation condition: left
+						// and right are not both nodes.");
+						addError(SadlErrorMessages.UNHANDLED.get("binary operation condition. ",
+								"Left and right are not both nodes."), container);
+					}
 				}
 			}
 			else if (lobj instanceof VariableNode && rexpr instanceof Declaration && robj instanceof VariableNode &&
@@ -7332,6 +7342,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (isList((NamedNode) typenode, type)) {
 					processListDeclaration(expr, (NamedNode)typenode);
 				}
+				try {
+					if (expr.eContainer() instanceof BinaryOperation &&
+							((BinaryOperation)expr.eContainer()).getOp().equals("is") &&
+							typenode instanceof NamedNode && 
+							((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) &&
+							((BinaryOperation)expr.eContainer()).getLeft() instanceof Name &&
+							(getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.INSTANCE) ||
+							getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.VARIABLE))) {
+						// this is of the form "something is a class" where so return the class (typenode)
+						//	where the something must be an instance or an explicit variable
+						return typenode;
+					}
+				} catch (CircularDefinitionException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				VariableNode var = null;
 				if (isUseArticlesInValidation()) {
 					var = getCruleVariable((NamedNode) typenode, ordNum);
@@ -7383,7 +7409,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else if(isDefinitionOfExplicitVariable(expr) && typenode instanceof NamedNode && isList((NamedNode) typenode, type)) {
 			processListDeclaration(expr, (NamedNode) typenode);
 		}
-		
+		else if (typenode instanceof VariableNode) {
+			EObject cont = expr.eContainer();
+			try {
+				if (cont instanceof BinaryOperation && 
+						((BinaryOperation)cont).getOp().equals("is") &&
+						((BinaryOperation)cont).getLeft() instanceof SadlResource &&
+						(getDeclarationExtensions().getOntConceptType((SadlResource)((BinaryOperation)cont).getLeft()).equals(OntConceptType.INSTANCE) ||
+								getDeclarationExtensions().getOntConceptType((SadlResource)((BinaryOperation)cont).getLeft()).equals(OntConceptType.VARIABLE))) {
+					// the type is a variable so must be of form instance is a variable
+					TypeCheckInfo varTCI = getModelValidator().getType((SadlResource)((BinaryOperation)cont).getLeft());
+					((VariableNode)typenode).setType(varTCI.getTypeCheckType());
+				}
+			} catch (Exception e) {
+				addError(e.getMessage(), cont);
+			} 
+		}
 		return typenode;
 	}
 
@@ -7528,10 +7569,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private boolean isDefinitionOfExplicitVariable(Declaration expr) {
 		EObject cont = expr.eContainer();
 		try {
-			if (cont instanceof BinaryOperation && ((BinaryOperation) cont).getLeft() instanceof SadlResource
-					&& getDeclarationExtensions().getOntConceptType((SadlResource) ((BinaryOperation) cont).getLeft())
-							.equals(OntConceptType.VARIABLE)) {
-				return true;
+			if (cont instanceof BinaryOperation && ((BinaryOperation)cont).getOp().equals("is")) {
+				if (((BinaryOperation) cont).getLeft() instanceof SadlResource && 
+						getDeclarationExtensions().getOntConceptType((SadlResource) ((BinaryOperation) cont).getLeft()).equals(OntConceptType.VARIABLE)) {
+					// of form variable is a class
+					return true;
+				}
+				else if (((BinaryOperation)cont).getRight() instanceof Declaration && 
+						((Declaration)((BinaryOperation)cont).getRight()).getType() instanceof SadlSimpleTypeReference &&
+						((SadlSimpleTypeReference)((Declaration)((BinaryOperation)cont).getRight()).getType()).getType() instanceof SadlResource &&
+						getDeclarationExtensions().getOntConceptType((SadlResource)((SadlSimpleTypeReference)((Declaration)((BinaryOperation)cont).getRight()).getType()).getType()).equals(OntConceptType.VARIABLE)) {
+					// of form instance is a variable (Note: grammar doesn't identify this as the declaration of the variable because it can't--the variable is an explicit reference
+					return true;
+				}
 			}
 		} catch (CircularDefinitionException e) {
 			addError(e.getMessage(), expr);

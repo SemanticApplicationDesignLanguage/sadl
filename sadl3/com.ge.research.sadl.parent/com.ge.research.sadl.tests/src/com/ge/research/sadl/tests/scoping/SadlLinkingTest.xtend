@@ -1227,6 +1227,22 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 	
+	@Test 
+	def void testQueryVariable_3() {
+		// this illustrates an inconvenient result of the way the grammar is defined. In a construct of the form
+		//	x is a y, y can never be the declaration of y because it is a reference in the grammar. This is the crux
+		//	of Issue 557. 
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Foo is a class described by bar with values of type Whim.
+			 Whim is a class described by wham with values of type string.
+			 MyFoo is a Foo with bar (a Whim MyWhim with wham "too bad").
+			 Ask: select [x] where MyFoo is an <x>.
+			 Ask: select [c] where MyFoo bar [b] and <b> is a <c>.
+		'''.assertLinking[sadl]
+	}
+
 	@Test
 	def void testRuleVariable_1() {
 		'''
