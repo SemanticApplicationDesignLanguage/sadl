@@ -6,3 +6,6 @@
  prop2 is a property with values of type boolean.
  subprop2 is a type of prop2.
  
+ C1 is a class, described by subprop1.
+ C2 is a class, described by prop1.
+ 

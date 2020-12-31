@@ -25,6 +25,8 @@ import java.util.List
 import com.ge.research.sadl.reasoner.ConfigurationItem
 import org.eclipse.xtext.preferences.PreferenceKey
 import com.ge.research.sadl.preferences.SadlPreferences
+import com.ge.research.sadl.reasoner.SadlCommandResult
+import com.ge.research.sadl.model.gp.TestResult
 
 /**
  * Test that demonstrate how to make assertions on the generated translator outputs, plus runs the inferencer too.
@@ -277,18 +279,23 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 			 Print: "This test will pass only if OWL entailments are enabled in the reasoner.".
 			 Test: George is a Genius.
 			''')
-//		assertNoErrorsInWorkspace;
-		var List<ConfigurationItem> configItems = newArrayList
-		val String[] catHier = newArrayOfSize(1)
-		catHier.set(0, "Jena")
-		val ci = new ConfigurationItem(catHier)
-		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
-		configItems.add(ci)
-		assertInferencer('UseArticles.sadl', null, configItems) [
-			// TODO do something with the SADL commands after running the inferencer.
+			assertNoErrorsInWorkspace;
+			var List<ConfigurationItem> configItems = newArrayList
+			val String[] catHier = newArrayOfSize(1)
+			catHier.set(0, "Jena")
+			val ci = new ConfigurationItem(catHier)
+			ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+			configItems.add(ci)
+			assertInferencer('UseArticles.sadl', null, configItems) [
 			for (scr:it) {
 				println(scr.toString)
 			}
+			val scr = it.get(1)
+			assertTrue(scr instanceof SadlCommandResult)
+			val tr = (scr as SadlCommandResult).results
+			assertTrue(tr instanceof TestResult)
+			assertTrue((tr as TestResult).passed)
+			
 		];
 
 	}
