@@ -19,21 +19,21 @@ import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;
 
 public final class SadlErrorMessages {
 /**
-* unable to find {0}
-**/
-    public static final SadlErrorMessage UNABLE_TO_FIND = new SadlErrorMessage("unable_to_find");
-/**
 * Property ''{0}'' does not exist in the model.
 **/
     public static final SadlErrorMessage PROPERTY_NOT_EXIST = new SadlErrorMessage("property_not_exist");
 /**
-* Unidentified expression.
+* unable to find {0}
 **/
-    public static final SadlErrorMessage UNIDENTIFIED = new SadlErrorMessage("unidentified");
+    public static final SadlErrorMessage UNABLE_TO_FIND = new SadlErrorMessage("unable_to_find");
 /**
 * range of property {0} does not match domain of property {1}
 **/
     public static final SadlErrorMessage RANGE_OF_NOT_IN_DOMAIN_OF = new SadlErrorMessage("range_of_not_in_domain_of");
+/**
+* Unidentified expression.
+**/
+    public static final SadlErrorMessage UNIDENTIFIED = new SadlErrorMessage("unidentified");
 /**
 * Must select folder (not file) for running Batch ATPT
 **/
@@ -71,13 +71,13 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage ATPT_NO_XML_SELECTED = new SadlErrorMessage("atpt_no_xml_selected");
 /**
-* Cannot assign {0}: property ''{1}'' already has {0} assigned to ''{2}''.
-**/
-    public static final SadlErrorMessage CANNOT_ASSIGN_EXISTING = new SadlErrorMessage("cannot_assign_existing");
-/**
 * No single ctp file or batch ctp folder has been selected for processing
 **/
     public static final SadlErrorMessage ATPT_NO_FILE_OR_FOLDER_SELECTED = new SadlErrorMessage("atpt_no_file_or_folder_selected");
+/**
+* Cannot assign {0}: property ''{1}'' already has {0} assigned to ''{2}''.
+**/
+    public static final SadlErrorMessage CANNOT_ASSIGN_EXISTING = new SadlErrorMessage("cannot_assign_existing");
 /**
 * ERROR-ATPT: Cannot run batch mode using TED files. Update ATPT preferences
 **/
@@ -99,13 +99,13 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage PROPERTY_WITHOUT_RANGE = new SadlErrorMessage("property_without_range");
 /**
-* {0} is not defined so return type is unknown, can''t do type checking
-**/
-    public static final SadlErrorMessage RETURN_TYPE_WARNING = new SadlErrorMessage("return_type_warning");
-/**
 * Unexpected: Property has more than 2 restrictions.
 **/
     public static final SadlErrorMessage PROPERTY_RESTRICTIONS = new SadlErrorMessage("property_restrictions");
+/**
+* {0} is not defined so return type is unknown, can''t do type checking
+**/
+    public static final SadlErrorMessage RETURN_TYPE_WARNING = new SadlErrorMessage("return_type_warning");
 /**
 * Controlled variable must have a range of type Boolean or a range of exactly two instances in order to be used with an "Only When" clause.
 **/
@@ -119,13 +119,13 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage UNDEFINED = new SadlErrorMessage("undefined");
 /**
-* It is unusual to have a variable (''{0}'') rather than a defined property as rule predicate.
-**/
-    public static final SadlErrorMessage VARIABLE_INSTEAD_OF_PROP = new SadlErrorMessage("variable_instead_of_prop");
-/**
 * A(n) {0} cannot be converted to a(n) {1}.
 **/
     public static final SadlErrorMessage CANNOT_CONVERT = new SadlErrorMessage("cannot_convert");
+/**
+* It is unusual to have a variable (''{0}'') rather than a defined property as rule predicate.
+**/
+    public static final SadlErrorMessage VARIABLE_INSTEAD_OF_PROP = new SadlErrorMessage("variable_instead_of_prop");
 /**
 * This {0} is not an instance of a known type. It is: {1}
 **/
@@ -143,13 +143,13 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage INVALID_ARGUMENT_FOR_OPERATOR = new SadlErrorMessage("invalid_argument_for_operator");
 /**
-* ERROR-ATPT: No {0} selected.
-**/
-    public static final SadlErrorMessage ATPT_NO_SELECTION = new SadlErrorMessage("atpt_no_selection");
-/**
 * {0} could not be found, expected to be in ''{1}''.
 **/
     public static final SadlErrorMessage NOT_FOUND = new SadlErrorMessage("not_found");
+/**
+* ERROR-ATPT: No {0} selected.
+**/
+    public static final SadlErrorMessage ATPT_NO_SELECTION = new SadlErrorMessage("atpt_no_selection");
 /**
 * Translation exception in Test: {0}
 **/
@@ -183,13 +183,13 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage EXPECTED_A = new SadlErrorMessage("expected_a");
 /**
-* unable to add {0}: {1}
-**/
-    public static final SadlErrorMessage UNABLE_TO_ADD = new SadlErrorMessage("unable_to_add");
-/**
 * Unable to do domain-range matching on a(n) {0}
 **/
     public static final SadlErrorMessage DOMAIN_MATCHING = new SadlErrorMessage("domain_matching");
+/**
+* unable to add {0}: {1}
+**/
+    public static final SadlErrorMessage UNABLE_TO_ADD = new SadlErrorMessage("unable_to_add");
 /**
 * This range restriction may be inapplicable. Property {0} currently has range {1}
 **/
@@ -235,13 +235,13 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage RANGE_RESOLVE = new SadlErrorMessage("range_resolve");
 /**
-* A class name in this context should be preceded by an article, e.g., 'a', 'an', or 'the'.
-**/
-    public static final SadlErrorMessage NEEDS_ARTICLE = new SadlErrorMessage("needs_article");
-/**
 * ERROR-ATPT: Must select Common Test Procedure XML file for Single CTP File Mode
 **/
     public static final SadlErrorMessage ATPT_CTP_NOT_FOUND = new SadlErrorMessage("atpt_ctp_not_found");
+/**
+* A class name in this context should be preceded by an article, e.g., 'a', 'an', or 'the'.
+**/
+    public static final SadlErrorMessage NEEDS_ARTICLE = new SadlErrorMessage("needs_article");
 /**
 * {0} should not be null.
 **/
@@ -263,33 +263,33 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage INVALID_NAME = new SadlErrorMessage("invalid_name");
 /**
-* Comparison using {0} cannot have a constant or literal on both sides.
-**/
-    public static final SadlErrorMessage COMPARISON_LITERALS_CONSTANTS = new SadlErrorMessage("comparison_literals_constants");
-/**
 * Did not expect a property ({0}) as a triple pattern subject.
 **/
     public static final SadlErrorMessage UNEXPECTED_TRIPLE = new SadlErrorMessage("unexpected_triple");
 /**
-* Events cannot occur simultaneously. An event must occur one at a time. 
+* Comparison using {0} cannot have a constant or literal on both sides.
 **/
-    public static final SadlErrorMessage INVALID_CONJUNCTION = new SadlErrorMessage("invalid_conjunction");
+    public static final SadlErrorMessage COMPARISON_LITERALS_CONSTANTS = new SadlErrorMessage("comparison_literals_constants");
 /**
 * type checking doesn't handle {0}
 **/
     public static final SadlErrorMessage TYPE_CHECK_HANDLE_WARNING = new SadlErrorMessage("type_check_handle_warning");
 /**
+* Events cannot occur simultaneously. An event must occur one at a time. 
+**/
+    public static final SadlErrorMessage INVALID_CONJUNCTION = new SadlErrorMessage("invalid_conjunction");
+/**
 * Operating mode of ''{0}'' is unknown.
 **/
     public static final SadlErrorMessage UNKNOWN_OPERATING_MODE = new SadlErrorMessage("unknown_operating_mode");
 /**
-* Variable {0} is of type {1} which is not in domain of property {2}
-**/
-    public static final SadlErrorMessage VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY = new SadlErrorMessage("variable_not_in_domain_of_property");
-/**
 * 
 **/
     public static final SadlErrorMessage NULL_ONT_MODEL = new SadlErrorMessage("null_ont_model");
+/**
+* Variable {0} is of type {1} which is not in domain of property {2}
+**/
+    public static final SadlErrorMessage VARIABLE_NOT_IN_DOMAIN_OF_PROPERTY = new SadlErrorMessage("variable_not_in_domain_of_property");
 /**
 * The {0} type may not be compatible with downstream projects
 **/
@@ -307,13 +307,13 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage SUBJECT_NOT_IN_DOMAIN_OF_PROPERTY = new SadlErrorMessage("subject_not_in_domain_of_property");
 /**
-* {0} is not in domain of property {1}
-**/
-    public static final SadlErrorMessage PROPERTY_NOT_IN_DOMAIN = new SadlErrorMessage("property_not_in_domain");
-/**
 * A(n) {0} requires a {1} but it is missing.
 **/
     public static final SadlErrorMessage MISSING = new SadlErrorMessage("missing");
+/**
+* {0} is not in domain of property {1}
+**/
+    public static final SadlErrorMessage PROPERTY_NOT_IN_DOMAIN = new SadlErrorMessage("property_not_in_domain");
 /**
 * Import resolved to a null {0}
 **/
@@ -330,6 +330,10 @@ public final class SadlErrorMessages {
 * cannot create {0} from {1}
 **/
     public static final SadlErrorMessage CANNOT_CREATE = new SadlErrorMessage("cannot_create");
+/**
+* The domain of a property should be a class.
+**/
+    public static final SadlErrorMessage DOMAIN_NOT_CLASS = new SadlErrorMessage("domain_not_class");
 /**
 * There can only be one {0} in a {1}.
 **/

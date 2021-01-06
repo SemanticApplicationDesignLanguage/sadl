@@ -9543,8 +9543,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					OntConceptType domaintype;
 					try {
 						domaintype = sadlTypeReferenceOntConceptType(domain);
-						if (domaintype != null && domaintype.equals(OntConceptType.DATATYPE)) {
-							addWarning(SadlErrorMessages.DATATYPE_AS_DOMAIN.get(), domain);
+						if (domaintype != null) {
+							if (domaintype.equals(OntConceptType.DATATYPE)) {
+								addWarning(SadlErrorMessages.DATATYPE_AS_DOMAIN.get(), domain);
+							}
+							else if (!domaintype.equals(OntConceptType.CLASS) &&
+									!domaintype.equals(OntConceptType.CLASS_LIST) &&
+									propType != null &&
+									!propType.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+								addError(SadlErrorMessages.DOMAIN_NOT_CLASS.get(), domain);
+							}
 						}
 					} catch (CircularDefinitionException e) {
 						// TODO Auto-generated catch block
