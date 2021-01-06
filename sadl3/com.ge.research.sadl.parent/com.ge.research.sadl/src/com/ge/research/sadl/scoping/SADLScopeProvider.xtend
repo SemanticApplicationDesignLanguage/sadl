@@ -466,7 +466,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 				if (resourceInImportScope !== null) {
 					val nameWithPrefixes = getName(it, false);
 					if (name1.segmentCount > 1) {
-						if (name1 == nameWithPrefixes && name1.startsWith(namespace)) {
+						if (name1 == nameWithPrefixes && (namespace === null || name1.startsWith(namespace))) {
 							ambiguousProblem = checkDuplicate(resourceInParentScope,
 								EObjectDescription.create(name1, it), ambiguousNameDetection);
 							if (ambiguousProblem !== null) {
