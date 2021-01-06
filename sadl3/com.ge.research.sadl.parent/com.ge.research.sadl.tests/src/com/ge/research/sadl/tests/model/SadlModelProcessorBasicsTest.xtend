@@ -774,7 +774,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  	
  	@Test
  	def void testCommentNotInNamespace() {
- 				val sadlModel1 = '''
+ 		val sadlModel1 = '''
 			 uri "http://sadl.org/model1.sadl" alias model1.
 			 
 			Rock is a class.
@@ -1234,4 +1234,25 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		]
 	}
 
+ 	@Test
+ 	def void testGH_430() {
+ 		val sadlModel1 = '''
+			 uri "http://sadl.org/base.sadl".
+			 Base is a class.
+ 		'''.sadl
+		val sadlModel2 = '''
+			 uri "http://sadl.org/sub.sadl".
+			 import "http://sadl.org/base.sadl" as base.
+			 
+			 MySub is a Base.
+			 MySub is a base:Base.
+			 base:Base is a class.
+ 		'''.sadl
+ 		val issues1 = _validationTestHelper.validate(sadlModel1)
+		val issues2 = _validationTestHelper.validate(sadlModel2)
+ 		assertTrue(issues1.empty)
+ 		assertFalse(issues2.empty)
+ 		assertTrue(issues2.toString.contains("Declaration of concepts in another namespace not supported"))
+ 	
+ 	}
 }
