@@ -1217,6 +1217,23 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			assertTrue((ask1 as Query).toString.equals("rdf(George, rdf:type, Genius)"))
 		]
 	}
+	
+	@Test
+	def void testGH597() {
+		val model = '''
+			 uri "http://sadl.org/GH-597.sadl" alias GH-597.
+			 
+			 Class1 is a class.
+			 Class2 is a class.
+			 Class3 is a class.
+			 prop1 describes Class1 with values of type Class2.
+			 prop2 describes prop1 with values of type Class3.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(issues)
+			assertTrue(issues.size == 1)
+			assertTrue(issues.get(0).message.equals("The domain of a property should be a class."))
+		]
+	}
 		
 	@Test
 	def void testSameAsDefinition() {
