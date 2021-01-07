@@ -41,6 +41,7 @@ import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContext
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
+import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
 
 /**
  * Provides filter for removing items from the content proposal.
@@ -85,6 +86,11 @@ class ProposalProviderFilterProvider {
 			return [
 				if (SADL_RESOURCE == EClass) {
 					ontologyHelper.validate(ontologyContext, EObjectOrProxy as SadlResource);
+					if (processor instanceof JenaBasedSadlModelProcessor &&
+						(processor as JenaBasedSadlModelProcessor).isTypeCheckingErrorDetected) {
+							((processor as JenaBasedSadlModelProcessor).clearTypeCheckingErrorDetected());
+							return false;
+					}
 					return acceptor.apply(it);
 				}
 				return false;

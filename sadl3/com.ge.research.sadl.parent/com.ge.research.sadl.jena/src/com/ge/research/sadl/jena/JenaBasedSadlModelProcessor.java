@@ -365,6 +365,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private boolean lookingForFirstProperty = false; // in rules and other constructs, the first property may be
 														// significant (the binding, for example)
+	private boolean typeCheckingErrorDetected = false;
 
 	protected List<String> importsInOrderOfAppearance = null; // an ordered set of import URIs, ordered by appearance in
 																// file.
@@ -3979,6 +3980,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else {
 			issueAcceptor.addError(message, expr);
 		}
+		this.setTypeCheckingErrorDetected(true);
 	}
 
 	/**
@@ -15428,5 +15430,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private void setEnableMetricsCollection(boolean enableMetricsCollection) {
 		this.enableMetricsCollection = enableMetricsCollection;
+	}
+
+	public void clearTypeCheckingErrorDetected() {
+		setTypeCheckingErrorDetected(false);
+	}
+
+	public boolean isTypeCheckingErrorDetected() {
+		return typeCheckingErrorDetected;
+	}
+
+	protected void setTypeCheckingErrorDetected(boolean typeCheckingErrorDetected) {
+		this.typeCheckingErrorDetected = typeCheckingErrorDetected;
 	}
 }
