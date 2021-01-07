@@ -334,4 +334,21 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposalIsNot('Shape');
 	}
 
+	@Test
+	def void checkCA_PofS() {
+		// https://github.com/crapo/sadlos2/issues/407
+		val key = new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString);
+		updatePreference(key);
+		
+		val builder = newBuilder('''
+			uri "http://sadl.org/x.sadl".
+			Shape is a class described by area with values of type float.
+			Rectangle is a type of Shape, described by height with values of type float, described by width with values of type float.
+			Circle is a type of Shape described by radius with values of type float.
+			Test: width of 
+		''');
+		builder.assertProposal('Rectangle');
+		builder.assertProposalIsNot('Circle');
+	}
+
 }
