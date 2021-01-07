@@ -2,7 +2,7 @@ uri "http://sadl.org/tabimport/blanks" alias blks.
 
 import "http://sadl.org/TransBlank.sadl".
 
-transform <A> to <Ap> replace " ":_ .
+transform <A> to <Ap> replace " ":"_" .
 transform <B> to <cond> replace "1" : true,"" : false .
 
 <Ap> is a Thingy.

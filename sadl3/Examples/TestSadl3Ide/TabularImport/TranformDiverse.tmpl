@@ -1,0 +1,18 @@
+uri "http://sadl.org/tabimport/blanks" alias blks.
+
+import "http://sadl.org/TransBlank.sadl".
+
+transform <A> to <Ap> replace " ":"_" .
+transform <B> to <cond> replace "1" : true,"" : false .
+transform <in> to <out> replace " ":"_","\t":"_t_".
+transform <in> to <out> replace " " :  "_"   , "\t" : "_t_".
+transform <in> to <out> replace "[^a-zA-Z0-9]":"_".
+transform <in> to <out> replace " ":"_","#":"No","&":"_And_".
+transform <in> to <out> replace "'"":"_quote_".
+transform <in> to <out> replace "''":"_singlequote_".
+transform <in> to <out> replace ":":"_colon_".
+transform <in> to <out> replace ",":"_comma_".
+transform <in> to <out> replace "'"":"_quote_","''":"_singlequote_",":":"_colon_",",":"_comma_".
+
+<Ap> is a Thingy.
+<Ap> bdprop <cond>.

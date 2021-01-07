@@ -2,51 +2,86 @@
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:j.0="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#">
   <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >srpns</j.0:prefix>
+    <j.0:sadlSourceURL>platform:/resource/Shapes/Shapes.sadl</j.0:sadlSourceURL>
+    <j.0:prefix>shape</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin/src/test/resources/DataModels/Shapes/OwlModels/Shapes.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Shapes/Shapes"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadllistmodel"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin/src/test/resources/DataModels/Shapes/OwlModels/SadlListModel.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix>sadllistmodel</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix>srpns</j.0:prefix>
     <j.0:createdBy>Rule Pattern Capture</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
     <j.0:altURL rdf:resource="file:/E:/sadl/workspace-sadl/Shapes/OwlModels/RulePatterns.owl"/>
     <j.0:publicURI rdf:resource="http://sadl.org/rule/patterns"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >rect</j.0:prefix>
+    <j.0:sadlSourceURL>platform:/resource/Shapes/Rule.sadl</j.0:sadlSourceURL>
+    <j.0:prefix>rule</j.0:prefix>
     <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/E:/sadl/workspace-sadl/Shapes/OwlModels/Rectangle.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Shapes/Rectangle"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin/src/test/resources/DataModels/Shapes/OwlModels/Rule.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Shapes/Rule"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >test</j.0:prefix>
+    <j.0:prefix>defs</j.0:prefix>
     <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/E:/sadl/workspace-sadl/Shapes/OwlModels/Test.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Shapes/Test"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin/src/test/resources/DataModels/Shapes/OwlModels/defaults.owl"/>
+    <j.0:publicURI rdf:resource="http://research.ge.com/Acuity/defaults.owl"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >srpdns</j.0:prefix>
+    <j.0:prefix>srpdns</j.0:prefix>
     <j.0:createdBy>Rule Pattern Capture</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
     <j.0:altURL rdf:resource="file:/E:/sadl/workspace-sadl/Shapes/OwlModels/RulePatternData.owl"/>
     <j.0:publicURI rdf:resource="http://sadl.org/rule/patterns/data"/>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >shape</j.0:prefix>
-    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadlbasemodel"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin/src/test/resources/DataModels/Shapes/OwlModels/SadlBaseModel.owl"/>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/E:/sadl/workspace-sadl/Shapes/OwlModels/Shapes.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Shapes/Shapes"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix>sadlbasemodel</j.0:prefix>
   </j.0:OntologySpec>
   <j.0:OntologySpec>
-    <j.0:prefix rdf:datatype="http://www.w3.org/2001/XMLSchema#string"
-    >rule</j.0:prefix>
+    <j.0:prefix>rect</j.0:prefix>
     <j.0:createdBy>SADL</j.0:createdBy>
     <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
-    <j.0:altURL rdf:resource="file:/E:/sadl/workspace-sadl/Shapes/OwlModels/Rule.owl"/>
-    <j.0:publicURI rdf:resource="http://sadl.org/Shapes/Rule"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin/src/test/resources/DataModels/Shapes/OwlModels/Rectangle.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Shapes/Rectangle"/>
+    <j.0:sadlSourceURL>platform:/resource/Shapes/Rectangle.sadl</j.0:sadlSourceURL>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadlimplicitmodel"/>
+    <j.0:prefix>sadlimplicitmodel</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin/src/test/resources/DataModels/Shapes/OwlModels/SadlImplicitModel.owl"/>
+    <j.0:sadlSourceURL>platform:/resource/Shapes/ImplicitModel/SadlImplicitModel.sadl</j.0:sadlSourceURL>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Shapes/ImplicitModel/SadlBuiltinFunctions.sadl</j.0:sadlSourceURL>
+    <j.0:prefix>builtinfunctions</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin/src/test/resources/DataModels/Shapes/OwlModels/SadlBuiltinFunctions.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/builtinfunctions"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix>test</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/git/sadlos2/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.swi-prolog-plugin/src/test/resources/DataModels/Shapes/OwlModels/Test.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Shapes/Test"/>
+    <j.0:sadlSourceURL>platform:/resource/Shapes/Test.sadl</j.0:sadlSourceURL>
   </j.0:OntologySpec>
 </rdf:RDF>

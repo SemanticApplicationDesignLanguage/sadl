@@ -1,0 +1,8 @@
+ uri "http://sadl.org/GH-597.sadl" alias GH-597.
+ 
+ Class1 is a class.
+ Class2 is a class.
+ Class3 is a class.
+ prop1 describes Class1 with values of type Class2.
+ prop2 describes prop1 with values of type Class3.
+   

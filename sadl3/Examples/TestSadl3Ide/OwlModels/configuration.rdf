@@ -96,6 +96,12 @@
             <class>com.ge.research.sadl.jena.reasoner.builtin.ThereExists</class>
           </Builtin>
         </rdf:li>
+        <rdf:li>
+          <Builtin>
+            <name>countMatches</name>
+            <class>com.ge.research.sadl.jena.reasoner.builtin.CountMatches</class>
+          </Builtin>
+        </rdf:li>
       </rdf:Bag>
     </subcategory>
   </Category>
@@ -116,6 +122,13 @@
     <pTransitiveClosureCaching rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
     >false</pTransitiveClosureCaching>
     <translatorClassName>com.ge.research.sadl.jena.translator.JenaTranslatorPlugin</translatorClassName>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#SWI-Prolog-Reasoner">
+    <translatorClassName>com.ge.research.sadl.swi_prolog.translator.SWIPrologTranslatorPlugin</translatorClassName>
+    <plHost>http://localhost</plHost>
+    <plImport></plImport>
+    <plArgs></plArgs>
+    <plPort>5000</plPort>
   </Category>
   <Category rdf:about="http://com.ge.research.sadl.configuration#Builtin"/>
 </rdf:RDF>

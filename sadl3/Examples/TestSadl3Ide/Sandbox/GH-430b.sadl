@@ -1,0 +1,7 @@
+ uri "http://sadl.org/sub.sadl".
+ import "http://sadl.org/base.sadl" as base.
+ 
+ MySub is a Base.
+ MySub is a base:Base.
+ base:Base is a class.
+ 

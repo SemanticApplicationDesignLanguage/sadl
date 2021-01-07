@@ -1,0 +1,5 @@
+uri "http://sadl.org/x.sadl".
+Shape is a class described by area with values of type float.
+Rectangle is a type of Shape, described by height with values of type float, described by width with values of type float.
+Circle is a type of Shape described by radius with values of type float.
+Test: width of  // <|> // <-- I can see `Rectangle` here

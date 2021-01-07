@@ -1,0 +1,6 @@
+ uri "http://sadl.org/Diverse2.sadl" alias Diverse2.
+ 
+ Subject is a class described by dp with values of type decimal .
+ 
+ MySubject is a Subject with dp 3.2e3.
+ 

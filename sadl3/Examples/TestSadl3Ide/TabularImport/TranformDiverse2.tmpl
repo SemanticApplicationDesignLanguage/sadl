@@ -1,0 +1,53 @@
+uri "http://sadl.org/tabimport/blanks" alias blks.
+
+import "http://sadl.org/TransBlank.sadl" as tb.
+
+//incremental.
+
+incremental /*why not */.
+// comment
+infer chunk 10 parallel 12.
+/* comment */
+log "/home/some/path/somefile.log".
+
+validate all exists.
+validate <A> exists. 
+validate <Aprime[1]> exists. 
+
+transform <A> to <Ap> replace " ":"_" .
+transform <B> to <cond> replace "1" : true,"" : false .
+transform <in> to <out> replace " ":"_","\t":"_t_".
+transform <in> to <out> replace " " :  "_"   , "\t" : "_t_".
+transform <in> to <out> replace "[^a-zA-Z0-9]":"_".
+transform <in> to <out> replace " ":"_","#":"No","&":"_And_".
+transform <in> to <out> replace "'"":"_quote_". 
+//transform <in> to <out> replace "''":"_singlequote_".
+transform <in> to <out> replace ":":"_colon_".
+transform <in> to <out> replace ",":"_comma_".
+//transform <in> to <out> replace "'"":"_quote_","''":"_singlequote_",":":"_colon_",",":"_comma_".
+
+Literal: 3.
+Literal: -3.
+Literal: 3.4.
+Literal: -3.4.
+Literal: 3.4e23.
+Literal: -2.3e-3.
+
+<Ap> is a Thingy. 
+<Ap> is a Thingy2.
+Pref<Ap> has dprop 34. 
+{
+	Pref<Ap> has dprop -34.
+	Pref<Ap> has dprop 34e23. 
+	Pref<Ap> has dprop 34.5 . 
+}
+Pref<Ap> has dprop -34.5.
+<Ap> bdprop <cond> .
+
+Ref: <cond>.
+Ref: Prefix<Ap>.
+Ref: <Ap>suffix.
+Ref: bdprop.
+Ref: <Aprime[i]>.
+Ref: Prefix<Aprime[i]>.
+
