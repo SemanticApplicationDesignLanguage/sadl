@@ -1448,4 +1448,22 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 
+	@Test
+	def void testGH437() {
+		'''
+		uri "https://github.com/crapo/sadlos2/issues/437".
+		AnatomicalPart is a class.
+		Hand is a type of AnatomicalPart.
+		Digit is a type of AnatomicalPart.
+		{Finger, Thumb} are types of Digit.
+		
+		The relationship of Hand to Digit is [digit].
+		// digit describes Hand with values of type Digit.
+		
+		<digit> of Hand has exactly 5 values.
+		
+		digit of Hand has exactly 4 values of type Finger.
+		digit of Hand has exactly 1 value of type Thumb.
+		'''.assertLinking[sadl]
+	}
 }
