@@ -9031,6 +9031,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if (getDeclarationExtensions().getOntConceptType(decl).equals(OntConceptType.STRUCTURE_NAME)) {
 							addError("This is already a Named Structure", sr);
 						}
+						if (!getDeclarationExtensions().getConceptNamespace(sr).equals(getModelNamespace())) {
+							addError("Declaration of concepts in another namespace not supported", sr);
+						}
 					} catch (CircularDefinitionException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
