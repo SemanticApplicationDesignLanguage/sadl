@@ -1,226 +1,271 @@
 <html>
-
-<head>
-<meta http-equiv="Content-Language" content="en-us">
-<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
-<meta name="ProgId" content="FrontPage.Editor.Document">
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-<title>Instructions for Building a SADL 3 Development Environment</title>
-</head>
-
-<body>
-
-<h1>SADL Version 3 Build Instructions</h1>
-
-<h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/08/2020<!--webbot bot="Timestamp" endspan i-checksum="12607" -->.</h5>
-<h2>Introduction</h2>
-<p>
-<span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">
-This document provides step-by-step instructions for creating an Eclipse Plug-in 
-Development Environment for the SADL grammar and IDE. It includes two different ways of installing Eclipse, followed by steps 
-to be taken after installing Eclipse, regardless of which method of installation 
-was followed. These instructions are for setting up a development environment on 
-a local machine. This development environment can then be used to generate new SADL updates, to make modifications/extensions to the SADL code, or to create 
-new Eclipse plug-ins to create extensions to the SADL grammar/IDE.</span></p>
-<h2>
-<span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'; color: #24292E; letter-spacing: normal; background-color: #FFFFFF">
-Setup Steps</span></h2>
-<ol>
-  <li>Create a folder in the local file system under which the source code and 
-  Eclipse workspace will be located. (For example, on MS Windows this might be 
-  &quot;c:\sadl&quot;.) This folder will be referred to as DEV-HOME.</li>
-  <li>Create a folder under DEV-HOME named &quot;git&quot;.</li>
-  <li>Clone the SADL github repository under DEV-HOME/git.<ul>
-    <li>Using the Git Bash client, change directory so that the DEV-HOME/git is 
-    the current directory</li>
-    <li>Go to SADL project on github.com:&nbsp;<a href="https://github.com/crapo/sadlos2/">https://github.com/SemanticApplicationDesignLanguage/sadl</a> </li>
-    <li>Copy the URL for cloning by clicking on the button &quot;Clone or download&quot;</li>
-    <li>Using the Git Bash client, type &quot;git clone &quot; and then paste in the URL 
-    copied in the previous step<ul>
-    <li>Note: if you are behind a firewall it may be necessary to set proxies 
-    with a command like &quot;export https_proxy=http://...:80&quot;.</li>
-  </ul>
-    </li>
-  </ul>
-  </li>
-  <li>Download and install (if not already present) the Java 9 or later <u><b>
-  JDK</b></u> (see&nbsp;<a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html" rel="nofollow" style="box-sizing: border-box; background-color: initial">https://www.oracle.com/technetwork/java/javase/downloads/index.html</a> 
-  or <a href="https://adoptopenjdk.net/">https://adoptopenjdk.net/</a>).<ul>
-    <li>Note that if you are behind a firewall and your organization is using a 
-    private certificate authority, you may need to replace your Java security 
-    cacerts file (see
-    <a href="https://docs.microfocus.com/SM/9.60/Codeless/Content/security/tasks/update_the_cacerts_keystore_file.htm">
-    https://docs.microfocus.com/SM/9.60/Codeless/Content/security/tasks/update_the_cacerts_keystore_file.htm</a>)</li>
-  </ul>
-  </li>
-  <li>Install Maven so that builds can be run from the command line<ul>
-    <li>Download and install Maven 3.5 or later from
-    <span style="font-family: Times New Roman; font-size: 12pt">
-    <a href="http://maven.apache.org/download.html">
-    http://maven.apache.org/download.html</a>.</span></li>
-    <li><span style="font-family: Times New Roman">Configure proxies if 
-    necessary by editing .../.m2/settings.xml under your user folder</span></li>
-    <li><span style="font-family: Times New Roman">Make sure Maven is on the 
-    classpath. Check in a cmd window with &quot;mvn -version&quot;.</span></li>
-  </ul>
-  </li>
-  <li>Install Eclipse 2020-03 by <b>one</b> of the methods below.<ul>
-    <li>Method 1: Install Eclipse by Direct Download<ul>
-      <li>Download and install &quot;Eclipse IDE for Java and DSL Developers&quot; (see&nbsp;<a href="https://www.eclipse.org/downloads/packages/" rel="nofollow" style="box-sizing: border-box; background-color: initial; color: rgb(3, 102, 214); text-decoration: none;">https://www.eclipse.org/downloads/packages/</a>). 
-      Eclipse 2020-03 is the latest version supported at this time due to 
-      changes in the Xtext API..</li>
-    </ul>
-    </li>
-    <li>Method 2: Install Eclipse Using the Eclipse Installer<ul>
-      <li>Download the Eclipse Installer</li>
-      <li>Change to Advanced Mode</li>
-      <li>Configure proxies if behind a firewall (mouse over icons on lower left 
-  corner until the one for Network Proxies settings is found)</li>
-      <li>Select Eclipse DSL Tools as Platform</li>
-      <li>Select 2020-03 or later as version</li>
-      <li>Finish</li>
-    </ul>
-    </li>
-  </ul>
-  </li>
-  <li>Start and configure Eclipse<ul>
-    <li>Start Eclipse (on Windows, run Eclipse.exe in the &quot;eclipse&quot; folder under 
-    your installation folder)</li>
-    <li>Switch your workspace to DEV-HOME/ws (or whatever you wish to name your 
-    workspace), File -&gt; Switch Workspace -&gt; Other..., 
-  then Browse to and create folder &quot;ws&quot; (or whatever you chose) under 
-    DEV-HOME)</li>
-    <li>Configure proxies if necessary if behind a firewall (Preferences -&gt; General -&gt; Network 
-  Connections)</li>
-  <li>Make the Java JDK installed above the default JRE (Window -&gt; Preferences 
-  -&gt; Java -&gt; Installed JREs -&gt; Add, then browse to the folder where the Java JDK 
-  is installed, select. Once added, check to make default.)</li>
-  </ul>
-  </li>
-</ol>
-<h2>Build the Projects</h2>
-<ol>
-  <li>In a command line window, change directory to the this folder in local 
-  SADLsource code repository, the SADL parent project:.../git/sadl/sadl3/com.ge.research.sadl.parent</li>
-  <li>Do a clean by typing the commend &quot;mvn clean&quot;. Let it finish and verify 
-  that there are no errors.</li>
-  <li>Do a build by typing the command &quot;mvn install -U&quot;. Let it finish and 
-  verify that there are no errors.</li>
-</ol>
-<h2>Import Maven Projects into Eclipse</h2>
-<ol>
-  <li>Start Eclipse if not already running</li>
-  <li>Import as Maven projects  
-  (File -&gt; Import... -&gt; Maven -&gt; Existing Maven Projects):<ul>
-    <li>Browse to .../git/sadl/sadl3/com.ge.research.sadl.parent, select the 
-    folder.</li>
-    <li>Select the parent project and all projects under it, then click Finish</li>
-    <li>You should get a modal dialog during the course of the import that is 
-    something like this:<ul>
-    <li><img border="0" src="images/Sadl3B1.jpg" width="512" height="535"></li>
-    <li>There should be no errors in this dialog box. </li>
-    <li>If there are errors they must be resolved before you continue.<ul>
-    <li>If the Maven plug-in connectors are not found, it may be due to a 
-    connectivity issue</li>
-    <li>To check connectivity, you can click on Help -&gt; Eclipse Marketplace... 
-    The Marketplace dialog should populate with information from the Internet</li>
-    <li>One potential problem that may occur behind a firewall has to do with 
-    the Java &quot;cacerts&quot; files. You may need files that are created for your 
-    organization. If so, be sure to replace the cacerts files for both the JRE 
-    that Eclipse starts up with and the JDK specified in Eclipse preferences. 
-    This error is accompanied with a message referencing &quot;PKIX&quot;.</li>
-  </ul>
-    </li>
-    <li>Click Finish</li>
-  </ul>
-    </li>
-    <li>You may be prompted to install Tycho Project Configurators:<ul>
-    <li><img border="0" src="images/Sadl3B2.jpg" width="867" height="523"></li>
-    <li>Leave the item checked and click Next until you can accept the license 
-    and click Finish.</li>
-  </ul>
-    </li>
-    <li>The content is unsigned so to install you must  click &quot;Install anyway&quot;<ul>
-    <li><img border="0" src="images/Sadl3B3.jpg" width="533" height="147"></li>
-  </ul>
-    </li>
-    <li>Restart Eclipse to apply software updates<ul>
-    <li><img border="0" src="images/Sadl3B4.jpg" width="516" height="138"></li>
-  </ul>
-    </li>
-  </ul>
-  </li>
-  <li>Select all imported projects in the Package Explorer window and do a Maven 
-  Project Update (right-click on the selected projects, select Maven -&gt; Update 
-  Project...)</li>
-  <li>Set the target platform to com.ge.research.sadl.target and let all builds 
-  resulting from the change complete<ul>
-    <li>Window -&gt; Preferences -&gt; Plug-in Development -&gt; Target Platform, check &quot;com.ge.research.sadl.target 
-    (if two appear chose the one in the target, not parent, project), then click &quot;Apply and Close&quot;</li>
-  </ul>
-  or<ul>
-    <li>Open the file &quot;com.ge.research.sadl.target&quot; in the project &quot;com.ge.research.sadl.target&quot;, 
-    click on &quot;Load Target Platform&quot; or &quot;Set as Active Target Platform&quot; in the upper-right corner.</li>
-  </ul>
-  </li>
-  <li>If there are any errors remaining, do a clean/build:<ul>
-    <li>Make sure that Build Automatically... is checked (on the toolbar's Project 
-  dropdown menu, &quot;Build Automatically should be checked; if not check it)</li>
-    <li>With all projects selected, clean and build all projects (Project -&gt; 
-  Clean...)</li>
-  </ul>
-  </li>
-</ol>
-<h2>Validating the Build Environment</h2>
-<p>At this point there should be no errors in any of the projects. </p>
-<ol>
-  <li>Right-click on the com.ge.research.sadl project and select Run As -&gt; 
-  Eclipse Application. or Debug As -&gt; Eclipse Application. Note that you may 
-  need to select Run Configurations... to get to Eclipse Application.<ul>
-    <li>If you wish to create a configuration to customize<ul>
-      <li>Do Run As -&gt; Run Configurations... or Debug As -&gt; Debug Configurations</li>
-      <li>Create a new configuration under Eclipse Application</li>
-      <li>Click on Run or Debug.</li>
-    </ul>
-    </li>
-  </ul>
-  </li>
-  <li>A new instance of Eclipse should start with the SADL plug-ins installed.<ul>
-    <li>To verify, create a new project (File -&gt; New -&gt; Project... -&gt; General -&gt; 
-    Project, no spaces allowed in names) and create a file in the project (File 
-    -&gt; New -&gt; File) with a name ending in &quot;.sadl&quot;, e.g., &quot;test.sadl&quot; (again, no 
-    spaces in name).
-    <ul>
-      <li dir="ltr">
-      <p dir="ltr">Content assist (normally control-space, see Window -&gt; 
-      Preferences -&gt; General -&gt; Keys) at the beginning of the new file should 
-      cause &quot;uri&quot; to be inserted.</li>
-      <li>Additional content assist requests should complete a first line. Note 
-      that sometimes a space must be added after an entry before content assist 
-      will give suggestions for the next word.</li>
-      <li>You might end up with something like this:<font SIZE="2"><p ALIGN="LEFT">
-      </font><font SIZE="2" COLOR="#800080">uri</font><font SIZE="2"> &quot;http://sadl.org/test.sadl&quot;
-      </font><font SIZE="2" COLOR="#800080">alias</font><font SIZE="2"> <b>test</b>.</font></p>
-      <p ALIGN="LEFT"><font SIZE="2" COLOR="#000080"><b>Test</b></font><font SIZE="2">
-      </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> </font>
-      <font SIZE="2" COLOR="#800080">a</font><font SIZE="2"> </font>
-      <font SIZE="2" COLOR="#800080">class</font><font SIZE="2"> </font>
-      <font SIZE="2" COLOR="#800080">described</font><font SIZE="2"> </font>
-      <font SIZE="2" COLOR="#800080">by</font><font SIZE="2"> </font>
-      <font SIZE="2" COLOR="#008000"><b>pass</b></font><font SIZE="2"> </font>
-      <font SIZE="2" COLOR="#800080">with</font><font SIZE="2"> </font>
-      <font SIZE="2" COLOR="#800080">values</font><font SIZE="2"> </font>
-      <font SIZE="2" COLOR="#800080">of</font><font SIZE="2"> </font>
-      <font SIZE="2" COLOR="#800080">type</font><font SIZE="2"> </font>
-      <font SIZE="2" COLOR="#800080">boolean</font><font SIZE="2">.</li>
-    </ul>
-    </font>
-    <p>&nbsp;</li>
-  </ul>
-  </li>
-</ol>
-
-</body>
-
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+    <meta name="ProgId" content="FrontPage.Editor.Document">
+    <title>Instructions for Building a SADL 3 Development Environment</title>
+  </head>
+  <body>
+    <h1>SADL Version 3 Build Instructions</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/08/2020<!--webbot bot="Timestamp" endspan i-checksum="12607" -->.</h5>
+    <h2>Introduction</h2>
+    <p>
+      <span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">
+        This document provides step-by-step instructions for creating an Eclipse
+        Plug-in Development Environment for the SADL grammar and IDE. It
+        includes two different ways of installing Eclipse, followed by steps to
+        be taken after installing Eclipse, regardless of which method of
+        installation was followed. These instructions are for setting up a
+        development environment on a local machine. This development environment
+        can then be used to generate new SADL updates, to make
+        modifications/extensions to the SADL code, or to create new Eclipse
+        plug-ins to create extensions to the SADL grammar/IDE.</span></p>
+    <h2>
+      <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'; color: #24292E; letter-spacing: normal; background-color: #FFFFFF">
+        Setup Steps</span></h2>
+    <ol>
+      <li>Create a folder in the local file system under which the source code
+        and Eclipse workspace will be located. (For example, on MS Windows this
+        might be "c:\sadl".) This folder will be referred to as DEV-HOME.</li>
+      <li>Create a folder under DEV-HOME named "git".</li>
+      <li>Clone the SADL github repository under DEV-HOME/git.
+        <ul>
+          <li>Using the Git Bash client, change directory so that the
+            DEV-HOME/git is the current directory</li>
+          <li>Go to SADL project on github.com:&nbsp;<a href="https://github.com/crapo/sadlos2/">https://github.com/SemanticApplicationDesignLanguage/sadl</a>
+          </li>
+          <li>Copy the URL for cloning by clicking on the button "Clone or
+            download"</li>
+          <li>Using the Git Bash client, type "git clone " and then paste in the
+            URL copied in the previous step
+            <ul>
+              <li>Note: if you are behind a firewall it may be necessary to set
+                proxies with a command like "export https_proxy=http://...:80".</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>Download and install (if not already present) the Java 9 or later <u><b>
+            JDK</b></u> (see&nbsp;<a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html"
+          rel="nofollow" style="box-sizing: border-box; background-color: initial">https://www.oracle.com/technetwork/java/javase/downloads/index.html</a>
+        or <a href="https://adoptopenjdk.net/">https://adoptopenjdk.net/</a>).
+        <ul>
+          <li>Note that if you are behind a firewall and your organization is
+            using a private certificate authority, you may need to replace your
+            Java security cacerts file (see <a href="https://docs.microfocus.com/SM/9.60/Codeless/Content/security/tasks/update_the_cacerts_keystore_file.htm">
+https://docs.microfocus.com/SM/9.60/Codeless/Content/security/tasks/update_the_cacerts_keystore_file.htm</a>)</li>
+        </ul>
+      </li>
+      <li>Install Maven so that builds can be run from the command line
+        <ul>
+          <li>Download and install Maven 3.5 or later from <span style="font-family: Times New Roman; font-size: 12pt">
+              <a href="http://maven.apache.org/download.html">
+                http://maven.apache.org/download.html</a>.</span></li>
+          <li><span style="font-family: Times New Roman">Configure proxies if
+              necessary by editing .../.m2/settings.xml under your user folder</span></li>
+          <li><span style="font-family: Times New Roman">Make sure Maven is on
+              the classpath. Check in a cmd window with "mvn -version".</span></li>
+        </ul>
+      </li>
+      <li>Install Eclipse 2020-03 by <b>one</b> of the methods below.
+        <ul>
+          <li>Method 1: Install Eclipse by Direct Download
+            <ul>
+              <li>Download and install "Eclipse IDE for Java and DSL Developers"
+                (see&nbsp;<a href="https://www.eclipse.org/downloads/packages/"
+                  rel="nofollow" style="box-sizing: border-box; background-color: initial; color: rgb(3, 102, 214); text-decoration: none;">https://www.eclipse.org/downloads/packages/</a>).
+                Eclipse 2020-03 is the latest version supported at this time due
+                to changes in the Xtext API..</li>
+            </ul>
+          </li>
+          <li>Method 2: Install Eclipse Using the Eclipse Installer
+            <ul>
+              <li>Download the Eclipse Installer</li>
+              <li>Change to Advanced Mode</li>
+              <li>Configure proxies if behind a firewall (mouse over icons on
+                lower left corner until the one for Network Proxies settings is
+                found)</li>
+              <li>Select Eclipse DSL Tools as Platform</li>
+              <li>Select 2020-03 or later as version</li>
+              <li>Finish</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>Start and configure Eclipse
+        <ul>
+          <li>Start Eclipse (on Windows, run Eclipse.exe in the "eclipse" folder
+            under your installation folder)</li>
+          <li>Switch your workspace to DEV-HOME/ws (or whatever you wish to name
+            your workspace), File -&gt; Switch Workspace -&gt; Other..., then
+            Browse to and create folder "ws" (or whatever you chose) under
+            DEV-HOME)</li>
+          <li>Configure proxies if necessary if behind a firewall (Preferences
+            -&gt; General -&gt; Network Connections)</li>
+          <li>Make the Java JDK installed above the default JRE (Window -&gt;
+            Preferences -&gt; Java -&gt; Installed JREs -&gt; Add, then browse
+            to the folder where the Java JDK is installed, select. Once added,
+            check to make default.)</li>
+        </ul>
+      </li>
+    </ol>
+    <h2>Build the Projects</h2>
+    <ol>
+      <li>In a command line window, change directory to the this folder in local
+        SADLsource code repository, the SADL parent
+        project:.../git/sadl/sadl3/com.ge.research.sadl.parent</li>
+      <li>Do a clean by typing the commend "mvn clean". Let it finish and verify
+        that there are no errors.</li>
+      <li>Do a build by typing the command "mvn install -U". Let it finish and
+        verify that there are no errors.</li>
+    </ol>
+    <h2>Import Maven Projects into Eclipse</h2>
+    <ol>
+      <li>Start Eclipse if not already running</li>
+      <li>Import as Maven projects (File -&gt; Import... -&gt; Maven -&gt;
+        Existing Maven Projects):
+        <ul>
+          <li>Browse to .../git/sadl/sadl3/com.ge.research.sadl.parent, select
+            the folder.</li>
+          <li>Select the parent project and all projects under it, then click
+            Finish</li>
+          <li>You should get a modal dialog during the course of the import that
+            is something like this:
+            <ul>
+              <li><img src="images/Sadl3B1.jpg" height="535" border="0" width="512"></li>
+              <li>There should be no errors in this dialog box. </li>
+              <li>If there are errors they must be resolved before you continue.
+                <ul>
+                  <li>If the Maven plug-in connectors are not found, it may be
+                    due to a connectivity issue</li>
+                  <li>To check connectivity, you can click on Help -&gt; Eclipse
+                    Marketplace... The Marketplace dialog should populate with
+                    information from the Internet</li>
+                  <li>One potential problem that may occur behind a firewall has
+                    to do with the Java "cacerts" files. You may need files that
+                    are created for your organization. If so, be sure to replace
+                    the cacerts files for both the JRE that Eclipse starts up
+                    with and the JDK specified in Eclipse preferences. This
+                    error is accompanied with a message referencing "PKIX".</li>
+                </ul>
+              </li>
+              <li>Click Finish</li>
+            </ul>
+          </li>
+          <li>You may be prompted to install Tycho Project Configurators:
+            <ul>
+              <li><img src="images/Sadl3B2.jpg" height="523" border="0" width="867"></li>
+              <li>Leave the item checked and click Next until you can accept the
+                license and click Finish.</li>
+            </ul>
+          </li>
+          <li>The content is unsigned so to install you must click "Install
+            anyway"
+            <ul>
+              <li><img src="images/Sadl3B3.jpg" height="147" border="0" width="533"></li>
+            </ul>
+          </li>
+          <li>Restart Eclipse to apply software updates
+            <ul>
+              <li><img src="images/Sadl3B4.jpg" height="138" border="0" width="516"></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>Select all imported projects in the Package Explorer window and do a
+        Maven Project Update (right-click on the selected projects, select Maven
+        -&gt; Update Project...)</li>
+      <li>Set the target platform to com.ge.research.sadl.target and let all
+        builds resulting from the change complete
+        <ul>
+          <li>Window -&gt; Preferences -&gt; Plug-in Development -&gt; Target
+            Platform, check "com.ge.research.sadl.target (if two appear chose
+            the one in the target, not parent, project), then click "Apply and
+            Close"</li>
+        </ul>
+        or
+        <ul>
+          <li>Open the file "com.ge.research.sadl.target" in the project
+            "com.ge.research.sadl.target", click on "Load Target Platform" or
+            "Set as Active Target Platform" in the upper-right corner.</li>
+        </ul>
+      </li>
+      <li>If there are any errors remaining, do a clean/build:
+        <ul>
+          <li>Make sure that Build Automatically... is checked (on the toolbar's
+            Project dropdown menu, "Build Automatically should be checked; if
+            not check it)</li>
+          <li>With all projects selected, clean and build all projects (Project
+            -&gt; Clean...)</li>
+          <li>Note: sometimes the reasoner/translator projects <i>com.ge.research.sadl.jena-wrapper-for-sadl</i>
+            and <i>com.ge.research.sadl.swi-prolog-plugin</i> projects show an
+            error in the project <i>pom.xml</i> files after a clean/build of
+            all projects. If this occurs, do a clean/build <b>of just these two
+              projects</b> and the error should go away.</li>
+        </ul>
+      </li>
+    </ol>
+    <h2>Validating the Build Environment</h2>
+    <p>At this point there should be no errors in any of the projects. </p>
+    <ol>
+      <li>Right-click on the com.ge.research.sadl project and select Run As
+        -&gt; Eclipse Application. or Debug As -&gt; Eclipse Application. Note
+        that you may need to select Run Configurations... to get to Eclipse
+        Application.
+        <ul>
+          <li>If you wish to create a configuration to customize
+            <ul>
+              <li>Do Run As -&gt; Run Configurations... or Debug As -&gt; Debug
+                Configurations</li>
+              <li>Create a new configuration under Eclipse Application</li>
+              <li>Click on Run or Debug.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>A new instance of Eclipse should start with the SADL plug-ins
+        installed.
+        <ul>
+          <li>To verify, create a new project (File -&gt; New -&gt; Project...
+            -&gt; General -&gt; Project, no spaces allowed in names) and create
+            a file in the project (File -&gt; New -&gt; File) with a name ending
+            in ".sadl", e.g., "test.sadl" (again, no spaces in name).
+            <ul>
+              <li dir="ltr">
+                <p dir="ltr">Content assist (normally control-space, see Window
+                  -&gt; Preferences -&gt; General -&gt; Keys) at the beginning
+                  of the new file should cause "uri" to be inserted.</p>
+              </li>
+              <li>Additional content assist requests should complete a first
+                line. Note that sometimes a space must be added after an entry
+                before content assist will give suggestions for the next word.</li>
+              <li>You might end up with something like this:<font size="2"></font>
+                <p align="LEFT"><font size="2"> </font><font color="#800080" size="2">uri</font><font
+                    size="2"> "http://sadl.org/test.sadl" </font><font color="#800080"
+                    size="2">alias</font><font size="2"> <b>test</b>.</font></p>
+                <p align="LEFT"><font color="#000080" size="2"><b>Test</b></font><font
+                    size="2"> </font><font color="#800080" size="2">is</font><font
+                    size="2"> </font> <font color="#800080" size="2">a</font><font
+                    size="2"> </font> <font color="#800080" size="2">class</font><font
+                    size="2"> </font> <font color="#800080" size="2">described</font><font
+                    size="2"> </font> <font color="#800080" size="2">by</font><font
+                    size="2"> </font> <font color="#008000" size="2"><b>pass</b></font><font
+                    size="2"> </font> <font color="#800080" size="2">with</font><font
+                    size="2"> </font> <font color="#800080" size="2">values</font><font
+                    size="2"> </font> <font color="#800080" size="2">of</font><font
+                    size="2"> </font> <font color="#800080" size="2">type</font><font
+                    size="2"> </font> <font color="#800080" size="2">boolean</font><font
+                    size="2">.</font></p>
+              </li>
+              <font size="2"> </font>
+            </ul>
+            <font size="2"> </font>
+            <p>&nbsp;</p>
+          </li>
+        </ul>
+      </li>
+    </ol>
+  </body>
 </html>
