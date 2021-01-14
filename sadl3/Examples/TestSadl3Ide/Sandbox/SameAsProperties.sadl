@@ -1,0 +1,16 @@
+ uri "http://sadl.org/SameAsProperties.sadl" alias sap.
+ 
+ Person is a class described by child with values of type Person,
+ 	described by age with values of type int.
+ 
+ offspring is the same as child.
+ 
+ yearsSinceBirth is the same as age.
+  
+ A Person John has offspring (a Person Mary with yearsSinceBirth 23).
+ 
+ rdfp1 is a property.
+ rdfp2 is the same as rdfp1.
+ 
+ John has rdfp2 Mary.
+ 
