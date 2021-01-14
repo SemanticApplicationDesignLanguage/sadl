@@ -48,6 +48,8 @@ import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.createWithoutSubject
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
+import com.ge.research.sadl.sADL.SadlDisjointClasses
+import com.ge.research.sadl.sADL.SadlSameAs
 
 /**
  * Singleton service ontology context provider service for SADL.
@@ -227,9 +229,67 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 				if (initializer !== null) {
 					
 				}
+			} else if (key == SADLSTATEMENT_CLASSES) {
+				if (currentModel instanceof SadlDisjointClasses) {
+					val djclses = (currentModel as SadlDisjointClasses).classes
+					if (djclses.size > 0) {
+						for (sr : djclses) {
+							val type = sr.name;
+							
+							val builder = new ContextBuilder(type, processor) => [
+								grammarContextId = key;
+								validationAcceptor = acceptor;
+								contextClass = clazz;
+							]
+							return Optional.of(builder.build);
+						}
+					}
+				}
+			} else if (key == SADLSTATEMENT_CLASSORPROPERTY) {
+				if (currentModel instanceof SadlClassOrPropertyDeclaration) {
+					val cplst = (currentModel as SadlClassOrPropertyDeclaration).classOrProperty;
+					if (cplst.size > 0) {
+						for (sr : cplst) {
+							val type = sr.name;
+							if (type !== null) {
+								val builder = new ContextBuilder(type, processor) => [
+									grammarContextId = key;
+									validationAcceptor = acceptor;
+									contextClass = clazz;
+								]
+								return Optional.of(builder.build);
+							}
+							else {
+								val builder = createWithoutSubject(currentModel.ontModel, processor) => [
+									grammarContextId = key;
+									validationAcceptor = acceptor;
+									contextClass = clazz;
+								];
+								return Optional.of(builder.build);
+							}
+						}
+					}
+				}
+			} else if (key == SADLSTATEMENT_SAMEAS) {
+				if (currentModel instanceof SadlSameAs) {
+					val builder = createWithoutSubject(currentModel.ontModel, processor) => [
+						grammarContextId = key;
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
+					if ((currentModel as SadlSameAs).complement) {
+						// This is a bit of a kludge, but we need some way of telling the IModelProcessor
+						//	validate method that this is a "same as not" because then only
+						//	classes are valid. Doing this by putting the subject in as a restriction.
+						//	AWC 1/14/2021
+						builder.addRestriction((currentModel as SadlSameAs).nameOrRef);
+					}
+					return Optional.of(builder.build);
+				}
 			} else if (ONTOLOGY_INDEPENDENT_CONTEXT_IDS.contains(key)) {
-				val builder = createWithoutSubject(currentModel.ontModel) => [
+				val builder = createWithoutSubject(currentModel.ontModel, processor) => [
 					grammarContextId = key;
+					validationAcceptor = acceptor;
 					contextClass = clazz;
 				];
 				return Optional.of(builder.build);

@@ -351,4 +351,139 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposalIsNot('Circle');
 	}
 
+	@Test
+	def void checkCA_disjoint() {
+		// https://github.com/crapo/sadlos2/issues/407
+		val key = new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString);
+		updatePreference(key);
+		
+		val builder = newBuilder('''
+			uri "http://sadl.org/x.sadl".
+			Singer is a class.
+			Musician is a class.
+			{Singer, Instrumentalist} are types of Musician.
+			WindInstrumentalist is a type of Instrumentalist.
+			Singer and 
+		''');
+		builder.assertProposal('WindInstrumentalist');
+	}
+
+	@Test
+	def void checkCA_disjoint2() {
+		// https://github.com/crapo/sadlos2/issues/407
+		val key = new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString);
+		updatePreference(key);
+		
+		val builder = newBuilder('''
+			uri "http://sadl.org/x.sadl".
+			Singer is a class.
+			Instrumentalist is a class.
+			Musician is a class.
+			Musician is the same as {Singer or Instrumentalist}.
+			WindInstrumentalist is a type of Instrumentalist.
+			Singer and 
+		''');
+		builder.assertProposal('WindInstrumentalist');
+	}
+
+	@Test
+	def void checkCA_disjoint3() {
+		// https://github.com/crapo/sadlos2/issues/407
+		val key = new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString);
+		updatePreference(key);
+		
+		val builder = newBuilder('''
+			uri "http://sadl.org/x.sadl".
+			Singer is a class.
+			Instrumentalist is a class.
+			Musician is a class.
+			Musician is the same as {Singer or Instrumentalist}.
+			WindInstrumentalist is a type of Instrumentalist.
+			{Singer, 
+		''');
+		builder.assertProposal('WindInstrumentalist');
+	}
+	
+		@Test
+	def void checkCA_disjoint4() {
+		// https://github.com/crapo/sadlos2/issues/407
+		val key = new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString);
+		updatePreference(key);
+		
+		val builder = newBuilder('''
+			uri "http://sadl.org/x.sadl".
+			Singer is a class.
+			Instrumentalist is a class.
+			Musician is a class.
+			Musician is the same as {Singer or Instrumentalist}.
+			WindInstrumentalist is a type of Instrumentalist.
+			PresidentOfUSA is a class.
+			GeorgeWashington is a PresidentOfUSA.
+			
+			{  
+		''');
+		builder.assertProposal('WindInstrumentalist');
+		builder.assertProposal('GeorgeWashington');
+		builder.assertProposalIsNot('max');
+	}
+	
+	@Test
+	def void checkCA_disjoint5() {
+		// https://github.com/crapo/sadlos2/issues/407
+		val key = new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString);
+		updatePreference(key);
+		
+		val builder = newBuilder('''
+			 uri "http://sadl.org/BasicSetTheory2.sadl" alias bst2.
+			 
+			 PresidentOfUSA is a class .
+			 MilitaryCommander is a class.
+			
+			 GeorgeWashington is a {PresidentOfUSA and MilitaryCommander}.
+			 
+			 Singer is a class.
+			 Instrumentalist is a class.
+			 Musician is a class.
+			 Musician is the same as {Singer or Instrumentalist}.
+			 
+			 WindInstrumentalist is a type of Instrumentalist.
+			// Singer and 
+			//{Singer, WindInstrumentalist} are disjoint .  
+			{ 
+		''');
+		builder.assertProposal('WindInstrumentalist');
+		builder.assertProposal('GeorgeWashington');
+		builder.assertProposalIsNot('max');
+	}
+	
+	@Test
+	def void checkCA_sameAs() {
+		val builder = newBuilder('''
+			 uri "http://sadl.org/SameAsProperties.sadl" alias sap.
+			 
+			 Person is a class described by child with values of type Person,
+			 	described by age with values of type int.
+			 
+			 offspring is the same as 
+		''');
+		builder.assertProposal('Person');
+		builder.assertProposal('child');
+		builder.assertProposal('age');
+	}
+	
+		@Test
+	def void checkCA_sameAsNot() {
+		val builder = newBuilder('''
+			 uri "http://sadl.org/SameAsProperties.sadl" alias sap.
+			 
+			 Person is a class described by child with values of type Person,
+			 	described by age with values of type int.
+			 
+			 offspring is the same as not 
+		''');
+		builder.assertProposal('Person');
+		builder.assertProposalIsNot('child');
+		builder.assertProposalIsNot('age');
+	}
+	
 }

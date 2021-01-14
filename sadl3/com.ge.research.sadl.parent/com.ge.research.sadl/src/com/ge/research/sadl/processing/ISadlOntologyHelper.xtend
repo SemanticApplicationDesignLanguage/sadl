@@ -137,6 +137,12 @@ interface ISadlOntologyHelper {
 		public static val PROPOFSUBJECT_PROP = 'PROPOFSUBJECT_PROP';
 		
 		public static val SADLPROPERTYDECLARATIONINCLASS_NAMEDECLARATIONS = 'SADLPROPERTYDECLARATIONINCLASS_NAMEDECLARATIONS';
+		
+		public static val SADLSTATEMENT_CLASSES = 'SADLSTATEMENT_CLASSES';
+		
+		public static val SADLSTATEMENT_CLASSORPROPERTY = 'SADLSTATEMENT_CLASSORPROPERTY';
+		
+		public static val SADLSTATEMENT_SAMEAS = 'SADLSTATEMENT_SAMEAS';
 
 		/**
 		 * {@code C is a class described by p1 with values of type C. myC is a C with p1 <|>}
@@ -153,7 +159,10 @@ interface ISadlOntologyHelper {
 //			SADLSTATEMENT_SUPERELEMENT,
 			SADLPROPERTYRESTRICTION_TYPEONLY,
 			PROPOFSUBJECT_PROP,
-			PROPOFSUBJECT_RIGHT
+			PROPOFSUBJECT_RIGHT,
+			SADLSTATEMENT_CLASSES,
+			SADLSTATEMENT_CLASSORPROPERTY,
+			SADLSTATEMENT_SAMEAS
 		}
 
 		/**
@@ -195,9 +204,10 @@ interface ISadlOntologyHelper {
 		/**
 		 * Returns with a new context builder that has no subject SADL resource.
 		 */
-		static def createWithoutSubject(OntModel ontModel) {
+		static def createWithoutSubject(OntModel ontModel, IModelProcessor imp) {
 			val builder = new ContextBuilder();
 			builder.ontModel = ontModel;
+			builder.modelProcessor = imp;
 			return builder;
 		}
 
