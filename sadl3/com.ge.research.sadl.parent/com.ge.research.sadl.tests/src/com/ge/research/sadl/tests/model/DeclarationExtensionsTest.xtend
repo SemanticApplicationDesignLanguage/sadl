@@ -350,6 +350,66 @@ class DeclarationExtensionsTest {
 		assertEquals(OntConceptType.VARIABLE, name2resource.get('c').ontConceptType)
 	}
 	
+	@Test
+	def void testSameAs() {
+		val model = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			Singer is a class.
+			Instrumentalist is a class.
+			Musician is the same as {Singer or Instrumentalist}. 		
+			'''.parse
+		
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		assertTrue(name2resource.containsKey('Musician'))
+		assertEquals(OntConceptType.CLASS, name2resource.get('Musician').ontConceptType)
+	}
+
+	@Test
+	def void testSameAs2() {
+		val model = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			Singer is a class.
+			Instrumentalist is a class.
+			Musician is a class.
+			Musician is the same as {Singer or Instrumentalist}. 		
+			'''.parse
+		
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		assertTrue(name2resource.containsKey('Musician'))
+		assertEquals(OntConceptType.CLASS, name2resource.get('Musician').ontConceptType)
+	}
+	
+	@Test
+	def void testSameAs3() {
+		val model = '''
+		 uri "http://sadl.org/SameAsProperties.sadl" alias sap.
+		 
+		 Person is a class described by child with values of type Person,
+		 	described by age with values of type int.
+		 
+		 offspring is the same as child.
+		 
+		 yearsSinceBirth is the same as age.
+		  
+		 A Person John has offspring (a Person Mary with yearsSinceBirth 23).
+		 
+		 rdfp1 is a property.
+		 rdfp2 is the same as rdfp1.
+		 
+		 John has rdfp2 Mary.
+		'''.parse
+		
+		val name2resource = model.eAllContents.filter(SadlResource).toMap[concreteName]
+		assertTrue(name2resource.containsKey('offspring'))
+		assertEquals(OntConceptType.CLASS_PROPERTY, name2resource.get('offspring').ontConceptType)
+		assertTrue(name2resource.containsKey('yearsSinceBirth'))
+		assertEquals(OntConceptType.DATATYPE_PROPERTY, name2resource.get('yearsSinceBirth').ontConceptType)
+		assertTrue(name2resource.containsKey('rdfp2'))
+		assertEquals(OntConceptType.RDF_PROPERTY, name2resource.get('rdfp2').ontConceptType)
+	}
+
 	protected def void assertIs(SadlResource it, OntConceptType type) {
 		assertNotNull(it)
 		val typ = try {

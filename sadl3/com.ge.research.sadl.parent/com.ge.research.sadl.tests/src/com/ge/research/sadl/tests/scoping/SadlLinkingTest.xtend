@@ -1466,4 +1466,59 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		digit of Hand has exactly 1 value of type Thumb.
 		'''.assertLinking[sadl]
 	}
+
+	@Test
+	def void testSameAs() {
+		'''
+		uri "https://github.com/crapo/sadlos2/issues/437".
+		[Singer] is a class.
+		Instrumentalist is a class.
+		[Musician] is the same as {Singer or Instrumentalist}.
+		AliciaKeys is a <Musician>.
+		'''.assertLinking[sadl]
+	}
+
+	@Test
+	def void testSameAs2() {
+		'''
+		uri "https://github.com/crapo/sadlos2/issues/437".
+		[Singer] is a class.
+		Instrumentalist is a class.
+		[Musician] is a class.
+		<Musician> is the same as {Singer or Instrumentalist}.
+		AliciaKeys is a <Musician>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testSameAs3() {
+		'''
+			uri "http://sadl.org/model1" alias m1.
+			[Person] is a class.
+			[Bill] is a <Person>.
+			[William] is a Person.
+			<Bill> is the same as <William>.
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testSameAs4() {
+		'''
+			 uri "http://sadl.org/SameAsProperties.sadl" alias sap.
+			 
+			 Person is a class described by [child] with values of type Person,
+			 	described by [age] with values of type int.
+			 
+			 [offspring] is the same as <child>.
+			 
+			 [yearsSinceBirth] is the same as <age>.
+			  
+			 A Person John has <offspring> (a Person Mary with <yearsSinceBirth> 23).
+			 
+			 [rdfp1] is a property.
+			 [rdfp2] is the same as <rdfp1>.
+			 
+			 John has <rdfp2> Mary.
+		'''.assertLinking[sadl]
+	}
 }
