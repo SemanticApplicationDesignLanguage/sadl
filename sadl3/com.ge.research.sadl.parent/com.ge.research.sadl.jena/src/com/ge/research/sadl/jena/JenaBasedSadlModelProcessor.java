@@ -26,6 +26,7 @@ import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContext
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_CLASSES;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_CLASSORPROPERTY;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_SAMEAS;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLCARDINALITYCONDITION_CARDINALITY;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -1092,13 +1093,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				else if (contextId.equals(SADLSTATEMENT_SAMEAS)) {
 					OntConceptType candType = getDeclarationExtensions().getOntConceptType(candidate);
 					// if it has a "not" then it can only be a class.
-					if (context.getRestrictions() instanceof List<?> &&
-							((List<?>)context.getRestrictions()).size() > 0
-							&& !candType.equals(OntConceptType.CLASS)) {
-						// This is a bit of a kludge, but we need some way for the proposal provider 
-						//	to tell this method that this is a "same as not" because then only
-						//	classes are valid. Doing this by putting the subject in as a restriction.
-						//	AWC 1/14/2021
+					if (context.getCurrentModel() instanceof SadlSameAs &&
+							((SadlSameAs)context.getCurrentModel()).isComplement() &&
+							!candType.equals(OntConceptType.CLASS)) {
 						context.getAcceptor().add("Only classes can be in same as not", candidate, Severity.ERROR);
 					}
 					if (candType.equals(OntConceptType.CLASS) || 
@@ -1127,7 +1124,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return;
 			}
 			case SADLPROPERTYINITIALIZER_VALUE: {
-				SadlResource prop = context.getRestrictions().iterator().next();
+				// subject should be the class of the statement subject
+				// restriction[0] should be the property
+				SadlResource prop = null;
+				if (context.getRestrictions() instanceof List<?> &&
+						((List<?>)context.getRestrictions()).size() > 0) {
+					prop = context.getRestrictions().iterator().next();
+				}
+
+				if (prop == null) {
+					context.getAcceptor().add("No property found in restrictions", candidate, Severity.ERROR);
+					return;
+				}
 				OntConceptType proptype = getDeclarationExtensions().getOntConceptType(prop);
 				if (proptype.equals(OntConceptType.DATATYPE_PROPERTY)) {
 					context.getAcceptor().add("No", candidate, Severity.ERROR);
@@ -1136,11 +1144,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (proptype.equals(OntConceptType.CLASS_PROPERTY)) {
 					OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
 					if (!candtype.equals(OntConceptType.INSTANCE)) {
-						context.getAcceptor().add("No", candidate, Severity.ERROR);
+						String canduri = getDeclarationExtensions().getConceptUri(candidate);
+						context.getAcceptor().add("'" + canduri + "' is not an Instance", candidate, Severity.ERROR);
 						return;
 					}
 				}
-				Iterator<SadlResource> ritr = context.getRestrictions().iterator();
+//				Iterator<SadlResource> ritr = context.getRestrictions().iterator();
 //				while (ritr.hasNext()) {
 //					System.out.println("Restriction: " + getDeclarationExtensions().getConceptUri(ritr.next()));
 //				}
@@ -1247,8 +1256,34 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (snm != null && cnm != null && snm.equals(cnm)) {
 					addError("Duplicate entries not desirable", candidate);
 					return;
+				}				
+			}
+			case SADLCARDINALITYCONDITION_CARDINALITY: {
+				OntConceptType subjtype = getDeclarationExtensions().getOntConceptType(subject);
+				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
+				String snm = getDeclarationExtensions().getConceptUri(subject);
+				String cnm = getDeclarationExtensions().getConceptUri(candidate);
+				if (subjtype.equals(OntConceptType.INSTANCE)) {
+					if (!isProperty(candtype)) {
+						addError("Expected a property", candidate);
+						return;
+					}
+					Individual subjinst = getTheJenaModel().getIndividual(snm);
+					OntProperty candprop = getTheJenaModel().getOntProperty(cnm);
+					try {
+						getModelValidator().checkPropertyDomain(getTheJenaModel(), subjinst, candprop, subject, true, null, false, false);
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					return;
 				}
-				
+				else {
+					// TODO
+				}
 			}
 			default: {
 				// Ignored

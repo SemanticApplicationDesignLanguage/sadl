@@ -50,6 +50,11 @@ import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
 import com.ge.research.sadl.sADL.SadlDisjointClasses
 import com.ge.research.sadl.sADL.SadlSameAs
+import org.eclipse.xtext.nodemodel.impl.LeafNodeWithSyntaxError
+import org.eclipse.xtext.nodemodel.INode
+import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement
+import org.eclipse.emf.common.util.EList
 
 /**
  * Singleton service ontology context provider service for SADL.
@@ -87,10 +92,12 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 			val key = TO_STRING.apply(grammarElement);
 
 			if (key == SADLPROPERTYINITIALIZER_VALUE) {
+				// subject should be the class of the statement subject
+				// restriction[0] should be the property
 				val initializer = currentModel.propertyInitializer;
 				if (initializer !== null) {
 					val instance = initializer.eContainer as SadlInstance;
-					val type = instance.type;
+					val type = instance.type !== null ? instance.type : getTypeFromPropertyInitializers(instance.propertyInitializers);
 					if (type instanceof SadlSimpleTypeReference) {
 						val builder = new ContextBuilder(type.type, processor) => [
 							grammarContextId = key;
@@ -103,6 +110,24 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 							contextClass = clazz;
 						];
 						return Optional.of(builder.build);
+					}
+					else if (type instanceof SadlResource) {
+						val builder = new ContextBuilder(type, processor) => [
+							grammarContextId = key;
+							if (initializer instanceof SadlPropertyInitializer) {
+								addRestriction((initializer as SadlPropertyInitializer).property);
+							} else if (initializer instanceof SadlResource) {
+								addRestriction(initializer)
+							}
+							validationAcceptor = acceptor;
+							contextClass = clazz;
+						];
+						return Optional.of(builder.build);
+					}
+					else {
+						if (LOGGER.debugEnabled) {
+							LOGGER.warn('''Case handling incomplete: «key» [Class: «clazz.name»]''');
+						}
 					}
 				} else {
 					// need to do something else to get the type
@@ -260,7 +285,7 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 								return Optional.of(builder.build);
 							}
 							else {
-								val builder = createWithoutSubject(currentModel.ontModel, processor) => [
+								val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
 									grammarContextId = key;
 									validationAcceptor = acceptor;
 									contextClass = clazz;
@@ -272,22 +297,33 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 				}
 			} else if (key == SADLSTATEMENT_SAMEAS) {
 				if (currentModel instanceof SadlSameAs) {
-					val builder = createWithoutSubject(currentModel.ontModel, processor) => [
+					val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
 						grammarContextId = key;
 						validationAcceptor = acceptor;
 						contextClass = clazz;
 					];
-					if ((currentModel as SadlSameAs).complement) {
-						// This is a bit of a kludge, but we need some way of telling the IModelProcessor
-						//	validate method that this is a "same as not" because then only
-						//	classes are valid. Doing this by putting the subject in as a restriction.
-						//	AWC 1/14/2021
-						builder.addRestriction((currentModel as SadlSameAs).nameOrRef);
-					}
 					return Optional.of(builder.build);
 				}
+			} else if (key == SADLCARDINALITYCONDITION_CARDINALITY) {
+				if (currentModel instanceof SadlModel) {
+					// this may be a SadlResource at the start of a line
+					val sr = getPrecedingSadlResource(it);
+					if (sr.name !== null) {
+						val type = sr.name;
+
+						val builder = new ContextBuilder(type, processor) => [
+							grammarContextId = key;
+							validationAcceptor = acceptor;
+							contextClass = clazz;
+						]
+						return Optional.of(builder.build);
+					}
+					if (LOGGER.debugEnabled) {
+						LOGGER.warn('''Unhandled case: «key» [Class: «clazz.name»]''');
+					}
+				}			
 			} else if (ONTOLOGY_INDEPENDENT_CONTEXT_IDS.contains(key)) {
-				val builder = createWithoutSubject(currentModel.ontModel, processor) => [
+				val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
 					grammarContextId = key;
 					validationAcceptor = acceptor;
 					contextClass = clazz;
@@ -303,7 +339,40 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 
 		return Optional.absent;
 	}
+		
+	def getTypeFromPropertyInitializers(EList<SadlPropertyInitializer> propInitializers) {
+		if (propInitializers !== null && 
+			propInitializers.size > 0) {
+			val piitr = propInitializers.iterator;
+			while (piitr.hasNext) {
+				val pi = piitr.next
+				if (pi instanceof SadlPropertyInitializer) {
+					val spi = (pi as SadlPropertyInitializer)
+					if (spi.type !== null) {
+						return spi.type
+					}
+					if (pi.eContainer !== null &&
+						pi.eContainer instanceof SadlInstance) {
+						return (pi.eContainer as SadlInstance).nameOrRef
+					}
+				}
+			}
+		}
+		return null
+	}
 
+	def getPrecedingSadlResource(ContentAssistContext context) {
+		if (context.lastCompleteNode instanceof LeafNodeWithSyntaxError &&
+			(context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling instanceof HiddenLeafNode &&
+			((context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling as HiddenLeafNode).previousSibling instanceof CompositeNodeWithSemanticElement) {
+			val eobj = (((context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling as HiddenLeafNode).previousSibling as CompositeNodeWithSemanticElement).semanticElement
+			if (eobj instanceof SadlResource) {
+					return (eobj as SadlResource)
+			}
+		}
+		return null
+	}
+	
 	private def OntModel getOntModel(EObject it) {
 		return OntModelProvider.find(eResource);
 	}
