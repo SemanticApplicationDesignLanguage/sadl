@@ -471,7 +471,7 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposal('age');
 	}
 	
-		@Test
+	@Test
 	def void checkCA_sameAsNot() {
 		val builder = newBuilder('''
 			 uri "http://sadl.org/SameAsProperties.sadl" alias sap.
@@ -484,6 +484,104 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposal('Person');
 		builder.assertProposalIsNot('child');
 		builder.assertProposalIsNot('age');
+	}
+	
+	@Test
+	def void checkCA_subject_has() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		 
+		 Person is a class described by dateOfBirth with values of type date .
+		 
+		 PresidentOfUSA is a type of Person.
+		 
+		 wife describes Person with values of type Person.
+		 
+		 GeorgeWashington (alias "George Washington") is a PresidentOfUSA.
+		 MarthDandridge (alias "Martha Dandridge") is a Person.
+		 
+		GeorgeWashington has 
+		''');
+		builder.assertProposalIsNot('default');
+		builder.assertProposal('wife');
+		builder.assertProposal('dateOfBirth');
+		builder.assertProposalIsNot('Person');
+		builder.assertProposalIsNot('GeorgeWashington');
+		builder.assertProposalIsNot('one')
+	}
+	
+	@Test
+	def void checkCA_subject_has2() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		 
+		 Person is a class described by dateOfBirth with values of type date .
+		 
+		 PresidentOfUSA is a type of Person.
+		 
+		 wife describes Person with values of type Person.
+		 
+		 Rock is a class described by density with values of type float.
+		 
+		 GeorgeWashington (alias "George Washington") is a PresidentOfUSA.
+		 MarthDandridge (alias "Martha Dandridge") is a Person.
+		 
+		GeorgeWashington has 
+		''');
+		builder.assertProposal('wife');
+		builder.assertProposal('dateOfBirth');
+		builder.assertProposalIsNot('Person');
+		builder.assertProposalIsNot('GeorgeWashington');
+		builder.assertProposalIsNot('density')
+	}
+	
+	@Test
+	def void checkCA_subject_has3() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		 
+		 Person is a class described by dateOfBirth with values of type date .
+		 
+		 PresidentOfUSA is a type of Person.
+		 
+		 wife describes Person with values of type Person.
+		 
+		 Rock is a class described by density with values of type float.
+		 
+		 GeorgeWashington (alias "George Washington") is a PresidentOfUSA.
+		 MarthDandridge (alias "Martha Dandridge") is a Person.
+		 
+		GeorgeWashington has wife 
+		''');
+		builder.assertProposal('MarthDandridge');
+	}
+	
+	@Test
+	def void checkCA_subject_has4() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		 
+		 Person is a class described by dateOfBirth with values of type date .
+		 
+		 PresidentOfUSA is a type of Person.
+		 
+		 wife describes Person with values of type Person.
+		 
+		 Rock is a class described by density with values of type float.
+		 
+		 GeorgeWashington (alias "George Washington") is a PresidentOfUSA.
+		 MarthDandridge (alias "Martha Dandridge") is a Person.
+		 
+		GeorgeWashington has wife M''');
+		builder.assertProposal('MarthDandridge');
+	}
+	
+	@Test
+	def void checkCA_alias() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Logic1b.sadl" alias 
+		''');
+		builder.assertProposal('checkCA_alias');
 	}
 	
 }

@@ -69,6 +69,9 @@ import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContext
 import static com.ge.research.sadl.processing.SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME
 import static com.ge.research.sadl.processing.SadlConstants.SADL_IMPLICIT_MODEL_FILENAME
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
+import org.eclipse.xtext.nodemodel.impl.LeafNodeWithSyntaxError
+import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement
 
 /**
  * Generic content proposal provider for the {@code SADL} language.
@@ -128,7 +131,7 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 			}
 		}
 	}
-
+		
 	override protected getCrossrefFilter(CrossReference reference, ContentAssistContext ctx) {
 		// Special case for filtering out all those resources among import proposals which are already imported.
 		if (reference.eContainer == grammarAccess.sadlImportAccess.importedResourceAssignment_1) {
@@ -220,17 +223,34 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 	}
 
 	protected def completeCardinalityAssigment(ContentAssistContext ctx, IIdeContentProposalAcceptor acceptor) {
-		#['one', 2, 3, 4, 5].forEach [
-			val entry = proposalCreator.createProposal('''«it»''', ctx);
-			acceptor.accept(entry, proposalPriorities.getDefaultPriority(entry));
-		]
-		val proposal = 'CARDINALITY'
-		val entry = proposalCreator.createProposal(proposal, ctx) [
-			editPositions += new TextRegion(ctx.offset, proposal.length);
-			kind = ContentAssistEntry.KIND_VALUE;
-			description = 'Cardinality number'
-		]
-		acceptor.accept(entry, 100)
+		val oct = getPrecedingSadlResourceOntConceptType(ctx)
+		if (oct === null || oct.equals(OntConceptType.CLASS)) {
+			#['one', 2, 3, 4, 5].forEach [
+				val entry = proposalCreator.createProposal('''«it»''', ctx);
+				acceptor.accept(entry, proposalPriorities.getDefaultPriority(entry));
+			]
+			val proposal = 'CARDINALITY'
+			val entry = proposalCreator.createProposal(proposal, ctx) [
+				editPositions += new TextRegion(ctx.offset, proposal.length);
+				kind = ContentAssistEntry.KIND_VALUE;
+				description = 'Cardinality number'
+			]
+			acceptor.accept(entry, 100)
+		}
+	}
+
+	def getPrecedingSadlResourceOntConceptType(ContentAssistContext context) {
+		if (context.lastCompleteNode instanceof LeafNodeWithSyntaxError &&
+			(context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling instanceof HiddenLeafNode &&
+			((context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling as HiddenLeafNode).previousSibling instanceof CompositeNodeWithSemanticElement) {
+			val eobj = (((context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling as HiddenLeafNode).previousSibling as CompositeNodeWithSemanticElement).semanticElement
+			if (eobj instanceof SadlResource) {
+				// need to look at the OntConceptType to see what keywords can follow
+				val oct = declarationExtensions.getOntConceptType((eobj as SadlResource))
+				return oct
+			}
+		}
+		return null
 	}
 
 	protected static val SUPPORTED_FILE_EXTENSION = #{'sadl', 'n3', 'owl', 'ntriple', 'nt'};
@@ -548,8 +568,47 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 				}
 				return false;
 			}
+			else if (model instanceof SadlModel) {
+				val oct = getPrecedingSadlResourceOntConceptType(context)
+				if (oct !== null) {
+					if (oct.equals(OntConceptType.VARIABLE) && kval.equals("a")) {
+						return true;
+					}
+					if (!oct.equals(OntConceptType.CLASS)) {
+						if(kval.equals("default") ||
+							kval.equals("at") ||
+							kval.equals("exactly") ||
+							kval.equals("a") ||
+							kval.equals("level") ||
+							kval.equals("value") ||
+							kval.equals("values") ||
+							kval.startsWith("CARDINALITY") ||
+							kval.startsWith("one") ||
+							isInteger(kval)
+							
+						) {
+							return false
+						}
+					}
+				}
+//				else if (!oct.equals(OntConceptType.INSTANCE)) {
+//					if (kval.equals(""))
+//					}
+//				}
+			}
 		}
 		return true
+	}
+	
+	private def boolean isInteger(String nv) {
+		try {
+			Integer.parseInt(nv)
+			return true;
+		}
+		catch (Exception e) {
+			return false;
+		}
+		
 	}
 
 	protected def void displayModel(EObject object, String label) {
