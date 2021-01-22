@@ -20,12 +20,14 @@ package com.ge.research.sadl.jena;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.MISSING_SUBJECT;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.PROPOFSUBJECT_PROP;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.PROPOFSUBJECT_RIGHT;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLCARDINALITYCONDITION_CARDINALITY;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_PROPERTY;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_VALUE;
-import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_SUPERELEMENT;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_CLASSES;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_CLASSORPROPERTY;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_SAMEAS;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_SUPERELEMENT;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_TYPE;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -1077,10 +1079,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String contextId = context.getGrammarContextId().orNull();
 		OntModel ontModel = context.getOntModel();
 		SadlResource subject = context.getSubject();
+		String sruri = subject != null ? getDeclarationExtensions().getConceptUri(subject) : null;
+		String cruri = getDeclarationExtensions().getConceptUri(candidate);
 //		System.out.println("Subject: " + getDeclarationExtensions().getConceptUri(subject));
 //		System.out.println("Candidate: " + getDeclarationExtensions().getConceptUri(candidate));
-
+		if (sruri != null && sruri.equals(cruri)) {
+			context.getAcceptor().add("candidate and subject the same", candidate, Severity.ERROR);
+			return;
+		}
 		try {
+			OntConceptType oct = subject !=  null ? getDeclarationExtensions().getOntConceptType(subject) : null;
+			OntConceptType coct = getDeclarationExtensions().getOntConceptType(candidate);
 			if (subject == MISSING_SUBJECT) {
 				if (contextId.equals(SADLSTATEMENT_CLASSORPROPERTY)) {
 					OntConceptType candType = getDeclarationExtensions().getOntConceptType(candidate);
@@ -1092,13 +1101,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				else if (contextId.equals(SADLSTATEMENT_SAMEAS)) {
 					OntConceptType candType = getDeclarationExtensions().getOntConceptType(candidate);
 					// if it has a "not" then it can only be a class.
-					if (context.getRestrictions() instanceof List<?> &&
-							((List<?>)context.getRestrictions()).size() > 0
-							&& !candType.equals(OntConceptType.CLASS)) {
-						// This is a bit of a kludge, but we need some way for the proposal provider 
-						//	to tell this method that this is a "same as not" because then only
-						//	classes are valid. Doing this by putting the subject in as a restriction.
-						//	AWC 1/14/2021
+					if (context.getCurrentModel() instanceof SadlSameAs &&
+							((SadlSameAs)context.getCurrentModel()).isComplement() &&
+							!candType.equals(OntConceptType.CLASS)) {
 						context.getAcceptor().add("Only classes can be in same as not", candidate, Severity.ERROR);
 					}
 					if (candType.equals(OntConceptType.CLASS) || 
@@ -1106,12 +1111,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						isProperty(candType)) {
 						return;
 					}
+					
 					else {
 						context.getAcceptor().add("Only classes, instances, and properties can be in same as", candidate, Severity.ERROR);
 					}
 				}
+				else if (contextId.equals(SADLPROPERTYINITIALIZER_PROPERTY)) {
+					if (context.getCurrentModel() instanceof SadlModel) {
+						context.getAcceptor().add("Property initializer at top level?", candidate, Severity.ERROR);
+					}
+				}
+				else if (contextId.equals(SADLSTATEMENT_TYPE)) {
+					OntConceptType candType = getDeclarationExtensions().getOntConceptType(candidate);
+					if (!candType.equals(OntConceptType.CLASS)) {
+						context.getAcceptor().add("Only classes allowed here", candidate, Severity.ERROR);
+					}
+				}
 				return;
 			}
+			
+			if (logger.isDebugEnabled()) {
+				logger.debug("\nSubject: " + sruri + ", " + oct.toString());
+				logger.debug("Candidate: " + cruri + ", " + coct.toString());
+			}
+
 			switch (contextId) {
 			case SADLPROPERTYINITIALIZER_PROPERTY: {
 				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
@@ -1127,7 +1150,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return;
 			}
 			case SADLPROPERTYINITIALIZER_VALUE: {
-				SadlResource prop = context.getRestrictions().iterator().next();
+				// subject should be the class of the statement subject
+				// restriction[0] should be the property
+				SadlResource prop = null;
+				if (context.getRestrictions() instanceof List<?> &&
+						((List<?>)context.getRestrictions()).size() > 0) {
+					prop = context.getRestrictions().iterator().next();
+				}
+
+				if (prop == null) {
+					context.getAcceptor().add("No property found in restrictions", candidate, Severity.ERROR);
+					return;
+				}
 				OntConceptType proptype = getDeclarationExtensions().getOntConceptType(prop);
 				if (proptype.equals(OntConceptType.DATATYPE_PROPERTY)) {
 					context.getAcceptor().add("No", candidate, Severity.ERROR);
@@ -1136,11 +1170,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (proptype.equals(OntConceptType.CLASS_PROPERTY)) {
 					OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
 					if (!candtype.equals(OntConceptType.INSTANCE)) {
-						context.getAcceptor().add("No", candidate, Severity.ERROR);
+						String canduri = getDeclarationExtensions().getConceptUri(candidate);
+						context.getAcceptor().add("'" + canduri + "' is not an Instance", candidate, Severity.ERROR);
 						return;
 					}
 				}
-				Iterator<SadlResource> ritr = context.getRestrictions().iterator();
+//				Iterator<SadlResource> ritr = context.getRestrictions().iterator();
 //				while (ritr.hasNext()) {
 //					System.out.println("Restriction: " + getDeclarationExtensions().getConceptUri(ritr.next()));
 //				}
@@ -1247,8 +1282,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (snm != null && cnm != null && snm.equals(cnm)) {
 					addError("Duplicate entries not desirable", candidate);
 					return;
+				}				
+			}
+			case SADLCARDINALITYCONDITION_CARDINALITY: {
+				OntConceptType subjtype = getDeclarationExtensions().getOntConceptType(subject);
+				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
+				String snm = getDeclarationExtensions().getConceptUri(subject);
+				String cnm = getDeclarationExtensions().getConceptUri(candidate);
+				if (subjtype.equals(OntConceptType.INSTANCE)) {
+					if (!isProperty(candtype)) {
+						addError("Expected a property", candidate);
+						return;
+					}
+					Individual subjinst = getTheJenaModel().getIndividual(snm);
+					OntProperty candprop = getTheJenaModel().getOntProperty(cnm);
+					try {
+						getModelValidator().checkPropertyDomain(getTheJenaModel(), subjinst, candprop, subject, true, null, false, false);
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					return;
 				}
-				
+				else {
+					// TODO
+				}
+			}
+			case SADLSTATEMENT_TYPE: {
+//				if (oct !=  null && oct.equals(OntConceptType.CLASS)) {
+//					// if the subject is a class they no SadlResource is valid after
+//				}
+				// must be a class
+				if (!coct.equals(OntConceptType.CLASS)) {
+					context.getAcceptor().add("must be a class", candidate, Severity.ERROR);
+				}
 			}
 			default: {
 				// Ignored
@@ -15650,5 +15720,50 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected void setTypeCheckingErrorDetected(boolean typeCheckingErrorDetected) {
 		this.typeCheckingErrorDetected = typeCheckingErrorDetected;
+	}
+
+	@Override
+	public String getDatatypePropertyContentAssistSuggestion(SadlResource prop) {
+		OntConceptType oct;
+		String propuri = null;
+		try {
+			oct = getDeclarationExtensions().getOntConceptType(prop);
+			if (oct.equals(OntConceptType.DATATYPE_PROPERTY)) {
+	            propuri = getDeclarationExtensions().getConceptUri(prop);
+	            OntProperty ontprop = getTheJenaModel().getOntProperty(propuri);
+	            if (ontprop != null) {
+	                StmtIterator rngitr = getTheJenaModel().listStatements(ontprop, RDFS.range, (RDFNode)null);
+	                RDFNode rng = null;
+	                String proposal = null;
+	                if (rngitr.hasNext()) {
+	                        rng = rngitr.nextStatement().getObject();
+	                        switch(rng.toString()) {
+	                        case XSD.NS + "string":
+	                        	String pnm = getDeclarationExtensions().getConcreteName(prop);
+	                            proposal = "\"<" + pnm + "-value>\"";
+	                        break;
+	                        case XSD.NS + "date":
+	                            proposal = "\"mm/dd/yyyy\"";
+	                        break;
+	                        case XSD.NS + "float":
+	                        case XSD.NS + "double":
+	                            proposal = "123.4";
+	                        break;
+	                        case XSD.NS + "int":
+	                        case XSD.NS + "integer":
+	                        case XSD.NS + "long":
+	                            proposal = "123";
+	                        break;
+	                        default:
+	                        	addInfo("Content assist suggestion not provided for datatype '" + rng.toString() + "'", prop);
+	                        }       
+	                }
+	                return proposal;
+	            }
+			}
+		} catch (CircularDefinitionException e) {
+			addError("Unexpected error getting content assist example for property '" + propuri + "'", prop);
+		}
+		return null;
 	}
 }

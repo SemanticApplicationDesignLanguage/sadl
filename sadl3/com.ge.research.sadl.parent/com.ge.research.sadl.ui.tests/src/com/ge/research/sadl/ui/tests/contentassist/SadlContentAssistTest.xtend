@@ -332,6 +332,7 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		''');
 		builder.assertProposal('area');
 		builder.assertProposalIsNot('Shape');
+		builder.assertProposalIsNot('sin')
 	}
 
 	@Test
@@ -471,7 +472,7 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposal('age');
 	}
 	
-		@Test
+	@Test
 	def void checkCA_sameAsNot() {
 		val builder = newBuilder('''
 			 uri "http://sadl.org/SameAsProperties.sadl" alias sap.
@@ -484,6 +485,235 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposal('Person');
 		builder.assertProposalIsNot('child');
 		builder.assertProposalIsNot('age');
+	}
+	
+	@Test
+	def void checkCA_subject_has() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		 
+		 Person is a class described by dateOfBirth with values of type date .
+		 
+		 PresidentOfUSA is a type of Person.
+		 
+		 wife describes Person with values of type Person.
+		 
+		 GeorgeWashington (alias "George Washington") is a PresidentOfUSA.
+		 MarthDandridge (alias "Martha Dandridge") is a Person.
+		 
+		GeorgeWashington has 
+		''');
+		builder.assertProposalIsNot('default');
+		builder.assertProposal('wife');
+		builder.assertProposal('dateOfBirth');
+		builder.assertProposalIsNot('Person');
+		builder.assertProposalIsNot('GeorgeWashington');
+		builder.assertProposalIsNot('one')
+	}
+	
+	@Test
+	def void checkCA_subject_has2() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		 
+		 Person is a class described by dateOfBirth with values of type date .
+		 
+		 PresidentOfUSA is a type of Person.
+		 
+		 wife describes Person with values of type Person.
+		 
+		 Rock is a class described by density with values of type float.
+		 
+		 GeorgeWashington (alias "George Washington") is a PresidentOfUSA.
+		 MarthDandridge (alias "Martha Dandridge") is a Person.
+		 
+		GeorgeWashington has 
+		''');
+		builder.assertProposal('wife');
+		builder.assertProposal('dateOfBirth');
+		builder.assertProposalIsNot('Person');
+		builder.assertProposalIsNot('GeorgeWashington');
+		builder.assertProposalIsNot('density')
+	}
+	
+	@Test
+	def void checkCA_subject_has3() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		 
+		 Person is a class described by dateOfBirth with values of type date .
+		 
+		 PresidentOfUSA is a type of Person.
+		 
+		 wife describes Person with values of type Person.
+		 
+		 Rock is a class described by density with values of type float.
+		 
+		 GeorgeWashington (alias "George Washington") is a PresidentOfUSA.
+		 MarthDandridge (alias "Martha Dandridge") is a Person.
+		 
+		GeorgeWashington has wife 
+		''');
+		builder.assertProposal('MarthDandridge');
+	}
+	
+	@Test
+	def void checkCA_subject_has4() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		 
+		 Person is a class described by dateOfBirth with values of type date .
+		 
+		 PresidentOfUSA is a type of Person.
+		 
+		 wife describes Person with values of type Person.
+		 
+		 Rock is a class described by density with values of type float.
+		 
+		 GeorgeWashington (alias "George Washington") is a PresidentOfUSA.
+		 MarthDandridge (alias "Martha Dandridge") is a Person.
+		 
+		GeorgeWashington has wife M''');
+		builder.assertProposal('MarthDandridge');
+	}
+	
+	@Test
+	def void checkCA_subject_has5() {
+		val builder = newBuilder('''
+		uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		
+		Person is a class described by dateOfBirth with values of type date .
+		
+		Rock is a class described by density with values of type float.
+		
+		GeorgeWashington (alias "George Washington") is a Person.
+		
+		GeorgeWashington has dateOfBirth 
+		''');
+		builder.assertProposal('"mm/dd/yyyy"');
+	}
+	
+	@Test
+	def void checkCA_subject_has6() {
+		val builder = newBuilder('''
+		uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		
+		Rock is a class described by density with values of type float.
+		
+		MyRock is a Rock, has density  
+		''');
+		builder.assertProposal('123.4');
+	}
+	
+	@Test
+	def void checkCA_subject_has7() {
+		val builder = newBuilder('''
+		uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		
+		Rock is a class described by color with values of type string.
+		
+		MyRock is a Rock, has color 
+		''');
+		builder.assertProposal('"<color-value>"');
+	}
+	
+	@Test
+	def void checkCA_subject_has8() {
+		val builder = newBuilder('''
+		uri "http://sadl.org/Logic1b.sadl" alias l1b.
+		
+		Rock is a class described by shinny with values of type boolean.
+		
+		MyRock is a Rock, has shinny 
+		''');
+		builder.assertProposal('true');
+		builder.assertProposal('false');
+	}
+	
+	@Test
+	def void checkCA_is_a() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Concepts.sadl" alias Concepts.
+		 
+		 Person is a class described by birthdate with a single value of type date .
+		 {Man, Woman} are types of Person.
+		 
+		 Gender is a class, must be one of {Male, Female}.
+		 
+		 Man and Woman are disjoint .
+		 
+		 Person is ''');
+		 
+		 builder.assertProposal('a');
+		 builder.assertProposalIsNot('acos');
+		 builder.assertProposalIsNot('Gender');
+	}
+	
+	@Test
+	def void checkCA_is_a2() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Concepts.sadl" alias Concepts.
+		 
+		 Person is a class described by birthdate with a single value of type date .
+		 {Man, Woman} are types of Person.
+		 
+		 Gender is a class, must be one of {Male, Female}.
+		 
+		 Man and Woman are disjoint .
+		 
+		 Person is a ''');
+		 
+		 builder.assertProposal('type');
+		 builder.assertProposalIsNot('Person');	// Person is already defined, shouldn't define again
+		 builder.assertProposalIsNot('acos');
+	}
+	
+	@Test
+	def void checkCA_is_a3() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Concepts.sadl" alias Concepts.
+		 
+		 Person is a class described by birthdate with a single value of type date .
+		 {Man, Woman} are types of Person.
+		 
+		 Gender is a class, must be one of {Male, Female}.
+		 
+		 Man and Woman are disjoint .
+		 
+		 NewName is ''');
+		 
+		 builder.assertProposal('a');
+		 builder.assertProposalIsNot('acos');
+		 builder.assertProposalIsNot('Gender');
+		 builder.assertProposalIsNot('birthdate');
+	}
+	
+	@Test
+	def void checkCA_is_a4() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Concepts.sadl" alias Concepts.
+		 
+		 Person is a class described by birthdate with a single value of type date .
+		 {Man, Woman} are types of Person.
+		 
+		 Gender is a class, must be one of {Male, Female}.
+		 
+		 Man and Woman are disjoint .
+		 
+		 NewName is a ''');
+		 
+		 builder.assertProposal('type');
+		 builder.assertProposal('class');
+		 builder.assertProposal('Person');
+		 builder.assertProposalIsNot('acos');
+	}
+	
+	@Test
+	def void checkCA_alias() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Logic1b.sadl" alias 
+		''');
+		builder.assertProposal('checkCA_alias');
 	}
 	
 }

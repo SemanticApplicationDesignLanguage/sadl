@@ -29,6 +29,7 @@ import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.Assignment
 
 import static extension org.eclipse.xtext.GrammarUtil.containingParserRule
+import org.eclipse.emf.ecore.EObject
 
 /**
  * Reasoner independent implementation of an ontology helper for SADL. 
@@ -60,6 +61,11 @@ interface ISadlOntologyHelper {
 		 * Returns with the model processor for the context.
 		 */
 		def IModelProcessor getModelProcessor();
+		
+		/**
+		 * Returns the current model EObject
+		 */
+		def EObject getCurrentModel();
 
 		/**
 		 * Returns with the validation acceptor.
@@ -143,6 +149,10 @@ interface ISadlOntologyHelper {
 		public static val SADLSTATEMENT_CLASSORPROPERTY = 'SADLSTATEMENT_CLASSORPROPERTY';
 		
 		public static val SADLSTATEMENT_SAMEAS = 'SADLSTATEMENT_SAMEAS';
+		
+		public static val SADLCARDINALITYCONDITION_CARDINALITY = 'SADLCARDINALITYCONDITION_CARDINALITY';
+		
+		public static val SADLSTATEMENT_TYPE = 'SADLSTATEMENT_TYPE';
 
 		/**
 		 * {@code C is a class described by p1 with values of type C. myC is a C with p1 <|>}
@@ -162,7 +172,9 @@ interface ISadlOntologyHelper {
 			PROPOFSUBJECT_RIGHT,
 			SADLSTATEMENT_CLASSES,
 			SADLSTATEMENT_CLASSORPROPERTY,
-			SADLSTATEMENT_SAMEAS
+			SADLSTATEMENT_SAMEAS,
+			SADLCARDINALITYCONDITION_CARDINALITY,
+			SADLSTATEMENT_TYPE
 		}
 
 		/**
@@ -194,7 +206,7 @@ interface ISadlOntologyHelper {
 
 		var SadlResource subject;
 		var IModelProcessor modelProcessor;
-
+		var EObject currentModel;
 		var OntModel ontModel;
 		var ValidationAcceptor acceptor;
 		var Optional<String> grammarContextId;
@@ -204,10 +216,11 @@ interface ISadlOntologyHelper {
 		/**
 		 * Returns with a new context builder that has no subject SADL resource.
 		 */
-		static def createWithoutSubject(OntModel ontModel, IModelProcessor imp) {
+		static def createWithoutSubject(OntModel ontModel, IModelProcessor imp, EObject currentModel) {
 			val builder = new ContextBuilder();
 			builder.ontModel = ontModel;
 			builder.modelProcessor = imp;
+			builder.currentModel = currentModel;
 			return builder;
 		}
 
@@ -261,7 +274,7 @@ interface ISadlOntologyHelper {
 			if (ontModel === null) {
 				return null;
 			}
-			return new ContextImpl(ontModel, subject, modelProcessor, acceptor, grammarContextId, contextClass, restrictions);
+			return new ContextImpl(ontModel, subject, modelProcessor, currentModel, acceptor, grammarContextId, contextClass, restrictions);
 		}
 
 	}
@@ -271,6 +284,7 @@ interface ISadlOntologyHelper {
 		val OntModel ontModel;
 		val SadlResource subject;
 		val IModelProcessor modelProcessor;
+		val EObject currentModel;
 		val ValidationAcceptor acceptor;
 		val Optional<String> grammarContextId;
 		val Optional<EClass> contextClass;

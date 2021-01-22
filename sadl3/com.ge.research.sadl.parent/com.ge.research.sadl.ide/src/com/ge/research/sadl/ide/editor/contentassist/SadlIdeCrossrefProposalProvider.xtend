@@ -47,5 +47,9 @@ class SadlIdeCrossrefProposalProvider extends IdeCrossrefProposalProvider {
 			super.createProposal(candidate, crossRef, context)
 		}
 	}
+	
+	def String getProposalDatatypePropertySuggestion() {
+		
+	}
 
 }

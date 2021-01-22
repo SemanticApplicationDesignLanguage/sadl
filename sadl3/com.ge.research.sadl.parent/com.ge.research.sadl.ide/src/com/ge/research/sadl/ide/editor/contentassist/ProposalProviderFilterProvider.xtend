@@ -42,6 +42,10 @@ import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
+import org.eclipse.xtext.resource.EObjectDescription
+import com.ge.research.sadl.model.OntConceptType
+import com.ge.research.sadl.sADL.SadlPropertyInitializer
+import org.eclipse.xtext.nodemodel.impl.HiddenLeafNodeWithSyntaxError
 
 /**
  * Provides filter for removing items from the content proposal.
@@ -74,7 +78,10 @@ class ProposalProviderFilterProvider {
 		val ontologyContext = ontologyContextProvider.getOntologyContext(context, processor, acceptor).orNull;
 		if (ontologyContext === null) {
 			if (context.currentModel === context.previousModel && context.currentModel instanceof SadlModel) {
-				return [true]; // Any SADL resource is OK if we are at top level in the model.
+				if (context.currentNode === null || 
+					!(context.currentNode instanceof HiddenLeafNodeWithSyntaxError)) {
+					return [true]; // Any SADL resource is OK if we are at top level in the model.
+				}
 			}
 			return [false]
 		}
@@ -86,9 +93,8 @@ class ProposalProviderFilterProvider {
 			return [
 				if (SADL_RESOURCE == EClass) {
 					ontologyHelper.validate(ontologyContext, EObjectOrProxy as SadlResource);
-					if (processor instanceof JenaBasedSadlModelProcessor &&
-						(processor as JenaBasedSadlModelProcessor).isTypeCheckingErrorDetected) {
-							((processor as JenaBasedSadlModelProcessor).clearTypeCheckingErrorDetected());
+					if (processor.isTypeCheckingErrorDetected) {
+							processor.clearTypeCheckingErrorDetected();
 							return false;
 					}
 					return acceptor.apply(it);
@@ -104,6 +110,15 @@ class ProposalProviderFilterProvider {
 				currentModel.createPrimaryTypeRefFilter
 			case SADLPROPERTYDECLARATIONINCLASS_NAMEDECLARATIONS:
 				[ candidate |
+					val sr = candidate.EObjectOrProxy
+					if (sr instanceof SadlResource) {
+						val oct = processor.declarationExtensions.getOntConceptType(sr as SadlResource);
+						if (!oct.equals(OntConceptType.CLASS_PROPERTY) &&
+							!oct.equals(OntConceptType.DATATYPE_PROPERTY) &&
+							!oct.equals(OntConceptType.RDF_PROPERTY)) {
+								return false;
+						}
+					}
 					val container = currentModel.eContainer;
 					if (container instanceof SadlClassOrPropertyDeclaration) {
 						return container.createNotSelfClassOrPropertyFilter.apply(candidate)
@@ -134,6 +149,22 @@ class ProposalProviderFilterProvider {
 			default:
 				[false]
 		};
+	}
+
+	def String getSuggestion(ContentAssistContext context) {
+//		throw new UnsupportedOperationException("TODO: auto-generated method stub")
+		val pm = context.previousModel
+		if (pm instanceof SadlPropertyInitializer) {
+			val prop = (pm as SadlPropertyInitializer).property
+			if (prop instanceof SadlResource) {
+				val resource = context.currentModel.eResource;
+				val processor = modelProcessorProvider.getProcessor(resource);
+				val suggestion = processor.getDatatypePropertyContentAssistSuggestion(prop as SadlResource)
+//				println("Suggestion: " + suggestion)
+				return suggestion;
+			}
+		}		
+		return null;
 	}
 
 	private def Predicate<IEObjectDescription> createSubjectOfPropertyFilter(EObject currentModel) {
