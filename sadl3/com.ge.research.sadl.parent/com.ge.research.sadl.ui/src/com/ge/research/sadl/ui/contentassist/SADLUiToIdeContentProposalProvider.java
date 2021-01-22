@@ -19,6 +19,7 @@ import org.eclipse.xtext.ui.editor.contentassist.UiToIdeContentProposalProvider;
 import org.eclipse.xtext.util.TextRegion;
 import org.eclipse.xtext.xbase.lib.Pair;
 
+import com.ge.research.sadl.ide.editor.contentassist.DataTypePropertyInterruptException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
@@ -50,7 +51,20 @@ public class SADLUiToIdeContentProposalProvider extends UiToIdeContentProposalPr
 		};
 		Collection<org.eclipse.xtext.ide.editor.contentassist.ContentAssistContext> contexts = Collections
 				.singletonList(getIdeContext(context, builderProvider.get()));
-		ideProvider.createProposals(contexts, ideAcceptor);
+		try {
+			ideProvider.createProposals(contexts, ideAcceptor);
+		}
+		catch (Exception e) {
+			if (e instanceof DataTypePropertyInterruptException) {
+				ContentAssistEntry entry = ((DataTypePropertyInterruptException)e).getDatatypePropertySuggestion();
+				ICompletionProposalAcceptor uiAcceptor = new NullSafeCompletionProposalAcceptor(acceptor);
+				ConfigurableCompletionProposal proposal = doCreateProposal(entry.getProposal(), getDisplayString(entry),
+							getImage(entry), 0, context);
+				applySelection(entry, proposal);
+				uiAcceptor.accept(proposal);
+				return;
+			}
+		}
 		ICompletionProposalAcceptor uiAcceptor = new NullSafeCompletionProposalAcceptor(acceptor);
 		for (Pair<ContentAssistEntry, Integer> pair : entries) {
 			ContentAssistEntry entry = pair.getKey();

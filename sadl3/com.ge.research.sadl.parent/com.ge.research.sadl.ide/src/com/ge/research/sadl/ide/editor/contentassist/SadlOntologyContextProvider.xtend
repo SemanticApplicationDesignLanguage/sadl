@@ -55,6 +55,9 @@ import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement
 import org.eclipse.emf.common.util.EList
+import org.eclipse.xtext.nodemodel.impl.HiddenLeafNodeWithSyntaxError
+import org.eclipse.xtext.nodemodel.impl.CompositeNode
+import org.eclipse.xtext.nodemodel.impl.AbstractNode
 
 /**
  * Singleton service ontology context provider service for SADL.
@@ -151,6 +154,13 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 							return Optional.of(builder.build);
 						}
 					}
+				} else if (initializer !== null && initializer.eContainer instanceof SadlClassOrPropertyDeclaration) {
+					val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
+						grammarContextId = key;
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
+					return Optional.of(builder.build);
 				} else {
 					if (LOGGER.debugEnabled) {
 						LOGGER.warn('''Case handling incomplete: «key» [Class: «clazz.name»]''');
@@ -322,6 +332,24 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 						LOGGER.warn('''Unhandled case: «key» [Class: «clazz.name»]''');
 					}
 				}			
+			} else if (key == SADLSTATEMENT_TYPE) {
+				val type = getPrecedingSadlResource(it);
+				if (type !== null) {
+					val builder = new ContextBuilder(type, processor) => [
+						grammarContextId = key;
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
+					return Optional.of(builder.build);
+				}
+				else {
+					val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
+						grammarContextId = key;
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
+					return Optional.of(builder.build);
+				}
 			} else if (ONTOLOGY_INDEPENDENT_CONTEXT_IDS.contains(key)) {
 				val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
 					grammarContextId = key;
@@ -367,7 +395,31 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 			((context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling as HiddenLeafNode).previousSibling instanceof CompositeNodeWithSemanticElement) {
 			val eobj = (((context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling as HiddenLeafNode).previousSibling as CompositeNodeWithSemanticElement).semanticElement
 			if (eobj instanceof SadlResource) {
-					return (eobj as SadlResource)
+				return (eobj as SadlResource)
+			}
+		}
+		if (context.currentNode instanceof HiddenLeafNodeWithSyntaxError) {
+			var cn = context.currentNode;
+			while (cn !== null) {
+				if (cn instanceof AbstractNode) {
+					if (cn instanceof CompositeNode) {
+						var CompositeNodeWithSemanticElement cnwse = null
+						if ((cn as CompositeNode).firstChild instanceof CompositeNodeWithSemanticElement) {
+							cnwse = (cn as CompositeNode).firstChild as CompositeNodeWithSemanticElement
+						}
+						else if ((cn as CompositeNode).firstChild instanceof CompositeNode &&
+							((cn as CompositeNode).firstChild as CompositeNode).firstChild instanceof CompositeNodeWithSemanticElement) {
+							cnwse = (((cn as CompositeNode).firstChild) as CompositeNode).firstChild as CompositeNodeWithSemanticElement
+						}
+						if (cnwse !== null) {
+							if (cnwse.semanticElement instanceof SadlResource) {
+								return (cnwse.semanticElement as SadlResource)
+							}
+							
+						}
+					}
+					cn = cn.previousSibling;
+				}
 			}
 		}
 		return null

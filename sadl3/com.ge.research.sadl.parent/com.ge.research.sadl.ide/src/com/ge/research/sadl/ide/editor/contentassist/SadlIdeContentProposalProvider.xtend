@@ -72,6 +72,7 @@ import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 import org.eclipse.xtext.nodemodel.impl.LeafNodeWithSyntaxError
 import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement
+import org.eclipse.xtext.ParserRule
 
 /**
  * Generic content proposal provider for the {@code SADL} language.
@@ -128,9 +129,38 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 			}
 			default: {
 				super._createProposals(assignment, ctx, acceptor);
+//				createProposalDefaults(assignment, ctx, acceptor);
 			}
 		}
 	}
+	
+//	def protected void createProposalDefaults(Assignment assignment, ContentAssistContext ctx, IIdeContentProposalAcceptor acceptor) {
+//		val terminal = assignment.terminal;
+//		var getSuggestion = false;
+//		if (terminal instanceof RuleCall) {
+//			val rule = (terminal as RuleCall).rule;
+//			if (rule instanceof ParserRule) {
+//				val prule = (rule as ParserRule);
+//				val prname = prule.name;
+//				if (prname.equals("SadlExplicitValue")) {
+//					getSuggestion = true;
+//				}
+//			}
+//		}
+//		if (!getSuggestion && assignment.feature.compareTo("value") == 0) {
+//			getSuggestion = true;
+//		}
+//		
+//		if (getSuggestion) {
+//			if (crossrefProposalProvider instanceof SadlIdeCrossrefProposalProvider) {
+//				val suggestion = (crossrefProposalProvider as SadlIdeCrossrefProposalProvider).getProposalDatatypePropertySuggestion()
+//				if (suggestion !== null) {
+//					println("Suggestion: " + suggestion);
+//				}
+//			}
+//		}
+//		super._createProposals(assignment, ctx, acceptor);
+//	}
 		
 	override protected getCrossrefFilter(CrossReference reference, ContentAssistContext ctx) {
 		// Special case for filtering out all those resources among import proposals which are already imported.
@@ -267,7 +297,7 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 
 	protected List<OntConceptType> typeRestrictions
 	protected List<String> excludedNamespaces
-
+		
 	protected def Collection<String> getBuiltinFiles() {
 		return BUILTIN_FILES;
 	}
@@ -375,6 +405,31 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 					restrictTypeToAllPropertyTypes
 				} else {
 					// values of the property
+					val prop = (pm as SadlPropertyInitializer).property
+					if (prop instanceof SadlResource) {
+						val oct = declarationExtensions.getOntConceptType((prop as SadlResource))
+						if (oct.equals(OntConceptType.DATATYPE_PROPERTY)) {
+							return [ input |
+								val suggestion = context.getSuggestion();
+								if (suggestion !== null) {
+									var result = new ContentAssistEntry();
+									result.setProposal(suggestion);
+									result.setPrefix(context.prefix);
+									if (suggestion.startsWith("\"")) {
+										result.getEditPositions()
+												.add(new TextRegion(context.getOffset() + 1, suggestion.length() - 2));
+										result.setKind(ContentAssistEntry.KIND_TEXT);
+									} else {
+										result.getEditPositions().add(new TextRegion(context.getOffset(), suggestion.length()));
+										result.setKind(ContentAssistEntry.KIND_VALUE);
+									}
+									result.setDescription("datatype value suggestion");
+									throw new DataTypePropertyInterruptException(result);
+								}
+								return false;
+							]							
+						}
+					}
 				}
 			} else {
 				val container = pm.eContainer
@@ -449,7 +504,7 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 			return context.crossReferenceFilter.apply(input);
 		]
 	}
-
+		
 	protected def boolean includeKeyword(Keyword keyword, ContentAssistContext context) {
 		val enumRule = EcoreUtil2.getContainerOfType(keyword, EnumRule);
 		// https://github.com/crapo/sadlos2/issues/406
