@@ -1,0 +1,363 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+    <meta name="ProgId" content="FrontPage.Editor.Document">
+    <title>User-defined Data Types</title>
+  </head>
+  <body>
+    <h1>User-defined Data Types in SADL</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/29/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <ul>
+      <li><a href="#Introduction">Introduction</a></li>
+      <li><a href="#User-DefinedDataTypesSADL">User-Defined Data Types in SADL</a></li>
+      <li><a href="#ClassRangeVersusUserDefinedDatatype">When to Use an Object
+          Property with User-Defined Class as Range, When to Use a User-Defined
+          Datatype</a></li>
+      <li><a href="#AppendixA">Appendix A: XSD Datatypes in SADL</a></li>
+      <li><a href="#AppendixB">Appendix B: Example of rdfs:Datatype
+          Representation</a></li>
+    </ul>
+    <h2><a name="Introduction">Introduction</a></h2>
+    <p>In the Web Ontology Language (OWL), a property is defined as either an <em>owl:ObjectProperty</em>
+      or an <em>owl:DatatypeProperty</em>. The range of the former will be a
+      class and values of the property will be instances of the class. The range
+      of the latter will be an XSD primitive data type such as "int", "string",
+      or "date" or a user-defined data type. For the first we can define classes
+      and therefore the range any way that we want. For the latter a range that
+      is an XSD primitive datatypes is not always specific enough to be
+      sufficient. For example, consider the "age" property with domain "Person".
+      For the subclass of "Person" "Adolescent", we may want to allow the values
+      of the property to not be all values of type "int", but only those values
+      between 12 and 18, 12 included but 18 excluded. Or perhaps a model
+      includes a property whose range of values isn't any string but only those
+      strings which match the syntax of a US Social Security Number.
+      User-defined data types allow for just this kind of additional constraints
+      on the range of, or a restriction to, an <em>owl:DatatypeProperty</em>.</p>
+    <h2><a name="User-DefinedDataTypesSADL">User-Defined Data Types in SADL</a></h2>
+    <p>In SADL user-defined data types are defined as "subclasses" of XSD data
+      types using the same "is a type of" syntax as user-defined class
+      hierarchies. User-defined data types are the same dark blue as regular
+      classes but are not in bold font. The XSD data types supported by SADL 3
+      are listed in <a href="#AppendixA">Appendix A</a>. Here are some examples
+      of user-defined data type definitions.</p>
+    <ol>
+      <li><span style="font-size: 10.0pt; font-family: Consolas; color: navy">
+          AdolescentAge</span><span style="font-size: 10.0pt; font-family: Consolas; color: black">
+        </span><span style="font-size: 10.0pt; font-family: Consolas; color: purple">
+          is</span><span style="font-size: 10.0pt; font-family: Consolas; color: black">
+        </span><span style="font-size: 10.0pt; font-family: Consolas; color: purple">a</span><span
+          style="font-size: 10.0pt; font-family: Consolas; color: black"> </span><span
+          style="font-size: 10.0pt; font-family: Consolas; color: purple"> type</span><span
+          style="font-size: 10.0pt; font-family: Consolas; color: black"> </span><span
+          style="font-size: 10.0pt; font-family: Consolas; color: purple"> of</span><span
+          style="font-size: 10.0pt; font-family: Consolas; color: black"> </span><span
+          style="font-size: 10.0pt; font-family: Consolas; color: purple"> int</span><span
+          style="font-size: 10.0pt; font-family: Consolas; color: black">
+          [12,18).&nbsp;&nbsp;&nbsp; </span><font color="#808080" size="2"><i>//
+            12 inclusive, 18 exclusive</i></font></li>
+      <li><font color="#000080" size="2">Airport_Ident</font><font size="2"> </font>
+        <font color="#800080" size="2">is</font><font size="2"> </font> <font
+          color="#800080" size="2">a</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#800080" size="2">of</font><font
+          size="2"> </font> <font color="#800080" size="2">string</font><font
+          size="2"> </font> <font color="#800080" size="2">length</font><font
+          size="2"> 1-4 .</font></li>
+      <li><font color="#000080" size="2">Longitude</font><font size="2"> </font>
+        <font color="#800080" size="2">is</font><font size="2"> </font> <font
+          color="#800080" size="2">a</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#800080" size="2">of</font><font
+          size="2"> </font> <font color="#800080" size="2">float</font><font size="2">
+          (-180, 180).</font></li>
+      <li><font color="#000080" size="2">Latitude</font><font size="2"> </font><font
+          color="#800080" size="2">is</font><font size="2"> </font> <font color="#800080"
+          size="2">a</font><font size="2"> </font> <font color="#800080" size="2">type</font><font
+          size="2"> </font> <font color="#800080" size="2">of</font><font size="2">
+        </font> <font color="#800080" size="2">float</font><font size="2">
+          [-90, 90].</font></li>
+      <li><font color="#000080" size="2">SSN</font><font size="2"> </font> <font
+          color="#800080" size="2">is</font><font size="2"> </font> <font color="#800080"
+          size="2">a</font><font size="2"> </font> <font color="#800080" size="2">type</font><font
+          size="2"> </font> <font color="#800080" size="2">of</font><font size="2">
+        </font> <font color="#800080" size="2">string</font><font size="2">
+          "[0-9]{3}-[0-9]{2}-[0-9]{4}".</font></li>
+      <li><font color="#000080" size="2">ClothingSize</font><font size="2"> </font><font
+          color="#800080" size="2">is</font><font size="2"> </font> <font color="#800080"
+          size="2">a</font><font size="2"> </font> <font color="#800080" size="2">type</font><font
+          size="2"> </font> <font color="#800080" size="2">of</font><font size="2">
+          {</font><font color="#800080" size="2">int</font><font size="2"> </font><font
+          color="#800080" size="2">or</font><font size="2"> </font> <font color="#800080"
+          size="2">string</font><font size="2">}.&nbsp;&nbsp;&nbsp;&nbsp; </font><font
+          color="#808080" size="2"><i>// either an numeric or a string, e.g.
+            "Medium"</i></font></li>
+      <li><font color="#000080" size="2">EnumeratedHeight</font><font size="2">
+        </font><font color="#800080" size="2">is</font><font size="2"> </font>
+        <font color="#800080" size="2">a</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#800080" size="2">of</font><font
+          size="2"> </font> <font color="#800080" size="2">string</font><font
+          size="2"> {"short", "medium", "tall"}. </font><font color="#808080" size="2"><i>&nbsp;//
+            enumeration of 3 possible string values</i></font></li>
+    </ol>
+    <p>The SADL grammar for user-defined data types is derived from and is
+      consistent with W3C recommendations, see <a href="http://www.w3.org/TR/xmlschema-2/#datatype-components">
+        http://www.w3.org/TR/xmlschema-2/#datatype-components</a> and <a href="https://www.w3.org/TR/swbp-xsch-datatypes/">XML
+        Schema Datatypes in RDF and OWL</a>. After the parent type the
+      appropriate facets are specified, consistent with the type being extended.
+      Facets include:</p>
+    <ol>
+      <li>range (minInclusive, maxInclusive, minExclusive, maxExclusive)</li>
+      <li>regular expression pattern matching</li>
+      <li>length (single value or min and/or max length)</li>
+      <li>enumeration of values</li>
+    </ol>
+    <p>For strings this includes length and/or a regular expression to be
+      matched. For numbers this include a min and/or max and whether it is
+      inclusive or not. In addition, a user-defined data type can be union of
+      XSD data types, as illustrated in example 6 above.</p>
+    <p>When the target representation is OWL, a user-defined data type in SADL
+      is translated into the model representation as an <em>rdfs:Datatype</em>.
+      As an example of such a representation, the OWL equivalent of the SADL
+      definition of "AdolescentAge" above, may be found in <a href="#AppendixB">Appendix
+        B</a>.</p>
+    <h2><a name="ClassRangeVersusUserDefinedDatatype">When to Use an Object
+        Property with User-Defined Class as Range, When to Use a User-Defined
+        Data Type</a></h2>
+    <p>One might ask when it is appropriate to use an <em>owl:DatatypeProperty</em>
+      with a user-defined data type and when one should use an <em>owl:ObjectProperty</em>
+      with a class range. While the choice is to a certain extent a subjective
+      decision, there are some guiding principles to consider. Arguably, the
+      primary difference between an <em>owl:DatatypeProperty</em> and an <em>owl:ObjectProperty</em>
+      has to do with the identity of the values of the property. XSD primitive
+      data type instances are numbers, strings, dates, etc. These values do not
+      have identity in the same way that instances of classes have identity.
+      While an instance of a class may be a blank node, it still is a uniquely
+      defined instance and may be the subject of other statements. For example,
+      we may not know the name of Martha Washington's first husband, but that
+      instance of Person can still be the subject of statements giving his date
+      of birth and date of death. The same blank node (&lt;BN&gt;) is the object
+      of the statement "MarthaWashington has husband &lt;BN&gt;" and the subject
+      of the statements "&lt;BN&gt; has dateOfBirth '15 October 1711'", and
+      "&lt;BN&gt; has dateOfDeath '8 July 1757'". Contrast this with a value of
+      type xsd:int. Suppose I have 12 pairs of shoes and you have a child who is
+      12 years old. Is that the same "12" or a different "12"? The question
+      seems non-sensical. They are clearly not the same instance. XSD primitive
+      data type values do not have identity and do not appear as the subject of
+      statements in OWL. This is not usually a problem for things like airport
+      identity or Social Security number or even age when the unit years can be
+      assumed, so user-defined data types work very well for many modeling
+      problems.</p>
+    <p>If, however, one needs the value of a property to be the subject of other
+      statements in the model, one should use an <em>owl:ObjectProperty</em>
+      and define a class for the range of the property. The association of units
+      with numeric values is a good example. In order to include units, one
+      might create a class "UnittedQuantity" which is the domain of the
+      properties "value" and "unit" (see Quantity in <a href="http://qudt.org/">http://qudt.org/</a>).
+      The class "UnittedQuantity" would then become the range of properties such
+      as "length", "speed", "weight", etc. The length of a regulation American
+      football field, goal line to goal line, is 100 yards. In SADL one might
+      specify a model and define an instance as follows. Note that the "^" at
+      the beginning of "^value" and "^length" is necessary because "value" and
+      "length" are reserved words in SADL 3. The "^" allows any reserved word to
+      be used as a user-defined concept in the model. Note that this definition
+      of "UnittedQuantity" is, in fact, included by default in every SADL model
+      through the SadlImplicitModel.</p>
+    <font color="#000080" size="2"><b> </b></font>
+    <blockquote><font color="#000080" size="2"><b> </b></font>
+      <p align="LEFT"><font color="#000080" size="2"><b>UnittedQuantity</b></font><font
+          size="2"> </font> <font color="#800080" size="2">is</font><font size="2">
+        </font> <font color="#800080" size="2">a</font><font size="2"> </font>
+        <font color="#800080" size="2">class</font><font size="2"> </font> <font
+          color="#800080" size="2">described</font><font size="2"> </font> <font
+          color="#800080" size="2">by</font><font size="2"> </font><font color="#008000"
+          size="2"><b>^</b></font><font color="#008000" size="2"><b>value</b></font><font
+          size="2"> </font><font color="#800080" size="2">with</font><font size="2">
+        </font> <font color="#800080" size="2">values</font><font size="2"> </font>
+        <font color="#800080" size="2">of</font><font size="2"> </font> <font
+          color="#800080" size="2">type</font><font size="2"> </font> <font color="#800080"
+          size="2">decimal</font><font size="2">, </font> <font color="#800080"
+          size="2">described</font><font size="2"> </font> <font color="#800080"
+          size="2">by</font><font size="2"> </font> <font color="#008000" size="2"><b>unit</b></font><font
+          size="2"> </font> <font color="#800080" size="2">with</font><font size="2">
+        </font> <font color="#800080" size="2">values</font><font size="2"> </font>
+        <font color="#800080" size="2">of</font><font size="2"> </font> <font
+          color="#800080" size="2">type</font><font size="2"> </font> <font color="#800080"
+          size="2">string</font><font size="2">.</font><i><font color="#000080"
+            size="2"><b><br>
+              FootballField</b></font></i><font size="2"> </font> <font color="#800080"
+          size="2">is</font><font size="2"> </font> <font color="#800080" size="2">a</font><font
+          size="2"> </font> <font color="#800080" size="2">class</font><font size="2">
+        </font> <font color="#800080" size="2">described</font><font size="2">
+        </font> <font color="#800080" size="2">by</font><font size="2"> </font>
+        <font color="#008000" size="2"><b>^length</b></font><font size="2"> </font>
+        <font color="#800080" size="2">with</font><font size="2"> </font> <font
+          color="#800080" size="2">values</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#000080" size="2"><b>Quantity</b></font><font
+          size="2">, </font> <font color="#800080" size="2">described</font><font
+          size="2"> </font> <font color="#800080" size="2">by</font><font size="2">
+        </font> <font color="#008000" size="2"><b>width</b></font><font size="2">
+        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
+        <font color="#800080" size="2">values</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
+          size="2">type</font><font size="2"> </font> <font color="#000080" size="2"><b>Quantity</b></font><font
+          size="2">.</font></p>
+      <font size="2"> </font></blockquote>
+    <font size="2">
+      <p align="LEFT"></p>
+    </font><font color="#0000ff" size="2"> </font>
+    <blockquote><font color="#0000ff" size="2"> </font>
+      <p><font color="#0000ff" size="2">GiantsStadium</font><font size="2"> </font><font
+          color="#800080" size="2"> is</font><font size="2"> </font><font color="#800080"
+          size="2">a</font><font size="2"> </font><font color="#000080" size="2"><b>FootballField</b></font><font
+          size="2"> </font><font color="#800080" size="2">with</font><font size="2">
+        </font> <font color="#008000" size="2"><b>^length</b></font><font size="2">
+          (</font><font color="#800080" size="2">a</font><font size="2"> </font><font
+          color="#000080" size="2"><b>Quantity</b></font><font size="2"> </font><font
+          color="#800080" size="2">with</font><font size="2">&nbsp;</font><font
+          color="#008000" size="2"><b>^value</b></font><font size="2"> 100, </font><font
+          color="#800080" size="2">with</font><font size="2"> </font> <font color="#008000"
+          size="2"><b>unit</b></font><font size="2"> "<u>yds</u>").</font></p>
+      <font size="2"> </font></blockquote>
+    <font size="2"> </font>
+    <p>Alternatively, one might consider using a restriction.</p>
+    <font color="#000080" size="2"><b> </b></font>
+    <blockquote><font color="#000080" size="2"><b> </b></font>
+      <p align="LEFT"><font color="#000080" size="2"><b>RegulationFootballField</b></font><font
+          size="2"> </font> <font color="#800080" size="2">is</font><font size="2">
+        </font> <font color="#800080" size="2">a</font><font size="2"> </font>
+        <font color="#800080" size="2">type</font><font size="2"> </font> <font
+          color="#800080" size="2">of</font><font size="2"> </font> <font color="#000080"
+          size="2"><b>FootballField</b></font><font size="2">.</font><font color="#0000ff"
+          size="2"><br>
+          RegulationFFLength</font><font size="2"> </font> <font color="#800080"
+          size="2">is</font><font size="2"> </font> <font color="#800080" size="2">a</font><font
+          size="2"> </font> <font color="#000080" size="2"><b>Quantity</b></font><font
+          size="2"> </font> <font color="#800080" size="2">with</font><font size="2">&nbsp;</font><font
+          color="#008000" size="2"><b>^value</b></font><font size="2"> 100, </font><font
+          color="#800080" size="2">with</font><font size="2"> </font> <font color="#008000"
+          size="2"><b>unit</b></font><font size="2"> "<u>yds</u>".</font><font color="#800080"
+          size="2"><br>
+          A</font><font size="2"> </font><font color="#000080" size="2"><b>FootballField</b></font><font
+          size="2"> </font><font color="#800080" size="2">is</font><font size="2">
+        </font> <font color="#800080" size="2">a</font><font size="2"> </font>
+        <font color="#000080" size="2"><b>RegulationFootballField</b></font><font
+          size="2"> </font><font color="#800080" size="2">only</font><font size="2">
+        </font> <font color="#800080" size="2">if</font><font size="2"> </font>
+        <font color="#008000" size="2"><b>^length</b></font><font size="2"> </font>
+        <font color="#800080" size="2">always</font><font size="2"> </font> <font
+          color="#800080" size="2">has</font><font size="2"> </font> <font color="#800080"
+          size="2">value</font><font size="2"> </font> <font color="#0000ff" size="2">RegulationFFLength</font><font
+          size="2">.</font></p>
+      <font size="2">
+        <p align="LEFT"></p>
+      </font><font color="#0000ff" size="2"> </font>
+      <p><font color="#0000ff" size="2">KyleField</font><font size="2"> </font><font
+          color="#800080" size="2">is</font><font size="2"> </font><font color="#800080"
+          size="2">a</font><font size="2"> </font> <font color="#000080" size="2"><b>RegulationFootballField</b></font><font
+          size="2">.</font></p>
+      <font size="2"> </font></blockquote>
+    <h2><a name="AppendixA">Appendix A: XSD Data Types in SADL</a></h2>
+    <p>In OWL, and therefore in SADL, data type properties are properties whose
+      range is an XML Schema primitive data type such as xsd:string. The data
+      types explicitly supported by the SADL grammar include:</p>
+    <ol>
+      <li>string</li>
+      <li>boolean</li>
+      <li>decimal</li>
+      <li>int</li>
+      <li>long</li>
+      <li>float</li>
+      <li>double</li>
+      <li>duration</li>
+      <li>dateTime</li>
+      <li>time</li>
+      <li>date</li>
+      <li>gYearMonth</li>
+      <li>gYear</li>
+      <li>gMonthDay</li>
+      <li>gDay</li>
+      <li>gMonth</li>
+      <li>hexBinary</li>
+      <li>base64Binary</li>
+      <li>anyURI</li>
+      <li>integer</li>
+      <li>negativeInteger</li>
+      <li>nonNegativeInteger</li>
+      <li>positiveInteger</li>
+      <li>nonPositiveInteger</li>
+      <li>unsignedByte</li>
+      <li>sunsignedInt</li>
+      <li>anySimpleType</li>
+    </ol>
+    <font size="2"></font>
+    <h2><a name="AppendixB">Appendix B: Example of rdfs:Datatype Representation</a></h2>
+    <p class="MsoNormal" style="text-autospace:none">...</p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp; &lt;rdfs:Datatype rdf:ID="AdolescentAge"&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;
+        &lt;TestIdentityOfUserDefinedDataType:functional_min rdf:datatype=</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp; "http://www.w3.org/2001/XMLSchema#string"&gt;12&lt;/TestIdentityOfUserDefinedDataType:functional_min&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;
+        &lt;TestIdentityOfUserDefinedDataType:tolerance rdf:datatype=</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp; "http://www.w3.org/2001/XMLSchema#string"&gt;.5&lt;/TestIdentityOfUserDefinedDataType:tolerance&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;
+        &lt;TestIdentityOfUserDefinedDataType:mapping&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;TestIdentityOfUserDefinedDataType:ValueMapping&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;TestIdentityOfUserDefinedDataType:alias rdf:datatype=</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "http://www.w3.org/2001/XMLSchema#string"&gt;16&lt;/TestIdentityOfUserDefinedDataType:alias&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;TestIdentityOfUserDefinedDataType:value rdf:datatype=</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "http://www.w3.org/2001/XMLSchema#data"&gt;16&lt;/TestIdentityOfUserDefinedDataType:value&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;/TestIdentityOfUserDefinedDataType:ValueMapping&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;
+        &lt;/TestIdentityOfUserDefinedDataType:mapping&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp; &lt;owl:equivalentClass&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;rdfs:Datatype&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;owl:withRestrictions rdf:parseType="Collection"&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;rdf:Description&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;xsd:maxExclusive&gt;18&lt;/xsd:maxExclusive&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;xsd:minInclusive&gt;12&lt;/xsd:minInclusive&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;/rdf:Description&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;/owl:withRestrictions&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &lt;owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#int"/&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/rdfs:Datatype&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
+font-family:Consolas">&nbsp;&nbsp;&nbsp; &lt;/owl:equivalentClass&gt;</span></p>
+    <p class="MsoNormal" style="text-autospace: none"><font size="2"> <span style="font-family: Consolas">...</span></font></p>
+  </body>
+</html>

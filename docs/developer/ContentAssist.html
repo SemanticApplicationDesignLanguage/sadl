@@ -1,0 +1,53 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <title>Overview of Content Assist Implementation</title>
+  </head>
+  <body>
+    <h1>Content Assist</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/16/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <h2>Introduction</h2>
+    <p>Content assist is one a major feature of an IDE and Xtext provides
+      support for this capability in SADL. Providing meaningful content
+      assistance in SADL is complicated by the fact that what can next in a SADL
+      model file depends on what the ontology contains. The purpose of this
+      document is to provide an overview of how content assistance is
+      implemented in SADL Version 3.</p>
+    <h2>Architecture and Process</h2>
+    <p>Content assist is architected to work in both the Eclipse environment and
+      in WebSADL. Therefore the control flow goes through the
+      Eclipse-independent IdeContentProposalProvider and from there to the
+      _createProposals method (and others) in the SadlIdeContentProposalProvider
+      class in the com.ge.research.sadl.ide project.</p>
+    <p>The grammar definition in Sadl.xtext allows Xtext to identify keywords
+      that can appear next after the current cursor location in a fairly
+      standard way, but identifying which SadlResources (named concepts in the
+      model and the model's imports) is very contextual. The _createProposals
+      method uses the SADL Scopes to get a list of all of the SadlResources
+      known to the model. These are then filtered, ultimately coming down to the
+      getCrossReferenceFilter method in the ProposalProviderFilterProvider
+      class. This method uses the SadlOntologyContextProvider class's
+      getOntologyContext method to create an instance of the Context class. The
+      "currentModel" is the last EObject successfully identified in the parse
+      tree prior to the current cursor location. In some instances this will be
+      the top-level SadlModel. At other times it will be a lower-level EObject.
+      This method iterates over the contents of filtered grammar elements and
+      gets a "key" indicative of where one might be, grammar-wise. Depending on
+      the value of the "key", different instances of Context are created. </p>
+    <p>If no instance of Context is generated, the SadlResource the method
+      returns true, meaning that the SadlResource should be added to the content
+      assist proposals. Otherwise, if the "key" is contained by the
+      ONTOLOGY_DEPENDENT_CONTEXT_IDS list, the validate method of the
+      JenaBasedSadlModelProcessor is called to determine if the SadlResource is
+      viable. For example, if the cursor is at the end of the incomplete
+      statement "Dog is atype of " then only SadlResources that are of type
+      OntConceptType.CLASS are viable.</p>
+    <p>If the SadlResource under consideration is not viable, an error message
+      is added to the instance of ProposalProviderValidationAcceptor that is
+      passed into the call to validate. Upon return from the call, only those
+      candidates that have no errors added to the acceptor are added to the set
+      of proposals.</p>
+  </body>
+</html>
