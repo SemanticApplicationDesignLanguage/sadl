@@ -7,12 +7,54 @@
     <title>The SWI</title>
   </head>
   <body>
-    <h1>SWI-Prolog Reasoner/Translator Plug-in Pair for SADL</h1>
+    <h1><a id="mozTocId758285" class="mozTocH1"></a>SWI-Prolog
+      Reasoner/Translator Plug-in Pair for SADL</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->12/21/2020<!--webbot bot="Timestamp" endspan i-checksum="12576" -->.<a
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->2/1/2021<!--webbot bot="Timestamp" endspan i-checksum="12576" -->.<a
         href="contact.html">Contact us</a>.</h5>
     <p>Note: These plug-ins currently run on Windows, Mac, and Linux.</p>
-    <h2>Introduction</h2>
+    <ul id="mozToc">
+      <!--mozToc h1 1 h2 2 h3 3 h4 4-->
+      <li><a href="#mozTocId758285">SWI-Prolog Reasoner/Translator Plug-in Pair
+          for SADL</a>
+        <ul>
+          <li><a href="#mozTocId732462"></a><br>
+          </li>
+          <li><a href="#mozTocId655947">Introduction</a></li>
+          <li><a href="#mozTocId682232">Installation Instructions</a>
+            <ul>
+              <li><a href="#mozTocId185846">Install SWI-Prolog</a></li>
+            </ul>
+          </li>
+          <li><a href="#mozTocId848080">Configuring SADL to Use SWI-Prolog</a></li>
+          <li><a href="#mozTocId98945">Using SWI-Prolog in SADL</a>
+            <ul>
+              <li><a href="#mozTocId650708">Queries</a></li>
+              <li><a href="#mozTocId12489">Prolog Files of Interest</a></li>
+              <li><a href="#mozTocId472275">A Working Example</a>
+                <ul>
+                  <li><a href="#mozTocId467266">Add a rule to the
+                      swi-custom-predicates.pl file.</a></li>
+                  <li><a href="#mozTocId528041">Add a SADL rule to the SADL
+                      model</a></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><a href="#mozTocId721432">Troubleshooting</a>
+            <ul>
+              <li><a href="#mozTocId993745">SWI-Prolog does not start</a></li>
+              <li><a href="#mozTocId140908">SADL Fails to Connect to the
+                  SWI-Prolog HTTP Server</a></li>
+              <li><a href="#mozTocId338092">Debugging</a></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <h2><br>
+    </h2>
+    <h2><a id="mozTocId655947" class="mozTocH2"></a>Introduction</h2>
     <p><a href="http://www.swi-prolog.org/">SWI-Prolog</a> is a popular flavor
       of Prolog and one which is particularly well-suited for use with OWL due
       to its ability to directly load RDF Data.The SWIPrologReasonerPlugin and
@@ -26,13 +68,13 @@
       on a machine that can share files with the SADL IDE or SadlServer. In the
       future this constraint could be relaxed so that the passing of information
       to the service is not file-based. </p>
-    <h2>Installation Instructions</h2>
+    <h2><a id="mozTocId682232" class="mozTocH2"></a>Installation Instructions</h2>
     <p>Both the SWI-Prolog reasoner plug-in and the associated translator
       plug-in require that SWI-Prolog be available as a service. The translator
       uses the service to verify that built-in predicates used in rules are
       actually defined and the reasoner uses the service to do inference and to
       process queries.</p>
-    <h3>Install SWI-Prolog </h3>
+    <h3><a id="mozTocId185846" class="mozTocH3"></a>Install SWI-Prolog </h3>
     <p>Assuming that a conforming SWI-Prolog service is not already available,
       please follow these instructions to set up a local service.</p>
     <ol>
@@ -61,7 +103,8 @@
       machine the response should be the path to the SWI-Prolog executable.</div>
     <ol>
     </ol>
-    <h2>Configuring SADL to Use SWI-Prolog</h2>
+    <h2><a id="mozTocId848080" class="mozTocH2"></a>Configuring SADL to Use
+      SWI-Prolog</h2>
     <p>The SWI-Prolog reasoner/translator pair are included with the SADL 3
       distribution starting with release 3.2.0 in October, 2019. Therefore, no
       special SADL installation is currently required.</p>
@@ -81,13 +124,13 @@
       the SWIPrologReasonerPlugin is selected. That means that if models contain
       concept definitions that have the same name as Prolog predicates, these
       models will need to be modified to add prefixes to disambiguate.</p>
-    <h2>Using SWI-Prolog in SADL</h2>
+    <h2><a id="mozTocId98945" class="mozTocH2"></a>Using SWI-Prolog in SADL</h2>
     <p>Once the SWI-Prolog reasoner and translator have been selected and
       configured for a project, models can be tested and queries executed as
       desired. Rules will be translated to Prolog and the SWI-Prolog service
       will load these and the OWL models as needed to validate rules, do
       inference, and execute queries.</p>
-    <h3>Queries</h3>
+    <h3><a id="mozTocId650708" class="mozTocH3"></a>Queries</h3>
     <p>There are several options available when querying with SWI-Prolog.</p>
     <ol>
       <li>Simple queries can be written in the SADL query language and will be
@@ -470,7 +513,8 @@ holds('http://www.w3.org/1999/02/22-rdf-syntax-ns#type',PVx,'http://sadl.org/Mod
       the SWI-Prolog service in each case is that shown in the last <i>Ask</i>.
       For more information about the <em>holds</em> predicate, see the working
       example below.</p>
-    <h3 style=" margin-bottom: 0in; line-height: 100%">Prolog Files of Interest</h3>
+    <h3 style=" margin-bottom: 0in; line-height: 100%"><a id="mozTocId12489" class="mozTocH3"></a>Prolog
+      Files of Interest</h3>
     <p>The following files are created in the OwlModels folder, if they do not
       already exist, when the SWIPrologTranslatorPlug is invoked for a project.<br>
       <br>
@@ -493,7 +537,7 @@ holds('http://www.w3.org/1999/02/22-rdf-syntax-ns#type',PVx,'http://sadl.org/Mod
       by the first file in this list</p>
     <p>In addition to these files, each SADL model (.sadl file) generates an OWL
       (.owl) file and a Prolog (.pl) file. </p>
-    <h3>A Working Example</h3>
+    <h3><a id="mozTocId472275" class="mozTocH3"></a>A Working Example</h3>
     <p>The example above illustrates query syntax, but the queries will not
       return any results unless further knowledge is captured. The reason for
       this is that the queries each match on instances of the <i>Shape</i>
@@ -509,7 +553,8 @@ holds('http://www.w3.org/1999/02/22-rdf-syntax-ns#type',PVx,'http://sadl.org/Mod
       definitions of <i>Circle</i> and <em>Rectangle</em> as sub-classes of <em>Shape</em>.</p>
     <p>We can add such a rule (and others to do additional OWL reasoning) in
       either of two ways.</p>
-    <h4>Add a rule to the <i>swi-custom-predicates.pl</i> file.</h4>
+    <h4><a id="mozTocId467266" class="mozTocH4"></a>Add a rule to the <i>swi-custom-predicates.pl</i>
+      file.</h4>
     <p>To illustrate adding such a rule to the <em>swi-custom-predicates.pl</em>
       file, open this file in an editor and add the following Prolog rule.</p>
     <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
@@ -543,7 +588,8 @@ I,
       infers triples will cause a <em>holds(P,S,O) </em>to be inferred.
       Therefore our queries over the inferred model use the <em>holds</em>
       predicate rather than the <em>rdf</em> predicate.</p>
-    <h4>Add a SADL rule to the SADL model</h4>
+    <h4><a id="mozTocId528041" class="mozTocH4"></a>Add a SADL rule to the SADL
+      model</h4>
     <p>Alternatively, we could add a SADL rule to our SADL model or to an
       imported model. Such a SADL rule would look like this:</p>
     <p style="margin-bottom: 0in; line-height: 100%" align="left">&nbsp;&nbsp;&nbsp;&nbsp;<font
@@ -614,18 +660,19 @@ PVI,
     </p>
     <p style="margin-bottom: 0in; line-height: 100%"> </p>
     <p></p>
-    <h2>Troubleshooting</h2>
-    <h3>SWI-Prolog does not start</h3>
+    <h2><a id="mozTocId721432" class="mozTocH2"></a>Troubleshooting</h2>
+    <h3><a id="mozTocId993745" class="mozTocH3"></a>SWI-Prolog does not start</h3>
     <p>When the SWI-Prolog reasoner for SADL is requested, SADL will start the
       service provided that the executable (<i>swipl-win.exe</i> for Windows, <i>swipl</i>
       for Mac and Linux) is on the path. Make sure that you can start SWI-Prolog
       from a command window, demonstrating that the executable is on the system
       path.</p>
-    <h3>SADL Fails to Connect to the SWI-Prolog HTTP Server</h3>
+    <h3><a id="mozTocId140908" class="mozTocH3"></a>SADL Fails to Connect to the
+      SWI-Prolog HTTP Server</h3>
     <p>If the SWI-Prolog service is running other than on localhost, port 5000,
       the service must be configured for each project in the
       SWIPrologReasonerPlugin configuration options, as described above. </p>
-    <h3> Debugging</h3>
+    <h3><a id="mozTocId338092" class="mozTocH3"></a> Debugging</h3>
     <p>If the Prolog service is starting, further debugging can be performed by
       interacting directly with SWI-Prolog. The general procedure is as follows.</p>
     <ol>

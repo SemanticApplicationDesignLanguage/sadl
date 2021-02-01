@@ -6,7 +6,7 @@
   <body>
     <h1>Topics in Semantic Modeling, SADL, and OWL: a Tutorial</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/13/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/29/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <h2>Introduction</h2>
     <p>This document is the index to a sequence of topics in semantic modeling
@@ -15,43 +15,102 @@
       While the sequence is intended to provide a gentle introduction, an effort
       has also been made to allow each topic to be used independently by someone
       familiar with the technology in general and looking for specifics of how
-      the SADL modeling approach may be applied to their particular problem.</p>
+      the SADL modeling approach may be applied to their particular problem.
+      Later parts of the tutorial go into aspects of the SADL integrated
+      development environment (IDE) useful for model validation, regression
+      testing, maintenance, and knowledge base application for decision support.</p>
     <p><a href="FCSM_Introduction.pdf" target="_blank">Go to tutorial</a>.</p>
     <h2>Approach</h2>
     <p>Believing that people learn best when they are engaged in inquiry and
       reflection, many of the slide decks and videos linked in the outline below
-      pose problems and invite the user to pause and to work out their own
+      pose problems and invite the user to pause and to work out his or her own
       solution to the exercise before continuing. One or more solutions to the
       problem are then presented. Users of this material are encouraged to
       engage in the learning process and to not take an entirely passive
       approach.</p>
     <p>Engagement in solving problems and answering questions presupposes some
-      mechanism of expression. This material uses the Semantic Application
-      Design Language (SADL) development environment and language as the means
-      of model expression. Therefore the user is invited to have SADL installed
-      on their computer and to use it in solving the problems presented. See <a
-        href="http://semanticapplicationdesignlanguage.github.io/sadl/InstallSadlIde.html"
-        target="_blank">Installation Instructions for SADL-IDE, Version 3</a>.</p>
-    <h2>Topics</h2>
+      mechanism of expression and model execution. This material uses the
+      Semantic Application Design Language (SADL) IDE and language as means to
+      this end. Therefore the user is invited to have SADL installed on their
+      computer and to use it in solving the problems presented. See <a href="http://semanticapplicationdesignlanguage.github.io/sadl/InstallSadlIde.html"
+        target="_blank">Installation Instructions for SADL-IDE, Version 3</a>.
+      It is also possible to use WebSADL for a browser-based IDE after
+      installing the WebSADL server, see WebSadl installation at <a href="https://hub.docker.com/r/theiaide/sadl"
+        target="_blank">https://hub.docker.com/r/theiaide/sadl.</a></p>
+    <p></p>
+    <a https:="" hub.docker.com="" r="" theiaide="" sadl<="" a="">
+      <h2>Topics</h2>
+    </a>
     <ol>
-      <li>Foundational Concepts in Semantic Modeling</li>
+      <a https:="" hub.docker.com="" r="" theiaide="" sadl<="" a="">
+        <li>Part 1: Foundational Concepts in Semantic Modeling</li>
+      </a>
       <ul>
-        <li><a href="FCSM_BasicSetTheory.pdf" target="_blank">Basic Set Theory</a></li>
-        <li>Propositional Logic</li>
-        <li>Predicate Logic</li>
-        <li>Binary Predicates, Graphs, and OWL</li>
+        <a https:="" hub.docker.com="" r="" theiaide="" sadl<="" a=""> </a>
+        <li><a href="FCSM_BasicSetTheory.pdf" target="_blank">Basic Set Theory:
+            Pillar of Semantic Modeling</a></li>
         <ul>
-          <li>Graph Patterns</li>
-          <li>Matching a Graph Pattern in a Graph</li>
-          <li>Creating Complex Graph Patterns</li>
+          <li><span style="color: #330033;">Definition of a Set</span></li>
+          <li><span style=" color: #330033;">Set Operations</span></li>
+          <li><span style="  color: #330033;">Disjoint and Compliment Sets<br>
+            </span></li>
         </ul>
-        <li>Identity in the Semantic Web is by URI (or by Association)</li>
+        <li><span style="color: #0000ee;">Logic: the Second Pillar of Semantic
+            Modeling</span></li>
+        <ul>
+          <li><span style=" color: #0000ee;"><span style="color: #330033;">Propositional
+                Logic</span></span></li>
+          <li><span style="  color: #0000ee;"><span style=" color: #330033;">Predicate
+                Logic</span></span></li>
+          <li><span style="   color: #0000ee;"><span style="  color: #330033;">Graph
+                Models<br>
+              </span></span></li>
+        </ul>
+        <li><span style=" color: #0000ee;">The Web Ontology Language (OWL)</span></li>
+        <ul>
+          <li><span style="  color: #0000ee;"><span style="color: #330033;">Identity
+                and Namespaces<br>
+              </span></span></li>
+          <li><span style="   color: #0000ee;"><span style=" color: #330033;">OWL
+                Predicates</span></span></li>
+          <li><span style="    color: #0000ee;"><span style="  color: #330033;">Domain
+                and Range</span></span></li>
+          <li><span style="     color: #0000ee;"><span style="   color: #330033;">N-ary
+                Relationships<br>
+              </span></span></li>
+          <li><span style="     color: #0000ee;"><span style="   color: #330033;">Property
+                Restrictions</span></span></li>
+          <li><span style="      color: #0000ee;"><span style="    color: #330033;">Equivalent
+                Classes<br>
+              </span></span></li>
+        </ul>
+        <ul>
+        </ul>
+        <ul>
+          <li><span style="    color: #0000ee;"><span style="  color: #330033;">Modularity
+                (owl:imports)<br>
+              </span></span></li>
+          <li><span style="    color: #0000ee;"><span style="  color: #330033;">Graph
+                Patterns and Queries</span></span></li>
+          <li>OWL Entailments</li>
+        </ul>
+        <li>Rules</li>
+        <ul>
+          <li>Logical Justification of Rules</li>
+          <li>Functions, AKA Built-in Functions</li>
+          <li>Combining OWL Entailments with Rule-based Inference</li>
+          <li>Reasoners Available in SADL</li>
+          <ul>
+            <li>Jena Rule Engine</li>
+            <li>SWI-Prolog Reasoner</li>
+          </ul>
+        </ul>
       </ul>
-      <li>What is SADL?</li>
+      <li>Part 2: Building, Testing, and Deploying OWL Models with SADL</li>
       <ul>
-        <li>A Language that Translates Directly to OWL</li>
-        <li>An Environment for Building, Testing, and Maintaining OWL Models
-          (and More)</li>
+        <li>SADL Is a Language that Translates Directly to OWL</li>
+        <li>SADL Is an Environment for Building, Testing, and Maintaining OWL
+          Models Plus Rules</li>
       </ul>
       <li>Classes, Properties, and Property Restrictions in OWL and SADL</li>
       <ul>
