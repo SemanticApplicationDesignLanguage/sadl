@@ -48,6 +48,16 @@ import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.createWithoutSubject
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.*
+import com.ge.research.sadl.sADL.SadlDisjointClasses
+import com.ge.research.sadl.sADL.SadlSameAs
+import org.eclipse.xtext.nodemodel.impl.LeafNodeWithSyntaxError
+import org.eclipse.xtext.nodemodel.INode
+import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement
+import org.eclipse.emf.common.util.EList
+import org.eclipse.xtext.nodemodel.impl.HiddenLeafNodeWithSyntaxError
+import org.eclipse.xtext.nodemodel.impl.CompositeNode
+import org.eclipse.xtext.nodemodel.impl.AbstractNode
 
 /**
  * Singleton service ontology context provider service for SADL.
@@ -85,10 +95,12 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 			val key = TO_STRING.apply(grammarElement);
 
 			if (key == SADLPROPERTYINITIALIZER_VALUE) {
+				// subject should be the class of the statement subject
+				// restriction[0] should be the property
 				val initializer = currentModel.propertyInitializer;
 				if (initializer !== null) {
 					val instance = initializer.eContainer as SadlInstance;
-					val type = instance.type;
+					val type = instance.type !== null ? instance.type : getTypeFromPropertyInitializers(instance.propertyInitializers);
 					if (type instanceof SadlSimpleTypeReference) {
 						val builder = new ContextBuilder(type.type, processor) => [
 							grammarContextId = key;
@@ -101,6 +113,24 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 							contextClass = clazz;
 						];
 						return Optional.of(builder.build);
+					}
+					else if (type instanceof SadlResource) {
+						val builder = new ContextBuilder(type, processor) => [
+							grammarContextId = key;
+							if (initializer instanceof SadlPropertyInitializer) {
+								addRestriction((initializer as SadlPropertyInitializer).property);
+							} else if (initializer instanceof SadlResource) {
+								addRestriction(initializer)
+							}
+							validationAcceptor = acceptor;
+							contextClass = clazz;
+						];
+						return Optional.of(builder.build);
+					}
+					else {
+						if (LOGGER.debugEnabled) {
+							LOGGER.warn('''Case handling incomplete: «key» [Class: «clazz.name»]''');
+						}
 					}
 				} else {
 					// need to do something else to get the type
@@ -124,6 +154,13 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 							return Optional.of(builder.build);
 						}
 					}
+				} else if (initializer !== null && initializer.eContainer instanceof SadlClassOrPropertyDeclaration) {
+					val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
+						grammarContextId = key;
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
+					return Optional.of(builder.build);
 				} else {
 					if (LOGGER.debugEnabled) {
 						LOGGER.warn('''Case handling incomplete: «key» [Class: «clazz.name»]''');
@@ -227,9 +264,96 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 				if (initializer !== null) {
 					
 				}
+			} else if (key == SADLSTATEMENT_CLASSES) {
+				if (currentModel instanceof SadlDisjointClasses) {
+					val djclses = (currentModel as SadlDisjointClasses).classes
+					if (djclses.size > 0) {
+						for (sr : djclses) {
+							val type = sr.name;
+							
+							val builder = new ContextBuilder(type, processor) => [
+								grammarContextId = key;
+								validationAcceptor = acceptor;
+								contextClass = clazz;
+							]
+							return Optional.of(builder.build);
+						}
+					}
+				}
+			} else if (key == SADLSTATEMENT_CLASSORPROPERTY) {
+				if (currentModel instanceof SadlClassOrPropertyDeclaration) {
+					val cplst = (currentModel as SadlClassOrPropertyDeclaration).classOrProperty;
+					if (cplst.size > 0) {
+						for (sr : cplst) {
+							val type = sr.name;
+							if (type !== null) {
+								val builder = new ContextBuilder(type, processor) => [
+									grammarContextId = key;
+									validationAcceptor = acceptor;
+									contextClass = clazz;
+								]
+								return Optional.of(builder.build);
+							}
+							else {
+								val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
+									grammarContextId = key;
+									validationAcceptor = acceptor;
+									contextClass = clazz;
+								];
+								return Optional.of(builder.build);
+							}
+						}
+					}
+				}
+			} else if (key == SADLSTATEMENT_SAMEAS) {
+				if (currentModel instanceof SadlSameAs) {
+					val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
+						grammarContextId = key;
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
+					return Optional.of(builder.build);
+				}
+			} else if (key == SADLCARDINALITYCONDITION_CARDINALITY) {
+				if (currentModel instanceof SadlModel) {
+					// this may be a SadlResource at the start of a line
+					val sr = getPrecedingSadlResource(it);
+					if (sr.name !== null) {
+						val type = sr.name;
+
+						val builder = new ContextBuilder(type, processor) => [
+							grammarContextId = key;
+							validationAcceptor = acceptor;
+							contextClass = clazz;
+						]
+						return Optional.of(builder.build);
+					}
+					if (LOGGER.debugEnabled) {
+						LOGGER.warn('''Unhandled case: «key» [Class: «clazz.name»]''');
+					}
+				}			
+			} else if (key == SADLSTATEMENT_TYPE) {
+				val type = getPrecedingSadlResource(it);
+				if (type !== null) {
+					val builder = new ContextBuilder(type, processor) => [
+						grammarContextId = key;
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
+					return Optional.of(builder.build);
+				}
+				else {
+					val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
+						grammarContextId = key;
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
+					return Optional.of(builder.build);
+				}
 			} else if (ONTOLOGY_INDEPENDENT_CONTEXT_IDS.contains(key)) {
-				val builder = createWithoutSubject(currentModel.ontModel) => [
+				val builder = createWithoutSubject(currentModel.ontModel, processor, currentModel) => [
 					grammarContextId = key;
+					validationAcceptor = acceptor;
 					contextClass = clazz;
 				];
 				return Optional.of(builder.build);
@@ -243,7 +367,64 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 
 		return Optional.absent;
 	}
+		
+	def getTypeFromPropertyInitializers(EList<SadlPropertyInitializer> propInitializers) {
+		if (propInitializers !== null && 
+			propInitializers.size > 0) {
+			val piitr = propInitializers.iterator;
+			while (piitr.hasNext) {
+				val pi = piitr.next
+				if (pi instanceof SadlPropertyInitializer) {
+					val spi = (pi as SadlPropertyInitializer)
+					if (spi.type !== null) {
+						return spi.type
+					}
+					if (pi.eContainer !== null &&
+						pi.eContainer instanceof SadlInstance) {
+						return (pi.eContainer as SadlInstance).nameOrRef
+					}
+				}
+			}
+		}
+		return null
+	}
 
+	def getPrecedingSadlResource(ContentAssistContext context) {
+		if (context.lastCompleteNode instanceof LeafNodeWithSyntaxError &&
+			(context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling instanceof HiddenLeafNode &&
+			((context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling as HiddenLeafNode).previousSibling instanceof CompositeNodeWithSemanticElement) {
+			val eobj = (((context.lastCompleteNode as LeafNodeWithSyntaxError).previousSibling as HiddenLeafNode).previousSibling as CompositeNodeWithSemanticElement).semanticElement
+			if (eobj instanceof SadlResource) {
+				return (eobj as SadlResource)
+			}
+		}
+		if (context.currentNode instanceof HiddenLeafNodeWithSyntaxError) {
+			var cn = context.currentNode;
+			while (cn !== null) {
+				if (cn instanceof AbstractNode) {
+					if (cn instanceof CompositeNode) {
+						var CompositeNodeWithSemanticElement cnwse = null
+						if ((cn as CompositeNode).firstChild instanceof CompositeNodeWithSemanticElement) {
+							cnwse = (cn as CompositeNode).firstChild as CompositeNodeWithSemanticElement
+						}
+						else if ((cn as CompositeNode).firstChild instanceof CompositeNode &&
+							((cn as CompositeNode).firstChild as CompositeNode).firstChild instanceof CompositeNodeWithSemanticElement) {
+							cnwse = (((cn as CompositeNode).firstChild) as CompositeNode).firstChild as CompositeNodeWithSemanticElement
+						}
+						if (cnwse !== null) {
+							if (cnwse.semanticElement instanceof SadlResource) {
+								return (cnwse.semanticElement as SadlResource)
+							}
+							
+						}
+					}
+					cn = cn.previousSibling;
+				}
+			}
+		}
+		return null
+	}
+	
 	private def OntModel getOntModel(EObject it) {
 		return OntModelProvider.find(eResource);
 	}

@@ -30,6 +30,7 @@ import org.eclipse.xtext.preferences.IPreferenceValues
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
+import com.ge.research.sadl.model.DeclarationExtensions
 
 /**
  * Generic hook for 3rd party processors to participate in the processing of SADL resources
@@ -64,6 +65,22 @@ interface IModelProcessor {
 		override isSupported(String fileExtension) {
 			return false;
 		}
+		
+		override isTypeCheckingErrorDetected() {
+			return false;
+		}
+		
+		override clearTypeCheckingErrorDetected() {
+			// NOOP
+		}
+		
+		override getDeclarationExtensions() {
+			// NOOP
+		}
+		
+		override getDatatypePropertyContentAssistSuggestion(SadlResource sr) {
+			// NOOP
+		}
 
 	}
 
@@ -81,7 +98,27 @@ interface IModelProcessor {
 	 * Checks whether the candidate SADL resource is valid in the given context. 
 	 */
 	def void validate(Context context, SadlResource candidate);
+	
+	/**
+	 * After validation, returns true if and only if a type checking error was detected. This information is used content assist
+	 */
+	def boolean isTypeCheckingErrorDetected();
+	
+	/**
+	 * Clears the value of the type checking error flag after it has been used, after validation.
+	 */
+	def void clearTypeCheckingErrorDetected();
 
+	/**
+	 * Retrieves instance of DeclarationExtensions for use by content assist to retrieve types of SadlResources.
+	 */
+	def DeclarationExtensions getDeclarationExtensions();
+	
+	/**
+	 * Given a SadlResource which is of type OntConceptType.DATATYPE_PROPERTY, get a content assist suggestion for the value.
+	 */
+	def String getDatatypePropertyContentAssistSuggestion(SadlResource sr);
+	
 	/**
 	 * Called when external models are downloaded
 	 */

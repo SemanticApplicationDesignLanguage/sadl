@@ -59,6 +59,7 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.util.internal.EmfAdaptable
 import com.ge.research.sadl.sADL.SadlCardinalityCondition
+import com.ge.research.sadl.sADL.SadlSameAs
 
 class DeclarationExtensions {
 	
@@ -291,8 +292,12 @@ class DeclarationExtensions {
 					OntConceptType.INSTANCE
 						
 				SadlNecessaryAndSufficient,
-				SadlClassOrPropertyDeclaration: 
+				SadlClassOrPropertyDeclaration:
 					OntConceptType.CLASS						
+					
+				SadlSameAs case (e as SadlSameAs).sameAs !== null:
+					getOntConceptType((e as SadlSameAs).sameAs.referencedSadlResources.get(0))
+//					OntConceptType.CLASS
 					
 	//			SadlDataTypeDeclaration :
 	//				OntConceptType.DATATYPE

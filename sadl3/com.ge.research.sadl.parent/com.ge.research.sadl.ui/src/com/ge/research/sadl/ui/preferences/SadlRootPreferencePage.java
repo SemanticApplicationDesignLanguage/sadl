@@ -175,18 +175,24 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 					{ RDF_BINARY.getId(), RDF_BINARY.getId() },		// AWC 7/22/2020: This isn't working. Posted question on Jena users mailing list
 					{ JENA_TDB.getId(), JENA_TDB.getId() },
 				}, generalSettings));
-		addField(new RadioGroupFieldEditorExt("importBy", "Show import model list as:", 2,
-				new String[][] {
-					{ "Model Namespaces", MODEL_NAMESPACES.getId() },
-					{ "SADL File Names", SADL_FILE_NAMES.getId() }
-				}, generalSettings));
+
+// This is not enabled in V3. Only URIs work.
+//	AWC 1/22/2021		
+//		addField(new RadioGroupFieldEditorExt("importBy", "Show import model list as:", 2,
+//				new String[][] {
+//					{ "Model Namespaces", MODEL_NAMESPACES.getId() },
+//					{ "SADL File Names", SADL_FILE_NAMES.getId() }
+//				}, generalSettings));
 		addField(new BooleanFieldEditorExt(PREFIXES_ONLY_AS_NEEDED.getId(), "Show prefixes for imported concepts only when needed for disambiguation", generalSettings));
 		addField(new BooleanFieldEditorExt(SHOW_TIMING_INFORMATION.getId(), "Show Timing Informaton (Build, Reasoning)", generalSettings));
-		addField(new RadioGroupFieldEditorExt("dmyOrder", "Interpret Date 10/11/2012 as:", 2,
-				new String[][] {
-					{ "MM/DD/YYYY", DMY_ORDER_MDY.getId() },
-					{ "DD/MM/YYYY", DMY_ORDER_DMY.getId() }
-				}, generalSettings));
+
+// The following isn't used in code so it so it is commented out. It could be passed to POJava's DateTimeConfig to implement
+//   AWC 1/22/2021		
+//		addField(new RadioGroupFieldEditorExt("dmyOrder", "Interpret Date 10/11/2012 as:", 2,
+//				new String[][] {
+//					{ "MM/DD/YYYY", DMY_ORDER_MDY.getId() },
+//					{ "DD/MM/YYYY", DMY_ORDER_DMY.getId() }
+//				}, generalSettings));
 		addField(new BooleanFieldEditorExt(CHECK_FOR_AMBIGUOUS_NAMES.getId(), "Check for ambiguous names", generalSettings));
 
 		// Graph Settings

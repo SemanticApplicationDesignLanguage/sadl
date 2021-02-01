@@ -20,9 +20,14 @@ package com.ge.research.sadl.jena;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder.MISSING_SUBJECT;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.PROPOFSUBJECT_PROP;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.PROPOFSUBJECT_RIGHT;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLCARDINALITYCONDITION_CARDINALITY;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_PROPERTY;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_VALUE;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_CLASSES;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_CLASSORPROPERTY;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_SAMEAS;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_SUPERELEMENT;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_TYPE;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -1074,13 +1079,62 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String contextId = context.getGrammarContextId().orNull();
 		OntModel ontModel = context.getOntModel();
 		SadlResource subject = context.getSubject();
+		String sruri = subject != null ? getDeclarationExtensions().getConceptUri(subject) : null;
+		String cruri = getDeclarationExtensions().getConceptUri(candidate);
 //		System.out.println("Subject: " + getDeclarationExtensions().getConceptUri(subject));
 //		System.out.println("Candidate: " + getDeclarationExtensions().getConceptUri(candidate));
-
+		if (sruri != null && sruri.equals(cruri)) {
+			context.getAcceptor().add("candidate and subject the same", candidate, Severity.ERROR);
+			return;
+		}
 		try {
+			OntConceptType oct = subject !=  null ? getDeclarationExtensions().getOntConceptType(subject) : null;
+			OntConceptType coct = getDeclarationExtensions().getOntConceptType(candidate);
 			if (subject == MISSING_SUBJECT) {
+				if (contextId.equals(SADLSTATEMENT_CLASSORPROPERTY)) {
+					OntConceptType candType = getDeclarationExtensions().getOntConceptType(candidate);
+					String candUri = getDeclarationExtensions().getConceptUri(candidate);
+					if (!candType.equals(OntConceptType.CLASS) && !candType.equals(OntConceptType.INSTANCE)) {
+						context.getAcceptor().add("SADLSTATEMENT_CLASSORPROPERTY with no subject must be Class or Individual", candidate, Severity.ERROR);
+					}
+				}
+				else if (contextId.equals(SADLSTATEMENT_SAMEAS)) {
+					OntConceptType candType = getDeclarationExtensions().getOntConceptType(candidate);
+					// if it has a "not" then it can only be a class.
+					if (context.getCurrentModel() instanceof SadlSameAs &&
+							((SadlSameAs)context.getCurrentModel()).isComplement() &&
+							!candType.equals(OntConceptType.CLASS)) {
+						context.getAcceptor().add("Only classes can be in same as not", candidate, Severity.ERROR);
+					}
+					if (candType.equals(OntConceptType.CLASS) || 
+						candType.equals(OntConceptType.INSTANCE) ||
+						isProperty(candType)) {
+						return;
+					}
+					
+					else {
+						context.getAcceptor().add("Only classes, instances, and properties can be in same as", candidate, Severity.ERROR);
+					}
+				}
+				else if (contextId.equals(SADLPROPERTYINITIALIZER_PROPERTY)) {
+					if (context.getCurrentModel() instanceof SadlModel) {
+						context.getAcceptor().add("Property initializer at top level?", candidate, Severity.ERROR);
+					}
+				}
+				else if (contextId.equals(SADLSTATEMENT_TYPE)) {
+					OntConceptType candType = getDeclarationExtensions().getOntConceptType(candidate);
+					if (!candType.equals(OntConceptType.CLASS)) {
+						context.getAcceptor().add("Only classes allowed here", candidate, Severity.ERROR);
+					}
+				}
 				return;
 			}
+			
+			if (logger.isDebugEnabled()) {
+				logger.debug("\nSubject: " + sruri + ", " + oct.toString());
+				logger.debug("Candidate: " + cruri + ", " + coct.toString());
+			}
+
 			switch (contextId) {
 			case SADLPROPERTYINITIALIZER_PROPERTY: {
 				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
@@ -1096,7 +1150,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return;
 			}
 			case SADLPROPERTYINITIALIZER_VALUE: {
-				SadlResource prop = context.getRestrictions().iterator().next();
+				// subject should be the class of the statement subject
+				// restriction[0] should be the property
+				SadlResource prop = null;
+				if (context.getRestrictions() instanceof List<?> &&
+						((List<?>)context.getRestrictions()).size() > 0) {
+					prop = context.getRestrictions().iterator().next();
+				}
+
+				if (prop == null) {
+					context.getAcceptor().add("No property found in restrictions", candidate, Severity.ERROR);
+					return;
+				}
 				OntConceptType proptype = getDeclarationExtensions().getOntConceptType(prop);
 				if (proptype.equals(OntConceptType.DATATYPE_PROPERTY)) {
 					context.getAcceptor().add("No", candidate, Severity.ERROR);
@@ -1105,11 +1170,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (proptype.equals(OntConceptType.CLASS_PROPERTY)) {
 					OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
 					if (!candtype.equals(OntConceptType.INSTANCE)) {
-						context.getAcceptor().add("No", candidate, Severity.ERROR);
+						String canduri = getDeclarationExtensions().getConceptUri(candidate);
+						context.getAcceptor().add("'" + canduri + "' is not an Instance", candidate, Severity.ERROR);
 						return;
 					}
 				}
-				Iterator<SadlResource> ritr = context.getRestrictions().iterator();
+//				Iterator<SadlResource> ritr = context.getRestrictions().iterator();
 //				while (ritr.hasNext()) {
 //					System.out.println("Restriction: " + getDeclarationExtensions().getConceptUri(ritr.next()));
 //				}
@@ -1168,6 +1234,92 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				context.getAcceptor().add("No", candidate, Severity.ERROR);
 				return;
 			}
+			case SADLSTATEMENT_CLASSES: {
+				OntConceptType subjtype = getDeclarationExtensions().getOntConceptType(subject);
+				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
+				if (subjtype.equals(OntConceptType.CLASS) &&
+						!candtype.equals(OntConceptType.CLASS)) {
+					addError("SADLSTATEMENT_CLASSES must continue with a class", candidate);
+				}
+				String snm = getDeclarationExtensions().getConceptUri(subject);
+				String cnm = getDeclarationExtensions().getConceptUri(candidate);
+				if (snm != null && cnm != null && snm.equals(cnm)) {
+					addError("A class can't be disjoint with itself", candidate);
+					return;
+				}
+				// if the subject is not a root class, the subject and candidate should have a common super class
+				OntClass subcls = getTheJenaModel().getOntClass(snm);
+				if (subcls != null) {
+					List<OntClass> subjscls = new ArrayList<OntClass>();
+					subjscls = getAllSuperClasses(subcls, subjscls);
+					Iterator<OntClass> sclsitr = subjscls.iterator();
+					if (sclsitr.hasNext()) {
+						OntClass candcls = getTheJenaModel().getOntClass(cnm);
+						if (candcls != null) {
+							List<OntClass> candscls = new ArrayList<OntClass>();
+							candscls = getAllSuperClasses(candcls, candscls);
+							Iterator<OntClass> cclsitr = candscls.iterator();
+							while (cclsitr.hasNext()) {
+								OntClass ccls = cclsitr.next();
+								if (subjscls.contains(ccls)) {
+									return;
+								}
+							}
+							addError("Disjoint classes should be subclasses of the same universe", candidate);
+						}
+					}
+				}
+				return;
+			}
+			case SADLSTATEMENT_CLASSORPROPERTY: {
+				OntConceptType subjtype = getDeclarationExtensions().getOntConceptType(subject);
+				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
+				if (!subjtype.equals(candtype)) {
+					addError("SADLSTATEMENT_CLASSORPROPERTY must be of same type", candidate);
+				}
+				String snm = getDeclarationExtensions().getConceptUri(subject);
+				String cnm = getDeclarationExtensions().getConceptUri(candidate);
+				if (snm != null && cnm != null && snm.equals(cnm)) {
+					addError("Duplicate entries not desirable", candidate);
+					return;
+				}				
+			}
+			case SADLCARDINALITYCONDITION_CARDINALITY: {
+				OntConceptType subjtype = getDeclarationExtensions().getOntConceptType(subject);
+				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
+				String snm = getDeclarationExtensions().getConceptUri(subject);
+				String cnm = getDeclarationExtensions().getConceptUri(candidate);
+				if (subjtype.equals(OntConceptType.INSTANCE)) {
+					if (!isProperty(candtype)) {
+						addError("Expected a property", candidate);
+						return;
+					}
+					Individual subjinst = getTheJenaModel().getIndividual(snm);
+					OntProperty candprop = getTheJenaModel().getOntProperty(cnm);
+					try {
+						getModelValidator().checkPropertyDomain(getTheJenaModel(), subjinst, candprop, subject, true, null, false, false);
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					return;
+				}
+				else {
+					// TODO
+				}
+			}
+			case SADLSTATEMENT_TYPE: {
+//				if (oct !=  null && oct.equals(OntConceptType.CLASS)) {
+//					// if the subject is a class they no SadlResource is valid after
+//				}
+				// must be a class
+				if (!coct.equals(OntConceptType.CLASS)) {
+					context.getAcceptor().add("must be a class", candidate, Severity.ERROR);
+				}
+			}
 			default: {
 				// Ignored
 			}
@@ -1182,6 +1334,81 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				setIssueAcceptor(savedIssueAccpetor);
 			}
 		}
+	}
+
+	private List<OntClass> getAllSuperClasses(OntClass cls, List<OntClass> superClasses) {
+		if (cls != null) {
+			StmtIterator cclsitr = getTheJenaModel().listStatements(cls, RDFS.subClassOf, (RDFNode)null);
+			while (cclsitr.hasNext()) {
+				RDFNode on = cclsitr.nextStatement().getObject();
+				if (on.canAs(OntClass.class) ) {
+					OntClass onc = on.as(OntClass.class);
+					superClasses.add(onc);
+					superClasses = getAllSuperClasses(onc, superClasses);
+				}
+			}
+			
+			// If cls belongs to a UnionClass which is the same as or a subclass of class X, 
+			//	then X is a superclass of cls
+			StmtIterator unionItr = getTheJenaModel().listStatements(null, OWL.unionOf, (RDFNode)null);
+			while (unionItr.hasNext()) {
+				Statement uostmt = unionItr.nextStatement();
+				org.apache.jena.rdf.model.Resource subject = uostmt.getSubject();
+				RDFNode on = uostmt.getObject();
+				if (subject.canAs(OntClass.class)) {
+					OntClass subjcls = subject.as(OntClass.class);				
+					if (subjcls.isUnionClass()) {
+						ExtendedIterator<? extends OntClass> opitr = subjcls.asUnionClass().listOperands();
+						List<OntClass> opclses = new ArrayList<OntClass>();
+						while (opitr.hasNext()) {
+							try {
+								OntClass opcls = opitr.next();
+								opclses.add(opcls);
+							}
+							catch (Throwable t) {
+								// System.err.println(t.getMessage()); // not sure why errors occur... awc 1/11/2021
+							}
+						}
+						if (opclses.contains(cls)) {
+							if (subject.canAs(OntClass.class)) {
+								// is this a subclass of something?
+								StmtIterator scitr = getTheJenaModel().listStatements(subjcls, RDFS.subClassOf, (RDFNode)null);
+								while (scitr.hasNext()) {
+									RDFNode scn = scitr.nextStatement().getObject();
+									if (scn.isResource() && scn.asResource().canAs(OntClass.class)) {
+										if (scn.isURIResource()) {
+											superClasses.add(scn.asResource().as(OntClass.class));
+										}
+										superClasses = getAllSuperClasses(scn.asResource().as(OntClass.class), superClasses);
+									}
+								}
+								// is there an equivalent class?
+								StmtIterator eqclsitr = getTheJenaModel().listStatements(subjcls, OWL.equivalentClass, (RDFNode)null);
+								while (eqclsitr.hasNext()) {
+									RDFNode eqrn = eqclsitr.nextStatement().getObject();
+									if (eqrn.canAs(OntClass.class)) {
+										OntClass eqcls = eqrn.as(OntClass.class);
+										superClasses.add(eqcls);
+										superClasses = getAllSuperClasses(eqcls, superClasses);
+									}
+								}			
+								eqclsitr = getTheJenaModel().listStatements(null, OWL.equivalentClass, subjcls);
+								while (eqclsitr.hasNext()) {
+									org.apache.jena.rdf.model.Resource eqrn = eqclsitr.nextStatement().getSubject();
+									if (eqrn.canAs(OntClass.class)) {
+										OntClass eqcls = eqrn.as(OntClass.class);
+										superClasses.add(eqcls);
+										superClasses = getAllSuperClasses(eqcls, superClasses);
+									}
+								}			
+							}
+						}
+					}
+				}
+			}
+			
+		}
+		return superClasses;
 	}
 
 	@Override
@@ -8976,7 +9203,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		OntResource rsrc = getTheJenaModel().getOntResource(uri);
 		SadlTypeReference smas = element.getSameAs();
 		OntConceptType sameAsType;
-		if (rsrc == null) {
+		if (rsrc == null && smas != null) {
 			// concept does not exist--try to get the type from the sameAs
 			sameAsType = getSadlTypeReferenceType(smas);
 
@@ -9007,6 +9234,44 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			OntResource smasInst = sadlTypeReferenceToOntResource(smas);
 			rsrc.addSameAs(smasInst);
 			logger.debug("Instance '" + rsrc.toString() + "' declared same as '" + smas.toString() + "'");
+		} else if (isProperty(sameAsType)) {
+			OntProperty smasProp = sadlTypeReferenceToOntResource(smas).asProperty();
+			if (smasProp == null) {
+				addError("Unable to find property", smas);
+			}
+			else {
+				OntProperty prop = getTheJenaModel().getOntProperty(uri);
+				if (prop == null) {
+					if (sameAsType.equals(OntConceptType.CLASS_PROPERTY)) {
+						prop = createObjectProperty(uri, null);
+					}
+					else if (sameAsType.equals(OntConceptType.DATATYPE_PROPERTY)){
+						prop = createDatatypeProperty(uri, null);
+					}
+					else {
+						prop = createRdfProperty(uri, null);
+					}
+					// set domain and range to the same as smasProp
+					StmtIterator ditr = getTheJenaModel().listStatements(smasProp, RDFS.domain, (RDFNode)null);
+					while (ditr.hasNext()) {
+						prop.addDomain(ditr.nextStatement().getObject().asResource());
+					}
+					StmtIterator ritr = getTheJenaModel().listStatements(smasProp, RDFS.range, (RDFNode)null);
+					while (ritr.hasNext()) {
+						RDFNode rn = ritr.nextStatement().getObject();
+						if (rn.isResource()) {
+							prop.addRange(rn.asResource());
+						}
+						else {
+							addWarning("Unable to set range to equivalent property", sr);
+						}
+					}
+				}
+				smasProp.addEquivalentProperty(prop);
+			}
+		} else if (sameAsType.equals(OntConceptType.VARIABLE)) {
+			// do nothing--this will happen when the same as isn't complete
+			
 		} else {
 			throw new JenaProcessorException("Unexpected concept type for same as statement: " + sameAsType.toString());
 		}
@@ -11703,37 +11968,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private void processSadlDisjointClasses(SadlDisjointClasses element) throws JenaProcessorException {
 		List<OntClass> disjointClses = new ArrayList<OntClass>();
-		if (element.getClasses() != null) {
+		if (element.getClasses() != null && !element.getClasses().isEmpty()) {
 			Iterator<SadlResource> dcitr = element.getClasses().iterator();
 			while (dcitr.hasNext()) {
 				SadlResource sr = dcitr.next();
 				String declUri = getDeclarationExtensions().getConceptUri(sr);
 				if (declUri == null) {
-					throw new JenaProcessorException(
-							"Failed to get concept URI of SadlResource in processSadlDisjointClasses");
+					addError("Failed to get concept URI of SadlResource in processSadlDisjointClasses", sr);
 				}
 				OntClass cls = getTheJenaModel().getOntClass(declUri);
 				if (cls == null) {
-					throw new JenaProcessorException("Failed to get class '" + declUri + "' from Jena model.");
+//					getTheJenaModel().write(System.err);
+					addError("Failed to get class '" + declUri + "' from Jena model.", sr);
 				}
 				disjointClses.add(cls.asClass());
 			}
 		}
-		Iterator<SadlClassOrPropertyDeclaration> dcitr = element.getTypes().iterator();
-		while (dcitr.hasNext()) {
-			SadlClassOrPropertyDeclaration decl = dcitr.next();
-			Iterator<SadlResource> djitr = decl.getClassOrProperty().iterator();
-			while (djitr.hasNext()) {
-				SadlResource sr = djitr.next();
-				String declUri = getDeclarationExtensions().getConceptUri(sr);
-				if (declUri == null) {
-					throw new JenaProcessorException(
-							"Failed to get concept URI of SadlResource in processSadlDisjointClasses");
+		else if (element.getTypes() != null && element.getTypes().size() > 0 &&
+				element.getTypes().get(0) instanceof SadlClassOrPropertyDeclaration) {
+			EList<SadlResource> cplst = ((SadlClassOrPropertyDeclaration)element.getTypes().get(0)).getClassOrProperty();
+			if (cplst != null) {
+				Iterator<SadlResource> cpitr = cplst.iterator();
+				while (cpitr.hasNext()) {
+					SadlResource sr = cpitr.next();
+					String declUri = getDeclarationExtensions().getConceptUri(sr);
+					if (declUri == null) {
+						addError("Failed to get concept URI of SadlResource in processSadlDisjointClasses", sr);
+					}
+					OntClass cls = getTheJenaModel().getOntClass(declUri);
+					if (cls == null) {
+//						getTheJenaModel().write(System.err);
+						addError("Failed to get class '" + declUri + "' from Jena model.", sr);
+					}
+					disjointClses.add(cls.asClass());
 				}
-				OntClass cls = getTheJenaModel().getOntClass(declUri);
-				disjointClses.add(cls.asClass());
 			}
 		}
+
 		// must set them disjoint pairwise
 		for (int i = 0; i < disjointClses.size(); i++) {
 			for (int j = i + 1; j < disjointClses.size(); j++) {
@@ -12530,6 +12801,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							+ "' not found; should have found an DatatypeProperty");
 				}
 				return dtp;
+			} else if (ctype.equals(OntConceptType.RDF_PROPERTY)) {
+				OntProperty rdfp = getTheJenaModel().getOntProperty(strSRUri);
+				if (rdfp == null) {
+					throw new JenaProcessorException("SadlSimpleTypeReference '" + strSRUri
+							+ "' not found; should have found an RDFProperty");
+				}
+				return rdfp;
 			} else {
 				throw new JenaProcessorException("SadlSimpleTypeReference '" + strSRUri
 						+ "' was of a type not yet handled: " + ctype.toString());
@@ -15442,5 +15720,50 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected void setTypeCheckingErrorDetected(boolean typeCheckingErrorDetected) {
 		this.typeCheckingErrorDetected = typeCheckingErrorDetected;
+	}
+
+	@Override
+	public String getDatatypePropertyContentAssistSuggestion(SadlResource prop) {
+		OntConceptType oct;
+		String propuri = null;
+		try {
+			oct = getDeclarationExtensions().getOntConceptType(prop);
+			if (oct.equals(OntConceptType.DATATYPE_PROPERTY)) {
+	            propuri = getDeclarationExtensions().getConceptUri(prop);
+	            OntProperty ontprop = getTheJenaModel().getOntProperty(propuri);
+	            if (ontprop != null) {
+	                StmtIterator rngitr = getTheJenaModel().listStatements(ontprop, RDFS.range, (RDFNode)null);
+	                RDFNode rng = null;
+	                String proposal = null;
+	                if (rngitr.hasNext()) {
+	                        rng = rngitr.nextStatement().getObject();
+	                        switch(rng.toString()) {
+	                        case XSD.NS + "string":
+	                        	String pnm = getDeclarationExtensions().getConcreteName(prop);
+	                            proposal = "\"<" + pnm + "-value>\"";
+	                        break;
+	                        case XSD.NS + "date":
+	                            proposal = "\"mm/dd/yyyy\"";
+	                        break;
+	                        case XSD.NS + "float":
+	                        case XSD.NS + "double":
+	                            proposal = "123.4";
+	                        break;
+	                        case XSD.NS + "int":
+	                        case XSD.NS + "integer":
+	                        case XSD.NS + "long":
+	                            proposal = "123";
+	                        break;
+	                        default:
+	                        	addInfo("Content assist suggestion not provided for datatype '" + rng.toString() + "'", prop);
+	                        }       
+	                }
+	                return proposal;
+	            }
+			}
+		} catch (CircularDefinitionException e) {
+			addError("Unexpected error getting content assist example for property '" + propuri + "'", prop);
+		}
+		return null;
 	}
 }
