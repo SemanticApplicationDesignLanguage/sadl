@@ -1,0 +1,6 @@
+ uri "http://sadl.org/checkCA_subject_has8.sadl" alias checkCA_subject_has8.
+ 	
+Rock is a class described by shinny with values of type boolean.
+
+MyRock is a Rock, has shinny 
+ 

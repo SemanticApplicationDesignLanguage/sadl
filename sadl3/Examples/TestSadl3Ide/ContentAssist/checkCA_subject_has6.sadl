@@ -1,0 +1,6 @@
+ uri "http://sadl.org/checkCA_subject_has6.sadl" alias checkCA_subject_has6.
+ 
+ Rock is a class described by density with values of type float.
+		
+ MyRock is a Rock, has density 
+ 

@@ -9,6 +9,10 @@ Manufacturer is a type of Organization.
 Apple is a Manufacturer.
 Dell is a Manufacturer.
 
+manufacturer of Manufacturer has at least one value of type Artifact.	// necessary condition, allows --> inference
+hasProduct describes Organization with values of type boolean.
+hasProduct of Manufacturer always has value true.						// another example of necessary condition; if X is instance of Manufacturer then X hasProduct true
+
 Computer is a type of Artifact.
 
 Person is a class.

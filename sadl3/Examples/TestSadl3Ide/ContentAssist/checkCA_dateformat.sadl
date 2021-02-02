@@ -1,0 +1,12 @@
+ uri "http://sadl.org/checkCA_dateformat.sadl" alias checkCA_dateformat.
+ 
+ Person is a class described by birthdate with a single value of type date .
+ {Man, Woman} are types of Person.
+ 
+ Gender is a class, must be one of {Male, Female}.
+ 
+ Man and Woman are disjoint .
+ 
+George is a Person with birthdate "12/24/1998". 
+John is a Person with birthdate "1998-12-24".  
+Mary is a Person with birthdate "24/12/1998".

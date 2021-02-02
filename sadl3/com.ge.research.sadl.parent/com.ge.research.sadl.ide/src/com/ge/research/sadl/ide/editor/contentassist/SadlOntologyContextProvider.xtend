@@ -245,6 +245,13 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 						}
 					}
 				}
+//			} else if (key == SADLPROPERTYRESTRICTION_OTHERPROPERTY) {
+//				val initializer = currentModel.eContainer;
+//				if (initializer !== null) {
+//					if (initializer instanceof SadlResource) {
+//						
+//					}
+//				}
 			} else if (key == PROPOFSUBJECT_RIGHT) {
 				val initializer = currentModel.getPropOfSubjectInitializer
 				if (initializer !== null) {
