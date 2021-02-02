@@ -112,7 +112,7 @@ SadlStatement returns SadlStatement:
     | 	{SadlProperty} AnArticle? ('relationship'|'Relationship') 'of' from=SadlTypeReference 'to' to=SadlTypeReference 'is' property=SadlResource 
     | 	AnArticle SadlTypeReference (
     		{SadlInstance.type=current} instance=SadlResource? propertyInitializers+=SadlPropertyInitializer*
-    	|	{SadlNecessaryAndSufficient.subject=current} 'is' AnArticle object=SadlResource 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*)
+    	|	{SadlNecessaryAndSufficient.subject=current} 'is' AnArticle object=SadlResource ('if' 'and')? 'only' 'if' propConditions+=SadlPropertyCondition ('and' propConditions+=SadlPropertyCondition)*)
 ;
 
 
