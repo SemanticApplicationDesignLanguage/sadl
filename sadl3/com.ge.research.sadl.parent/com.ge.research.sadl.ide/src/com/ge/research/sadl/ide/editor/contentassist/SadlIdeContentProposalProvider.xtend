@@ -73,6 +73,7 @@ import org.eclipse.xtext.nodemodel.impl.LeafNodeWithSyntaxError
 import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement
 import org.eclipse.xtext.ParserRule
+import com.ge.research.sadl.sADL.SadlIsInverseOf
 
 /**
  * Generic content proposal provider for the {@code SADL} language.
@@ -241,7 +242,7 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 	}
 
 	protected def completeAlias(ContentAssistContext ctx, IIdeContentProposalAcceptor it) {
-		val proposalText = ctx.resource.URI.trimFileExtension.lastSegment;
+		val proposalText = ctx.resource.URI.trimFileExtension.lastSegment.toLowerCase;
 		val proposal = proposalCreator.createProposal(proposalText, ctx);
 		val priority = proposalPriorities.getDefaultPriority(proposal);
 		accept(proposal, priority);
@@ -383,6 +384,11 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 					excludeNamespace(SadlConstants.SADL_IMPLICIT_MODEL_URI)
 					restrictTypeToAllPropertyTypes
 				}
+			} else if (pm instanceof SadlIsInverseOf) {
+				val typeList = new ArrayList<OntConceptType>
+				typeList.add(OntConceptType.CLASS_PROPERTY)
+				typeRestrictions = typeList
+				
 			} else if (pm instanceof SadlResource && cm !== null && cm.eContainer instanceof SadlModel) {
 				// just a name on a new line--can't be followed by another name
 				return Predicates.alwaysFalse

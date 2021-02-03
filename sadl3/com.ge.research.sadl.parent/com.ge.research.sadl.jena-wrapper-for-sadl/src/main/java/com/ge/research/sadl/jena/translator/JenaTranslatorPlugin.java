@@ -595,7 +595,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 					sbmain.append("?" + vars.get(i).getName());
 				}
 			}
-			else {
+			else if (!query.getKeyword().equalsIgnoreCase("ask")) {
 				sbmain.append("*");
 			}
 			if (query.getKeyword().equalsIgnoreCase("construct")) {

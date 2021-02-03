@@ -146,6 +146,23 @@ class ProposalProviderFilterProvider {
 					default:
 						[false]
 				}
+			case SADLPROPERTYRESTRICTION_OTHERPROPERTY:
+				[ candidate |
+					val sr = candidate.EObjectOrProxy
+					if (sr instanceof SadlResource) {
+						val oct = processor.declarationExtensions.getOntConceptType(sr as SadlResource);
+						if (!oct.equals(OntConceptType.CLASS_PROPERTY)) {
+								return false;
+						}				
+						val container = currentModel.eContainer;
+						if (container instanceof SadlProperty) {
+							val cpuri = processor.declarationExtensions.getConceptUri((container as SadlProperty).nameOrRef);
+							val canduri = processor.declarationExtensions.getConceptUri(sr as SadlResource);
+							return !(cpuri.equals(canduri));
+						}
+					}
+					return candidate.EClass === SADL_RESOURCE
+				]
 			default:
 				[false]
 		};
