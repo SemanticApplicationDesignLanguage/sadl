@@ -2105,7 +2105,8 @@ public class OwlToSadl {
 			boolean bNamedIndividualFound = false;
 			boolean intersectionClass = false;
 			while (stmtitr.hasNext()) {
-				RDFNode type = stmtitr.nextStatement().getObject();
+				Statement nextStmt = stmtitr.nextStatement();
+				RDFNode type = nextStmt.getObject();
 				if (type.isResource()) {
 					if (type.isURIResource() && type.asResource().getNameSpace().equals(OWL.NS) && 
 							type.asResource().getLocalName().equals("NamedIndividual")) {
@@ -2129,6 +2130,7 @@ public class OwlToSadl {
 							sb.append(" and ");
 						}
 						sb.append(uriToSadlString(concepts, type.asResource()));
+						statementsProcessed.add(nextStmt);
 					}
 				}
 			}
