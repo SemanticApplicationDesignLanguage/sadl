@@ -2735,6 +2735,7 @@ public class OwlToSadl {
 		else if (res.hasProperty(OWL2.maxQualifiedCardinality)) {
 			RDFNode op = res.getPropertyValue(OWL.onProperty);
 			RDFNode oc = res.getPropertyValue(OWL2.onClass);
+			RDFNode dr = res.getPropertyValue(OWL2.onDataRange);
 			if (op.isResource() && op.equals(onprop)) {
 				sb.append(" has at most ");
 				RDFNode mcv = res.getPropertyValue(OWL2.maxQualifiedCardinality);
@@ -2747,13 +2748,19 @@ public class OwlToSadl {
 					else {
 						sb.append(" value of type ");
 					}
-					sb.append(resourceToString(oc.asResource(), false));
+					if(oc != null) { //It is an object cardinality restriction
+						sb.append(resourceToString(oc.asResource(), false));
+					}
+					if(dr != null) { //It is a data cardinality restriction
+						sb.append(resourceToString(dr.asResource(), false));
+					}
 				}
 			}
 		}
 		else if (res.hasProperty(OWL2.qualifiedCardinality)) {
 			RDFNode op = res.getPropertyValue(OWL.onProperty);
 			RDFNode oc = res.getPropertyValue(OWL2.onClass);
+			RDFNode dr = res.getPropertyValue(OWL2.onDataRange);
 			if (op.isResource() && op.equals(onprop)) {
 				sb.append(" has exactly ");
 				RDFNode cv = res.getPropertyValue(OWL2.qualifiedCardinality);
@@ -2766,13 +2773,19 @@ public class OwlToSadl {
 					else {
 						sb.append(" value of type ");
 					}
-					sb.append(resourceToString(oc.asResource(), false));
+					if(oc != null) { //It is an object cardinality restriction
+						sb.append(resourceToString(oc.asResource(), false));
+					}
+					if(dr != null) { //It is a data cardinality restriction
+						sb.append(resourceToString(dr.asResource(), false));
+					}
 				}
 			}
 		}
 		else if (res.hasProperty(OWL2.minQualifiedCardinality)) {
 			RDFNode op = res.getPropertyValue(OWL.onProperty);
 			RDFNode oc = res.getPropertyValue(OWL2.onClass);
+			RDFNode dr = res.getPropertyValue(OWL2.onDataRange);
 			if (op.isResource() && op.equals(onprop)) {
 				sb.append(" has at least ");
 				RDFNode mcv = res.getPropertyValue(OWL2.minQualifiedCardinality);
@@ -2785,7 +2798,12 @@ public class OwlToSadl {
 					else {
 						sb.append(" value of type ");
 					}
-					sb.append(resourceToString(oc.asResource(), false));
+					if(oc != null) { //It is an object cardinality restriction
+						sb.append(resourceToString(oc.asResource(), false));
+					}
+					if(dr != null) { //It is a data cardinality restriction
+						sb.append(resourceToString(dr.asResource(), false));
+					}
 				}
 			}
 		}
