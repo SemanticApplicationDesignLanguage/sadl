@@ -2105,7 +2105,8 @@ public class OwlToSadl {
 			boolean bNamedIndividualFound = false;
 			boolean intersectionClass = false;
 			while (stmtitr.hasNext()) {
-				RDFNode type = stmtitr.nextStatement().getObject();
+				Statement nextStmt = stmtitr.nextStatement();
+				RDFNode type = nextStmt.getObject();
 				if (type.isResource()) {
 					if (type.isURIResource() && type.asResource().getNameSpace().equals(OWL.NS) && 
 							type.asResource().getLocalName().equals("NamedIndividual")) {
@@ -2129,6 +2130,7 @@ public class OwlToSadl {
 							sb.append(" and ");
 						}
 						sb.append(uriToSadlString(concepts, type.asResource()));
+						statementsProcessed.add(nextStmt);
 					}
 				}
 			}
@@ -2213,7 +2215,7 @@ public class OwlToSadl {
 			return null;	// wait and see if this is the object of a statement
 		}
 		if (stripNamespaceDelimiter(s.getSubject().getNameSpace()).equals(getBaseUri())) {
-			return null;	// the model cannot be a subject
+			return null;	// the model cannot be a subject	// awc 2/4/2021: this is misleading, actually checking to see if subject is in this model
 		}
 		if (!s.getPredicate().equals(RDF.type) && ignoreNamespace(s.getPredicate(), false)) {
 			return null;
