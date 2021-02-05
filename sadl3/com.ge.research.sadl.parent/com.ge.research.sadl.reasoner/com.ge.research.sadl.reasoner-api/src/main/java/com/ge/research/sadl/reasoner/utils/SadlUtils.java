@@ -79,8 +79,8 @@ public class SadlUtils {
 	    catch (Exception e1) {
 	    	return ("'" + uri + "' is not a valid URL: " + e1.getLocalizedMessage());
 	    }
-	    if (!"http".equals(url.getProtocol())) {
-	    	return ("'" + uri + "' is not a valid URL: Model name must use http protocol.");
+	    if (!"http".equals(url.getProtocol()) && !"https".equals(url.getProtocol())) {
+	    	return ("'" + uri + "' is not a valid URL: Model name must use http or https protocol.");
 	    }
 	    return null;
 	}
@@ -93,8 +93,8 @@ public class SadlUtils {
 		catch (Exception e1) { 
 			throw new java.net.MalformedURLException("'" + uri + "' is not a valid URL: " + e1.getLocalizedMessage());
 		} 
-		if (!"http".equals(url.getProtocol())) {
-			throw new java.net.MalformedURLException("'" + uri + "' is not a valid URL: Model name must use http protocol.");
+		if (!"http".equals(url.getProtocol()) && !"https".equals(url.getProtocol())) {
+			throw new java.net.MalformedURLException("'" + uri + "' is not a valid URL: Model name must use http or https protocol.");
 		}
 		return uri;
 	}	

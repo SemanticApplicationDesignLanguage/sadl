@@ -1090,6 +1090,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		try {
 			OntConceptType oct = subject !=  null ? getDeclarationExtensions().getOntConceptType(subject) : null;
 			OntConceptType coct = getDeclarationExtensions().getOntConceptType(candidate);
+			modelValidator.resetValidatorState(null);
 			if (subject == MISSING_SUBJECT) {
 				if (contextId.equals(SADLSTATEMENT_CLASSORPROPERTY)) {
 					OntConceptType candType = getDeclarationExtensions().getOntConceptType(candidate);
@@ -1187,7 +1188,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				StringBuilder errorMessageBuilder = new StringBuilder();
 				if (!modelValidator.validateBinaryOperationByParts(candidate, prop, candidate, "is",
-						errorMessageBuilder, false)) {
+						errorMessageBuilder, true)) {
 					context.getAcceptor().add(errorMessageBuilder.toString(), candidate, Severity.ERROR);
 				}
 				return;

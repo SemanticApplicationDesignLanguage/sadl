@@ -1,0 +1,6 @@
+ uri "http://sadl.org/checkCA_subject_has7.sadl" alias checkCA_subject_has7.
+ 
+ Rock is a class described by color with values of type string.
+		
+ MyRock is a Rock, has color 
+ 

@@ -1,0 +1,11 @@
+ uri "http://sadl.org/checkCA_subject_has5.sadl" alias checkCA_subject_has5.
+ 
+ Person is a class described by dateOfBirth with values of type date .
+		
+ Rock is a class described by density with values of type float.
+		
+ GeorgeWashington (alias "George Washington") is a Person.
+		
+ GeorgeWashington has dateOfBirth 
+ 
+ 

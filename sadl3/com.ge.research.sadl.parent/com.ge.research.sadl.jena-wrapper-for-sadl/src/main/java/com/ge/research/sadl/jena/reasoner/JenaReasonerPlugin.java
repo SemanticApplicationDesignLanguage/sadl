@@ -1308,7 +1308,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		//				LARQ.setDefaultIndex(qexec.getContext(), index);
 		//			}
 					qexec.setTimeout(queryTimeout);
-					if (askQuery.trim().substring(0, 3).equals("ask")) {	
+					if (askQuery.trim().substring(0, 3).equalsIgnoreCase("ask")) {	
 						boolean askResult = qexec.execAsk();
 						String[] columnName = new String[1];
 						columnName[0] = "ask";
@@ -1316,51 +1316,16 @@ public class JenaReasonerPlugin extends Reasoner{
 						array[0][0] = askResult;
 						rs = new ResultSet(columnName, array);
 					}
-					else if (askQuery.trim().substring(0, 9).equals("construct")) {
+					else if (askQuery.trim().substring(0, 9).equalsIgnoreCase("construct")) {
 						Model constructModel = qexec.execConstruct();
 						if (constructModel != null) {
-							StmtIterator sitr = constructModel.listStatements();
-							if (sitr.hasNext()) {
-								String[] columnName = new String[3];
-								Query q = qexec.getQuery();
-								Template template = q.getConstructTemplate();
-								Triple triple0 = template.getBGP().get(0);
-	//							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
-	//							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
-	//							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
-								org.apache.jena.graph.Node subj = triple0.getSubject();
-								org.apache.jena.graph.Node pred = triple0.getPredicate();
-								org.apache.jena.graph.Node obj = triple0.getObject();
-								
-								columnName[0] = subj.isVariable() ? subj.getName() : subj.getLocalName();
-								columnName[1] = pred.isVariable() ? pred.getName() : pred.getLocalName();
-								columnName[2] = obj.isVariable() ? obj.getName() : obj.getLocalName();
-								List<Object[]> dataList = new ArrayList<Object[]>();
-								while (sitr.hasNext()) {
-									Statement stmt = sitr.nextStatement();
-									Object[] row = new Object[3];
-									row[0] = stmt.getSubject().toString();
-									row[1] = stmt.getPredicate().toString();
-									RDFNode val = stmt.getObject();
-									if (val instanceof Resource) {
-										row[2] = ((Resource)val).toString();
-									}
-									else if (val instanceof Literal) {
-										row[2] = ((Literal)val).getValue();
-									}
-									else {
-										row[2] = val.toString();
-									}
-									dataList.add(row);
-								}
-								Object[][] data = new Object[dataList.size()][3];
-								for (int r = 0; r < dataList.size(); r++) {
-									for (int c = 0; c < 3; c++) {
-										data[r][c] = ((Object[]) dataList.get(r))[c];
-									}
-								}
-								rs = new ResultSet(columnName, data);
-							}
+							rs = modelToSadlResultSet(constructModel, qexec);
+						}
+					}
+					else if (askQuery.trim().substring(0, 8).equalsIgnoreCase("describe")) {
+						Model dm = qexec.execDescribe();
+						if (dm != null) {
+							rs = modelToSadlResultSet(dm, qexec);
 						}
 					}
 					else {
@@ -1397,6 +1362,66 @@ public class JenaReasonerPlugin extends Reasoner{
 		finally {
 		}
 //		}
+		return rs;
+	}
+
+	/**
+	 * Method to convert a Jena Model to a SADL ResultSet
+	 * @param model
+	 * @param qexec
+	 * @return
+	 */
+	private ResultSet modelToSadlResultSet(Model model, QueryExecution qexec) {
+		ResultSet rs = null;
+		StmtIterator sitr = model.listStatements();
+		if (sitr.hasNext()) {
+			String[] columnName = new String[3];
+			Query q = qexec.getQuery();
+			Template template = q.getConstructTemplate();
+			if (template != null) {
+				Triple triple0 = template.getBGP().get(0);
+	//							columnName[0] = qexec.getQuery().getProjectVars().get(0).getVarName();  //"s";
+	//							columnName[1] = qexec.getQuery().getProjectVars().get(1).getVarName(); //"p";
+	//							columnName[2] = qexec.getQuery().getProjectVars().get(2).getVarName(); //"o";
+				org.apache.jena.graph.Node subj = triple0.getSubject();
+				org.apache.jena.graph.Node pred = triple0.getPredicate();
+				org.apache.jena.graph.Node obj = triple0.getObject();
+				
+				columnName[0] = subj.isVariable() ? subj.getName() : subj.getLocalName();
+				columnName[1] = pred.isVariable() ? pred.getName() : pred.getLocalName();
+				columnName[2] = obj.isVariable() ? obj.getName() : obj.getLocalName();
+			}
+			else {
+				columnName[0] = "subject";
+				columnName[1] = "predicate";
+				columnName[2] = "object";
+			}
+			List<Object[]> dataList = new ArrayList<Object[]>();
+			while (sitr.hasNext()) {
+				Statement stmt = sitr.nextStatement();
+				Object[] row = new Object[3];
+				row[0] = stmt.getSubject().toString();
+				row[1] = stmt.getPredicate().toString();
+				RDFNode val = stmt.getObject();
+				if (val instanceof Resource) {
+					row[2] = ((Resource)val).toString();
+				}
+				else if (val instanceof Literal) {
+					row[2] = ((Literal)val).getValue();
+				}
+				else {
+					row[2] = val.toString();
+				}
+				dataList.add(row);
+			}
+			Object[][] data = new Object[dataList.size()][3];
+			for (int r = 0; r < dataList.size(); r++) {
+				for (int c = 0; c < 3; c++) {
+					data[r][c] = ((Object[]) dataList.get(r))[c];
+				}
+			}
+			rs = new ResultSet(columnName, data);
+		}
 		return rs;
 	}
 

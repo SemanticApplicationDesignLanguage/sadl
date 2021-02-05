@@ -631,6 +631,30 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 	
 	@Test
+	def void checkCA_subject_has9() {
+		val builder = newBuilder('''
+			 uri "http://sadl.org/Owl2b.sadl" alias owl2b.
+			 
+			 Person is a class.
+			 {Man, Woman} are types of Person.
+			 
+			 Marriage is a class described by husband with values of type Man,
+			 	described by wife with values of type Woman
+			 	described by ^date with values of type date,
+			 	described by location with values of type string.
+			 	
+			GeorgeWashington is a Man.
+			MarthaDandridge is a Woman.
+			
+			 A Marriage with husband GeorgeWashington, 
+			 	with wife 
+		''');
+		builder.assertProposal('MarthaDandridge');
+		builder.assertProposalIsNot('GeorgeWashington');
+		builder.assertProposalIsNot('acos');
+	}
+	
+	@Test
 	def void checkCA_is_a() {
 		val builder = newBuilder('''
 		 uri "http://sadl.org/Concepts.sadl" alias Concepts.
@@ -709,11 +733,29 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 	}
 	
 	@Test
+	def void checkCA_inverse_of() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Concepts.sadl" alias Concepts.
+		 
+		 Person is a class.
+		 Place is a class.
+
+		 ownedBy describes Place with values of type Person.
+		 owns describes Person with values of type Place.
+		 ownedBy is the inverse of ''');
+		 
+		 builder.assertProposal('owns');
+		 builder.assertProposalIsNot('ownedBy');
+		 builder.assertProposalIsNot('Person');
+		 builder.assertProposalIsNot('acos');
+	}
+	
+	@Test
 	def void checkCA_alias() {
 		val builder = newBuilder('''
 		 uri "http://sadl.org/Logic1b.sadl" alias 
 		''');
-		builder.assertProposal('checkCA_alias');
+		builder.assertProposal('checkca_alias');
 	}
 	
 }

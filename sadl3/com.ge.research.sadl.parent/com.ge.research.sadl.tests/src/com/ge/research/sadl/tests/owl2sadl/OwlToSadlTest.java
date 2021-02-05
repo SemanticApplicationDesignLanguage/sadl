@@ -457,6 +457,51 @@ public class OwlToSadlTest {
 		assertEquals(expected.trim(), sadlModelContent.trim());
 	}
 	
+	@Test
+	public void test08() throws OwlImportException {
+		String owlModelContent = 
+				"<rdf:RDF\n" + 
+				"xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" + 
+				"xmlns:builtinfunctions=\"http://sadl.org/builtinfunctions#\"\n" + 
+				"xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n" + 
+				"xmlns:sadlimplicitmodel=\"http://sadl.org/sadlimplicitmodel#\"\n" + 
+				"xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n" + 
+				"xmlns:owlimp=\"http://sadl.org/testOwlimport.sadl#\"\n" + 
+				"xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel#\"\n" + 
+				"xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n" + 
+				"xml:base=\"http://sadl.org/testOwlimport.sadl\">\n" + 
+				"<owl:Ontology rdf:about=\"\">\n" + 
+				"<owl:imports rdf:resource=\"builtinfunctions\"/>\n" + 
+				"<owl:imports rdf:resource=\"sadlimplicitmodel\"/>\n" + 
+				"<owl:imports rdf:resource=\"sadlbasemodel\"/>\n" + 
+				"</owl:Ontology>\n" + 
+				"<owl:Class rdf:ID=\"C\"/>\n" + 
+				"<owl:DatatypeProperty rdf:ID=\"description\">\n" + 
+				"<rdfs:domain rdf:resource=\"#C\"/>\n" + 
+				"<rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#string\"/>\n" + 
+				"</owl:DatatypeProperty>\n" + 
+				"<owlimp:C rdf:about=\"aninstance\">\n" + 
+				"<owlimp:description>sample instance</owlimp:description>\n" + 
+				"</owlimp:C>\n" + 
+				"</rdf:RDF>";
+		OwlToSadl o2s = new OwlToSadl(owlModelContent, "http://sadl.org/testOwlimport.sadl");
+//		o2s.setVerboseMode(true);
+		String sadlModelContent = o2s.getSadlModel();
+		String expected = 
+				"uri \"http://sadl.org/testOwlimport.sadl\" alias owlimp.\n" + 
+				"\n" + 
+				"// Class definitions:\n" + 
+				"C is a class,\n" + 
+				"    described by description with values of type string.\n" + 
+				"\n" + 
+				"// Individuals:\n" + 
+				"aninstance is a C,\n" + 
+				"    has description \"sample instance\".\n" + 
+				"\n";
+		System.out.print(sadlModelContent);
+		assertEquals(expected.trim(), sadlModelContent.trim());
+	}
+	
 	private void assertEquals(Object expected, Object actual) {
 		String s1 = expected.toString().replace("\r", "");
 		s1 = s1.replace("\n", "");

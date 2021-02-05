@@ -1,0 +1,6 @@
+uri "http://sadl.org/y.sadl".
+Artefact is a class.
+Aircraft is a type of Artefact.
+W_IsSomethingWithW is a class.
+IsSomethingWithoutW is a class.
+MyAircraft is an Aircraft w
