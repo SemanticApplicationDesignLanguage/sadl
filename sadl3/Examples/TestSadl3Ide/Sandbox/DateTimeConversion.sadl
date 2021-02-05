@@ -1,0 +1,7 @@
+ uri "http://sadl.org/DateTimeConversion.sadl" alias datetimeconversion.
+ 
+ Artifact is a class described by generatedAtTime with values of type dateTime .
+ 
+// MyArtifact is an Artifact with generatedAtTime "2017-03-23T10:03:16-05:00".
+ 
+ MyArtifact is an Artifact with generatedAtTime "2/4/2021 7:35 PM EST".

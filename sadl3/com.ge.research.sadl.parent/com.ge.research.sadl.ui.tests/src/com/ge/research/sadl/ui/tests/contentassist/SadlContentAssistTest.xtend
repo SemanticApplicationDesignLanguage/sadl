@@ -151,6 +151,15 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 					  MyFoo is a Foo with p1 M''').
 			assertProposal('MyBar');
 	}
+	
+	@Test
+	def void checCA_14d_PropertyInitializerValue_Positive() {
+		newBuilder('''uri "http://sadl.org/DateTimeConversion.sadl" alias datetimeconversion.
+					  Artifact is a class described by generatedAtTime with values of type dateTime .
+		              MyArtifact is an Artifact with generatedAtTime ''').
+			assertProposal('"MM/DD/YYYY hh:mm:ss PM TZD"');
+	}
+	
 	/** Super element with `type of`. */
 	@Test
 	def void checkCA_15_SuperElement_IsATypeOf_Positive() {
@@ -257,6 +266,18 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		builder.assertProposal('Engine');
 	}
 
+	@Test
+	def void checCA_14e_PropertyInitializerValue_Positive() {
+		val builder = newBuilder('''uri "http://sadl.org/AdamsFamily.sadl" alias adamsfamily.
+					  Gender is a class, must be one of {Male, Female}.
+					  Person is a class described by gender with values of type Gender.
+					  JohnAdams (alias "John Adams") is a Person, 
+					  with gender  ''');
+			builder.assertProposal('Male');
+			builder.assertProposal('Female');
+			builder.assertProposalIsNot('literalString');
+	}
+	
 	@Test
 	def void checkCA_29_PrimitivesInRanges() {
 		// https://github.com/crapo/sadlos2/issues/406
@@ -590,7 +611,7 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		
 		GeorgeWashington has dateOfBirth 
 		''');
-		builder.assertProposal('"mm/dd/yyyy"');
+		builder.assertProposal('"MM/DD/YYYY"');
 	}
 	
 	@Test
@@ -748,6 +769,81 @@ class SadlContentAssistTest extends AbstractSadlContentAssistTest {
 		 builder.assertProposalIsNot('ownedBy');
 		 builder.assertProposalIsNot('Person');
 		 builder.assertProposalIsNot('acos');
+	}
+	
+	@Test
+	def void checkCA_HasValueValue01() {
+		val builder = newBuilder('''
+		  uri "http://sadl.org/Genealogy1.sadl" alias gen1.
+		  
+		  Gender is a class, must be one of {Male, Female}.
+		  Person is a class described by gender with values of type Gender,
+		  	described by dateOfBirth with values of type date,
+		  	described by age with values of type nonNegativeInteger,
+		  	described by parent with values of type Person.
+		  	
+		  A Person is a Woman only if gender always has value ''');
+		 
+		 builder.assertProposal('Female');
+		 builder.assertProposalIsNot('Gender');
+		 builder.assertProposalIsNot('Person');
+		 builder.assertProposalIsNot('acos');
+	}
+	
+	@Test
+	def void checkCA_HasValueValue02() {
+		val builder = newBuilder('''
+		  uri "http://sadl.org/Genealogy1.sadl" alias gen1.
+		  
+		  Gender is a class, must be one of {Male, Female}.
+		  Person is a class described by gender with values of type Gender,
+		  	described by dateOfBirth with values of type date,
+		  	described by age with values of type nonNegativeInteger,
+		  	described by parent with values of type Person.
+		  Woman is a class.	
+		  gender of Woman always has value ''');
+		 
+		 builder.assertProposal('Female');
+		 builder.assertProposalIsNot('Gender');
+		 builder.assertProposalIsNot('Person');
+		 builder.assertProposalIsNot('false');		 
+		 builder.assertProposalIsNot('known');
+		 builder.assertProposalIsNot('PI');
+		 builder.assertProposalIsNot('e');
+	}
+	
+	@Ignore ("lots to work out with CA in rules...")
+	@Test
+	def void checkCA_Rule01() {
+		val builder = newBuilder('''
+		 uri "http://sadl.org/Genealogy1.sadl" alias gen1.
+		 
+		 Gender is a class, must be one of {Male, Female}.
+		 Person is a class described by gender with values of type Gender,
+		 	described by dateOfBirth with values of type date,
+		 	described by age with values of type nonNegativeInteger,
+		 	described by parent with values of type Person.
+		 	
+		 A Person is a Woman only if gender always has value Female.
+		 A Person is a Man only if gender always has value Male. 	
+		 	
+		 child describes Person with values of type Person.
+		 spouse describes Person with values of type Person.
+		 spouse of Person has at most 1 value.
+		 sibling describes Person with values of type Person.
+		 
+		 spouse is symmetrical .
+		 sibling is symmetrical .
+		  Rule SiblingRule:
+		  	if x is a Person and x has parent ''');
+		 
+		 builder.assertProposal('Female');
+		 builder.assertProposalIsNot('Gender');
+		 builder.assertProposalIsNot('Person');
+		 builder.assertProposalIsNot('false');		 
+		 builder.assertProposalIsNot('known');
+		 builder.assertProposalIsNot('PI');
+		 builder.assertProposalIsNot('e');
 	}
 	
 	@Test
