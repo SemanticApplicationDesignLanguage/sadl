@@ -1,0 +1,11 @@
+ uri "http://sadl.org/GH-617.sadl" alias gh-617.
+ 
+ D is a class.
+ C is a class,
+ 	described by p1 with values of type D,
+ 	described by p2 with values of type string .
+ 	
+ p1 of C has at least one value of type D.
+ p2 of C has at least one value of type string.
+ p2 of C has at least 1 value of type string.
+ 

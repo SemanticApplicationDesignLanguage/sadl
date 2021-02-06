@@ -604,6 +604,65 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 	}
 
 	@Test
+	def void testPropertyInLinePropertyRestriction_10() {
+		val sadlModel = '''
+			 uri "http://sadl.org/GH-617.sadl" alias gh-617.
+			 
+			 D is a class.
+			 C is a class,
+			 	described by p2 with values of type string .
+			 	
+			 p2 of C has at least 1 value of type string.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/GH-617.sadl#C")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/GH-617.sadl#p2"))
+ 				val onclass = rest.getPropertyValue(OWL2.onDataRange).asResource
+ 				assertTrue(onclass.URI.equals("http://www.w3.org/2001/XMLSchema#string"))
+ 				assertTrue(rest.getPropertyValue(OWL2.minQualifiedCardinality).asLiteral.int == 1)
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
+	def void testPropertyInLinePropertyRestriction_11() {
+		val sadlModel = '''
+			 uri "http://sadl.org/GH-617.sadl" alias gh-617.
+			 
+			 D is a class.
+			 C is a class,
+			 	described by p2 with values of type string .
+			 	
+			 p2 of C has at least one value of type string.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val pcls = jenaModel.getOntClass("http://sadl.org/GH-617.sadl#C")
+ 			val itr = pcls.listSuperClasses(true)
+ 			assertTrue(itr.hasNext)
+ 			val sprc = itr.next
+ 			if (sprc instanceof OntClass && (sprc as OntClass).canAs(Restriction)) {
+ 				val rest = (sprc as OntClass).^as(Restriction)
+ 				assertTrue(rest.onProperty.URI.equals("http://sadl.org/GH-617.sadl#p2"))
+ 				val onclass = rest.getPropertyValue(OWL.someValuesFrom).asResource
+ 				assertTrue(onclass.URI.equals("http://www.w3.org/2001/XMLSchema#string"))
+ 				return
+ 			}
+ 			fail()
+ 		]
+	}
+
+	@Test
 	def void testPropertyAlwaysHasValueTrue() {
 		val sadlModel = '''
 			 uri "http://sadl.org/MTC1" alias Name version "$Revision:$ Last modified on   $Date:$". 
