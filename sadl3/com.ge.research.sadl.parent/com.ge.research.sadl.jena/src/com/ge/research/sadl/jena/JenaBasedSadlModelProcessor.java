@@ -12619,6 +12619,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (((RDFNode) obj).canAs(OntResource.class)) {
 				return ((RDFNode) obj).as(OntResource.class);
 			}
+			else if (obj.isURIResource()){
+				return getTheJenaModel().getOntResource(obj.getURI());
+			}
 		}
 		throw new JenaProcessorException("Unable to convert SadlTypeReference '" + sadlTypeRef + "' to OntResource");
 	}
