@@ -74,6 +74,10 @@ import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement
 import org.eclipse.xtext.ParserRule
 import com.ge.research.sadl.sADL.SadlIsInverseOf
+import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
+import com.ge.research.sadl.sADL.SadlHasValueCondition
+import com.ge.research.sadl.sADL.SadlPropertyCondition
+import org.eclipse.xtext.Alternatives
 
 /**
  * Generic content proposal provider for the {@code SADL} language.
@@ -129,40 +133,55 @@ class SadlIdeContentProposalProvider extends IdeContentProposalProvider {
 				ctx.completeCardinalityAssigment(acceptor);
 			}
 			default: {
-				super._createProposals(assignment, ctx, acceptor);
+				if (continueProposalCreation(assignment, ctx)) {
+					super._createProposals(assignment, ctx, acceptor);
+				}
 //				createProposalDefaults(assignment, ctx, acceptor);
 			}
 		}
 	}
 	
-//	def protected void createProposalDefaults(Assignment assignment, ContentAssistContext ctx, IIdeContentProposalAcceptor acceptor) {
-//		val terminal = assignment.terminal;
-//		var getSuggestion = false;
-//		if (terminal instanceof RuleCall) {
-//			val rule = (terminal as RuleCall).rule;
-//			if (rule instanceof ParserRule) {
-//				val prule = (rule as ParserRule);
-//				val prname = prule.name;
-//				if (prname.equals("SadlExplicitValue")) {
-//					getSuggestion = true;
-//				}
-//			}
-//		}
-//		if (!getSuggestion && assignment.feature.compareTo("value") == 0) {
-//			getSuggestion = true;
-//		}
-//		
-//		if (getSuggestion) {
-//			if (crossrefProposalProvider instanceof SadlIdeCrossrefProposalProvider) {
-//				val suggestion = (crossrefProposalProvider as SadlIdeCrossrefProposalProvider).getProposalDatatypePropertySuggestion()
-//				if (suggestion !== null) {
-//					println("Suggestion: " + suggestion);
-//				}
-//			}
-//		}
-//		super._createProposals(assignment, ctx, acceptor);
-//	}
-		
+	protected def continueProposalCreation(Assignment assignment, ContentAssistContext ctx) {
+		var SadlResource sr = null
+		val terminal = assignment !== null ? assignment.terminal : null
+		if (terminal instanceof CrossReference) {
+			return true
+		}
+		if (terminal instanceof Alternatives) {
+			return true
+		}
+		val cm = ctx.currentModel
+		if (cm instanceof SadlHasValueCondition) {
+			val cont = cm.eContainer;
+			if (cont instanceof SadlPropertyCondition) {
+				sr = (cont as SadlPropertyCondition).property
+			}
+		}
+		else if (cm instanceof SadlPropertyCondition) {
+			sr = (cm as SadlPropertyCondition).property
+		}
+		else if (cm instanceof SadlPropertyInitializer) {
+			sr = (cm as SadlPropertyInitializer).property
+		}
+		else if (cm instanceof SadlProperty) {
+			sr = (cm as SadlProperty).nameOrRef
+		}
+		else if (cm instanceof SubjHasProp) {
+			sr = (cm as SubjHasProp).prop
+		}
+		else if (cm instanceof SadlResource) {
+			val uri = declarationExtensions.getConceptUri(cm)
+			val oct = declarationExtensions.getOntConceptType(cm)
+			sr = cm
+		}
+		if (sr !== null) {
+			return declarationExtensions.getOntConceptType(sr).equals(OntConceptType.DATATYPE_PROPERTY)
+		}
+		else {
+			return true
+		}
+	}
+	
 	override protected getCrossrefFilter(CrossReference reference, ContentAssistContext ctx) {
 		// Special case for filtering out all those resources among import proposals which are already imported.
 		if (reference.eContainer == grammarAccess.sadlImportAccess.importedResourceAssignment_1) {
@@ -317,7 +336,7 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 	protected override dispatch void createProposals(Keyword keyword, ContentAssistContext context,
 		IIdeContentProposalAcceptor acceptor) {
 
-		if (filterKeyword(keyword, context)) {
+		if (continueProposalCreation(null, context) && filterKeyword(keyword, context)) {
 			var proposalText = keyword.getValue();
 			if (isInvokedDirectlyAfterKeyword(context) && requireSpaceBefore(keyword, context) &&
 				!hasSpaceBefore(context)) {
@@ -388,7 +407,8 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 				val typeList = new ArrayList<OntConceptType>
 				typeList.add(OntConceptType.CLASS_PROPERTY)
 				typeRestrictions = typeList
-				
+			} else if (pm instanceof SadlNecessaryAndSufficient) {
+				restrictTypeToAllPropertyTypesExceptAnnotation
 			} else if (pm instanceof SadlResource && cm !== null && cm.eContainer instanceof SadlModel) {
 				// just a name on a new line--can't be followed by another name
 				return Predicates.alwaysFalse
@@ -435,8 +455,72 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 								return false;
 							]							
 						}
+						else if (!oct.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+							restrictTypeToIndividualType
+						}
 					}
 				}
+			} else if (pm instanceof SadlHasValueCondition) {
+				val cont = pm.eContainer
+				if (cont instanceof SadlPropertyCondition) {
+					val prop = (cont as SadlPropertyCondition).property
+					if (prop instanceof SadlResource) {
+						val oct = declarationExtensions.getOntConceptType((prop as SadlResource))
+						if (oct.equals(OntConceptType.DATATYPE_PROPERTY)) {
+							return [ input |
+								val suggestion = context.getSuggestion();
+								if (suggestion !== null) {
+									var result = new ContentAssistEntry();
+									result.setProposal(suggestion);
+									result.setPrefix(context.prefix);
+									if (suggestion.startsWith("\"")) {
+										result.getEditPositions()
+												.add(new TextRegion(context.getOffset() + 1, suggestion.length() - 2));
+										result.setKind(ContentAssistEntry.KIND_TEXT);
+									} else {
+										result.getEditPositions().add(new TextRegion(context.getOffset(), suggestion.length()));
+										result.setKind(ContentAssistEntry.KIND_VALUE);
+									}
+									result.setDescription("datatype value suggestion");
+									throw new DataTypePropertyInterruptException(result);
+								}
+								return false;
+							]							
+						}
+						else if (!oct.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+							restrictTypeToIndividualType
+						}
+					}
+				}
+			} else if (pm instanceof SadlPropertyCondition) {
+					val prop = (pm as SadlPropertyCondition).property
+					if (prop instanceof SadlResource) {
+						val oct = declarationExtensions.getOntConceptType((prop as SadlResource))
+						if (oct.equals(OntConceptType.DATATYPE_PROPERTY)) {
+							return [ input |
+								val suggestion = context.getSuggestion();
+								if (suggestion !== null) {
+									var result = new ContentAssistEntry();
+									result.setProposal(suggestion);
+									result.setPrefix(context.prefix);
+									if (suggestion.startsWith("\"")) {
+										result.getEditPositions()
+												.add(new TextRegion(context.getOffset() + 1, suggestion.length() - 2));
+										result.setKind(ContentAssistEntry.KIND_TEXT);
+									} else {
+										result.getEditPositions().add(new TextRegion(context.getOffset(), suggestion.length()));
+										result.setKind(ContentAssistEntry.KIND_VALUE);
+									}
+									result.setDescription("datatype value suggestion");
+									throw new DataTypePropertyInterruptException(result);
+								}
+								return false;
+							]							
+						}
+						else if (!oct.equals(OntConceptType.ANNOTATION_PROPERTY)) {
+							restrictTypeToIndividualType
+						}
+					}
 			} else {
 				val container = pm.eContainer
 				if (container instanceof SubjHasProp) {
@@ -652,10 +736,6 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 						}
 					}
 				}
-//				else if (!oct.equals(OntConceptType.INSTANCE)) {
-//					if (kval.equals(""))
-//					}
-//				}
 			}
 		}
 		return true
@@ -706,21 +786,46 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 	}
 
 	protected def restrictTypeToClass(SadlResource propsr) {
-		// only classes in the domain of the property
+		// only classes in the domain of the property but that further filtering is done by JBSMP.validate
 		if (propsr !== null) {
-			// for now just filter to classes
 			val typeList = new ArrayList<OntConceptType>
 			typeList.add(OntConceptType.CLASS)
+			typeList.add(OntConceptType.VARIABLE)
 			typeRestrictions = typeList
 		}
 	}
 
+	protected def restrictTypeToIndividualType() {
+		val typeList = new ArrayList<OntConceptType>
+		typeList.add(OntConceptType.INSTANCE)
+		typeList.add(OntConceptType.VARIABLE)
+		typeRestrictions = typeList
+	}
+		
 	protected def restrictTypeToAllPropertyTypes() {
 		val typeList = new ArrayList<OntConceptType>
 		typeList.add(OntConceptType.ANNOTATION_PROPERTY)
 		typeList.add(OntConceptType.CLASS_PROPERTY)
 		typeList.add(OntConceptType.DATATYPE_PROPERTY)
 		typeList.add(OntConceptType.RDF_PROPERTY)
+		typeList.add(OntConceptType.VARIABLE)
+		typeRestrictions = typeList
+	}
+
+	protected def restrictTypeToAllPropertyTypesExceptAnnotation() {
+		val typeList = new ArrayList<OntConceptType>
+		typeList.add(OntConceptType.CLASS_PROPERTY)
+		typeList.add(OntConceptType.DATATYPE_PROPERTY)
+		typeList.add(OntConceptType.RDF_PROPERTY)
+		typeList.add(OntConceptType.VARIABLE)
+		typeRestrictions = typeList
+	}
+
+	protected def restrictTypeToPropertyTypesClassAndRdf() {
+		val typeList = new ArrayList<OntConceptType>
+		typeList.add(OntConceptType.CLASS_PROPERTY)
+		typeList.add(OntConceptType.RDF_PROPERTY)
+		typeList.add(OntConceptType.VARIABLE)
 		typeRestrictions = typeList
 	}
 

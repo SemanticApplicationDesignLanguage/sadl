@@ -58,6 +58,10 @@ import org.eclipse.emf.common.util.EList
 import org.eclipse.xtext.nodemodel.impl.HiddenLeafNodeWithSyntaxError
 import org.eclipse.xtext.nodemodel.impl.CompositeNode
 import org.eclipse.xtext.nodemodel.impl.AbstractNode
+import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
+import com.ge.research.sadl.sADL.SadlPropertyCondition
+import com.ge.research.sadl.sADL.SadlHasValueCondition
+import com.ge.research.sadl.sADL.SadlProperty
 
 /**
  * Singleton service ontology context provider service for SADL.
@@ -135,6 +139,29 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 				} else {
 					// need to do something else to get the type
 					// val i = 0;
+				}
+			} else if (key == SADLHASVALUECONDITION_RESTRICTION) {
+				var SadlResource sr = null;
+				if (currentModel instanceof SadlHasValueCondition) {
+					val cont = currentModel.eContainer;
+					if (cont instanceof SadlPropertyCondition) {
+						sr = (cont as SadlPropertyCondition).property;
+					}
+				}
+				else if (currentModel instanceof SadlPropertyCondition) {
+					sr = (currentModel as SadlPropertyCondition).property;
+				}
+				else if (currentModel instanceof SadlProperty) {
+					sr = (currentModel as SadlProperty).nameOrRef;
+				}
+				if (sr !== null) {
+					val type = sr;
+					val builder = new ContextBuilder(type, processor) => [
+						grammarContextId = key;
+						validationAcceptor = acceptor;
+						contextClass = clazz;
+					];
+					return Optional.of(builder.build);
 				}
 			} else if (key == SADLPROPERTYINITIALIZER_PROPERTY) {
 				val initializer = currentModel.propertyInitializer;
@@ -245,6 +272,20 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 						}
 					}
 				}
+			} else if (key == SADLSTATEMENT_PROPCONDITIONS) {
+				val subj = (currentModel as SadlNecessaryAndSufficient).subject;
+				if (subj instanceof SadlSimpleTypeReference) {
+					val type = (subj as SadlSimpleTypeReference).type;
+					if (type instanceof SadlResource) {
+						val builder = new ContextBuilder(type, processor) => [
+							grammarContextId = key;
+							validationAcceptor = acceptor;
+							contextClass = clazz;
+						];
+						return Optional.of(builder.build);
+					}
+				}
+				
 //			} else if (key == SADLPROPERTYRESTRICTION_OTHERPROPERTY) {
 //				val initializer = currentModel.eContainer;
 //				if (initializer !== null) {
