@@ -9,7 +9,7 @@
   <body>
     <h1>User-defined Data Types in SADL</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/29/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->2/15/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <ul>
       <li><a href="#Introduction">Introduction</a></li>
@@ -117,6 +117,10 @@
       matched. For numbers this include a min and/or max and whether it is
       inclusive or not. In addition, a user-defined data type can be union of
       XSD data types, as illustrated in example 6 above.</p>
+    <p><b>Note</b> that a user-defined data type must be named and declared in a
+      definition statement, as shown in the examples above. It <b>cannot</b> be
+      declared in-line in statements specifying property range or property
+      restrictions.</p>
     <p>When the target representation is OWL, a user-defined data type in SADL
       is translated into the model representation as an <em>rdfs:Datatype</em>.
       As an example of such a representation, the OWL equivalent of the SADL
@@ -301,12 +305,14 @@ font-family:Consolas">&nbsp; &lt;rdfs:Datatype rdf:ID="AdolescentAge"&gt;</span>
 font-family:Consolas">&nbsp;&nbsp;&nbsp;
         &lt;TestIdentityOfUserDefinedDataType:functional_min rdf:datatype=</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
-font-family:Consolas">&nbsp;&nbsp;&nbsp; "http://www.w3.org/2001/XMLSchema#string"&gt;12&lt;/TestIdentityOfUserDefinedDataType:functional_min&gt;</span></p>
+font-family:Consolas">&nbsp;&nbsp;&nbsp;
+"http://www.w3.org/2001/XMLSchema#string"&gt;12&lt;/TestIdentityOfUserDefinedDataType:functional_min&gt;</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
 font-family:Consolas">&nbsp;&nbsp;&nbsp;
         &lt;TestIdentityOfUserDefinedDataType:tolerance rdf:datatype=</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
-font-family:Consolas">&nbsp;&nbsp;&nbsp; "http://www.w3.org/2001/XMLSchema#string"&gt;.5&lt;/TestIdentityOfUserDefinedDataType:tolerance&gt;</span></p>
+font-family:Consolas">&nbsp;&nbsp;&nbsp;
+"http://www.w3.org/2001/XMLSchema#string"&gt;.5&lt;/TestIdentityOfUserDefinedDataType:tolerance&gt;</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
 font-family:Consolas">&nbsp;&nbsp;&nbsp;
         &lt;TestIdentityOfUserDefinedDataType:mapping&gt;</span></p>
@@ -317,12 +323,14 @@ font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &lt;TestIdentityOfUserDefinedDataType:alias rdf:datatype=</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
-font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "http://www.w3.org/2001/XMLSchema#string"&gt;16&lt;/TestIdentityOfUserDefinedDataType:alias&gt;</span></p>
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+"http://www.w3.org/2001/XMLSchema#string"&gt;16&lt;/TestIdentityOfUserDefinedDataType:alias&gt;</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
 font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &lt;TestIdentityOfUserDefinedDataType:value rdf:datatype=</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
-font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "http://www.w3.org/2001/XMLSchema#data"&gt;16&lt;/TestIdentityOfUserDefinedDataType:value&gt;</span></p>
+font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+"http://www.w3.org/2001/XMLSchema#data"&gt;16&lt;/TestIdentityOfUserDefinedDataType:value&gt;</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
 font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &lt;/TestIdentityOfUserDefinedDataType:ValueMapping&gt;</span></p>
@@ -353,7 +361,8 @@ font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         &lt;/owl:withRestrictions&gt;</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
 font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        &lt;owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#int"/&gt;</span></p>
+        &lt;owl:onDatatype
+        rdf:resource="http://www.w3.org/2001/XMLSchema#int"/&gt;</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
 font-family:Consolas">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/rdfs:Datatype&gt;</span></p>
     <p class="MsoNormal" style="text-autospace:none"> <span style="font-size:10.0pt;
