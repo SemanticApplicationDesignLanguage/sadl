@@ -10,7 +10,7 @@
 // mc2 is a MyClass with p1 0, with p2 false.
  
  Requirement is a class.
- reqName is a type of string "[a-Z0-9_]+".
+ reqName is a type of string "[a-zA-Z0-9_]+".
  name describes Requirement with a single value of type reqName.
 // r is a Requirement with name "This is an invalid name".
  

@@ -1430,6 +1430,25 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  	@Test
  	def void testUserDefined05() {
  		val sadlModel = '''
+			 uri "http://sadl.org/UserDefinedDataTypes.sadl" alias UserDefinedDataTypes.
+			 
+			 Requirement is a class.
+			 name describes Requirement with a single value of type string "^[a-z0-9_]+$".
+			 r is a Requirement with name "This is an invalid name".
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			if (issues !== null) {
+ 				for (iss : issues) {
+ 					println(iss.toString)
+ 				}
+ 			}
+			assertNotNull(issues)
+			assertTrue(issues.size == 1)
+		]
+ 	}
+ 	
+ 	@Test
+ 	def void testUserDefined06() {
+ 		val sadlModel = '''
 	 	 uri "http://sadl.org/ComplexUserdefinedDatatypes.sadl" alias complexuserdefineddatatypes.
 	 	 
 	 	 SmMedLg is a type of string {"small", "medium", "large"}.

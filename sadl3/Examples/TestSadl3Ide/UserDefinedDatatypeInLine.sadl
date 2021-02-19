@@ -1,0 +1,7 @@
+ uri "http://sadl.org/UserDefinedDatatypeInLine.sadl" alias  userdefineddatatypeinline.
+ 
+ Requirement is a class.
+ name describes Requirement with a single value of type string "[a-zA-Z0-9_]+".
+ r1 is a Requirement with name "abc345".
+// r2 is a Requirement with name "This is an invalid name".								// should have 1 error
+ 

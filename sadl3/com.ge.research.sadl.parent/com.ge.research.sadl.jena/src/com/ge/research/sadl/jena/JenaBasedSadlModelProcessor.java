@@ -9984,6 +9984,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (rng instanceof SadlPrimitiveDataType && !rngValueType.equals(RangeValueType.LIST)) {
 						String rngName = ((SadlPrimitiveDataType) rng).getPrimitiveType().getName();
 						rngNode = primitiveDatatypeToRDFNode(rngName);
+						if (((SadlRangeRestriction)spr2).getFacet() != null) {
+							// this is an in-line restriction 
+							if (rngNode.isURIResource() && rngNode.asResource().getNameSpace().equals(XSD.getURI())) {
+								// give this a system-generated name and create user-defined datatype
+								//	this is the property definition, and it's a datatype property so appending "_range" to the
+								//	property URI should be unique
+								String uddtUri = propUri + "_range";
+								rngNode = createRdfsDatatype(uddtUri, null, rngNode.asResource(), ((SadlRangeRestriction)spr2).getFacet());
+							}							
+						}
 						DatatypeProperty prop2 = null;
 						if (!checkForExistingCompatibleDatatypeProperty(propUri, rngNode)) {
 							// TODO should this ever happen? spr1 should have created the property?
