@@ -685,12 +685,10 @@ public class SadlUtils {
         boolean isNumeric = isNumericRange(rnguri);
         RDFDatatype rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
         if (rdftype != null) {
-        	if (rdftype.isValidValue(v)) {
-	         	val = m.createTypedLiteral(v, rdftype);
-	        	if (val != null) {
-	        		return val;
-	        	}
-        	}
+         	val = m.createTypedLiteral(v, rdftype);
+        	if (val != null) {
+        		return val;
+         	}
 	        Resource rng = m.getResource(rnguri);
 			OntClass eqcls = null;
 			if (rng.canAs(OntClass.class)) {
