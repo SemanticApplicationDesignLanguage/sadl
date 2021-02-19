@@ -18,6 +18,7 @@
 package com.ge.research.sadl.jena.userdefineddatatypes;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
@@ -30,8 +31,13 @@ import org.apache.jena.datatypes.TypeMapper;
 //import org.apache.jena.datatypes.xsd.XSDDatatype.XSDGenericType;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.ontology.DatatypeProperty;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.ontology.OntProperty;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.ValidityReport;
@@ -41,13 +47,52 @@ import org.apache.xerces.impl.dv.xs.XSSimpleTypeDecl;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.reasoner.AmbiguousNameException;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.QueryCancelledException;
+import com.ge.research.sadl.reasoner.QueryParseException;
+import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
+import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
+
 public class TestUserDefinedDatatype {
 	
 
 	@Test
+	public void test_01() throws ConfigurationException, ReasonerNotFoundException, QueryParseException, QueryCancelledException, InvalidNameException, AmbiguousNameException {
+		URL dataModelsFolder = ClassLoader.getSystemResource("TestModels");
+		String kbid = dataModelsFolder.getFile() + "/GH-620";
+		String mfp = kbid + "/OwlModels";
+		String modelName = "http://sadl.org/UserDefinedDataTypes.sadl";
+		OntModel om = ModelFactory.createOntologyModel();
+		om.read(SadlUtils.FILE_ABS_URL_PREFIX + mfp + "/UserDefinedDataTypes.owl");
+		om.write(System.out);
+		Resource sldt = om.getResource(modelName + "#SL");
+	    RDFDatatype rdfdtype = TypeMapper.getInstance().getTypeByName(sldt.getURI());
+		assertTrue(rdfdtype instanceof RDFDatatype);
+		Literal lit1 = om.createTypedLiteral(4, rdfdtype);
+		System.out.println(lit1.getValue().toString());
+		Literal lit2 = om.createTypedLiteral(6, rdfdtype);
+		System.out.println(lit2.getValue().toString());
+//		OntClass myclass = om.getOntClass(modelName + "#MyClass");
+//		Individual imc = om.createIndividual(modelName + "#mc1", myclass);
+//		OntProperty p1 = om.getOntProperty(modelName + "#p1");
+//		RDFNode lit5 = om.createTypedLiteral(v)
+//		om.add(imc, p1, 5);
+//		om.add(imc, )
+//		om.add(statements)
+	}
+
+	@Test
 	@Ignore
 	public void test() throws DatatypeFormatException, FileNotFoundException {
-		URL dataModelsFolder = ClassLoader.getSystemResource("testing");
+		URL dataModelsFolder = ClassLoader.getSystemResource("TestModels");
+//		URL dataModelsFolder = ClassLoader.getSystemResource("testing");
         String uri = "http://www.daml.org/2001/03/daml+oil-ex-dt";
         String filename1 = dataModelsFolder.getFile() + "/xsd/daml+oil-ex-dt.xsd";
         String filename2 = dataModelsFolder.getFile() + "/xsd/over12.xsd";

@@ -1,0 +1,23 @@
+ uri "http://sadl.org/UserDefinedDataTypes2.sadl" alias UserDefinedDataTypes2.
+ 
+ SL is a type of int [1,5].
+ 
+ UDT is a type of {int or string}.
+ 
+ SSN is a type of string "[0-9]{3}-[0-9]{2}-[0-9]{4}".
+ 
+ MyClass is a class described by p1 with values of type SL, 
+ 	described by p2 with values of type UDT
+ 	described by ssn with values of type SSN.
+ 
+ mc0 is a MyClass with p1 4, with p2 "hello there", with p2 45, with ssn "123-45-6789".
+// mc1 is a MyClass with p1 6, with p2 "hi", with p2 4 , with ssn "12345".				// should have 3 errors
+// mc2 is a MyClass with p1 0, with p2 false.												// should have 2 errors
+ 
+ Requirement is a class.
+ reqName is a type of string "[a-zA-Z0-9_]+".
+ name describes Requirement with a single value of type reqName.
+ r1 is a Requirement with name "abc345".
+// r2 is a Requirement with name "This is an invalid name".								// should have 1 error
+  
+ 

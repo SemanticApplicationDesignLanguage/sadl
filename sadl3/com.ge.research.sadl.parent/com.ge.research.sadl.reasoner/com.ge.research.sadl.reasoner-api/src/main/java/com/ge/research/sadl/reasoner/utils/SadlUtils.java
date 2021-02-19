@@ -51,6 +51,7 @@ import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.OWL2;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 import org.pojava.datetime.DateTime;
 import org.pojava.datetime.Duration;
 import org.slf4j.Logger;
@@ -677,18 +678,24 @@ public class SadlUtils {
     }
     
     public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, String rnguri, Object v) throws TranslationException {
+    	v = preProcessValueString(rnguri, v.toString());
         Literal val = null;
         String errMsg = null;
         boolean rdfTypeValid = false;
         boolean isNumeric = isNumericRange(rnguri);
         RDFDatatype rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
         if (rdftype != null) {
-        	Resource rng = m.getResource(rnguri);
+         	val = m.createTypedLiteral(v, rdftype);
+        	if (val != null) {
+        		return val;
+         	}
+	        Resource rng = m.getResource(rnguri);
 			OntClass eqcls = null;
 			if (rng.canAs(OntClass.class)) {
 				eqcls = rng.as(OntClass.class).getEquivalentClass();
 			}
 			if (eqcls != null) {
+				rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
 				Statement pv = eqcls.getProperty(OWL2.onDatatype);
 				if (pv != null) {
 					RDFNode pvobj = pv.getObject();
@@ -706,6 +713,7 @@ public class SadlUtils {
 							java.util.List<RDFNode> l = convertList(uofnode, m);
 							if (l != null) {
 								Iterator<RDFNode> opsitr = l.iterator();
+								List<Throwable> exceptions = null;
 								while (opsitr.hasNext()) {
 									RDFNode op = opsitr.next();
 									if (op.isURIResource()) {
@@ -716,9 +724,24 @@ public class SadlUtils {
 											}
 										}
 										catch (Throwable t) {
-											
+											if (opsitr.hasNext()) {
+												if (exceptions == null) {
+													exceptions = new ArrayList<Throwable>();
+												}
+												exceptions.add(t);
+											}
+											else {
+												throw t;
+											}
 										}
 									}
+								}
+								if (exceptions != null) {
+									StringBuilder sb = new StringBuilder("Union operand results: ");
+									for (int i = 0; i < exceptions.size(); i++) {
+										sb.append(exceptions.get(i).getMessage() + "\n");
+									}
+									throw new TranslationException(sb.toString());
 								}
 							}
 						}
@@ -975,6 +998,57 @@ public class SadlUtils {
             throw new TranslationException(errMsg);
         }
         return val;
+    }
+    
+    /*
+     * Method to convert a date, dateTime, or duration to the XSD format expected using POJava classes
+     */
+    public static String preProcessValueString(String rnguri, String v) throws TranslationException {
+    	String retval = v;
+        if (rnguri.endsWith("date")) {
+            if (v instanceof String) {
+                v = stripQuotes((String)v);
+				DateTime dt = new DateTime((String)v);
+				String xsdFormat = "yyyy-MM-dd";
+				String modifiedV = dt.toString(xsdFormat);
+				retval = modifiedV;
+            }
+        }
+        else if (rnguri.endsWith("dateTime")) {
+            if (v instanceof String) {
+                v = stripQuotes((String)v);
+                if (v != null && ((String) v).length() > 0) {
+					DateTime dt = new DateTime((String)v);
+					String xsdFormat = "yyyy-MM-dd'T'HH:mm:ssZZ";
+					String modifiedV = dt.toString(xsdFormat);
+	                retval = modifiedV;
+                }
+            }
+        }
+        else if (rnguri.endsWith("time")) {
+            if (v instanceof String) {
+                v = stripQuotes((String)v);
+                retval = v;
+            }
+        }
+        else if (rnguri.endsWith("duration")) {
+        	if (v instanceof String) {
+        		v = stripQuotes((String)v);
+        		if (v != null && ((String)v).length() > 0) {
+        			String lc = ((String)v).toLowerCase();
+        			if (lc.contains("ye") ||lc.contains("yr") || lc.contains("mo")) {
+        				throw new TranslationException("Durations containing years or months are not supported");
+        			}
+        			else {
+        				Duration dur = new Duration((String)v);
+        				String modDur = "PT" + dur.toString().toUpperCase();
+        				retval = modDur;
+        			}
+        		}
+        	}
+
+        }
+        return retval;
     }
 
     /**
@@ -1286,6 +1360,10 @@ public class SadlUtils {
 					previousClasses = checkPreviousClassList(previousClasses, eqcls);
 					if (classIsSubclassOf(subcls, eqcls, false, previousClasses)) {
 						return true;
+					}
+					// if the eqcls didn't pan out, remove as other wise it may be reached in a different path
+					if (previousClasses.contains(eqcls)) {
+						previousClasses.remove(eqcls);
 					}
 				}
 			}

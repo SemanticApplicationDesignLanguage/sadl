@@ -37,7 +37,7 @@ class SadlIdeCrossrefProposalProvider extends IdeCrossrefProposalProvider {
 		if (SADL_MODEL == candidate.EClass && SADL_MODEL == crossRef?.type.classifier &&
 			SADL_IMPORT == context?.currentModel.eClass) {
 			
-			val proposal = '''"«qualifiedNameConverter.toString(candidate.name)»"''';
+			val proposal = '''"«qualifiedNameConverter.toString(candidate.name)»" ''';
 			return proposalCreator.createProposal(proposal, context) [
 				source = candidate
 				description = candidate.getEClass?.name

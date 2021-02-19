@@ -1,0 +1,16 @@
+ uri "http://sadl.org/ComplexUserdefinedDatatypes.sadl" alias complexuserdefineddatatypes.
+ 
+ SmMedLg is a type of string {"small", "medium", "large"}.
+ 
+ NumSize is a type of int [1,].
+ 
+ MixedSize is a type of {SmMedLg or NumSize}.
+ 
+ SizedThing is a class described by size with values of type MixedSize.
+ 
+ GoodSized is a SizedThing with size "small".
+ GoodSized2 is a SizedThing with size 3.
+ 
+// BadSized is a SizedThing with size "very small".	// should be error
+// BadSized2 is a SizedThing with size 0.				// should be error
+ 

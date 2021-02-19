@@ -253,7 +253,7 @@ A KnowledgeBase with entryPoint (A NamedService ServiceName
 			accept(proposal, priority);
 		}
 		else {
-			val proposalText = '''"http://sadl.org/«ctx.resource.URI.lastSegment»"''';
+			val proposalText = '''"http://sadl.org/«ctx.resource.URI.lastSegment»" ''';
 			val proposal = proposalCreator.createProposal(proposalText, ctx);
 			val priority = proposalPriorities.getDefaultPriority(proposal);
 			accept(proposal, priority);

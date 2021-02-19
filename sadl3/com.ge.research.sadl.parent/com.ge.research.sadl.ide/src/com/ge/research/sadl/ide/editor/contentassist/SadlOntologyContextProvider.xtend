@@ -62,6 +62,7 @@ import com.ge.research.sadl.sADL.SadlNecessaryAndSufficient
 import com.ge.research.sadl.sADL.SadlPropertyCondition
 import com.ge.research.sadl.sADL.SadlHasValueCondition
 import com.ge.research.sadl.sADL.SadlProperty
+import com.ge.research.sadl.sADL.SadlNestedInstance
 
 /**
  * Singleton service ontology context provider service for SADL.
@@ -97,8 +98,21 @@ class SadlOntologyContextProvider implements IOntologyContextProvider {
 		for (grammarElement : firstSetGrammarElements?.filter(Assignment)) {
 			val clazz = currentModel?.eClass;
 			val key = TO_STRING.apply(grammarElement);
-
-			if (key == SADLPROPERTYINITIALIZER_VALUE) {
+			if (key == SADLNESTEDINSTANCE_TYPE) {
+				if (currentModel instanceof SadlNestedInstance) {
+					val cont = (currentModel as SadlNestedInstance).eContainer
+					if (cont instanceof SadlPropertyInitializer) {
+						val psr = (cont as SadlPropertyInitializer).property
+						val builder = new ContextBuilder(psr, processor) => [
+							grammarContextId = key
+							validationAcceptor = acceptor;
+							contextClass = clazz;
+						]
+						return Optional.of(builder.build)
+					}
+				}
+			}
+			else if (key == SADLPROPERTYINITIALIZER_VALUE) {
 				// subject should be the class of the statement subject
 				// restriction[0] should be the property
 				val initializer = currentModel.propertyInitializer;

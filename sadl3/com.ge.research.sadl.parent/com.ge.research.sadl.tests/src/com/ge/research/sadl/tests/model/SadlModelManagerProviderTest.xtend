@@ -472,7 +472,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			clothingsize is a type of {int or string}.	// either an int or a string
 			enumeratedheight is a type of string {"short", "medium", "tall"}.	// enumeration of 3 possible string values
 			SSN is a type of string "[0-9]{3}-[0-9]{2}-[0-9]{4}".
-			year is a type of int length 4 .
+			year is a type of string length 4 .
 			
 			SomeClass is a class, described by ident with values of type shortident.
 			Adolescent is a class described by age with a single value of type over12.
@@ -482,6 +482,11 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			// expectations go here
 			assertNotNull(jenaModel)
+			if (issues != null) {
+				for (iss : issues) {
+					println(iss.toString)
+				}
+			}
 			assertTrue(issues.size == 0)
 			var prop = jenaModel.getDatatypeProperty("http://sadl.org/model1#ident")
 			if (prop !== null) {
@@ -511,7 +516,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			for (issue:issues) {
 				println(issue)
 			}
-			assertTrue(issues.size == 0)
+			assertTrue(issues.size == 1)
 			var found = false
 			// look for something specific to the model; if found set found true
 // TODO use datatype facets to check validity?			
