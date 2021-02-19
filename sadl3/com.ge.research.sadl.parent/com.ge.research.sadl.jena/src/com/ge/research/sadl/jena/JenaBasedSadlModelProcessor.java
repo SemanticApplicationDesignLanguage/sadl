@@ -30,6 +30,7 @@ import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContext
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_TYPE;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_PROPCONDITIONS;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLHASVALUECONDITION_RESTRICTION;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLNESTEDINSTANCE_TYPE;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -55,10 +56,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 import java.util.stream.Collectors;
 
+import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.datatypes.xsd.impl.XSDBaseNumericType;
+import org.apache.jena.ext.xerces.impl.dv.InvalidDatatypeFacetException;
+import org.apache.jena.ext.xerces.impl.dv.ValidationContext;
+import org.apache.jena.ext.xerces.impl.dv.XSFacets;
+import org.apache.jena.ext.xerces.impl.dv.XSSimpleType;
+import org.apache.jena.ext.xerces.impl.dv.xs.XSSimpleTypeDecl;
+import org.apache.jena.ext.xerces.xs.XSObjectList;
 import org.apache.jena.ontology.AllValuesFromRestriction;
 import org.apache.jena.ontology.AnnotationProperty;
 import org.apache.jena.ontology.CardinalityRestriction;
@@ -102,6 +112,7 @@ import org.apache.jena.vocabulary.OWL2;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
+import org.apache.xerces.xs.XSSimpleTypeDefinition;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -1153,6 +1164,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 
 			switch (contextId) {
+			case SADLNESTEDINSTANCE_TYPE: {
+				if (!isProperty(oct) || !coct.equals(OntConceptType.CLASS)) {
+					context.getAcceptor().add("No", candidate, Severity.ERROR);
+					return;
+				}
+				OntProperty prop = ontModel.getOntProperty(sruri);
+				StmtIterator rngitr = ontModel.listStatements(prop, RDFS.range, (RDFNode)null);
+				while (rngitr.hasNext()) {
+					RDFNode rng = rngitr.nextStatement().getObject();
+					if (rng.isResource() && rng.asResource().canAs(OntClass.class)) {
+						OntClass rngcls = rng.asResource().as(OntClass.class);
+						OntClass candcls = ontModel.getOntClass(cruri);
+						if (candcls != null) {
+							if (candcls.equals(rngcls) ) {
+								return;
+							}
+							try {
+								if (checkForSubclassing(candcls, rngcls, candidate)) {
+									return;
+								}
+							} catch (JenaProcessorException e) {
+								context.getAcceptor().add(e.getMessage(), candidate, Severity.ERROR);	
+								return;
+							}
+						}
+					}
+				}
+				context.getAcceptor().add("No", candidate, Severity.ERROR);
+				return;
+			}
 			case SADLPROPERTYINITIALIZER_PROPERTY: {
 				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
 				if (!isProperty(candtype)) {
@@ -9496,11 +9537,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else if (superClsObj instanceof OntResource) {
 				OntResource superCls = (OntResource) superClsObj;
 				if (superCls != null) {
+					boolean isRDFDatatype = false;
+					List<RDFNode> unionClasses = null;
 					if (superCls instanceof UnionClass) {
 						ExtendedIterator<? extends org.apache.jena.rdf.model.Resource> itr = ((UnionClass) superCls)
 								.listOperands();
+						unionClasses = new ArrayList<RDFNode>();
 						while (itr.hasNext()) {
 							org.apache.jena.rdf.model.Resource cls = itr.next();
+							if (cls.canAs(OntResource.class) && conceptIsRDFDatatype(cls.as(OntResource.class))) {
+								isRDFDatatype = true;
+								unionClasses.add(cls.as(OntResource.class));
+							}
 							// System.out.println("Union member: " + cls.toString());
 						}
 					} else if (superCls instanceof IntersectionClass) {
@@ -9511,7 +9559,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							// System.out.println("Intersection member: " + cls.toString());
 						}
 					}
-					rsrcList.add(createOntClass(newNames.get(0), superCls.as(OntClass.class)));
+					
+					if (isRDFDatatype) {
+						OntClass newCls = createRdfsDatatype(newNames.get(0), unionClasses, null, null);
+						newCls.addProperty(RDF.type, RDFS.Datatype);
+					}
+					else {
+						OntClass newCls = createOntClass(newNames.get(0), superCls.as(OntClass.class));
+						rsrcList.add(newCls);
+					}
 				}
 			}
 		}
@@ -11813,6 +11869,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				} else if (val instanceof SadlExplicitValue) {
 					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, oprop.getRange());
 					if (inst != null && lval != null) {
+						try {
+							lval.getValue();
+						}
+						catch (Throwable t) {
+							addError(t.getMessage(), val);
+						}
 						addInstancePropertyValue(inst, oprop, lval, val);
 					}
 				} else if (val instanceof SadlNestedInstance) {
@@ -13134,8 +13196,83 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throw new JenaProcessorException("Invalid arguments to createRdfsDatatype");
 		}
 		datatype.addEquivalentClass(equivClass);
-		TypeMapper.getInstance().getSafeTypeByName(newDatatypeUri);
+		// The above code added the RDFDatatype to the OntModel but not to the TypeMapper
+		addRDFDatatypeToTypeMapper(newDatatypeUri, onDatatype, unionOfTypes, facet);
 		return datatype;
+	}
+
+	/**
+	 * Method to determine if an OntResource is an RDFDatatype 
+	 * 	(which property value should have been set when defined) 
+	 * @param range
+	 * @return
+	 */
+	protected boolean conceptIsRDFDatatype(OntResource range) {
+		StmtIterator itr = getTheJenaModel().listStatements(range, RDF.type, RDFS.Datatype);
+		if (itr.hasNext()) {
+			itr.close();
+			return true;
+		}
+		return false;
+	}
+
+	private void addRDFDatatypeToTypeMapper(String newDatatypeUri, org.apache.jena.rdf.model.Resource onDatatype,
+			List<RDFNode> unionOfTypes, SadlDataTypeFacet facet) throws JenaProcessorException {
+		RDFDatatype type = null;
+		String ns;
+		String ln;
+		if (newDatatypeUri.indexOf('#') > 0) {
+			ns = newDatatypeUri.substring(0, newDatatypeUri.indexOf('#'));
+			ln = newDatatypeUri.substring(newDatatypeUri.indexOf('#') + 1);
+		}
+		else {
+			throw new JenaProcessorException("Invalid user-defined URI");
+		}
+		if (onDatatype != null) {
+			RDFDatatype basetype = TypeMapper.getInstance().getSafeTypeByName(onDatatype.getURI());
+			Object basesimpletype = basetype.extendedTypeDefinition();
+			
+			XSSimpleType nst = org.apache.jena.ext.xerces.impl.dv.xs.BaseDVFactory.getInstance().createTypeRestriction(ln, ns,
+                    (short)0, (org.apache.jena.ext.xerces.impl.dv.XSSimpleType) basesimpletype, null);
+			Object[] facetInfo = sadlFacetsToXSFacets(facet);
+			XSFacets facets = null;
+			short presentFacet = 0;
+			short fixedFacet = 0;
+			ValidationContext context = null;
+			if (facetInfo != null && facetInfo.length == 2) {
+				facets = (XSFacets) facetInfo[0];
+				presentFacet = (short) facetInfo[1];
+			}
+			try {
+				nst.applyFacets(facets, presentFacet, fixedFacet, context);
+				type = new SadlXSDDatatype(nst, ns);
+			} catch (InvalidDatatypeFacetException e) {
+				// TODO Auto-generated catch block
+				throw new JenaProcessorException(e.getMessage(), e);
+			}
+		}
+		else if (unionOfTypes != null && unionOfTypes.size() > 0) {
+			XSSimpleTypeDecl[] xsstdtypes = new XSSimpleTypeDecl[unionOfTypes.size()];
+			for (int i = 0; i < unionOfTypes.size(); i++) {
+				RDFNode umember = unionOfTypes.get(i);
+				if (umember.isURIResource()) {
+					Object memetd = TypeMapper.getInstance().getSafeTypeByName(umember.asResource().getURI()).extendedTypeDefinition();
+					if (memetd instanceof XSSimpleTypeDecl) {
+						xsstdtypes[i] = (XSSimpleTypeDecl)memetd;
+					}
+				}
+			}
+			XSSimpleType nst = org.apache.jena.ext.xerces.impl.dv.xs.BaseDVFactory.getInstance().createTypeUnion(ln, ns, (short)0, xsstdtypes, null);
+			type = new SadlXSDDatatype(nst, ns);
+		}
+		if (type != null) {
+			TypeMapper.getInstance().registerDatatype(type);
+		}
+		else {
+			if (onDatatype != null) {
+				throw new JenaProcessorException("Base type '" + onDatatype.getURI() + "' not handled");
+			}
+		}
 	}
 
 	private org.apache.jena.rdf.model.Resource facetsToRestrictionNode(String newName, SadlDataTypeFacet facet, org.apache.jena.rdf.model.Resource onDatatype) {
@@ -13180,6 +13317,73 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		return anon;
+	}
+
+	/**
+	 * Method to convert the SADL facets on a user-defined data type to an XSFacets
+	 * @param facet
+	 * @return
+	 */
+	private Object[] sadlFacetsToXSFacets(SadlDataTypeFacet facet) {
+		XSFacets xsfacets = new XSFacets();
+		short facetsPresent = 0;
+		
+		if (facet.getMin() != null) {
+			if (facet.isMinInclusive()) {
+				xsfacets.minInclusive = facet.getMin();
+				facetsPresent = (short) (facetsPresent | org.apache.jena.ext.xerces.xs.XSSimpleTypeDefinition.FACET_MININCLUSIVE);
+			}
+			else {
+				xsfacets.minExclusive = facet.getMin();
+				facetsPresent = (short) (facetsPresent | org.apache.jena.ext.xerces.xs.XSSimpleTypeDefinition.FACET_MINEXCLUSIVE);
+			}
+		}
+		
+		if (facet.getMax() != null) {
+			if (facet.isMaxInclusive()) {
+				xsfacets.maxInclusive = facet.getMax();
+				facetsPresent = (short) (facetsPresent | org.apache.jena.ext.xerces.xs.XSSimpleTypeDefinition.FACET_MAXINCLUSIVE);
+			}
+			else {
+				xsfacets.maxExclusive = facet.getMax();
+				facetsPresent = (short) (facetsPresent | org.apache.jena.ext.xerces.xs.XSSimpleTypeDefinition.FACET_MAXEXCLUSIVE);
+			}
+		}
+		
+		if (facet.getLen() != null) {
+			xsfacets.length = Integer.parseInt(facet.getLen());
+			facetsPresent = (short) (facetsPresent | org.apache.jena.ext.xerces.xs.XSSimpleTypeDefinition.FACET_LENGTH);
+		}
+		if (facet.getMinlen() != null) {
+			xsfacets.minLength = Integer.parseInt(facet.getMinlen());
+			facetsPresent = (short) (facetsPresent | org.apache.jena.ext.xerces.xs.XSSimpleTypeDefinition.FACET_MINLENGTH);
+		}
+		if (facet.getMaxlen() != null && !facet.getMaxlen().equals("*")) {
+			xsfacets.maxLength = Integer.parseInt(facet.getMaxlen());
+			facetsPresent = (short) (facetsPresent | org.apache.jena.ext.xerces.xs.XSSimpleTypeDefinition.FACET_MAXLENGTH);
+		}
+		if (facet.getRegex() != null) {
+			xsfacets.pattern = facet.getRegex();
+			facetsPresent = (short) (facetsPresent | org.apache.jena.ext.xerces.xs.XSSimpleTypeDefinition.FACET_PATTERN);
+		}
+		if (facet.getValues() != null) {
+			Iterator<String> iter = facet.getValues().iterator();
+			Vector<String> vector = new Vector<String>();
+			while (iter.hasNext()) {
+				String val = iter.next();
+				// for some reason these values end up with quotes as part of the string????
+				val = SadlUtils.stripQuotes(val);
+				vector.add(val);
+			}
+			if (vector.size() > 0) {
+				xsfacets.enumeration = vector;
+				facetsPresent = (short) (facetsPresent | org.apache.jena.ext.xerces.xs.XSSimpleTypeDefinition.FACET_ENUMERATION);
+			}
+		}
+		Object[] results = new Object[2];
+		results[0] = xsfacets;
+		results[1] = facetsPresent;
+		return results;
 	}
 
 	protected OntClass processSadlPropertyCondition(SadlPropertyCondition sadlPropCond) throws JenaProcessorException {
@@ -14878,7 +15082,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public boolean isNumericType(String uri) {
 		//uri is exactly a numeric type
 		if (uri.equals(XSD.decimal.getURI()) || uri.equals(XSD.integer.getURI()) || uri.equals(XSD.xdouble.getURI())
-				|| uri.equals(XSD.xfloat.getURI()) || uri.equals(XSD.xint.getURI()) || uri.equals(XSD.xlong.getURI())) {
+				|| uri.equals(XSD.xfloat.getURI()) || uri.equals(XSD.xint.getURI()) || uri.equals(XSD.xlong.getURI())
+				|| uri.equals(XSD.negativeInteger.getURI()) || uri.equals(XSD.nonNegativeInteger.getURI())
+				|| uri.equals(XSD.nonPositiveInteger.getURI()) || uri.equals(XSD.positiveInteger.getURI())
+				|| uri.equals(XSD.unsignedInt.getURI()) || uri.equals(XSD.unsignedLong.getURI())
+				|| uri.equals(XSD.unsignedShort.getURI()) || uri.equals(XSD.xshort.getURI())) {
 			return true;
 		}
 		if (uri.equals(XSD.duration.getURI())) {

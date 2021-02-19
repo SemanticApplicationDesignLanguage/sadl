@@ -3934,34 +3934,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			EObject expression, ConceptType propertyType) throws InvalidTypeException, TranslationException, InvalidNameException {
 		TypeCheckInfo tci = null;
 		NamedNode rangeNamedNode = getModelProcessor().validateNamedNode(new NamedNode(first.asResource().getURI(), NodeType.DataTypeNode));
-//		ConceptName rangeConceptName = new ConceptName(first.asResource().getURI());
 		if (propertyType.equals(ConceptType.DATATYPEPROPERTY)) {
-//			rangeConceptName.setType(ConceptType.RDFDATATYPE);
-			OntResource range;
-			range = getTheJenaModel().getOntResource(rangeNamedNode.toFullyQualifiedString());
-			if (getTheJenaModel().listStatements(range, RDF.type, RDFS.Datatype).hasNext()) {
+			OntResource range = getTheJenaModel().getOntResource(rangeNamedNode.toFullyQualifiedString());
+			if (getModelProcessor().conceptIsRDFDatatype(range)) {
 				// this is a user-defined datatype
-				RDFNode rngEC = range.listPropertyValues(OWL.equivalentClass).next();
-				if (rngEC != null && rngEC.canAs(OntResource.class)) {
-					try {
-						RDFNode baseType = rngEC.as(OntResource.class).listPropertyValues(OWL2.onDatatype).next();
-						if (baseType != null && baseType.isURIResource()) {
-							NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(baseType.asResource().getURI(), NodeType.DataTypeNode));
-							tci = new TypeCheckInfo(propConceptName, tctype, this, expression);
-						}
-					}
-					catch (Exception e) {
-						// didn't have a OWL2.onDataType property
-						RDFNode baseType = rngEC.as(OntResource.class).listPropertyValues(OWL2.unionOf).next();
-						if (baseType.isResource()) {
-							List<RDFNode> l = SadlUtils.convertList(baseType, getTheJenaModel());
-							tci = createTypeCheckInfoForUnion(propConceptName, l, false, expression);		
-						}
-					}
-				}
+				tci = typeCheckInfoFromRDFDatatypeOrUnion(propConceptName, range, expression);
 			}
 			else {
-//					rangeConceptName.setRangeValueType(propConceptName.getRangeValueType());
 				if (propConceptName.getRangeValueType().equals(RangeValueType.LIST)) {
 					rangeNamedNode.setNodeType(NodeType.DataTypeListNode);
 				}
@@ -3995,25 +3974,83 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return tci;
 	}
 
+	/**
+	 * Method to create a TypeCheckInfo from an RDFDatatype which can be a union of RDFDatatypes
+	 * @param propConceptName
+	 * @param range
+	 * @param expression
+	 * @return
+	 * @throws InvalidTypeException
+	 */
+	private TypeCheckInfo typeCheckInfoFromRDFDatatypeOrUnion(ConceptName propConceptName, OntResource range,
+			EObject expression) throws InvalidTypeException {
+		TypeCheckInfo tci = null;
+		// is it a union or a single datatype?
+		if (range instanceof OntClass && ((OntClass)range).isUnionClass()) {
+			ExtendedIterator<? extends OntClass> memitr = ((OntClass)range).asUnionClass().listOperands();
+			tci = new TypeCheckInfo(propConceptName, this, expression);
+			while (memitr.hasNext()) {
+				OntClass element = memitr.next();
+				if (element.isURIResource()) {
+					TypeCheckInfo tciinner = typeCheckInfoFromRDFDatatypeOrUnion(propConceptName, element, expression);
+					tci.addCompoundType(tciinner);
+					tci.setTypeToExprRelationship("range");
+				}
+				else {
+					getModelProcessor().addTypeCheckingError("Unexpected non-URI range element in union, please report.", expression); 
+				}
+			}
+		}
+		else {
+			ExtendedIterator<OntClass> eitr = ((OntClass)range).listSuperClasses(true);
+			if (eitr.hasNext()) {
+				while (eitr.hasNext()) {
+					OntClass scls = eitr.next();
+					tci = typeCheckInfoFromRDFDatatypeOrUnion(propConceptName, scls, expression);
+				}
+			}
+			else {
+				tci = typeCheckInfoFromRDFDatatype(propConceptName, range, expression);
+			}
+		}
+		return tci;
+	}
+
+	/**
+	 * Method to create a TypeCheckInfo from  an RDFDatatype
+	 * @param propConceptName
+	 * @param range
+	 * @param expression
+	 * @return
+	 * @throws InvalidTypeException
+	 */
+	private TypeCheckInfo typeCheckInfoFromRDFDatatype(ConceptName propConceptName, OntResource range,
+			EObject expression) throws InvalidTypeException {
+		TypeCheckInfo tci = null;
+		RDFNode rngEC = range.listPropertyValues(OWL.equivalentClass).next();
+		if (rngEC != null && rngEC.canAs(OntResource.class)) {
+			try {
+				RDFNode baseType = rngEC.as(OntResource.class).listPropertyValues(OWL2.onDatatype).next();
+				if (baseType != null && baseType.isURIResource()) {
+					NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(baseType.asResource().getURI(), NodeType.DataTypeNode));
+					tci = new TypeCheckInfo(propConceptName, tctype, this, expression);
+				}
+			}
+			catch (Exception e) {
+				// didn't have a OWL2.onDataType property
+				RDFNode baseType = rngEC.as(OntResource.class).listPropertyValues(OWL2.unionOf).next();
+				if (baseType.isResource()) {
+					List<RDFNode> l = SadlUtils.convertList(baseType, getTheJenaModel());
+					tci = createTypeCheckInfoForUnion(propConceptName, l, false, expression);		
+				}
+			}
+		}
+		return tci;
+	}
+
 	protected List<ConceptName> getImpliedProperties(Resource first) throws InvalidTypeException {
 		return getModelProcessor().getImpliedProperties(first);
 	}
-
-//	private boolean isRangeKlugyDATASubclass(OntResource rsrc) {
-//		if (rsrc.getURI().endsWith("#DATA")) {
-//			return true;
-//		}
-//		if (rsrc.canAs(OntClass.class)){
-//			ExtendedIterator<OntClass> itr = rsrc.as(OntClass.class).listSuperClasses();
-//			while (itr.hasNext()) {
-//				OntClass spr = itr.next();
-//				if (spr.isURIResource() && spr.getURI().endsWith("#DATA")) {
-//					return true;
-//				}
-//			}
-//		}
-//		return false;
-//	}
 
 	protected TypeCheckInfo getVariableType(ConceptType variable, SadlResource sr, String conceptNm, String conceptUri, EObject reference) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if (sr == null) {
@@ -5752,7 +5789,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (compareTypes(operations , pred, val, ctci, valType, ImplicitPropertySide.NONE)) {
 							return true;
 						}
-						break;	// only need one true
+//						break;	// only need one true
 					}
 				}
 				if (allFalse) {

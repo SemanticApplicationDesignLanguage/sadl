@@ -1331,4 +1331,128 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  		assertTrue(issues2.toString.contains("Declaration of concepts in another namespace not supported"))
  	
  	}
+ 	
+ 	@Test
+ 	def void testUserDefined01() {
+ 		val sadlModel = '''
+			 uri "http://sadl.org/UserDefinedDataTypes.sadl" alias UserDefinedDataTypes.
+			 
+			 SL is a type of int [1,5].
+			 
+			 UDT is a type of {int or string}.
+			 
+			 SSN is a type of string "[0-9]{3}-[0-9]{2}-[0-9]{4}".
+			 
+			 MyClass is a class described by p1 with values of type SL, 
+			 	described by p2 with values of type UDT,
+			 	described by ssn with values of type SSN.
+			 
+			 mc1 is a MyClass with p1 5, with p2 "hi", with p2 4, with ssn "123-45-6789".
+			 mc2 is a MyClass with p1 1, with p2 "a very long, long string".
+			 
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			if (issues !== null) {
+ 				for (iss : issues) {
+ 					println(iss.toString)
+ 				}
+ 			}
+			assertTrue(issues.size == 0)
+			
+		]
+ 	}
+ 	
+ 	@Test
+ 	def void testUserDefined02() {
+ 		val sadlModel = '''
+			 uri "http://sadl.org/UserDefinedDataTypes.sadl" alias UserDefinedDataTypes.
+			 
+			 SL is a type of int [1,5].
+			 
+			 UDT is a type of {int or string}.
+			 
+			 SSN is a type of string "[0-9]{3}-[0-9]{2}-[0-9]{4}".
+			 
+			 MyClass is a class described by p1 with values of type SL, 
+			 	described by p2 with values of type UDT,
+			 	described by ssn with values of type SSN.
+			 
+			 mc1 is a MyClass with p1 6, with ssn "12345".
+			 mc2 is a MyClass with p1 0, with p2 false.		 
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			if (issues !== null) {
+ 				for (iss : issues) {
+ 					println(iss.toString)
+ 				}
+ 			}
+			assertNotNull(issues)
+			assertTrue(issues.size == 4)
+		]
+ 	}
+ 	
+ 	@Test
+ 	def void testUserDefined03() {
+ 		val sadlModel = '''
+			 uri "http://sadl.org/UserDefinedDataTypes.sadl" alias UserDefinedDataTypes.
+			 
+			 Requirement is a class.
+			 reqName is a type of string "[a-Z0-9_]+".
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			if (issues !== null) {
+ 				for (iss : issues) {
+ 					println(iss.toString)
+ 				}
+ 			}
+			assertNotNull(issues)
+			assertTrue(issues.size == 1)
+		]
+ 	}
+ 	
+ 	@Test
+ 	def void testUserDefined04() {
+ 		val sadlModel = '''
+			 uri "http://sadl.org/UserDefinedDataTypes.sadl" alias UserDefinedDataTypes.
+			 
+			 Requirement is a class.
+			 reqName is a type of string "^[a-z0-9_]+$".
+			 name describes Requirement with a single value of type reqName.
+			 r is a Requirement with name "This is an invalid name".
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			if (issues !== null) {
+ 				for (iss : issues) {
+ 					println(iss.toString)
+ 				}
+ 			}
+			assertNotNull(issues)
+			assertTrue(issues.size == 1)
+		]
+ 	}
+ 	
+ 	@Test
+ 	def void testUserDefined05() {
+ 		val sadlModel = '''
+	 	 uri "http://sadl.org/ComplexUserdefinedDatatypes.sadl" alias complexuserdefineddatatypes.
+	 	 
+	 	 SmMedLg is a type of string {"small", "medium", "large"}.
+	 	 
+	 	 NumSize is a type of int [1,].
+	 	 
+	 	 MixedSize is a type of {SmMedLg or NumSize}.
+	 	 
+	 	 SizedThing is a class described by size with values of type MixedSize.
+	 	 
+	 	 GoodSized is a SizedThing with size "small".
+	 	 GoodSized2 is a SizedThing with size 3.
+	 	 
+	 	 BadSized is a SizedThing with size "very small".
+	 	 BadSized2 is a SizedThing with size 0.	
+ 	'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			if (issues !== null) {
+ 				for (iss : issues) {
+ 					println(iss.toString)
+ 				}
+ 			}
+			assertNotNull(issues)
+			assertTrue(issues.size == 2)
+		]
+	}
 }
