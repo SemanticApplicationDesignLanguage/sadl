@@ -4,22 +4,21 @@
     <title>Tutorial Outline</title>
   </head>
   <body>
-    <h1>Topics in Semantic Modeling, SADL, and OWL: a Tutorial</h1>
+    <h1>Topics in Semantic Modeling, SADL, and OWL</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/29/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->2/23/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <h2>Introduction</h2>
-    <p>This document is the index to a sequence of topics in semantic modeling
-      and in the use of the Semantic Application Design Language (SADL) to
-      generate models expressed in the Web Ontology Language (OWL) plus rules.
-      While the sequence is intended to provide a gentle introduction, an effort
-      has also been made to allow each topic to be used independently by someone
-      familiar with the technology in general and looking for specifics of how
-      the SADL modeling approach may be applied to their particular problem.
-      Later parts of the tutorial go into aspects of the SADL integrated
+    <p>This document is the index to tutorials in semantic modeling and in the
+      use of the Semantic Application Design Language (SADL) to generate models
+      expressed in the Web Ontology Language (OWL) plus rules. While some topics
+      depend on an understanding of other topics, suggesting a sequence, an
+      effort has also been made to allow each topic to be used independently by
+      someone familiar with the technology in general and looking for specifics
+      of how the SADL modeling approach may be applied to their particular
+      problem. Later tutorials go into aspects of the SADL integrated
       development environment (IDE) useful for model validation, regression
       testing, maintenance, and knowledge base application for decision support.</p>
-    <p><a href="FCSM_Introduction.pdf" target="_blank">Go to tutorial</a>.</p>
     <h2>Approach</h2>
     <p>Believing that people learn best when they are engaged in inquiry and
       reflection, many of the slide decks and videos linked in the outline below
@@ -29,10 +28,12 @@
       engage in the learning process and to not take an entirely passive
       approach.</p>
     <p>Engagement in solving problems and answering questions presupposes some
-      mechanism of expression and model execution. This material uses the
-      Semantic Application Design Language (SADL) IDE and language as means to
-      this end. Therefore the user is invited to have SADL installed on their
-      computer and to use it in solving the problems presented. See <a href="http://semanticapplicationdesignlanguage.github.io/sadl/InstallSadlIde.html"
+      mechanism of expression and model execution. Therefore, even for material
+      that is not specifically about the Semantic Application Design Language
+      (SADL) IDE and language, it is still used as means to allow concrete
+      solution implementation and validation. Therefore the user is invited to
+      have SADL installed on their computer and to use it in solving the
+      problems presented. See <a href="http://semanticapplicationdesignlanguage.github.io/sadl/InstallSadlIde.html"
         target="_blank">Installation Instructions for SADL-IDE, Version 3</a>.
       It is also possible to use WebSADL for a browser-based IDE after
       installing the WebSADL server, see WebSadl installation at <a href="https://hub.docker.com/r/theiaide/sadl"
@@ -43,7 +44,7 @@
     </a>
     <ol>
       <a https:="" hub.docker.com="" r="" theiaide="" sadl<="" a="">
-        <li>Part 1: Foundational Concepts in Semantic Modeling</li>
+        <li>Foundational Concepts in Semantic Modeling</li>
       </a>
       <ul>
         <a https:="" hub.docker.com="" r="" theiaide="" sadl<="" a=""> </a>
@@ -76,12 +77,19 @@
           <li><span style="    color: #0000ee;"><span style="  color: #330033;">Domain
                 and Range</span></span></li>
           <li><span style="     color: #0000ee;"><span style="   color: #330033;">N-ary
-                Relationships<br>
+                Relationships</span></span></li>
+          <li><span style="      color: #0000ee;"><span style="    color: #330033;">Necessary
+                and Sufficient Conditions in OWL</span></span></li>
+          <li><span style="       color: #0000ee;"><span style="     color: #330033;">Subproperties</span></span></li>
+          <li><span style="        color: #0000ee;"><span style="      color: #330033;">Types
+                of Properties: Transitive, Symmetrical, Functional, Inverse
+                Functional, and Inverse</span></span></li>
+          <li><span style="         color: #0000ee;"><span style="       color: #330033;">Class
+                Definitions in OWL<br>
               </span></span></li>
           <li><span style="     color: #0000ee;"><span style="   color: #330033;">Property
-                Restrictions</span></span></li>
-          <li><span style="      color: #0000ee;"><span style="    color: #330033;">Equivalent
-                Classes<br>
+                Restrictions: Cardinality, Some Values From, All Values From,
+                Has Value<br>
               </span></span></li>
         </ul>
         <ul>
@@ -94,10 +102,11 @@
                 Patterns and Queries</span></span></li>
           <li>OWL Entailments</li>
         </ul>
-        <li>Rules</li>
         <ul>
-          <li>Logical Justification of Rules</li>
-          <li>Functions, AKA Built-in Functions</li>
+          <li>Rules</li>
+        </ul>
+        <ul>
+          <li>Functions, AKA Built-in Functions in Rules</li>
           <li>Combining OWL Entailments with Rule-based Inference</li>
           <li>Reasoners Available in SADL</li>
           <ul>
@@ -106,109 +115,24 @@
           </ul>
         </ul>
       </ul>
-      <li>Part 2: Building, Testing, and Deploying OWL Models with SADL</li>
-      <ul>
-        <li>SADL Is a Language that Translates Directly to OWL</li>
-        <li>SADL Is an Environment for Building, Testing, and Maintaining OWL
-          Models Plus Rules</li>
-      </ul>
-      <li>Classes, Properties, and Property Restrictions in OWL and SADL</li>
-      <ul>
-        <li>Classes -- </li>
-        <ul>
-          <li>A Set of Things</li>
-          <li>Partial Ordering of Classes</li>
-          <li>Can Be Anonymous (So Identification Must Be by Association)</li>
-        </ul>
-        <li>Properties </li>
-        <ul>
-          <li>Are First-class Citizens</li>
-          <li>Domain and Range</li>
-          <li>Object Properties, Datatype Properties, Annotation Properties, and
-            RDF Properties</li>
-          <li>Transitive Properties</li>
-          <li>Symmetrical Properties</li>
-          <li>Functional Properties</li>
-          <li>Inverse Functional Properties</li>
-          <li>Inverse Properties</li>
-          <li>Partial Ordering of Properties</li>
-        </ul>
-        <li>Property Restrictions</li>
-        <ul>
-          <li>Apply to the Members of a Class</li>
-          <li>Help to further define the class</li>
-          <li>Cardinality, Minimum Cardinality, Maximum Cardinality</li>
-          <li>Qualified Cardinality</li>
-          <li>Has Value</li>
-          <li>Some Values From</li>
-          <li>All Values From</li>
-        </ul>
-        <li>Necessary and Sufficient Conditions (see
-https://stackoverflow.com/questions/34053032/is-it-possible-to-represent-sufficient-condition-relation-in-owl)</li>
-        <li>Identity Revisited</li>
-        <ul>
-          <li>Examples of Blank Nodes in SADL</li>
-        </ul>
-      </ul>
-      <li>Inference: What is Implied by What is Known</li>
-      <ul>
-        <li>OWL Entailments (depending on flavor of OWL)</li>
-        <li>Rules</li>
-        <li>OWL Entailments Can Be [at Least Partially] Implemented in Rules</li>
-      </ul>
-      <li>Knowledge Base Modularity </li>
-      <ul>
-        <li>Property owl:imports</li>
-        <ul>
-          <li>owl:imports Is a Transitive Property</li>
-        </ul>
-        <li>Import What? Another Ontology</li>
-        <li>Ontologies and Namespaces</li>
-        <li>Ontology URIs Versus URLs and the Mapping File in Jena and SADL</li>
-        <li>Project Dependencies in Eclipse</li>
-      </ul>
-      <li>Querying the Knowledge Base: What Is Needed Beyond Graph Patterns?</li>
-      <ul>
-        <li>Select Identifying What To Select</li>
-        <li>Optional Graph Patterns</li>
-        <li>Joining Results (Union)</li>
-        <li>Filters to reduce results in Non-graph-pattern Ways</li>
-        <li>SPARQL: All of This and More</li>
-        <ul>
-          <li>Ask</li>
-          <li>Construct</li>
-          <li>Update</li>
-          <li>Insert</li>
-          <li>Delete</li>
-        </ul>
-        <li>SADL Query Language</li>
-        <ul>
-          <li>Much Simpler (More Restricted) than SPARQL</li>
-          <li>Has Semantic Coloring, Type Checking, Hyperlinking</li>
-          <li>Named Queries</li>
-          <li>Parameterized Queries</li>
-        </ul>
-      </ul>
-      <li>Indefinite and Definite Articles in SADL, Alternative to Named
-        Variables</li>
-      <li>There Exists in SADL: Creating New Instances During Inference</li>
+      <li>There Exists in SADL: Creating New Instances During Inference <em>(Future)</em></li>
       <li>The SADL Expression Language: Combining Graph Semantics with
-        Functional Semantics</li>
+        Functional Semantics<em> (Future)</em></li>
       <ul>
         <li>The SADL Intermediate Form</li>
         <li><i>Expr:</i> Statements</li>
       </ul>
-      <li>Implicit Models in SADL</li>
-      <li>Typed Lists in SADL</li>
-      <li>Default Values in SADL</li>
-      <li>Regression Testing in SADL</li>
-      <li>Debugging in SADL</li>
-      <li>Converting OWL Models into SADL Models</li>
-      <li>Converting Tabular Data into OWL or SADL Models</li>
-      <li>Read, Write: Data Input and Output During Inference</li>
-      <li>The SWI-Prolog Reasoner and Translator</li>
-      <li>The SADL Knowledge Server</li>
-      <li>Equations, External Equations, and Rule Built-in Functions</li>
+      <li>Implicit Models in SADL <em>(Future)</em></li>
+      <li>Typed Lists in SADL <em>(Future)</em></li>
+      <li>Default Values in SADL <em>(Future)</em></li>
+      <li>Regression Testing in SADL <em>(Future)</em></li>
+      <li>Debugging in SADL <em>(Future)</em></li>
+      <li>Converting OWL Models into SADL Models <em>(Future)</em></li>
+      <li>Converting Tabular Data into OWL or SADL Models <em>(Future)</em></li>
+      <li>Read, Write: Data Input and Output During Inference <em>(Future)</em></li>
+      <li>The SWI-Prolog Reasoner and Translator <em>(Future)</em></li>
+      <li>The SADL Knowledge Server <em>(Future)</em></li>
+      <li>Equations, External Equations, and Rule Built-in Functions <em>(Future)</em></li>
     </ol>
     <br>
     <p></p>
