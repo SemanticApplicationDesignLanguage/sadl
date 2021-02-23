@@ -9,7 +9,7 @@
   <body>
     <h1>User-defined Data Types in SADL</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->2/15/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->2/23/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <ul>
       <li><a href="#Introduction">Introduction</a></li>
@@ -26,13 +26,14 @@
       or an <em>owl:DatatypeProperty</em>. The range of the former will be a
       class and values of the property will be instances of the class. The range
       of the latter will be an XSD primitive data type such as "int", "string",
-      or "date" or a user-defined data type. For the first we can define classes
-      and therefore the range any way that we want. For the latter a range that
-      is an XSD primitive datatypes is not always specific enough to be
-      sufficient. For example, consider the "age" property with domain "Person".
-      For the subclass of "Person" "Adolescent", we may want to allow the values
-      of the property to not be all values of type "int", but only those values
-      between 12 and 18, 12 included but 18 excluded. Or perhaps a model
+      or "date" or a user-defined data type. For the range of an <em>owl:ObjectProperty</em>,
+      we can define classes and therefore the range any way that we want. For
+      the range of an <em>owl:DatatypeProperty</em>,&nbsp; a range that is an
+      XSD primitive datatype is not always specific enough to be sufficient. For
+      example, consider the "age" property with domain "Person". For the
+      subclass of "Person" "Adolescent", we may want to allow the values of the
+      property to not be all values of type "nonNegativeInteger", but only those
+      values between 12 and 18, 12 included but 18 excluded. Or perhaps a model
       includes a property whose range of values isn't any string but only those
       strings which match the syntax of a US Social Security Number.
       User-defined data types allow for just this kind of additional constraints
@@ -43,7 +44,8 @@
       hierarchies. User-defined data types are the same dark blue as regular
       classes but are not in bold font. The XSD data types supported by SADL 3
       are listed in <a href="#AppendixA">Appendix A</a>. Here are some examples
-      of user-defined data type definitions.</p>
+      of user-defined data type definitions. Examples 8-10 show how user-defined
+      datatypes can be combined to create new user-defined datatypes.</p>
     <ol>
       <li><span style="font-size: 10.0pt; font-family: Consolas; color: navy">
           AdolescentAge</span><span style="font-size: 10.0pt; font-family: Consolas; color: black">
@@ -100,6 +102,56 @@
           size="2"> </font> <font color="#800080" size="2">string</font><font
           size="2"> {"short", "medium", "tall"}. </font><font color="#808080" size="2"><i>&nbsp;//
             enumeration of 3 possible string values</i></font></li>
+      <li><font color="#000080"><font style="font-size: 10pt" size="2">SmMedLg</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">is</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">a</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">type</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">of</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">string</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2">
+            {</font></font><font color="#4c4c4c"><font style="font-size: 10pt" size="2"><span
+              style="background: #e6f0ff">"small"</span></font></font><font color="#4c4c4c"><font
+            style="font-size: 10pt" size="2">, </font></font><font color="#4c4c4c"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"medium"</span></font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2">, </font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"large"</span></font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2">}.</font></font></li>
+      <li><font color="#000080"><font style="font-size: 10pt" size="2">NumSize</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">is</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">a</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">type</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">of</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">int</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2">
+            [</font></font><font color="#4c4c4c"><font style="font-size: 10pt" size="2"><span
+              style="background: #e6f0ff">1</span></font></font><font color="#4c4c4c"><font
+            style="font-size: 10pt" size="2">,].</font></font></li>
+      <li><font color="#000080"><font style="font-size: 10pt" size="2">MixedSize</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">is</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">a</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">type</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">of</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2">
+            {</font></font><font color="#000080"><font style="font-size: 10pt" size="2">SmMedLg</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#800080"><font style="font-size: 10pt" size="2">or</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2"> </font></font><font
+          color="#000080"><font style="font-size: 10pt" size="2">NumSize</font></font><font
+          color="#4c4c4c"><font style="font-size: 10pt" size="2">}.</font></font></li>
     </ol>
     <p>The SADL grammar for user-defined data types is derived from and is
       consistent with W3C recommendations, see <a href="http://www.w3.org/TR/xmlschema-2/#datatype-components">
@@ -116,11 +168,11 @@
     <p>For strings this includes length and/or a regular expression to be
       matched. For numbers this include a min and/or max and whether it is
       inclusive or not. In addition, a user-defined data type can be union of
-      XSD data types, as illustrated in example 6 above.</p>
-    <p><b>Note</b> that a user-defined data type must be named and declared in a
-      definition statement, as shown in the examples above. It <b>cannot</b> be
-      declared in-line in statements specifying property range or property
-      restrictions.</p>
+      XSD data types, as illustrated in examples 6 and 10 above.</p>
+    <p><b>Note</b> that a user-defined data type can be declared in-line in
+      statements specifying property range or property restrictions. However,
+      since such a user-defined data type will not then have a user-provided
+      name, it cannot be reused in other statements. </p>
     <p>When the target representation is OWL, a user-defined data type in SADL
       is translated into the model representation as an <em>rdfs:Datatype</em>.
       As an example of such a representation, the OWL equivalent of the SADL
@@ -135,19 +187,20 @@
       decision, there are some guiding principles to consider. Arguably, the
       primary difference between an <em>owl:DatatypeProperty</em> and an <em>owl:ObjectProperty</em>
       has to do with the identity of the values of the property. XSD primitive
-      data type instances are numbers, strings, dates, etc. These values do not
-      have identity in the same way that instances of classes have identity.
-      While an instance of a class may be a blank node, it still is a uniquely
-      defined instance and may be the subject of other statements. For example,
-      we may not know the name of Martha Washington's first husband, but that
-      instance of Person can still be the subject of statements giving his date
-      of birth and date of death. The same blank node (&lt;BN&gt;) is the object
-      of the statement "MarthaWashington has husband &lt;BN&gt;" and the subject
-      of the statements "&lt;BN&gt; has dateOfBirth '15 October 1711'", and
-      "&lt;BN&gt; has dateOfDeath '8 July 1757'". Contrast this with a value of
-      type xsd:int. Suppose I have 12 pairs of shoes and you have a child who is
-      12 years old. Is that the same "12" or a different "12"? The question
-      seems non-sensical. They are clearly not the same instance. XSD primitive
+      data type and user-defined data type instances are numbers, strings,
+      dates, etc. These values do not have identity in the same way that
+      instances of classes have identity. While an instance of a class may be a
+      blank node, it still is a uniquely defined instance and may be the subject
+      of other statements. For example, we may not know the name of Martha
+      Washington's first husband, but that instance of Person can still be the
+      subject of statements giving his date of birth and date of death. The same
+      blank node (&lt;BN&gt;) is the object of the statement "MarthaWashington
+      has husband &lt;BN&gt;" and the subject of the statements "&lt;BN&gt; has
+      dateOfBirth '15 October 1711'", and "&lt;BN&gt; has dateOfDeath '8 July
+      1757'". Contrast this with a value of type xsd:int. Suppose I have 12
+      pairs of shoes and you have a child who is 12 years old. Is that the same
+      "12" or a different "12"? The question seems non-sensical. They are
+      clearly not the same instance. XSD primitive data type and user-defined
       data type values do not have identity and do not appear as the subject of
       statements in OWL. This is not usually a problem for things like airport
       identity or Social Security number or even age when the unit years can be
@@ -157,7 +210,7 @@
       statements in the model, one should use an <em>owl:ObjectProperty</em>
       and define a class for the range of the property. The association of units
       with numeric values is a good example. In order to include units, one
-      might create a class "UnittedQuantity" which is the domain of the
+      might create a class such as "UnittedQuantity" which is the domain of the
       properties "value" and "unit" (see Quantity in <a href="http://qudt.org/">http://qudt.org/</a>).
       The class "UnittedQuantity" would then become the range of properties such
       as "length", "speed", "weight", etc. The length of a regulation American
@@ -199,15 +252,16 @@
         <font color="#800080" size="2">with</font><font size="2"> </font> <font
           color="#800080" size="2">values</font><font size="2"> </font> <font
           color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
-          size="2">type</font><font size="2"> </font> <font color="#000080" size="2"><b>Quantity</b></font><font
-          size="2">, </font> <font color="#800080" size="2">described</font><font
-          size="2"> </font> <font color="#800080" size="2">by</font><font size="2">
-        </font> <font color="#008000" size="2"><b>width</b></font><font size="2">
-        </font> <font color="#800080" size="2">with</font><font size="2"> </font>
-        <font color="#800080" size="2">values</font><font size="2"> </font> <font
+          size="2">type</font><font size="2">&nbsp;</font><font color="#000080"
+          size="2"><b>UnittedQuantity</b></font><font size="2"></font><font size="2">,
+        </font> <font color="#800080" size="2">described</font><font size="2">
+        </font> <font color="#800080" size="2">by</font><font size="2"> </font>
+        <font color="#008000" size="2"><b>width</b></font><font size="2"> </font>
+        <font color="#800080" size="2">with</font><font size="2"> </font> <font
+          color="#800080" size="2">values</font><font size="2"> </font> <font
           color="#800080" size="2">of</font><font size="2"> </font> <font color="#800080"
-          size="2">type</font><font size="2"> </font> <font color="#000080" size="2"><b>Quantity</b></font><font
-          size="2">.</font></p>
+          size="2">type</font><font size="2">&nbsp;</font><font color="#000080"
+          size="2"><b>UnittedQuantity</b></font><font size="2"></font><font size="2">.</font></p>
       <font size="2"> </font></blockquote>
     <font size="2">
       <p align="LEFT"></p>
@@ -219,8 +273,8 @@
           size="2"> </font><font color="#800080" size="2">with</font><font size="2">
         </font> <font color="#008000" size="2"><b>^length</b></font><font size="2">
           (</font><font color="#800080" size="2">a</font><font size="2"> </font><font
-          color="#000080" size="2"><b>Quantity</b></font><font size="2"> </font><font
-          color="#800080" size="2">with</font><font size="2">&nbsp;</font><font
+          color="#000080" size="2"><b>UnittedQuantity</b></font><font size="2"></font><font
+          size="2"> </font><font color="#800080" size="2">with</font><font size="2">&nbsp;</font><font
           color="#008000" size="2"><b>^value</b></font><font size="2"> 100, </font><font
           color="#800080" size="2">with</font><font size="2"> </font> <font color="#008000"
           size="2"><b>unit</b></font><font size="2"> "<u>yds</u>").</font></p>
