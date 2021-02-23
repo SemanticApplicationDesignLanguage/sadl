@@ -1,212 +1,229 @@
-<title>Custom Jena Builtins</title>
-<h1>Creating and Deploying Custom Jena Built-ins</h1>
-<h5>Last revised
-<!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->09/17/2020<!--webbot bot="Timestamp" endspan i-checksum="12616" --> 
-by <a href="mailto:crapo@research.ge.com?subject=Custom Jena Built-ins">A. W. 
-Crapo</a></h5>
-<h2>Introduction</h2>
-<p>Jena rules can use
-<a href="http://jena.apache.org/documentation/inference/#RULEbuiltins">built-ins</a> to perform various tasks in procedural code. These built-ins have 
-methods called by the Jena rule engine. A built-in can be called from the rule 
-body (premises), from the rule head (conclusions), or from either. Adding custom 
-built-ins to use in your rules is a powerful way to extend the capability of an 
-application. This document describes how to build and how to deploy a set of 
-custom Jena built-ins. For more details, see
-<a href="http://jena.apache.org/documentation/inference/#RULEextensions">
-http://jena.apache.org/documentation/inference/#RULEextensions</a>. </p>
-<h2>Building the Custom Built-in</h2>
-<p>A custom Jena built-in must extend the Java class <i>
-org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin</i>. If desired, the 
-custom built-in can extend the Java class <i>
-com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin</i>, which is a 
-subclass of <i>org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin</i>, in 
-order to provide a hook for making inference in SADL cancelable. Since the deployment 
-is to an Eclipse environment, it is assumed in this discussion that the building 
-of  custom built-ins also takes place in an Eclipse Java development 
-environment. Building a custom built-in consists of the following steps. The <i>
-Pow</i> built-in, which is deployed with the SADL-IDE, and will serve as an example. </p>
-<h4>Step 1: Create an Eclipse Plug-in Fragment Project</h4>
-<p>To begin, create a new Eclipse Fragment Project (File -&gt; New -&gt; Project..., Plug-in 
-Development -&gt; Fragment Project) to contain the source code for your built-ins. 
-For example, PowBuiltinFragment. Set the Host Plug-in to &quot;com.ge.research.sadl&quot; with some appropriate minimum 
-version (the version you are using or that your users will be using) or leave 
-blank.  </p>
-<h3>Step 2: Create the Source Code for the Built-in</h3>
-<p>In the fragment project, create the package for your built-in(s) under the 
-source code folder, &quot;src&quot;, e.g., <i>com.ge.research.sadl.jena.reasoner.builtin</i>. 
-Then add the built-in class(es) to the package, e.g., <i>Pow.java</i>. Make the
-<a href="http://jena.apache.org/download/">Jena</a> 
-jars available  on your classpath. If you are extending the <i>
-CancellableBuiltin</i> you will need to also add the <i>
-com.ge.research.sadl.jena-wrapper-for-sadl </i>project's jar file, found in the
-<i>target</i> folder.</p>
-<p>If your built-in is to be used in rule premises it must either return true 
-when it &quot;matches&quot; (false when it doesn't) or bind a value to a variable. In the 
-latter case, the built-in will have one more argument than its inputs, which is 
-the variable to which the output will be bound. For example, the
-<a href="pow.java.txt">pow</a> built-in provides the capability to take a first 
-argument to the power of the second argument and return the value as the third 
-argument so it takes three arguments. Note that 
-in SADL rules, a built-in that returns a value appears to have 1 fewer arguments than it actually has 
-because the output appears on the left-hand-side of an assignment. The 
-translator takes this into account. For example,</p>
-<blockquote>
-  <font SIZE="2" COLOR="#ff00ff"><b>
-  <p>y</b></font><font SIZE="2"> </font><font SIZE="2" COLOR="#800080">is</font><font SIZE="2"> 
-  pow(2,3)&nbsp;&nbsp;&nbsp;&nbsp; </font><font SIZE="2" COLOR="#808080"><i>// 
-  assign 2 raised to the power 3 to the variable y</i></font></p>
-</blockquote>
-<p>translates to <i>pow(2,3,y) </i>(loosely speaking, this isn't the actual Jena 
-Rule syntax).</p>
-<p>Here is the relevant source code for the Pow class, as an example.</p>
-<blockquote>
-<p>package com.ge.research.sadl.jena.reasoner.builtin;<br>
-<br>
-import org.apache.jena.graph.Node;<br>
-import org.apache.jena.reasoner.rulesys.BindingEnvironment;<br>
-import org.apache.jena.reasoner.rulesys.RuleContext;<br>
-import org.apache.jena.reasoner.rulesys.Util;<br>
-import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;<br>
-<br>
-public class Pow extends BaseBuiltin {<br>
-&nbsp;&nbsp;&nbsp; /**<br>
-&nbsp;&nbsp;&nbsp; * Return a name for this builtin, normally this will be the 
-name of the <br>
-&nbsp;&nbsp;&nbsp; * functor that will be used to invoke it.<br>
-&nbsp;&nbsp;&nbsp; */<br>
-&nbsp;&nbsp;&nbsp; public String getName() {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return &quot;pow&quot;;<br>
-&nbsp;&nbsp;&nbsp; }<br>
-<br>
-&nbsp;&nbsp;&nbsp; /**<br>
-&nbsp;&nbsp;&nbsp; * Return the expected number of arguments for this functor or 
-0 if the number is flexible.<br>
-&nbsp;&nbsp;&nbsp; */<br>
-&nbsp;&nbsp;&nbsp; public int getArgLength() {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 3;<br>
-&nbsp;&nbsp;&nbsp; }<br>
-<br>
-&nbsp;&nbsp;&nbsp; /**<br>
-&nbsp;&nbsp;&nbsp; * This method is invoked when the builtin is called in a rule 
-body.<br>
-&nbsp;&nbsp;&nbsp; * @param args the array of argument values for the builtin, 
-this is an array <br>
-&nbsp;&nbsp;&nbsp; * of Nodes, some of which may be Node_RuleVariables.<br>
-&nbsp;&nbsp;&nbsp; * @param length the length of the argument list, may be less 
-than the length of the args array<br>
-&nbsp;&nbsp;&nbsp; * for some rule engines<br>
-&nbsp;&nbsp;&nbsp; * @param context an execution context giving access to other 
-relevant data<br>
-&nbsp;&nbsp;&nbsp; * @return return true if the buildin predicate is deemed to 
-have succeeded in<br>
-&nbsp;&nbsp;&nbsp; * the current environment<br>
-&nbsp;&nbsp;&nbsp; */<br>
-&nbsp;&nbsp;&nbsp; public boolean bodyCall(Node[] args, int length, RuleContext 
-context) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; checkArgs(length, context);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; BindingEnvironment env = 
-context.getEnv();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Node n1 = getArg(0, args, context);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Node n2 = getArg(1, args, context);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (n1.isLiteral() &amp;&amp; n2.isLiteral()) 
-{<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Object v1 = 
-n1.getLiteralValue();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Object v2 = 
-n2.getLiteralValue();<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Node pow = 
-null;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (v1 
-instanceof Number &amp;&amp; v2 instanceof Number) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Number nv1 = (Number)v1;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-Number nv2 = (Number)v2;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-if (v1 instanceof Float || v1 instanceof Double <br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-|| v2 instanceof Float || v2 instanceof Double) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-double pwd = Math.pow(nv1.doubleValue(), nv2.doubleValue());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-pow = Util.makeDoubleNode(pwd);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-} else {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-long pwd = (long) Math.pow(nv1.longValue(),nv2.longValue());<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-pow = Util.makeLongNode(pwd);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-}<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-return env.bind(args[2], pow);<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Doesn't (yet) handle partially 
-bound cases<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return false;<br>
-&nbsp;&nbsp;&nbsp; }<br>
-}</p>
-</blockquote>
-<h3>Step 3: Organize the Manifest File</h3>
-<p>Organize the fragment using the Organize 
-Manifests Wizard (Overview tab, META-INF -&gt; MANIFEST.MF editor). In 
-particular, on the &quot;Runtime&quot; tab add the package(s) containing your built-in(s) 
-to the &quot;Exported Packages&quot; and add the &quot;bin&quot; (assuming that's where compiled 
-class files are placed) and the &quot;META-INF&quot; folders to the &quot;ClassPath&quot; so that 
-the contents of these folders will be part of the fragment runtime. On the 
-Overview tab you can increment the version number of your fragment as you make 
-new releases.</p>
-<p>Under the Plug-in Fragment project's META-INF folder (which contains the MANFEST.MF 
-file), create a folder named &quot;services&quot;. In this folder create a file with the 
-same name as the base class, &quot;org.apache.jena.reasoner.rulesys.Builtin&quot;. In this 
-file, add one line for each custom built-in in the project. For example, the 
-entry for the example built-in above would be as follows.</p>
-<p>&nbsp;&nbsp;&nbsp; com.ge.research.sadl.jena.reasoner.builtin.Pow</p>
-<p>These names and packages must match exactly what is in your source code. The built-ins are then discovered in the jar file by a service loader and 
-made available to the application. Use of a built-in within the SADL-IDE will 
-cause the definition of that built-in to be added to the configuration.rdf file 
-in the OwlModels folder, which will be used by SadlServer to load built-ins 
-needed for a particular knowledge base.</p>
-<h3>Step 4: Create a Feature Project</h3>
-<p>Create a new Feature Project (File -&gt; New -&gt; Project..., Plug-in Development -&gt; Feature 
-Project), e.g., PowBuiltinFeature. On the &quot;Plug-ins&quot; tab of the feature.xml 
-editor, add your new fragment. Add explanation, copyright, and licensing 
-information to the &quot;Information&quot; tab.</p>
-<h3>Step 5: Create an Update Project</h3>
-<p>Create a new Update Site Project ((File -&gt; New -&gt; Project..., Plug-in Development -&gt; 
-Update Site Project), e.g., PowBuiltinUpdate.&nbsp; Open &quot;site.xml&quot; in the 
-default editor and add your feature to the &quot;Site Map&quot; tab. It is a good idea to 
-create a New Category and add your feature under the category. Click on Build All to 
-build the update site. For subsequent releases, you may add new feature versions 
-to the category. If you wish previous versions to be available, leave them in the site.xml file. If not, drop old versions by selecting and deleting (delete key). </p>
-<h2>Deploying the Custom Built-in</h2>
-<p>To deploy a set of custom Jena built-ins to the SADL-IDE, place the zip file 
-in the Update Site project in a location that will allow users to easily add 
-download and add your custom built-ins to their Eclipse 
-environment. Or if you are deploying to a Web site to which user will have access 
-(with 
-appropriate access control), copy the contents of your Update Site Project to 
-this update site. The following files and directories with content should be 
-copied to the site:</p>
-<ol>
-  <li>site.xml</li>
-  <li>content.jar</li>
-  <li>artifacts.jar</li>
-  <li>features</li>
-  <li>plugins</li>
-</ol>
-<p>Either from the downloaded zip file or from the Web site, users can then use the Eclipse Install New Software function to add the 
-fragment containing your built-ins to their SADL-IDE plug-ins. This will place 
-the new plug-ins on the classpath of the IDE and allow them to be used in your 
-models' Jena rules.</p>
-<h2>Installing Custom Built-ins in SADL-IDE</h2>
-<p>The SADL-IDE is a set of plug-ins for Eclipse that implement the SADL 
-language editor and runtime environment. The update site for the customer 
-built-ins created by following the instructions above will create an update 
-fragment requiring that the SADL-IDE be installed before the custom built-ins. 
-To install the custom built-ins, select from the Eclipse menu Help -&gt; Install 
-New Software.... Click the &quot;Add...&quot; button and enter a name for the built-ins 
-and the location of zip file or the update site created in the step above. Follow the 
-instructions to complete installation of the fragment extending the SADL-IDE 
-with the new built-ins.</p>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <title>Custom Jena Builtins</title>
+  </head>
+  <body>
+    <h1>Creating and Deploying Custom Jena Built-ins</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->2/23/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <h2>Introduction</h2>
+    <p>Jena rules can use <a href="http://jena.apache.org/documentation/inference/#RULEbuiltins">built-ins</a>
+      to perform various tasks in procedural code. These built-ins have methods
+      called by the Jena rule engine. A built-in can be called from the rule
+      body (premises), from the rule head (conclusions), or from either. Adding
+      custom built-ins to use in your rules is a powerful way to extend the
+      capability of an application. This document describes how to build and how
+      to deploy a set of custom Jena built-ins. For more details, see <a href="http://jena.apache.org/documentation/inference/#RULEextensions">
+        http://jena.apache.org/documentation/inference/#RULEextensions</a>. </p>
+    <h2>Building the Custom Built-in</h2>
+    <p>A custom Jena built-in must extend the Java class <i>
+        org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin</i>. If desired,
+      the custom built-in can extend the Java class <i>
+        com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin</i>, which
+      is a subclass of <i>org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin</i>,
+      in order to provide a hook for making inference in SADL cancelable. Since
+      the deployment is to an Eclipse environment, it is assumed in this
+      discussion that the building of custom built-ins also takes place in an
+      Eclipse Java development environment. Building a custom built-in consists
+      of the following steps. The <i> Pow</i> built-in, which is deployed with
+      the SADL-IDE, and will serve as an example. </p>
+    <h4>Step 1: Create an Eclipse Plug-in Fragment Project</h4>
+    <p>To begin, create a new Eclipse Fragment Project (File -&gt; New -&gt;
+      Project..., Plug-in Development -&gt; Fragment Project) to contain the
+      source code for your built-ins. For example, PowBuiltinFragment. Set the
+      Host Plug-in to "com.ge.research.sadl" with some appropriate minimum
+      version (the version you are using or that your users will be using) or
+      leave blank. </p>
+    <h3>Step 2: Create the Source Code for the Built-in</h3>
+    <p>In the fragment project, create the package for your built-in(s) under
+      the source code folder, "src", e.g., <i>com.ge.research.sadl.jena.reasoner.builtin</i>.
+      Then add the built-in class(es) to the package, e.g., <i>Pow.java</i>.
+      Make the <a href="http://jena.apache.org/download/">Jena</a> jars
+      available on your classpath. If you are extending the <i>
+        CancellableBuiltin</i> you will need to also add the <i>
+        com.ge.research.sadl.jena-wrapper-for-sadl </i>project's jar file,
+      found in the <i>target</i> folder.</p>
+    <p>If your built-in is to be used in rule premises it must either return
+      true when it "matches" (false when it doesn't) or bind a value to a
+      variable. In the latter case, the built-in will have one more argument
+      than its inputs, which is the variable to which the output will be bound.
+      For example, the <a href="pow.java.txt">pow</a> built-in provides the
+      capability to take a first argument to the power of the second argument
+      and return the value as the third argument so it takes three arguments.
+      Note that in SADL rules, a built-in that returns a value appears to have 1
+      fewer arguments than it actually has because the output appears on the
+      left-hand-side of an assignment. The translator takes this into account.
+      For example,</p>
+    <blockquote> <font color="#ff00ff" size="2"><b> </b></font>
+      <p><font color="#ff00ff" size="2"><b>y</b></font><font size="2"> </font><font
+          color="#800080" size="2">is</font><font size="2">
+          pow(2,3)&nbsp;&nbsp;&nbsp;&nbsp; </font><font color="#808080" size="2"><i>//
+            assign 2 raised to the power 3 to the variable y</i></font></p>
+    </blockquote>
+    <p>translates to <i>pow(2,3,y) </i>(loosely speaking, this isn't the
+      actual Jena Rule syntax).</p>
+    <p>Here is the relevant source code for the Pow class, as an example.</p>
+    <blockquote>
+      <p>package com.ge.research.sadl.jena.reasoner.builtin;<br>
+        <br>
+        import org.apache.jena.graph.Node;<br>
+        import org.apache.jena.reasoner.rulesys.BindingEnvironment;<br>
+        import org.apache.jena.reasoner.rulesys.RuleContext;<br>
+        import org.apache.jena.reasoner.rulesys.Util;<br>
+        import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;<br>
+        <br>
+        public class Pow extends BaseBuiltin {<br>
+        &nbsp;&nbsp;&nbsp; /**<br>
+        &nbsp;&nbsp;&nbsp; * Return a name for this builtin, normally this will
+        be the name of the <br>
+        &nbsp;&nbsp;&nbsp; * functor that will be used to invoke it.<br>
+        &nbsp;&nbsp;&nbsp; */<br>
+        &nbsp;&nbsp;&nbsp; public String getName() {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return "pow";<br>
+        &nbsp;&nbsp;&nbsp; }<br>
+        <br>
+        &nbsp;&nbsp;&nbsp; /**<br>
+        &nbsp;&nbsp;&nbsp; * Return the expected number of arguments for this
+        functor or 0 if the number is flexible.<br>
+        &nbsp;&nbsp;&nbsp; */<br>
+        &nbsp;&nbsp;&nbsp; public int getArgLength() {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return 3;<br>
+        &nbsp;&nbsp;&nbsp; }<br>
+        <br>
+        &nbsp;&nbsp;&nbsp; /**<br>
+        &nbsp;&nbsp;&nbsp; * This method is invoked when the builtin is called
+        in a rule body.<br>
+        &nbsp;&nbsp;&nbsp; * @param args the array of argument values for the
+        builtin, this is an array <br>
+        &nbsp;&nbsp;&nbsp; * of Nodes, some of which may be Node_RuleVariables.<br>
+        &nbsp;&nbsp;&nbsp; * @param length the length of the argument list, may
+        be less than the length of the args array<br>
+        &nbsp;&nbsp;&nbsp; * for some rule engines<br>
+        &nbsp;&nbsp;&nbsp; * @param context an execution context giving access
+        to other relevant data<br>
+        &nbsp;&nbsp;&nbsp; * @return return true if the buildin predicate is
+        deemed to have succeeded in<br>
+        &nbsp;&nbsp;&nbsp; * the current environment<br>
+        &nbsp;&nbsp;&nbsp; */<br>
+        &nbsp;&nbsp;&nbsp; public boolean bodyCall(Node[] args, int length,
+        RuleContext context) {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; checkArgs(length, context);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; BindingEnvironment env =
+        context.getEnv();<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Node n1 = getArg(0, args,
+        context);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Node n2 = getArg(1, args,
+        context);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (n1.isLiteral() &amp;&amp;
+        n2.isLiteral()) {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Object v1 = n1.getLiteralValue();<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Object v2 = n2.getLiteralValue();<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Node
+        pow = null;<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if
+        (v1 instanceof Number &amp;&amp; v2 instanceof Number) {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Number nv1 = (Number)v1;<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Number nv2 = (Number)v2;<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        if (v1 instanceof Float || v1 instanceof Double <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        || v2 instanceof Float || v2 instanceof Double) {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        double pwd = Math.pow(nv1.doubleValue(), nv2.doubleValue());<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        pow = Util.makeDoubleNode(pwd);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        } else {<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        long pwd = (long) Math.pow(nv1.longValue(),nv2.longValue());<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        pow = Util.makeLongNode(pwd);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        }<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        return env.bind(args[2], pow);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Doesn't (yet) handle
+        partially bound cases<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return false;<br>
+        &nbsp;&nbsp;&nbsp; }<br>
+        }</p>
+    </blockquote>
+    <h3>Step 3: Organize the Manifest File</h3>
+    <p>Organize the fragment using the Organize Manifests Wizard (Overview tab,
+      META-INF -&gt; MANIFEST.MF editor). In particular, on the "Runtime" tab
+      add the package(s) containing your built-in(s) to the "Exported Packages"
+      and add the "bin" (assuming that's where compiled class files are placed)
+      and the "META-INF" folders to the "ClassPath" so that the contents of
+      these folders will be part of the fragment runtime. On the Overview tab
+      you can increment the version number of your fragment as you make new
+      releases.</p>
+    <p>Under the Plug-in Fragment project's META-INF folder (which contains the
+      MANFEST.MF file), create a folder named "services". In this folder create
+      a file with the same name as the base class,
+      "org.apache.jena.reasoner.rulesys.Builtin". In this file, add one line for
+      each custom built-in in the project. For example, the entry for the
+      example built-in above would be as follows.</p>
+    <p>&nbsp;&nbsp;&nbsp; com.ge.research.sadl.jena.reasoner.builtin.Pow</p>
+    <p>These names and packages must match exactly what is in your source code.
+      The built-ins are then discovered in the jar file by a service loader and
+      made available to the application. Use of a built-in within the SADL-IDE
+      will cause the definition of that built-in to be added to the
+      configuration.rdf file in the OwlModels folder, which will be used by
+      SadlServer to load built-ins needed for a particular knowledge base.</p>
+    <h3>Step 4: Create a Feature Project</h3>
+    <p>Create a new Feature Project (File -&gt; New -&gt; Project..., Plug-in
+      Development -&gt; Feature Project), e.g., PowBuiltinFeature. On the
+      "Plug-ins" tab of the feature.xml editor, add your new fragment. Add
+      explanation, copyright, and licensing information to the "Information"
+      tab.</p>
+    <h3>Step 5: Create an Update Project</h3>
+    <p>Create a new Update Site Project ((File -&gt; New -&gt; Project...,
+      Plug-in Development -&gt; Update Site Project), e.g.,
+      PowBuiltinUpdate.&nbsp; Open "site.xml" in the default editor and add your
+      feature to the "Site Map" tab. It is a good idea to create a New Category
+      and add your feature under the category. Click on Build All to build the
+      update site. For subsequent releases, you may add new feature versions to
+      the category. If you wish previous versions to be available, leave them in
+      the site.xml file. If not, drop old versions by selecting and deleting
+      (delete key). </p>
+    <h2>Deploying the Custom Built-in</h2>
+    <p>To deploy a set of custom Jena built-ins to the SADL-IDE, place the zip
+      file in the Update Site project in a location that will allow users to
+      easily add download and add your custom built-ins to their Eclipse
+      environment. Or if you are deploying to a Web site to which user will have
+      access (with appropriate access control), copy the contents of your Update
+      Site Project to this update site. The following files and directories with
+      content should be copied to the site:</p>
+    <ol>
+      <li>site.xml</li>
+      <li>content.jar</li>
+      <li>artifacts.jar</li>
+      <li>features</li>
+      <li>plugins</li>
+    </ol>
+    <p>Either from the downloaded zip file or from the Web site, users can then
+      use the Eclipse Install New Software function to add the fragment
+      containing your built-ins to their SADL-IDE plug-ins. This will place the
+      new plug-ins on the classpath of the IDE and allow them to be used in your
+      models' Jena rules.</p>
+    <h2>Installing Custom Built-ins in SADL-IDE</h2>
+    <p>The SADL-IDE is a set of plug-ins for Eclipse that implement the SADL
+      language editor and runtime environment. The update site for the customer
+      built-ins created by following the instructions above will create an
+      update fragment requiring that the SADL-IDE be installed before the custom
+      built-ins. To install the custom built-ins, select from the Eclipse menu
+      Help -&gt; Install New Software.... Click the "Add..." button and enter a
+      name for the built-ins and the location of zip file or the update site
+      created in the step above. Follow the instructions to complete
+      installation of the fragment extending the SADL-IDE with the new
+      built-ins.</p>
+  </body>
+</html>
