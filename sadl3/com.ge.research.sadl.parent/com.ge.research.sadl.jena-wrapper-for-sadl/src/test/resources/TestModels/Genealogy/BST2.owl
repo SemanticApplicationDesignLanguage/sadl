@@ -1,0 +1,57 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:BST2="http://sadl.org/BST2.sadl#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/BST2.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'BST2.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <owl:Class rdf:ID="Food"/>
+  <owl:Class rdf:ID="Instrumentalist"/>
+  <owl:Class rdf:ID="Musician">
+    <owl:equivalentClass>
+      <owl:Class>
+        <owl:unionOf rdf:parseType="Collection">
+          <owl:Class rdf:ID="Singer"/>
+          <owl:Class rdf:about="#Instrumentalist"/>
+        </owl:unionOf>
+      </owl:Class>
+    </owl:equivalentClass>
+  </owl:Class>
+  <owl:Class rdf:ID="PresidentOfUSA"/>
+  <owl:Class rdf:ID="Vegetable">
+    <owl:complementOf>
+      <owl:Class rdf:ID="Meat"/>
+    </owl:complementOf>
+    <rdfs:subClassOf rdf:resource="#Food"/>
+  </owl:Class>
+  <owl:Class rdf:about="#Meat">
+    <rdfs:subClassOf rdf:resource="#Food"/>
+  </owl:Class>
+  <owl:Class rdf:ID="WindInstrumentalist">
+    <rdfs:subClassOf rdf:resource="#Instrumentalist"/>
+  </owl:Class>
+  <owl:Class rdf:ID="MilitaryCommander"/>
+  <owl:Class rdf:about="#Singer">
+    <owl:disjointWith rdf:resource="#WindInstrumentalist"/>
+  </owl:Class>
+  <BST2:Musician rdf:ID="AlicaKeys"/>
+  <rdf:Description rdf:ID="GeorgeWashington">
+    <rdf:type>
+      <owl:Class>
+        <owl:intersectionOf rdf:parseType="Collection">
+          <owl:Class rdf:about="#PresidentOfUSA"/>
+          <owl:Class rdf:about="#MilitaryCommander"/>
+        </owl:intersectionOf>
+      </owl:Class>
+    </rdf:type>
+  </rdf:Description>
+</rdf:RDF>

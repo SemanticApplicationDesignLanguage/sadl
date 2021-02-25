@@ -1,0 +1,23 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns="http://com.ge.research.sadl.configuration#">
+  <Category rdf:about="http://com.ge.research.sadl.configuration#ReasonerSpec">
+    <reasonerClassName>com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin</reasonerClassName>
+  </Category>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#Builtin"/>
+  <Category rdf:about="http://com.ge.research.sadl.configuration#Jena">
+    <pOWLTranslation rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pOWLTranslation>
+    <pUseLuceneIndexer rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pUseLuceneIndexer>
+    <pTrace rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pTrace>
+    <pRuleMode>hybrid</pRuleMode>
+    <pModelSpec>OWL_LITE_MEM_RULES</pModelSpec>
+    <pDerivationLogging>None</pDerivationLogging>
+    <pTransitiveClosureCaching rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean"
+    >false</pTransitiveClosureCaching>
+    <translatorClassName>com.ge.research.sadl.jena.translator.JenaTranslatorPlugin</translatorClassName>
+    <pTimeOut>60</pTimeOut>
+  </Category>
+</rdf:RDF>

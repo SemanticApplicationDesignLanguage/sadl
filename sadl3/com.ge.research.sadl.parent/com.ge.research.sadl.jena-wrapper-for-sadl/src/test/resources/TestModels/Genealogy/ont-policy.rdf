@@ -1,0 +1,146 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:j.0="http://jena.hpl.hp.com/schemas/2003/03/ont-manager#">
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Genealogy1.sadl</j.0:sadlSourceURL>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Genealogy1.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix>gen1</j.0:prefix>
+    <j.0:publicURI rdf:resource="http://sadl.org/Genealogy1.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/ImplicitModel/SadlImplicitModel.sadl</j.0:sadlSourceURL>
+    <j.0:prefix>sadlimplicitmodel</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/SadlImplicitModel.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadlimplicitmodel"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Owl4b.sadl</j.0:sadlSourceURL>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Owl4b.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix>owl4b</j.0:prefix>
+    <j.0:publicURI rdf:resource="http://sadl.org/Owl4b.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Owl3b.sadl</j.0:sadlSourceURL>
+    <j.0:prefix>owl3b</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Owl3b.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Owl3b.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/BST1.sadl</j.0:sadlSourceURL>
+    <j.0:prefix>bst1</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/BST1.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/BST1.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/AdamsFamily.sadl</j.0:sadlSourceURL>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/AdamsFamily.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix>adamsfamily</j.0:prefix>
+    <j.0:publicURI rdf:resource="http://sadl.org/AdamsFamily.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Owl5ab.sadl</j.0:sadlSourceURL>
+    <j.0:publicURI rdf:resource="http://sadl/m1"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Owl5ab.owl"/>
+    <j.0:prefix>m1</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Owl5cb.sadl</j.0:sadlSourceURL>
+    <j.0:publicURI rdf:resource="http://sadl/m3"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Owl5cb.owl"/>
+    <j.0:prefix>m3</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Owl5db.sadl</j.0:sadlSourceURL>
+    <j.0:publicURI rdf:resource="http://sadl/m4"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Owl5db.owl"/>
+    <j.0:prefix>m4</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix>sadlbasemodel</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/SadlBaseModel.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadlbasemodel"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/BST2.sadl</j.0:sadlSourceURL>
+    <j.0:prefix>BST2</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/BST2.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/BST2.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Logic1bb.sadl</j.0:sadlSourceURL>
+    <j.0:publicURI rdf:resource="http://sadl.org/Logic1bb.sadl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Logic1bb.owl"/>
+    <j.0:prefix>Logic1bb</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:prefix>sadllistmodel</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/SadlListModel.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/sadllistmodel"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Logic1.sadl</j.0:sadlSourceURL>
+    <j.0:prefix>Logic1</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Logic1.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Logic1.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Owl5bb.sadl</j.0:sadlSourceURL>
+    <j.0:publicURI rdf:resource="http://sadl/m2"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Owl5bb.owl"/>
+    <j.0:prefix>m2</j.0:prefix>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/ImplicitModel/SadlBuiltinFunctions.sadl</j.0:sadlSourceURL>
+    <j.0:prefix>builtinfunctions</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/SadlBuiltinFunctions.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/builtinfunctions"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Owl2b.sadl</j.0:sadlSourceURL>
+    <j.0:prefix>owl2b</j.0:prefix>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Owl2b.owl"/>
+    <j.0:publicURI rdf:resource="http://sadl.org/Owl2b.sadl"/>
+  </j.0:OntologySpec>
+  <j.0:OntologySpec>
+    <j.0:sadlSourceURL>platform:/resource/Tutorial/Owl1b.sadl</j.0:sadlSourceURL>
+    <j.0:altURL rdf:resource="file:/home/camfe/andy/ws/sadl/runtime-EclipseApplication2/Tutorial/OwlModels/Owl1b.owl"/>
+    <j.0:language rdf:resource="http://www.w3.org/2002/07/owl"/>
+    <j.0:createdBy>SADL</j.0:createdBy>
+    <j.0:prefix>owl1b</j.0:prefix>
+    <j.0:publicURI rdf:resource="http://sadl.org/Owl1b.sadl"/>
+  </j.0:OntologySpec>
+</rdf:RDF>

@@ -1,0 +1,23 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:m3="http://sadl/m3#"
+    xmlns:m4="http://sadl/m4#"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+    xmlns:j.0="http://sadl/m1#"
+  xml:base="http://sadl/m4">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="m3"/>
+    <owl:imports rdf:resource="http://sadl.org/builtinfunctions"/>
+    <owl:imports rdf:resource="http://sadl.org/sadlimplicitmodel"/>
+    <owl:imports rdf:resource="http://sadl.org/sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'Owl5db.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <m3:Dog rdf:ID="Spot"/>
+  <m3:Cat rdf:ID="Felix"/>
+  <j.0:LivingThing rdf:ID="AngelOak"/>
+</rdf:RDF>

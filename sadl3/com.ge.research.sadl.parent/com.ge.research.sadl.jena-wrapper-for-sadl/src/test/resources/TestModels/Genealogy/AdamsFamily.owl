@@ -1,0 +1,86 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:builtinfunctions="http://sadl.org/builtinfunctions#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:gen1="http://sadl.org/Genealogy1.sadl#"
+    xmlns:sadlimplicitmodel="http://sadl.org/sadlimplicitmodel#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:adamsfamily="http://sadl.org/AdamsFamily.sadl#"
+    xmlns:sadlbasemodel="http://sadl.org/sadlbasemodel#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+  xml:base="http://sadl.org/AdamsFamily.sadl">
+  <owl:Ontology rdf:about="">
+    <owl:imports rdf:resource="Genealogy1.sadl"/>
+    <owl:imports rdf:resource="builtinfunctions"/>
+    <owl:imports rdf:resource="sadlimplicitmodel"/>
+    <owl:imports rdf:resource="sadlbasemodel"/>
+    <rdfs:comment xml:lang="en">This ontology was created from a SADL file 'AdamsFamily.sadl' and should not be directly edited.</rdfs:comment>
+  </owl:Ontology>
+  <gen1:Birth>
+    <gen1:mother>
+      <gen1:Woman rdf:ID="ElizabethQuincy">
+        <gen1:spouse>
+          <gen1:Man rdf:ID="WilliamSmith">
+            <rdfs:label xml:lang="en">William Smith</rdfs:label>
+          </gen1:Man>
+        </gen1:spouse>
+        <rdfs:label xml:lang="en">Elizabeth Smith</rdfs:label>
+      </gen1:Woman>
+    </gen1:mother>
+    <gen1:location>
+      <gen1:Location>
+        <gen1:description>Weymouth, MA</gen1:description>
+      </gen1:Location>
+    </gen1:location>
+    <gen1:baby>
+      <gen1:Woman rdf:ID="AbigailSmith">
+        <gen1:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+        >1744-11-22</gen1:dateOfBirth>
+        <rdfs:label xml:lang="en">Abigail Adams</rdfs:label>
+        <rdfs:label xml:lang="en">Abigail Smith</rdfs:label>
+      </gen1:Woman>
+    </gen1:baby>
+  </gen1:Birth>
+  <gen1:Man rdf:ID="JohnQuincyAdams">
+    <gen1:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+    >1767-07-11</gen1:dateOfBirth>
+    <gen1:parent rdf:resource="#AbigailSmith"/>
+    <gen1:parent>
+      <gen1:Person rdf:ID="JohnAdams">
+        <gen1:spouse rdf:resource="#AbigailSmith"/>
+        <gen1:parent>
+          <gen1:Woman rdf:ID="SusannaBoylston">
+            <rdfs:label xml:lang="en">Susanna Boylston</rdfs:label>
+          </gen1:Woman>
+        </gen1:parent>
+        <gen1:parent>
+          <gen1:Man rdf:ID="JohnAdamsSr">
+            <gen1:spouse rdf:resource="#SusannaBoylston"/>
+            <rdfs:label xml:lang="en">John Adams Sr</rdfs:label>
+          </gen1:Man>
+        </gen1:parent>
+        <gen1:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+        >1735-10-30</gen1:dateOfBirth>
+        <gen1:gender rdf:resource="Genealogy1.sadl#Male"/>
+        <rdfs:label xml:lang="en">John Adams</rdfs:label>
+      </gen1:Person>
+    </gen1:parent>
+    <rdfs:label xml:lang="en">John Quincy Adams</rdfs:label>
+  </gen1:Man>
+  <gen1:Woman rdf:ID="AbigailAmeliaAdams">
+    <gen1:dateOfBirth rdf:datatype="http://www.w3.org/2001/XMLSchema#date"
+    >1765-07-14</gen1:dateOfBirth>
+    <gen1:parent rdf:resource="#AbigailSmith"/>
+    <gen1:parent rdf:resource="#JohnAdams"/>
+    <rdfs:label xml:lang="en">Abigail 'Nabby' Amelia Adams Smith</rdfs:label>
+  </gen1:Woman>
+  <gen1:Birth>
+    <gen1:mother rdf:resource="#SusannaBoylston"/>
+    <gen1:location>
+      <gen1:Location>
+        <gen1:description>Braintree, MA</gen1:description>
+      </gen1:Location>
+    </gen1:location>
+    <gen1:baby rdf:resource="#JohnAdams"/>
+  </gen1:Birth>
+</rdf:RDF>
