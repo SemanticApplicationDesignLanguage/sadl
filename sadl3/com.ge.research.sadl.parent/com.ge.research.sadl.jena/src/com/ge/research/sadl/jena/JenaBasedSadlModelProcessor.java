@@ -9929,18 +9929,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						SadlExplicitValue dv = sdv.getDefValue();
 						if (dv instanceof SadlResource){
 							defValue = getTheJenaModel().getResource(declarationExtensions.getConceptUri((SadlResource)dv));
-							System.out.println("def val: " + declarationExtensions.getConceptUri((SadlResource)dv));
 						}
 						else if (dv instanceof SadlExplicitValueLiteral) {
 							defValue = sadlExplicitValueToRdfNode(dv, getTheJenaModel().getProperty(declarationExtensions.getConceptUri(srs.get(0))), true);
-							System.out.println("def val: " + defValue.toString());
 						}
 						isDefVal = true;
 					}
 					
-				}
-				for (SadlResource s : srs) {
-					System.out.println("SR: " + declarationExtensions.getConceptUri(s));
 				}
 				if (isDefVal) {
 					// process the default value and return (don't keep going)					
