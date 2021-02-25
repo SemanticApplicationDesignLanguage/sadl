@@ -256,6 +256,7 @@ import com.ge.research.sadl.sADL.SadlDefaultValue;
 import com.ge.research.sadl.sADL.SadlDifferentFrom;
 import com.ge.research.sadl.sADL.SadlDisjointClasses;
 import com.ge.research.sadl.sADL.SadlExplicitValue;
+import com.ge.research.sadl.sADL.SadlExplicitValueLiteral;
 import com.ge.research.sadl.sADL.SadlHasValueCondition;
 import com.ge.research.sadl.sADL.SadlImport;
 import com.ge.research.sadl.sADL.SadlInstance;
@@ -9735,6 +9736,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// spr is SadlTypeAssociation, 2nd spr is a SadlCanOnlyBeOneOf)
 		// 6) <prop> of <class> must be one of {<instances> or <datavalues>} (1st spr is
 		// SadlTypeAssociation, 2nd spr is a SadlCanOnlyBeOneOf)
+		// 7) <prop> of <prop> of .... of <class> has [level n] default value <value>.
 		SadlResource sr = sadlResourceFromSadlProperty(element);
 		String propUri = getDeclarationExtensions().getConceptUri(sr);
 		checkForInvalidAnnotation(sr);
@@ -9900,17 +9902,89 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					addError("A property restriction requires specifying the class to which it applies.", element);
 				}
 			} else if (spitr.hasNext()) {
+				// there is more than one restriction in the element
 				SadlPropertyRestriction spr2 = spitr.next();
-				if (spitr.hasNext()) {
-					StringBuilder sb = new StringBuilder();
-					int cntr = 0;
-					while (spitr.hasNext()) {
-						if (cntr++ > 0)
-							sb.append(", ");
-						sb.append(spitr.next().getClass().getCanonicalName());
+				boolean isDefVal = false;
+				List<SadlResource> srs = new ArrayList<SadlResource>();
+				SadlDefaultValue sdv = null;
+				RDFNode defValue = null;
+				int dvlvl = 0;
+				srs.add(element.getNameOrRef());
+				EList<SadlPropertyRestriction> restrictions = element.getRestrictions();
+				int restrictionCount = 0;
+				for (SadlPropertyRestriction spr : restrictions) {
+					restrictionCount++;
+					if (spr instanceof SadlTypeAssociation) {
+						SadlTypeReference sprd = ((SadlTypeAssociation)spr).getDomain();
+						if (sprd instanceof SadlSimpleTypeReference) {
+							srs.add(((SadlSimpleTypeReference)sprd).getType());
+						}
+						else {
+							addError("Unhandled restriction type reference: " + sprd.getClass().getCanonicalName(), sprd);
+						}
 					}
+					else if (spr instanceof SadlDefaultValue) {
+						sdv = (SadlDefaultValue)spr;
+						dvlvl = sdv.getLevel();
+						SadlExplicitValue dv = sdv.getDefValue();
+						if (dv instanceof SadlResource){
+							defValue = getTheJenaModel().getResource(declarationExtensions.getConceptUri((SadlResource)dv));
+							System.out.println("def val: " + declarationExtensions.getConceptUri((SadlResource)dv));
+						}
+						else if (dv instanceof SadlExplicitValueLiteral) {
+							defValue = sadlExplicitValueToRdfNode(dv, getTheJenaModel().getProperty(declarationExtensions.getConceptUri(srs.get(0))), true);
+							System.out.println("def val: " + defValue.toString());
+						}
+						isDefVal = true;
+					}
+					
+				}
+				for (SadlResource s : srs) {
+					System.out.println("SR: " + declarationExtensions.getConceptUri(s));
+				}
+				if (isDefVal) {
+					// process the default value and return (don't keep going)					
+					OntClass restricted = null;
+					List<Property> props = new ArrayList<Property>();	
+					for (int i = srs.size(); i > 0; i--) {
+						SadlResource chsr = srs.get(i-1);
+						try {
+							OntConceptType chsrtype = declarationExtensions.getOntConceptType(chsr);
+							if (chsrtype.equals(OntConceptType.CLASS)) {
+								restricted = getTheJenaModel().getOntClass(declarationExtensions.getConceptUri(chsr));
+							}
+							else {
+								props.add(getTheJenaModel().getProperty(declarationExtensions.getConceptUri(chsr)));
+							}
+						} catch (CircularDefinitionException e) {
+							throw new JenaProcessorException(e.getMessage(), e);
+						}
+					}
+					try {
+						if (sadlDefaultsModel == null) {
+							try {
+								importSadlDefaultsModel(element.eResource());
+							} catch (Exception e) {
+								e.printStackTrace();
+								throw new JenaProcessorException("Failed to load SADL Defaults model", e);
+							}
+						}
+						Individual seeAlsoDefault = createDefault(restricted, props, defValue, dvlvl, element);
+						if (seeAlsoDefault != null) {
+							restricted.addSeeAlso(seeAlsoDefault);
+							return props.get(props.size() - 1);
+						} else {
+							addError("Unable to create default for '" + restricted.getURI() + "'", element);
+						}
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						throw new JenaProcessorException(e.getMessage(), e);
+					}
+					return null;
+				}
+				if (restrictionCount > 2) {
 					throw new JenaProcessorException(
-							"Unexpected SadlProperty has more than 2 restrictions: " + sb.toString());
+							"Unexpected SadlProperty has more than 2 restrictions");
 				}
 				if (spr1 instanceof SadlTypeAssociation && spr2 instanceof SadlRangeRestriction) {
 					// this is case 3
@@ -10160,6 +10234,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								}
 							}
 							Individual seeAlsoDefault = null;
+							List<Property> props = new ArrayList<Property>();
+							props.add(prop);
 							if (propType.equals(OntConceptType.CLASS_PROPERTY)
 									|| (propType.equals(OntConceptType.RDF_PROPERTY) && defVal.isResource())) {
 								if (!(defVal.isURIResource()) || !defVal.canAs(Individual.class)) {
@@ -10169,7 +10245,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								} else {
 									Individual defInst = defVal.as(Individual.class);
 									try {
-										seeAlsoDefault = createDefault(cls, prop, defInst, lvl, element);
+										seeAlsoDefault = createDefault(cls, props, defInst, lvl, element);
 									} catch (Exception e) {
 										addError("Error creating default for property '" + propUri + "' for class '"
 												+ cls.getURI() + "' with value '" + defVal.toString() + "': "
@@ -10185,7 +10261,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 											spr2);
 								} else {
 									try {
-										seeAlsoDefault = createDefault(cls, prop, defVal.asLiteral(), lvl, spr2);
+										seeAlsoDefault = createDefault(cls, props, defVal.asLiteral(), lvl, spr2);
 									} catch (Exception e) {
 										addError("Error creating default for property '" + propUri + "' for class '"
 												+ cls.getURI() + "' with value '" + defVal.toString() + "': "
@@ -10199,7 +10275,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								addError("Unable to create default for '" + cls.getURI() + "', '" + propUri + "', '"
 										+ defVal + "'", element);
 							}
-
 						}
 					}
 				} else {
@@ -10437,8 +10512,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	private String createUniqueDefaultValName(OntClass restricted, Property prop) throws PrefixNotFoundException {
-		String nmBase = restricted.getLocalName() + "_" + prop.getLocalName() + "_default";
+	private String createUniqueDefaultValName(OntClass restricted, List<Property> props) throws PrefixNotFoundException {
+		StringBuilder sb = new StringBuilder(restricted.getLocalName());
+		for (Property prop : props) {
+			sb.append("_");
+			sb.append(prop.getLocalName());
+		}
+		sb.append("_default");
+		String nmBase = sb.toString();
 		String nm = getModelNamespace() + nmBase;
 		int cntr = 0;
 		while (getTheJenaModel().getIndividual(nm) != null) {
@@ -10447,56 +10528,45 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return nm;
 	}
 
-	private Individual createDefault(OntClass restricted, Property prop, RDFNode defValue, int level, EObject ref)
+	private Individual createDefault(OntClass restricted, List<Property> props, RDFNode defValue, int level, EObject ref)
 			throws Exception {
-		if (defValue instanceof Individual) {
-			OntClass instDefCls = getTheJenaModel().getOntClass(ResourceManager.ACUITY_DEFAULTS_NS + "ObjectDefault");
-			if (instDefCls == null) {
-				addError("Unable to find ObjectDefault in Defaults model", ref);
-				return null;
-			}
-			Individual def = getTheJenaModel().createIndividual(createUniqueDefaultValName(restricted, prop),
-					instDefCls);
-			def.addProperty(getTheJenaModel().getOntProperty(ResourceManager.ACUITY_DEFAULTS_NS + "appliesToProperty"),
-					prop);
-			def.addProperty(getTheJenaModel().getOntProperty(ResourceManager.ACUITY_DEFAULTS_NS + "hasObjectDefault"),
-					defValue);
-			if (level > 0) {
-				String hlpuri = ResourceManager.ACUITY_DEFAULTS_NS + "hasLevel";
-				OntProperty hlp = getTheJenaModel().getOntProperty(hlpuri);
-				if (hlp == null) {
-					addError("Unable to find hasLevel property in Defaults model", ref);
-					return null;
-				}
-				Literal defLvl = getTheJenaModel().createTypedLiteral(level);
-				def.addProperty(hlp, defLvl);
-			}
-			return def;
-		} else if (defValue instanceof Literal) {
-			OntClass litDefCls = getTheJenaModel().getOntClass(ResourceManager.ACUITY_DEFAULTS_NS + "DataDefault");
-			if (litDefCls == null) {
-				addError("Unable to find DataDefault in Defaults model", ref);
-				return null;
-			}
-			Individual def = getTheJenaModel()
-					.createIndividual(modelNamespace + createUniqueDefaultValName(restricted, prop), litDefCls);
-			def.addProperty(getTheJenaModel().getOntProperty(ResourceManager.ACUITY_DEFAULTS_NS + "appliesToProperty"),
-					prop);
-			def.addProperty(getTheJenaModel().getOntProperty(ResourceManager.ACUITY_DEFAULTS_NS + "hasDataDefault"),
-					defValue);
-			if (level > 0) {
-				String hlpuri = ResourceManager.ACUITY_DEFAULTS_NS + "hasLevel";
-				OntProperty hlp = getTheJenaModel().getOntProperty(hlpuri);
-				if (hlp == null) {
-					addError("Unable to find hasLevel in Defaults model", ref);
-					return null;
-				}
-				Literal defLvl = getTheJenaModel().createTypedLiteral(level);
-				def.addProperty(hlp, defLvl);
-			}
-			return def;
+		OntClass instDefCls = getTheJenaModel().getOntClass(ResourceManager.ACUITY_DEFAULTS_NS + "DefaultValue");
+		if (instDefCls == null) {
+			addError("Unable to find DefaultValue in Defaults model", ref);
+			return null;
 		}
-		return null;
+		OntClass pceCls = getTheJenaModel().getOntClass(ResourceManager.ACUITY_DEFAULTS_NS + "PropertyChainElement");
+		if (pceCls == null) {
+			addError("Unable to find PropertyChainElement in Defaults model", ref);
+			return null;
+		}
+		Individual def = getTheJenaModel().createIndividual(createUniqueDefaultValName(restricted, props),
+				instDefCls);
+		if (level > 0) {
+			String hlpuri = ResourceManager.ACUITY_DEFAULTS_NS + "hasLevel";
+			OntProperty hlp = getTheJenaModel().getOntProperty(hlpuri);
+			if (hlp == null) {
+				addError("Unable to find hasLevel property in Defaults model", ref);
+				return null;
+			}
+			Literal defLvl = getTheJenaModel().createTypedLiteral(level);
+			def.addProperty(hlp, defLvl);
+		}
+		def.addProperty(getTheJenaModel().getOntProperty(ResourceManager.ACUITY_DEFAULTS_NS + "hasDefault"), defValue);
+		
+		Individual lastPce = null;
+		for (Property prop : props) {
+			Individual pce = getTheJenaModel().createIndividual(pceCls);
+			pce.addProperty(getTheJenaModel().getOntProperty(ResourceManager.ACUITY_DEFAULTS_NS + "propertyElement"), prop);
+			if (lastPce == null) {
+				def.addProperty(getTheJenaModel().getOntProperty(ResourceManager.ACUITY_DEFAULTS_NS + "appliesToPropertyChain"), pce);
+			}
+			else {
+				lastPce.addProperty(getTheJenaModel().getOntProperty(ResourceManager.ACUITY_DEFAULTS_NS + "nextPropertyChainElement"), pce);
+			}
+			lastPce = pce;
+		}
+		return def;
 	}
 
 	private EnumeratedClass sadlExplicitValuesToEnumeratedClass(EList<SadlExplicitValue> values)
@@ -14534,44 +14604,37 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		sb.append("xml:base=\"http://research.ge.com/Acuity/defaults.owl\">\n");
 		sb.append("	<owl:Ontology rdf:about=\"\">\n");
 		sb.append(
-				"	  <rdfs:comment>Copyright 2007, 2008, 2009 - General Electric Company, All Rights Reserved</rdfs:comment>\n");
+				"	  <rdfs:comment>Copyright 2007, 2008, 2009, 2021 - General Electric Company, All Rights Reserved</rdfs:comment>\n");
 		sb.append("	  <owl:versionInfo>$Id: defaults.owl,v 1.1 2014/01/23 21:52:26 crapo Exp $</owl:versionInfo>\n");
 		sb.append("	</owl:Ontology>\n");
-		sb.append("	<owl:Class rdf:ID=\"DataDefault\">\n");
-		sb.append(
-				"		<rdfs:comment rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">This type of default has a value which is a Literal</rdfs:comment>\n");
-		sb.append("		<rdfs:subClassOf>\n");
-		sb.append("			<owl:Class rdf:ID=\"DefaultValue\"/>\n");
-		sb.append("		</rdfs:subClassOf>\n");
-		sb.append("	</owl:Class>\n");
-		sb.append("	<owl:Class rdf:ID=\"ObjectDefault\">\n");
-		sb.append(
-				"		<rdfs:comment rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">This type of default has a value which is an Individual</rdfs:comment>\n");
-		sb.append("		<rdfs:subClassOf>\n");
-		sb.append("			<owl:Class rdf:about=\"#DefaultValue\"/>\n");
-		sb.append("		</rdfs:subClassOf>\n");
-		sb.append("	</owl:Class>\n");
-		sb.append("	<owl:FunctionalProperty rdf:ID=\"hasLevel\">\n");
-		sb.append("		<rdfs:domain rdf:resource=\"#DataDefault\"/>\n");
-		sb.append("		<rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#DatatypeProperty\"/>\n");
-		sb.append("		<rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n");
-		sb.append("	</owl:FunctionalProperty>\n");
-		sb.append("	<owl:FunctionalProperty rdf:ID=\"hasDataDefault\">\n");
-		sb.append("		<rdfs:domain rdf:resource=\"#DataDefault\"/>\n");
-		sb.append("		<rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#DatatypeProperty\"/>\n");
-		sb.append("	</owl:FunctionalProperty>\n");
-		sb.append("	<owl:ObjectProperty rdf:ID=\"hasObjectDefault\">\n");
-		sb.append("		<rdfs:domain rdf:resource=\"#ObjectDefault\"/>\n");
-		sb.append("		<rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#FunctionalProperty\"/>\n");
-		sb.append("	</owl:ObjectProperty>\n");
-		sb.append("	<owl:ObjectProperty rdf:ID=\"appliesToProperty\">\n");
-		sb.append(
-				"		<rdfs:comment rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\">The value of this Property is the Property to which the default value applies.</rdfs:comment>\n");
-		sb.append("		<rdfs:domain rdf:resource=\"#DefaultValue\"/>\n");
-		sb.append("		<rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#FunctionalProperty\"/>\n");
-		sb.append("		<rdfs:range rdf:resource=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#Property\"/>");
-		sb.append("	</owl:ObjectProperty>\n");
-		sb.append("</rdf:RDF>\n");
+		sb.append("  <owl:Class rdf:ID=\"DefaultValue\">\n" + 
+				"    <rdfs:comment xml:lang=\"en\">A default value is associated with a class by the rdfs:seeAlso annotation property</rdfs:comment>\n" + 
+				"  </owl:Class>\n" + 
+				"  <owl:Class rdf:ID=\"PropertyChainElement\"/>\n" + 
+				"  <owl:FunctionalProperty rdf:ID=\"nextPropertyChainElement\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#PropertyChainElement\"/>\n" + 
+				"    <rdfs:range rdf:resource=\"#PropertyChainElement\"/>\n" + 
+				"    <rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#ObjectProperty\"/>\n" + 
+				"  </owl:FunctionalProperty>\n" + 
+				"  <owl:FunctionalProperty rdf:ID=\"appliesToPropertyChain\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#DefaultValue\"/>\n" + 
+				"    <rdfs:range rdf:resource=\"#PropertyChainElement\"/>\n" + 
+				"    <rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#ObjectProperty\"/>\n" + 
+				"  </owl:FunctionalProperty>\n" + 
+				"  <owl:FunctionalProperty rdf:ID=\"propertyElement\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#PropertyChainElement\"/>\n" + 
+				"    <rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#ObjectProperty\"/>\n" + 
+				"  </owl:FunctionalProperty>\n" + 
+				"  <owl:FunctionalProperty rdf:ID=\"hasLevel\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#DefaultValue\"/>\n" + 
+				"    <rdfs:range rdf:resource=\"http://www.w3.org/2001/XMLSchema#int\"/>\n" + 
+				"    <rdf:type rdf:resource=\"http://www.w3.org/2002/07/owl#DatatypeProperty\"/>\n" + 
+				"  </owl:FunctionalProperty>\n" + 
+				"  <owl:FunctionalProperty rdf:ID=\"hasDefault\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#DefaultValue\"/>\n" + 
+				"    <rdf:type rdf:resource=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#Property\"/>\n" + 
+				"  </owl:FunctionalProperty>\n" + 
+				"</rdf:RDF>\n");
 		return sb.toString();
 	}
 	
