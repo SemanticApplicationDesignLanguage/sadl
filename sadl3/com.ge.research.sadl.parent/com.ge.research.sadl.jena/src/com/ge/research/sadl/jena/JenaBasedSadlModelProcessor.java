@@ -10595,6 +10595,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				while (rngitr.hasNext()) {
 					RDFNode rng = rngitr.nextStatement().getObject();
 					if (rng instanceof org.apache.jena.rdf.model.Resource) {
+						if (rng.asResource().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+							org.apache.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
+							if (isIgnoreUnittedQuantities()) {
+								Literal lval = sadlExplicitValueToLiteral((SadlNumberLiteral) value, effectiveRng);
+								if (lval != null) {
+									return lval;
+								}
+							}
+							else {
+								Individual unittedVal = getTheJenaModel().createIndividual(
+											getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI));
+								
+								// TODO this may need to check for property restrictions on a subclass of
+								// UnittedQuantity
+								unittedVal.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI),
+										getTheJenaModel().createTypedLiteral(((SadlNumberLiteral)value).getLiteralNumber(), XSD.decimal.getURI()));
+								if (((SadlNumberLiteral)value).getUnit() != null) {
+									unittedVal.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI),
+											getTheJenaModel().createTypedLiteral(((SadlNumberLiteral)value).getUnit(), XSD.xstring.getURI()));
+								}
+								return unittedVal;
+							}
+						}
 						try {
 							Literal litval = sadlExplicitValueToLiteral(value, (org.apache.jena.rdf.model.Resource) rng);
 							rngitr.close();
@@ -12114,9 +12137,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// TODO this may need to check for property restrictions on a subclass of
 		// UnittedQuantity
 		unittedVal.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI),
-				getTheJenaModel().createTypedLiteral(literalNumber));
+				getTheJenaModel().createTypedLiteral(literalNumber, XSD.decimal.getURI()));
 		unittedVal.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI),
-				getTheJenaModel().createTypedLiteral(unit));
+				getTheJenaModel().createTypedLiteral(unit, XSD.xstring.getURI()));
 		try {
 			
 			getModelValidator().checkPropertyDomain(getTheJenaModel(), inst, oprop, null, false, null, false, true);
