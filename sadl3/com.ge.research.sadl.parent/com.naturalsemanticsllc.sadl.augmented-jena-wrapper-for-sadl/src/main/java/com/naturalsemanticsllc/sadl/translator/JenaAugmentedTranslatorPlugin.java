@@ -34,11 +34,14 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.ResourceManager;
@@ -47,8 +50,8 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 
 	@Override
 	public String getConfigurationCategory() {
-//		return "Augmented-" + super.getConfigurationCategory();
-		return super.getConfigurationCategory();
+		return "Augmented-" + super.getConfigurationCategory();
+//		return super.getConfigurationCategory();
 	}
 
 	
@@ -223,26 +226,76 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 		sb.append(": (");
 		sb.append("?i rdf:type ");
 		sb.append(onClass.getURI());
-		sb.append("), (?i ");
+		sb.append("), ");
 		int vcntr = 0;
+		String lastvar = "?i";
 		for (int i = 0; i < propChainList.size(); i++) {
 			Property p = propChainList.get(i);
-			sb.append(p.getURI());
-			sb.append(" ");
 			if (i < propChainList.size() - 1) {
+				sb.append("(");
+				sb.append(lastvar);
+				sb.append(" ");
+				sb.append(p.getURI());
+				sb.append(" ");
 				String var = "?v" + vcntr++;
 				sb.append(var);
 				sb.append(")");
 				sb.append("), (");
 				sb.append(var);
 				sb.append(" ");
+				lastvar = var;
 			}
 			else {
+				sb.append("noValue(");
+				sb.append(lastvar);
+				sb.append(",");
+				sb.append(p.getURI());
+				sb.append(") -> (");
+				
 				if (defval.isResource() && defval.asResource().isURIResource()) {
+					sb.append(lastvar);
+					sb.append(" ");
+					sb.append(p.getURI());
 					sb.append(defval.asResource().getURI());
 				}
 				else if (defval.isLiteral()) {
+					sb.append(lastvar);
+					sb.append(" ");
+					sb.append(p.getURI());
 					sb.append(defval.asLiteral().getValue().toString());
+				}
+				else if (defval.canAs(Individual.class)){
+					// must be a blank node, which may be a structure with property values
+					// create a set of arguments to thereExists built-in to create the structure and assign in rule conclusion
+					Individual defvalinst = defval.as(Individual.class);
+					ExtendedIterator<Resource> typitr = defvalinst.listRDFTypes(true);
+					OntClass typecls = null;
+					if (typitr.hasNext()) {
+						typecls = typitr.next().as(OntClass.class);
+					}
+					if (typecls != null) {
+						sb.append("thereExists(");
+						sb.append(typecls.getURI());
+						sb.append(", ");
+						StmtIterator sitr = defvalinst.listProperties();
+						while (sitr.hasNext()) {
+							Statement stmt = sitr.nextStatement();
+							if (!stmt.getPredicate().equals(RDF.type)) {
+								sb.append(stmt.getPredicate().getURI());
+								sb.append(", ");
+								RDFNode obj = stmt.getObject();
+								if (obj.isLiteral()) {
+									sb.append(obj.asLiteral().getValue().toString());
+								}
+								else {
+									sb.append(obj.asResource().getURI());
+								}
+							}
+						}
+					}
+					else {
+						addError(new ModelError("Class of default value individual not found", ErrorType.ERROR));
+					}
 				}
 			}
 		}

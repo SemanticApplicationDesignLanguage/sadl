@@ -40,8 +40,8 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 
 	@Override
 	public String getConfigurationCategory() {
-//		return "Augmented-" + super.getConfigurationCategory();
-		return super.getConfigurationCategory();
+		return "Augmented-" + super.getConfigurationCategory();
+//		return super.getConfigurationCategory();
 	}
 	
 	@Override
