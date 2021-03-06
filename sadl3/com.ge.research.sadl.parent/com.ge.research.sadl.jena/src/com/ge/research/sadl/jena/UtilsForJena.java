@@ -32,21 +32,35 @@ import org.eclipse.core.runtime.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.ResourceManager;
 import org.apache.jena.ontology.CardinalityRestriction;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.IntersectionClass;
 import org.apache.jena.ontology.MaxCardinalityRestriction;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntDocumentManager;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.Restriction;
+import org.apache.jena.ontology.UnionClass;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.OWL2;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 
 public class UtilsForJena {
 	protected static final Logger logger = LoggerFactory.getLogger(UtilsForJena.class);
@@ -145,267 +159,6 @@ public class UtilsForJena {
 		return false;
 	}
 	
-//	public String addMappingToPolicyFile(String content, String publicUri, String altUrl, String globalAlias, String source) throws JenaProcessorException {
-//		// read content into a Model
-//        Model m = ModelFactory.createDefaultModel();
-//        m.read(new ByteArrayInputStream(content.getBytes()), null);
-//        
-//        // add/update the model with the specified mapping
-//        initializePolicyConcepts(m);
-//		Resource pubv = m.createResource(publicUri);
-//		Resource altv = m.createResource(altUrl);
-//		Literal pref = null;
-//		if (globalAlias != null) {
-//			pref = m.createTypedLiteral(globalAlias);
-//		}
-//		addMapping(m, altv, pubv, pref, false, source);
-//        
-//        // prepare the new content and return it
-//		String pfBase = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager";
-//		String format = ConfigurationManager.RDF_XML_ABBREV_FORMAT;
-//		RDFWriter w = m.getWriter(format);
-//		w.setProperty("xmlbase", pfBase);
-//		ByteArrayOutputStream out = new ByteArrayOutputStream();
-//		w.write(m, out, pfBase);
-//		Charset charset = Charset.forName("UTF-8"); 
-//		CharSequence seq = new String(out.toByteArray(), charset);
-//		return seq.toString();
-//	}
-
-//	public String getMinimalPolicyFileContent() throws IOException, URISyntaxException {
-//        File source = ResourceManager.getAbsoluteBundlePath("Models", ONT_POLICY_FILENAME);
-//        return new SadlUtils().fileToString(source);
-//		StringBuilder sb = new StringBuilder();
-//		sb.append("<rdf:RDF\n");
-//		sb.append("xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n");
-//		sb.append("xmlns=\"http://jena.hpl.hp.com/schemas/2003/03/ont-manager#\"\n");
-//		sb.append("xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\">\n");
-//		sb.append("<OntologySpec>\n");
-//		sb.append("<language rdf:resource=\"http://www.w3.org/2002/07/owl\"/>\n");
-//		sb.append("<publicURI rdf:resource=\"http://www.w3.org/2002/07/owl\"/>\n");
-//		sb.append("<prefix rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\"\n");
-//		sb.append(">owl</prefix>\n");
-//		sb.append("</OntologySpec>\n");
-//		sb.append("<DocumentManagerPolicy>\n");
-//		sb.append("  <cacheModels rdf:datatype=\"http://www.w3.org/2001/XMLSchema#boolean\"\n");
-//		sb.append("  >true</cacheModels>\n");
-//		sb.append("  <processImports rdf:datatype=\"http://www.w3.org/2001/XMLSchema#boolean\"\n");
-//		sb.append("  >true</processImports>\n");
-//		sb.append("</DocumentManagerPolicy>\n");
-//		sb.append("<OntologySpec>\n");
-//		sb.append("  <altURL rdf:resource=\"http://protege.stanford.edu/plugins/owl/dc/protege-dc.owl\"/>\n");
-//		sb.append("  <publicURI rdf:resource=\"http://purl.org/dc/elements/1.1/\"/>\n");
-//		sb.append("  <language rdf:resource=\"http://www.w3.org/2002/07/owl\"/>\n");
-//		sb.append("  <prefix rdf:datatype=\"http://www.w3.org/2001/XMLSchema#string\"\n");
-//		sb.append("  >dc</prefix>\n");
-//		sb.append("</OntologySpec>\n");
-//		sb.append("</rdf:RDF>\n");
-//		return sb.toString();
-//	}
-
-//	private boolean initializePolicyConcepts(Model m) {
-//    	if (sadlNode == null) {
-//    		sadlNode = m.createTypedLiteral(SADL);
-//    		createdBy = m.createProperty(ONT_MANAGER_CREATED_BY);
-//    		altUrlProp = m.createProperty(ONT_MANAGER_ALT_URL);
-//    		publicUrlProp = m.createProperty(ONT_MANAGER_PUBLIC_URI);
-//    		prefixProp = m.createProperty(ONT_MANAGER_PREFIX);
-//    		return true;
-//    	}
-//    	return false;
-//	}
-
-//	public synchronized boolean addMapping(Model m, Resource altv, Resource pubv, Literal prefix, boolean bKeepPrefix, String source) {
-//		boolean bChanged = false;
-//		boolean mappingFound = false;
-//		List<Statement> pendingDeletions = null;
-//		// Get all the statements that have this public URI
-//		StmtIterator pubitr = m.listStatements(null,
-//				publicUrlProp, pubv);
-//		if (pubitr.hasNext()) {
-//			mappingFound = true;
-//			int cntr = 0;
-//			while (pubitr.hasNext()) {
-//				Statement s = pubitr.nextStatement();
-//				if (cntr > 0) {
-//					// there are multiple entries for this public URI
-//					if (pendingDeletions == null) {
-//						pendingDeletions = new ArrayList<Statement>();
-//					}
-//					pendingDeletions.add(s);
-//				} else {
-//					Resource subj = s.getSubject();
-//					// find the corresponding altURL
-//					Statement s2 = subj.getProperty(altUrlProp);
-//					if (s2 != null) {
-//						// Is the old and the new actual URL the same? If not
-//						// then change the statement for the actual URL
-//						if (!s2.getObject().equals(altv)) {
-//							if (pendingDeletions == null) {
-//								pendingDeletions = new ArrayList<Statement>();
-//							}
-//							pendingDeletions.add(s2);
-//							subj.addProperty(altUrlProp, altv);
-//							bChanged = true;
-//						}
-//					} else {
-//						subj.addProperty(altUrlProp, altv);
-//						bChanged = true;
-//					}
-//					Statement s3 = subj.getProperty(prefixProp);
-//					if (s3 != null) {
-//						// there is already a prefix in the model
-//						if (prefix != null) {
-//							// we have another which is not null
-//							if (!s3.getObject().equals(prefix)) {
-//								if (!bKeepPrefix) {
-//									// only make the change if not keeping old prefix (when the new prefix is null)
-//									if (pendingDeletions == null) {
-//										pendingDeletions = new ArrayList<Statement>();
-//									}
-//									pendingDeletions.add(s3);
-//								}
-//								if (prefix != null) {
-//									subj.addProperty(prefixProp, prefix);
-//								}
-//								bChanged = true;
-//							}
-//						}
-//					} else if (prefix != null) {
-//						subj.addProperty(prefixProp, prefix);
-//						bChanged = true;
-//					}
-//				}
-//				cntr++;
-//			}
-//		}
-//		StmtIterator altitr = m.listStatements(null,
-//				altUrlProp, altv);
-//		if (altitr.hasNext()) {
-//			mappingFound = true;
-//			int cntr = 0;
-//			while (altitr.hasNext()) {
-//				Statement s = altitr.nextStatement();
-//				if (cntr > 0) {
-//					// there are mulitiple statements for this alt URL
-//					if (pendingDeletions == null) {
-//						pendingDeletions = new ArrayList<Statement>();
-//					}
-//					pendingDeletions.add(s);
-//				} else {
-//					if (!bChanged) {
-//						// if bChanged is true then we must have already fixed
-//						// the one mapping in the section above--no need to do
-//						// it again
-//						Resource subj = s.getSubject();
-//						// find the corresponding publicUri
-//						Statement s2 = subj.getProperty(publicUrlProp);
-//						if (s2 != null) {
-//							// is the old and the new public URI the same? If
-//							// not then change the statement for the new public
-//							// URI
-//							if (!s2.getObject().equals(pubv)) {
-//								if (pendingDeletions == null) {
-//									pendingDeletions = new ArrayList<Statement>();
-//								}
-//								pendingDeletions.add(s2);
-//								subj.addProperty(publicUrlProp, pubv);
-//								bChanged = true;
-//							}
-//						}
-//						subj.addProperty(publicUrlProp, pubv);
-//						bChanged = true;
-//
-//						Statement s3 = subj.getProperty(prefixProp);
-//						if (s3 != null) {
-//							// there is already a prefix in the model
-//							if (prefix != null) {
-//								// we have another which is not null
-//								if (!s3.getObject().equals(prefix)) {
-//									if (!bKeepPrefix) {
-//										// only make the change if not keeping old prefix (when the new prefix is null)
-//										if (pendingDeletions == null) {
-//											pendingDeletions = new ArrayList<Statement>();
-//										}
-//										pendingDeletions.add(s3);
-//									}
-//									if (prefix != null) {
-//										subj.addProperty(prefixProp, prefix);
-//									}
-//									bChanged = true;
-//								}
-//							}
-//						} else if (prefix != null) {
-//							subj.addProperty(prefixProp, prefix);
-//							bChanged = true;
-//						}
-//					}
-//				}
-//				cntr++;
-//			}
-//		}
-//
-//		// remove extra and obsolete entries
-//		if (pendingDeletions != null && pendingDeletions.size() > 0) {
-//			for (int i = 0; i < pendingDeletions.size(); i++) {
-//				Statement s = pendingDeletions.get(i);
-//				m.remove(s);
-//				bChanged = true;
-//			}
-//		}
-//
-//		if (!mappingFound) {
-//			org.apache.jena.rdf.model.Resource type = m
-//					.createResource(ONT_MANAGER_ONTOLOGY_SPEC);
-//			org.apache.jena.rdf.model.Resource newOntSpec = m
-//					.createResource(type);
-//			Property langp = m
-//					.getProperty(ONT_MANAGER_LANGUAGE);
-//			RDFNode langv = m.createResource(
-//					OWL_ONT_MANAGER_PUBLIC_URINS);
-//			m.add(newOntSpec, publicUrlProp, pubv);
-//			m.add(newOntSpec, altUrlProp, altv);
-//			m.add(newOntSpec, langp, langv);
-//			if (source != null && !source.equalsIgnoreCase(SADL)) {
-//				m.add(newOntSpec, createdBy, m.createTypedLiteral(source));
-//			} else {
-//				m.add(newOntSpec, createdBy, SADL);
-//			}
-//			if (prefix != null) {
-//				m.add(newOntSpec, prefixProp, prefix);
-//			}
-//			logger.debug("Created new mapping for '" + pubv.toString() + "', '"
-//					+ altv.toString() + "'");
-//			bChanged = true;
-//		}
-//		try {
-//			// add mapping to Jena OntDocumentManager
-//			if (addJenaMapping(pubv.getURI().toString(), altv.getURI()
-//					.toString())) {
-//				bChanged = true;
-//			}
-//		} catch (URISyntaxException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (ConfigurationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		if (bChanged) {
-//			setMappingChanged(true);
-//			logger.debug("Modified mapping for '" + pubv.toString() + "', '"
-//					+ altv.toString() + "'");
-//		}
-//		if (this.mappings == null) {
-//			mappings = new HashMap<String, String>();
-//		}
-//		mappings.put(rdfNodeToString(pubv), rdfNodeToString(altv));
-//		return bChanged;
-//	}
-	
 	public static String getPolicyFilePathForProject(String projectPath) throws ConfigurationException {
 		if (projectPath.startsWith("file:/")) {
 			projectPath = projectPath.substring(6);
@@ -423,143 +176,6 @@ public class UtilsForJena {
      	return projectPath + "/" + OWL_MODELS_FOLDER_NAME + "/" + ONT_POLICY_FILENAME;
 	}
 
-//	public OntDocumentManager loadMappings(File pf) throws IOException {
-//		if (!pf.exists()) {
-//			// reconstruct the policy file, including externals
-//		}
-//		else if (!pf.isFile()) {
-//			throw new IOException("'" + pf.getCanonicalPath() + "' is not a valid policy file identifier");
-//		}
-//		// load mapping info from file
-//		Model mappingModel = ModelFactory.createDefaultModel();
-//	    InputStream in = FileManager.get().open(pf.getCanonicalPath());
-//	    if (in == null) {
-//	    	throw new IllegalArgumentException("File: " + pf.getCanonicalPath() + " not found");
-//	    }
-//		try {
-//			mappingModel.read(in, "");
-//		}
-//		catch (Throwable t) {
-//			t.printStackTrace();
-//			logger.error("Failed to read mapping file '" + pf.getCanonicalPath() + "': " + t.getLocalizedMessage());
-//		}
-//		
-//		boolean needFileLocator = false;
-//        RDFNode pubv;
-//        RDFNode altv;
-////        createdBySadlLiteral = mappingModel.createLiteral("SADL");
-//        String fileName = new String();
-//        String actualFilePath = new String();
-//        initializePolicyConcepts(mappingModel);
-//        StmtIterator sitr = mappingModel.listStatements(null, altUrlProp, (RDFNode)null);
-//        
-//        while (sitr.hasNext()) {
-//        	fileName = null;
-//        	actualFilePath = null;
-//            Statement s = sitr.nextStatement();
-//            org.apache.jena.rdf.model.Resource subj = s.getSubject();	
-//            Statement salt = subj.getProperty(altUrlProp);
-//            Statement spub = subj.getProperty(publicUrlProp);
-//            Statement sprefix = subj.getProperty(prefixProp);
-//            if (salt != null && spub != null) {
-//	            altv = salt.getObject();
-//            	String strAltv = rdfNodeToString(altv);
-//	            pubv = spub.getObject();
-//	            Statement isSadlStmt = subj.getProperty(createdBy);
-//	            if (isSadlStmt != null && isSadlStmt.getObject().asLiteral().getLexicalForm().equals(sadlNode.asLiteral().getLexicalForm())) {         
-//	            	// this mapping was created by SADL
-//		            StringTokenizer st1 = new StringTokenizer(strAltv, "/");
-//		 			while(st1.hasMoreTokens()) {
-//		            	fileName = st1.nextToken();
-//		 			}
-//	            	actualFilePath = getActualUrl(pf.getParent(), fileName);
-//	            }
-//	            else {
-//	            	// this handles mappings that are not created by SADL
-//	            	//  1) if the mapping is of type "file:" and the file exists assume it is correct
-//	            	//	2) else if their is a file of that name in the same folder as the policy file assume that file is the correct one
-//	            	//	3) else if there is a sibling folder to the folder of the policy file that contains a file of that name assume it is the correct one
-//	            	if (strAltv.startsWith(FILE_SHORT_PREFIX)) {
-//			            StringTokenizer st1 = new StringTokenizer(strAltv, "/");
-//			            String lastToken = null;
-//			 			while(st1.hasMoreTokens()) {
-//			 				lastToken = fileName;
-//			            	fileName = st1.nextToken();
-//			 			}
-//			 			String testName = strAltv;
-//		 				try {
-//				 			File testFile = new File(fileUrlToFileName(testName));
-//				 			if (testFile.exists()) {
-//				 				// the actualUrl exists as is so use it
-//				 				actualFilePath = testName;
-//				 			}
-//				 			else {
-//				 				testName =  getActualUrl(pf.getParent(), fileName);
-//								testFile = new File(fileUrlToFileName(testName));
-//				 				if (testFile.exists()) {
-//				 					// the actualUrl adjusted to have the relative location of the models folder exists so use it
-//				 					actualFilePath = testName;
-//				 				}
-//				 				else {
-//				 					String siblingName = siblingFolderUrl(pf.getParent(), fileName, lastToken);
-//				 					boolean siblingFound = false;
-//				 					if (siblingName != null) {
-//				 						File sibling = new File(fileUrlToFileName(siblingName));
-//				 						if (sibling.exists()) {
-//				 							// the named file exists in a sibling directory; use it
-//				 							siblingFound = true;
-//				 							actualFilePath = siblingName;
-//				 						}
-//				 					}
-//				 					if (!siblingFound) {
-//				 						if (pf.getParent() != null) {
-//								 			String folderPath = fileNameToFileUrl(pf.getParent());
-//						 					testName = folderPath.substring(0, folderPath.length() - (1 + lastToken.length())) + "/" + fileName;
-//						 					testFile = new File(fileUrlToFileName(testName));
-//						 					if (testFile.exists()) {
-//						 						// folder above??
-//						 						actualFilePath = testName;
-//						 					}
-//						 					else {
-//						 						logger.warn("Mapping file has actual URL '" + testName + "' but it does not appear to exist and could not be found in adjacent folders.");
-//						 					}
-//				 						}
-//				 						else {
-//				 							actualFilePath = testName;
-//				 							if (!actualFilePath.startsWith("http:")) {
-//				 								logger.warn("Mapping file '" + strAltv + "'; using '" + actualFilePath + "'");
-//				 							}
-//				 						}
-//				 					}
-//				 				}
-//				 			}
-//		 				}
-//						catch (MalformedURLException e) {
-//							// oh well, we tried
-//						}
-//	            	}
-//	            }
-//	            if (actualFilePath == null) {
-//	            	actualFilePath = strAltv;
-//	            }
-//	            String publicUri = rdfNodeToString(pubv);
-//	            logger.debug("Found mapping from public URI '" + publicUri + "' to alternative URL '" + actualFilePath + "'");
-//	            if (!actualFilePath.equals(publicUri)) {
-//	            	getJenaDocumentMgr(mappingModel).addAltEntry(publicUri, actualFilePath);
-//					if (actualFilePath != null && actualFilePath.startsWith(FILE_SHORT_PREFIX)) {
-//						needFileLocator = true;
-//					}
-//	            }
-//           }
-//            
-//         } // end while
-//		
-//		if (needFileLocator) {
-//			setupJenaFileManager(pf.getParent(), mappingModel);
-//		}
-//		return getJenaDocumentMgr(mappingModel);
-//	}
-
     protected String rdfNodeToString(RDFNode node) {
     	if (node != null) {
 			if (node instanceof Literal) {
@@ -570,11 +186,6 @@ public class UtilsForJena {
     	return null;
 	}
 
-//	private String getActualUrl(String modelFolder, String fileName) {
-//		String rawPath = modelFolder + "/" + fileName;
-//		return fileNameToFileUrl(rawPath);
-//	}
-//
 	/**
      * This method converts an OS filename (e.g., "C:\\folder\file.ext")
      * to a file URL
@@ -765,6 +376,273 @@ public class UtilsForJena {
 			}
 		}
 		return found;
+	}
+	
+	/*
+	 * Methods to handle SADL typed lists
+	 */
+
+	/**
+	 * Method to get the list type of a typed list
+	 * @param theJenaModel
+	 * @param configMgr
+	 * @param modelNamespace
+	 * @param node
+	 * @return
+	 * @throws TranslationException
+	 */
+	public static NamedNode getTypedListType(OntModel theJenaModel, IConfigurationManager configMgr, 
+			String modelNamespace, RDFNode node) throws TranslationException {
+		if (node.isResource()) {
+			StmtIterator sitr = theJenaModel.listStatements(node.asResource(), RDFS.subClassOf, (RDFNode) null);
+			NodeType tctypetype = null;
+			RDFNode type = null;
+			int lMaxLengthRestriction = -1;
+			int lMinLengthRestriction = -1;
+			int lLengthRestriction = -1;
+			while (sitr.hasNext()) {
+				RDFNode supercls = sitr.nextStatement().getObject();
+				if (supercls.isResource()) {
+					if (supercls.asResource().hasProperty(OWL.onProperty,
+							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
+						Statement avfstmt = supercls.asResource().getProperty(OWL.allValuesFrom);
+						if (avfstmt != null) {
+							type = avfstmt.getObject();
+							if (type.isURIResource()) {
+								tctypetype = NodeType.ClassListNode;
+								if (type.asResource().getNameSpace().equals(XSD.getURI())) {
+									tctypetype = NodeType.DataTypeListNode;
+								}
+								else {
+									StmtIterator eqitr = type.asResource().listProperties(OWL.equivalentClass);
+									if (eqitr.hasNext()) {
+										RDFNode eqCls = eqitr.nextStatement().getObject();
+										if (eqCls.equals(RDFS.Datatype)) {
+											tctypetype = NodeType.DataTypeListNode;
+										}
+									}
+								}
+							}
+						}
+					}
+					if(supercls.asResource().hasProperty(OWL.onProperty,
+							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI))) {
+						Statement lHasValueStmt = supercls.asResource().getProperty(OWL.hasValue);
+						if(lHasValueStmt != null) {
+							lMaxLengthRestriction = lHasValueStmt.getObject().asLiteral().getInt();
+							
+						}
+					}
+					if(supercls.asResource().hasProperty(OWL.onProperty,
+							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI))) {
+						Statement lHasValueStmt = supercls.asResource().getProperty(OWL.hasValue);
+						if(lHasValueStmt != null) {
+							lMinLengthRestriction = lHasValueStmt.getObject().asLiteral().getInt();
+							
+						}
+					}
+					if(supercls.asResource().hasProperty(OWL.onProperty,
+							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI))) {
+						Statement lHasValueStmt = supercls.asResource().getProperty(OWL.hasValue);
+						if(lHasValueStmt != null) {
+							lLengthRestriction = lHasValueStmt.getObject().asLiteral().getInt();
+							
+						}
+					}
+				}
+			}
+			if(tctypetype != null) {
+				NamedNode tctype = validateNamedNode(configMgr, modelNamespace, new NamedNode(type.asResource().getURI(),
+						tctypetype));
+				tctype.setMaxListLength(lMaxLengthRestriction);
+				tctype.setMinListLength(lMinLengthRestriction);
+				tctype.setListLength(lLengthRestriction);
+				return tctype;
+			}
+			
+			// maybe it's an instance
+			if (node.asResource().canAs(Individual.class)) {
+				ExtendedIterator<org.apache.jena.rdf.model.Resource> itr = node.asResource().as(Individual.class)
+						.listRDFTypes(true);
+				while (itr.hasNext()) {
+					org.apache.jena.rdf.model.Resource r = itr.next();
+					sitr = theJenaModel.listStatements(r, RDFS.subClassOf, (RDFNode) null);
+					while (sitr.hasNext()) {
+						RDFNode supercls = sitr.nextStatement().getObject();
+						if (supercls.isResource()) {
+							if (supercls.asResource().hasProperty(OWL.onProperty,
+									theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
+								Statement avfstmt = supercls.asResource().getProperty(OWL.allValuesFrom);
+								if (avfstmt != null) {
+									type = avfstmt.getObject();
+									if (type.isURIResource()) {
+										NamedNode tctype = validateNamedNode(configMgr, modelNamespace, new NamedNode(type.asResource().getURI(),
+												NodeType.ClassNode));
+										sitr.close();
+										return tctype;
+									}
+								}
+							}
+							
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Method to validate a NamedNode by making sure it has a namespace and prefix
+	 * @param configMgr
+	 * @param modelNamespace
+	 * @param namedNode
+	 * @return
+	 */
+	public static NamedNode validateNamedNode(IConfigurationManager configMgr, 
+			String modelNamespace, NamedNode namedNode) {
+		if (namedNode.getPrefix() == null) {
+			if (namedNode.getNamespace() == null) {
+				namedNode.setNamespace(modelNamespace);
+			}
+			if (configMgr != null) {
+				namedNode.setPrefix(configMgr.getGlobalPrefix(namedNode.getNamespace()));
+			}
+		}
+		return namedNode;
+	}
+
+	/**
+	 * Method to determine if an RDFNode is a subclass of the SADL typed list
+	 * @param theJenaModel
+	 * @param node
+	 * @return
+	 */
+	public static boolean isTypedListSubclass(OntModel theJenaModel, RDFNode node) {
+		if (node != null && node.isResource()) {
+			org.apache.jena.rdf.model.Resource lstcls = theJenaModel
+					.getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
+			if (lstcls != null && node.asResource().hasProperty(RDFS.subClassOf, lstcls)) { // if model has no lists,
+																							// the list model will not
+																							// have been imported
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Method to convert an RDFNode to a SADL string
+	 * @param theJenaModel
+	 * @param configMgr
+	 * @param modelNamespace
+	 * @param obj
+	 * @return
+	 */
+	public static String nodeToString(OntModel theJenaModel, IConfigurationManager configMgr, 
+			String modelNamespace, RDFNode obj) {
+		StringBuilder sb = new StringBuilder();
+		if (obj.isURIResource()) {
+			sb.append(uriStringToString(configMgr, modelNamespace, obj.toString()));
+		} else if (obj.canAs(UnionClass.class)) {
+			UnionClass ucls = obj.as(UnionClass.class);
+			ExtendedIterator<RDFNode> uitr = ucls.getOperands().iterator();
+			sb.append("(");
+			while (uitr.hasNext()) {
+				if (sb.length() > 1) {
+					sb.append(" or ");
+				}
+				sb.append(nodeToString(theJenaModel, configMgr, modelNamespace, uitr.next()));
+			}
+			sb.append(")");
+		} else if (obj.canAs(IntersectionClass.class)) {
+			IntersectionClass icls = obj.as(IntersectionClass.class);
+			ExtendedIterator<RDFNode> iitr = icls.getOperands().iterator();
+			sb.append("(");
+			while (iitr.hasNext()) {
+				if (sb.length() > 1) {
+					sb.append(" and ");
+				}
+				sb.append(nodeToString(theJenaModel, configMgr, modelNamespace, iitr.next()));
+			}
+			sb.append(")");
+		} else if (obj.isResource() && isTypedListSubclass(theJenaModel, obj)) {
+			NamedNode cn;
+			try {
+				cn = getTypedListType(theJenaModel, configMgr, modelNamespace, obj);
+				sb.append(cn.getName() + " List");
+				String lLengthInfo = getListLengthAsString(cn);
+				if(!lLengthInfo.isEmpty()) {
+					sb.append(" " + lLengthInfo);
+				}
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				sb.append("<null>");
+			}
+		} else {
+			sb.append("<blank node>");
+		}
+		return sb.toString();
+	}
+
+	/*
+	 * Method to convert a URI string into a SADL string
+	 */
+	public static String uriStringToString(IConfigurationManager configMgr, String modelName, String uri) {
+		int sep = uri.lastIndexOf('#');
+		if (sep > 0) {
+			String ns = uri.substring(0, sep);
+			String ln = uri.substring(sep + 1);
+			// if the concept is in the current model just return the localname
+			if (ns.equals(modelName)) {
+				return ln;
+			}
+			// get the prefix and if there is one generate qname
+			String prefix = configMgr.getGlobalPrefix(ns);
+			if (prefix == null) {
+				if (ns.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
+					prefix = SadlConstants.SADL_IMPLICIT_MODEL_PREFIX;
+				}
+			}
+			if (prefix != null && prefix.length() > 0) {
+				return prefix + ":" + ln;
+			}
+			return ln;
+		}
+		return uri;
+	}
+
+	/**
+	 * Method to convert a NamedNode with list properties into a SADL string
+	 * @param node
+	 * @return
+	 */
+	public static String getListLengthAsString(NamedNode node) {
+		StringBuilder sb = new StringBuilder();	
+		int length = node.getListLength();
+		int minLength = node.getMinListLength();
+		int maxLength = node.getMaxListLength();
+		if(length != -1 || minLength != -1 || maxLength != -1) {		
+			sb.append("length ");
+			if(minLength != -1 || maxLength != -1) {
+				if(minLength == -1) {
+					sb.append("0");
+				}else {
+					sb.append(minLength);
+				}
+				sb.append("-");
+				if(maxLength == -1) {
+					sb.append("*");
+				}else {
+					sb.append(maxLength);
+				}
+			}else {
+				sb.append(length);
+			}
+			sb.append(" ");
+		}
+		return sb.toString();
 	}
 
 }

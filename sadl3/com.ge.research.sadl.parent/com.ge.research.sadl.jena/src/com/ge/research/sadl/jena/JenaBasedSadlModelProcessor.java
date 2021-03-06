@@ -5600,13 +5600,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	@Override
 	public NamedNode validateNamedNode(NamedNode namedNode) {
-		if (namedNode.getPrefix() == null) {
-			if (namedNode.getNamespace() == null) {
-				namedNode.setNamespace(getModelNamespace());
-			}
-			namedNode.setPrefix(getConfigMgr().getGlobalPrefix(namedNode.getNamespace()));
-		}
-		return namedNode;
+		return UtilsForJena.validateNamedNode(getConfigMgr(), getModelNamespace(), namedNode);
 	}
 
 	private boolean isNamedNodeSubclassOfNamedNode(NamedNode cls, NamedNode subcls) {
@@ -5625,22 +5619,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	// private VariableNode setListTypeInfo(VariableNode var, NamedNode type,
-	// Expression variableDefn) throws TranslationException {
-	// var.setType(type);
-	// int[] lenRest = getLengthRestrictions(variableDefn);
-	// if (lenRest != null) {
-	// if (lenRest.length == 1) {
-	// var.setListLength(lenRest[0]);
-	// }
-	// else if (lenRest.length == 2) {
-	// var.setMinListLength(lenRest[0]);
-	// var.setMaxListLength(lenRest[1]);
-	// }
-	// }
-	// return var;
-	// }
-	//
 	protected boolean isVariableDefinition(Name expr) throws CircularDefinitionException {
 		if (expr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name) expr).getName())
 				.equals(OntConceptType.VARIABLE)) {
@@ -10727,7 +10705,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (prop.isDatatypeProperty()) {
 				String existingRange = stmtIteratorToObjectString(
 						getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode) null));
-				addError(SadlErrorMessages.CANNOT_ASSIGN_EXISTING.get("range", nodeToString(prop), existingRange),
+				addError(SadlErrorMessages.CANNOT_ASSIGN_EXISTING.get("range", 
+						UtilsForJena.nodeToString(theJenaModel, getConfigMgr(), getModelNamespace(), prop), existingRange),
 						context);
 				return;
 			}
@@ -10745,7 +10724,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								existingRngNode.as(OntClass.class), context)) {
 					StringBuilder sb = new StringBuilder(
 							"This range is a subclass of the range which is already defined");
-					String existingRange = nodeToString(existingRngNode);
+					String existingRange = UtilsForJena.nodeToString(theJenaModel, getConfigMgr(), getModelNamespace(), existingRngNode);
 					if (existingRange != null) {
 						sb.append(" (");
 						sb.append(existingRange);
@@ -10822,7 +10801,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				inModelStmtItr.close();
 			}
 			if (rangeExists && !rangeInThisModel) {
-				addWarning(SadlErrorMessages.IMPORTED_RANGE_CHANGE.get(nodeToString(prop)), context);
+				addWarning(SadlErrorMessages.IMPORTED_RANGE_CHANGE.get(
+						UtilsForJena.nodeToString(theJenaModel, getConfigMgr(), getModelNamespace(), prop)), context);
 			}
 		} // end if existing range in any model, this or imports
 		if (rngNode != null) {
@@ -10864,81 +10844,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (sb.length() > 0) {
 				sb.append(", ");
 			}
-			sb.append(nodeToString(obj));
+			sb.append(UtilsForJena.nodeToString(theJenaModel, getConfigMgr(), getModelNamespace(), obj));
 		}
 		return sb.toString();
-	}
-
-	private String nodeToString(RDFNode obj) {
-		StringBuilder sb = new StringBuilder();
-		if (obj.isURIResource()) {
-			sb.append(uriStringToString(obj.toString()));
-		} else if (obj.canAs(UnionClass.class)) {
-			UnionClass ucls = obj.as(UnionClass.class);
-			ExtendedIterator<RDFNode> uitr = ucls.getOperands().iterator();
-			sb.append("(");
-			while (uitr.hasNext()) {
-				if (sb.length() > 1) {
-					sb.append(" or ");
-				}
-				sb.append(nodeToString(uitr.next()));
-			}
-			sb.append(")");
-		} else if (obj.canAs(IntersectionClass.class)) {
-			IntersectionClass icls = obj.as(IntersectionClass.class);
-			ExtendedIterator<RDFNode> iitr = icls.getOperands().iterator();
-			sb.append("(");
-			while (iitr.hasNext()) {
-				if (sb.length() > 1) {
-					sb.append(" and ");
-				}
-				sb.append(nodeToString(iitr.next()));
-			}
-			sb.append(")");
-		} else if (obj.isResource() && getTheJenaModel().getOntClass(SadlConstants.SADL_LIST_MODEL_LIST_URI) != null
-				&& getTheJenaModel().contains(obj.asResource(), RDFS.subClassOf,
-						getTheJenaModel().getOntClass(SadlConstants.SADL_LIST_MODEL_LIST_URI))) {
-			NamedNode cn;
-			try {
-				cn = getTypedListType(obj);
-				sb.append(cn.getName() + " List");
-				String lLengthInfo = getModelValidator().getListLengthAsString(cn);
-				if(!lLengthInfo.isEmpty()) {
-					sb.append(" " + lLengthInfo);
-				}
-			} catch (TranslationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				sb.append("<null>");
-			}
-		} else {
-			sb.append("<blank node>");
-		}
-		return sb.toString();
-	}
-
-	public String uriStringToString(String uri) {
-		int sep = uri.lastIndexOf('#');
-		if (sep > 0) {
-			String ns = uri.substring(0, sep);
-			String ln = uri.substring(sep + 1);
-			// if the concept is in the current model just return the localname
-			if (ns.equals(getModelName())) {
-				return ln;
-			}
-			// get the prefix and if there is one generate qname
-			String prefix = getConfigMgr().getGlobalPrefix(ns);
-			if (prefix == null) {
-				if (ns.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
-					prefix = SadlConstants.SADL_IMPLICIT_MODEL_PREFIX;
-				}
-			}
-			if (prefix != null && prefix.length() > 0) {
-				return prefix + ":" + ln;
-			}
-			return ln;
-		}
-		return uri;
 	}
 
 	private boolean checkForSubclassing(OntClass rangeCls, OntResource existingRange, EObject context)
@@ -11452,103 +11360,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	@Override
 	public NamedNode getTypedListType(RDFNode node) throws TranslationException {
-		if (node.isResource()) {
-			StmtIterator sitr = theJenaModel.listStatements(node.asResource(), RDFS.subClassOf, (RDFNode) null);
-			OntConceptType tctypetype = null;
-			RDFNode type = null;
-			int lMaxLengthRestriction = -1;
-			int lMinLengthRestriction = -1;
-			int lLengthRestriction = -1;
-			while (sitr.hasNext()) {
-				RDFNode supercls = sitr.nextStatement().getObject();
-				if (supercls.isResource()) {
-					if (supercls.asResource().hasProperty(OWL.onProperty,
-							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
-						Statement avfstmt = supercls.asResource().getProperty(OWL.allValuesFrom);
-						if (avfstmt != null) {
-							type = avfstmt.getObject();
-							if (type.isURIResource()) {
-								tctypetype = OntConceptType.CLASS_LIST;
-								if (type.asResource().getNameSpace().equals(XSD.getURI())) {
-									tctypetype = OntConceptType.DATATYPE_LIST;
-								}
-								else {
-									StmtIterator eqitr = type.asResource().listProperties(OWL.equivalentClass);
-									if (eqitr.hasNext()) {
-										RDFNode eqCls = eqitr.nextStatement().getObject();
-										if (eqCls.equals(RDFS.Datatype)) {
-											tctypetype = OntConceptType.DATATYPE_LIST;
-										}
-									}
-								}
-							}
-						}
-					}
-					if(supercls.asResource().hasProperty(OWL.onProperty,
-							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_MAXLENGTH_RESTRICTION_URI))) {
-						Statement lHasValueStmt = supercls.asResource().getProperty(OWL.hasValue);
-						if(lHasValueStmt != null) {
-							lMaxLengthRestriction = lHasValueStmt.getObject().asLiteral().getInt();
-							
-						}
-					}
-					if(supercls.asResource().hasProperty(OWL.onProperty,
-							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_MINLENGTH_RESTRICTION_URI))) {
-						Statement lHasValueStmt = supercls.asResource().getProperty(OWL.hasValue);
-						if(lHasValueStmt != null) {
-							lMinLengthRestriction = lHasValueStmt.getObject().asLiteral().getInt();
-							
-						}
-					}
-					if(supercls.asResource().hasProperty(OWL.onProperty,
-							theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_LENGTH_RESTRICTION_URI))) {
-						Statement lHasValueStmt = supercls.asResource().getProperty(OWL.hasValue);
-						if(lHasValueStmt != null) {
-							lLengthRestriction = lHasValueStmt.getObject().asLiteral().getInt();
-							
-						}
-					}
-				}
-			}
-			if(tctypetype != null) {
-				NamedNode tctype = validateNamedNode(new NamedNode(type.asResource().getURI(),
-						ontConceptTypeToNodeType(tctypetype)));
-				tctype.setMaxListLength(lMaxLengthRestriction);
-				tctype.setMinListLength(lMinLengthRestriction);
-				tctype.setListLength(lLengthRestriction);
-				return tctype;
-			}
-			
-			// maybe it's an instance
-			if (node.asResource().canAs(Individual.class)) {
-				ExtendedIterator<org.apache.jena.rdf.model.Resource> itr = node.asResource().as(Individual.class)
-						.listRDFTypes(true);
-				while (itr.hasNext()) {
-					org.apache.jena.rdf.model.Resource r = itr.next();
-					sitr = theJenaModel.listStatements(r, RDFS.subClassOf, (RDFNode) null);
-					while (sitr.hasNext()) {
-						RDFNode supercls = sitr.nextStatement().getObject();
-						if (supercls.isResource()) {
-							if (supercls.asResource().hasProperty(OWL.onProperty,
-									theJenaModel.getResource(SadlConstants.SADL_LIST_MODEL_FIRST_URI))) {
-								Statement avfstmt = supercls.asResource().getProperty(OWL.allValuesFrom);
-								if (avfstmt != null) {
-									type = avfstmt.getObject();
-									if (type.isURIResource()) {
-										NamedNode tctype = validateNamedNode(new NamedNode(type.asResource().getURI(),
-												ontConceptTypeToNodeType(OntConceptType.CLASS)));
-										sitr.close();
-										return tctype;
-									}
-								}
-							}
-							
-						}
-					}
-				}
-			}
-		}
-		return null;
+		return UtilsForJena.getTypedListType(theJenaModel, getConfigMgr(), getModelNamespace(), node);
 	}
 
 	public ConceptName createTypedConceptName(String conceptUri, OntConceptType conceptType) throws InvalidTypeException {
@@ -12363,7 +12175,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			
-			addWarning(SadlErrorMessages.RANGE_MAY_BE_INAPPLICABLE.get(nodeToString(aProperty), nodeToString(lRange)), aCondition);
+			addWarning(SadlErrorMessages.RANGE_MAY_BE_INAPPLICABLE.get(
+					UtilsForJena.nodeToString(theJenaModel, getConfigMgr(), getModelNamespace(), aProperty), 
+					UtilsForJena.nodeToString(theJenaModel, getConfigMgr(), getModelNamespace(), lRange)), aCondition);
 		}
 	}
 
@@ -12385,9 +12199,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (cls.canAs(OntClass.class)
 						&& checkForSubclassing(cls.as(OntClass.class), existingDomain.as(OntClass.class), context)) {
 					StringBuilder sb = new StringBuilder("This specified domain of '");
-					sb.append(nodeToString(prop));
+					sb.append(UtilsForJena.nodeToString(theJenaModel, getConfigMgr(), getModelNamespace(), prop));
 					sb.append("' is a subclass of the domain which is already defined");
-					String dmnstr = nodeToString(existingDomain);
+					String dmnstr = UtilsForJena.nodeToString(theJenaModel, getConfigMgr(), getModelNamespace(), existingDomain);
 					if (dmnstr != null) {
 						sb.append(" (");
 						sb.append(dmnstr);
@@ -12458,7 +12272,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				inModelStmtItr.close();
 			}
 			if (domainExists && !domainInThisModel) {
-				addWarning(SadlErrorMessages.IMPORTED_DOMAIN_CHANGE.get(nodeToString(prop)), context);
+				addWarning(SadlErrorMessages.IMPORTED_DOMAIN_CHANGE.get(
+						UtilsForJena.nodeToString(theJenaModel, getConfigMgr(), getModelNamespace(), prop)), context);
 			}
 		} // end if existing domain in any model, this or imports
 		if (cls != null) {
@@ -12472,7 +12287,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else if (addNewDomain) {
 				getTheJenaModel().add(prop, RDFS.domain, cls);
 				logger.debug("Domain '" + cls.toString() + "' added to property '" + prop.getURI() + "'");
-				logger.debug("Domain of '" + prop.toString() + "' is now: " + nodeToString(cls));
+				logger.debug("Domain of '" + prop.toString() + "' is now: " + 
+				UtilsForJena.nodeToString(theJenaModel, getConfigMgr(), getModelNamespace(), cls));
 			}
 		} else {
 			logger.debug("Domain is not defined for property '" + prop.toString() + "'");
@@ -15245,16 +15061,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	@Override
 	public boolean isTypedListSubclass(RDFNode node) {
-		if (node != null && node.isResource()) {
-			org.apache.jena.rdf.model.Resource lstcls = theJenaModel
-					.getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
-			if (lstcls != null && node.asResource().hasProperty(RDFS.subClassOf, lstcls)) { // if model has no lists,
-																							// the list model will not
-																							// have been imported
-				return true;
-			}
-		}
-		return false;
+		return UtilsForJena.isTypedListSubclass(theJenaModel, node);
 	}
 
 	protected boolean isEqualOperator(String op) {

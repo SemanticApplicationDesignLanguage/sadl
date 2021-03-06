@@ -1233,7 +1233,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (typeCheckInfo.getRangeValueType().equals(RangeValueType.LIST) && 
 						(typeCheckInfo.getTypeCheckType() instanceof NamedNode && ((NamedNode)typeCheckInfo.getTypeCheckType()).isList())) {
 					if (sb2 == null) sb2 = new StringBuilder();
-					String lengthOrRange = getListLengthAsString((NamedNode)typeCheckInfo.getTypeCheckType());
+					String lengthOrRange = UtilsForJena.getListLengthAsString((NamedNode)typeCheckInfo.getTypeCheckType());
 					sb2.append("a List " + lengthOrRange + "of values of type ");
 				}
 				if (sb2 != null && typeCheckInfo.getTypeCheckType() != null) {
@@ -1265,66 +1265,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			return result;
 		}
-//		String leftName = leftTypeCheckInfo != null ? leftTypeCheckInfo.expressionType != null ? leftTypeCheckInfo.expressionType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
-//		String rightName = rightTypeCheckInfo != null ? rightTypeCheckInfo.expressionType != null ? rightTypeCheckInfo.expressionType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED";
-//		String leftType;
-//		String leftRange;
-//		if (leftTypeCheckInfo == null) {
-//			leftType = "UNIDENTIFIED";
-//			leftRange = "UNIDENTIFIED";
-//		}
-//		else if (leftTypeCheckInfo.compoundTypes == null) {
-//			leftType = leftTypeCheckInfo.typeCheckType != null ? leftTypeCheckInfo.typeCheckType.toString() : "UNIDENTIFIED";
-//			leftRange = leftTypeCheckInfo.rangeValueType != null ? leftTypeCheckInfo.rangeValueType.toString() : "UNIDENTIFIED";
-//		}
-//		else {
-//			StringBuilder sb = new StringBuilder();
-//			for (int i = 0; i < leftTypeCheckInfo.getCompoundType().size(); i++) {
-//				if (i > 0) {
-//					sb.append(" or ");
-//				}
-//				TypeCheckInfo tic = leftTypeCheckInfo.getCompoundType().get(i);
-//				sb.append(tic != null ? tic.typeCheckType != null ? tic.typeCheckType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED");
-//			}
-//			leftType = sb.toString();
-//			sb = new StringBuilder();
-//			for (int i = 0; i < leftTypeCheckInfo.getCompoundType().size(); i++) {
-//				if (i > 0) {
-//					sb.append(" or ");
-//				}
-//				TypeCheckInfo tic = leftTypeCheckInfo.getCompoundType().get(i);
-//				sb.append(tic != null ? tic.rangeValueType != null ? tic.rangeValueType.toString() : "UNIDENTIFIED" : "UNIDENTIFIED");
-//			}
-//			leftRange = sb.toString();
-//		}
-//		return null;
-	}
-
-	String getListLengthAsString(NamedNode node) {
-		StringBuilder sb = new StringBuilder();	
-		int length = node.getListLength();
-		int minLength = node.getMinListLength();
-		int maxLength = node.getMaxListLength();
-		if(length != -1 || minLength != -1 || maxLength != -1) {		
-			sb.append("length ");
-			if(minLength != -1 || maxLength != -1) {
-				if(minLength == -1) {
-					sb.append("0");
-				}else {
-					sb.append(minLength);
-				}
-				sb.append("-");
-				if(maxLength == -1) {
-					sb.append("*");
-				}else {
-					sb.append(maxLength);
-				}
-			}else {
-				sb.append(length);
-			}
-			sb.append(" ");
-		}
-		return sb.toString();
 	}
 
 	private boolean rdfPropertyTypeCheckInfoHasRange(TypeCheckInfo typeCheckInfo) {

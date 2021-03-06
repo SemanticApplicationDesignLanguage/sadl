@@ -502,6 +502,89 @@ public class OwlToSadlTest {
 		assertEquals(expected.trim(), sadlModelContent.trim());
 	}
 	
+	@Test
+	public void test09() throws OwlImportException {
+		String owlModelContent = 
+				"<rdf:RDF\n" + 
+				"    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" + 
+				"    xmlns:builtinfunctions=\"http://sadl.org/builtinfunctions#\"\n" + 
+				"    xmlns:sadllistmodel=\"http://sadl.org/sadllistmodel#\"\n" + 
+				"    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n" + 
+				"    xmlns:sadlimplicitmodel=\"http://sadl.org/sadlimplicitmodel#\"\n" + 
+				"    xmlns=\"http://sadl.org/list_test.sadl#\"\n" + 
+				"    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n" + 
+				"    xmlns:sadlbasemodel=\"http://sadl.org/sadlbasemodel#\"\n" + 
+				"    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n" + 
+				"  xml:base=\"http://sadl.org/list_test.sadl\">\n" + 
+				"  <owl:Ontology rdf:about=\"\">\n" + 
+				"    <owl:imports rdf:resource=\"sadllistmodel\"/>\n" + 
+				"    <owl:imports rdf:resource=\"builtinfunctions\"/>\n" + 
+				"    <owl:imports rdf:resource=\"sadlimplicitmodel\"/>\n" + 
+				"    <owl:imports rdf:resource=\"sadlbasemodel\"/>\n" + 
+				"    <rdfs:comment xml:lang=\"en\">This ontology was created from a SADL file 'list_test.sadl' and should not be directly edited.</rdfs:comment>\n" + 
+				"  </owl:Ontology>\n" + 
+				"  <owl:Class rdf:nodeID=\"A0\">\n" + 
+				"    <rdfs:subClassOf>\n" + 
+				"      <owl:Restriction>\n" + 
+				"        <owl:allValuesFrom rdf:nodeID=\"A0\"/>\n" + 
+				"        <owl:onProperty rdf:resource=\"sadllistmodel#rest\"/>\n" + 
+				"      </owl:Restriction>\n" + 
+				"    </rdfs:subClassOf>\n" + 
+				"    <rdfs:subClassOf>\n" + 
+				"      <owl:Restriction>\n" + 
+				"        <owl:allValuesFrom>\n" + 
+				"          <owl:Class rdf:ID=\"LC\"/>\n" + 
+				"        </owl:allValuesFrom>\n" + 
+				"        <owl:onProperty rdf:resource=\"sadllistmodel#first\"/>\n" + 
+				"      </owl:Restriction>\n" + 
+				"    </rdfs:subClassOf>\n" + 
+				"    <rdfs:subClassOf rdf:resource=\"sadllistmodel#List\"/>\n" + 
+				"  </owl:Class>\n" + 
+				"  <owl:Class rdf:ID=\"B\"/>\n" + 
+				"  <owl:ObjectProperty rdf:ID=\"p\">\n" + 
+				"    <rdfs:domain rdf:resource=\"#B\"/>\n" + 
+				"    <rdfs:range rdf:nodeID=\"A0\"/>\n" + 
+				"  </owl:ObjectProperty>\n" + 
+				"  <B rdf:ID=\"i3\">\n" + 
+				"    <p rdf:parseType=\"Resource\">\n" + 
+				"      <sadllistmodel:rest rdf:parseType=\"Resource\">\n" + 
+				"        <sadllistmodel:first>\n" + 
+				"          <LC rdf:ID=\"i2\"/>\n" + 
+				"        </sadllistmodel:first>\n" + 
+				"        <rdf:type rdf:nodeID=\"A0\"/>\n" + 
+				"      </sadllistmodel:rest>\n" + 
+				"      <sadllistmodel:first>\n" + 
+				"        <LC rdf:ID=\"i1\"/>\n" + 
+				"      </sadllistmodel:first>\n" + 
+				"      <rdf:type rdf:nodeID=\"A0\"/>\n" + 
+				"    </p>\n" + 
+				"  </B>\n" + 
+				"</rdf:RDF>\n" + 
+				"";
+		OwlToSadl o2s = new OwlToSadl(owlModelContent, "http://sadl.org/list_test.sadl");
+//		o2s.setVerboseMode(true);
+		String sadlModelContent = o2s.getSadlModel();
+		String expected = 
+				"uri \"http://sadl.org/list_test.sadl\"\n" + 
+				"    (note \"This ontology was created from a SADL file 'list_test.sadl' and should not be directly edited.\").\n" + 
+				"\n" + 
+				"\n" + 
+				"\n" + 
+				"// Class definitions:\n" + 
+				"B is a class,\n" + 
+				"    described by p with values of type LC List.\n" + 
+				"LC is a class.\n" + 
+				"\n" + 
+				"\n" + 
+				"// Individuals:\n" + 
+				"i1 is a LC.\n" + 
+				"i2 is a LC.\n" + 
+				"i3 is a B,\n" + 
+				"    has p [i1,i2].\n" + 
+				"";
+		System.out.print(sadlModelContent);
+		assertEquals(expected.trim(), sadlModelContent.trim());
+	}
 	private void assertEquals(Object expected, Object actual) {
 		String s1 = expected.toString().replace("\r", "");
 		s1 = s1.replace("\n", "");
