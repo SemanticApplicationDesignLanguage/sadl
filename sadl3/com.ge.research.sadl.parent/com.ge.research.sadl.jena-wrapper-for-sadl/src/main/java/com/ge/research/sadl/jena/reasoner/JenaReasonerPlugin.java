@@ -3689,13 +3689,15 @@ public class JenaReasonerPlugin extends Reasoner{
 	@Override
 	public String getReasonerConfigurationItem(String itemKey) {
 		if (configuration != null) {
-			if (itemKey.equals(IReasoner.DerivationsRequestedKey)) {
+			if (itemKey.equals(IReasoner.DerivationsRequestedKey) &&
+					configuration.containsKey(pDerivationLogging)) {
 				return configuration.get(pDerivationLogging).toString();
 			}
-			else if (itemKey.contentEquals(IReasoner.QueryTimeoutKey)) {
+			else if (itemKey.contentEquals(IReasoner.QueryTimeoutKey) &&
+					configuration.containsKey(pTimeOut)) {
 				return configuration.get(pTimeOut).toString();
 			}
-			else {
+			else if (configuration.containsKey(itemKey)){
 				return configuration.get(itemKey).toString();
 			}
 		}

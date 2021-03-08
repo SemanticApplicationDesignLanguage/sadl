@@ -105,7 +105,7 @@ public class JenaTranslatorPlugin implements ITranslator {
     
     private Map<String, String> prefixes = new HashMap<String, String>();
 	
-	private boolean saveRuleFileAfterModelSave = true; 	// unless set to false because an explicit list of rules are
+	protected boolean saveRuleFileAfterModelSave = true; 	// unless set to false because an explicit list of rules are
 
 	private Rule ruleInTranslation = null;
 	private Query queryInTranslation = null;
@@ -795,7 +795,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 	}
 
-	private boolean translateAndSaveRules(OntModel model, List<Rule> ruleList, String modelName, String filename) throws TranslationException, IOException {
+	protected boolean translateAndSaveRules(OntModel model, List<Rule> ruleList, String modelName, String filename) throws TranslationException, IOException {
 		if (ruleList == null || ruleList.size() < 1) {
 			throw new TranslationException("No rules provided to rule translation.");
 		}

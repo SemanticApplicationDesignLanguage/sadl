@@ -89,7 +89,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.external.XMLHelper;
+import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SparqlQueries;
 import com.ge.research.sadl.reasoner.AmbiguousNameException;
@@ -101,6 +103,7 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.google.common.base.Optional;
 
@@ -1823,12 +1826,26 @@ public class OwlToSadl {
 	
 	private String sadlListToSadl(ModelConcepts concepts, Individual inst, boolean embeddedBNode) throws OwlImportException {
 		Individual rest = inst;
+		NamedNode listType = null;
+		boolean quoteListElements = false;
+		try {
+			listType = UtilsForJena.getTypedListType(theModel, configMgr, baseUri, inst);
+			if (listType != null && listType.getNodeType().equals(NodeType.DataTypeNode)) {
+				if (listType.getURI().equals(XSD.xstring) ||
+						listType.getURI().contains("date")) {
+					quoteListElements = true;
+				}
+			}
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		StringBuilder sb = new StringBuilder("[");
 		int cntr = 0;
 		while (rest != null) {
 			RDFNode first = getSadlFirstPropertyValue(rest); //rest.getProperty(getSadlListFirstProperty()).getObject();
 			if (cntr++ > 0) sb.append(",");
-			sb.append(rdfNodeToSadlString(concepts, first, true));
+			sb.append(rdfNodeToSadlString(concepts, first, quoteListElements));
 			RDFNode rstobj = getSadlRestPropertyValue(rest);
 //			Statement rststmt = rest.getProperty(getSadlListRestProperty());
 //			if (rststmt != null) {
@@ -3087,7 +3104,8 @@ public class OwlToSadl {
 				}
 			}
 		}
-		return rsrc.toString();
+		return UtilsForJena.nodeToString(theModel, this.configMgr, this.getBaseUri(), rsrc);
+//		return rsrc.toString();
 	}
 
 	private boolean isAmbiguousName(Resource rsrc) {

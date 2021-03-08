@@ -970,6 +970,12 @@ public class SadlUtils {
 		        				TypeMapper.getInstance().getSafeTypeByName(rnguri);
 		        				return getLiteralMatchingDataPropertyRange(m, rnguri, v);
 		        			}
+		        			else {
+				        		errMsg = "Unhandled range " + rnguri;
+		        			}
+		        		}
+		        		else {
+			        		errMsg = "Unhandled range " + rnguri;
 		        		}
 		        	}
 		        	else {
