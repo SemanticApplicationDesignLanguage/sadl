@@ -27,16 +27,24 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.IntersectionClass;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntResource;
+import org.apache.jena.ontology.UnionClass;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.OWL2;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.model.ModelError;
@@ -126,7 +134,7 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 					StringBuilder sb = new StringBuilder();
 					sb.append("# Jena Rule file for default values, level ");
 					sb.append(level);
-					sb.append("\nCreated by the JenaAugmentedTranslator\n\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\n");
+					sb.append("\n# Created by the JenaAugmentedTranslator\n\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\n");
 					for (String rule : rules) {
 						sb.append(rule);
 						sb.append("\n");
@@ -205,7 +213,7 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 						}
 					}
 				}
-				String rule = getRuleForDefault(objInst, onClass, propChainList, defval);
+				String rule = getRuleForDefault(model, objInst, onClass, propChainList, defval);
 				if (rule != null) {
 					if (!defValRulesByLevel.containsKey(lvl)) {
 						defValRulesByLevel.put(lvl, new ArrayList<String>());
@@ -219,7 +227,7 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 	}
 
 
-	private String getRuleForDefault(Individual objInst, OntClass onClass, List<Property> propChainList, RDFNode defval) {
+	private String getRuleForDefault(OntModel model, Individual objInst, OntClass onClass, List<Property> propChainList, RDFNode defval) {
 		String ruleName = objInst.getURI();
 		StringBuilder sb = new StringBuilder("[");
 		sb.append(ruleName);
@@ -256,13 +264,15 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 					sb.append(lastvar);
 					sb.append(" ");
 					sb.append(p.getURI());
+					sb.append(" ");
 					sb.append(defval.asResource().getURI());
 				}
 				else if (defval.isLiteral()) {
 					sb.append(lastvar);
 					sb.append(" ");
 					sb.append(p.getURI());
-					sb.append(defval.asLiteral().getValue().toString());
+					sb.append(" ");
+					sb.append(literalToString(model, defval.asLiteral()));
 				}
 				else if (defval.canAs(Individual.class)){
 					// must be a blank node, which may be a structure with property values
@@ -276,16 +286,16 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 					if (typecls != null) {
 						sb.append("thereExists(");
 						sb.append(typecls.getURI());
-						sb.append(", ");
 						StmtIterator sitr = defvalinst.listProperties();
 						while (sitr.hasNext()) {
 							Statement stmt = sitr.nextStatement();
 							if (!stmt.getPredicate().equals(RDF.type)) {
+								sb.append(", ");
 								sb.append(stmt.getPredicate().getURI());
 								sb.append(", ");
 								RDFNode obj = stmt.getObject();
 								if (obj.isLiteral()) {
-									sb.append(obj.asLiteral().getValue().toString());
+									sb.append(literalToString(model, obj.asLiteral()));
 								}
 								else {
 									sb.append(obj.asResource().getURI());
@@ -303,4 +313,101 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 		
 		return sb.toString();
 	}
+	
+	private String literalToString(OntModel model, Literal litval) {
+		String dturi = litval.asLiteral().getDatatypeURI();
+		boolean forceQuotes = dturi != null ? isRDFDatatypeString(model, dturi, litval) : true;
+		if (litval.asLiteral().getDatatypeURI() == null) {
+			String lf = litval.asLiteral().getLexicalForm();
+			if (forceQuotes || lf.contains(" ") || lf.contains("\"")) {
+				String s = litval.asLiteral().getLexicalForm();
+				return makeStringDoubleQuoted(s); 
+			}
+			return litval.asLiteral().getLexicalForm();
+		}
+		if (forceQuotes || litval.asLiteral().getDatatypeURI().equals(XSD.xstring.getURI())) {
+			String s = litval.asLiteral().getLexicalForm();
+			if (s.startsWith("\"") && s.endsWith("\"")) {
+				s = s.substring(1, s.length() - 2);
+			}
+			return makeStringDoubleQuoted(s); 
+		}
+		else {
+			return litval.asLiteral().getLexicalForm();
+		}
+
+	}
+	
+	private boolean isRDFDatatypeString(OntModel model, String dturi, RDFNode value) {
+		if (dturi.startsWith(XSD.getURI())) {
+			// this is a direct type
+			if (dturi.equals(XSD.xstring.getURI()) || dturi.equals(XSD.date.getURI()) || 
+					dturi.equals(XSD.dateTime.getURI()) || dturi.equals(XSD.time.getURI()) || 
+					dturi.equals(XSD.anyURI.getURI())) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+		Resource rsrc = model.getResource(dturi);
+		// is there an equivalent class?
+		List<String> intersection = null;
+		List<String> union = null;
+		String xsdtype = null;
+		RDFNode eqCls = null;
+		StmtIterator eqitr = rsrc.listProperties(OWL.equivalentClass);
+		if (eqitr.hasNext()) {
+			eqCls = eqitr.nextStatement().getObject();
+			if (eqCls.canAs(Resource.class)) {
+				if (eqCls.canAs(UnionClass.class)) {
+					union = new ArrayList<String>();
+					RDFList opList = eqCls.as(UnionClass.class).getOperands();
+					for (int i = 0; i < opList.size(); i++) {
+						RDFNode opnode = opList.get(i);
+						union.add(opnode.asResource().getLocalName());
+					}
+				}
+				else if (eqCls.canAs(IntersectionClass.class)) {
+					intersection  = new ArrayList<String>();
+					RDFList opList = eqCls.as(IntersectionClass.class).getOperands();
+					for (int i = 0; i < opList.size(); i++) {
+						RDFNode opnode = opList.get(i);
+						intersection.add(opnode.asResource().getLocalName());
+					}
+				}
+				else {
+					RDFNode odt = eqCls.as(OntResource.class).getPropertyValue(OWL2.onDatatype);
+					if (odt != null && odt.canAs(Resource.class)) {
+						String ns = odt.as(Resource.class).getNameSpace();
+						if (ns.startsWith(XSD.getURI())) {
+							xsdtype = odt.as(Resource.class).getLocalName();
+						}
+					}
+				}
+			}
+		}
+		else {
+			System.err.println("Unable to determine if RDFDatatype '" + dturi + " has string value.");
+		}
+		if (xsdtype != null && xsdtype.equals(XSD.xstring.getLocalName())) {
+			return true;
+		}
+		if (union != null) {
+			if (union.contains(XSD.xstring.getLocalName())) {
+				if (value.asLiteral().getValue() instanceof Number) {
+					return false;
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private String makeStringDoubleQuoted(String s) {
+		s = s.replace("\"", "\\\"");
+		return "\"" + s + "\"";
+	}
+
+
 }
