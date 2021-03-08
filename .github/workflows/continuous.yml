@@ -132,4 +132,4 @@ jobs:
 
     - name: Push WebSADL image to Docker Hub
       if: github.ref == 'refs/heads/development'
-      run: docker push theiaide/sadl
+      run: docker push theiaide/sadl:next
