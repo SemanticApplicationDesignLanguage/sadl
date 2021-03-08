@@ -240,6 +240,7 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 		for (int i = 0; i < propChainList.size(); i++) {
 			Property p = propChainList.get(i);
 			if (i < propChainList.size() - 1) {
+				if (i > 0) sb.append(", ");
 				sb.append("(");
 				sb.append(lastvar);
 				sb.append(" ");
@@ -247,32 +248,34 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 				sb.append(" ");
 				String var = "?v" + vcntr++;
 				sb.append(var);
-				sb.append(")");
-				sb.append("), (");
-				sb.append(var);
-				sb.append(" ");
 				lastvar = var;
+				sb.append(")");
 			}
 			else {
+				if (i > 0) sb.append(", ");
 				sb.append("noValue(");
 				sb.append(lastvar);
 				sb.append(",");
 				sb.append(p.getURI());
-				sb.append(") -> (");
+				sb.append(") -> ");
 				
 				if (defval.isResource() && defval.asResource().isURIResource()) {
+					sb.append("(");
 					sb.append(lastvar);
 					sb.append(" ");
 					sb.append(p.getURI());
 					sb.append(" ");
 					sb.append(defval.asResource().getURI());
+					sb.append(")");
 				}
 				else if (defval.isLiteral()) {
+					sb.append("(");
 					sb.append(lastvar);
 					sb.append(" ");
 					sb.append(p.getURI());
 					sb.append(" ");
 					sb.append(literalToString(model, defval.asLiteral()));
+					sb.append(")");
 				}
 				else if (defval.canAs(Individual.class)){
 					// must be a blank node, which may be a structure with property values
@@ -302,6 +305,7 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 								}
 							}
 						}
+						sb.append(")");	// closes arguments of thereExists
 					}
 					else {
 						addError(new ModelError("Class of default value individual not found", ErrorType.ERROR));
@@ -309,7 +313,7 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 				}
 			}
 		}
-		sb.append(")]");
+		sb.append("]");
 		
 		return sb.toString();
 	}
