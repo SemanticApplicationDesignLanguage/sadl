@@ -57,7 +57,7 @@ public class ConceptName extends ConceptIdentifier {
 		RDFDATATYPE, RDFDATATYPELIST, VARIABLE, CONCEPT_NOT_FOUND_IN_MODEL, FUNCTION_DEFN
 	}
 
-	public enum RangeValueType {CLASS_OR_DT, LIST}
+	public enum RangeValueType {CLASS_OR_DT, LIST, UNION_OF_CLASSES, INTERSECTION_OF_CLASSES}
 
     private String name;
     private String prefix = null;

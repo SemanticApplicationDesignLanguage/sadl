@@ -424,6 +424,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private Map<String, List<ConceptName>> impliedPropoertiesCache = new HashMap<>();
 	private Map<String, Boolean> classIsSubclassOfCache = new HashMap<>();
 
+	/**
+	 * Method to determine if subcls is a subclass of cls
+	 * @param subcls
+	 * @param cls
+	 * @param rootCall
+	 * @param previousClasses
+	 * @return
+	 * @throws CircularDependencyException
+	 */
 	protected boolean classIsSubclassOfCached(OntClass subcls, OntResource cls, boolean rootCall, List<OntResource> previousClasses) throws CircularDependencyException {
 		String key = new StringBuilder()
 				.append(subcls == null ? "null" : subcls.getURI())
@@ -11606,12 +11615,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					try {
 						TypeCheckInfo vtct = getModelValidator().getType(val);
 						if (vtct != null) {
-							String typstr = vtct.getTypeCheckType().getURI();
-							OntClass lstcls = getOrCreateListSubclass(null, typstr, prop.eResource(), null);
-							Individual lval = getTheJenaModel().createIndividual(lstcls);
-							addListValues(lval, lstcls, (SadlValueList) val);
-							addInstancePropertyValue(inst, oprop, lval, val);
-							RDFNode nv = inst.getPropertyValue(oprop);
+							if (vtct.getTypeCheckType() != null) {
+								String typstr = vtct.getTypeCheckType().getURI();
+								OntClass lstcls = getOrCreateListSubclass(null, typstr, prop.eResource(), null);
+								Individual lval = getTheJenaModel().createIndividual(lstcls);
+								addListValues(lval, lstcls, (SadlValueList) val);
+								addInstancePropertyValue(inst, oprop, lval, val);
+								RDFNode nv = inst.getPropertyValue(oprop);								
+							}
+							else {
+								//create a list of the range type
+								StmtIterator existingRngItr = getTheJenaModel().listStatements(oprop, RDFS.range, (RDFNode) null);
+								if (existingRngItr.hasNext()) {
+									RDFNode existingRngNode = existingRngItr.next().getObject();
+									if (existingRngNode.isResource() && existingRngNode.canAs(OntClass.class)) {
+										OntClass lstcls = existingRngNode.as(OntClass.class);
+										Individual lval = getTheJenaModel().createIndividual(lstcls);
+										addListValues(lval, lstcls, (SadlValueList) val);
+										addInstancePropertyValue(inst, oprop, lval, val);
+										RDFNode nv = inst.getPropertyValue(oprop);								
+									}
+								}
+							}
 						}
 					} catch (InvalidNameException e) {
 						// TODO Auto-generated catch block

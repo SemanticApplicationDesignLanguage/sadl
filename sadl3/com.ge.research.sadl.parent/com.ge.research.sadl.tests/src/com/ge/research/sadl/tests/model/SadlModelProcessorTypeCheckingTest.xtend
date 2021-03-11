@@ -18,6 +18,8 @@ import org.junit.Assert
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
+import static org.junit.Assert.assertEquals
+import com.google.common.collect.Iterables
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -216,7 +218,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		'''.sadl.enableAmbiguousNameDetection;
 
 		val issues_1 = validate(model_1);
-//		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
+		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
 	}
 	
 	@Test
@@ -240,6 +242,10 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		'''.sadl.enableAmbiguousNameDetection;
 
 		val issues_1 = validate(model_1);
+		for (issue : issues_1) {
+			println(issue.toString)
+		}
+		model_1.assertError("Declaration of concepts in another namespace not supported")
 //		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
 	}
 	
@@ -257,9 +263,10 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		'''.sadl.enableAmbiguousNameDetection;
 
 		val issues_1 = validate(model_1);
-//		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
+		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
 	}
 	
+	@Test
 	def void testIncompletelyDefinedEquation() {
 		val sadlModel = '''
 			 uri "http://sadl.org/Test1.sadl" alias Test1.
@@ -283,6 +290,190 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			 		 
 			 Rule AgeRule: if p is a LivingThing then age of p is subtractDates(now(), dateOfBirth of p, "y"). 		
 		'''.sadl
-		sadlModel.assertError("External equation declaration does not provide type information; can't type check.")
+//		val String[] errors = #["Number of arguments does not match function declaration",
+//			"xsd:dateTime, an RDF datatype  xsd:dateTime, cannot operate (argument) with No type check info generated.",
+//			"age, a datatype property with range  xsd:float, cannot be compared (is) with No type check info generated.",
+//			"Type comparison not possible"
+//		]
+//		sadlModel.assertErrors(errors)
+		sadlModel.assertError("age, a datatype property with range  xsd:float, cannot be compared (is) with No type check info generated.")
 	}
+	
+	@Test
+	def void testTypedList_01() {
+		val sadlModel = '''
+		uri "http://sadl.org/list.sadl3" alias lst3.
+		
+		B is a class.
+		C is a class.
+		D is a class described by p with values of type BC List .
+		
+		BC is the same as {B or C}.
+		
+		i1 is a B.
+		i2 is a C.
+		
+		i3 is a D has p [i1,i2].
+		'''.sadl
+		val issues_1 = validate(sadlModel);
+		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
+	}
+	
+	@Test
+	def void testTypedList02() {
+		val sadlModel = '''
+			 uri "http://sadl.org/list.sadl" alias lst.
+			 
+			 B is a class.
+			 C is a class.
+			 D is a class described by p with values of type B List.
+			 
+			 i1 is a {B and C}.
+			 
+			 i2 is a D with p [i1].
+	 		'''.sadl
+	 		val issues = validate(sadlModel)
+		for (issue : issues) {
+			println(issue.message)
+		}
+		assertEquals(Iterables.toString(issues), 0, issues.size);
+	}
+	
+	@Test
+	def void testTypedList03() {
+		val sadlModel = '''
+			 uri "http://sadl.org/list.sadl" alias lst.
+			 
+			 B is a class.
+			 C is a class.
+			 D is a class described by p with values of type B List.
+			 
+			 i1 is a {B and C}.
+			 i2 is a B.
+			 
+			 i3 is a D with p [i1, i2].
+	 		'''.sadl
+	 		val issues = validate(sadlModel)
+		for (issue : issues) {
+			println(issue.message)
+		}
+		assertEquals(Iterables.toString(issues), 0, issues.size);
+	}
+	
+	@Test
+	def void testTypedList04() {
+		val sadlModel = '''
+			 uri "http://sadl.org/list.sadl" alias lst.
+			 
+			 B is a class.
+			 C is a class.
+			 D is a class described by p with values of type B List.
+			 
+			 i1 is a {B and C}.
+			 i2 is a B.
+			 i3 is a C.
+			 
+			 i4 is a D with p [i1, i2, i3].
+	 		'''.sadl
+	 		val issues = validate(sadlModel)
+		for (issue : issues) {
+			println(issue.message)
+		}
+		// expect error on last line as i5 could be a C
+		sadlModel.assertError("TypeCheckInfo(B List, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i1 (type B and C),TypeCheckInfo(http://sadl.org/list.sadl#i2, B),TypeCheckInfo(http://sadl.org/list.sadl#i3, C)].")
+	}
+	
+	@Test
+	def void testTypeList_10() {
+		val sadlModel = '''
+		 uri "http://sadl.org/list.sadl" alias lst.
+		 
+		 B is a class.
+		 C is a class.
+		 D is a class described by p with values of type B List.
+		 
+		 i1 is a {B and C}.
+		 i2 is a D with p [i1].
+		 
+		 i3 is a B.
+		 i3 is a C.
+		 i4 is a D with p [i3].
+		 
+		 i5 is a {B or C}.
+		 i6 is a D with p [i5].
+		'''.sadl
+		val issues = validate(sadlModel)
+		for (issue : issues) {
+			println(issue.message)
+		}
+		// expect error on last line as i5 could be a C
+		sadlModel.assertError("TypeCheckInfo(B List, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i5 (type B or C)].")
+	}
+
+	@Test
+	def void testIntersectionClass_01() {
+		val sadlModel = '''
+		 uri "http://sadl.org/NoList.sadl" alias nolist.
+		 
+		 B is a class.
+		 C is a class.
+		 BnC is the same as {B and C}.
+		 BoC is the same as {B or C}.
+		 
+		 D is a class described by p1 with values of type BnC,
+		 	described by p2 with values of type BoC.
+		 	
+		 B1 is a B.
+		 C1 is a C. 	
+		 BnC1 is a BnC.
+		 BoC1 is a BoC.
+		 
+		 D1 is a D with p1 B1, with p2 C1.	// this is worthy of a warning
+		 
+		 D2 is a D with p1 C1, with p2 B1.	// likewise
+		'''.sadl
+		val issues = validate(sadlModel)
+		for (issue : issues) {
+			println(issue.message)
+		}
+		// expect warning that p1 values may not be in range (is B or C but can't know if in BnC)
+		val String[] errors = #[
+			"p1, an object property with range  http://sadl.org/NoList.sadl#BnC, cannot be compared (is) with B1, an instance of type  http://sadl.org/NoList.sadl#B.",
+			"p1, an object property with range  http://sadl.org/NoList.sadl#BnC, cannot be compared (is) with C1, an instance of type  http://sadl.org/NoList.sadl#C."
+		]
+		sadlModel.assertErrors(errors)
+	}
+	
+	@Test
+	def void testIntersectionClass_02() {
+		val sadlModel = '''
+		 uri "http://sadl.org/NoList2.sadl" alias nolist2.
+		 
+		 B is a class.
+		 C is a class.
+		 
+		 D is a class described by p1 with values of type {B and C},
+		 	described by p2 with values of type {B or C}.
+		  
+		 B1 is a B.
+		 C1 is a C. 	
+		 BnC1 is a {B and C}.
+		 BoC1 is a {B or C}.
+		 
+		 D1 is a D with p1 B1, with p2 C1.	// this is worthy of a warning
+		 
+		 D2 is a D with p1 C1, with p2 B1.	// likewise
+		'''.sadl
+		val issues = validate(sadlModel)
+		for (issue : issues) {
+			println(issue.message)
+		}
+		// expect warning that p1 values may not be in range (is B or C but can't know if in BnC)
+		val String[] errors = #[
+			"p1, an object property with range  http://sadl.org/NoList2.sadl#B and http://sadl.org/NoList2.sadl#C, cannot be compared (is) with B1, an instance of type  http://sadl.org/NoList2.sadl#B.",
+			"p1, an object property with range  http://sadl.org/NoList2.sadl#B and http://sadl.org/NoList2.sadl#C, cannot be compared (is) with C1, an instance of type  http://sadl.org/NoList2.sadl#C."
+		]
+		sadlModel.assertErrors(errors)
+	}
+
 }
