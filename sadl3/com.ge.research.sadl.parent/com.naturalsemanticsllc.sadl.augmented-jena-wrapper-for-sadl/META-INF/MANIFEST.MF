@@ -21,5 +21,6 @@ Bundle-ClassPath: .
 Import-Package: com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
  com.ge.research.sadl.reasoner,
+ com.ge.research.sadl.jena.reasoner.builtin,
  javax.activation
 Automatic-Module-Name: com.ge.research.sadl.jena-wrapper-for-sadl

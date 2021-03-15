@@ -7,6 +7,6 @@
     described by var4 with a single value of type int.
      	
  Rule example-1:
- 	if var2 of System is not var3 of System
- 	then var1 of System is  var2 of System + var3 of System.
+ 	if var2 of a System is not var3 of the System
+ 	then var1 of the System is  var2 of the System + var3 of the System.
  

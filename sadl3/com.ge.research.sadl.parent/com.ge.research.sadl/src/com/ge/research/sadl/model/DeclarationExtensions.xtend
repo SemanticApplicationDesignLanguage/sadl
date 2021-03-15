@@ -322,7 +322,9 @@ class DeclarationExtensions {
 					
 				SadlProperty case e.restrictions.filter(SadlCardinalityCondition).exists[type instanceof SadlSimpleTypeReference && (type as SadlSimpleTypeReference).type instanceof SadlResource]:
 					OntConceptType.CLASS_PROPERTY
-
+				SadlProperty case (e.to instanceof SadlUnionType || e.to instanceof SadlIntersectionType):
+					OntConceptType.CLASS_PROPERTY
+					
 				SadlProperty case e.hasFromToRestriction:
 					e.inferrConceptTypeFromToType
 
