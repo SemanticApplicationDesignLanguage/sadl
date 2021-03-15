@@ -42,6 +42,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +93,7 @@ import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.PropOfSubject;
 import com.ge.research.sadl.sADL.QueryStatement;
+import com.ge.research.sadl.sADL.RuleStatement;
 import com.ge.research.sadl.sADL.SadlBooleanLiteral;
 import com.ge.research.sadl.sADL.SadlCanOnlyBeOneOf;
 import com.ge.research.sadl.sADL.SadlClassOrPropertyDeclaration;
@@ -794,6 +796,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			            }
 					
 				}
+				else if (getModelProcessor().isVariableInDeclarationInRuleOrQuery(rightExpression)) {
+					dontTypeCheck = true;
+				}
 			} catch (DontTypeCheckException e) {
 				dontTypeCheck = true;
 			}
@@ -929,7 +934,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else {
 			try {
-				getModelProcessor().addError("Unexpected failure to find binary operation type checking type", expression);
+				getModelProcessor().addTypeCheckingError("Unexpected failure to find binary operation type checking type", expression);
 			} catch (InvalidTypeException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1362,7 +1367,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 						catch (DatatypeFormatException e) {
 							getModelProcessor().addTypeCheckingError(SadlErrorMessages.TYPE_CHECK_EXCEPTION.get("Datatype Format"), typeCheckInfo.context);
-							//addError(e.getMessage(), typeCheckInfo.context);
 						}
 					}
 					else {
@@ -1455,7 +1459,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							getModelProcessor().addTypeCheckingError("Number is not in the range of xsd:long", expression);
 						}
 						else {
-							getModelProcessor().addError(e.getMessage(), expression);
+							getModelProcessor().addTypeCheckingError(e.getMessage(), expression);
 						}
 					}
 				}
@@ -1789,6 +1793,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 				}
 			}
+		}
+		if (getModelProcessor().isVariableInDeclarationInRuleOrQuery(expression.getRight())) {
+			return null;
 		}
 
 		TypeCheckInfo binopreturn = combineBinaryOperationTypesWithComparison(operations, expression, expression.getLeft(), expression.getRight(), 
@@ -5878,10 +5885,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 	
-	private boolean checkForPropertyDomainMatch(Resource subj, Property prop, Resource obj) throws InvalidTypeException, CircularDependencyException {
-		if (obj.isResource()) {
-			if (obj.canAs(UnionClass.class)){
-				List<OntResource> uclsMembers = getModelProcessor().getOntResourcesInUnionClass(getTheJenaModel(), obj.as(UnionClass.class));
+	private boolean checkForPropertyDomainMatch(Resource subj, Property prop, Resource domain) throws InvalidTypeException, CircularDependencyException {
+		if (domain.isResource()) {
+			if (domain.canAs(UnionClass.class)){
+				// domain is a union class so if the subject is in the union check passes
+				List<OntResource> uclsMembers = getModelProcessor().getOntResourcesInUnionClass(getTheJenaModel(), domain.as(UnionClass.class));
 				if (uclsMembers.contains(subj)) {
 					return true;
 				}
@@ -5900,22 +5908,52 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				else if (subj.canAs(Individual.class)){
 					ExtendedIterator<Resource> titr = subj.as(Individual.class).listRDFTypes(false);
-					while (titr.hasNext()) {
-						Resource type = titr.next();
-						if (uclsMembers.contains(type)) {
+					while (titr.hasNext()) { 
+						Resource instType = titr.next();	// class to which the subj instance belongs
+						if (instType.canAs(UnionClass.class)) {
+							// both domain and type are union--they must contain the same classes
+							List<OntResource> unionTypes = getModelProcessor().getOntResourcesInUnionClass(getTheJenaModel(), instType.as(UnionClass.class));
+							for (OntResource utype : unionTypes) {
+								if (!uclsMembers.contains(utype)) {
+									return false;
+								}
+							}
+							return true;	// they all matched
+						}
+						else if (instType.canAs(IntersectionClass.class)) {
+							// instance type is intersection so it belongs to all of the classes;
+							//	a single match will do to return true
+							List<OntResource> intersectTypes = getModelProcessor().getOntResourcesInIntersectionClass(getTheJenaModel(), instType.as(IntersectionClass.class));
+							for (OntResource itype : intersectTypes) {
+								if (uclsMembers.contains(itype)) {
+									return true;
+								}
+							}
+						}	
+						else if (uclsMembers.contains(instType)) {
 							titr.close();
 							return true;
+						}
+						else {
+							for (OntResource uclsm : uclsMembers) {
+								// if instType is a subclass of uclsm then it's OK
+								if (uclsm.canAs(OntClass.class) && instType.canAs(OntClass.class)) {
+									if (SadlUtils.classIsSubclassOf(instType.as(OntClass.class), uclsm.as(OntClass.class), true, null)) {
+										return true;
+									}									
+								}
+							}
 						}
 					}
 				}
 			}
-			else if (subj != null && obj.isURIResource() && obj.asResource().getURI().equals(subj.getURI())) {
+			else if (subj != null && domain.isURIResource() && domain.asResource().getURI().equals(subj.getURI())) {
 				return true;	
 			}
 			else {
 				if (subj.canAs(OntClass.class)){
 					try {
-						if (modelProcessor.classIsSubclassOfCached(subj.as(OntClass.class), obj.as(OntResource.class),true, null)) {
+						if (modelProcessor.classIsSubclassOfCached(subj.as(OntClass.class), domain.as(OntResource.class),true, null)) {
 							return true;
 						}
 //						if (obj.canAs(OntClass.class) &&  SadlUtils.classIsSuperClassOf(obj.as(OntClass.class), subj.as(OntClass.class))) {
@@ -5935,7 +5973,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						RDFNode missingSubject = stmtitr.nextStatement().getObject();
 						if (missingSubject.isResource() && missingSubject.canAs(OntClass.class)) {
 							try {
-								if ( SadlUtils.classIsSubclassOf(missingSubject.as(OntClass.class), obj.as(OntResource.class),true, null)) {
+								if ( SadlUtils.classIsSubclassOf(missingSubject.as(OntClass.class), domain.as(OntResource.class),true, null)) {
 									stmtitr.close();
 									return true;
 								}
@@ -5951,7 +5989,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					ExtendedIterator<Resource> itr = inst.listRDFTypes(false);
 					while (itr.hasNext()) {
 						Resource cls = itr.next();
-						boolean match = checkForPropertyDomainMatch(cls, prop, obj);
+						boolean match = checkForPropertyDomainMatch(cls, prop, domain);
 						if (match) {
 							itr.close();
 							return true;
@@ -6048,7 +6086,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (compareTypes(operations , pred, val, ctci, valType, ImplicitPropertySide.NONE)) {
 							return true;
 						}
-//						break;	// only need one true
 					}
 				}
 				if (allFalse) {

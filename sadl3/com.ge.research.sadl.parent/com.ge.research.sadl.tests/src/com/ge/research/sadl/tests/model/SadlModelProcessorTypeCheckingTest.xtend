@@ -197,6 +197,31 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
    		'''.sadl
 		sadlModel.assertError('''Object of conclusion triple 'rdf(air, sos:speedOfSound, sosair)' is not bound in rule premises''')
 	}
+	
+	@Test
+	def void testNestedInstanceDomain() {
+		val sadlModel = '''
+		 uri "http://sadl.org/GrammarCoverage.sadl" alias GrammarCoverage.
+		 
+		 Person is a class, described by friend with values of type Person .
+		 
+		 {Professor, Teacher, Student, Pupil} are types of Person.
+		 relationship of {Professor or Teacher} to {Student or Pupil} is teaches.
+		 
+		 Plato is a Student.
+		 Sue is a Professor with friend (a Person with teaches Plato).
+		 Sue is a Professor, friend (a Person teaches Plato).
+ 	 	'''.sadl
+ 	 	val issues = validate(sadlModel)
+ 	 	for (issue : issues) {
+ 	 		println(issue.toString)
+ 	 	}
+		val String[] errors = #["The subject  is not in domain of property http://sadl.org/GrammarCoverage.sadl#teaches",
+			"The subject  is not in domain of property http://sadl.org/GrammarCoverage.sadl#teaches"
+		] 	
+ 	 	sadlModel.assertErrors(errors)
+	}
+	
 	@Test
 	def void testLocalVsImportedNames_GH_226_15() {
 		'''
@@ -476,4 +501,21 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		sadlModel.assertErrors(errors)
 	}
 
+	@Ignore
+	@Test
+	def void testAgeOfMarthaIsAnInt() {
+		val sadlModel = '''
+		 uri "http://sadl.org/AgeOfMarthaIsAnInt.sadl" alias AgeOfMarthaIsAnInt.
+		 
+		 Person is a class described by age with values of type data.
+		 Martha is a Person.
+		 
+		 Rule R1: if age of Martha is an int then Martha has age 3.
+		'''.sadl
+		val issues = validate(sadlModel)
+		for (issue : issues) {
+			println(issue.toString)
+		}
+		
+	}
 }
