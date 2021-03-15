@@ -37,3 +37,4 @@ com.ge.research.sadl.jena.reasoner.builtin.Sum
 com.ge.research.sadl.jena.reasoner.builtin.Tan
 com.ge.research.sadl.jena.reasoner.builtin.ThereExists
 com.ge.research.sadl.jena.reasoner.builtin.Unique
+com.ge.research.sadl.jena.reasoner.builtin.StrAfter
