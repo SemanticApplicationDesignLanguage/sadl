@@ -6,16 +6,15 @@ import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 
-
 /**
  * @author alfredo
  *
  */
-public class StrAfter extends BaseBuiltin {
+public class StrBefore extends BaseBuiltin {
 
 	@Override
 	public String getName() {
-		return "strafter";
+		return "strbefore";
 	}
 
     /**
@@ -37,7 +36,7 @@ public class StrAfter extends BaseBuiltin {
             if (v1 instanceof String && v2 instanceof String) {
             	String s1 = (String)v1;
             	String s2 = (String)v2;
-            	String sa = s1.split(s2,2)[1];
+            	String sa = s1.split(s2,2)[0];
             	result = ResourceFactory.createTypedLiteral(sa).asNode();
             	return env.bind(args[2], result);
             }
