@@ -9520,10 +9520,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						(SadlPrimitiveDataType) superElement, newNames.get(0));
 				if (spdt instanceof OntClass) {
 					rsrcList.add((OntClass) spdt);
-				} else if (spdt.canAs(OntResource.class)) {
-					rsrcList.add(spdt.as(OntResource.class));
-				} else {
-					throw new JenaProcessorException("Expected OntResource to be returned"); // .add(spdt);
+				} else if (spdt != null) {
+					if (spdt.canAs(OntResource.class)) {
+						rsrcList.add(spdt.as(OntResource.class));
+					} else {
+						throw new JenaProcessorException("Expected OntResource to be returned"); // .add(spdt);
+					}
 				}
 			}
 		}
