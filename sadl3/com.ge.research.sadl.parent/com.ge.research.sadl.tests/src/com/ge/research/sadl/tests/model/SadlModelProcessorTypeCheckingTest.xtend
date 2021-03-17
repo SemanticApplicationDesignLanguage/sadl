@@ -128,6 +128,24 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 	}
 	
 	@Test
+	def void testRuleMultipleClassMembership() {
+		val sadlModel = '''
+		uri "http://sadl.org/gh633.sadl" alias gh633.
+		 
+		B is a class.
+		C is a class.
+		D is a class.
+		
+		NotC is the same as not C.
+		
+		Rule r:
+		if x is a B and x is a NotC
+		then x is a D.
+		'''.sadl
+		sadlModel.assertNoErrors
+	}
+	
+	@Test
 	def void testUserDefinedEquation2() {
 		val sadlModel = '''
 			 uri "http://sadl.org/Test1.sadl" alias Test1.
