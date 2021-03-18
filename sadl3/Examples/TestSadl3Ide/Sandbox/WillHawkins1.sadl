@@ -1,8 +1,8 @@
  uri "http://sadl.org/WillHawkins1.sadl" alias willhawkins1.
  
- Version is a type of nonNegativeInteger.
+ Version is a type of nonNegativeInteger. 
  Module is a class.
  ver describes Module with a single value of type Version .
  
  m is a Module with ver 1.
-     
+  

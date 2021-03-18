@@ -29,6 +29,7 @@
 		<module>com.ge.research.sadl.ui.tests</module>
 		<module>com.ge.research.sadl.jena</module>
 		<module>com.ge.research.sadl.jena-wrapper-for-sadl</module>
+		<module>com.naturalsemanticsllc.sadl.augmented-jena-wrapper-for-sadl</module>
 		<module>com.ge.research.sadl.swi-prolog-plugin</module>
 		<module>com.ge.research.sadl.errorgenerator</module>
 		<module>com.ge.research.sadl.importer</module>

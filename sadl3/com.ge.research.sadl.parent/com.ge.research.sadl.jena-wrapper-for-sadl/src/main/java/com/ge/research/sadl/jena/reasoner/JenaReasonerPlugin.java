@@ -251,22 +251,22 @@ public class JenaReasonerPlugin extends Reasoner{
 	protected boolean newInputFlag = false;
 	protected boolean initialized = false;
 
-	private boolean explanationsEnabled = false;
+	public boolean explanationsEnabled = false;
 	
-	private String luceneIndexerClass = null;
+	protected String luceneIndexerClass = null;
 	
 //	private FileAppender traceAppender = null;
 	private String outputFormat = "N-TRIPLE";
 	private String modelName;
 	protected String instDataNS;
-	private long tboxLoadTime = 0L;
-	private boolean derivationLogging = false;
-	private long queryTimeout = -1L;  // Query timeout, -1 means no timeout
+	protected long tboxLoadTime = 0L;
+	protected boolean derivationLogging = false;
+	protected long queryTimeout = -1L;  // Query timeout, -1 means no timeout
 	
 //	// repo stuff
-	private String repoType = null;
+	protected String repoType = null;
 	protected List<ConfigurationItem> preferences = null;
-	private OntModel tboxModelWithSpec;
+	protected OntModel tboxModelWithSpec;
 	private List<ModelError> newErrors = null;
 	
 	public JenaReasonerPlugin() {
@@ -473,7 +473,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 
-	private boolean validateFormat(String format) {
+	protected boolean validateFormat(String format) {
 		return SadlSerializationFormat.validateSadlFormat(format);
 	}
 
@@ -590,7 +590,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		}
 	}
 
-	private void loadImports() {
+	protected void loadImports() {
 		if (configurationMgr != null) {
 			try {
 				imports = configurationMgr.loadImportedModel(schemaModel.getOntology(modelName), 
@@ -2382,7 +2382,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		}
 	}
 
-	private void generateTboxModelWithSpec() {
+	protected void generateTboxModelWithSpec() {
 		if (schemaModelIsCachedInferredModel) {
 			// don't need a model spec, new OntModel; use the model on the TDB Dataset directly
 			if (dataModel != null) {
@@ -3647,7 +3647,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		return returning;
 	}
 
-	private void addError(ModelError newError) {
+	protected void addError(ModelError newError) {
 		if (newErrors == null) {
 			newErrors = new ArrayList<ModelError>();
 		}

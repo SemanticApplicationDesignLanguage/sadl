@@ -424,6 +424,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private Map<String, List<ConceptName>> impliedPropoertiesCache = new HashMap<>();
 	private Map<String, Boolean> classIsSubclassOfCache = new HashMap<>();
 
+	/**
+	 * Method to determine if subcls is a subclass of cls
+	 * @param subcls
+	 * @param cls
+	 * @param rootCall
+	 * @param previousClasses
+	 * @return
+	 * @throws CircularDependencyException
+	 */
 	protected boolean classIsSubclassOfCached(OntClass subcls, OntResource cls, boolean rootCall, List<OntResource> previousClasses) throws CircularDependencyException {
 		String key = new StringBuilder()
 				.append(subcls == null ? "null" : subcls.getURI())
@@ -1063,7 +1072,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private List<Class> allowedVariableContainers;
 
-	private List<EObject> undefinedEObjects = new ArrayList<EObject>();;
+	private List<EObject> undefinedEObjects = new ArrayList<EObject>();
+
+	private Map<EObject, org.apache.jena.rdf.model.Resource> cachedJenaResource = null;
 
 	public static void refreshResource(Resource newRsrc) {
 		try {
@@ -2579,7 +2590,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					tci = getModelValidator().getType(((SubjHasProp) defnContainer).getProp());
 				}
 			} else if (sr.eContainer() instanceof Name && ((Name)sr.eContainer()).isFunction()) {
-				addWarning("Variable '" + var.getName() + "' is not defined", sr);
+				if (EcoreUtil2.getContainerOfType(sr, QueryStatement.class) == null
+						&& EcoreUtil2.getContainerOfType(sr, SelectExpression.class)== null 
+						&& EcoreUtil2.getContainerOfType(sr, RuleStatement.class) == null) {
+					addWarning("Variable '" + var.getName() + "' is not defined", sr);
+				}
 			} else if (EcoreUtil2.getContainerOfType(sr, EquationStatement.class) != null) {
 				Equation cureq = getCurrentEquation();
 				if (cureq != null) {
@@ -6802,6 +6817,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
+	protected boolean isVariableInDeclarationInRuleOrQuery(EObject expr) throws CircularDefinitionException {
+		if (expr instanceof Declaration && 
+			((Declaration)expr).getType() instanceof SadlSimpleTypeReference &&
+			declarationExtensions.getOntConceptType(((SadlSimpleTypeReference)((Declaration)expr).getType()).getType()).equals(OntConceptType.VARIABLE) &&
+			(EcoreUtil2.getContainerOfType(expr, QueryStatement.class) != null
+			|| EcoreUtil2.getContainerOfType(expr, SelectExpression.class) != null 
+			|| EcoreUtil2.getContainerOfType(expr, RuleStatement.class) != null)) {
+				return true;
+		}
+		return false;
+	}
+
+
+	protected boolean isVariableTypeConditionInRuleOrQuery(EObject expression) throws CircularDefinitionException {
+		if (EcoreUtil2.getContainerOfType(expression, QueryStatement.class) != null
+				|| EcoreUtil2.getContainerOfType(expression, SelectExpression.class) != null 
+				|| EcoreUtil2.getContainerOfType(expression, RuleStatement.class) != null) {
+			// this is in a rule or query
+			if (expression instanceof BinaryOperation &&
+					((BinaryOperation)expression).getOp().equals("is") &&
+					((BinaryOperation)expression).getRight() instanceof Declaration &&
+					((BinaryOperation)expression).getLeft() instanceof Name &&
+					declarationExtensions.getOntConceptType(((Name)((BinaryOperation)expression).getLeft()).getName()).equals(OntConceptType.VARIABLE)) {
+				return true;
+			}
+			
+		}
+		return false;
+	}
+	
 	private void checkTripleRange(EObject subjeo, EObject predeo, EObject objeo, Expression expr, Node subjNode,
 			Node predNode, OntProperty pred, NodeType pnodetype, Node obj, boolean isKnownToBeList)
 			throws InvalidTypeException, TranslationException, CircularDependencyException {
@@ -9493,10 +9538,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						(SadlPrimitiveDataType) superElement, newNames.get(0));
 				if (spdt instanceof OntClass) {
 					rsrcList.add((OntClass) spdt);
-				} else if (spdt.canAs(OntResource.class)) {
-					rsrcList.add(spdt.as(OntResource.class));
-				} else {
-					throw new JenaProcessorException("Expected OntResource to be returned"); // .add(spdt);
+				} else if (spdt != null) {
+					if (spdt.canAs(OntResource.class)) {
+						rsrcList.add(spdt.as(OntResource.class));
+					} else {
+						throw new JenaProcessorException("Expected OntResource to be returned"); // .add(spdt);
+					}
 				}
 			}
 		}
@@ -9871,7 +9918,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (subject.canAs(OntClass.class)) {
 						cls = subject.as(OntClass.class);
 						cls.addSuperClass(condCls);
-						retProp = null;
+						retProp = prop;	// awc 3/12/21: this was set to null but that failed case GH509
 					} else {
 						throw new JenaProcessorException("Unable to convert concept being restricted ("
 								+ subject.toString() + ") to an OntClass.");
@@ -9897,7 +9944,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if (sprd instanceof SadlSimpleTypeReference) {
 							srs.add(((SadlSimpleTypeReference)sprd).getType());
 						}
-						else {
+						else if (!(sprd instanceof SadlUnionType) && !(sprd instanceof SadlIntersectionType)) {
+							// union and intersection classes handled below
 							addError("Unhandled restriction type reference: " + sprd.getClass().getCanonicalName(), sprd);
 						}
 					}
@@ -11606,12 +11654,28 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					try {
 						TypeCheckInfo vtct = getModelValidator().getType(val);
 						if (vtct != null) {
-							String typstr = vtct.getTypeCheckType().getURI();
-							OntClass lstcls = getOrCreateListSubclass(null, typstr, prop.eResource(), null);
-							Individual lval = getTheJenaModel().createIndividual(lstcls);
-							addListValues(lval, lstcls, (SadlValueList) val);
-							addInstancePropertyValue(inst, oprop, lval, val);
-							RDFNode nv = inst.getPropertyValue(oprop);
+							if (vtct.getTypeCheckType() != null) {
+								String typstr = vtct.getTypeCheckType().getURI();
+								OntClass lstcls = getOrCreateListSubclass(null, typstr, prop.eResource(), null);
+								Individual lval = getTheJenaModel().createIndividual(lstcls);
+								addListValues(lval, lstcls, (SadlValueList) val);
+								addInstancePropertyValue(inst, oprop, lval, val);
+								RDFNode nv = inst.getPropertyValue(oprop);								
+							}
+							else {
+								//create a list of the range type
+								StmtIterator existingRngItr = getTheJenaModel().listStatements(oprop, RDFS.range, (RDFNode) null);
+								if (existingRngItr.hasNext()) {
+									RDFNode existingRngNode = existingRngItr.next().getObject();
+									if (existingRngNode.isResource() && existingRngNode.canAs(OntClass.class)) {
+										OntClass lstcls = existingRngNode.as(OntClass.class);
+										Individual lval = getTheJenaModel().createIndividual(lstcls);
+										addListValues(lval, lstcls, (SadlValueList) val);
+										addInstancePropertyValue(inst, oprop, lval, val);
+										RDFNode nv = inst.getPropertyValue(oprop);								
+									}
+								}
+							}
 						}
 					} catch (InvalidNameException e) {
 						// TODO Auto-generated catch block
@@ -12652,16 +12716,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private org.apache.jena.rdf.model.Resource sadlTypeReferenceToResource(SadlTypeReference sadlTypeRef)
 			throws JenaProcessorException {
+		if (getCachedJenaResource(sadlTypeRef) != null) {
+			return getCachedJenaResource(sadlTypeRef);
+		}
 		Object obj = sadlTypeReferenceToObject(sadlTypeRef);
 		if (obj == null) {
 			return null; // this happens when sadlTypeRef is a variable (even if unintended)
 		}
+		org.apache.jena.rdf.model.Resource newJenaResource = null;
 		if (obj instanceof org.apache.jena.rdf.model.Resource) {
-			return (org.apache.jena.rdf.model.Resource) obj;
+			newJenaResource = (org.apache.jena.rdf.model.Resource) obj;
 		} else if (obj instanceof RDFNode) {
 			if (((RDFNode) obj).canAs(org.apache.jena.rdf.model.Resource.class)) {
-				return ((RDFNode) obj).as(org.apache.jena.rdf.model.Resource.class);
+				newJenaResource = ((RDFNode) obj).as(org.apache.jena.rdf.model.Resource.class);
 			}
+		}
+		if (newJenaResource != null) {
+			addCachedJenaResource(sadlTypeRef, newJenaResource);
+			return newJenaResource;
 		}
 		throw new JenaProcessorException("Unable to convert SadlTypeReference '" + sadlTypeRef + "' to OntResource");
 	}
@@ -12997,8 +13069,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return onDatatype;
 		}
 		SadlDataTypeFacet facet = element.getFacet();
-		OntClass datatype = createRdfsDatatype(newDatatypeUri, null, onDatatype, facet);
-		return datatype;
+		try {
+			OntClass datatype = createRdfsDatatype(newDatatypeUri, null, onDatatype, facet);
+			return datatype;
+		}
+		catch (JenaProcessorException e) {
+			addError(e.getMessage(), element);
+			return null;
+		}
 	}
 
 	private org.apache.jena.rdf.model.Resource getSadlPrimitiveDataTypeResource(SadlPrimitiveDataType sadlTypeRef)
@@ -13148,6 +13226,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			
 			XSSimpleType nst = org.apache.jena.ext.xerces.impl.dv.xs.BaseDVFactory.getInstance().createTypeRestriction(ln, ns,
                     (short)0, (org.apache.jena.ext.xerces.impl.dv.XSSimpleType) basesimpletype, null);
+			if (facet == null) {
+				throw new JenaProcessorException("A new datatype is expected to have facets to distinguish it from the base type");
+			}
 			Object[] facetInfo = sadlFacetsToXSFacets(facet);
 			XSFacets facets = null;
 			short presentFacet = 0;
@@ -13241,7 +13322,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private Object[] sadlFacetsToXSFacets(SadlDataTypeFacet facet) {
 		XSFacets xsfacets = new XSFacets();
 		short facetsPresent = 0;
-		
+		if (facet == null) {
+			return null;
+		}
 		if (facet.getMin() != null) {
 			if (facet.isMinInclusive()) {
 				xsfacets.minInclusive = facet.getMin();
@@ -15929,5 +16012,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addError("Unexpected error getting content assist example for property '" + propuri + "'", prop);
 		}
 		return null;
+	}
+
+	/**
+	 * Method to obtain a cached Jena Resource for a given EObject
+	 * @param key
+	 * @return
+	 */
+	protected org.apache.jena.rdf.model.Resource getCachedJenaResource(EObject key) {
+		if (cachedJenaResource != null) {
+			return cachedJenaResource.get(key);
+		}
+		return null;
+	}
+
+	/**
+	 * Method to cache a Jena Resource for a given EObject
+	 * @param key
+	 * @param jenaResource
+	 */
+	protected void addCachedJenaResource(EObject key, org.apache.jena.rdf.model.Resource jenaResource) {
+		if(cachedJenaResource == null) {
+			cachedJenaResource = new HashMap<EObject, org.apache.jena.rdf.model.Resource>();
+		}
+		cachedJenaResource.put(key, jenaResource);
 	}
 }
