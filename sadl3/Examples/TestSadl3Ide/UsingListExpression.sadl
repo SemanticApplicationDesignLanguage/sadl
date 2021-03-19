@@ -40,6 +40,10 @@
 
  Rule ListIndex:
  	if l1 is a YooHooList and index of yh2 in l1 is idx then print("Index of yh2: ", idx). 
+ 	
+ Rule ListLength:
+ 	if l1 is a YooHooList and len is length of l1 then print("Length of l1: ", len). 
+ 	
 
 // Rule ListFirst2:
 //   if lst is a YooHooList and 
