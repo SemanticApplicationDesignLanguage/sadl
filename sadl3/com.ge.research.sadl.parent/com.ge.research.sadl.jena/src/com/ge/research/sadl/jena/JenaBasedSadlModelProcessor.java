@@ -5677,7 +5677,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //		if (!op.equals("and") && !op.equals("or")) {
 //			// don't validate these as they will be validated in their parts and to do so now will not always work
 			if (lexpr != null && rexpr != null) {
-				if(!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
+				if(!isDeclaration(lexpr, rexpr, op) && 
+						!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
 					addTypeCheckingError(errorMessage.toString(), container);
 				}
 				else {
@@ -6269,6 +6270,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi), rest);
 		}
+	}
+
+	private boolean isDeclaration(Expression lexpr, Expression rexpr, String op) {
+		if (op.equals("is") && lexpr instanceof Name && 
+				declarationExtensions.getDeclaration(((Name)lexpr).getName().getName()).equals(((Name)lexpr).getName()) &&
+				lexpr.eContainer().equals(rexpr.eContainer())) {
+			return true;
+		}
+		return false;
 	}
 
 	private void applyRestrictionToVariableType(VariableNode vobj, NamedNode restrictionType, EObject expr) throws CircularDependencyException, TranslationException {
@@ -7689,7 +7699,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (expr.eContainer() instanceof BinaryOperation &&
 							((BinaryOperation)expr.eContainer()).getOp().equals("is") &&
 							typenode instanceof NamedNode && 
-							((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) &&
+							(((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) ||
+									((NamedNode)typenode).getNodeType().equals(NodeType.ClassListNode)) &&
 							((BinaryOperation)expr.eContainer()).getLeft() instanceof Name &&
 							(getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.INSTANCE) ||
 							getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.VARIABLE))) {

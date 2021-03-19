@@ -140,6 +140,9 @@ import com.ge.research.sadl.utils.SadlASTUtils;
 public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	public static final String RANGE = "range";
 	public static final String RESTRICTED_TO = "restriction to";
+	public static final String INSTANCE_OF_LIST = "instance of typed list with elements of type";
+	public static final String NAMED_LIST_OF_TYPE = "type of a named typed list class";
+	public static final String UNAMED_LIST_OF_TYPE = "type of an unnamed typed list class";
 	private static final int MIN_INT = -2147483648;
 	private static final int MAX_INT = 2147483647;
 	private static final long MIN_LONG = -9223372036854775808L;
@@ -422,7 +425,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					sb.append(", ");
 					if (typeToExprRelationship != null) {
 						sb.append(typeToExprRelationship);
-						sb.append(" of property ");
+						if (typeToExprRelationship.equals(RANGE)) {
+							sb.append(" of property ");
+						}
+						else {
+							sb.append(" ");
+						}
 						if (expressionType instanceof ConceptName) {
 							sb.append(((ConceptName)expressionType).getName());
 						}
@@ -3512,10 +3520,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return getFunctionType(declarationExtensions.getDeclaration(sr));
 		}
 		else if (conceptType.equals(OntConceptType.CLASS_LIST)) {
+			NamedNode listTypenn = null;
 			if (conceptUri != null) {
 				OntClass ontcls = getTheJenaModel().getOntClass(conceptUri);
-				ConceptName typecn = getListClassType(ontcls);
-				conceptUri = typecn.toFQString();
+				ConceptName listTypecn = getListClassType(ontcls);
+				listTypecn.setType(ConceptType.ONTCLASS);
+				listTypenn = getModelProcessor().conceptNameToNamedNode(listTypecn);
 			}
 			SadlResource declsr = declarationExtensions.getDeclaration(sr);
 			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(conceptUri, NodeType.ClassListNode));
@@ -3536,7 +3546,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			else {
 				List<ConceptName> impliedProps = getImpliedProperties(getTheJenaModel().getResource(conceptUri));
-				TypeCheckInfo tci = new TypeCheckInfo(conceptName, tctype, this, impliedProps, reference);
+				TypeCheckInfo tci = new TypeCheckInfo(conceptName, listTypenn, this, impliedProps, reference);
+				tci.setTypeToExprRelationship(NAMED_LIST_OF_TYPE);
+				tci.setRangeValueType(RangeValueType.LIST);
+
 				return tci;
 			}
 		}
@@ -3578,6 +3591,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ConceptName conceptName = getModelProcessor().namedNodeToConceptName(tctype);
 			List<ConceptName> impliedProperties = getImpliedProperties(ontResource);
 			tci = new TypeCheckInfo(instConceptName, tctype, this, impliedProperties, reference);
+			if (isSadlTypedList(ontResource) && ontResource.canAs(OntClass.class)) {
+				tctype.setNodeType(NodeType.ClassListNode);
+//				tci.setRangeValueType(RangeValueType.LIST);
+//				tci.setTypeToExprRelationship(INSTANCE_OF_LIST);
+			}
 		}
 		return tci;
 	}
@@ -3998,9 +4016,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				tctype.setNodeType(NodeType.ClassListNode);
 			}
-			ConceptName rangeConceptName = getModelProcessor().namedNodeToConceptName(tctype);
-			TypeCheckInfo tci = new TypeCheckInfo(propConceptName, tctype, impliedProperties, this, expression);
+			ConceptName tctypecn = getModelProcessor().namedNodeToConceptName(tctype);
+			TypeCheckInfo tci = new TypeCheckInfo(propConceptName != null ? propConceptName : tctypecn, tctype, impliedProperties, this, expression);
 			tci.setRangeValueType(RangeValueType.LIST);
+			tci.setTypeToExprRelationship(UNAMED_LIST_OF_TYPE);
 			return tci;
 		}
 		return null;
