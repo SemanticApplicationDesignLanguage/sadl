@@ -460,11 +460,11 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			println(issue.message)
 		}
 		// expect error on last line as i5 could be a C
-		sadlModel.assertError("TypeCheckInfo(B List, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i1 (type B and C),TypeCheckInfo(http://sadl.org/list.sadl#i2, B),TypeCheckInfo(http://sadl.org/list.sadl#i3, C)].")
+		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i1 (type B and C),TypeCheckInfo(http://sadl.org/list.sadl#i2, B),TypeCheckInfo(http://sadl.org/list.sadl#i3, C)].")
 	}
 	
 	@Test
-	def void testTypeList_10() {
+	def void testTypedList_10() {
 		val sadlModel = '''
 		 uri "http://sadl.org/list.sadl" alias lst.
 		 
@@ -487,7 +487,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			println(issue.message)
 		}
 		// expect error on last line as i5 could be a C
-		sadlModel.assertError("TypeCheckInfo(B List, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i5 (type B or C)].")
+		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i5 (type B or C)].")
 	}
 
 	@Test
@@ -515,7 +515,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule ListFirst:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHoo List) and firstElement(UsingListExpression:l1,le1) then print(le1)."))
+					"Rule ListFirst:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHoo (List)) and firstElement(UsingListExpression:l1,le1) then print(le1)."))
 		]
 	}
 	
@@ -569,11 +569,11 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 4)	// content requires articles to be enabled, 2 var not bound in premises
+			assertTrue(issues.size == 0)
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule ListFirst:  if rdf(UsingListExpression:l1, rdf:type, v0) and firstElement(UsingListExpression:l1,le1) then rdf(UsingListExpression:l1, UsingListExpression:selectedElement, le1) and print(le1)."))
+					"Rule ListFirst:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and firstElement(UsingListExpression:l1,le1) then rdf(UsingListExpression:l1, UsingListExpression:selectedElement, le1) and print(le1)."))
 		]
 	}
 	

@@ -61,32 +61,67 @@ public class ElementBefore extends TypedBaseBuiltin {
      */
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
         Node typedList = getArg(0, args, context);
+        Node matchElement = getArg(1, args, context);
         Node slmfirst = NodeFactory.createURI("http://sadl.org/sadllistmodel#first");
-        ClosableIterator<Triple> itr = context.find(typedList, slmfirst, null);
-        if (itr.hasNext()) {
-        	Node firstElement = itr.next().getObject();
-        	if (firstElement != null) {
-        		return context.getEnv().bind(args[length - 1], firstElement);	     
-        	}
+        Node slmrest = NodeFactory.createURI("http://sadl.org/sadllistmodel#rest");
+        
+        Node currentList = typedList;
+        Node previousList = null;
+        boolean atMatchingElement = false;
+        do {
+            ClosableIterator<Triple> itr = context.find(currentList, slmfirst, null);
+            if (itr.hasNext()) {
+            	Node firstElement = itr.next().getObject();
+            	if (firstElement != null && firstElement.equals(matchElement)) {
+            		itr.close();
+            		atMatchingElement = true;
+             	}
+            }
+            if (!atMatchingElement) {
+		        ClosableIterator<Triple> ritr = context.find(currentList, slmrest, null);
+		        if (ritr.hasNext()) {
+		        	previousList = currentList;
+		        	currentList = ritr.next().getObject();
+		        }
+		        else {
+		        	currentList = null;
+		        	previousList = null;
+		        }
+		        ritr.close();
+            }
+        } while (!atMatchingElement && currentList != null);
+        
+        if (previousList != null) {
+	        ClosableIterator<Triple> itr = context.find(previousList, slmfirst, null);
+	        if (itr.hasNext()) {
+	        	Node firstElement = itr.next().getObject();
+	        	if (firstElement != null) {
+	        		itr.close();
+	        		return context.getEnv().bind(args[length - 1], firstElement);	     
+	        	}
+	        }
         }
-        else {
-            ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
-            if (itr2.hasNext()) {
+        boolean debug = true;;
+		if (debug ) {
+	        ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
+	        if (itr2.hasNext()) {
 	            while (itr2.hasNext()) {
 	            	System.out.println(itr2.next().toString());
 	            }
-            }
-            else {
-            	ExtendedIterator<Triple> itr3 = context.getGraph().find();
-            	if (itr3.hasNext()) {
+	        }
+	        else {
+	        	ExtendedIterator<Triple> itr3 = context.getGraph().find();
+	        	if (itr3.hasNext()) {
 	            	while (itr3.hasNext()) {
 	            		System.out.println(itr3.next().toString());
 	            	}
-            	}
-            	else {
-            		System.out.println(context.getGraph().toString());
-            	}
-            }
+	        	}
+	        	else {
+	        		System.out.println(context.getGraph().toString());
+	        	}
+	        	itr3.close();
+	        }
+	        itr2.close();
         }
         return false;
     }

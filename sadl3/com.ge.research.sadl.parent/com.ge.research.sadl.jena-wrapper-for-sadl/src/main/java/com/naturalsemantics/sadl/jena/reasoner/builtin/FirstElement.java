@@ -68,7 +68,8 @@ public class FirstElement extends TypedBaseBuiltin {
         		return context.getEnv().bind(args[length - 1], firstElement);	     
         	}
         }
-        else {
+        boolean debug = true;;
+		if (debug ) {
             ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
             if (itr2.hasNext()) {
 	            while (itr2.hasNext()) {

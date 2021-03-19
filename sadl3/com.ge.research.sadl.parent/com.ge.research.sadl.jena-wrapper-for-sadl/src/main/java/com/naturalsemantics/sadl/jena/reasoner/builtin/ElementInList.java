@@ -24,6 +24,7 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
+import com.ge.research.sadl.jena.reasoner.builtin.GeUtils;
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 
 /**
@@ -60,32 +61,63 @@ public class ElementInList extends TypedBaseBuiltin {
      */
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
         Node typedList = getArg(0, args, context);
-        Node slmfirst = NodeFactory.createURI("http://sadl.org/sadllistmodel#first");
-        ClosableIterator<Triple> itr = context.find(typedList, slmfirst, null);
-        if (itr.hasNext()) {
-        	Node firstElement = itr.next().getObject();
-        	if (firstElement != null) {
-        		return context.getEnv().bind(args[length - 1], firstElement);	     
-        	}
+        Node indexNode = getArg(1, args, context);
+        int index = -1;
+        Object v1 = indexNode.getLiteralValue();
+        Node sum = null;
+        if (v1 instanceof Number) {
+            index = ((Number)v1).intValue();
         }
-        else {
-            ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
-            if (itr2.hasNext()) {
+        if (index >= 0) {
+	        Node slmfirst = NodeFactory.createURI("http://sadl.org/sadllistmodel#first");
+	        Node slmrest = NodeFactory.createURI("http://sadl.org/sadllistmodel#rest");
+	        
+	        Node currentList = typedList;
+	        int idx = 0;
+	        while (idx < index && currentList != null) {
+		        ClosableIterator<Triple> ritr = context.find(currentList, slmrest, null);
+		        if (ritr.hasNext()) {
+		        	currentList = ritr.next().getObject();
+		        }
+		        else {
+		        	currentList = null;
+		        }
+		        ritr.close();
+		        idx++;
+	        } 
+	        
+	        if (currentList != null) {
+		        ClosableIterator<Triple> itr = context.find(currentList, slmfirst, null);
+		        if (itr.hasNext()) {
+		        	Node firstElement = itr.next().getObject();
+		        	if (firstElement != null) {
+		        		itr.close();
+		        		return context.getEnv().bind(args[length - 1], firstElement);	     
+		        	}
+		        }
+	        }
+        }
+        boolean debug = true;;
+		if (debug ) {
+	        ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
+	        if (itr2.hasNext()) {
 	            while (itr2.hasNext()) {
 	            	System.out.println(itr2.next().toString());
 	            }
-            }
-            else {
-            	ExtendedIterator<Triple> itr3 = context.getGraph().find();
-            	if (itr3.hasNext()) {
+	        }
+	        else {
+	        	ExtendedIterator<Triple> itr3 = context.getGraph().find();
+	        	if (itr3.hasNext()) {
 	            	while (itr3.hasNext()) {
 	            		System.out.println(itr3.next().toString());
 	            	}
-            	}
-            	else {
-            		System.out.println(context.getGraph().toString());
-            	}
-            }
+	        	}
+	        	else {
+	        		System.out.println(context.getGraph().toString());
+	        	}
+	        	itr3.close();
+	        }
+	        itr2.close();
         }
         return false;
     }

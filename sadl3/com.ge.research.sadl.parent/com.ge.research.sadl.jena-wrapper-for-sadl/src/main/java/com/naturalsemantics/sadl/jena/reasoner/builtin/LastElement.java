@@ -61,14 +61,32 @@ public class LastElement extends TypedBaseBuiltin {
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
         Node typedList = getArg(0, args, context);
         Node slmfirst = NodeFactory.createURI("http://sadl.org/sadllistmodel#first");
-        ClosableIterator<Triple> itr = context.find(typedList, slmfirst, null);
+        Node slmrest = NodeFactory.createURI("http://sadl.org/sadllistmodel#rest");
+        
+        Node relevantList = typedList;
+        
+        boolean atLastElement = false;
+        do {
+	        ClosableIterator<Triple> ritr = context.find(relevantList, slmrest, null);
+	        if (ritr.hasNext()) {
+	        	relevantList = ritr.next().getObject();
+	        }
+	        else {
+	        	atLastElement = true;
+	        }
+	        ritr.close();
+        } while (!atLastElement);
+        
+        ClosableIterator<Triple> itr = context.find(relevantList, slmfirst, null);
         if (itr.hasNext()) {
         	Node firstElement = itr.next().getObject();
         	if (firstElement != null) {
+        		itr.close();
         		return context.getEnv().bind(args[length - 1], firstElement);	     
         	}
         }
-        else {
+        boolean debug = true;;
+		if (debug ) {
             ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
             if (itr2.hasNext()) {
 	            while (itr2.hasNext()) {
@@ -85,7 +103,9 @@ public class LastElement extends TypedBaseBuiltin {
             	else {
             		System.out.println(context.getGraph().toString());
             	}
+            	itr3.close();
             }
+            itr2.close();
         }
         return false;
     }

@@ -188,7 +188,7 @@ public class NamedNode extends Node {
 		sb.append(name);
 		if (getNodeType() != null && 
 				(getNodeType().equals(NodeType.ClassListNode) || getNodeType().equals(NodeType.DataTypeListNode))) {
-			sb.append(" List");
+			sb.append(" (List)");
 			if(listLiterals != null) {
 				sb.append(" [");
 				for(int i = 0; i < listLiterals.size(); i++) {

@@ -21,6 +21,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.reasoner.rulesys.RuleContext;
+import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
@@ -61,32 +62,61 @@ public class Index extends TypedBaseBuiltin {
      */
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
         Node typedList = getArg(0, args, context);
+        Node matchElement = getArg(1, args, context);
+        int index = 0;
         Node slmfirst = NodeFactory.createURI("http://sadl.org/sadllistmodel#first");
-        ClosableIterator<Triple> itr = context.find(typedList, slmfirst, null);
-        if (itr.hasNext()) {
-        	Node firstElement = itr.next().getObject();
-        	if (firstElement != null) {
-        		return context.getEnv().bind(args[length - 1], firstElement);	     
-        	}
+        Node slmrest = NodeFactory.createURI("http://sadl.org/sadllistmodel#rest");
+        
+        Node relevantList = typedList;
+        
+        boolean atMatchingElement = false;
+        do {
+            ClosableIterator<Triple> itr = context.find(relevantList, slmfirst, null);
+            if (itr.hasNext()) {
+            	Node firstElement = itr.next().getObject();
+            	if (firstElement != null && firstElement.equals(matchElement)) {
+            		itr.close();
+            		atMatchingElement = true;
+             	}
+            }
+            if (!atMatchingElement) {
+		        ClosableIterator<Triple> ritr = context.find(relevantList, slmrest, null);
+		        if (ritr.hasNext()) {
+		        	relevantList = ritr.next().getObject();
+			        index++;
+		        }
+		        else {
+		        	relevantList = null;
+		        }
+		        ritr.close();
+            }
+        } while (!atMatchingElement && relevantList != null);
+        
+        if (atMatchingElement) {
+        	Node indexNode = Util.makeIntNode(index);
+    		return context.getEnv().bind(args[length - 1], indexNode);	     
         }
-        else {
-            ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
-            if (itr2.hasNext()) {
+        boolean debug = true;
+		if (debug) {
+	        ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
+	        if (itr2.hasNext()) {
 	            while (itr2.hasNext()) {
 	            	System.out.println(itr2.next().toString());
 	            }
-            }
-            else {
-            	ExtendedIterator<Triple> itr3 = context.getGraph().find();
-            	if (itr3.hasNext()) {
+	        }
+	        else {
+	        	ExtendedIterator<Triple> itr3 = context.getGraph().find();
+	        	if (itr3.hasNext()) {
 	            	while (itr3.hasNext()) {
 	            		System.out.println(itr3.next().toString());
 	            	}
-            	}
-            	else {
-            		System.out.println(context.getGraph().toString());
-            	}
-            }
+	        	}
+	        	else {
+	        		System.out.println(context.getGraph().toString());
+	        	}
+	        	itr3.close();
+	        }
+	        itr2.close();
         }
         return false;
     }
