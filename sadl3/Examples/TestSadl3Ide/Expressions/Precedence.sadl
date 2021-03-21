@@ -18,9 +18,3 @@
  Expr: -PI+3*-e.
  Expr: -(PI)+3*(-e).
  Expr: e % PI.
- 
- Expr: element before v1 in v2.
- 
- 
- 
-  

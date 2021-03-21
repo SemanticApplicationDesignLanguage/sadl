@@ -767,9 +767,10 @@ public class PathFinder {
 	 * @param nodesReached 
 	 * @param notSolved
 	 * @return
+	 * @throws TranslationException 
 	 */
 	private List<Resource> getNewEffectiveRoots(List<Resource> roots, List<Resource> newEffectiveRoots, List<Resource> ceilingNodes,
-			List<Resource> solved, Map<Resource, Map<Resource, List<DirectedPath>>> nodesReached) {
+			List<Resource> solved, Map<Resource, Map<Resource, List<DirectedPath>>> nodesReached) throws TranslationException {
 		boolean allRootsConnected = true;
 		
 		// Identify a target to serve as a test node against which all other roots are checked for paths to determine if solution is complete
@@ -1517,8 +1518,9 @@ public class PathFinder {
 	 * Method to determine if a Node is a property in the ontology
 	 * @param nodeType
 	 * @return
+	 * @throws TranslationException 
 	 */
-	protected boolean isProperty(Node nodeType) {
+	protected boolean isProperty(Node nodeType) throws TranslationException {
 		return getIftranslator().getModelProcessor().isProperty(nodeType);
 	}
 

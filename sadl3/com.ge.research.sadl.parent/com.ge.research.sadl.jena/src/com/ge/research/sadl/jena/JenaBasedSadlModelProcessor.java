@@ -5674,25 +5674,26 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected Object processBinaryExpressionByParts(EObject container, String op, Expression lexpr, Expression rexpr)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		StringBuilder errorMessage = new StringBuilder();
-//		if (!op.equals("and") && !op.equals("or")) {
-//			// don't validate these as they will be validated in their parts and to do so now will not always work
-			if (lexpr != null && rexpr != null) {
-				if(!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
-					addTypeCheckingError(errorMessage.toString(), container);
-				}
-				else {
-					Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
-					if (ip != null) {
-						Iterator<EObject> ipitr = ip.keySet().iterator();
-						while (ipitr.hasNext()) {
-							EObject eobj = ipitr.next();
-							OntModelProvider.addImpliedProperty(lexpr.eResource(), eobj, ip.get(eobj));
-						}
-						// TODO must add implied properties to rules, tests, etc.
+		boolean isDefiningDeclaration = false;
+		if (lexpr != null && rexpr != null) {
+			isDefiningDeclaration = isDefiningDeclaration(lexpr, rexpr, op);
+			// no need to do type checking if this is a defining declaration
+			if(!isDefiningDeclaration && 
+					!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
+				addTypeCheckingError(errorMessage.toString(), container);
+			}
+			else {
+				Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
+				if (ip != null) {
+					Iterator<EObject> ipitr = ip.keySet().iterator();
+					while (ipitr.hasNext()) {
+						EObject eobj = ipitr.next();
+						OntModelProvider.addImpliedProperty(lexpr.eResource(), eobj, ip.get(eobj));
 					}
+					// TODO must add implied properties to rules, tests, etc.
 				}
 			}
-//		}
+		}
 		BuiltinType optype = BuiltinType.getType(op);
 		Object lobj = null;
 		if (lexpr != null) {
@@ -5868,6 +5869,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// this is a Declaration with a variable on the right and an individual on the left
 					TripleElement trel = new TripleElement((Node) lobj, new RDFTypeNode(), (Node) robj);
 					trel.setSourceType(TripleSourceType.ITC);
+					if (isDefiningDeclaration) {
+						trel.setObject(((VariableNode)robj).getType());
+					}
 					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
 				}
 				else if (!(robj instanceof VariableNode)) {
@@ -6269,6 +6273,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi), rest);
 		}
+	}
+
+	private boolean isDefiningDeclaration(Expression lexpr, Expression rexpr, String op) {
+		if (op.equals("is") && lexpr instanceof Name && 
+				declarationExtensions.getDeclaration(((Name)lexpr).getName().getName()).equals(((Name)lexpr).getName()) &&
+				lexpr.eContainer().equals(rexpr.eContainer())) {
+			return true;
+		}
+		return false;
 	}
 
 	private void applyRestrictionToVariableType(VariableNode vobj, NamedNode restrictionType, EObject expr) throws CircularDependencyException, TranslationException {
@@ -7689,7 +7702,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (expr.eContainer() instanceof BinaryOperation &&
 							((BinaryOperation)expr.eContainer()).getOp().equals("is") &&
 							typenode instanceof NamedNode && 
-							((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) &&
+							(((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) ||
+									((NamedNode)typenode).getNodeType().equals(NodeType.ClassListNode)) &&
 							((BinaryOperation)expr.eContainer()).getLeft() instanceof Name &&
 							(getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.INSTANCE) ||
 							getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.VARIABLE))) {
@@ -7881,9 +7895,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	public boolean isProperty(Object node) {
+	public boolean isProperty(Object node) throws TranslationException {
 		if (node instanceof NamedNode) {
 			return isProperty(((NamedNode) node).getNodeType());
+		}
+		else if (node instanceof ConceptName) {
+			return isProperty(conceptTypeToNodeType(((ConceptName)node).getType()));
 		}
 		return false;
 	}
@@ -15679,7 +15696,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	private List<TripleElement> getTriplesOfInterestList(List<TripleElement> found, GraphPatternElement gpe) throws InvalidTypeException {
+	private List<TripleElement> getTriplesOfInterestList(List<TripleElement> found, GraphPatternElement gpe) throws InvalidTypeException, TranslationException {
 		if (gpe instanceof TripleElement) {
 			if (((TripleElement)gpe).getSubject() != null) {
 				found = addTripleElement(found, (TripleElement)gpe);
@@ -15713,7 +15730,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return found;
 	}
 
-	private List<TripleElement> addTripleOfInterest(List<TripleElement> found, Node node) throws InvalidTypeException {
+	private List<TripleElement> addTripleOfInterest(List<TripleElement> found, Node node) throws InvalidTypeException, TranslationException {
 		if (node instanceof NamedNode && !(node instanceof VariableNode)) {
 			if (isProperty((NamedNode)node)) {
 				TripleElement newtr = new TripleElement(null, node, null);
