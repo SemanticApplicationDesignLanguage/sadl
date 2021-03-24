@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Automatic-Module-Name: com.ge.research.sadl.testsuite.ide
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.testsuite.ide
-Bundle-Vendor: General Electic CompanyGeneral Electic Company
+Bundle-Vendor: GE Research
 Bundle-Version: 3.5.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.testsuite.ide; singleton:=true
 Bundle-ActivationPolicy: lazy
@@ -11,6 +11,6 @@ Require-Bundle: com.ge.research.sadl.testsuite,
  org.eclipse.xtext.xbase.ide,
  org.antlr.runtime;bundle-version="[3.2.0,3.2.1)",
  com.ge.research.sadl
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.testsuite.ide.contentassist.antlr.internal,
  com.ge.research.sadl.testsuite.ide.contentassist.antlr

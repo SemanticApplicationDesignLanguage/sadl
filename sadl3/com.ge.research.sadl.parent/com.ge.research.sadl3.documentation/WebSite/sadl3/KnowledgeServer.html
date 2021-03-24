@@ -127,9 +127,7 @@ true, &quot;<a href="file:///c:/kbases/mykbase/mytemplate.tmpl">file:///c:/kbase
 String.</p>
 <h3>Sending Data from a Client File Containing RDF Triples</h3>
 <p>If a file on the client file system contains RDF triples, the data can be 
-sent to the server using the class <i>
-<a class="header" href="eclipse-javadoc:â??=com.ge.research.sadl.sadlserver-impl/C:\/Program%20Files\/Java\/jdk1.8.0_77\/jre\/lib\/rt.jar%3Cjavax">
-javax</a>.<a class="header" href="eclipse-javadoc:â??=com.ge.research.sadl.sadlserver-impl/C:\/Program%20Files\/Java\/jdk1.8.0_77\/jre\/lib\/rt.jar%3Cjavax.activation">activation</a>.DataSource</i> 
+sent to the server using the class <i>jakarta.activation.DataSource</i>
 or one of its subclasses.</p>
 <p>&nbsp;&nbsp;&nbsp; <i>DataSource fdsrc = new FileDataSource(file:///c:/tmp/instdata1.owl);<br>
 &nbsp;&nbsp;&nbsp; boolean status = srvr.sendData(fdsrc);</i></p>

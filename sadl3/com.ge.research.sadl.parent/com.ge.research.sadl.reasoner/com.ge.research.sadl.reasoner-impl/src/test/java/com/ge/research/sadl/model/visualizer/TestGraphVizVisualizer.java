@@ -13,7 +13,6 @@ import com.ge.research.sadl.reasoner.ResultSet;
 
 public class TestGraphVizVisualizer {
 
-	@Ignore("https://github.com/crapo/sadlos2/issues/139")
 	@Test
 	public void test() throws IOException {
 		String exec = System.getenv("GraphVizPath");
@@ -42,7 +41,6 @@ public class TestGraphVizVisualizer {
 		gv.graphResultSetData(rs);
 	}
 
-	@Ignore("https://github.com/crapo/sadlos2/issues/139")
 	@Test
 	public void testDuplicates() throws IOException {
 		String exec = System.getenv("GraphVizPath");

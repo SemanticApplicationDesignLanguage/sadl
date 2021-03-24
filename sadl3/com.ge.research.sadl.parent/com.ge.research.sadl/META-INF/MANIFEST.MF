@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl
-Bundle-Vendor: GE Global Research
+Bundle-Vendor: GE Research
 Bundle-Version: 3.5.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl; singleton:=true
 Bundle-ActivationPolicy: lazy
@@ -23,7 +23,7 @@ Require-Bundle: com.ge.research.jena,
  org.jsoup,
  org.objectweb.asm;resolution:=optional
 Eclipse-BuddyPolicy: registered
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl,
  com.ge.research.sadl.builder,
  com.ge.research.sadl.external,
@@ -47,6 +47,6 @@ Export-Package: com.ge.research.sadl,
  com.ge.research.sadl.services,
  com.ge.research.sadl.utils,
  com.ge.research.sadl.validation
-Import-Package: javax.activation,
+Import-Package: jakarta.activation,
  org.apache.log4j
 Automatic-Module-Name: com.ge.research.sadl

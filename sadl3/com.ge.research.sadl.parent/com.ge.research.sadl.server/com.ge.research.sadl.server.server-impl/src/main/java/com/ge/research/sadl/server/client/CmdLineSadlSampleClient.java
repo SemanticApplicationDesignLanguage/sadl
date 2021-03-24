@@ -30,8 +30,8 @@ package com.ge.research.sadl.server.client;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

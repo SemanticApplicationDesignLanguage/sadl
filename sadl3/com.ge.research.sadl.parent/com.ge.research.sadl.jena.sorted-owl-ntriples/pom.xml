@@ -1,36 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>sorted.owl.ntriples</artifactId>
-  <name>Sorted OWL N-triples</name>
-  <description>Sort OWL file by n-triples, ignoring blank nodes</description>
+
   <parent>
-  	<groupId>com.ge.research.sadl</groupId>
-  	<version>3.5.0-SNAPSHOT</version>
-  	<artifactId>com.ge.research.sadl.parent</artifactId>
+    <groupId>com.ge.research.sadl</groupId>
+    <artifactId>com.ge.research.sadl.parent</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
   </parent>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.apache.jena</groupId>
-				<artifactId>apache-jena-libs</artifactId>
-				<version>3.16.0</version>
-				<type>pom</type>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>apache-jena-libs</artifactId>
-			<type>pom</type>
-		</dependency>
-	  <dependency>
-	    <groupId>org.apache.jena</groupId>
-	    <artifactId>jena-tdb</artifactId>
-	    <version>3.16.0</version>
-	  </dependency>
-	</dependencies>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+
+  <artifactId>com.ge.research.sadl.jena.sorted-owl-ntriples</artifactId>
+  <packaging>jar</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>apache-jena-libs</artifactId>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+
 </project>

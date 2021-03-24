@@ -18,6 +18,10 @@ import org.apache.jena.rdf.model.RDFWriter;
 
 public class SortedOwlNtriples {
 
+	private static String RDF_XML_ABBREV_FORMAT = "RDF/XML-ABBREV";
+	private static String N_TRIPLE_FORMAT = "N-TRIPLE";
+	private static String N3_FORMAT = "N3";
+
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.err.println("Input OWL file name must be first command-line argument");

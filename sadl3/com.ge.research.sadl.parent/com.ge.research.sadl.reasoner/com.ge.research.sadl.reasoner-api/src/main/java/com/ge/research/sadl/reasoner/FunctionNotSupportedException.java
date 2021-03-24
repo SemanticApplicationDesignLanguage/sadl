@@ -25,6 +25,8 @@ package com.ge.research.sadl.reasoner;
 
 public class FunctionNotSupportedException extends Exception {
 
+    private static final long serialVersionUID = 1L;
+
 	public FunctionNotSupportedException(String msg) {
 		super(msg);
 	}
