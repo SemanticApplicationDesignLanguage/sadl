@@ -799,6 +799,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else if (getModelProcessor().isVariableInDeclarationInRuleOrQuery(rightExpression)) {
 					dontTypeCheck = true;
 				}
+				else if (getModelProcessor().isVariableTypeConditionInRuleOrQuery(expression)) {
+					dontTypeCheck = true;
+				}
 			} catch (DontTypeCheckException e) {
 				dontTypeCheck = true;
 			}

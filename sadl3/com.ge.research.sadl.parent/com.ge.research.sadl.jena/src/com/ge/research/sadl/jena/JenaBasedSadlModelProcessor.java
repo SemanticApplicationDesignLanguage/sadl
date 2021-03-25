@@ -6829,6 +6829,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
+
+	protected boolean isVariableTypeConditionInRuleOrQuery(EObject expression) throws CircularDefinitionException {
+		if (EcoreUtil2.getContainerOfType(expression, QueryStatement.class) != null
+				|| EcoreUtil2.getContainerOfType(expression, SelectExpression.class) != null 
+				|| EcoreUtil2.getContainerOfType(expression, RuleStatement.class) != null) {
+			// this is in a rule or query
+			if (expression instanceof BinaryOperation &&
+					((BinaryOperation)expression).getOp().equals("is") &&
+					((BinaryOperation)expression).getRight() instanceof Declaration &&
+					((BinaryOperation)expression).getLeft() instanceof Name &&
+					declarationExtensions.getOntConceptType(((Name)((BinaryOperation)expression).getLeft()).getName()).equals(OntConceptType.VARIABLE)) {
+				return true;
+			}
+			
+		}
+		return false;
+	}
+	
 	private void checkTripleRange(EObject subjeo, EObject predeo, EObject objeo, Expression expr, Node subjNode,
 			Node predNode, OntProperty pred, NodeType pnodetype, Node obj, boolean isKnownToBeList)
 			throws InvalidTypeException, TranslationException, CircularDependencyException {
