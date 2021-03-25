@@ -44,3 +44,6 @@ com.naturalsemantics.sadl.jena.reasoner.builtin.FirstElement
 com.naturalsemantics.sadl.jena.reasoner.builtin.Index
 com.naturalsemantics.sadl.jena.reasoner.builtin.LastElement
 com.naturalsemantics.sadl.jena.reasoner.builtin.Length
+com.naturalsemantics.sadl.jena.reasoner.builtin.InsertElementInList
+com.naturalsemantics.sadl.jena.reasoner.builtin.DeleteElementFromList
+com.naturalsemantics.sadl.jena.reasoner.builtin.SadlListToString
