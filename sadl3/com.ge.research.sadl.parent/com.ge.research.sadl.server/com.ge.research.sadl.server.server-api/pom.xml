@@ -14,15 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>com.ge.research.sadl</groupId>
-      <artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.ge.research.sadl</groupId>
       <artifactId>reasoner-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.ge.research.sadl</groupId>
-      <artifactId>reasoner-impl</artifactId>
     </dependency>
     <dependency>
       <groupId>com.sun.activation</groupId>

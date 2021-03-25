@@ -14,6 +14,10 @@
   <dependencies>
     <dependency>
       <groupId>com.ge.research.sadl</groupId>
+      <artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.ge.research.sadl</groupId>
       <artifactId>reasoner-api</artifactId>
     </dependency>
     <dependency>
@@ -25,13 +29,21 @@
       <artifactId>sadlserver-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
+      <groupId>com.sun.activation</groupId>
+      <artifactId>jakarta.activation</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-server</artifactId>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>apache-jena-libs</artifactId>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

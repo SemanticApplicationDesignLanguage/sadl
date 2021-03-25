@@ -181,8 +181,8 @@
       </dependency>
       <dependency>
         <groupId>org.pojava</groupId>
-        <artifactId>pojava</artifactId>
-        <version>3.0.3</version>
+        <artifactId>datetime</artifactId>
+        <version>3.0.2</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -324,8 +324,18 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.2.0</version>
           <configuration>
+            <author>false</author>
+            <docencoding>UTF-8</docencoding>
             <doclint>all,-missing</doclint>
+            <doctitle>${project.name} API Reference</doctitle>
+            <keywords>true</keywords>
+            <linksource>true</linksource>
+            <locale>en_US</locale>
+            <notimestamp>true</notimestamp>
             <quiet>true</quiet>
+            <source>11</source>
+            <version>false</version>
+            <windowtitle>${project.name} API Reference</windowtitle>
           </configuration>
         </plugin>
         <plugin>

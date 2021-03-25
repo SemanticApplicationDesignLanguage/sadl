@@ -17,17 +17,13 @@
       <artifactId>jakarta.activation</artifactId>
     </dependency>
     <dependency>
-      <groupId>net.sf.opencsv</groupId>
-      <artifactId>opencsv</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.jena</groupId>
       <artifactId>apache-jena-libs</artifactId>
       <type>pom</type>
     </dependency>
     <dependency>
       <groupId>org.pojava</groupId>
-      <artifactId>pojava</artifactId>
+      <artifactId>datetime</artifactId>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

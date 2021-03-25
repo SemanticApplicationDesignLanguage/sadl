@@ -4,6 +4,7 @@ Bundle-Name: com.ge.research.sadl.ui
 Bundle-Vendor: GE Research
 Bundle-Version: 3.5.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.ui; singleton:=true
+Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
@@ -52,7 +53,5 @@ Import-Package: com.ge.research.sadl.errorgenerator.generator,
  com.ge.research.sadl.reasoner.utils,
  jakarta.activation,
  org.apache.log4j,
- org.eclipse.jdt.internal.ui.packageview,
- org.pojava.datetime
-Bundle-Activator: com.ge.research.sadl.ui.internal.SadlActivator
+ org.eclipse.jdt.internal.ui.packageview
 Automatic-Module-Name: com.ge.research.sadl.ui
