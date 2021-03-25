@@ -17,28 +17,34 @@
  ***********************************************************************/
 package com.naturalsemantics.sadl.jena.reasoner.builtin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.vocabulary.RDF;
 
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
+import com.ge.research.sadl.jena.reasoner.builtin.Utils;
 
 /**
  * This class implements a Jena Built-in function in the bodyCall method that takes a SADL typed 
- * list and an int index as arguments and binds the list element having that index, if such exists, 
- * to the 3rd argument. If successful, the method returns true else it returns false.
+ * list and an int index as arguments. The method creates a new list with the same elements as the 
+ * old list except that the index-th element is removed. 
+ * If successful, the method returns true else it returns false.
  * @author andy@naturalsemantics.com
  */
-public class ElementInList extends TypedBaseBuiltin {
+public class DeleteElementFromList extends TypedBaseBuiltin {
 
 	private int argLength = 3;
 	
 	@Override
 	public String getName() {
-		return "elementInList";
+		return "deleteElementFromList";
 	}
 
     /**
@@ -63,16 +69,31 @@ public class ElementInList extends TypedBaseBuiltin {
         Node indexNode = getArg(1, args, context);
         int index = -1;
         Object v1 = indexNode.getLiteralValue();
-         if (v1 instanceof Number) {
+        if (v1 instanceof Number) {
             index = ((Number)v1).intValue();
         }
         if (index >= 0) {
 	        Node slmfirst = NodeFactory.createURI("http://sadl.org/sadllistmodel#first");
 	        Node slmrest = NodeFactory.createURI("http://sadl.org/sadllistmodel#rest");
 	        
+	        List<Node> oldListElements = new ArrayList<Node>();
 	        Node currentList = typedList;
-	        int idx = 0;
-	        while (idx < index && currentList != null) {
+	        while (currentList != null) {
+	        	ClosableIterator<Triple> fitr = context.find(currentList, slmfirst, null);
+	        	if (fitr.hasNext()) {
+	        		oldListElements.add(fitr.next().getObject());
+	        		fitr.close();
+	        	}
+	        	else {
+	        		if (!currentList.isBlank()) {
+	        			System.err.println("List '" + currentList.getLocalName() + "' has no first value");
+	        		}
+	        		else {
+	        			System.err.println("List first unexpectedly has no value");
+	        		}
+	        		fitr.close();
+	        		return false;
+	        	}
 		        ClosableIterator<Triple> ritr = context.find(currentList, slmrest, null);
 		        if (ritr.hasNext()) {
 		        	currentList = ritr.next().getObject();
@@ -81,19 +102,28 @@ public class ElementInList extends TypedBaseBuiltin {
 		        	currentList = null;
 		        }
 		        ritr.close();
-		        idx++;
-	        } 
-	        
-	        if (currentList != null) {
-		        ClosableIterator<Triple> itr = context.find(currentList, slmfirst, null);
-		        if (itr.hasNext()) {
-		        	Node firstElement = itr.next().getObject();
-		        	if (firstElement != null) {
-		        		itr.close();
-		        		return context.getEnv().bind(args[length - 1], firstElement);	     
-		        	}
-		        }
 	        }
+	        // create new lists of the same type(s) as old list
+		    // then copy elements from the old list to the new one except in the index location
+	        Node firstList = null;
+	        Node lastList = null;
+	        for (int i = 0; i < oldListElements.size(); i++) {
+	        	if (i != index) {
+			        Node newList = createTypedList(typedList, context);
+	        		Triple t1 = new Triple(newList, slmfirst, oldListElements.get(i));
+	        		Utils.doAddTriple(t1, context, true);
+	        		if (lastList == null) {
+	        			firstList = newList;
+	        		}
+	        		else {
+	        			Triple t2 = new Triple(lastList, slmrest, newList);
+	        			Utils.doAddTriple(t2, context, true);
+	        		}
+	        		lastList = newList;
+	        	}
+	        }
+	        
+       		return context.getEnv().bind(args[length - 1], firstList);	     
         }
         boolean debug = true;;
 		if (debug ) {
@@ -120,9 +150,25 @@ public class ElementInList extends TypedBaseBuiltin {
         return false;
     }
 
+    /**
+     * Method to create a new List instance of the same type as the List passed in.
+     * @param typedList
+     * @param context
+     * @return
+     */
+	private Node createTypedList(Node typedList, RuleContext context) {
+		Node newList = NodeFactory.createBlankNode();
+		ClosableIterator<Triple> typitr = context.find(typedList, RDF.type.asNode(), null);
+		if (typitr.hasNext()) {
+			Triple typtr = new Triple(newList, RDF.type.asNode(), typitr.next().getObject());
+			Utils.doAddTriple(typtr, context, true);
+		}
+		return newList;
+	}
+
 	@Override
 	public String getFunctionSignatureString() {
-		return "elementInList(string, int)string";
+		return "deleteElementFromList(string, int)string";
 	}
 
 

@@ -84,6 +84,36 @@ External sqrt(decimal X) returns decimal:
 External unbound(string X) returns string:
 "org.apache.jena.reasoner.rulesys.builtins#unbound".
 
+External firstElement(string X) returns string:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#firstElement".
+
+External insertElementInList(string X,  string X,  int X) returns string:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#insertElementInList".
+
+External elementInList(string X,  int X) returns string:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#elementInList".
+
+External lastElement(string X) returns string:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#lastElement".
+
+External deleteElementFromList(string X,  int X) returns string:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#deleteElementFromList".
+
+External elementAfter(string X,  string X) returns string:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#elementAfter".
+
+External sadlListToString(--) returns --:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#sadlListToString".
+
+External ^length(string X) returns int:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#length".
+
+External ^index(string X,  string X) returns int:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#index".
+
+External elementBefore(string X,  string X) returns string:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#elementBefore".
+
 External localname(--) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin#localname".
 
