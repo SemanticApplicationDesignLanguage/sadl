@@ -1,0 +1,17 @@
+uri "http://sadl.imp/testsadlide/testdefaults" version "$Revision: 1.1 $ Last modified on $Date: 2012/10/22 12:31:20 $".
+
+Thingy is a top-level class.
+Color is a top-level class, must be one of {Black, White}.
+dp describes Thingy has values of type float.
+op describes Thingy has values of type Color. 
+
+dp of Thingy has default 2.3 .
+op of Thingy has default White.
+
+MyThing is a Thingy.
+
+Test: MyThing has dp 2.3 .
+Test: MyThing has op White.
+Explain: MyThing has op White.
+Explain: MyThing has dp 2.3.
+
