@@ -1831,7 +1831,7 @@ public class OwlToSadl {
 		try {
 			listType = UtilsForJena.getTypedListType(theModel, configMgr, baseUri, inst);
 			if (listType != null && listType.getNodeType().equals(NodeType.DataTypeNode)) {
-				if (listType.getURI().equals(XSD.xstring) ||
+				if (listType.getURI().equals(XSD.xstring.getURI()) ||
 						listType.getURI().contains("date")) {
 					quoteListElements = true;
 				}

@@ -24,6 +24,7 @@
 package com.ge.research.sadl.reasoner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.ge.research.sadl.model.gp.Literal;
@@ -132,10 +133,19 @@ public class ResultSet {
 				table[i][j] = data[i][j];
 	}
 	
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.deepHashCode(table);
+        return result;
+    }
+
 	/**
 	 * Compare this ResultSet to the argument ResultSet.
 	 * Two ResultSets are equal if every row in one is equal to some row in the other and there are no extra rows.
 	 */
+	@Override
 	public boolean equals(Object otherObj) {
 		if (!(otherObj instanceof ResultSet)) {
 			return false;
@@ -356,7 +366,7 @@ public class ResultSet {
 	}
 
 	public static synchronized boolean areDoublesEqual(double testVal, double actVal) {
-		String tv = new Double(testVal).toString();
+		String tv = Double.toString(testVal);
 		while (tv.length() > 0 && !Character.isDigit(tv.charAt(0))) {
 			tv = tv.substring(1);
 		}

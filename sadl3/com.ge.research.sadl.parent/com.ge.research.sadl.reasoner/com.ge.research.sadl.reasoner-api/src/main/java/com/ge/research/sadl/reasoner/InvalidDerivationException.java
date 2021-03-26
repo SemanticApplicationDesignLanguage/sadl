@@ -25,6 +25,8 @@ package com.ge.research.sadl.reasoner;
 
 public class InvalidDerivationException extends Exception {
 
+    private static final long serialVersionUID = 1L;
+
 	public InvalidDerivationException(String msg) {
 		super(msg);
 	}

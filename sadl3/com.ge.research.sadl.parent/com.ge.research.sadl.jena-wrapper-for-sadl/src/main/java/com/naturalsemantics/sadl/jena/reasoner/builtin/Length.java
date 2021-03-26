@@ -23,7 +23,6 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.util.iterator.ClosableIterator;
-import org.apache.jena.util.iterator.ExtendedIterator;
 
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 

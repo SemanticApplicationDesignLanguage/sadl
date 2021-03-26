@@ -191,7 +191,7 @@ public class GetInstance extends CancellableBuiltin {
     	}
     	
     	if (theInst == null) {
-    		theInst = NodeFactory.createAnon();
+    		theInst = NodeFactory.createBlankNode();
 			if (_logger.isDebugEnabled()) {
 				_logger.debug("in Rule " + context.getRule().getName() + " created new bnode (" + theInst.toString() + " type will be " + pclass.toString());
 			}

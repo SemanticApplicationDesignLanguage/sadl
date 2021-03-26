@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -57,7 +58,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Seq;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.util.FileManager;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.util.FileUtils;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OWL;
@@ -188,7 +189,7 @@ public class ConfigurationManager implements IConfigurationManager {
 				logger.debug("reading existing mapping model '" + mappingFilename + "'");
 				// load mapping info from file
 				setMappingModel(ModelFactory.createDefaultModel()) ;
-			    InputStream in = FileManager.get().open(mappingFilename);
+			    InputStream in = RDFDataMgr.open(mappingFilename);
 			    if (in == null) {
 			    	throw new IllegalArgumentException("File: " + mappingFilename + " not found");
 			    }
@@ -226,7 +227,7 @@ public class ConfigurationManager implements IConfigurationManager {
 			Iterator<String> iterator = mappings.keySet().iterator();
 			boolean needFileLocator = false;
 			while (iterator.hasNext()) {
-				String url = (String)iterator.next();
+				String url = iterator.next();
 				logger.debug("loading mapping url ="+url);
 				String altUrl = mappings.get(url);
 				getJenaDocumentMgr().addAltEntry(url, altUrl);
@@ -269,11 +270,9 @@ public class ConfigurationManager implements IConfigurationManager {
 		            Statement stmt = getConfigModel().getProperty(df, dmyp);
 		            if (stmt != null) {
 		            	String val = stmt.getObject().asLiteral().getLexicalForm();
-		            	if (val.equals(IConfigurationManager.dmyOrderDMY)) {
-		            		DateTimeConfig.getGlobalDefault().setDmyOrder(true);
-		            	}
-		            	else {
-		            		DateTimeConfig.getGlobalDefault().setDmyOrder(false);
+		            	if (val.equals(IConfigurationManager.dmyOrderDMY)
+		            			&& !DateTimeConfig.getGlobalDefault().isDmyOrder()) {
+		            		logger.warn("Cannot configure DMY order for model");
 		            	}
 		            }
 				}
@@ -665,10 +664,10 @@ public class ConfigurationManager implements IConfigurationManager {
 		try {
 			Class<?> serviceClass = this.getClass().getClassLoader().loadClass(name);
 			if (serviceClass != null && clazz.isAssignableFrom(serviceClass)) {
-				Object service = serviceClass.newInstance();
+				Object service = serviceClass.getDeclaredConstructor().newInstance();
 				return clazz.cast(service);
 			}
-		} catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			// Ignored, we will throw a proper CNFE anyway. 
 		}
 		
@@ -1374,7 +1373,7 @@ public class ConfigurationManager implements IConfigurationManager {
 		for (int j = 0; j < categoryHierarchy.length; j++) {
 			newCatHier[j] = categoryHierarchy[j];
 		}
-		newCatHier[newCatHier.length - 1] = ((Resource)value).getLocalName();
+		newCatHier[newCatHier.length - 1] = value.getLocalName();
 		return newCatHier;
 	}
 

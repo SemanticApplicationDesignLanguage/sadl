@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
-import javax.activation.DataSource;
+import jakarta.activation.DataSource;
 
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;

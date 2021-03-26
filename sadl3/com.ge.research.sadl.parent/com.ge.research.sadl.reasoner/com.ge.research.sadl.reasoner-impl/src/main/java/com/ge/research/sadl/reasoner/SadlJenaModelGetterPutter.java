@@ -99,8 +99,7 @@ public class SadlJenaModelGetterPutter extends SadlJenaModelGetter {
     		boolean status = true;
     		File folder = new File(tdbFolder);
     		if (folder.exists()) {
-    			SadlUtils su = new SadlUtils();
-    			if (!su.recursiveDelete(folder)) {
+    			if (!SadlUtils.recursiveDelete(folder)) {
     				status = false;
     			}
     			return status;
