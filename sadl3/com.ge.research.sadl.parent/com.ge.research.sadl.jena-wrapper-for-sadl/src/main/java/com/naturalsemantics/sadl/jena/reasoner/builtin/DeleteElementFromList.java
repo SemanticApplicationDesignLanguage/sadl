@@ -107,25 +107,35 @@ public class DeleteElementFromList extends TypedBaseBuiltin {
 		    // then copy elements from the old list to the new one except in the index location
 	        Node firstList = null;
 	        Node lastList = null;
-	        for (int i = 0; i < oldListElements.size(); i++) {
-	        	if (i != index) {
-			        Node newList = createTypedList(typedList, context);
-	        		Triple t1 = new Triple(newList, slmfirst, oldListElements.get(i));
-	        		Utils.doAddTriple(t1, context, true);
-	        		if (lastList == null) {
-	        			firstList = newList;
-	        		}
-	        		else {
-	        			Triple t2 = new Triple(lastList, slmrest, newList);
-	        			Utils.doAddTriple(t2, context, true);
-	        		}
-	        		lastList = newList;
-	        	}
+	        
+	        if (index >= oldListElements.size()) {
+	        	System.out.println("Index of element of list to remove is out of bounds of list (index = " + index + ", list length = " + oldListElements.size() + ")");
+	        	return false;
+	        }
+	        if (oldListElements.size() == 1 && index == 0) {
+	        	firstList = createTypedList(typedList, context);
+	        }
+	        else {
+		        for (int i = 0; i < oldListElements.size(); i++) {
+		        	if (i != index) {
+				        Node newList = createTypedList(typedList, context);
+		        		Triple t1 = new Triple(newList, slmfirst, oldListElements.get(i));
+		        		Utils.doAddTriple(t1, context, true);
+		        		if (lastList == null) {
+		        			firstList = newList;
+		        		}
+		        		else {
+		        			Triple t2 = new Triple(lastList, slmrest, newList);
+		        			Utils.doAddTriple(t2, context, true);
+		        		}
+		        		lastList = newList;
+		        	}
+		        }
 	        }
 	        
        		return context.getEnv().bind(args[length - 1], firstList);	     
         }
-        boolean debug = true;;
+        boolean debug = false;;
 		if (debug ) {
 	        ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
 	        if (itr2.hasNext()) {
