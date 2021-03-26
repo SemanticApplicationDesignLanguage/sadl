@@ -1,0 +1,35 @@
+ uri "http://sadl.org/SadlListModelTemplate.sadl" alias sadllistmodeltemplate.
+ 
+ ^List is a class
+	described by ^first,
+    described by rest with values of type ^List,
+    described by lengthRestriction with values of type int,
+    described by minLengthRestriction with values of type int,
+    described by maxLengthRestriction with values of type int.
+    
+ Person is a class.
+ 
+ TopTenStudents is a type of Person List.   
+ 
+ TopTenFavoriteNames is a type of string List. 
+ 
+ ChildrenList is a type of Person List length 1-*.
+ children describes Person with values of type ChildrenList.
+ children of Person has at most 1 value. 
+
+ children describes Person with values of type ChildrenList.
+ children of Person has at most 1 value. 
+ children describes Person with values of type Person List length 1-*.
+ 
+ a Person List.
+ a string List.
+ 
+{John, Sue, Craig} are instances of Person.
+JoesChildren is the ChildrenList [John, Sue, Craig].
+
+JoesChildren is the Person List [John, Sue, Craig].
+
+//ChildlessChildren is the Person List [].
+//ChildlessChildren is the ChildrenList [].
+//
+//John has children ChildrenList [Sue, Craig].
