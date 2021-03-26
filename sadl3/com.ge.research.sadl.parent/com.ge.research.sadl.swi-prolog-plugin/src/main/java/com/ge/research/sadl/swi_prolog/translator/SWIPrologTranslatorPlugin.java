@@ -1876,7 +1876,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	}
 	
 	@Override
-	public Enum isBuiltinFunctionTypeCheckingAvailable(){
+	public IReasoner.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY isBuiltinFunctionTypeCheckingAvailable(){
 		return IReasoner.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
 	}
 

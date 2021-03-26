@@ -3,14 +3,14 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Jena
 Bundle-SymbolicName: com.ge.research.sadl.jena;singleton:=true
 Bundle-Version: 3.5.0.qualifier
-Bundle-Vendor: GE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: GE Research
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.jena;
   uses:="org.eclipse.emf.ecore,
    org.apache.jena.ontology,
    com.ge.research.sadl.model.gp,
    org.slf4j,
-   javax.activation,
+   jakarta.activation,
    com.ge.research.sadl.jena.missingpatterns,
    org.eclipse.xtext.util,
    org.apache.jena.rdf.model,
@@ -45,13 +45,12 @@ Export-Package: com.ge.research.sadl.jena;
 Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
  com.ge.research.sadl.errorgenerator,
- org.apache.xerces,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.emf.ecore,
  org.eclipse.equinox.common,
  org.eclipse.xtext,
  org.eclipse.xtext.builder
-Import-Package: javax.activation
+Import-Package: jakarta.activation
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Automatic-Module-Name: com.ge.research.sadl.jena

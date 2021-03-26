@@ -2,7 +2,7 @@ package com.ge.research.sadl.reasoner;
 
 import java.util.List;
 
-import javax.activation.DataSource;
+import jakarta.activation.DataSource;
 
 import com.ge.research.sadl.model.gp.SadlCommand;
 

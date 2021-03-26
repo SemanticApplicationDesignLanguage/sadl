@@ -23,6 +23,8 @@
 
 package com.ge.research.sadl.reasoner;
 
+import java.util.Objects;
+
 public class ModelError {
     public enum ErrorType{INFO, WARNING, ERROR}
 
@@ -42,13 +44,20 @@ public class ModelError {
     	setHyperLinkFileName(hyperlinkFilename);
     }
 
-	public boolean equals(Object me) {
-		if (me instanceof ModelError && errorType.equals(((ModelError)me).errorType) &&
-				errorMsg.equals(((ModelError)me).errorMsg)) {
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(errorMsg, errorType);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!(obj instanceof ModelError))
+            return false;
+        ModelError other = (ModelError) obj;
+        return Objects.equals(errorMsg, other.errorMsg) && errorType == other.errorType;
+    }
 	
     private void setErrorMsg(String errorMsg) {
         this.errorMsg = errorMsg;

@@ -1,33 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.ge.research.sadl</groupId>
-  <artifactId>com.ge.research.sadl.reasoner</artifactId>
-  <version>3.5.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>Reasoner/Translator</name>
+  <parent>
+    <groupId>com.ge.research.sadl</groupId>
+    <artifactId>com.ge.research.sadl.parent</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
+  </parent>
 
-  <properties>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  <artifactId>com.ge.research.sadl.reasoner</artifactId>
+  <packaging>pom</packaging>
 
   <modules>
-      <module>com.ge.research.sadl.reasoner-api</module>
-      <module>com.ge.research.sadl.reasoner-impl</module>
+    <module>com.ge.research.sadl.reasoner-api</module>
+    <module>com.ge.research.sadl.reasoner-impl</module>
   </modules>
 
   <build>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <version>3.2.0</version>
-              <configuration>
-                  <doclint>none</doclint>
-                  <quiet>true</quiet>
-              </configuration>
-          </plugin>
-      </plugins>
+    <finalName>${project.artifactId}-${project.version}</finalName>
+    <plugins>
+      <!-- Attach sources -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
+    </plugins>
   </build>
 
 </project>

@@ -3,7 +3,7 @@
       id="com.ge.research.sadl.feature"
       label="SADL Feature"
       version="3.5.0.qualifier"
-      provider-name="GE">
+      provider-name="GE Research">
 
    <description url="http://www.example.com/description">
       The Semantic Application Design Language (SADL) is a controlled
@@ -12,7 +12,7 @@ semantic models.
    </description>
 
    <copyright url="http://www.example.com/copyright">
-      Copyright General Electric, 2007-2018.
+      Copyright General Electric, 2007-2021.
    </copyright>
 
    <license url="http://sadl.sourceforge.net">

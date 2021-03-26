@@ -352,18 +352,9 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * java.lang.String)
 	 */
 	public boolean replaceJenaModelCache(OntModel model, String publicUri) {
-		// model.getDocumentManager().setCacheModels(true);
-		Model oldModel = model.getDocumentManager().getFileManager()
-				.getFromCache(publicUri);
-		if (oldModel != null && !model.equals(oldModel)) {
-			model.getDocumentManager().getFileManager()
-					.removeCacheModel(publicUri);
-			model.getDocumentManager().addModel(publicUri, model, true);
-		}
 		if (model.getImportModelMaker().hasModel(publicUri)) {
 			model.getImportModelMaker().removeModel(publicUri);
 		}
-		// model.getDocumentManager().setCacheModels(false);
 		return true;
 	}
 
@@ -375,7 +366,6 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 */
 	public boolean resetJena() {
 		getJenaDocumentMgr().clearCache();
-		getJenaDocumentMgr().getFileManager().resetCache();
 		return true;
 	}
 
@@ -713,8 +703,6 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		mappings.remove(publicUri);
 		globalPrefixes.remove(publicUri);
 		getJenaDocumentMgr().forget(publicUri);
-		getJenaDocumentMgr().getFileManager()
-				.removeCacheModel(publicUri);
 		return true;
 	}
 
@@ -879,6 +867,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 		return ServiceLoader.load(cls);
 	}
 
+	@SuppressWarnings("unchecked")
 	public ServiceLoader<Class<?>> getServiceLoader(Class<?> bcls) {
 		return (ServiceLoader<Class<?>>) ServiceLoader.load(bcls);
 	}
@@ -1008,7 +997,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 																+ lastCategory);
 										subject = getConfigModel()
 												.createResource(bagItemType);
-										((Bag) bag.as(Bag.class)).add(subject);
+										bag.as(Bag.class).add(subject);
 									}
 									getConfigModel().add(
 											subject,
@@ -1032,7 +1021,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 										&& bag instanceof Resource
 										&& ((Resource) bag).hasProperty(
 												RDF.type, RDF.Bag)) {
-									((Bag) bag.as(Bag.class))
+									bag.as(Bag.class)
 											.add(getConfigModel()
 													.createTypedLiteral(
 															nvp.getValue()));
@@ -1066,7 +1055,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 																+ lastCategory);
 										subject = getConfigModel()
 												.createResource(bagItemType);
-										((Seq) seq.as(Seq.class)).add(subject);
+										seq.as(Seq.class).add(subject);
 									}
 									getConfigModel().add(
 											subject,
@@ -1090,7 +1079,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 										&& seq instanceof Resource
 										&& ((Resource) seq).hasProperty(
 												RDF.type, RDF.Seq)) {
-									((Seq) seq.as(Seq.class))
+									seq.as(Seq.class)
 											.add(getConfigModel()
 													.createTypedLiteral(
 															nvp.getValue()));
@@ -1106,10 +1095,10 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 									if (sizeLimitNode instanceof Literal) {
 										int sslval = ((Literal) sizeLimitNode)
 												.getInt();
-										int cursize = ((Seq) seq.as(Seq.class))
+										int cursize = seq.as(Seq.class)
 												.size();
 										if (cursize >= sslval) {
-											((Seq) seq.as(Seq.class)).remove(1);
+											seq.as(Seq.class).remove(1);
 										}
 									}
 								}

@@ -135,7 +135,6 @@ public class TranslatorConfigurationDialog extends Dialog {
 				super.createControl(parentComposite);
 			}
             
-            @SuppressWarnings("synthetic-access")
 			@Override
 		    protected void createFieldEditors() {
             	rcps = this.doGetPreferenceStore();
@@ -213,7 +212,6 @@ public class TranslatorConfigurationDialog extends Dialog {
             	}
             }
             
-			@SuppressWarnings("synthetic-access")
 			@Override
 			protected void updateApplyButton() {
 				updateButtons(isValid());

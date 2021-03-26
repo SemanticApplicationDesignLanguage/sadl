@@ -44,8 +44,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
 import javax.naming.NameNotFoundException;
 
 import org.slf4j.Logger;
@@ -96,7 +96,7 @@ public class SadlServerMain {
 	 *   must be present (could be empty) for a later to be included.
 	 * 
 	 * arg0. service class name -- the fully qualified name of the class implementing the service defined in com.ge.research.sadl.server.ISadlServer
-	 * 	e.g, com.ge.research.sadl.sadlserver.SadlServerImpl
+	 * 	e.g, com.ge.research.sadl.server.server.SadlServerImpl
 	 * arg1. service identifier -- either 1) kbase root--the path to the directory on the local file system in or under under which model folders and/or service definition files are located
 	 *                                 or 2) the URL of the Web service to invoke
 	 * arg2. service name -- either 1) the name of the named service to be invoked. This maps to a kbase and an entry point model.
@@ -364,11 +364,11 @@ public class SadlServerMain {
 						}
 						else if (thisQuery.equals("IsDatatypeProperty")) {
 							boolean bval = isDatatypeProperty(stknzr.nextToken());
-							results = new Boolean(bval);
+							results = Boolean.valueOf(bval);
 						}
 						else if (thisQuery.equals("IsObjectProperty")) {
 							boolean bval = isObjectProperty(stknzr.nextToken());
-							results = new Boolean(bval);
+							results = Boolean.valueOf(bval);
 						}
 						if (results != null) {
 							resultsToFile(results, outFile, outputFormat);

@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import javax.activation.DataSource;
+import jakarta.activation.DataSource;
 
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
@@ -51,7 +51,6 @@ import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.OWL2;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.apache.jena.vocabulary.XSD;
 import org.pojava.datetime.DateTime;
 import org.pojava.datetime.Duration;
 import org.slf4j.Logger;
@@ -206,7 +205,8 @@ public class SadlUtils {
 				prefixes.add(null);
 			}
 		}
-		List<String>[] retvals = new List[2];
+		@SuppressWarnings("unchecked")
+		List<String>[] retvals = (List<String>[]) new List<?>[2];
 		retvals[0] = urls;
 		retvals[1] = prefixes;
 		return retvals;
@@ -770,22 +770,22 @@ public class SadlUtils {
     				}
 			        if (rnguri.contains("float")) {
 			        	if (v instanceof BigDecimal) {
-			        		v = new Float(((BigDecimal)v).floatValue());
+			        		v = Float.valueOf(((BigDecimal)v).floatValue());
 			        		val = m.createTypedLiteral(v);
 			        	}
 			        	else if (v instanceof Double) {
-			                v = new Float(((Double)v).floatValue());
+			                v = Float.valueOf(((Double)v).floatValue());
 			                val = m.createTypedLiteral(v);
 			            }
 			            else if (v instanceof Float){
 			                val = m.createTypedLiteral(v);
 			            }
 			            else if (v instanceof Integer) {
-			                v = new Float(((Integer)v).floatValue());
+			                v = Float.valueOf(((Integer)v).floatValue());
 			                val = m.createTypedLiteral(v);
 			            }
 			            else if (v instanceof Long) {
-			            	v = new Float(((Long)v).floatValue());
+			            	v = Float.valueOf(((Long)v).floatValue());
 			                val = m.createTypedLiteral(v);
 			            }
 			            else {
@@ -794,22 +794,22 @@ public class SadlUtils {
 			        }
 			        else if (rnguri.contains("double")) {
 			        	if (v instanceof BigDecimal) {
-			        		v = new Double(((BigDecimal)v).doubleValue());
+			        		v = Double.valueOf(((BigDecimal)v).doubleValue());
 			        		val = m.createTypedLiteral(v);
 			        	}
 			        	else if (v instanceof Double) {
 			                val = m.createTypedLiteral(v);
 			            }
 			            else if (v instanceof Float){
-			                v = new Double(((Float)v).doubleValue());
+			                v = Double.valueOf(((Float)v).doubleValue());
 			                val = m.createTypedLiteral(v);
 			            }
 			            else if (v instanceof Integer) {
-			                v = new Double(((Integer)v).doubleValue());
+			                v = Double.valueOf(((Integer)v).doubleValue());
 			                val = m.createTypedLiteral(v);
 			            }
 			            else if (v instanceof Long) {
-			            	v = new Double(((Long)v).doubleValue());
+			            	v = Double.valueOf(((Long)v).doubleValue());
 			                val = m.createTypedLiteral(v);
 			            }
 			            else {
@@ -856,10 +856,10 @@ public class SadlUtils {
 			        		}
 			         	}
 			        	if (v instanceof BigDecimal) {
-			        		v = new Long(((BigDecimal)v).longValue());
+			        		v = Long.valueOf(((BigDecimal)v).longValue());
 			        	}
 			        	if (v instanceof Long) {
-			            	v = new Integer(((Long)v).intValue());
+			            	v = Integer.valueOf(((Long)v).intValue());
 			        	}
 			            if (v instanceof Integer) {
 			                val = m.createTypedLiteral(v);
@@ -1013,8 +1013,8 @@ public class SadlUtils {
     	String retval = v;
         if (rnguri.endsWith("date")) {
             if (v instanceof String) {
-                v = stripQuotes((String)v);
-				DateTime dt = new DateTime((String)v);
+                v = stripQuotes(v);
+				DateTime dt = new DateTime(v);
 				String xsdFormat = "yyyy-MM-dd";
 				String modifiedV = dt.toString(xsdFormat);
 				retval = modifiedV;
@@ -1022,9 +1022,9 @@ public class SadlUtils {
         }
         else if (rnguri.endsWith("dateTime")) {
             if (v instanceof String) {
-                v = stripQuotes((String)v);
-                if (v != null && ((String) v).length() > 0) {
-					DateTime dt = new DateTime((String)v);
+                v = stripQuotes(v);
+                if (v != null && v.length() > 0) {
+					DateTime dt = new DateTime(v);
 					String xsdFormat = "yyyy-MM-dd'T'HH:mm:ssZZ";
 					String modifiedV = dt.toString(xsdFormat);
 	                retval = modifiedV;
@@ -1033,20 +1033,20 @@ public class SadlUtils {
         }
         else if (rnguri.endsWith("time")) {
             if (v instanceof String) {
-                v = stripQuotes((String)v);
+                v = stripQuotes(v);
                 retval = v;
             }
         }
         else if (rnguri.endsWith("duration")) {
         	if (v instanceof String) {
-        		v = stripQuotes((String)v);
-        		if (v != null && ((String)v).length() > 0) {
-        			String lc = ((String)v).toLowerCase();
+        		v = stripQuotes(v);
+        		if (v != null && v.length() > 0) {
+        			String lc = v.toLowerCase();
         			if (lc.contains("ye") ||lc.contains("yr") || lc.contains("mo")) {
         				throw new TranslationException("Durations containing years or months are not supported");
         			}
         			else {
-        				Duration dur = new Duration((String)v);
+        				Duration dur = new Duration(v);
         				String modDur = "PT" + dur.toString().toUpperCase();
         				retval = modDur;
         			}
@@ -1064,7 +1064,7 @@ public class SadlUtils {
      */
 	public static Object stringToNumber(String v) {
 		Object vRet = v;
-		if (((String) v).contains(".")) {
+		if (v.contains(".")) {
 			vRet = Double.parseDouble(stripQuotes(v));
 		}
 		else {
@@ -1210,11 +1210,10 @@ public class SadlUtils {
 		return cn;
 	}
 
-	private Object[] getImplicitResourceAndType(String uri, String ns, Class cls) {
+	private Object[] getImplicitResourceAndType(String uri, String ns, Class<?> cls) {
 		Field[] fields = cls.getDeclaredFields();
 		for (Field field : fields) {
 			if ((ns + field.getName()).equals(uri)) {
-				Object ft = field.getType();
 				Object[] retvals = new Object[2];
 				retvals[0] = uri;
 				if (field.getType().equals(Resource.class)) {

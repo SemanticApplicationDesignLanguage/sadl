@@ -240,7 +240,7 @@ public interface ITranslator {
 	 * Checks if reasoner/translator pair provide any type-checking information for built-in functions
 	 * @return -- an enumeration of the amount of information available for type-checking built-in functions:
 	 */
-	public Enum isBuiltinFunctionTypeCheckingAvailable();
+	public IReasoner.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY isBuiltinFunctionTypeCheckingAvailable();
 	
 	/**
 	 * Method to obtain the implicit model for built-in functions for this reasoner/translator pair.

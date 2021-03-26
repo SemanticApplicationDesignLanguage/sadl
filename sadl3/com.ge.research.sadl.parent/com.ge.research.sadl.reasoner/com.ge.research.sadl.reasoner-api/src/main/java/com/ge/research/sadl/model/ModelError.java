@@ -23,6 +23,8 @@
 
 package com.ge.research.sadl.model;
 
+import java.util.Objects;
+
 /**
  * This class encapsulates the important information describing an error in a call to ModelManager to create 
  * model content. Various constructors allow the relevant information to be passed to populate a class instance.
@@ -83,22 +85,25 @@ public class ModelError extends com.ge.research.sadl.reasoner.ModelError {
         setExistingNameIndex(extNameIdx);
     }
     
-	public boolean equals(Object me) {
-		if (super.equals(me)) {
-			if (me instanceof ModelError) {
-				if (getContext() != null && ((ModelError)me).getContext() != null &&
-						getContext().equals(((ModelError)me).getContext())) {
-					// this is the V3 way of anchoring ModelError to the location in the editor
-					return true;
-				}
-				else if (offset >= 0 && offset == ((ModelError)me).offset) {
-					// this is the V2 way of anchoring ModelError to the location in the editor
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Objects.hash(context, offset);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof ModelError))
+            return false;
+        ModelError other = (ModelError) obj;
+        return Objects.equals(context, other.context) && offset == other.offset;
+    }
     
     private void setArgumentIndex(int argumentIndex) {
         this.argumentIndex = argumentIndex;
