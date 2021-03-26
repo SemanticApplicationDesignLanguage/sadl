@@ -60,11 +60,17 @@ public class Length extends TypedBaseBuiltin {
      */
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
         Node typedList = getArg(0, args, context);
+        Node slmfirst = NodeFactory.createURI("http://sadl.org/sadllistmodel#first");
         Node slmrest = NodeFactory.createURI("http://sadl.org/sadllistmodel#rest");
         
         Node relevantList = typedList;
         
-        int listLength = 1;
+        int listLength = 0;
+        ClosableIterator<Triple> fitr = context.find(relevantList, slmfirst, null);
+        if (fitr.hasNext()) {
+        	listLength = 1;
+        	fitr.close();
+        }
         boolean atLastElement = false;
         do {
 	        ClosableIterator<Triple> ritr = context.find(relevantList, slmrest, null);

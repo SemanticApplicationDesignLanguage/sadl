@@ -11349,7 +11349,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		SadlValueList listInitializer = element.getListInitializer();
 		if (listInitializer != null) {
 			if (listInitializer.getExplicitValues().isEmpty()) {
-				addError(SadlErrorMessages.EMPTY_LIST_DEFINITION.get(), element);
+				addWarning(SadlErrorMessages.EMPTY_LIST_DEFINITION.get(), element);
 			} else {
 				if (cls == null) {
 					NamedNode cn;
