@@ -29,7 +29,7 @@ JoesChildren is the ChildrenList [John, Sue, Craig].
 
 JoesChildren is the Person List [John, Sue, Craig].
 
-//ChildlessChildren is the Person List [].
-//ChildlessChildren is the ChildrenList [].
+ChildlessChildren is the Person List [].
+ChildlessChildren is the ChildrenList []. 
 //
 //John has children ChildrenList [Sue, Craig].
