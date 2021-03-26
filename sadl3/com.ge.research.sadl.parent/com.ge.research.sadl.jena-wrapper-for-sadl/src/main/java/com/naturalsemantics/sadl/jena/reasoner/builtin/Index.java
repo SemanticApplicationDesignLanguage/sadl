@@ -96,7 +96,7 @@ public class Index extends TypedBaseBuiltin {
         	Node indexNode = Util.makeIntNode(index);
     		return context.getEnv().bind(args[length - 1], indexNode);	     
         }
-        boolean debug = true;
+        boolean debug = false;
 		if (debug) {
 	        ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
 	        if (itr2.hasNext()) {

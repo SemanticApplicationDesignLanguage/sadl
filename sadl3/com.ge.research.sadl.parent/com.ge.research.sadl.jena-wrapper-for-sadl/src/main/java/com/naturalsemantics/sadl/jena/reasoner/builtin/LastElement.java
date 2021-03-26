@@ -85,7 +85,7 @@ public class LastElement extends TypedBaseBuiltin {
         		return context.getEnv().bind(args[length - 1], firstElement);	     
         	}
         }
-        boolean debug = true;;
+        boolean debug = false;;
 		if (debug ) {
             ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
             if (itr2.hasNext()) {

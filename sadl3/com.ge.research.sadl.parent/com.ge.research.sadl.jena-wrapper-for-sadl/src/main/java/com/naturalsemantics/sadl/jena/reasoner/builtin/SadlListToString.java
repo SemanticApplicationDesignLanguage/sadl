@@ -100,7 +100,7 @@ public class SadlListToString extends BaseBuiltin {
     
     public static synchronized String listToString(RuleContext context, Node n1, String strDelim) {
 		java.util.List<Node> l = convertList(n1, context);
-       	StringBuilder sb = new StringBuilder("{");
+       	StringBuilder sb = new StringBuilder("[");
        	for (int i = 0; l != null && i < l.size(); i++) {
     		Node elt = (Node) l.get(i);
             if (elt != null) {
@@ -131,7 +131,7 @@ public class SadlListToString extends BaseBuiltin {
             	}
             }
         }
-        sb.append("}");
+        sb.append("]");
 		return sb.toString();
 	}
     

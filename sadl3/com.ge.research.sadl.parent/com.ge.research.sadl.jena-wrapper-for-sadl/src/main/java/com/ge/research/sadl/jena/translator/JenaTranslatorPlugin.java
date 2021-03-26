@@ -56,6 +56,7 @@ import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.model.gp.Update;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.reasoner.AmbiguousNameException;
@@ -73,11 +74,14 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+
+import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
 import org.apache.jena.ontology.Ontology;
 import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.rulesys.Builtin;
 import org.apache.jena.reasoner.rulesys.BuiltinRegistry;
@@ -1263,7 +1267,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		String builtinName = bin.getFuncName();
 		if (builtinName.equals("length") && bin.getArguments() != null && bin.getArguments().size() == 2) {
 			Node arg0 = bin.getArguments().get(0);
-			if (arg0 instanceof NamedNode && ((NamedNode)arg0).isList()) {
+			if (arg0 instanceof NamedNode && !isSadlTypeList(arg0)) {
 				builtinName = "listLength";		
 			}
 		}
@@ -1286,6 +1290,48 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return builtinName;
 	}
 	
+	/**
+	 * Method to determine if an Node is an instance of a SADL typed list
+	 * @param node
+	 * @return
+	 */
+	private boolean isSadlTypeList(Node node) {
+		Node instType = null;
+		if (node instanceof VariableNode) {
+			instType = ((VariableNode)node).getType();
+		}
+		else if (node instanceof NamedNode) {
+			instType =((NamedNode)node).getLocalizedType();	
+		}
+		if (instType != null && instType instanceof NamedNode) {
+			OntClass type = getTheModel().getOntClass(((NamedNode)instType).getURI());
+			if (type != null) {
+				return isTypedListSubclass(getTheModel(), type);
+			}
+		}
+		return false;
+	}
+
+
+	/**
+	 * Method to determine if an RDFNode is a subclass of the SADL typed list
+	 * @param theJenaModel
+	 * @param node
+	 * @return
+	 */
+	public static boolean isTypedListSubclass(OntModel theJenaModel, RDFNode node) {
+		if (node != null && node.isResource()) {
+			org.apache.jena.rdf.model.Resource lstcls = theJenaModel
+					.getResource(SadlConstants.SADL_LIST_MODEL_LIST_URI);
+			if (lstcls != null && node.asResource().hasProperty(RDFS.subClassOf, lstcls)) { // if model has no lists,
+																							// the list model will not
+																							// have been imported
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public String getBuiltinClassName(String builtinName) {
 		String className = null;

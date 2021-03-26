@@ -95,7 +95,7 @@ public class ElementInList extends TypedBaseBuiltin {
 		        }
 	        }
         }
-        boolean debug = true;;
+        boolean debug = false;;
 		if (debug ) {
 	        ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
 	        if (itr2.hasNext()) {

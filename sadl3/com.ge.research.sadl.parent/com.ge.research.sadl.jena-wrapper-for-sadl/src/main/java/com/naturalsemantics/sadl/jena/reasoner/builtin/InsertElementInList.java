@@ -86,14 +86,9 @@ public class InsertElementInList extends TypedBaseBuiltin {
 	        		fitr.close();
 	        	}
 	        	else {
-	        		if (!currentList.isBlank()) {
-	        			System.err.println("List '" + currentList.getLocalName() + "' has no first value");
-	        		}
-	        		else {
-	        			System.err.println("List first unexpectedly has no value");
-	        		}
+	        		// this list has no element, an empty list
 	        		fitr.close();
-	        		return false;
+	        		break;
 	        	}
 		        ClosableIterator<Triple> ritr = context.find(currentList, slmrest, null);
 		        if (ritr.hasNext()) {
@@ -108,42 +103,55 @@ public class InsertElementInList extends TypedBaseBuiltin {
 		    // add the elements, inserting the new one in the index location
 	        Node firstList = null;
 	        Node lastList = null;
-	        for (int i = 0; i < oldListElements.size(); i++) {
+	        if (index > oldListElements.size()) {
+	        	System.out.println("Index of insertion location is out of bounds of list (index = " + index + ", list length = " + oldListElements.size() + ")");
+	        	return false;
+	        }
+	        if (oldListElements.size() == 0 && index == 0) {
+	        	// inserting into empty list
 		        Node newList = createTypedList(typedList, context);
-	        	if (i == index) {
-	        		// the new element goes into newList
-	        		// set first property of newList to new element
-	        		Triple t = new Triple(newList, slmfirst, newElement);
-	        		Utils.doAddTriple(t, context, true);
-	        		// create a new List to contain the current element from the old list
-	        		Node newList2 = createTypedList(typedList, context);
-	        		if (lastList != null) {
-	        			Triple t2 = new Triple(lastList, slmrest, newList);
-	        			Utils.doAddTriple(t2, context, true);
-	        			lastList = newList;
-	        			newList = newList2;
+        		Triple t = new Triple(newList, slmfirst, newElement);
+        		Utils.doAddTriple(t, context, true);
+        		firstList = newList;
+	        }
+	        else {
+		        for (int i = 0; i < oldListElements.size(); i++) {
+			        Node newList = createTypedList(typedList, context);
+		        	if (i == index) {
+		        		// the new element goes into newList
+		        		// set first property of newList to new element
+		        		Triple t = new Triple(newList, slmfirst, newElement);
+		        		Utils.doAddTriple(t, context, true);
+		        		// create a new List to contain the current element from the old list
+		        		Node newList2 = createTypedList(typedList, context);
+		        		if (lastList != null) {
+		        			Triple t2 = new Triple(lastList, slmrest, newList);
+		        			Utils.doAddTriple(t2, context, true);
+		        			lastList = newList;
+		        			newList = newList2;
+		        		}
+		        		else {
+		        			// the new element is inserted into the start of the list
+		        			lastList = newList;
+		        			newList = newList2;
+		        		}
+		        	}
+	        		Triple t1 = new Triple(newList, slmfirst, oldListElements.get(i));
+	        		Utils.doAddTriple(t1, context, true);
+	        		if (lastList == null) {
+	        			firstList = newList;
 	        		}
 	        		else {
-	        			// the new element is inserted into the start of the list
-	        			lastList = newList;
-	        			newList = newList2;
+	        			Triple t2 = new Triple(lastList, slmrest, newList);
+	        			Utils.doAddTriple(t2, context, true);
 	        		}
-	        	}
-        		Triple t1 = new Triple(newList, slmfirst, oldListElements.get(i));
-        		Utils.doAddTriple(t1, context, true);
-        		if (lastList == null) {
-        			firstList = newList;
-        		}
-        		else {
-        			Triple t2 = new Triple(lastList, slmrest, newList);
-        			Utils.doAddTriple(t2, context, true);
-        		}
-        		lastList = newList;
+	        		lastList = newList;
+		        }
 	        }
 	        
        		return context.getEnv().bind(args[length - 1], firstList);	     
         }
-        boolean debug = true;;
+        boolean debug = false;;
 		if (debug ) {
 	        ClosableIterator<Triple> itr2 = context.find(typedList, null, null);
 	        if (itr2.hasNext()) {

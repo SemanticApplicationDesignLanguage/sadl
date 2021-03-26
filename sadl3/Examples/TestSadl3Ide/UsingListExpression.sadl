@@ -4,6 +4,8 @@
  YooHooList is a type of YooHoo List, described by selectedElement with values of type YooHoo.
  l1 is the YooHooList [yh1, yh2, yh3, yh4].
  l2 is the YooHoo List [yha, yhb, yhc].
+ l3 is the YooHooList [yh1].
+ l4 is the YooHooList [].
  
  yh5 is a YooHoo.
  
@@ -37,7 +39,7 @@
  Rule ListIndex:
  	if l1 is a YooHooList and index of yh2 in l1 is idx then print("Index of yh2: ", idx). 
  	
- Rule ListLength:
+ Rule ListLength:  
  	if l1 is a YooHooList and len is length of l1 then print("Length of l1: ", len). 
  	
  Rule ListInsert:
@@ -50,6 +52,15 @@
  Rule ListFirst2:
    if lst is a YooHooList and 
    		first element of lst is le1 then lst has selectedElement le1 and print("ListFirst2: ", le1).
-
+   		
+ Rule ToEmptyList:
+ 	if l3 is a YooHooList and l3Deleted is deleteElementFromList(l3, 0) then print("l3Deleted: ", sadlListToString(l3Deleted)).
+ 	
+ Rule PrintList: if x is a YooHooList and l is length of x then print(x, sadlListToString(x), " length = ", l).
+ 
+ Rule AddToEmptyList: 
+ 	if x is a YooHooList and length of x is 0 and y is insertElementInList(x, yh1, 0) then print("From empty list: ", sadlListToString(y)).
+ 	
+ 
  Ask: select x, y where x is a YooHooList and x has selectedElement y. 
   
