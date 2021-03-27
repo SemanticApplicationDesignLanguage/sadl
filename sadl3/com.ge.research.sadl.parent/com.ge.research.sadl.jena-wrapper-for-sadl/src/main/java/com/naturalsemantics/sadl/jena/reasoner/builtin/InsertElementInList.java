@@ -194,7 +194,8 @@ public class InsertElementInList extends TypedBaseBuiltin {
 
 	@Override
 	public String getFunctionSignatureString() {
-		return "insertElementInList(string, string, int)string";
+//		return "insertElementInList(--, --, int)--";
+		return "insertElementInList(--)--";
 	}
 
 

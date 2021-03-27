@@ -90,7 +90,7 @@ public class Length extends TypedBaseBuiltin {
 
 	@Override
 	public String getFunctionSignatureString() {
-		return "length(string)int";
+		return "length(--)int";
 	}
 
 }

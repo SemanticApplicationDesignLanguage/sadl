@@ -33,16 +33,17 @@ import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
-import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
+
+import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 
 /**
 	This class converts an RDF list to a string of the form "{element1, element2, ....}". 
 	String values are placed inside the optional string delimiter (2nd argument).
 	 
  */
-public class SadlListToString extends BaseBuiltin {
+public class SadlListToString extends TypedBaseBuiltin {
 
-	private int argLength = 0;
+	private int argLength = 1;
 	
     private static Node slmfirst;
     private static Node slmrest; 
@@ -169,5 +170,10 @@ public class SadlListToString extends BaseBuiltin {
 			slmrest = NodeFactory.createURI("http://sadl.org/sadllistmodel#rest");
 		}
 		return slmrest;
+	}
+	
+	@Override
+	public String getFunctionSignatureString() {
+		return "sadlListToString(--)int";
 	}
 }

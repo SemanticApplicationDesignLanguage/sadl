@@ -91,7 +91,7 @@ public final class SadlErrorMessages {
 **/
     public static final SadlErrorMessage IMPORTED_DOMAIN_CHANGE = new SadlErrorMessage("imported_domain_change");
 /**
-* List definition is empty. Remove empty list brackets from definition. 
+* List definition is empty. 
 **/
     public static final SadlErrorMessage EMPTY_LIST_DEFINITION = new SadlErrorMessage("empty_list_definition");
 /**

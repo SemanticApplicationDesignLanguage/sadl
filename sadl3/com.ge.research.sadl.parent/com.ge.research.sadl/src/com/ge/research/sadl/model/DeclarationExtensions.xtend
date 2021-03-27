@@ -281,7 +281,7 @@ class DeclarationExtensions {
 				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.RDF_PROPERTY]:
 					OntConceptType.RDF_PROPERTY
 					 
-				SadlClassOrPropertyDeclaration case e.superElement.isList: 
+				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.list: //e.superElement.isList: 
 					if (e.superElement.isDatatype) OntConceptType.DATATYPE_LIST
 					else OntConceptType.CLASS_LIST
 				
