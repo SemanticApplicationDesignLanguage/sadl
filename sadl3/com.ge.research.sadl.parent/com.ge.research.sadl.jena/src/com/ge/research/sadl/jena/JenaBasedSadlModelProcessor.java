@@ -1806,7 +1806,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if (intForm instanceof List<?>) {
 							if (((List<?>) intForm).size() > 0) {
 								addIntermediateFormResult(intForm);
-								addInfo(intForm.toString(), element);
+								if (!(((List<?>)intForm).size() == 1 && ((List<?>)intForm).get(0).toString().equals(rawResult.toString()))) {
+									addInfo(intForm.toString(), element);
+								}
 								return;
 							}
 						}
@@ -5057,8 +5059,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								leftVariableDefnTci = leftVariableDefnTci.getCompoundTypes().get(leftMultiVarIndex);
 							}
 							if (leftVariableDefnTci != null && leftVariableDefnTci.getTypeCheckType() != null) {
-								vtype = leftVariableDefnTci.getTypeCheckType();
-								if (vtype != null) {
+								Node lvdttype = leftVariableDefnTci.getTypeCheckType();
+								if (lvdttype != null && !(lvdttype instanceof ConstantNode)) {
+									vtype = lvdttype;
 									validateNode(vtype);
 								}
 							}
@@ -7352,21 +7355,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (argtypes != null) {
 				List<Node> argTypeNodes = new ArrayList<Node>();
 				for (SadlParameterDeclaration spd : argtypes) {
-					try {
-						SadlTypeReference typ = spd.getType();
-						EObject augtype = spd.getAugtype();
-						if (augtype != null) {
-							addError("unhandled parameter augmented data descriptor in processFunction", contr);
+					if (spd.getUnknown() != null) {
+						ConstantNode typnode = new ConstantNode(SadlConstants.CONSTANT_NONE);
+						argTypeNodes.add(typnode);
+					}
+					else {
+						try {
+							SadlTypeReference typ = spd.getType();
+							EObject augtype = spd.getAugtype();
+							if (augtype != null) {
+								addError("unhandled parameter augmented data descriptor in processFunction", contr);
+							}
+							if (typ != null) {
+								NamedNode typnode = sadlTypeReferenceToNode(typ);
+								if (typnode != null) {
+									argTypeNodes.add(typnode);
+								}	
+							}
+						} catch (JenaProcessorException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-						if (typ != null) {
-							NamedNode typnode = sadlTypeReferenceToNode(typ);
-							if (typnode != null) {
-								argTypeNodes.add(typnode);
-							}	
-						}
-					} catch (JenaProcessorException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 					}
 				}
 				builtin.setArgumentTypes(argTypeNodes);
@@ -7375,27 +7384,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (rtypes != null) {
 				List<Node> rTypeNodes = new ArrayList<Node>();
 				for (SadlReturnDeclaration srd : rtypes) {
-					try {
-						SadlTypeReference typ = srd.getType();
-						EObject augtype = srd.getAugtype();
-						if (augtype != null) {
-							addError("unhandled return augmented data descriptor in processFunction", srd);
-						}
-						if (typ != null) {
-							NamedNode typnode = sadlTypeReferenceToNode(typ);
-							if (typnode != null) {
-								rTypeNodes.add(typnode);
-							}
-						}
-					} catch (JenaProcessorException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					if (srd.getUnknown() != null) {
+						ConstantNode typnode = new ConstantNode(SadlConstants.CONSTANT_NONE);
+						rTypeNodes.add(typnode);
 					}
-
+					else {
+						try {
+							SadlTypeReference typ = srd.getType();
+							EObject augtype = srd.getAugtype();
+							if (augtype != null) {
+								addError("unhandled return augmented data descriptor in processFunction", srd);
+							}
+							if (typ != null) {
+								NamedNode typnode = sadlTypeReferenceToNode(typ);
+								if (typnode != null) {
+									rTypeNodes.add(typnode);
+								}
+							}
+						} catch (JenaProcessorException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 				}
 				builtin.setReturnTypes(rTypeNodes);
 			}
 		}
+		try {
+			getModelValidator().getFunctionTypeCheckInfoAndCheckArguments(expr, expr.getName(), true); // this will do argment checks on function
+		} catch (InvalidNameException e) {
+			throw e;
+		} catch (InvalidTypeException e) {
+			throw e;
+		} catch (TranslationException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new TranslationException(e.getMessage(), e);
+		}	
 		return builtin;
 	}
 
@@ -12975,10 +13000,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				OntClass unionCls = createUnionClass(lftNode, rhtNode);
 				return unionCls;
 			} else if (lftObj instanceof List && rhtNode instanceof RDFNode) {
-				((List) lftObj).add(rhtNode);
+				((List<RDFNode>) lftObj).add(rhtNode);
 				return lftObj;
 			} else if (lftObj instanceof RDFNode && rhtNode instanceof List) {
-				((List) rhtNode).add(lftNode);
+				((List<RDFNode>) rhtNode).add(lftNode);
 				return rhtNode;
 			} else if (lftNode instanceof RDFNode && rhtNode instanceof RDFNode) {
 				List<RDFNode> rdfdatatypelist = new ArrayList<RDFNode>();

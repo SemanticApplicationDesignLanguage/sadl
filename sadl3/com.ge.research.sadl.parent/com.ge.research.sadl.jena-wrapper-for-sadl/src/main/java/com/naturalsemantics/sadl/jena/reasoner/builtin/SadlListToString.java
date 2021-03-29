@@ -174,6 +174,6 @@ public class SadlListToString extends TypedBaseBuiltin {
 	
 	@Override
 	public String getFunctionSignatureString() {
-		return "sadlListToString(--)int";
+		return "sadlListToString(--)string";
 	}
 }

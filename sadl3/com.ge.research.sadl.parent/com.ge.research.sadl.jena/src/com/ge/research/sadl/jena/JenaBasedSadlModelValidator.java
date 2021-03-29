@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
+import com.ge.research.sadl.errorgenerator.messages.SadlErrorMessage;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
@@ -144,6 +145,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	public static final String INSTANCE_OF_LIST = "instance of typed list of type";
 	public static final String NAMED_LIST_OF_TYPE = "type of a named typed list class";
 	public static final String UNAMED_LIST_OF_TYPE = "type of an unnamed typed list class";
+	public static final String FUNCTION_RETURN = "function return";
 	private static final int MIN_INT = -2147483648;
 	private static final int MAX_INT = 2147483647;
 	private static final long MIN_LONG = -9223372036854775808L;
@@ -475,9 +477,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //					sb.append(getRangeValueType().toString());
 //					sb.append(" of values of type, ");
 //				}
-				sb.append(expressionType.toString());
-				sb.append(", ");
-				sb.append(typeCheckType != null ? typeCheckType.toString() : "unknown type");
+				if (expressionType != null) {
+					sb.append(expressionType.toString());
+					sb.append(", ");
+				}
+				if (typeToExprRelationship != null) {
+					sb.append(typeToExprRelationship);
+					sb.append(", ");
+				}
+				if (typeCheckType != null) {
+					if (typeCheckType instanceof ConstantNode && ((ConstantNode)typeCheckType).getName().contentEquals(SadlConstants.CONSTANT_NONE)) {
+						sb.append("\"--\" (don't check)");
+					}
+					else {
+						sb.append(typeCheckType.toString());
+					}
+				}
+				else {
+					sb.append("unknown type");
+				}
 				if (getExplicitValue() != null) {
 					if (getExplicitValueType().equals(ExplicitValueType.RESTRICTION)) {
 						sb.append(", restricted to explicit value '");
@@ -3165,23 +3183,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		//If the expression is a function, find equation definition from name and get the return type
 		if(expression.isFunction()){
 			try {
-				TypeCheckInfo ftci = getFunctionType(qnm);
-				if (qnm.eContainer() instanceof ExternalEquationStatement) {
-					EList<Expression> args = expression.getArglist();
-					EList<SadlParameterDeclaration> params = ((ExternalEquationStatementImpl)qnm.eContainer()).getParameter();
-					checkFunctionArguments(params, args, expression);
-				}
-				else if (qnm.eContainer() instanceof EquationStatement) {
-					EList<Expression> args = expression.getArglist();
-					EList<SadlParameterDeclaration> params = ((EquationStatement)qnm.eContainer()).getParameter();
-					checkFunctionArguments(params, args, expression);
-				}
+				TypeCheckInfo ftci = getFunctionTypeCheckInfoAndCheckArguments(expression, qnm, false);
 				if (ftci != null) {
 					return ftci;
 				}
 			}
 			catch (DontTypeCheckException e) {
-				getModelProcessor().addWarning("External equation declaration does not provide type information; can't type check.", expression);
+				if (e.getMessage() != null) {
+					getModelProcessor().addWarning(e.getMessage(), expression);
+				}
+				else {
+					getModelProcessor().addWarning("External equation declaration does not provide type information; can't type check.", expression);
+				}
 				throw e;
 			}
 			handleUndefinedFunctions(expression);
@@ -3189,8 +3202,44 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return getType(qnm, expression);
 	}
 
-	private void checkFunctionArguments(EList<SadlParameterDeclaration> params, EList<Expression> args, Name expression)
-			throws InvalidTypeException, TranslationException {
+	/**
+	 * This method is separated out of the getType methods to allow forcing a check of the 
+	 * function arguments.
+	 * @param expression -- the Name that is the current call
+	 * @param qnm -- the name that is the function definition
+	 * @param forceCheck 
+	 * @return
+	 * @throws DontTypeCheckException
+	 * @throws CircularDefinitionException
+	 * @throws InvalidNameException
+	 * @throws TranslationException
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 * @throws ConfigurationException
+	 * @throws InvalidTypeException
+	 * @throws CircularDependencyException
+	 * @throws PropertyWithoutRangeException
+	 */
+	public TypeCheckInfo getFunctionTypeCheckInfoAndCheckArguments(Name expression, SadlResource qnm, boolean forceCheck)
+			throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException,
+			URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException,
+			PropertyWithoutRangeException {
+		TypeCheckInfo ftci = getFunctionType(qnm);
+		if (qnm.eContainer() instanceof ExternalEquationStatement) {
+			EList<Expression> args = expression.getArglist();
+			EList<SadlParameterDeclaration> params = ((ExternalEquationStatementImpl)qnm.eContainer()).getParameter();
+			checkFunctionArguments(params, args, expression, forceCheck);
+		}
+		else if (qnm.eContainer() instanceof EquationStatement) {
+			EList<Expression> args = expression.getArglist();
+			EList<SadlParameterDeclaration> params = ((EquationStatement)qnm.eContainer()).getParameter();
+			checkFunctionArguments(params, args, expression, forceCheck);
+		}
+		return ftci;
+	}
+
+	private void checkFunctionArguments(EList<SadlParameterDeclaration> params, EList<Expression> args, Name expression, boolean forceCheck)
+			throws InvalidTypeException, TranslationException, DontTypeCheckException {
 		boolean variableNumArgs = false;
 		int minNumArgs = 0;
 		if (args.size() != params.size() || (params.size() > 1 && params.get(params.size() - 1).getEllipsis() != null)) {
@@ -3203,15 +3252,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					wrongNumArgs = false;
 				}
 			}
-			if (params.size() > 0 && params.get(0).getUnknown() != null) {
+			if (params.size() > 0 && params.get(0).getEllipsis() != null) {
 				getModelProcessor().addWarning("Number of arguments of function is unknown", expression);
 			}
 			else if (wrongNumArgs) {
 				getModelProcessor().addTypeCheckingError("Number of arguments does not match function declaration", expression);
 			}
 		}
-		// if this is a built-in with graph pattern arguments then don't check type except range of final property
-		if (!isGraphPatternArguments(args)) {
+		// if check forced or this is a built-in with graph pattern arguments then don't check type except range of final property
+		if (forceCheck || !isGraphPatternArguments(args)) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < args.size(); i++) {
 				Expression arg = args.get(i);
@@ -3228,6 +3277,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (sb.length() > 0) {
 							getModelProcessor().addTypeCheckingError(sb.toString(), expression);
 						}
+					}
+					else if (param.getUnknown() != null) {			
+						getModelProcessor().addTypeCheckingError(SadlErrorMessages.TYPE_CHECK_BUILTIN_EXCEPTION.get("parameter " + (i + 1)), arg);
 					}
 					else {
 						// don't try to typecheck if it's an ellipsis
@@ -3286,7 +3338,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}else if(fsr.eContainer() instanceof ExternalEquationStatement){
 			ExternalEquationStatement ees = (ExternalEquationStatement)fsr.eContainer();
 			if(ees != null) {
-				return getType(ees.getReturnType());
+				TypeCheckInfo tci = getType(ees.getReturnType());
+				if (tci != null) {
+					tci.setTypeToExprRelationship(FUNCTION_RETURN);
+				}
+				return tci;
 			}
 		}
 		return null;
@@ -3302,7 +3358,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return tci;
 		}
 		else {
-			if (!returnType.isEmpty() && returnType.get(0).getUnknown() == null) {
+			if (!returnType.isEmpty() && returnType.get(0).getUnknown() != null) {
+				return new TypeCheckInfo(null, new ConstantNode(SadlConstants.CONSTANT_NONE), this, returnType.get(0));
+			}
+			else if (!returnType.isEmpty()) {
 				return getType(returnType.get(0).getType());
 			}
 			else {

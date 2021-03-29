@@ -178,8 +178,8 @@ public class DeleteElementFromList extends TypedBaseBuiltin {
 
 	@Override
 	public String getFunctionSignatureString() {
-//		return "deleteElementFromList(--, int)--";
-		return "deleteElementFromList(--)--";
+		return "deleteElementFromList(--, int)--";
+//		return "deleteElementFromList(--)--";
 	}
 
 

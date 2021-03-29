@@ -122,8 +122,8 @@ public class ElementInList extends TypedBaseBuiltin {
 
 	@Override
 	public String getFunctionSignatureString() {
-//		return "elementInList(--, int)--";
-		return "elementInList(--)--";
+		return "elementInList(--, int)--";
+//		return "elementInList(--)--";
 	}
 
 

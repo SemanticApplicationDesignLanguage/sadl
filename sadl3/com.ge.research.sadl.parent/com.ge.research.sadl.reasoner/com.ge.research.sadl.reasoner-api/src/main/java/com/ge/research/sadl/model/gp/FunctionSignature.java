@@ -29,14 +29,14 @@ public class FunctionSignature {
 		sb.append("(");		
 		for(int i = 0; i < this.getParameterTypes().length; i++){
 			if(!this.getParameterTypes()[i].isEmpty()){
-				sb.append(this.getParameterTypes()[i]);
-				if (!this.getParameterTypes()[i].equals("--")) {
-					if (!this.getParameterTypes()[i].equals("...")) {
+				sb.append(this.getParameterTypes()[i].trim());
+				if (!this.getParameterTypes()[i].trim().equals("--")) {
+					if (!this.getParameterTypes()[i].trim().equals("...")) {
 						sb.append(" X");
 					}
-					if(i != this.getParameterTypes().length - 1){
-						sb.append(", ");
-					}
+				}
+				if(i != this.getParameterTypes().length - 1){
+					sb.append(", ");
 				}
 			}
 		}
@@ -44,8 +44,8 @@ public class FunctionSignature {
 		if (hasReturns()) {
 			sb.append(" returns ");
 			for (int i = 0; i < this.getReturnTypes().length; i++) {
-				if (!this.getReturnTypes()[i].isEmpty()) {
-					sb.append(this.getReturnTypes()[i]);
+				if (!this.getReturnTypes()[i].trim().isEmpty()) {
+					sb.append(this.getReturnTypes()[i].trim());
 					if ( i != this.getReturnTypes().length - 1) {
 						sb.append(", ");
 					}
