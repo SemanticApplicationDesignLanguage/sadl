@@ -7,7 +7,7 @@
   <body>
     <h1><a id="mozTocId534060" class="mozTocH1"></a>Lists in SADL</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->3/26/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->3/30/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <ul id="mozToc">
       <!--mozToc h1 1 h2 2 h3 3-->
@@ -39,8 +39,8 @@
       lists in modeling many real-world domains, SADL provides a typed list
       construct defined in SadlListModel.owl, which is automatically added to
       the OwlModels folder of a project and automatically imported into any
-      .sadl file (and its corresponding OWL file) that uses a typed list. The
-      basic construct in SadlListModel.owl, in SADL syntax is:</p>
+      .sadl file (and its corresponding OWL file) that uses a SADL typed list
+      construct. This basic construct in SadlListModel.owl is, in SADL syntax:</p>
     <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
       <font color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
             style="font-size: 10pt" size="2">uri</font></font></font><font color="#4c4c4c"><font
@@ -327,7 +327,7 @@
           </font></font></font> </p>
     <p>The first line in this example includes a list length restriction that
       instances of the class <em>ChildrenList</em> should have at least one and
-      may have any number of members.<br>
+      may have any larger number of members.<br>
       The third line in the example is a maximum cardinality restriction
       indicating that an instance of <em>Person</em> should have at most one
       value of the <em> children</em> property.<br>
@@ -370,10 +370,11 @@
     <div style="margin-left: 40px;"> </div>
     <p style="margin-bottom: 0in; line-height: 100%" align="left">This will
       create an unnamed subclass of <em>sadllist:List</em>, and the <em>rest</em>
-      property will be restricted to values of the type of the unnamed list<em></em><br>
+      property will be restricted to values of the type of this unnamed subclass
+      of <em>sadllist:List</em>.<br>
       <br>
     </p>
-    <p>It is also possible to create instances of a subclass of <em>sadllist:List</em>.
+    <p>It is also possible to create instances of a SADL list class<em></em>.
       For example,<br>
     </p>
     <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
@@ -416,9 +417,10 @@
           </font></font></font><font color="#0000ff"><font face="Monospace"><font
             style="font-size: 10pt" size="2">Craig</font></font></font><font color="#4c4c4c"><font
           face="Monospace"><font style="font-size: 10pt" size="2">].</font></font></font></p>
-    <p>creates an instance of ChildrenList with ordered members John, Sue, and
-      Craig. Similarly, we could have created an instance of an unnamed subclass
-      of <em>sadllist:List</em>.</p>
+    <p>creates an instance of <em>ChildrenList</em> with ordered members <em>John</em>,
+      <em>Sue</em>, and
+      <em> Craig</em>. Similarly, we could have created an instance of an
+      unnamed subclass of <em>sadllist:List</em>.</p>
     <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
       <font color="#0000ff"><font face="Monospace"><font style="font-size: 10pt"
             size="2">JoesChildren</font></font></font><font color="#4c4c4c"><font
@@ -586,8 +588,8 @@
               </span></font></font></font></li>
     </ol>
     <p>&nbsp;These SADL grammar constructs are equivalent, when using the
-      Jena-based&nbsp; reasoner/translator pair, to the following SADL
-      constructs, respectively, using the built-in functions directly.</p>
+      Jena-based reasoner/translator pair, to the following SADL constructs,
+      respectively, using the Jena-based built-in functions directly.</p>
     <ol>
       <li> <font color="#801480"><font face="Monospace"><font style="font-size: 10pt"
               size="2"><b>elementBefore</b></font></font></font><font color="#4c4c4c"><font
@@ -649,195 +651,17 @@
           color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">)</font></font></font></li>
     </ol>
     <p>Note that in the above references, the caret before the <em>index</em>
-      and <em>length</em> built-in function names are necessary because the
-      names are also keywords in the grammar.</p>
-    <p>There is one additional Jena built-in function which may be found useful
-      in rules dealing with SADL typed lists: <em>isHeadList(list)</em>.
-      Because a list with more than one element is actually a series of lists,
-      and when using the various list operations discussed above or on other
-      occasions, it may be desirable to only operate on the first list in such a
-      series. For example, given this model</p>
-    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
-      <font color="#0000ff"><font face="Monospace"><font style="font-size: 10pt"
-            size="2">l1</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">the</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#000080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>YooHooList</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            [</font></font></font><font color="#0000ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">yh1</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">,
-          </font></font></font><font color="#0000ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">yh2</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">,
-          </font></font></font><font color="#0000ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">yh3</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">,
-          </font></font></font><font color="#0000ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">yh4</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">].</font></font></font></p>
-    <div style="margin-left: 40px;">
-    </div>
-    <p></p>
-    <p>and this rule</p>
-    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
-      <font color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">Rule</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#0000ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>PrintList</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">:
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#000080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>YooHooList</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">and</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>l</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">length</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">then</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#801480"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>print</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
-        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
-          </font></font></font><font color="#801480"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>sadlListToString</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
-        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">),
-          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"
-              length = "</span></font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">,
-          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>l</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">).</font></font></font></p>
-    <p></p>
-    <p>inference will produce these results.</p>
-    <p style="margin-left: 40px;">print:
-      &lt;http://sadl.org/UsingListExpression.sadl#l1&gt; [yh1, yh2, yh3, yh4]
-      length = 4 <br>
-      print: b6cb453b-6297-4cac-bd8d-a6ac96916364 [yh2, yh3, yh4] length = 3 <br>
-      print: c55e02b2-8968-4d19-8962-38f04d0fc800 [yh3, yh4] length = 2 <br>
-      print: afbbc8b7-0d10-47ac-82bc-845bff14c63e [yh4] length = 1 </p>
-    <p>However, if the rule is modified&nbsp; as follows</p>
-    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
-      <font color="#4c4c4c"><span style="background: #e8f2fe"> </span></font><font
-        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">Rule</font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#0000ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>PrintList</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">:
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#000080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>YooHooList</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">and</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#801480"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>isListHead</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
-        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">)
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">and</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>l</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">length</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">then</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#801480"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>print</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
-        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
-          </font></font></font><font color="#801480"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>sadlListToString</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
-        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">),
-          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"
-              length = "</span></font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">,
-          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>l</b></font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">).</font></font></font></p>
-    <p></p>
-    <p>these results are produced.</p>
-    <p style="margin-left: 40px;">print:
-      &lt;http://sadl.org/UsingListExpression.sadl#l1&gt; [yh1, yh2, yh3, yh4]
-      length = 4 </p>
-    <p>Besides the grammar constructs and associated built-in functions above,
-      the Jena-based default reasoner/translator pair support the following
-      built-in functions for SADL typed lists.</p>
+      and <em>length</em> built-in function names is necessary because the
+      names are also keywords in the SADL grammar.</p>
+    Besides the grammar constructs and associated built-in functions above, the
+    Jena-based default reasoner/translator pair support the following built-in
+    functions for SADL typed lists.
     <ol>
     </ol>
     <ol>
-      <li><font color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
-              size="2"><u></u></font></font></font><font color="#801480"><font face="Monospace"><font
-              style="font-size: 10pt" size="2"><b>insertElementInList</b></font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+      <li><font color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+              size="2"><b>insertElementInList</b></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
           color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">l1</font></font></font><font
           color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
             </font></font></font><font color="#0000ff"><font face="Monospace"><font
@@ -845,8 +669,7 @@
             face="Monospace"><font style="font-size: 10pt" size="2">,&nbsp;</font></font></font><font
           color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><font
                 color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
-                    size="2"></font></font></font><font color="#4c4c4c"><font face="Monospace"><font
-                    style="font-size: 10pt" size="2"><span style="background: #e6f0ff">3</span></font></font></font>)&nbsp;&nbsp;
+                    size="2"><span style="background: #e6f0ff">3</span></font></font></font>)&nbsp;&nbsp;
               </font></font></font><span style="font-family: monospace;"><span style="color: #4c4c4c;"></span></span><font
           color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
                 style="color: #405e40;">// function that returns</span><span style="color: #405e40;">
@@ -868,6 +691,191 @@
                 removed </span></font></font></font><font color="#0000ff"><font
             face="Monospace"><font style="font-size: 10pt" size="2"><span style="color: #405e40;">(the
                 first position in the list is 0)</span></font></font></font></li>
+      <li><font color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+              size="2"><b>isListHead</b></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+          color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">l1</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+                style="background: #e6f0ff"></span></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </font></font></font><font color="#0000ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><span style="color: #405e40;">//
+                function that returns</span><span style="color: #405e40;"> true
+                if the list l1 is not the value of any triple with "rest" as
+                predicate</span></font></font></font></li>
+      <li><font color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+              size="2"><b>sadlListToString</b></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+          color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">l1</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+                style="background: #e6f0ff"></span></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              </font></font></font><font color="#0000ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><span style="color: #405e40;">//
+                function that </span><span style="color: #405e40;">returns a
+                serialization of the list l1 as a string in the SADL syntax used
+                to declare instances of typed lists<br>
+              </span></font></font></font></li>
+    </ol>
+    <p>The third Jena built-in function which may be found useful in rules
+      dealing with SADL typed lists<em></em>. Because a list with more than one
+      element is actually a sequence of lists, when using the various list
+      operations discussed above or on other occasions it may be desirable to
+      only operate on the first list in such a series. For example, given this
+      model </p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#0000ff"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">l1</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#800080"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">the</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>YooHooList</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            [</font></font></font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">yh1</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+        color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">yh2</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+          </font></font></font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">yh3</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+        color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">yh4</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">].</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p></p>
+    <p>and this rule</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">Rule</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>PrintList</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">:
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>YooHooList</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">and</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>l</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">length</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">then</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#801480"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>print</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+          </font></font></font><font color="#801480"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>sadlListToString</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">),
+            </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"
+              length = "</span></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>l</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">).</font></font></font></p>
+    <p></p>
+    <p>inference will produce these results.</p>
+    <p style="margin-left: 40px;">print:
+      &lt;http://sadl.org/UsingListExpression.sadl#l1&gt; [yh1, yh2, yh3, yh4]
+      length = 4 <br>
+      print: b6cb453b-6297-4cac-bd8d-a6ac96916364 [yh2, yh3, yh4] length = 3 <br>
+      print: c55e02b2-8968-4d19-8962-38f04d0fc800 [yh3, yh4] length = 2 <br>
+      print: afbbc8b7-0d10-47ac-82bc-845bff14c63e [yh4] length = 1 </p>
+    <p>However, if the rule is modified&nbsp; as follows</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"><span style="background: #e8f2fe"> </span></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">Rule</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>PrintList</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">:
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>YooHooList</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">and</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#801480"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>isListHead</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">)
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">and</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>l</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">length</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">then</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#801480"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>print</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+          </font></font></font><font color="#801480"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>sadlListToString</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">),
+            </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"
+              length = "</span></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>l</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">).</font></font></font></p>
+    <p></p>
+    <p>these results, which may be more what is intended when using the <em>length</em>
+      built-in, are produced.</p>
+    <p> print: &lt;http://sadl.org/UsingListExpression.sadl#l1&gt; [yh1, yh2,
+      yh3, yh4] length = 4 </p>
+    <p>The fourth Jena built-in function may be useful, when the results are
+      passed into the <em>print</em> built-in function, for debugging rules.</p>
+    <ol>
     </ol>
     <h2 style=" margin-bottom: 0in; line-height: 100%"><a id="mozTocId939251" class="mozTocH2"></a>Empty
       Lists<br>
@@ -1025,40 +1033,27 @@
           </font></font></font><font color="#0000ff"><font face="Monospace"><font
             style="font-size: 10pt" size="2">Craig</font></font></font><font color="#4c4c4c"><font
           face="Monospace"><font style="font-size: 10pt" size="2">].</font></font></font></p>
-    <br>
     <p style="margin-bottom: 0in; line-height: 100%;" align="left">&nbsp;
-      &lt;owl:Class rdf:ID="ChildrenList"&gt;<br>
-      &nbsp;&nbsp;&nbsp; &lt;rdfs:subClassOf&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:Restriction&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:hasValue
-      rdf:datatype="http://www.w3.org/2001/XMLSchema#int"<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &gt;1&lt;/owl:hasValue&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:onProperty
-      rdf:resource="sadllistmodel#minLengthRestriction"/&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/owl:Restriction&gt;<br>
-      &nbsp;&nbsp;&nbsp; &lt;/rdfs:subClassOf&gt;<br>
-      &nbsp;&nbsp;&nbsp; &lt;rdfs:subClassOf&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:Restriction&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:allValuesFrom
-      rdf:resource="#ChildrenList"/&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:onProperty
-      rdf:resource="sadllistmodel#rest"/&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/owl:Restriction&gt;<br>
-      &nbsp;&nbsp;&nbsp; &lt;/rdfs:subClassOf&gt;<br>
-      &nbsp;&nbsp;&nbsp; &lt;rdfs:subClassOf&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:Restriction&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:allValuesFrom
-      rdf:resource="#Person"/&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:onProperty
-      rdf:resource="sadllistmodel#first"/&gt;<br>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/owl:Restriction&gt;<br>
-      &nbsp;&nbsp;&nbsp; &lt;/rdfs:subClassOf&gt;<br>
-      &nbsp;&nbsp;&nbsp; &lt;rdfs:subClassOf
-      rdf:resource="sadllistmodel#List"/&gt;<br>
-      &nbsp; &lt;/owl:Class&gt;</p>
+      &lt;sadllistmodeltemplate:ChildrenList rdf:ID="JoesChildren"&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;sadllistmodel:rest&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;sadllistmodeltemplate:ChildrenList&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;sadllistmodel:rest&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &lt;sadllistmodeltemplate:ChildrenList&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &lt;sadllistmodel:first rdf:resource="#Craig"/&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &lt;/sadllistmodeltemplate:ChildrenList&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/sadllistmodel:rest&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;sadllistmodel:first
+      rdf:resource="#Sue"/&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/sadllistmodeltemplate:ChildrenList&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;/sadllistmodel:rest&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;sadllistmodel:first rdf:resource="#John"/&gt;<br>
+      &nbsp; &lt;/sadllistmodeltemplate:ChildrenList&gt;</p>
     <p style="margin-bottom: 0in; line-height: 100%;" align="left"><br>
-      If the SADL typed list class is unnamed, as in this declaration of the
-      instance of a SADL typed list, the generated RDF-XML is slightly
+      &nbsp;If the SADL typed list class is unnamed, as in this declaration of
+      the instance of a SADL typed list, the generated RDF-XML is slightly
       different.</p>
     <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
       <font color="#0000ff"><font face="Monospace"><font style="font-size: 10pt"
@@ -1082,7 +1077,7 @@
         color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">Craig</font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">].</font></font></font></p>
     <p style="margin-bottom: 0in; line-height: 100%">&nbsp; &lt;rdf:Description
-      rdf:ID="JoesChildren2"&gt;<br>
+      rdf:ID="JoesChildren"&gt;<br>
       &nbsp;&nbsp;&nbsp; &lt;sadllistmodel:rest rdf:parseType="Resource"&gt;<br>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;sadllistmodel:rest
       rdf:parseType="Resource"&gt;<br>
