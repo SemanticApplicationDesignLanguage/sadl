@@ -5,20 +5,27 @@
  l1 is the YooHooList [yh1, yh2, yh3, yh4].
  l2 is the YooHoo List [yha, yhb, yhc].
  l3 is the YooHooList [yh1].
- l4 is the YooHooList [].
+ l4 is the YooHooList []. 
  
  yh5 is a YooHoo.
  
 
 // Expr: element before yh1 in l1.
 // Expr: element after yh1 in l1.
-// 
-// 
-// Expr: last element of l1.
 // Expr: first element of l1.
+// Expr: last element of l1.
 // Expr: element 2 of l1.
 // Expr: index of yh1 in l1.
 // Expr: length of l1.
+// Expr: elementBefore(l1, yh1).
+// Expr: elementAfter(l1, yh1).
+// Expr: firstElement(l1, yh1).
+// Expr: lastElement(l1, yh1).
+// Expr: elementInList(l1, 2).
+// Expr: ^index(l1, yh1).
+// Expr: ^length(l1).
+// Expr: insertElementInList(l1, yh1, 3).
+// Expr: deleteElementFromList(l3, 0).
  
  Rule ListFirst:
    if l1 is a YooHooList and 
@@ -47,20 +54,20 @@
  	
  Rule ListDelete:
  	if l1 is a YooHooList and l1Deleted is deleteElementFromList(l1, 1) then print("l1Deleted: ", sadlListToString(l1Deleted)). 	
- 
+  
 
- Rule ListFirst2:
+ Rule ListFirst2: 
    if lst is a YooHooList and 
    		first element of lst is le1 then lst has selectedElement le1 and print("ListFirst2: ", le1).
    		
  Rule ToEmptyList:
  	if l3 is a YooHooList and l3Deleted is deleteElementFromList(l3, 0) then print("l3Deleted: ", sadlListToString(l3Deleted)).
  	
- Rule PrintList: if x is a YooHooList and l is length of x then print(x, sadlListToString(x), " length = ", l).
- 
- Rule AddToEmptyList: 
+ Rule PrintList: if x is a YooHooList and isListHead(x) and l is length of x then print(x, sadlListToString(x), " length = ", l). 
+  
+ Rule AddToEmptyList:   
  	if x is a YooHooList and length of x is 0 and y is insertElementInList(x, yh1, 0) then print("From empty list: ", sadlListToString(y)).
- 	
+  
  
  Ask: select x, y where x is a YooHooList and x has selectedElement y. 
   

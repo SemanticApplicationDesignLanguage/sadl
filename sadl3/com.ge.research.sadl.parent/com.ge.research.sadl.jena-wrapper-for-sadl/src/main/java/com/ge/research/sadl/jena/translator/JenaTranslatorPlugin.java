@@ -2278,7 +2278,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 										sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
 										sb.append("\n\n");
 									} else {
-										String untypedFctSignature = binfo.getName() + "(--)--";
+										// # arguments not known, use "..." for arguments
+										// return type not known, use "--" for return type
+										String untypedFctSignature = binfo.getName() + "(...)--";
 										FunctionSignature fs = new FunctionSignature(untypedFctSignature, binfo.getUri());
 										sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
 										sb.append("\n\n");

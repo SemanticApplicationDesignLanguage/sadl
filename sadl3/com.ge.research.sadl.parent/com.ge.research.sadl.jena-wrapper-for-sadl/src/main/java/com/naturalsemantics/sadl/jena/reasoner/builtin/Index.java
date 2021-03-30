@@ -124,7 +124,6 @@ public class Index extends TypedBaseBuiltin {
 	@Override
 	public String getFunctionSignatureString() {
 		return "index(--, --)int";
-//		return "index(--)int";
 	}
 
 

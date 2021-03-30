@@ -129,7 +129,6 @@ public class ElementBefore extends TypedBaseBuiltin {
 	@Override
 	public String getFunctionSignatureString() {
 		return "elementBefore(--, --)--";
-//		return "elementBefore(--)--";
 	}
 
 
