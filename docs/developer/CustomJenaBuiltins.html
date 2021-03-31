@@ -4,31 +4,57 @@
     <title>Custom Jena Builtins</title>
   </head>
   <body>
-    <h1>Creating and Deploying Custom Jena Built-ins</h1>
+    <h1><a id="mozTocId421296" class="mozTocH1"></a>Creating and Deploying
+      Custom Jena Built-ins</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->2/23/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->3/31/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
-    <h2>Introduction</h2>
+    <ol id="mozToc">
+      <!--mozToc h1 1 h2 2 h3 3-->
+      <li><a href="#mozTocId421296">Creating and Deploying Custom Jena Built-ins</a>
+        <ol>
+          <li><a href="#mozTocId59974">Introduction</a></li>
+          <li><a href="#mozTocId659081">Building the Custom Built-in</a>
+            <ol>
+              <li><a href="#mozTocId495489">Step 2: Create the Source Code for
+                  the Built-in</a></li>
+              <li><a href="#mozTocId152279">Step 3: Organize the Manifest File</a></li>
+              <li><a href="#mozTocId439760">Step 4: Create a Feature Project</a></li>
+              <li><a href="#mozTocId409187">Step 5: Create an Update Project</a></li>
+            </ol>
+          </li>
+          <li><a href="#mozTocId737462">Deploying the Custom Built-in</a></li>
+          <li><a href="#mozTocId420387">Installing Custom Built-ins in SADL-IDE</a></li>
+          <li><a href="#mozTocId234742">Enabling Type Checking of Jena Built-in
+              Functions</a></li>
+        </ol>
+      </li>
+    </ol>
+    <h2><a id="mozTocId59974" class="mozTocH2"></a>Introduction</h2>
     <p>Jena rules can use <a href="http://jena.apache.org/documentation/inference/#RULEbuiltins">built-ins</a>
       to perform various tasks in procedural code. These built-ins have methods
-      called by the Jena rule engine. A built-in can be called from the rule
-      body (premises), from the rule head (conclusions), or from either. Adding
-      custom built-ins to use in your rules is a powerful way to extend the
-      capability of an application. This document describes how to build and how
-      to deploy a set of custom Jena built-ins. For more details, see <a href="http://jena.apache.org/documentation/inference/#RULEextensions">
+      called by the Jena rule engine. A built-in can be designed to be called
+      from the rule body (premises), from the rule head (conclusions), or from
+      either. Adding custom built-ins to use in your rules is a powerful way to
+      extend the capability of an application. This document describes how to
+      build and how to deploy a set of custom Jena built-ins. For more details,
+      see <a href="http://jena.apache.org/documentation/inference/#RULEextensions">
         http://jena.apache.org/documentation/inference/#RULEextensions</a>. </p>
-    <h2>Building the Custom Built-in</h2>
+    <h2><a id="mozTocId659081" class="mozTocH2"></a>Building the Custom Built-in</h2>
     <p>A custom Jena built-in must extend the Java class <i>
         org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin</i>. If desired,
       the custom built-in can extend the Java class <i>
         com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin</i>, which
       is a subclass of <i>org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin</i>,
-      in order to provide a hook for making inference in SADL cancelable. Since
-      the deployment is to an Eclipse environment, it is assumed in this
-      discussion that the building of custom built-ins also takes place in an
-      Eclipse Java development environment. Building a custom built-in consists
-      of the following steps. The <i> Pow</i> built-in, which is deployed with
-      the SADL-IDE, and will serve as an example. </p>
+      in order to provide a hook for making inference in SADL cancelable. The
+      custom built-in may also extend <em>com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin</em>
+      in order to support type checking of function arguments. For details see <a
+        href="#TypedBaseBuiltin">section below</a>. Since the deployment is to
+      an Eclipse environment, it is assumed in this discussion that the building
+      of custom built-ins also takes place in an Eclipse Java development
+      environment. Building a custom built-in consists of the following steps.
+      The <i> Pow</i> built-in, which is deployed with the SADL-IDE, and will
+      serve as an example. </p>
     <h4>Step 1: Create an Eclipse Plug-in Fragment Project</h4>
     <p>To begin, create a new Eclipse Fragment Project (File -&gt; New -&gt;
       Project..., Plug-in Development -&gt; Fragment Project) to contain the
@@ -36,15 +62,16 @@
       Host Plug-in to "com.ge.research.sadl" with some appropriate minimum
       version (the version you are using or that your users will be using) or
       leave blank. </p>
-    <h3>Step 2: Create the Source Code for the Built-in</h3>
+    <h3><a id="mozTocId495489" class="mozTocH3"></a>Step 2: Create the Source
+      Code for the Built-in</h3>
     <p>In the fragment project, create the package for your built-in(s) under
       the source code folder, "src", e.g., <i>com.ge.research.sadl.jena.reasoner.builtin</i>.
       Then add the built-in class(es) to the package, e.g., <i>Pow.java</i>.
       Make the <a href="http://jena.apache.org/download/">Jena</a> jars
       available on your classpath. If you are extending the <i>
-        CancellableBuiltin</i> you will need to also add the <i>
-        com.ge.research.sadl.jena-wrapper-for-sadl </i>project's jar file,
-      found in the <i>target</i> folder.</p>
+        CancellableBuiltin</i> or <em>TypedBaseBuiltins</em> you will need to
+      also add the <i> com.ge.research.sadl.jena-wrapper-for-sadl </i>project's
+      jar file, found in the <i>target</i> folder.</p>
     <p>If your built-in is to be used in rule premises it must either return
       true when it "matches" (false when it doesn't) or bind a value to a
       variable. In the latter case, the built-in will have one more argument
@@ -156,7 +183,8 @@
         &nbsp;&nbsp;&nbsp; }<br>
         }</p>
     </blockquote>
-    <h3>Step 3: Organize the Manifest File</h3>
+    <h3><a id="mozTocId152279" class="mozTocH3"></a>Step 3: Organize the
+      Manifest File</h3>
     <p>Organize the fragment using the Organize Manifests Wizard (Overview tab,
       META-INF -&gt; MANIFEST.MF editor). In particular, on the "Runtime" tab
       add the package(s) containing your built-in(s) to the "Exported Packages"
@@ -178,13 +206,15 @@
       will cause the definition of that built-in to be added to the
       configuration.rdf file in the OwlModels folder, which will be used by
       SadlServer to load built-ins needed for a particular knowledge base.</p>
-    <h3>Step 4: Create a Feature Project</h3>
+    <h3><a id="mozTocId439760" class="mozTocH3"></a>Step 4: Create a Feature
+      Project</h3>
     <p>Create a new Feature Project (File -&gt; New -&gt; Project..., Plug-in
       Development -&gt; Feature Project), e.g., PowBuiltinFeature. On the
       "Plug-ins" tab of the feature.xml editor, add your new fragment. Add
       explanation, copyright, and licensing information to the "Information"
       tab.</p>
-    <h3>Step 5: Create an Update Project</h3>
+    <h3><a id="mozTocId409187" class="mozTocH3"></a>Step 5: Create an Update
+      Project</h3>
     <p>Create a new Update Site Project ((File -&gt; New -&gt; Project...,
       Plug-in Development -&gt; Update Site Project), e.g.,
       PowBuiltinUpdate.&nbsp; Open "site.xml" in the default editor and add your
@@ -194,7 +224,8 @@
       the category. If you wish previous versions to be available, leave them in
       the site.xml file. If not, drop old versions by selecting and deleting
       (delete key). </p>
-    <h2>Deploying the Custom Built-in</h2>
+    <h2><a id="mozTocId737462" class="mozTocH2"></a>Deploying the Custom
+      Built-in</h2>
     <p>To deploy a set of custom Jena built-ins to the SADL-IDE, place the zip
       file in the Update Site project in a location that will allow users to
       easily add download and add your custom built-ins to their Eclipse
@@ -214,7 +245,8 @@
       containing your built-ins to their SADL-IDE plug-ins. This will place the
       new plug-ins on the classpath of the IDE and allow them to be used in your
       models' Jena rules.</p>
-    <h2>Installing Custom Built-ins in SADL-IDE</h2>
+    <h2><a id="mozTocId420387" class="mozTocH2"></a>Installing Custom Built-ins
+      in SADL-IDE</h2>
     <p>The SADL-IDE is a set of plug-ins for Eclipse that implement the SADL
       language editor and runtime environment. The update site for the customer
       built-ins created by following the instructions above will create an
@@ -225,5 +257,57 @@
       created in the step above. Follow the instructions to complete
       installation of the fragment extending the SADL-IDE with the new
       built-ins.</p>
+    <h2><a id="mozTocId234742" class="mozTocH2"></a><a name="TypedBaseBuiltin">Enabling
+        Type Checking of Jena Built-in Functions</a></h2>
+    <p>To enable type checking of the arguments and returned value of a custom
+      built-in, have them built-in class extend <em>com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin.
+        </em>This abstract class adds the additional method</p>
+    <p style="margin-left: 40px;"><em>abstract public String
+        getFunctionSignatureString();</em></p>
+    <p>which provides the reasoner/translator pair with the signature of the
+      function, allowing the arguments provided, as well as the use of the value
+      returned, to be check for type consistency. The method should return the
+      expected signature of the built-in function in the following syntax.</p>
+    <p style="margin-left: 40px;">functionName(ar1type, arg2type,
+      ....)returnType</p>
+    <p>For example, the custom built-in <em>com.ge.research.sadl.jena.reasoner.builtin.Abs</em>
+      (absolute value) has this method.</p>
+    <p>&nbsp;&nbsp;&nbsp; @Override<br>
+      &nbsp;&nbsp;&nbsp; public String getFunctionSignatureString() {<br>
+      &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; return "abs(decimal)decimal";<br>
+      &nbsp;&nbsp;&nbsp; }</p>
+    <p>This signature indicates that the built-in name to be used is "abs", it
+      takes a single argument of type <em>decimal</em>, and it returns a single
+      value of type <em>decimal</em>. (All Jena built-ins are expected to
+      return at most one value.)</p>
+    <p>Type checking will check for both the correct number of arguments and for
+      the correct type of arguments. Sometimes built-in functions can take a
+      variable number or arguments, or can take arguments of various types.
+      Also, sometimes it is not possible, at least currently, to identify the
+      argument type as is the case for function arguments of type SADL typed
+      list. (There is not a corresponding <em>sadllist:List</em> class in the
+      Xtext model. If a function takes a specific subclass of <em>sadllist:List</em>
+      then that type can be specified for an argument.) To handle these special
+      cases use the following special argument types.</p>
+    <ol>
+      <li>"..." indicates that the number of arguments is not known. </li>
+      <li>"--" indicates that the type of a particular argument is not specified
+        and so cannot be type-checked.</li>
+    </ol>
+    <p>For example, the <em>com.ge.research.sadl.jena.reasoner.builtin.Print</em>
+      has the following signature method.</p>
+    <p>&nbsp;&nbsp;&nbsp; @Override<br>
+      &nbsp;&nbsp;&nbsp; public String getFunctionSignatureString() {<br>
+      &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; return "print(--,...)--";<br>
+      &nbsp;&nbsp;&nbsp; }</p>
+    <p>This indicates that the first argument can be of any type, and there can
+      be any number of arguments, which will not be type checked. It also
+      indicates that the return value should not be type checked.</p>
+    <p><br>
+    </p>
+    <p><br>
+    </p>
+    <p><em><br>
+      </em></p>
   </body>
 </html>
