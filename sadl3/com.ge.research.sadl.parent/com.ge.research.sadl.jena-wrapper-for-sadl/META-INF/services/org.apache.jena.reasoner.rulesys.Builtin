@@ -37,3 +37,13 @@ com.ge.research.sadl.jena.reasoner.builtin.Sum
 com.ge.research.sadl.jena.reasoner.builtin.Tan
 com.ge.research.sadl.jena.reasoner.builtin.ThereExists
 com.ge.research.sadl.jena.reasoner.builtin.Unique
+com.naturalsemantics.sadl.jena.reasoner.builtin.ElementAfter
+com.naturalsemantics.sadl.jena.reasoner.builtin.ElementBefore
+com.naturalsemantics.sadl.jena.reasoner.builtin.ElementInList
+com.naturalsemantics.sadl.jena.reasoner.builtin.FirstElement
+com.naturalsemantics.sadl.jena.reasoner.builtin.Index
+com.naturalsemantics.sadl.jena.reasoner.builtin.LastElement
+com.naturalsemantics.sadl.jena.reasoner.builtin.Length
+com.naturalsemantics.sadl.jena.reasoner.builtin.InsertElementInList
+com.naturalsemantics.sadl.jena.reasoner.builtin.DeleteElementFromList
+com.naturalsemantics.sadl.jena.reasoner.builtin.SadlListToString

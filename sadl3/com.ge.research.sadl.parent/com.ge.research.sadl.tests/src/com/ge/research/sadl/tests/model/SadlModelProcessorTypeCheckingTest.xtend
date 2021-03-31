@@ -19,6 +19,8 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertTrue
 import com.google.common.collect.Iterables
 
 @RunWith(XtextRunner)
@@ -343,7 +345,42 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 	}
 	
 	@Test
+	def void testTypedList_00() {
+		'''
+		 uri "http://sadl.org/UsingListExpression.sadl" alias UsingListExpression.
+		 YooHoo is a class.
+		 l1 is the YooHoo List [yh1, yh2, yh3, yh4].
+		 '''.assertValidatesTo[ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			assertTrue(issues.size == 0)
+		]
+	}
+	
+	@Test
 	def void testTypedList_01() {
+		'''
+		 uri "http://sadl.org/UsingListExpression.sadl" alias UsingListExpression.
+		 YooHoo is a class.
+		 YooHooList is a type of YooHoo List, described by selectedElement with values of type YooHoo.
+		 l1 is the YooHooList [yh1, yh2, yh3, yh4].
+		 '''.assertValidatesTo[ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			assertTrue(issues.size == 0)	// content requires articles to be enabled, 2 var not bound in premises
+		]
+	}
+	
+	@Test
+	def void testTypedList_06() {
 		val sadlModel = '''
 		uri "http://sadl.org/list.sadl3" alias lst3.
 		
@@ -363,7 +400,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 	}
 	
 	@Test
-	def void testTypedList02() {
+	def void testTypedList_07() {
 		val sadlModel = '''
 			 uri "http://sadl.org/list.sadl" alias lst.
 			 
@@ -383,7 +420,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 	}
 	
 	@Test
-	def void testTypedList03() {
+	def void testTypedList_08() {
 		val sadlModel = '''
 			 uri "http://sadl.org/list.sadl" alias lst.
 			 
@@ -404,7 +441,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 	}
 	
 	@Test
-	def void testTypedList04() {
+	def void testTypedList_09() {
 		val sadlModel = '''
 			 uri "http://sadl.org/list.sadl" alias lst.
 			 
@@ -423,11 +460,11 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			println(issue.message)
 		}
 		// expect error on last line as i5 could be a C
-		sadlModel.assertError("TypeCheckInfo(B List, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i1 (type B and C),TypeCheckInfo(http://sadl.org/list.sadl#i2, B),TypeCheckInfo(http://sadl.org/list.sadl#i3, C)].")
+		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i1 (type B and C),TypeCheckInfo(http://sadl.org/list.sadl#i2, B),TypeCheckInfo(http://sadl.org/list.sadl#i3, C)].")
 	}
 	
 	@Test
-	def void testTypeList_10() {
+	def void testTypedList_10() {
 		val sadlModel = '''
 		 uri "http://sadl.org/list.sadl" alias lst.
 		 
@@ -450,9 +487,173 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			println(issue.message)
 		}
 		// expect error on last line as i5 could be a C
-		sadlModel.assertError("TypeCheckInfo(B List, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i5 (type B or C)].")
+		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i5 (type B or C)].")
 	}
 
+	@Test
+	def void testFirstElement_01() {
+		'''
+		 uri "http://sadl.org/UsingListExpression.sadl" alias UsingListExpression.
+		 YooHoo is a class.
+		 l1 is the YooHoo List [yh1, yh2, yh3, yh4].
+		 Rule ListFirst:
+		   if l1 is a YooHoo List and 
+		   		first element of l1 is le1 then print(le1).
+		 '''.assertValidatesTo[ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.size == 0)	
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule ListFirst:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHoo (List)) and firstElement(UsingListExpression:l1,le1) then print(le1)."))
+		]
+	}
+	
+	@Test
+	def void testFirstElement_01Compare() {
+		'''
+		 uri "http://sadl.org/UsingListExpression.sadl" alias UsingListExpression.
+		 YooHoo is a class.
+		 l1 is the YooHoo.
+		 Rule ListFirst:
+		   if l1 is a YooHoo then print(l1).
+		 '''.assertValidatesTo[ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.size == 0)	
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule ListFirst:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHoo) then print(UsingListExpression:l1)."))
+		]
+	}
+
+	@Test
+	def void testFirstElement_02() {
+		'''
+		 uri "http://sadl.org/UsingListExpression.sadl" alias UsingListExpression.
+		 YooHoo is a class.
+		 YooHooList is a type of YooHoo List, described by selectedElement with values of type YooHoo.
+		 l1 is the YooHooList [yh1, yh2, yh3, yh4].
+		 Rule ListFirst:
+		   if l1 is a YooHooList and 
+		   		first element of l1 is le1 then l1 has selectedElement le1 and print(le1).
+		 '''.assertValidatesTo[ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.size == 0)
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule ListFirst:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and firstElement(UsingListExpression:l1,le1) then rdf(UsingListExpression:l1, UsingListExpression:selectedElement, le1) and print(le1)."))
+		]
+	}
+	
+	@Test
+	def void testListBuiltins_01() {
+		'''
+		  uri "http://sadl.org/UsingListExpression.sadl" alias UsingListExpression.
+		  
+		  YooHoo is a class.
+		  YooHooList is a type of YooHoo List, described by selectedElement with values of type YooHoo.
+		  l1 is the YooHooList [yh1, yh2, yh3, yh4].
+		  
+		  Rule ListFirst:
+		    if l1 is a YooHooList and 
+		    		first element of l1 is le1 then l1 has selectedElement le1 and print("ListFirst: ", le1).
+		    		
+		  Rule ListLast:
+		  	if l1 is a YooHooList and last element of l1 is lel then print("Last element of l1: ", lel).   	
+		  	
+		  Rule ListAfter:
+		  	if l1 is a YooHooList and element after yh2 in l1 is lea then print("Element after yh2: ", lea). 
+		    
+		  Rule ListBefore:
+		  	if l1 is a YooHooList and element before yh3 in l1 is leb then print("Element before yh3: ", leb). 
+		 
+		  Rule ListElementAt:
+		  	if l1 is a YooHooList and element 3 of l1 is le3 then print("Element 3: ", le3). 
+		 
+		  Rule ListIndex:
+		  	if l1 is a YooHooList and index of yh2 in l1 is idx then print("Index of yh2: ", idx). 
+		  	
+		  Rule ListLength:
+		  	if l1 is a YooHooList and len is length of l1 then print("Length of l1: ", len).
+		 '''.assertValidatesTo[ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.size == 0)
+			assertTrue(rules.size == 7)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					'Rule ListFirst:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and firstElement(UsingListExpression:l1,le1) then rdf(UsingListExpression:l1, UsingListExpression:selectedElement, le1) and print("ListFirst: ",le1).'))
+			assertTrue(
+				processor.compareTranslations(rules.get(1).toString(),
+					'Rule ListLast:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and lastElement(UsingListExpression:l1,lel) then print("Last element of l1: ",lel).'))
+			assertTrue(
+				processor.compareTranslations(rules.get(2).toString(),
+					'Rule ListAfter:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and elementAfter(UsingListExpression:l1,UsingListExpression:yh2,lea) then print("Element after yh2: ",lea).'))
+			assertTrue(
+				processor.compareTranslations(rules.get(3).toString(),
+					'Rule ListBefore:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and elementBefore(UsingListExpression:l1,UsingListExpression:yh3,leb) then print("Element before yh3: ",leb).'))
+			assertTrue(
+				processor.compareTranslations(rules.get(4).toString(),
+					'Rule ListElementAt:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and elementInList(UsingListExpression:l1,3,le3) then print("Element 3: ",le3).'))
+			assertTrue(
+				processor.compareTranslations(rules.get(5).toString(),
+					'Rule ListIndex:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and index(UsingListExpression:l1,UsingListExpression:yh2,idx) then print("Index of yh2: ",idx).'))
+			assertTrue(
+				processor.compareTranslations(rules.get(6).toString(),
+					'Rule ListLength:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and length(UsingListExpression:l1,len) then print("Length of l1: ",len).'))
+		]
+/*
+Rule ListFirst:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and firstElement(UsingListExpression:l1,le1) then rdf(UsingListExpression:l1, UsingListExpression:selectedElement, le1) and print("ListFirst: ",le1).
+Rule ListLast:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and lastElement(UsingListExpression:l1,lel) then print("Last element of l1: ",lel).
+Rule ListAfter:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and elementAfter(UsingListExpression:l1,UsingListExpression:yh2,lea) then print("Element after yh2: ",lea).
+Rule ListBefore:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and elementBefore(UsingListExpression:l1,UsingListExpression:yh3,leb) then print("Element before yh3: ",leb).
+Rule ListElementAt:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and elementInList(UsingListExpression:l1,3,le3) then print("Element 3: ",le3).
+Rule ListIndex:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and index(UsingListExpression:l1,UsingListExpression:yh2,idx) then print("Index of yh2: ",idx).
+Rule ListLength:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:YooHooList (List)) and length(UsingListExpression:l1,len) then print("Length of l1: ",len).
+		*/
+	}
+	
 	@Test
 	def void testIntersectionClass_01() {
 		val sadlModel = '''

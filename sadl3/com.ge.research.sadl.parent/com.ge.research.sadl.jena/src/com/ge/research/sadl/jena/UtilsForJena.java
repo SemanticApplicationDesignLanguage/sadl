@@ -409,16 +409,16 @@ public class UtilsForJena {
 						if (avfstmt != null) {
 							type = avfstmt.getObject();
 							if (type.isURIResource()) {
-								tctypetype = NodeType.ClassListNode;
+								tctypetype = NodeType.ClassNode;
 								if (type.asResource().getNameSpace().equals(XSD.getURI())) {
-									tctypetype = NodeType.DataTypeListNode;
+									tctypetype = NodeType.DataTypeNode;
 								}
 								else {
 									StmtIterator eqitr = type.asResource().listProperties(OWL.equivalentClass);
 									if (eqitr.hasNext()) {
 										RDFNode eqCls = eqitr.nextStatement().getObject();
 										if (eqCls.equals(RDFS.Datatype)) {
-											tctypetype = NodeType.DataTypeListNode;
+											tctypetype = NodeType.DataTypeNode;
 										}
 									}
 								}

@@ -4869,8 +4869,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * information in the original NamedNode from the Jena OntModel Resource.
 	 * @param theNode
 	 * @return
+	 * @throws TranslationException 
 	 */
-	public Resource getResourceFromNamedNode(NamedNode theNode) {
+	public Resource getResourceFromNamedNode(NamedNode theNode) throws TranslationException {
 		Resource rsrc = null;
 		if(theNode == null) {
 			return null;
