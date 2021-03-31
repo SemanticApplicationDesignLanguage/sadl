@@ -122,7 +122,7 @@ public class ElementAfter extends TypedBaseBuiltin {
 
 	@Override
 	public String getFunctionSignatureString() {
-		return "elementAfter(string, string)string";
+		return "elementAfter(--, --)--";
 	}
 
 

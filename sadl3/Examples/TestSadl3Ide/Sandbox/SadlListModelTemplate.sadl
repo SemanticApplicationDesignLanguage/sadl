@@ -25,9 +25,9 @@
  a string List.
  
 {John, Sue, Craig} are instances of Person.
-JoesChildren is the ChildrenList [John, Sue, Craig].
+JoesChildren1 is the ChildrenList [John, Sue, Craig].
 
-JoesChildren is the Person List [John, Sue, Craig].
+JoesChildren2 is the Person List [John, Sue, Craig].
 
 ChildlessChildren is the Person List [].
 ChildlessChildren is the ChildrenList []. 

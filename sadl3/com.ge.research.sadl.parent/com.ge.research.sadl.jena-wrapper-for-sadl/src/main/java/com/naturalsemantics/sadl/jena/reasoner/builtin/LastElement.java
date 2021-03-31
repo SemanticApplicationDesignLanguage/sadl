@@ -112,7 +112,7 @@ public class LastElement extends TypedBaseBuiltin {
 
 	@Override
 	public String getFunctionSignatureString() {
-		return "lastElement(string)string";
+		return "lastElement(--)--";
 	}
 
 
