@@ -262,20 +262,45 @@
     <p>To enable type checking of the arguments and returned value of a custom
       built-in, have them built-in class extend <em>com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin.
         </em>This abstract class adds the additional method</p>
-    <p style="margin-left: 40px;"><em>abstract public String
-        getFunctionSignatureString();</em></p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#000000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"> </font></font></font><font color="#7f0055"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>abstract</b></font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#7f0055"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>public</b></font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            String getFunctionSignatureString();</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-left: 40px;"></p>
     <p>which provides the reasoner/translator pair with the signature of the
       function, allowing the arguments provided, as well as the use of the value
       returned, to be check for type consistency. The method should return the
-      expected signature of the built-in function in the following syntax.</p>
+      expected signature of the built-in function as a string in the following
+      syntax.</p>
     <p style="margin-left: 40px;">functionName(ar1type, arg2type,
       ....)returnType</p>
     <p>For example, the custom built-in <em>com.ge.research.sadl.jena.reasoner.builtin.Abs</em>
       (absolute value) has this method.</p>
-    <p>&nbsp;&nbsp;&nbsp; @Override<br>
-      &nbsp;&nbsp;&nbsp; public String getFunctionSignatureString() {<br>
-      &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; return "abs(decimal)decimal";<br>
-      &nbsp;&nbsp;&nbsp; }</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#000000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"> </font></font></font><font color="#646464"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">@Override</font></font></font><br>
+      <font color="#000000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"> </font></font></font><font color="#7f0055"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>public</b></font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            String getFunctionSignatureString() {</font></font></font><br>
+      <font color="#000000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">&nbsp;&nbsp; </font></font></font><font color="#7f0055"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>return</b></font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#2a00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">"abs(decimal)decimal"</font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">;</font></font></font><br>
+      <font color="#000000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"> }</font></font></font></p>
     <p>This signature indicates that the built-in name to be used is "abs", it
       takes a single argument of type <em>decimal</em>, and it returns a single
       value of type <em>decimal</em>. (All Jena built-ins are expected to
@@ -296,10 +321,25 @@
     </ol>
     <p>For example, the <em>com.ge.research.sadl.jena.reasoner.builtin.Print</em>
       has the following signature method.</p>
-    <p>&nbsp;&nbsp;&nbsp; @Override<br>
-      &nbsp;&nbsp;&nbsp; public String getFunctionSignatureString() {<br>
-      &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; return "print(--,...)--";<br>
-      &nbsp;&nbsp;&nbsp; }</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#000000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"> </font></font></font><font color="#646464"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">@Override</font></font></font><br>
+      <font color="#000000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"> </font></font></font><font color="#7f0055"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>public</b></font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            String getFunctionSignatureString() {</font></font></font><br>
+      <font color="#000000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">&nbsp;&nbsp; </font></font></font><font color="#7f0055"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>return</b></font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#2a00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">"print(--,...)--"</font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">;</font></font></font><br>
+      <font color="#000000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"> }</font></font></font></p>
+    <p></p>
     <p>This indicates that the first argument can be of any type, and there can
       be any number of arguments, which will not be type checked. It also
       indicates that the return value should not be type checked.</p>
