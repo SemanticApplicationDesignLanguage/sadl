@@ -16,7 +16,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import javax.activation.DataSource;
+import jakarta.activation.DataSource;
 
 //import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologInterface;
 import org.apache.jena.ontology.OntModel;

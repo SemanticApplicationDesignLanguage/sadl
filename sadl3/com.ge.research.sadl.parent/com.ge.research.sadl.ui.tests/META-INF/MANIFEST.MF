@@ -19,7 +19,7 @@ Require-Bundle: com.ge.research.sadl.ui,
  com.ge.research.sadl.tests,
  org.eclipse.ui.ide,
  org.eclipse.xtext.ui.testing
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.ui.tests;x-internal=true,
  com.ge.research.sadl.ui.tests.contentassist
 Import-Package: org.hamcrest.core,

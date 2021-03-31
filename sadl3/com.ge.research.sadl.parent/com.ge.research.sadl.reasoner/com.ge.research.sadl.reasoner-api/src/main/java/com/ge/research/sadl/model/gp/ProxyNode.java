@@ -162,7 +162,7 @@ public class ProxyNode extends Node {
 							return ((Node) pfr).toFullyQualifiedString();					
 						}
 						else if (pfr instanceof GraphPatternElement) {
-							return ((GraphPatternElement)proxyFor).toFullyQualifiedString();
+							return proxyFor.toFullyQualifiedString();
 						}
 						else {
 							return ((List<?>)proxyFor).get(0).toString();					
@@ -173,7 +173,7 @@ public class ProxyNode extends Node {
 					}
 				}
 				else if (proxyFor instanceof GraphPatternElement) {
-					return ((GraphPatternElement)proxyFor).toFullyQualifiedString();
+					return proxyFor.toFullyQualifiedString();
 				}
 //				else if (proxyFor instanceof Node) {
 //					return ((Node) proxyFor).toFullyQualifiedString();
@@ -202,7 +202,7 @@ public class ProxyNode extends Node {
 							return ((Node) pfr).toDescriptiveString();					
 						}
 						else if (pfr instanceof GraphPatternElement) {
-							return ((GraphPatternElement)proxyFor).toDescriptiveString();
+							return proxyFor.toDescriptiveString();
 						}
 						else {
 							return  ((List<?>)proxyFor).get(0).toString();					
@@ -213,7 +213,7 @@ public class ProxyNode extends Node {
 					}
 				}
 				else if (proxyFor instanceof GraphPatternElement) {
-					return ((GraphPatternElement)proxyFor).toDescriptiveString();
+					return proxyFor.toDescriptiveString();
 				}
 //				else if (proxyFor instanceof Node) {
 //					return ((Node) proxyFor).toDescriptiveString();

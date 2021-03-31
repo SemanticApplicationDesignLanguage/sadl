@@ -1,5 +1,12 @@
-The primary location for user access to SADL documentation remains on http://sadl.sourceforge.net with links to various parts of the documentation 
-appearing in the sadlos2 Wiki (https://github.com/crapo/sadlos2/wiki). However, this project is the source of SADL 3 documenation. 
+The primary location for user access to SADL documentation is on
+http://semanticapplicationdesignlanguage.github.io/sadl/ with older
+documentation remaining on http://sadl.sourceforge.net/ and other
+parts of the documentation appearing in the SADL wiki
+(https://github.com/SemanticApplicationDesignLanguage/sadl/wiki/).
 
-Please make all editing changes to documentation in this github folder, https://github.com/crapo/sadlos2/tree/development/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl3.documentation. 
-Documentation files, both HTML and images, can then be uploaded to sourceforge.net.
+Going forward, please make all editing changes to documentation in the
+gh-pages branch of this git repository,
+https://github.com/SemanticApplicationDesignLanguage/sadl/tree/gh-pages/docs/.
+Documentation files in the gh-pages branch, both HTML and images, will
+be displayed automatically on
+http://semanticapplicationdesignlanguage.github.io/sadl/.

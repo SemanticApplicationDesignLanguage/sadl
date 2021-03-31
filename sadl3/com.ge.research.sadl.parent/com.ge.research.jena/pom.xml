@@ -1,85 +1,73 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-	<groupId>com.ge.research.sadl</groupId>
-	<artifactId>com.ge.research.sadl.parent</artifactId>
-	<version>3.5.0-SNAPSHOT</version>
-    </parent>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>com.ge.research.jena</artifactId>
-    <packaging>eclipse-plugin</packaging>
+  <parent>
+    <groupId>com.ge.research.sadl</groupId>
+    <artifactId>com.ge.research.sadl.parent</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
+  </parent>
 
-    <dependencies>
-	<dependency>
-	    <groupId>com.ge.research.sadl</groupId>
-	    <artifactId>reasoner-api</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>com.ge.research.sadl</groupId>
-	    <artifactId>reasoner-impl</artifactId>
-	    <version>${project.version}</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.apache.logging.log4j</groupId>
-	    <artifactId>log4j-api</artifactId>
-	    <version>2.13.3</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.apache.logging.log4j</groupId>
-	    <artifactId>log4j-core</artifactId>
-	    <version>2.13.3</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.apache.logging.log4j</groupId>
-	    <artifactId>log4j-slf4j-impl</artifactId>
-	    <version>2.13.3</version>
-	</dependency>
-	<dependency>
-	    <groupId>org.codehaus.woodstox</groupId>
-	    <artifactId>wstx-asl</artifactId>
-	    <version>3.2.9</version>
-	</dependency>
-    </dependencies>
+  <artifactId>com.ge.research.jena</artifactId>
+  <packaging>eclipse-plugin</packaging>
 
-    <build>
-	<plugins>
-	    <plugin>
-		<artifactId>maven-clean-plugin</artifactId>
-		<configuration>
-		    <filesets>
-			<fileset>
-			    <directory>lib/</directory>
-			    <includes>
-				<include>**/*</include>
-			    </includes>
-			    <followSymlinks>false</followSymlinks>
-			</fileset>
-		    </filesets>
-		</configuration>
-	    </plugin>
-	    <plugin>
-		<groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-dependency-plugin</artifactId>
-		<executions>
-		    <execution>
-			<?m2e ignore?>
-			<id>copy-dependencies</id>
-			<phase>generate-resources</phase>
-			<goals>
-			    <goal>copy-dependencies</goal>
-			</goals>
-			<configuration>
-			    <outputDirectory>${project.basedir}/lib/</outputDirectory>
-			    <overWriteReleases>true</overWriteReleases>
-			    <overWriteSnapshots>true</overWriteSnapshots>
-			    <stripVersion>true</stripVersion>
-			    <excludeScope>system</excludeScope>
-			</configuration>
-		    </execution>
-		</executions>
-	    </plugin>
-	</plugins>
-    </build>
+  <!-- Needed by maven-dependency-plugin -->
+  <dependencies>
+    <dependency>
+      <groupId>com.ge.research.sadl</groupId>
+      <artifactId>reasoner-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.ge.research.sadl</groupId>
+      <artifactId>reasoner-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.opencsv</groupId>
+      <artifactId>opencsv</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.woodstox</groupId>
+      <artifactId>wstx-asl</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Copy dependencies to lib directory -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <?m2e ignore?>
+            <id>default-copy-dependencies</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <outputDirectory>${project.basedir}/lib/</outputDirectory>
+              <overWriteReleases>true</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+              <stripVersion>true</stripVersion>
+              <excludeScope>system</excludeScope>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

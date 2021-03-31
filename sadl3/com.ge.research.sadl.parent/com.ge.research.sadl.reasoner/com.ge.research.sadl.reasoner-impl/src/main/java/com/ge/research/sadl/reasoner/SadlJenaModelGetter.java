@@ -29,7 +29,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelGetter;
 import org.apache.jena.rdf.model.ModelReader;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.tdb.TDB;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.vocabulary.OWL;
@@ -239,8 +239,8 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     public OntModel getOntModel(String publicUri, String altUrl, String format) {
     	Model m = getModel(publicUri, new ModelReader() {
             @Override
-            public Model readModel( Model toRead, String URL ) {
-               configurationManager.getJenaDocumentMgr().getFileManager().readModel( toRead, URL );
+            public Model readModel(Model toRead, String URL) {
+               RDFDataMgr.read(toRead, URL);
                return toRead;
             }
          });
@@ -330,21 +330,5 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
 	public void setFormat(String format) {
 		this.format = format;
 	}
-
-	private String getModelXsdFolder(String uri, String altUrl) throws MalformedURLException {
-		String uriModified = uri.substring(7);
-		SadlUtils su = new SadlUtils();
-		String fn = su.fileUrlToFileName(altUrl);
-		if (fn.endsWith(".TDB/")) {
-			// TODO need to handle TD B
-			fn = new File(fn).getParent();
-		}
-		File f = new File(fn);
-		if (f.exists()) {
-			return f.getParent() + File.separator + uriModified;			
-		}
-		return null;
-	}
-
 
 }

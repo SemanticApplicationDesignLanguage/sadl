@@ -23,6 +23,8 @@
 
 package com.ge.research.sadl.model;
 
+import java.util.Objects;
+
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -232,11 +234,17 @@ public class ConceptName extends ConceptIdentifier {
 	/**
 	 * This version is needed to handle comparisons in lists, etc.
 	 */
+	@Override
 	public boolean equals(Object o) {
 		if (o instanceof ConceptName) {
 			return equals((ConceptName)o);
 		}
 		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, namespace, prefix);
 	}
 
 	public RangeValueType getRangeValueType() {

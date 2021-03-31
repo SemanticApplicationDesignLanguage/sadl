@@ -42,8 +42,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.reasoner.ValidityReport.Report;
-import org.apache.xerces.impl.dv.XSSimpleType;
-import org.apache.xerces.impl.dv.xs.XSSimpleTypeDecl;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -124,10 +122,10 @@ public class TestUserDefinedDatatype {
         }
 
         RDFDatatype over12Type = tm.getSafeTypeByName(uri + "#over12");
-        Object etd = over12Type.extendedTypeDefinition();
-        Object xsa = ((XSSimpleTypeDecl)etd).getMinExclusiveValue();
+//        Object etd = over12Type.extendedTypeDefinition();
+//        Object xsa = ((XSSimpleTypeDecl)etd).getMinExclusiveValue();
         
-        XSSimpleType st = new XSSimpleTypeDecl();
+//        XSSimpleType st = new XSSimpleTypeDecl();
 //        ((XSSimpleTypeDecl)st).setNamespaceItem(new XSNamespaceItem());
         
 //        XSDGenericType newDT = new XSDDataType.XSDGenericType(st, "http://com.ge.research/ns");

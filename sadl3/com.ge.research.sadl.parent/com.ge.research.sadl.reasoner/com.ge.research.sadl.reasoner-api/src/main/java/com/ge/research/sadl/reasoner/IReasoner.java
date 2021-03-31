@@ -30,7 +30,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-import javax.activation.DataSource;
+import jakarta.activation.DataSource;
 
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.gp.FunctionSignature;

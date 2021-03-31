@@ -56,9 +56,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.activation.URLDataSource;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
+import jakarta.activation.URLDataSource;
 
 import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.OntClass;
@@ -1048,7 +1048,7 @@ public class CsvImporter implements ITabularDataImporter {
 	}
 
 	/* (non-Javadoc)
-	 * @see com.ge.research.sadl.importer.ICsvImporter#setCsvDataSource(javax.activation.DataSource, boolean)
+	 * @see com.ge.research.sadl.importer.ICsvImporter#setCsvDataSource(jakarta.activation.DataSource, boolean)
 	 */
 	@Override
 	public void setImportDataSource(DataSource csvDs, boolean _includesHeader) throws IOException {

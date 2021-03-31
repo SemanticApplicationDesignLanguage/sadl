@@ -1,57 +1,60 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.ge.research.sadl</groupId>
-		<artifactId>com.ge.research.sadl.parent</artifactId>
-		<version>3.5.0-SNAPSHOT</version>
-	</parent>
-	<artifactId>com.ge.research.sadl.tests</artifactId>
-	<packaging>eclipse-test-plugin</packaging>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-	<build>
-		<!-- We do not want to run the headless tests in an OSGi container. -->
-		<!-- We use Maven Surefire instead of Tycho Surefire to run the tests outside of the OSGi container. -->
-		<!-- Source: https://wiki.eclipse.org/Tycho/FAQ#Can_I_run_eclipse-plugin_tests_also_outside_an_OSGi_container.3F -->
-		<!-- GH issue: https://github.com/crapo/sadlos2/issues/370 -->
-		<!-- Maven Surefire expects test classes in ${project.build.directory}/test-classes by default. -->
-		<testOutputDirectory>${project.build.directory}/classes</testOutputDirectory>
-		<plugins>
-			<plugin>
-				<groupId>org.eclipse.xtend</groupId>
-				<artifactId>xtend-maven-plugin</artifactId>
-			</plugin>
-			<!-- Make sure, the tests do not run as Tycho Surefire test. Otherwise, we would run them twice. -->
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-surefire-plugin</artifactId>
-				<version>${tycho-version}</version>
-				<configuration>
-					<skipTests>true</skipTests>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.21.0</version>
-				<dependencies>
-					<!-- Explicitly declare the Maven Surefire provider for JUnit4, see http://maven.apache.org/surefire/maven-surefire-plugin/examples/providers.html -->
-					<dependency>
-						<groupId>org.apache.maven.surefire</groupId>
-						<artifactId>surefire-junit4</artifactId>
-						<version>2.22.0</version>
-					</dependency>
-				</dependencies>
-				<executions>
-					<execution>
-						<id>default-test</id>
-						<phase>test</phase>
-						<goals>
-							<goal>test</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+  <parent>
+    <groupId>com.ge.research.sadl</groupId>
+    <artifactId>com.ge.research.sadl.parent</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>com.ge.research.sadl.tests</artifactId>
+  <packaging>eclipse-test-plugin</packaging>
+
+  <build>
+    <!-- We do not want to run the headless tests in an OSGi container. -->
+    <!-- We use Maven Surefire instead of Tycho Surefire to run the tests outside of the OSGi container. -->
+    <!-- Source: https://wiki.eclipse.org/Tycho/FAQ#Can_I_run_eclipse-plugin_tests_also_outside_an_OSGi_container.3F -->
+    <!-- GH issue: https://github.com/crapo/sadlos2/issues/370 -->
+    <!-- Maven Surefire expects test classes in ${project.build.directory}/test-classes by default. -->
+    <testOutputDirectory>${project.build.directory}/classes</testOutputDirectory>
+    <plugins>
+      <!-- Make sure the tests run as Maven Surefire tests. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <dependencies>
+          <!-- Explicitly declare the Maven Surefire provider for JUnit4, see http://maven.apache.org/surefire/maven-surefire-plugin/examples/providers.html -->
+          <dependency>
+            <groupId>org.apache.maven.surefire</groupId>
+            <artifactId>surefire-junit4</artifactId>
+            <version>3.0.0-M5</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>default-test</id>
+            <goals>
+              <goal>test</goal>
+            </goals>
+            <phase>test</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Make sure the tests do not run as Tycho Surefire tests. Otherwise we would run them twice. -->
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+      <!-- Compile Xtend sources -->
+      <plugin>
+        <groupId>org.eclipse.xtend</groupId>
+        <artifactId>xtend-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

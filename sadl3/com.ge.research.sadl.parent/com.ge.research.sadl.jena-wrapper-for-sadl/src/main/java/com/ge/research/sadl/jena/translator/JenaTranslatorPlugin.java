@@ -675,12 +675,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return tripleCtr;
 	}
 	
-	private String translateUpdate(OntModel model, Update query) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
 	/**
 	 * Convert a junction to a query string. Filter stuff goes to the sbfilter StringBuilder, triple stuff gets returned.
 	 * 
@@ -2377,7 +2371,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 	
 	@Override
-	public Enum isBuiltinFunctionTypeCheckingAvailable(){
+	public IReasoner.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY isBuiltinFunctionTypeCheckingAvailable(){
 		return IReasoner.SADL_BUILTIN_FUNCTIONS_TYPE_CHECKING_AVAILABILITY.NAME_ONLY;
 	}
 

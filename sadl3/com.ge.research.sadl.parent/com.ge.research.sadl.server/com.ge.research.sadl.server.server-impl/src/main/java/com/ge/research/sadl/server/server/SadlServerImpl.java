@@ -51,9 +51,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import javax.activation.DataSource;
-import javax.activation.FileDataSource;
-import javax.activation.URLDataSource;
+import jakarta.activation.DataSource;
+import jakarta.activation.FileDataSource;
+import jakarta.activation.URLDataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

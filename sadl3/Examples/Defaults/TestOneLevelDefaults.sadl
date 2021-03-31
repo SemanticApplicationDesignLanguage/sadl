@@ -1,0 +1,42 @@
+uri "http://sadl.imp/TestOneLevelDefaults".
+
+// In this test case we are trying to construct a model which
+//  will only give the value Black to MyThingy1 and only give the value Green to op of Thingy2
+//  We fail to do so (the second test case fails).
+
+
+Thingy is a top-level class.
+Color is a top-level class, must be one of {Black, White, Green}.
+dp describes Thingy has values of type float.
+op describes Thingy has values of type Color. 
+
+dp of Thingy has default 2.3  . 
+op of Thingy has default White.
+
+Rule StageOneRule
+	given
+		x is a Thingy
+	if
+		dp of x > 2
+	then
+		op of x is Black.
+		
+Rule StageTwoRule
+	given
+		x is a Thingy
+	if
+		op of x is not Black
+	then
+		op of x is Green.		
+
+MyThing1 is a Thingy.
+MyThing2 is a Thingy, has dp 1.5 . 
+
+// dp of MyThing1 is 2.3 from default
+Test: MyThing1 has dp 2.3 .
+
+// op of MyThing1 should be Black by StageOneRule but will also be Green by StageTwoRule
+Test: "select ?c where {<MyThing1> <op> ?c}" is only {[Black],[Green]}. 
+
+// op of MyThing2 should be Green by StageTwoRule and won't get any other values
+Test: "select ?c where {<MyThing2> <op> ?c}" is only Green. 
