@@ -1,78 +1,40 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.ge.research.sadl</groupId>
-		<artifactId>com.ge.research.sadl.parent</artifactId>
-		<version>3.5.0-SNAPSHOT</version>
-	</parent>
-	<artifactId>com.ge.research.sadl.jena</artifactId>
-	<packaging>eclipse-plugin</packaging>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.apache.jena</groupId>
-				<artifactId>apache-jena-libs</artifactId>
-				<version>3.16.0</version>
-				<type>pom</type>
-			</dependency>
-		  <dependency>
-		    <groupId>org.apache.jena</groupId>
-		    <artifactId>jena-tdb</artifactId>
-		    <version>3.16.0</version>
-		  </dependency>
-		</dependencies>
-	</dependencyManagement>
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>apache-jena-libs</artifactId>
-			<type>pom</type>
-			<exclusions>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-	  <dependency>
-	    <groupId>org.apache.jena</groupId>
-	    <artifactId>jena-tdb</artifactId>
-	    <version>3.16.0</version>
-	  </dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-base</artifactId>
-			<version>3.16.0</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.ge.research.sadl</groupId>
-		    <artifactId>com.ge.research.sadl</artifactId>
-		    <version>${project.version}</version>
-		    <type>eclipse-plugin</type>
-		</dependency>
-	</dependencies>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
-				<artifactId>serviceloader-maven-plugin</artifactId>
-				<version>1.1.0</version>
-				<configuration>
-					<services>
-						<param>com.ge.research.sadl.processing.IModelProcessor</param>
-						<param>com.ge.research.sadl.processing.ISadlImportProcessor</param>
-						<param>com.ge.research.sadl.processing.ISadlInferenceProcessor</param>
-					</services>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.ge.research.sadl</groupId>
+    <artifactId>com.ge.research.sadl.parent</artifactId>
+    <version>3.5.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>com.ge.research.sadl.jena</artifactId>
+  <packaging>eclipse-plugin</packaging>
+
+  <!-- Needed by eu.somatik.serviceloader-maven-plugin -->
+  <dependencies>
+    <dependency>
+      <groupId>com.ge.research.sadl</groupId>
+      <artifactId>com.ge.research.sadl</artifactId>
+      <type>eclipse-plugin</type>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Generate META-INF/services/... -->
+      <plugin>
+        <groupId>eu.somatik.serviceloader-maven-plugin</groupId>
+        <artifactId>serviceloader-maven-plugin</artifactId>
+        <configuration>
+          <services>
+            <param>com.ge.research.sadl.processing.IModelProcessor</param>
+            <param>com.ge.research.sadl.processing.ISadlImportProcessor</param>
+            <param>com.ge.research.sadl.processing.ISadlInferenceProcessor</param>
+          </services>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

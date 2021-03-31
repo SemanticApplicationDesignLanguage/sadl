@@ -1,102 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>com.ge.research.sadl</groupId>
     <artifactId>com.ge.research.sadl.parent</artifactId>
     <version>3.5.0-SNAPSHOT</version>
   </parent>
+
   <artifactId>com.naturalsemanticsllc.sadl.augmented-jena-wrapper-for-sadl</artifactId>
   <packaging>eclipse-plugin</packaging>
-<!--  <version>0.0.1-SNAPSHOT</version>  -->
-  <name>Augmented Jena Reasoner/Translator Plugin for SADL</name>
-  
-  <properties>
-  	<sadlVersion>3.5.0-SNAPSHOT</sadlVersion>		
-  	
-  </properties>
-  
 
-	<!-- Define where to deploy this project's artifacts -->
-	<distributionManagement>
-		<repository>
-			<id>swcoealppcr01</id>
-			<name>swcoealppcr01-releases</name>
-			<url>https://devcloud.swcoe.ge.com/artifactory/CYNZT</url>
-		</repository>
-	</distributionManagement>
+  <!-- Needed by eu.somatik.serviceloader-maven-plugin -->
+  <dependencies>
+    <dependency>
+      <groupId>com.ge.research.sadl</groupId>
+      <artifactId>reasoner-api</artifactId>
+    </dependency>
+  </dependencies>
 
-	<build>
-		<defaultGoal>install</defaultGoal>
-        <plugins>
-			<plugin>
-				<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
-				<artifactId>serviceloader-maven-plugin</artifactId>
-				<version>1.1.0</version>
-				<configuration>
-					<services>
-						<param>com.ge.research.sadl.importer.ITabularDataImporter</param>
-						<param>com.ge.research.sadl.reasoner.IReasoner</param>
-						<param>com.ge.research.sadl.reasoner.ITranslator</param>
-						<param>org.apache.jena.reasoner.rulesys.Builtin</param>
-					</services>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.1.1</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		      <plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-compiler-plugin</artifactId>
-			    <version>3.1</version>
-			    <configuration>
-			      <source>1.8</source>
-			      <target>1.8</target>
-		      <excludes>
-		      	<exclude>**/Activator.java</exclude>
-		      </excludes>
-			    </configuration>
-		      </plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.16</version>
-				<configuration>
-					<workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
-		           <excludes>
-		            <exclude>**/TestJenaTDB.java</exclude>
-		          </excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-	<dependencies>
-		<dependency>
-			<groupId>net.sf.opencsv</groupId>
-			<artifactId>opencsv</artifactId>
-			<version>2.3</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.ge.research.sadl</groupId>
-		    <artifactId>reasoner-api</artifactId>
-		    <version>${sadlVersion}</version>
-		</dependency>
-	</dependencies>
+  <build>
+    <plugins>
+      <!-- Generate META-INF/services/... -->
+      <plugin>
+        <groupId>eu.somatik.serviceloader-maven-plugin</groupId>
+        <artifactId>serviceloader-maven-plugin</artifactId>
+        <configuration>
+          <services>
+            <param>com.ge.research.sadl.reasoner.IReasoner</param>
+            <param>com.ge.research.sadl.reasoner.ITranslator</param>
+          </services>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
 </project>

@@ -22,30 +22,33 @@ public class FunctionSignature {
 		StringBuilder sb = new StringBuilder();
 		sb.append("External ");
 		String nm = this.getName();
-		if (reservedWords != null && reservedWords.contains(nm)) {
+		if (isReservedKeyword(reservedWords, nm)) {
 			sb.append("^");
 		}
 		sb.append(nm);
 		sb.append("(");		
 		for(int i = 0; i < this.getParameterTypes().length; i++){
 			if(!this.getParameterTypes()[i].isEmpty()){
-				sb.append(this.getParameterTypes()[i]);
-				if (!this.getParameterTypes()[i].equals("--")) {
-					if (!this.getParameterTypes()[i].equals("...")) {
+				sb.append(this.getParameterTypes()[i].trim());
+				if (!this.getParameterTypes()[i].trim().equals("--")) {
+					if (!this.getParameterTypes()[i].trim().equals("...")) {
 						sb.append(" X");
 					}
-					if(i != this.getParameterTypes().length - 1){
-						sb.append(", ");
-					}
+				}
+				if(i != this.getParameterTypes().length - 1){
+					sb.append(", ");
 				}
 			}
 		}
-		sb.append(") returns ");
-		for (int i = 0; i < this.getReturnTypes().length; i++) {
-			if (!this.getReturnTypes()[i].isEmpty()) {
-				sb.append(this.getReturnTypes()[i]);
-				if ( i != this.getReturnTypes().length - 1) {
-					sb.append(", ");
+		sb.append(")");
+		if (hasReturns()) {
+			sb.append(" returns ");
+			for (int i = 0; i < this.getReturnTypes().length; i++) {
+				if (!this.getReturnTypes()[i].trim().isEmpty()) {
+					sb.append(this.getReturnTypes()[i].trim());
+					if ( i != this.getReturnTypes().length - 1) {
+						sb.append(", ");
+					}
 				}
 			}
 		}
@@ -54,6 +57,27 @@ public class FunctionSignature {
 		sb.append("\".");
 		
 		return sb.toString();
+	}
+
+	private boolean isReservedKeyword(List<String> reservedWords, String nm) {
+		return reservedWords != null && reservedWords.contains(nm);
+	}
+
+	/**
+	 * Method to determine if the function has a return
+	 * @return
+	 */
+	private boolean hasReturns() {
+		String[] rettypes = this.getReturnTypes();
+		if (rettypes == null || rettypes.length == 0) {
+			return false;
+		}
+		for (String rt : rettypes) {
+			if (rt != null && !rt.isEmpty()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public String getName() {

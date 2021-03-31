@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.emf.common.util.URI;
 
 import com.ge.research.sadl.builder.MessageManager.MessageType;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -36,7 +35,6 @@ import com.ge.research.sadl.ui.visualize.GraphSegment;
 import com.ge.research.sadl.ui.visualize.OntologyGraphGenerator;
 import com.ge.research.sadl.utils.ResourceManager;
 
-@SuppressWarnings("restriction")
 public class OntologyGraphGeneratorHandler extends GraphGeneratorHandler {
 
 

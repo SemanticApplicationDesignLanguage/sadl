@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Automatic-Module-Name: com.ge.research.sadl.testsuite.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.testsuite.ui
-Bundle-Vendor: General Electic Company
+Bundle-Vendor: GE Research
 Bundle-Version: 3.5.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.testsuite.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
@@ -22,7 +22,7 @@ Require-Bundle: com.ge.research.sadl.testsuite,
  com.ge.research.sadl,
  com.ge.research.sadl.ui
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.testsuite.ui.internal,
  com.ge.research.sadl.testsuite.ui.quickfix,
  com.ge.research.sadl.testsuite.ui.contentassist

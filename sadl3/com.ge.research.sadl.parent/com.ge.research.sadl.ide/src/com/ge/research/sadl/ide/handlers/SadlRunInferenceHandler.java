@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 
-import javax.activation.DataSource;
+import jakarta.activation.DataSource;
 
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;

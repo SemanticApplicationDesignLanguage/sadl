@@ -93,7 +93,7 @@ public class FirstElement extends TypedBaseBuiltin {
 
 	@Override
 	public String getFunctionSignatureString() {
-		return "firstElement(string)string";
+		return "firstElement(--)--";
 	}
 
 }

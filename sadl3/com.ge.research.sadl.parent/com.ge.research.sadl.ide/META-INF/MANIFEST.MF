@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.ide
-Bundle-Vendor: My Company
+Bundle-Vendor: GE Research
 Bundle-Version: 3.5.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.ide; singleton:=true
 Bundle-ActivationPolicy: lazy
@@ -17,7 +17,7 @@ Require-Bundle: com.ge.research.jena,
  org.eclipse.lsp4j.jsonrpc,
  org.eclipse.xtext.ide,
  org.eclipse.xtext.xbase.ide
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.ide,
  com.ge.research.sadl.ide.contentassist.antlr,
  com.ge.research.sadl.ide.contentassist.antlr.internal,
@@ -26,6 +26,6 @@ Export-Package: com.ge.research.sadl.ide,
  com.ge.research.sadl.ide.editor.coloring,
  com.ge.research.sadl.ide.editor.contentassist,
  com.ge.research.sadl.ide.handlers
-Import-Package: javax.activation,
+Import-Package: jakarta.activation,
  org.apache.log4j
 Automatic-Module-Name: com.ge.research.sadl.ide

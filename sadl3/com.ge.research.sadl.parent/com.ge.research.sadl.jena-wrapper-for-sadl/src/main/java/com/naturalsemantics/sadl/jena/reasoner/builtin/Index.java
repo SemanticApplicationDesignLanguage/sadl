@@ -75,10 +75,10 @@ public class Index extends TypedBaseBuiltin {
             if (itr.hasNext()) {
             	Node firstElement = itr.next().getObject();
             	if (firstElement != null && firstElement.equals(matchElement)) {
-            		itr.close();
             		atMatchingElement = true;
              	}
             }
+    		itr.close();
             if (!atMatchingElement) {
 		        ClosableIterator<Triple> ritr = context.find(relevantList, slmrest, null);
 		        if (ritr.hasNext()) {
@@ -123,7 +123,7 @@ public class Index extends TypedBaseBuiltin {
 
 	@Override
 	public String getFunctionSignatureString() {
-		return "index(string, string)int";
+		return "index(--, --)int";
 	}
 
 
