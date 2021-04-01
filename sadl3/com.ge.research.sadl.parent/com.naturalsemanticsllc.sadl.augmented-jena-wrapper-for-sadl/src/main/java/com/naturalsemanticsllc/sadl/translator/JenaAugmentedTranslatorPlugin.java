@@ -104,6 +104,15 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 			int i = 0;
 			for (Integer stage : stages) {
 				if (stage > maxStage) maxStage = stage;
+				boolean useStageInName = rulesByStage.size() > 1;
+				if (useStageInName) {
+				    File f = new File((new SadlUtils()).fileUrlToFileName(fullyQualifiedRulesFilename));
+				    if (f.exists()) {
+				    	// if staged names are to be used make sure any old rule names are deleted
+						f.delete();
+					}
+				    // TODO need to delete any higher-stage rules as well, but up to what max stage #?
+				}
 				String stageFQRuleFilename = rulesByStage.size() == 1 ? fullyQualifiedRulesFilename : fullyQualifiedRulesFilename + "-stage" + i++;
 				if (rulesByStage.get(stage) != null && rulesByStage.get(stage).size() > 0) {
 					translateAndSaveRules(model, rulesByStage.get(stage), modelName, stageFQRuleFilename);

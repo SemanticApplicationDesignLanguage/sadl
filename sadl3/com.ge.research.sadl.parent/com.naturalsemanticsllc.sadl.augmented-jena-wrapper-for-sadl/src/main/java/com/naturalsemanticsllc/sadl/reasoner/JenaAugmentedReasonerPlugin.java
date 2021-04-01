@@ -355,30 +355,17 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 			try {
 		    	File f = new File((new SadlUtils()).fileUrlToFileName(ruleFileName));
 		    	if (f.exists()) {
-		    		logger.debug(ruleFileName + " exists");
-					InputStream in = configurationMgr.getJenaDocumentMgr().getFileManager().open(ruleFileName);
-					if (in != null) {
-					    try {
-					    	InputStreamReader isr = new InputStreamReader(in);
-					    	BufferedReader br = new BufferedReader(isr);
-							List<Rule> rules = Rule.parseRules(Rule.rulesParserFromReader(br));
-							if (rules != null) {
-								ruleListMap.put(stage, rules);
-								newInputFlag = true;
-								return true;
-							}
-					    } catch (ParserException e) {
-					    	String msg = "Error reading rule file '" + ruleFileName + "': " + e.getMessage();
-					    	logger.error(msg);
-					    	addError(new ModelError(msg, ErrorType.ERROR));
-					    }
-					    finally {
-					    	in.close();
-					    }
-					}
+		    		return loadRulesFromFile(ruleFileName, stage);
 		    	}
 		    	else {
-		    		logger.debug(ruleFileName + " does not exit");
+					String rulefn = ruleFileName + "-stage" + stage;
+			    	File f2 = new File((new SadlUtils()).fileUrlToFileName(rulefn));
+			    	if (f2.exists()) {
+			    		return loadRulesFromFile(rulefn, stage);
+			    	}
+			    	else {
+			    		logger.debug("No stage " + stage + " rule file found for base name " + ruleFileName + ".");
+			    	}
 		    	}
 			}
 			catch (RulesetNotFoundException e) {
@@ -391,6 +378,31 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 			}
 		}		
 //		dataModelSourceCount++;
+		return false;
+	}
+
+	private boolean loadRulesFromFile(String ruleFileName, Integer stage) throws IOException {
+		logger.debug(ruleFileName + " exists");
+		InputStream in = configurationMgr.getJenaDocumentMgr().getFileManager().open(ruleFileName);
+		if (in != null) {
+		    try {
+		    	InputStreamReader isr = new InputStreamReader(in);
+		    	BufferedReader br = new BufferedReader(isr);
+				List<Rule> rules = Rule.parseRules(Rule.rulesParserFromReader(br));
+				if (rules != null) {
+					ruleListMap.put(stage, rules);
+					newInputFlag = true;
+					return true;
+				}
+		    } catch (ParserException e) {
+		    	String msg = "Error reading rule file '" + ruleFileName + "': " + e.getMessage();
+		    	logger.error(msg);
+		    	addError(new ModelError(msg, ErrorType.ERROR));
+		    }
+		    finally {
+		    	in.close();
+		    }
+		}
 		return false;
 	}
 

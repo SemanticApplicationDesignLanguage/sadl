@@ -5,15 +5,21 @@ Bundle-SymbolicName: com.naturalsemanticsllc.sadl.augmented-jena-wrapper-for-sad
 Bundle-Version: 3.5.0.qualifier
 Bundle-Vendor: Natural Semanantics, LLC
 Bundle-Activator: com.naturalsemanticsllc.sadl.java_plugin.Activator
-Require-Bundle: com.ge.research.jena,
+Require-Bundle: com.ge.research.sadl.jena-wrapper-for-sadl,
+ com.ge.research.jena,
  com.ge.research.sadl,
- com.ge.research.sadl.jena-wrapper-for-sadl,
- org.eclipse.core.runtime
+ com.ge.research.sadl.jena,
+ org.apache.log4j,
+ org.eclipse.core.runtime,
+ org.eclipse.osgi,
+ org.junit;bundle-version="4.12.0";resolution:=optional
+Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Import-Package: com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
- com.ge.research.sadl.reasoner
+ com.ge.research.sadl.reasoner,
+ jakarta.activation
 Export-Package: com.naturalsemanticsllc.sadl.java_plugin,
  com.naturalsemanticsllc.sadl.reasoner,
  com.naturalsemanticsllc.sadl.translator
