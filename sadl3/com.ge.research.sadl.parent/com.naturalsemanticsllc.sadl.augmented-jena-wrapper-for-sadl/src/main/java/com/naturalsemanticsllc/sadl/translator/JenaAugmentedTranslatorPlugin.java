@@ -82,6 +82,7 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 		 */
 		
 		Map<Integer, List<Rule>> rulesByStage = null;
+		Integer maxStage = 0;
 		
 		if (ruleList != null && ruleList.size() > 0) {
 			rulesByStage = new HashMap<Integer, List<Rule>>();
@@ -93,45 +94,67 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 					rulesByStage.put(stage, stageRules);
 				}
 				rulesByStage.get(stage).add(rule);
+				if (maxStage < stage) {
+					maxStage = stage;
+				}
 			}
 		}
-				
+			
 		String ruleFilename = createDerivedFilename(saveFilename, "rules");
 		String fullyQualifiedRulesFilename = translationFolder + File.separator + ruleFilename;
-		Integer maxStage = 0;
-		if (rulesByStage != null && rulesByStage.size() > 0) {
-			Set<Integer> stages = rulesByStage.keySet();
+		boolean useStageInName = rulesByStage != null && rulesByStage.size() > 1;
+
+		// Remove old rule filenames
+		// 1. any non-staged rule file
+		File f1 = new File(fullyQualifiedRulesFilename);
+		if (f1.exists()) {
+			if (!f1.delete()) {
+				addError("Failed to delete old rule file '" + fullyQualifiedRulesFilename + "'");
+			}
+		}
+		// 2. any staged rule files until there are no more
+		int stageNum = 0;
+		do {
+			String stageFQRuleFilename = fullyQualifiedRulesFilename + "-stage" + stageNum;
+			File f2 = new File(stageFQRuleFilename);
+			if (f2.exists()) {
+				if (!f2.delete()) {
+					addError("Failed to delete old rule file '" + stageFQRuleFilename + "'");
+				}
+				stageNum++;
+			}
+			else {
+				stageNum = -1;
+			}
+		} while (stageNum >= 0);
+		
+	
+		// Save rule file(s)
+		Set<Integer> stages = useStageInName ? rulesByStage.keySet() : null;	
+		if (stages != null) {
+			// there are explicit rules
 			int i = 0;
 			for (Integer stage : stages) {
-				if (stage > maxStage) maxStage = stage;
-				boolean useStageInName = rulesByStage.size() > 1;
+				String stageFQRuleFilename;
 				if (useStageInName) {
-				    File f = new File((new SadlUtils()).fileUrlToFileName(fullyQualifiedRulesFilename));
-				    if (f.exists()) {
-				    	// if staged names are to be used make sure any old rule names are deleted
-						f.delete();
-					}
-				    // TODO need to delete any higher-stage rules as well, but up to what max stage #?
+					stageFQRuleFilename = rulesByStage.size() == 1 ? fullyQualifiedRulesFilename : fullyQualifiedRulesFilename + "-stage" + i++;
 				}
-				String stageFQRuleFilename = rulesByStage.size() == 1 ? fullyQualifiedRulesFilename : fullyQualifiedRulesFilename + "-stage" + i++;
+				else {
+					stageFQRuleFilename = fullyQualifiedRulesFilename;
+				}
 				if (rulesByStage.get(stage) != null && rulesByStage.get(stage).size() > 0) {
 					translateAndSaveRules(model, rulesByStage.get(stage), modelName, stageFQRuleFilename);
 				}
 				else {
-					// there isn't a rules file but make sure there isn't an old one around that needs to be deleted
-					File oldRuleFile = new File(stageFQRuleFilename);
-					if (oldRuleFile.exists() && oldRuleFile.isFile()) {
-						try {
-							oldRuleFile.delete();
-						}
-						catch (Exception e) {
-							addError("Failed to delete old rules file '" + stageFQRuleFilename + "'.");
-							logger.error("Failed to delete old rule file '" + stageFQRuleFilename + "': " + e.getLocalizedMessage());
-						}
-					}
+					addError("A stage without any rules. This should not happen! Please report with description of situation.");
 				}
 			}
 		}
+		else {
+			// there aren't any rules so the next level (for defaults) should be 0
+			maxStage = -1;	
+		}
+
 				
 		Map<Integer, List<String>> defvalrulesbylevel = getDefaultValueRules(model);
 		if (defvalrulesbylevel != null) {

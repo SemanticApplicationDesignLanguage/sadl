@@ -25,6 +25,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -150,32 +151,58 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 		logger.debug("JenaReasonerPlugin.initializeReasoner, imports size = " + (imports == null ? 0 : imports.size()));
 
 		long t2 = System.currentTimeMillis();
+		if (collectTimingInfo) {
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_MODEL, "load ontology model", t2 - tboxLoadTime));
+		}
+ 
 		loadRules(schemaModel, getModelName());
 		logger.debug("JenaReasonerPluging.initialize, number of rule stages is "+ruleListMap.size());
+		long t3 = System.currentTimeMillis();
+		if (collectTimingInfo) {
+			int numRules = getNumRules();
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "read " + numRules + " rules from file(s)", t3 - t2));
+		}
 		
 		// load only first stage rules at this point
 		lastRuleStageLoaded = 0;
-		reasoner = new GenericRuleReasoner(ruleListMap.get(lastRuleStageLoaded));
-		reasoner.setDerivationLogging(derivationLogging);
-		logger.debug("JenaReasonerPluging.initialize, size of ruleList from reasoner = "+reasoner.getRules().size());
-		reasoner.setMode(getRuleMode(preferences));
-		long t3 = System.currentTimeMillis();
-		if (collectTimingInfo) {
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_MODEL, "load ontology model", t2 - tboxLoadTime));
-			int numRules = ruleList.size();
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "load model " + numRules + " rules", t3 - t2));
-		}
+		reasoner = createReasonerAndLoadRules(ruleListMap.get(lastRuleStageLoaded), 0);
+		return reasoner;
+	}
 
-		long t4;
-		if (collectTimingInfo) {
-			t4 = System.currentTimeMillis();
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "bind schema to reasoner", t4 - t3));			
+	/**
+	 * Method to count the number of rules loaded from rule files
+	 * @return
+	 */
+	private int getNumRules() {
+		int numRules = 0;
+		if (ruleListMap != null) {
+			Collection<List<Rule>> rlmvalues = ruleListMap.values();
+			for (List<Rule> rlst : rlmvalues) {
+				numRules += rlst.size();
+			}
 		}
+		return numRules;
+	}
+
+	/**
+	 * Method to create a reasoner and load the cumulative set of rules
+	 * @param rules 
+	 * @param stage
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	private GenericRuleReasoner createReasonerAndLoadRules(List<Rule> rules, int stage) throws ConfigurationException {
+		long tLoad1 = System.currentTimeMillis();
+		GenericRuleReasoner newReasoner = new GenericRuleReasoner(rules);
+		newReasoner.setDerivationLogging(derivationLogging);
+		logger.debug("JenaReasonerPluging.initialize, size of ruleList from reasoner = "+newReasoner.getRules().size());
+		newReasoner.setMode(getRuleMode(preferences));
+
 		boolean transitiveClosure = getBooleanConfigurationValue(preferences, pTransitiveClosureCaching, false);
-		reasoner.setTransitiveClosureCaching(transitiveClosure);
-		reasoner.setOWLTranslation(getBooleanConfigurationValue(preferences, pOWLTranslation, false));
+		newReasoner.setTransitiveClosureCaching(transitiveClosure);
+		newReasoner.setOWLTranslation(getBooleanConfigurationValue(preferences, pOWLTranslation, false));
 		boolean bTrace = getBooleanConfigurationValue(preferences, pTrace, false);
-		reasoner.setTraceOn(bTrace);
+		newReasoner.setTraceOn(bTrace);
 		if (bTrace) {
 //			traceAppender = new FileAppender();
 			// configure the appender here, with file location, etc
@@ -202,9 +229,13 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 		catch (NumberFormatException e) {
 			String msg = "Invalid timeout value '" + strTimeOut + "'";
 			logger.error(msg); addError(new ModelError(msg, ErrorType.ERROR));
-
 		}
-		return reasoner;
+		long tLoad2 = System.currentTimeMillis();
+		if (collectTimingInfo) {
+			int numRules = newReasoner.getRules() != null ? newReasoner.getRules().size() : 0;
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "add " + numRules + " rule(s) to reasoner for stage " + stage, tLoad2 - tLoad1));
+		}
+		return newReasoner;
 	}
 		
 	@Override
@@ -234,8 +265,15 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 				if (ruleListMap.size() > 1) {
 					long tsl = System.currentTimeMillis();
 					for (Integer stage = 1; stage < ruleListMap.size(); stage++) {
-						reasoner.addRules(ruleListMap.get(stage));
-						infModel.size();
+						List<Rule> rules = reasoner.getRules();
+						List<Rule> newRules = ruleListMap.get(stage);
+						rules.addAll(newRules);
+						GenericRuleReasoner newReasoner = createReasonerAndLoadRules(rules, stage);
+						InfModel newInfModel = ModelFactory.createInfModel(newReasoner, infModel);
+						newInfModel.size();
+						infModel = newInfModel;
+						reasoner = newReasoner;
+//						infModel.size();
 						if (collectTimingInfo) {
 							long t2 = System.currentTimeMillis();
 							timingInfo.add(new ReasonerTiming(TIMING_PREPARE_INFMODEL, "prepare inference model stage " + stage, t2 - tsl));
@@ -358,14 +396,17 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 		    		return loadRulesFromFile(ruleFileName, stage);
 		    	}
 		    	else {
-					String rulefn = ruleFileName + "-stage" + stage;
-			    	File f2 = new File((new SadlUtils()).fileUrlToFileName(rulefn));
-			    	if (f2.exists()) {
-			    		return loadRulesFromFile(rulefn, stage);
-			    	}
-			    	else {
-			    		logger.debug("No stage " + stage + " rule file found for base name " + ruleFileName + ".");
-			    	}
+		    		String ending = ".rules-stage" + stage;
+		    		if (!ruleFileName.endsWith(ending)) {
+						String rulefn = ruleFileName + "-stage" + stage;
+				    	File f2 = new File((new SadlUtils()).fileUrlToFileName(rulefn));
+				    	if (f2.exists()) {
+				    		return loadRulesFromFile(rulefn, stage);
+				    	}
+				    	else {
+				    		logger.debug("No stage " + stage + " rule file found for base name " + ruleFileName + ".");
+				    	}
+		    		}
 		    	}
 			}
 			catch (RulesetNotFoundException e) {

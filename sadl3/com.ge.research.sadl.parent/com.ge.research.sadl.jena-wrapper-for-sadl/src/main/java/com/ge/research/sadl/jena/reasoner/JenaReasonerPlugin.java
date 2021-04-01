@@ -413,7 +413,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (collectTimingInfo) {
 			timingInfo.add(new ReasonerTiming(TIMING_LOAD_MODEL, "load ontology model", t2 - tboxLoadTime));
 			int numRules = ruleList.size();
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "load model " + numRules + " rules", t3 - t2));
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "add " + numRules + " rules to reasoner", t3 - t2));
 		}
 
 		long t4;
@@ -662,7 +662,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (collectTimingInfo) {
 			timingInfo.add(new ReasonerTiming(TIMING_LOAD_MODEL, "load ontology model", t2 - tboxLoadTime));
 			int numRules = ruleList.size();
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "load model " + numRules + " rules", t3 - t2));
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "load " + numRules + " rules", t3 - t2));
 		}
 
 		long t4;

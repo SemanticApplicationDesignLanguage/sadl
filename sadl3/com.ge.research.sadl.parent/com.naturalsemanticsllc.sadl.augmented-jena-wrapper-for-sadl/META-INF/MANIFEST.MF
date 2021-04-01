@@ -3,12 +3,11 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Jena-augmented-plugin
 Bundle-SymbolicName: com.naturalsemanticsllc.sadl.augmented-jena-wrapper-for-sadl;singleton:=true
 Bundle-Version: 3.5.0.qualifier
-Bundle-Vendor: Natural Semanantics, LLC
 Bundle-Activator: com.naturalsemanticsllc.sadl.java_plugin.Activator
+Bundle-Vendor: Natural Semanantics, LLC
 Require-Bundle: com.ge.research.sadl.jena-wrapper-for-sadl,
  com.ge.research.jena,
  com.ge.research.sadl,
- com.ge.research.sadl.jena,
  org.apache.log4j,
  org.eclipse.core.runtime,
  org.eclipse.osgi,
@@ -16,11 +15,12 @@ Require-Bundle: com.ge.research.sadl.jena-wrapper-for-sadl,
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
+Export-Package: com.naturalsemanticsllc.sadl.java_plugin;uses:="org.osgi.framework",
+ com.naturalsemanticsllc.sadl.reasoner;uses:="org.apache.jena.ontology,org.apache.jena.reasoner.rulesys,com.ge.research.sadl.jena.reasoner",
+ com.naturalsemanticsllc.sadl.translator;uses:="org.apache.jena.ontology,com.ge.research.sadl.jena.translator"
+Bundle-ClassPath: .
 Import-Package: com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
  com.ge.research.sadl.reasoner,
  jakarta.activation
-Export-Package: com.naturalsemanticsllc.sadl.java_plugin,
- com.naturalsemanticsllc.sadl.reasoner,
- com.naturalsemanticsllc.sadl.translator
 Automatic-Module-Name: com.naturalsemanticsllc.sadl.augmented-jena-wrapper-for-sadl
