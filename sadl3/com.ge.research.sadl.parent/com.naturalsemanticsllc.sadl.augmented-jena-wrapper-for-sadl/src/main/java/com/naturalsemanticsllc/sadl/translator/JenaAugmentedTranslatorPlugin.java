@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,12 +50,13 @@ import org.apache.jena.vocabulary.XSD;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.ResourceManager;
 
-public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
+public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin implements ITranslator {
 
 	@Override
 	public String getConfigurationCategory() {
@@ -75,10 +77,15 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 		translateAndSaveModel(model, translationFolder, modelName, orderedImports, saveFilename);
 
 		/*
-		 * This method differs from its parent in that it
-		 * 	a) looks for rule stages and creates multiple rule files identified in their name by stage
-		 *  b) and furthermore, looks for default values in the OWL model and constructs default value
-		 *  	rules in potentially multiple files according to the default value levels
+		 * This method differs from its parent in that 
+		 * 	a) it looks for rule stages and for default values and creates multiple rule files 
+		 * 		identified in their name by stage (.rules-stage<n>)
+		 *  b) the stage of the rule and the level of the default are used, with the rule stage
+		 *  	having preference when the stage and rule are the same, to create a sequence
+		 *  	of files starting with .rules-stage0, and without gaps. The lack of gaps allows
+		 *  	easier cleanup of old files. 
+		 *  Note that if there are no staged rules and there are no defaults the resulting rule
+		 *  	file will be the same as with the parent translator 
 		 */
 		
 		Map<Integer, List<Rule>> rulesByStage = null;
@@ -129,56 +136,60 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin {
 		} while (stageNum >= 0);
 		
 	
-		// Save rule file(s)
-		Set<Integer> stages = useStageInName ? rulesByStage.keySet() : null;	
-		if (stages != null) {
-			// there are explicit rules
-			int i = 0;
-			for (Integer stage : stages) {
-				String stageFQRuleFilename;
-				if (useStageInName) {
-					stageFQRuleFilename = rulesByStage.size() == 1 ? fullyQualifiedRulesFilename : fullyQualifiedRulesFilename + "-stage" + i++;
-				}
-				else {
-					stageFQRuleFilename = fullyQualifiedRulesFilename;
-				}
-				if (rulesByStage.get(stage) != null && rulesByStage.get(stage).size() > 0) {
-					translateAndSaveRules(model, rulesByStage.get(stage), modelName, stageFQRuleFilename);
-				}
-				else {
-					addError("A stage without any rules. This should not happen! Please report with description of situation.");
-				}
-			}
-		}
-		else {
-			// there aren't any rules so the next level (for defaults) should be 0
-			maxStage = -1;	
-		}
-
-				
+		// Save rule file(s), both for rules and any default values, interleaving per the stage and level
+		Set<Integer> stages = rulesByStage != null ? rulesByStage.keySet() : null;	
 		Map<Integer, List<String>> defvalrulesbylevel = getDefaultValueRules(model);
-		if (defvalrulesbylevel != null) {
-			Set<Integer> levels = defvalrulesbylevel.keySet();
+		Set<Integer> levels = defvalrulesbylevel != null ? defvalrulesbylevel.keySet() : null;
+		
+		if (stages != null || levels != null) {
+			// we have some rules to save
+			Integer maxRuleStage = stages != null ? Collections.max(stages) : -1;
+			Integer maxDVLevel = levels != null ? Collections.max(levels) : -1;
+			
+			int stageOrLevel = 0;
+			int ruleSuffix = 0;
 			SadlUtils su = new SadlUtils();
-			for (Integer level : levels) {
-				List<String> rules = defvalrulesbylevel.get(level);
-				if (rules != null) {
-					StringBuilder sb = new StringBuilder();
-					sb.append("# Jena Rule file for default values, level ");
-					sb.append(level);
-					sb.append("\n# Created by the JenaAugmentedTranslator\n\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\n");
-					for (String rule : rules) {
-						sb.append(rule);
-						sb.append("\n");
-					}
-					int fidx = maxStage + level;
-					String levelFQRuleFilename = fullyQualifiedRulesFilename + "-stage" + fidx;
-					File ruleFile = new File(levelFQRuleFilename);
-					su.stringToFile(ruleFile, sb.toString(), true);
-				}
-			}
-		}
 
+			do {
+				if (stages != null && stages.contains(stageOrLevel)) {
+					// we have a stage for this stageOrLevel
+					String stageFQRuleFilename;
+					if (useStageInName) {
+						stageFQRuleFilename = rulesByStage.size() == 1 ? fullyQualifiedRulesFilename : fullyQualifiedRulesFilename + "-stage" + ruleSuffix;
+					}
+					else {
+						stageFQRuleFilename = fullyQualifiedRulesFilename;
+					}
+					if (rulesByStage.get(stageOrLevel) != null && rulesByStage.get(stageOrLevel).size() > 0) {
+						translateAndSaveRules(model, rulesByStage.get(stageOrLevel), modelName, stageFQRuleFilename);
+					}
+					else {
+						addError("A stage without any rules. This should not happen! Please report with description of situation.");
+					}
+					ruleSuffix++;
+				}
+				
+				if (levels != null && levels.contains(stageOrLevel)) {
+					// we have a default value for this stageOrLevel
+					List<String> rules = defvalrulesbylevel.get(stageOrLevel);
+					if (rules != null) {
+						StringBuilder sb = new StringBuilder();
+						sb.append("# Jena Rule file for default values, level ");
+						sb.append(stageOrLevel);
+						sb.append("\n# Created by the JenaAugmentedTranslator\n\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n\n");
+						for (String rule : rules) {
+							sb.append(rule);
+							sb.append("\n");
+						}
+						String levelFQRuleFilename = fullyQualifiedRulesFilename + "-stage" + ruleSuffix;
+						File ruleFile = new File(levelFQRuleFilename);
+						su.stringToFile(ruleFile, sb.toString(), true);
+					}
+					ruleSuffix++;
+				}
+				stageOrLevel++;
+			} while (stageOrLevel <= maxRuleStage || stageOrLevel <= maxDVLevel);		
+		}
 		return (errors != null && errors.size() > 0) ? errors : null;
 	}
 

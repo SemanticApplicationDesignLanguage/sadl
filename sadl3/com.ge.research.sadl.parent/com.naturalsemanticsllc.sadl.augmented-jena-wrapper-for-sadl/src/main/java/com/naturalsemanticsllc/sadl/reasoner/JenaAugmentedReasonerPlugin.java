@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.atlas.web.HttpException;
-import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelGetter;
@@ -46,11 +46,12 @@ import com.ge.research.sadl.jena.reasoner.SadlReadFailureHandler;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ModelError;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
-import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 
@@ -59,7 +60,7 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
  * occur, namely changing rules or changing the data, rules must also be unloaded to restart the staged
  * sequence of rule application to create the inferred model.
  */
-public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
+public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements IReasoner {
     private static final String DEFAULT_TRANSLATOR_CLASSNAME = "com.naturalsemanticsllc.sadl.translator.JenaAugmentedTranslatorPlugin";
 
 	protected Map<Integer, List<String>> ruleFilesLoadedMap = null;
@@ -250,10 +251,7 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 				generateTboxModelWithSpec();
 				logger.debug("In prepareInfModel, modelSpec: "+modelSpec.toString());
 				logger.debug("In prepareInfModel, reasoner rule count: "+getReasonerOnlyWhenNeeded().getRules().size());
-//				dumpModelToLogger(tboxModelWithSpec);
 				infModel = ModelFactory.createInfModel(reasoner, tboxModelWithSpec);
-//		        InfGraph graph = reasoner.bind(tboxModelWithSpec.getGraph());
-//		        infModel = new InfModelImpl(graph);
 
 				synchronized(ReasonerFamily) {
 					infModel.size();	// this forces instantiation of the inference model
@@ -262,6 +260,17 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 						timingInfo.add(new ReasonerTiming(TIMING_PREPARE_INFMODEL, "prepare inference model stage 0", t2 - t1));
 					}
 				}
+				/*
+				 * The call to getReasonerOnlyWhenNeeded causes all rules to be read from the rule files
+				 * and creates the first reasoner so that it has the first rules loaded. An InfModel
+				 * is then created using this reasoner and the model provided to the reasoner plugin.
+				 * If there are multiple rule files, the loop below 
+				 * 	1. gets the rules already loaded from the current reasoner
+				 *  2. adds the next set of rules to that
+				 *  3. creates a new reasoner with the new rule set
+				 *  4. Creates a new InfModel using new reasoner and the previous infModel
+				 *  5. sets infModel and reasoner to the new InfModel and Reasoner created in steps 3 & 4.
+				 */
 				if (ruleListMap.size() > 1) {
 					long tsl = System.currentTimeMillis();
 					for (Integer stage = 1; stage < ruleListMap.size(); stage++) {
@@ -270,10 +279,9 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 						rules.addAll(newRules);
 						GenericRuleReasoner newReasoner = createReasonerAndLoadRules(rules, stage);
 						InfModel newInfModel = ModelFactory.createInfModel(newReasoner, infModel);
-						newInfModel.size();
+						newInfModel.size();   // this forces instantiation of the inference model
 						infModel = newInfModel;
 						reasoner = newReasoner;
-//						infModel.size();
 						if (collectTimingInfo) {
 							long t2 = System.currentTimeMillis();
 							timingInfo.add(new ReasonerTiming(TIMING_PREPARE_INFMODEL, "prepare inference model stage " + stage, t2 - tsl));
