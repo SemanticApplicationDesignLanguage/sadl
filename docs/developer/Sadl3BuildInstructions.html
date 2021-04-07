@@ -11,8 +11,7 @@
     <h5>Last revised
       <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/08/2020<!--webbot bot="Timestamp" endspan i-checksum="12607" -->.</h5>
     <h2>Introduction</h2>
-    <p>
-      <span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">
+    <p> <span style="color: rgb(36, 41, 46); font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;; font-size: 16px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">
         This document provides step-by-step instructions for creating an Eclipse
         Plug-in Development Environment for the SADL grammar and IDE. It
         includes two different ways of installing Eclipse, followed by steps to
@@ -22,8 +21,7 @@
         can then be used to generate new SADL updates, to make
         modifications/extensions to the SADL code, or to create new Eclipse
         plug-ins to create extensions to the SADL grammar/IDE.</span></p>
-    <h2>
-      <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'; color: #24292E; letter-spacing: normal; background-color: #FFFFFF">
+    <h2> <span style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji'; color: #24292E; letter-spacing: normal; background-color: #FFFFFF">
         Setup Steps</span></h2>
     <ol>
       <li>Create a folder in the local file system under which the source code
@@ -47,8 +45,8 @@
           </li>
         </ul>
       </li>
-      <li>Download and install (if not already present) the Java 9 or later <u><b>
-            JDK</b></u> (see&nbsp;<a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html"
+      <li>Download and install (if not already present) the Java 11<u><b> JDK</b></u>
+        (see&nbsp;<a href="https://www.oracle.com/technetwork/java/javase/downloads/index.html"
           rel="nofollow" style="box-sizing: border-box; background-color: initial">https://www.oracle.com/technetwork/java/javase/downloads/index.html</a>
         or <a href="https://adoptopenjdk.net/">https://adoptopenjdk.net/</a>).
         <ul>
@@ -69,15 +67,15 @@ https://docs.microfocus.com/SM/9.60/Codeless/Content/security/tasks/update_the_c
               the classpath. Check in a cmd window with "mvn -version".</span></li>
         </ul>
       </li>
-      <li>Install Eclipse 2020-03 by <b>one</b> of the methods below.
+      <li>Install Eclipse 2020-12 by <b>one</b> of the methods below.
         <ul>
           <li>Method 1: Install Eclipse by Direct Download
             <ul>
-              <li>Download and install "Eclipse IDE for Java and DSL Developers"
-                (see&nbsp;<a href="https://www.eclipse.org/downloads/packages/"
-                  rel="nofollow" style="box-sizing: border-box; background-color: initial; color: rgb(3, 102, 214); text-decoration: none;">https://www.eclipse.org/downloads/packages/</a>).
-                Eclipse 2020-03 is the latest version supported at this time due
-                to changes in the Xtext API..</li>
+              <li>Go to <a href="https://www.eclipse.org/downloads/packages/" rel="nofollow"
+                  style="box-sizing: border-box; background-color: initial; color: rgb(3, 102, 214); text-decoration: none;">https://www.eclipse.org/downloads/packages/</a></li>
+              <li>Under More Downloads, select Ecipse 2020-12</li>
+              <li>Download and install "Eclipse IDE for Java Developers" for
+                your operating system</li>
             </ul>
           </li>
           <li>Method 2: Install Eclipse Using the Eclipse Installer
@@ -87,8 +85,8 @@ https://docs.microfocus.com/SM/9.60/Codeless/Content/security/tasks/update_the_c
               <li>Configure proxies if behind a firewall (mouse over icons on
                 lower left corner until the one for Network Proxies settings is
                 found)</li>
-              <li>Select Eclipse DSL Tools as Platform</li>
-              <li>Select 2020-03 or later as version</li>
+              <li>Select Eclipse IDE for Java Developers as Package</li>
+              <li>Select 2020-12 as version</li>
               <li>Finish</li>
             </ul>
           </li>
