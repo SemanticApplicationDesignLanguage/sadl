@@ -14,7 +14,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Import-Package: com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
- com.ge.research.sadl.reasoner
+ com.ge.research.sadl.reasoner,
+ org.junit;version="4.13.0"
 Export-Package: com.naturalsemanticsllc.sadl.java_plugin,
  com.naturalsemanticsllc.sadl.reasoner,
  com.naturalsemanticsllc.sadl.translator

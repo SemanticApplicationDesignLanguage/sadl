@@ -2892,6 +2892,7 @@ public class JenaReasonerPlugin extends Reasoner{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+	        return true;
 		}
 		return false;
 	}

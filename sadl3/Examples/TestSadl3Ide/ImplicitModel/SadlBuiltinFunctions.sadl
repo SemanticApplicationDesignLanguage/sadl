@@ -96,6 +96,9 @@ External elementInList(--, int X) returns --:
 External lastElement(--) returns --:
 "com.naturalsemantics.sadl.jena.reasoner.builtin#lastElement".
 
+External listLength(--) returns int:
+"com.naturalsemantics.sadl.jena.reasoner.builtin#listLength".
+
 External deleteElementFromList(--, int X) returns --:
 "com.naturalsemantics.sadl.jena.reasoner.builtin#deleteElementFromList".
 
@@ -104,9 +107,6 @@ External elementAfter(--, --) returns --:
 
 External sadlListToString(--) returns string:
 "com.naturalsemantics.sadl.jena.reasoner.builtin#sadlListToString".
-
-External ^length(--) returns int:
-"com.naturalsemantics.sadl.jena.reasoner.builtin#length".
 
 External ^index(--, --) returns int:
 "com.naturalsemantics.sadl.jena.reasoner.builtin#index".
@@ -132,11 +132,17 @@ External min(decimal X, decimal X, ...) returns decimal:
 External assign(...) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin#assign".
 
+External strbefore(...) returns --:
+"com.ge.research.sadl.jena.reasoner.builtin#strbefore".
+
 External tan(...) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin#tan".
 
 External sum(...) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin#sum".
+
+External strafter(...) returns --:
+"com.ge.research.sadl.jena.reasoner.builtin#strafter".
 
 External greaterThan(...) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin#greaterThan".

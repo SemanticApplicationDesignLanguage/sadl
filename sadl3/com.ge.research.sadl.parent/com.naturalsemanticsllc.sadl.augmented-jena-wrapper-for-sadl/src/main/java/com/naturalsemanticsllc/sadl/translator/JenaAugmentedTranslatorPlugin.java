@@ -332,6 +332,10 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin implemen
 					if (typecls != null) {
 						sb.append("thereExists(");
 						sb.append(typecls.getURI());
+						sb.append(", ");
+						sb.append(lastvar);
+						sb.append(", ");
+						sb.append(p.getURI());
 						StmtIterator sitr = defvalinst.listProperties();
 						while (sitr.hasNext()) {
 							Statement stmt = sitr.nextStatement();

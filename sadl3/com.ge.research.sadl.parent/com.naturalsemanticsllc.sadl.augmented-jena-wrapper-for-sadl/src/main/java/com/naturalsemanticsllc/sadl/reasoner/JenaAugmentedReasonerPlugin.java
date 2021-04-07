@@ -19,23 +19,34 @@ package com.naturalsemanticsllc.sadl.reasoner;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.atlas.web.HttpException;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.InfModel;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelGetter;
+import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.reasoner.Derivation;
 import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.reasoner.rulesys.Rule.ParserException;
@@ -47,12 +58,16 @@ import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.InvalidDerivationException;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.reasoner.utils.StringDataSource;
+
+import jakarta.activation.DataSource;
 
 
 /*
@@ -66,6 +81,9 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 	protected Map<Integer, List<String>> ruleFilesLoadedMap = null;
 	protected Map<Integer, List<Rule>> ruleListMap = null;
 	private int lastRuleStageLoaded;
+	
+	private OntModel deductionsModel = null;
+	private List<Derivation> derivations = null;
 
 	@Override
 	public String getConfigurationCategory() {
@@ -272,8 +290,22 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 				 *  5. sets infModel and reasoner to the new InfModel and Reasoner created in steps 3 & 4.
 				 */
 				if (ruleListMap.size() > 1) {
+					boolean collectDerivations = !getDerivationLevel().equals(DERIVATION_NONE);
 					long tsl = System.currentTimeMillis();
 					for (Integer stage = 1; stage < ruleListMap.size(); stage++) {
+						// Might need to have a flag and only do this if preference is set for getting deductions...
+						// Likewise for derivations?
+						if (collectDerivations) {
+							if (deductionsModel == null) {
+								deductionsModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), ((InfModel) infModel).getDeductionsModel());				
+								addDerivations(deductionsModel);
+							}
+							else {
+								Model moreDM = ((InfModel) infModel).getDeductionsModel();
+								addDerivations(moreDM);
+								deductionsModel.add(moreDM);
+							}
+						}
 						List<Rule> rules = reasoner.getRules();
 						List<Rule> newRules = ruleListMap.get(stage);
 						rules.addAll(newRules);
@@ -303,6 +335,112 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 			logger.debug("In prepareInfModel, reusing infModel without any changes, newInputFlag is false");
 		}
 		newInputFlag = false;			
+	}
+
+	/**
+	 * Method to add the derivations in the input model to the list of derivations field
+	 * @param moreDM
+	 */
+	private void addDerivations(Model moreDM) {
+		if (derivations == null) {
+			derivations = new ArrayList<Derivation>();
+		}
+		StmtIterator sitr = moreDM.listStatements();
+		while (sitr.hasNext()) {
+			Triple s = sitr.nextStatement().asTriple();
+			Iterator<Derivation> itr = getDerivation(s);
+			while (itr.hasNext()) {
+				derivations.add(itr.next());
+			}
+		}
+	}
+
+	@Override
+	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException {
+		try {
+			prepareInfModel();
+		} catch (ConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		OntModel m;
+		if (deductionsOnly) {
+			if (deductionsModel == null) {
+				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), ((InfModel) infModel).getDeductionsModel());				
+			}
+			else {
+				m = deductionsModel;
+			}
+		}
+		else {
+			m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), infModel);
+		}
+
+		if (m != null) {
+			String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	
+		    FileOutputStream fps = new FileOutputStream(filename);
+	        RDFWriter rdfw = m.getWriter(format);
+	        rdfw.write(m, fps, modelname);
+	        try {
+				fps.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        return true;
+		}
+		return false;
+	}
+
+	@Override
+	public DataSource getDerivations() throws InvalidDerivationException, ConfigurationException {
+		if (getDerivationLevel().equals(DERIVATION_NONE)){
+			return null;
+		}
+		try {
+			getReasonerOnlyWhenNeeded();
+			prepareInfModel();
+			if (deductionsModel == null) {
+				deductionsModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), ((InfModel) infModel).getDeductionsModel());				
+				addDerivations(deductionsModel);
+			}
+			if (derivations == null || derivations.isEmpty()) {
+				return null;
+			}
+			StringWriter swriter = new StringWriter();
+			PrintWriter out = new PrintWriter(swriter);
+			out.println("Derivations from instance data combined with model '" + tbox + "', " + now() + "\n");
+			int cnt = 0;
+			HashSet<Derivation> seen = null;
+			for (Derivation d : derivations) {
+				d.printTrace(out, true);
+//				if (getDerivationLevel().equals(DERIVATION_SHALLOW)) {
+//					printShallowDerivationTrace(infModel.getGraph(), d, out, 0, 0, false);
+//				}
+//				else {
+//					if (!derivationAlreadyShown(d, seen, out, 0)) {
+//						// must be DERIVATION_DEEP
+//						if (seen == null) {
+//							seen = new HashSet<Derivation>();
+//						}
+//						printDeepDerivationTrace(infModel.getGraph(), d, out, true, 0, 0, seen, false);
+//					}
+//				}
+				cnt++;
+			}
+			if (cnt > 0) {
+				out.print("\n");
+			}
+			String derivations = swriter.toString();
+			out.close();
+			StringDataSource ds = new StringDataSource(derivations, "text/plain");
+			ds.setName("Derivations");
+			return ds;
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		return null;
 	}
 
 	@Override

@@ -32,6 +32,14 @@
           </services>
         </configuration>
       </plugin>
+      <!-- Run tests with current working directory set to target/test-classes -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <workingDirectory>${project.build.testOutputDirectory}</workingDirectory>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
