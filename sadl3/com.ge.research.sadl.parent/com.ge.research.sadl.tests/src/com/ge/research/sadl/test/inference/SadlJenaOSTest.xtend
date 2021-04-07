@@ -162,4 +162,36 @@ then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulev
 		]
 	}
 	
+	@Test
+	def void testSingleQuoteInPrintArgument() {
+		'''
+			 uri "http://sadl.org/SadlJenaOSTest.sadl" alias sjost.
+			
+			Person is a class described by child with values of type Person.
+			comment describes Person with values of type string.
+			A Person is a Parent only if child has at least 1 value.
+			
+			Rule UnnamedChild: 
+			if X is a Parent
+			then print("Now's the time!").
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.size == 1)
+			assertTrue(issues.get(0).message.equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information"))
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule UnnamedChild:  if rdf(X, rdf:type, sjost:Parent) then print(\"Now's the time!\")."))
+		]
+	}
 }

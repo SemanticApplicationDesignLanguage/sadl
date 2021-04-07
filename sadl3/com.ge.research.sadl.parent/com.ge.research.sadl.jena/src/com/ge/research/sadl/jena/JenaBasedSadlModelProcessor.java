@@ -4572,9 +4572,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Rule rule = new Rule(ruleName);
 		setTarget(rule);
 		int stage = element.getStage();
-		if (stage > 1) {
-			rule.setStage(stage);
-		}
+		rule.setStage(stage);
 		EList<Expression> ifs = element.getIfs();
 		EList<Expression> thens = element.getThens();
 		setRulePart(RulePart.PREMISE);
@@ -8563,7 +8561,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected void addLocalizedTypeToNode(Node predNode, TypeCheckInfo lTci) throws TranslationException {
 		if(predNode instanceof NamedNode && lTci != null) {
-			if(isIgnoreUnittedQuantities() && lTci.getTypeCheckType() != null && lTci.getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+			if(isIgnoreUnittedQuantities() && lTci.getTypeCheckType() != null && 
+					lTci.getTypeCheckType().getURI() != null &&
+					lTci.getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 				((NamedNode) predNode).setLocalizedType(validateNamedNode(new NamedNode(XSD.decimal.getURI(),NodeType.DataTypeNode)));
 			}else {
 				((NamedNode) predNode).setLocalizedType(lTci.getTypeCheckType());
@@ -10574,13 +10574,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	private String createUniqueDefaultValName(OntClass restricted, List<Property> props) throws PrefixNotFoundException {
+	private String createUniqueDefaultValName(OntClass restricted, List<Property> props, int level) throws PrefixNotFoundException {
 		StringBuilder sb = new StringBuilder(restricted.getLocalName());
 		for (Property prop : props) {
 			sb.append("_");
 			sb.append(prop.getLocalName());
 		}
 		sb.append("_default");
+		sb.append("_lvl");
+		sb.append(level);
 		String nmBase = sb.toString();
 		String nm = getModelNamespace() + nmBase;
 		int cntr = 0;
@@ -10602,7 +10604,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addError("Unable to find PropertyChainElement in Defaults model", ref);
 			return null;
 		}
-		Individual def = getTheJenaModel().createIndividual(createUniqueDefaultValName(restricted, props),
+		Individual def = getTheJenaModel().createIndividual(createUniqueDefaultValName(restricted, props, level),
 				instDefCls);
 		if (level > 0) {
 			String hlpuri = ResourceManager.ACUITY_DEFAULTS_NS + "hasLevel";

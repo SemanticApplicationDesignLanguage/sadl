@@ -43,6 +43,7 @@ import org.apache.jena.vocabulary.XSD;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.debug.internal.ui.actions.ConfigureColumnsAction;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
@@ -63,11 +64,13 @@ import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
+import com.ge.research.sadl.model.gp.JunctionList;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Print;
+import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Read;
@@ -89,6 +92,7 @@ import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.query.SadlQueryHelper;
 import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
@@ -304,7 +308,25 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			if (collectTimingInfo()) {
 				getInitializedReasoner().collectTimingInformation(true);
 			}
+			if (deepValidation()) {
+				String[] catHier = new String[1];
+				catHier[0] = "Jena";
+				ConfigurationItem configItem = new ConfigurationItem(catHier);
+				configItem.addNameValuePair("pDerivationLogging", "Deep");
+				getInitializedReasoner().configure(configItem);
+			}
 		}
+	}
+	
+	private boolean deepValidation() {
+		if (preferenceMap != null) {
+			if (preferenceMap.containsKey(SadlPreferences.DEEP_VALIDATION_OFF.getId())) {
+				String dvoff = preferenceMap.get(SadlPreferences.DEEP_VALIDATION_OFF.getId());
+				boolean dvoffbv = Boolean.parseBoolean(dvoff.trim());
+				return !dvoffbv;
+			}
+		}
+		return false;
 	}
 	
 	private boolean collectTimingInfo() {
@@ -511,6 +533,16 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 									.getColumnCount() > 0) {
 						testResult = new TestResult(true);
 					}
+				} else if (lhs instanceof Junction && rhs == null) {
+					Object lhobj = convertToComparableObject(
+							getModelFolderPath(), getInitializedReasoner(),
+							lhs, ((Test) cmd).getLhsVariables());
+					if (lhobj instanceof ResultSet
+							&& ((ResultSet) lhobj)
+									.getColumnCount() > 0) {
+						testResult = new TestResult(true);
+					}
+				
 				} else {
 					testResult = new TestResult(false);
 					if (lhs == null && rhs == null) {
@@ -709,7 +741,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		}
 		Node on = triple.getObject();
 		String object = null;
-		if (triple.getModifierType().equals(TripleModifierType.None)
+		if ((triple.getModifierType().equals(TripleModifierType.None) ||
+				triple.getModifierType().equals(TripleModifierType.Assignment))	// in a test this is just an alternate ordering of the triple.
 				&& (pn instanceof RDFTypeNode || (on instanceof NamedNode
 						&& sn instanceof NamedNode && !(sn instanceof VariableNode)))) {
 			object = ((NamedNode) on).toFullyQualifiedString();
@@ -720,7 +753,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				logger.debug("ResultSet: "
 						+ (rs != null ? rs.toString() : "null"));
 			if (on instanceof NamedNode) { // object != null) {
-				if (triple.getModifierType().equals(TripleModifierType.None)) {
+				if (triple.getModifierType().equals(TripleModifierType.None) ||
+						triple.getModifierType().equals(TripleModifierType.Assignment)) {
 					if (rs != null && rs.getRowCount() > 0) {
 						TestResult testResult = new TestResult();
 						testResult.setPassed(true);
@@ -945,17 +979,26 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		} 
 		else if (obj instanceof Junction) {
 			if (((Junction)obj).getJunctionType().equals(JunctionType.Conj)) {
-				Object lhs = ((Junction)obj).getLhs();
-				Object rhs = ((Junction)obj).getRhs();
+				JunctionList jlst = IntermediateFormTranslator.junctionToList((Junction) obj);
+//				Object lhs = ((Junction)obj).getLhs();
+//				if (lhs instanceof ProxyNode) {
+//					lhs = ((ProxyNode)lhs).getProxyFor();
+//				}
+//				Object rhs = ((Junction)obj).getRhs();
+//				if (rhs instanceof ProxyNode) {
+//					rhs = ((ProxyNode)rhs).getProxyFor();
+//				}
 				Query newQuery = new Query();
-				if (lhs instanceof GraphPatternElement && rhs instanceof GraphPatternElement) {
-					newQuery.addPattern((GraphPatternElement) lhs);
-					newQuery.addPattern((GraphPatternElement) rhs);
-					obj = newQuery;
-				}
-				else {
-					throw new TranslationException("Conversion of disjunction encountered unexpected non-GraphPatternElement content.");
-				}
+				newQuery.setPatterns(jlst);
+				obj = newQuery;
+//				if (lhs instanceof GraphPatternElement && rhs instanceof GraphPatternElement) {
+//					newQuery.addPattern((GraphPatternElement) lhs);
+//					newQuery.addPattern((GraphPatternElement) rhs);
+//					obj = newQuery;
+//				}
+//				else {
+//					throw new TranslationException("Conversion of disjunction encountered unexpected non-GraphPatternElement content.");
+//				}
 			}
 			else {
 				throw new TranslationException("Conversion of disjunction to a comparable object not currently supported.");

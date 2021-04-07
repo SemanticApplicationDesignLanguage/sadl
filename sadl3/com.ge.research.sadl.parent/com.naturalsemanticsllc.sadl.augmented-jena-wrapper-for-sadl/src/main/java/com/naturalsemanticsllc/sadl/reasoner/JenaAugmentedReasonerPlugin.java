@@ -19,22 +19,34 @@ package com.naturalsemanticsllc.sadl.reasoner;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.atlas.web.HttpException;
-import org.apache.jena.ontology.OntModel;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.InfModel;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelGetter;
+import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.reasoner.Derivation;
 import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.reasoner.rulesys.Rule.ParserException;
@@ -45,12 +57,17 @@ import com.ge.research.sadl.jena.reasoner.SadlReadFailureHandler;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.InvalidDerivationException;
 import com.ge.research.sadl.reasoner.ModelError;
+import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
-import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.reasoner.utils.StringDataSource;
+
+import jakarta.activation.DataSource;
 
 
 /*
@@ -58,12 +75,15 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
  * occur, namely changing rules or changing the data, rules must also be unloaded to restart the staged
  * sequence of rule application to create the inferred model.
  */
-public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
+public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements IReasoner {
     private static final String DEFAULT_TRANSLATOR_CLASSNAME = "com.naturalsemanticsllc.sadl.translator.JenaAugmentedTranslatorPlugin";
 
 	protected Map<Integer, List<String>> ruleFilesLoadedMap = null;
 	protected Map<Integer, List<Rule>> ruleListMap = null;
 	private int lastRuleStageLoaded;
+	
+	private OntModel deductionsModel = null;
+	private List<Derivation> derivations = null;
 
 	@Override
 	public String getConfigurationCategory() {
@@ -150,32 +170,58 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 		logger.debug("JenaReasonerPlugin.initializeReasoner, imports size = " + (imports == null ? 0 : imports.size()));
 
 		long t2 = System.currentTimeMillis();
+		if (collectTimingInfo) {
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_MODEL, "load ontology model", t2 - tboxLoadTime));
+		}
+ 
 		loadRules(schemaModel, getModelName());
 		logger.debug("JenaReasonerPluging.initialize, number of rule stages is "+ruleListMap.size());
+		long t3 = System.currentTimeMillis();
+		if (collectTimingInfo) {
+			int numRules = getNumRules();
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "read " + numRules + " rules from file(s)", t3 - t2));
+		}
 		
 		// load only first stage rules at this point
 		lastRuleStageLoaded = 0;
-		reasoner = new GenericRuleReasoner(ruleListMap.get(lastRuleStageLoaded));
-		reasoner.setDerivationLogging(derivationLogging);
-		logger.debug("JenaReasonerPluging.initialize, size of ruleList from reasoner = "+reasoner.getRules().size());
-		reasoner.setMode(getRuleMode(preferences));
-		long t3 = System.currentTimeMillis();
-		if (collectTimingInfo) {
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_MODEL, "load ontology model", t2 - tboxLoadTime));
-			int numRules = ruleList.size();
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "load model " + numRules + " rules", t3 - t2));
-		}
+		reasoner = createReasonerAndLoadRules(ruleListMap.get(lastRuleStageLoaded), 0);
+		return reasoner;
+	}
 
-		long t4;
-		if (collectTimingInfo) {
-			t4 = System.currentTimeMillis();
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "bind schema to reasoner", t4 - t3));			
+	/**
+	 * Method to count the number of rules loaded from rule files
+	 * @return
+	 */
+	private int getNumRules() {
+		int numRules = 0;
+		if (ruleListMap != null) {
+			Collection<List<Rule>> rlmvalues = ruleListMap.values();
+			for (List<Rule> rlst : rlmvalues) {
+				numRules += rlst.size();
+			}
 		}
+		return numRules;
+	}
+
+	/**
+	 * Method to create a reasoner and load the cumulative set of rules
+	 * @param rules 
+	 * @param stage
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	private GenericRuleReasoner createReasonerAndLoadRules(List<Rule> rules, int stage) throws ConfigurationException {
+		long tLoad1 = System.currentTimeMillis();
+		GenericRuleReasoner newReasoner = new GenericRuleReasoner(rules);
+		newReasoner.setDerivationLogging(derivationLogging);
+		logger.debug("JenaReasonerPluging.initialize, size of ruleList from reasoner = "+newReasoner.getRules().size());
+		newReasoner.setMode(getRuleMode(preferences));
+
 		boolean transitiveClosure = getBooleanConfigurationValue(preferences, pTransitiveClosureCaching, false);
-		reasoner.setTransitiveClosureCaching(transitiveClosure);
-		reasoner.setOWLTranslation(getBooleanConfigurationValue(preferences, pOWLTranslation, false));
+		newReasoner.setTransitiveClosureCaching(transitiveClosure);
+		newReasoner.setOWLTranslation(getBooleanConfigurationValue(preferences, pOWLTranslation, false));
 		boolean bTrace = getBooleanConfigurationValue(preferences, pTrace, false);
-		reasoner.setTraceOn(bTrace);
+		newReasoner.setTraceOn(bTrace);
 		if (bTrace) {
 //			traceAppender = new FileAppender();
 			// configure the appender here, with file location, etc
@@ -202,9 +248,13 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 		catch (NumberFormatException e) {
 			String msg = "Invalid timeout value '" + strTimeOut + "'";
 			logger.error(msg); addError(new ModelError(msg, ErrorType.ERROR));
-
 		}
-		return reasoner;
+		long tLoad2 = System.currentTimeMillis();
+		if (collectTimingInfo) {
+			int numRules = newReasoner.getRules() != null ? newReasoner.getRules().size() : 0;
+			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "add " + numRules + " rule(s) to reasoner for stage " + stage, tLoad2 - tLoad1));
+		}
+		return newReasoner;
 	}
 		
 	@Override
@@ -219,10 +269,7 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 				generateTboxModelWithSpec();
 				logger.debug("In prepareInfModel, modelSpec: "+modelSpec.toString());
 				logger.debug("In prepareInfModel, reasoner rule count: "+getReasonerOnlyWhenNeeded().getRules().size());
-//				dumpModelToLogger(tboxModelWithSpec);
 				infModel = ModelFactory.createInfModel(reasoner, tboxModelWithSpec);
-//		        InfGraph graph = reasoner.bind(tboxModelWithSpec.getGraph());
-//		        infModel = new InfModelImpl(graph);
 
 				synchronized(ReasonerFamily) {
 					infModel.size();	// this forces instantiation of the inference model
@@ -231,11 +278,42 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 						timingInfo.add(new ReasonerTiming(TIMING_PREPARE_INFMODEL, "prepare inference model stage 0", t2 - t1));
 					}
 				}
+				/*
+				 * The call to getReasonerOnlyWhenNeeded causes all rules to be read from the rule files
+				 * and creates the first reasoner so that it has the first rules loaded. An InfModel
+				 * is then created using this reasoner and the model provided to the reasoner plugin.
+				 * If there are multiple rule files, the loop below 
+				 * 	1. gets the rules already loaded from the current reasoner
+				 *  2. adds the next set of rules to that
+				 *  3. creates a new reasoner with the new rule set
+				 *  4. Creates a new InfModel using new reasoner and the previous infModel
+				 *  5. sets infModel and reasoner to the new InfModel and Reasoner created in steps 3 & 4.
+				 */
 				if (ruleListMap.size() > 1) {
+					boolean collectDerivations = !getDerivationLevel().equals(DERIVATION_NONE);
 					long tsl = System.currentTimeMillis();
 					for (Integer stage = 1; stage < ruleListMap.size(); stage++) {
-						reasoner.addRules(ruleListMap.get(stage));
-						infModel.size();
+						// Might need to have a flag and only do this if preference is set for getting deductions...
+						// Likewise for derivations?
+						if (collectDerivations) {
+							if (deductionsModel == null) {
+								deductionsModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), ((InfModel) infModel).getDeductionsModel());				
+								addDerivations(deductionsModel);
+							}
+							else {
+								Model moreDM = ((InfModel) infModel).getDeductionsModel();
+								addDerivations(moreDM);
+								deductionsModel.add(moreDM);
+							}
+						}
+						List<Rule> rules = reasoner.getRules();
+						List<Rule> newRules = ruleListMap.get(stage);
+						rules.addAll(newRules);
+						GenericRuleReasoner newReasoner = createReasonerAndLoadRules(rules, stage);
+						InfModel newInfModel = ModelFactory.createInfModel(newReasoner, infModel);
+						newInfModel.size();   // this forces instantiation of the inference model
+						infModel = newInfModel;
+						reasoner = newReasoner;
 						if (collectTimingInfo) {
 							long t2 = System.currentTimeMillis();
 							timingInfo.add(new ReasonerTiming(TIMING_PREPARE_INFMODEL, "prepare inference model stage " + stage, t2 - tsl));
@@ -257,6 +335,112 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 			logger.debug("In prepareInfModel, reusing infModel without any changes, newInputFlag is false");
 		}
 		newInputFlag = false;			
+	}
+
+	/**
+	 * Method to add the derivations in the input model to the list of derivations field
+	 * @param moreDM
+	 */
+	private void addDerivations(Model moreDM) {
+		if (derivations == null) {
+			derivations = new ArrayList<Derivation>();
+		}
+		StmtIterator sitr = moreDM.listStatements();
+		while (sitr.hasNext()) {
+			Triple s = sitr.nextStatement().asTriple();
+			Iterator<Derivation> itr = getDerivation(s);
+			while (itr.hasNext()) {
+				derivations.add(itr.next());
+			}
+		}
+	}
+
+	@Override
+	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException {
+		try {
+			prepareInfModel();
+		} catch (ConfigurationException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		OntModel m;
+		if (deductionsOnly) {
+			if (deductionsModel == null) {
+				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), ((InfModel) infModel).getDeductionsModel());				
+			}
+			else {
+				m = deductionsModel;
+			}
+		}
+		else {
+			m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), infModel);
+		}
+
+		if (m != null) {
+			String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	
+		    FileOutputStream fps = new FileOutputStream(filename);
+	        RDFWriter rdfw = m.getWriter(format);
+	        rdfw.write(m, fps, modelname);
+	        try {
+				fps.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        return true;
+		}
+		return false;
+	}
+
+	@Override
+	public DataSource getDerivations() throws InvalidDerivationException, ConfigurationException {
+		if (getDerivationLevel().equals(DERIVATION_NONE)){
+			return null;
+		}
+		try {
+			getReasonerOnlyWhenNeeded();
+			prepareInfModel();
+			if (deductionsModel == null) {
+				deductionsModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), ((InfModel) infModel).getDeductionsModel());				
+				addDerivations(deductionsModel);
+			}
+			if (derivations == null || derivations.isEmpty()) {
+				return null;
+			}
+			StringWriter swriter = new StringWriter();
+			PrintWriter out = new PrintWriter(swriter);
+			out.println("Derivations from instance data combined with model '" + tbox + "', " + now() + "\n");
+			int cnt = 0;
+			HashSet<Derivation> seen = null;
+			for (Derivation d : derivations) {
+				d.printTrace(out, true);
+//				if (getDerivationLevel().equals(DERIVATION_SHALLOW)) {
+//					printShallowDerivationTrace(infModel.getGraph(), d, out, 0, 0, false);
+//				}
+//				else {
+//					if (!derivationAlreadyShown(d, seen, out, 0)) {
+//						// must be DERIVATION_DEEP
+//						if (seen == null) {
+//							seen = new HashSet<Derivation>();
+//						}
+//						printDeepDerivationTrace(infModel.getGraph(), d, out, true, 0, 0, seen, false);
+//					}
+//				}
+				cnt++;
+			}
+			if (cnt > 0) {
+				out.print("\n");
+			}
+			String derivations = swriter.toString();
+			out.close();
+			StringDataSource ds = new StringDataSource(derivations, "text/plain");
+			ds.setName("Derivations");
+			return ds;
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		return null;
 	}
 
 	@Override
@@ -355,30 +539,20 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 			try {
 		    	File f = new File((new SadlUtils()).fileUrlToFileName(ruleFileName));
 		    	if (f.exists()) {
-		    		logger.debug(ruleFileName + " exists");
-					InputStream in = configurationMgr.getJenaDocumentMgr().getFileManager().open(ruleFileName);
-					if (in != null) {
-					    try {
-					    	InputStreamReader isr = new InputStreamReader(in);
-					    	BufferedReader br = new BufferedReader(isr);
-							List<Rule> rules = Rule.parseRules(Rule.rulesParserFromReader(br));
-							if (rules != null) {
-								ruleListMap.put(stage, rules);
-								newInputFlag = true;
-								return true;
-							}
-					    } catch (ParserException e) {
-					    	String msg = "Error reading rule file '" + ruleFileName + "': " + e.getMessage();
-					    	logger.error(msg);
-					    	addError(new ModelError(msg, ErrorType.ERROR));
-					    }
-					    finally {
-					    	in.close();
-					    }
-					}
+		    		return loadRulesFromFile(ruleFileName, stage);
 		    	}
 		    	else {
-		    		logger.debug(ruleFileName + " does not exit");
+		    		String ending = ".rules-stage" + stage;
+		    		if (!ruleFileName.endsWith(ending)) {
+						String rulefn = ruleFileName + "-stage" + stage;
+				    	File f2 = new File((new SadlUtils()).fileUrlToFileName(rulefn));
+				    	if (f2.exists()) {
+				    		return loadRulesFromFile(rulefn, stage);
+				    	}
+				    	else {
+				    		logger.debug("No stage " + stage + " rule file found for base name " + ruleFileName + ".");
+				    	}
+		    		}
 		    	}
 			}
 			catch (RulesetNotFoundException e) {
@@ -391,6 +565,31 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin {
 			}
 		}		
 //		dataModelSourceCount++;
+		return false;
+	}
+
+	private boolean loadRulesFromFile(String ruleFileName, Integer stage) throws IOException {
+		logger.debug(ruleFileName + " exists");
+		InputStream in = configurationMgr.getJenaDocumentMgr().getFileManager().open(ruleFileName);
+		if (in != null) {
+		    try {
+		    	InputStreamReader isr = new InputStreamReader(in);
+		    	BufferedReader br = new BufferedReader(isr);
+				List<Rule> rules = Rule.parseRules(Rule.rulesParserFromReader(br));
+				if (rules != null) {
+					ruleListMap.put(stage, rules);
+					newInputFlag = true;
+					return true;
+				}
+		    } catch (ParserException e) {
+		    	String msg = "Error reading rule file '" + ruleFileName + "': " + e.getMessage();
+		    	logger.error(msg);
+		    	addError(new ModelError(msg, ErrorType.ERROR));
+		    }
+		    finally {
+		    	in.close();
+		    }
+		}
 		return false;
 	}
 

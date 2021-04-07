@@ -4333,8 +4333,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 			}
 		}
-		else {
-			ExtendedIterator<OntClass> eitr = ((OntClass)range).listSuperClasses(true);
+		else if (range.canAs(OntClass.class)){
+			ExtendedIterator<OntClass> eitr = ((OntClass)range.as(OntClass.class)).listSuperClasses(true);
 			if (eitr.hasNext()) {
 				while (eitr.hasNext()) {
 					OntClass scls = eitr.next();

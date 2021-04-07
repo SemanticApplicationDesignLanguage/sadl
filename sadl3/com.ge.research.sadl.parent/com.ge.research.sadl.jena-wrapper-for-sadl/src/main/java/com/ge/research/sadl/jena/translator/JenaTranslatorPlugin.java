@@ -1267,7 +1267,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 		String builtinName = bin.getFuncName();
 		if (builtinName.equals("length") && bin.getArguments() != null && bin.getArguments().size() == 2) {
 			Node arg0 = bin.getArguments().get(0);
-			if (arg0 instanceof NamedNode && !isSadlTypeList(arg0)) {
+			if (arg0 instanceof NamedNode) {
 				builtinName = "listLength";		
 			}
 		}
@@ -1546,7 +1546,13 @@ public class JenaTranslatorPlugin implements ITranslator {
 	public static synchronized String literalValueToString(Object litObj, TranslationTarget target) {
 		if (litObj instanceof String) {
 			if (target.equals(TranslationTarget.RULE_BUILTIN)) {
-				return "'" + litObj.toString().trim() + "'^^http://www.w3.org/2001/XMLSchema#string";
+				String litStr = litObj.toString();
+				if (litStr.indexOf("'") >= 0) {
+					return "\"" + litStr + "\"^^http://www.w3.org/2001/XMLSchema#string";
+				}
+				else {
+					return "'" + litStr + "'^^http://www.w3.org/2001/XMLSchema#string";
+				}
 			}
 			else {
 				litObj = "\"" + litObj + "\"";
