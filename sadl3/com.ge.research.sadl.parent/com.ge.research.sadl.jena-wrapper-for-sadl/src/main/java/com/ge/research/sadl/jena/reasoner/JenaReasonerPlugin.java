@@ -3174,7 +3174,8 @@ public class JenaReasonerPlugin extends Reasoner{
 		String pkg = "org.apache.jena.reasoner.rulesys.builtins";
 		String[] impbuiltinnames = {
 		"AddOne", "Bound", "CountLiteralValues", "IsBNode", "IsDType",
-		"IsLiteral", "ListContains", "ListEntry", "ListEqual", "ListLength", 
+		"IsLiteral", "ListContains", "ListEntry", "ListEqual", 
+//		"ListLength", this one removed so that the custom builtin by same name will not be confounded awc 4/9/2021
 		"ListMapAsObject", "ListMapAsSubject", "ListNotContains", "ListNotEqual", 
 		"NotBNode", "NotDType", "NotLiteral", "Now", "Regex", "StrConcat", "Table", 
 		"TableAll", "Unbound", "UriConcat"};
@@ -3227,7 +3228,7 @@ public class JenaReasonerPlugin extends Reasoner{
 							"listContains(string,string)boolean", 
 							"listEntry(string,int)string", 
 							"listEqual(string,string)boolean", 
-							"listLength(string)int", 
+//							"listLength(string)int", 				this is replaced with a custom built-in handling both RDF lists and SADL typed lists awc 4/9/2021
 							"listMapAsObject(string,string,string)boolean", 
 							"listMapAsSubject(string,string,string)boolean", 
 							"listNotContains(string,string)boolean", 

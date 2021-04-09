@@ -37,7 +37,6 @@
     <module>com.ge.research.sadl.ui.tests</module>
     <module>com.ge.research.sadl.update</module>
     <module>com.ge.research.sadl.xtextgenerator</module>
-    <module>com.naturalsemanticsllc.sadl.augmented-jena-wrapper-for-sadl</module>
   </modules>
 
   <!-- Set properties used by all modules -->

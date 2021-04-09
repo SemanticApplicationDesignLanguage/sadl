@@ -335,7 +335,7 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 			String dl;
 			try {
 				dl = inferenceProcessor.getReasonerConfigurationItem(IReasoner.DerivationsRequestedKey);
-				if (dl != null && dl.length() > 0) {
+				if (dl != null && dl.length() > 0 && !dl.equals("None")) {
 					console.info("Derivation information requested but none available.");
 				}
 			} catch (Exception e) {
