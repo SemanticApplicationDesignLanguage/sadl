@@ -381,7 +381,9 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 				checkNewDefaultReasoner(e.getElement());
 				checkedReasoner = (IReasoner) e.getElement();
 				translators = getAvailableTranslatorsForReasoner(checkedReasoner);
+				String defTranslator = checkedReasoner.getDefaultTranslatorClassName();
 				if (translatorTableViewer != null) {
+					checkNewDefaultTranslator(defTranslator);
 					translatorTableViewer.refresh(true, false);
 				}
 				//Turns off the 'ok' and 'apply' buttons when a reasoner has been selected without a translator
@@ -582,8 +584,10 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		TableItem[] children = translatorTableViewer.getTable().getItems();
 		for (int i = 0; i < children.length; i++) {
 			TableItem item = children[i];
-			if (!(item.getData().equals(translator)))
+			if (!(item.getData().getClass().getCanonicalName().equals(translator)))
 				item.setChecked(false);
+			else 
+				item.setChecked(true);
 		}
 	}
 

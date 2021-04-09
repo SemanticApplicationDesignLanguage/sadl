@@ -203,6 +203,18 @@ import com.google.inject.Inject;
 			e.printStackTrace();
 		}
 	}
+	
+	private void cleanBuiltinFunctionsImplicitModel(IProject project) {
+		IFile file = project.getFile(SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/" + SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME);
+		if(file.exists()){
+			try {
+				file.delete(true, null);
+			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 
 	private void checkForSadlImplicitModel(IProject project){
 		IFile file = project.getFile(SadlConstants.SADL_IMPLICIT_MODEL_FOLDER + "/" + SadlConstants.SADL_IMPLICIT_MODEL_FILENAME);
@@ -255,6 +267,8 @@ import com.google.inject.Inject;
 //			}
 //		}
 		implicitModelFolder.mkdir();
+		cleanBuiltinFunctionsImplicitModel(project);	// this is here so that built-in changes get get into
+														// the file without doing a manual delete
 		checkForBuiltinFunctionImplicitModel(project);
 		checkForSadlImplicitModel(project);
 		if (projectsSelected == null) {

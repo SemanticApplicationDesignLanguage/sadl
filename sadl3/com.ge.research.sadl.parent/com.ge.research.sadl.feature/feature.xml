@@ -199,11 +199,4 @@ SADL also includes POJava licensed under Apache License V2.0.
          version="0.0.0"
          unpack="false"/>
 
-   <plugin
-         id="com.naturalsemanticsllc.sadl.augmented-jena-wrapper-for-sadl"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
 </feature>

@@ -243,6 +243,7 @@ public interface IReasoner {
 	 * @throws QueryCancelledException
 	 */
 	public DataSource construct(String constructQuery) throws QueryParseException, QueryCancelledException;
+	
 	/**
 	 * Method to identify the family of reasoners to which this reasoner belongs, e.g., "Jena-Based".
 	 * 

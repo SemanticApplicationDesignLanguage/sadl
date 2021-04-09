@@ -166,7 +166,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		if (cmds == null || cmds.size() < 1) {
 			Object[] results = new Object[3];
 			List<String> errors = new ArrayList<String>();
-			errors.add("No commands to process. Inference complete.");
+			errors.add("No commands to process. Inference was not invoked.");
 			results[2] = errors;
 			return results;
 		}
@@ -307,13 +307,6 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 //			}
 			if (collectTimingInfo()) {
 				getInitializedReasoner().collectTimingInformation(true);
-			}
-			if (deepValidation()) {
-				String[] catHier = new String[1];
-				catHier[0] = "Jena";
-				ConfigurationItem configItem = new ConfigurationItem(catHier);
-				configItem.addNameValuePair("pDerivationLogging", "Deep");
-				getInitializedReasoner().configure(configItem);
 			}
 		}
 	}
