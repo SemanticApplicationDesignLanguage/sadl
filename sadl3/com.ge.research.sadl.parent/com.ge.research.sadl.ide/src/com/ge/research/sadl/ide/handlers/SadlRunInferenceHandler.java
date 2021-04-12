@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 
-import jakarta.activation.DataSource;
-
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.xtext.resource.XtextResource;
@@ -41,7 +39,6 @@ import org.eclipse.xtext.validation.Issue;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.jena.importer.CsvImporter;
-import com.ge.research.sadl.jena.reasoner.builtin.GetInstance;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.EndWrite;
@@ -59,7 +56,6 @@ import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
-import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.SadlCommandResult;
@@ -67,6 +63,8 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.common.base.Supplier;
 import com.google.common.base.Throwables;
+
+import jakarta.activation.DataSource;
 
 /**
  * IDE agnostic handler for running the inferencer.
@@ -193,6 +191,12 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 	}
 
 	protected void displayInferenceResults(Object[] retvals, Path trgtFile, String owlModelPath, String modelFolderPath, Map<String, String> prefMap) throws ConfigurationException, IOException {
+		if (inferenceProcessor != null) {
+			String reasonerInfo = inferenceProcessor.getReasonerIdentity();
+			if (reasonerInfo != null) {
+				console.info(reasonerInfo + ".\n");
+			}
+		}
 		if (retvals == null || retvals.length < 1) {
 			console.error("There are no inference results.");
 			return;

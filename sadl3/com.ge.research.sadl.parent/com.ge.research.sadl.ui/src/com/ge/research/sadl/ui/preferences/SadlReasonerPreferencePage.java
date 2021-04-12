@@ -378,16 +378,17 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		});
 		tableViewer.addCheckStateListener(new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent e) {
+				boolean valid = false;
 				checkNewDefaultReasoner(e.getElement());
 				checkedReasoner = (IReasoner) e.getElement();
 				translators = getAvailableTranslatorsForReasoner(checkedReasoner);
 				String defTranslator = checkedReasoner.getDefaultTranslatorClassName();
 				if (translatorTableViewer != null) {
-					checkNewDefaultTranslator(defTranslator);
+					valid = checkNewDefaultTranslator(defTranslator);
 					translatorTableViewer.refresh(true, false);
 				}
 				//Turns off the 'ok' and 'apply' buttons when a reasoner has been selected without a translator
-				setValid(false);
+				setValid(valid);
 			}
 		});
 
@@ -580,15 +581,21 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 	}
 
 	// Un-check all the translators except the current one that was just checked
-	protected void checkNewDefaultTranslator(Object translator) {
+	protected boolean checkNewDefaultTranslator(Object translator) {
+		boolean found = false;
 		TableItem[] children = translatorTableViewer.getTable().getItems();
 		for (int i = 0; i < children.length; i++) {
 			TableItem item = children[i];
-			if (!(item.getData().getClass().getCanonicalName().equals(translator)))
+			String transFQName = (translator instanceof String) ? (String)translator : translator.getClass().getCanonicalName();
+			if (!(item.getData().getClass().getCanonicalName().equals(transFQName))) {
 				item.setChecked(false);
-			else 
+			}
+			else {
 				item.setChecked(true);
+				found = true;
+			}
 		}
+		return found;
 	}
 
 	/**

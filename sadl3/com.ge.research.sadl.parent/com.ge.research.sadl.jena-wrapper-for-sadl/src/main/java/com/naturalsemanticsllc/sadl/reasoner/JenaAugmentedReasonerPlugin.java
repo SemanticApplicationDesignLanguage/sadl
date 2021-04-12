@@ -78,6 +78,8 @@ import jakarta.activation.DataSource;
 public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements IReasoner {
     private static final String DEFAULT_TRANSLATOR_CLASSNAME = "com.naturalsemanticsllc.sadl.translator.JenaAugmentedTranslatorPlugin";
 
+    public static final String version = "date 12 April 2021";
+
 	protected Map<Integer, List<String>> ruleFilesLoadedMap = null;
 	protected Map<Integer, List<Rule>> ruleListMap = null;
 	private int lastRuleStageLoaded;
@@ -95,6 +97,12 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 	public String getDefaultTranslatorClassName() {
 		return DEFAULT_TRANSLATOR_CLASSNAME;
 	}
+	
+	@Override
+	public String getReasonerVersion() {
+		return version;
+	}
+
 
 	@Override
 	public GenericRuleReasoner getReasonerOnlyWhenNeeded() throws ConfigurationException {

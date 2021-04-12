@@ -1909,4 +1909,24 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return getInitializedReasoner().getReasonerConfigurationItem(itemKey);
 	}
 
+	@Override
+	public String getReasonerIdentity() {
+		IReasoner reasoner;
+		try {
+			reasoner = getConfigMgr(getOwlFormat()).getReasoner();
+			if (reasoner != null) {
+				String reasonerInfo = "Reasoner family: " + reasoner.getReasonerFamily() + " (" + reasoner.getClass().getName() + ")";
+				if (reasoner.getReasonerVersion() != null) {
+					reasonerInfo += ", version " + reasoner.getReasonerVersion();
+				}
+				return reasonerInfo;
+			}
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
 }
