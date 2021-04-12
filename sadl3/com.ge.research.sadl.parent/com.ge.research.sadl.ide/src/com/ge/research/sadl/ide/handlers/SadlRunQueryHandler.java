@@ -66,13 +66,13 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 			// XXX: this is not used anyway!
 			String owlFileName = null;
 			boolean tryAddingOwlExtension = true;
-			String fmt = properties.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
+			String fmt = properties != null ? properties.get(SadlPreferences.OWL_MODEL_FORMAT.getId()) : null;
 			final String format = fmt != null ? fmt : SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
 			String ext = "." + SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(format));
 			if (path.getFileName().toString().endsWith(".sadl")) {
 				// run query on this model
 //				Resource res = prepareActionHandler(target[2]);
-				console.info("Adhoc Query of '" + path.toString() + "' requested.\n");
+				console.info("Ad hoc query of '" + path.toString() + "' requested.\n");
 				
 //				final List<Issue> issues = new ArrayList<Issue>();
 //				processor.processAdhocQuery(res, new ValidationAcceptor(new IAcceptor<Issue>(){
@@ -93,7 +93,7 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 			else if (path.getFileName().toString().endsWith(".owl")) {
 				// run query on this model
 //				Resource res = prepareActionHandler(trgtFile);
-				console.info("Adhoc Query of '" + path.toString() + "' requested.\n");
+				console.info("Ad hoc query of '" + path.toString() + "' requested.\n");
 				owlFileName = path.getFileName().toString();
 			}
 			else if (tryAddingOwlExtension) {
@@ -132,6 +132,11 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 					reasoner.initializeReasoner(modelFolderUri, modelName, format);
 				}
 				if (reasoner != null) {	
+					String reasonerInfo = "Reasoner family: " + reasoner.getReasonerFamily() + " (" + reasoner.getClass().getName() + ")";
+					if (reasoner.getReasonerVersion() != null) {
+						reasonerInfo += ", version " + reasoner.getReasonerVersion();
+					}
+					console.info(reasonerInfo + ".\n");
 					int qidx = 0;
 					while (query != null) {
 						if (qlist != null) {
@@ -194,7 +199,7 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 								ResultSet rs = reasoner.ask(currentQuery);
 								if (rs != null) {
 									if (currentQuery.toLowerCase().startsWith("construct")) {
-										String desc = "Adhoc query Graph";
+										String desc = "Ad hoc query graph";
 	        							String baseFileName = path.getFileName().toString() + System.currentTimeMillis(); 							
 		        						resultSetToGraph(path, rs, desc, baseFileName, null, properties);
 									}

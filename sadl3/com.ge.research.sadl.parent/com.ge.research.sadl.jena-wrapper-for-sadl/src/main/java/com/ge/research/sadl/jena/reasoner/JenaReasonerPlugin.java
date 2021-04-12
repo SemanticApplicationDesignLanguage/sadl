@@ -185,7 +185,7 @@ public class JenaReasonerPlugin extends Reasoner{
     private static final String DEFAULT_TRANSLATOR_CLASSNAME = "com.ge.research.sadl.jena.translator.JenaTranslatorPlugin";
 	protected static final Logger logger = LoggerFactory.getLogger(JenaReasonerPlugin.class);
 	public static String ReasonerFamily="Jena-Based";
-	public static final String version = "$Revision: 1.19 $";
+	public static final String version = "date 12 April 2021";
 	private static String ReasonerCategory = "Jena";
 	public static final String pModelSpec = "pModelSpec";
 	public static final String pTimeOut = "pTimeOut";

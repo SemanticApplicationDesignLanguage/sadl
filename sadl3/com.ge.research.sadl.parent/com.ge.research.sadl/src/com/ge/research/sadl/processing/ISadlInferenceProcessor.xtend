@@ -120,4 +120,9 @@ interface ISadlInferenceProcessor {
 	 * @param itemKey -- the key to the desired value
 	 */
 	def String getReasonerConfigurationItem(String itemKey)	throws ConfigurationException, ReasonerNotFoundException
+
+	/**
+	 * Method to return the identity of the selected reasoner
+	 */
+	def String getReasonerIdentity();
 }
