@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Ad Hoc Queries in SADL IDE</title>
+  </head>
+  <body>
+    <h1>Ad Hoc Queries in the SADL IDE </h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->4/12/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p>While queries can be persisted as part of a SADL model and run whenever
+      desired, see <a href="AskStatement.html">Ask Statement</a>,&nbsp; it is
+      also possible to run SPARQL queries against the current model in an ad hoc
+      fashion. To do so, follow this sequence of actions.</p>
+    <ol>
+      <li>Identify the model to be queried. This can be done in either of two
+        ways:</li>
+      <ul>
+        <li>Open the SADL model in the SADL editor or the OWL model in a text
+          editor.</li>
+      </ul>
+      <ul>
+        <li>Select the SADL or OWL file in the Project Explorer window.</li>
+      </ul>
+      <li>Open the ad hoc query dialog by selecting "Run Query" on the SADL
+        menu. This can be made visible in either of two ways:</li>
+      <ul>
+        <li>In the SADL perspective, click on "SADL" in the menu bar<br>
+          <img src="images/AdHoc4.png" alt=""></li>
+        <li>Click on the SADL icon on the toolbar.<br>
+          <img src="images/AdHoc3.png" alt=""></li>
+      </ul>
+      <li>Enter a SPARQL query into the resulting Run Query dialog.<br>
+        <img src="images/AdHoc5.png" alt=""></li>
+      <li>Check or uncheck "Show namespaces?", as desired</li>
+      <li>Click the OK button.</li>
+    </ol>
+    <p>Results will be displayed in the console window:</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Ad hoc query of '.../Shapes/OwlModels/Test.owl' requested.</font></font></font><br>
+      <font color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Reasoner family: Jena-Based
+            (...JenaAugmentedReasonerPlugin), version date 12 April 2021.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> <font face="Monospace"><font style="font-size: 10pt" size="2">"s","sa"</font></font></font><br>
+      <font color="#4c4c4c"> <font face="Monospace"><font style="font-size: 10pt"
+            size="2">"http://sadl.org/Shapes/Test#MyRect",13.75</font></font></font></p>
+    <p style="margin-left: 40px;"></p>
+  </body>
+</html>
