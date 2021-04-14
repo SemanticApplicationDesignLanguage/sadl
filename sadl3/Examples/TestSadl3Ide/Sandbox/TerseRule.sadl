@@ -8,4 +8,3 @@
  	
  Rule TerseCircleArea:
 	then area is PI*radius^2.
-	

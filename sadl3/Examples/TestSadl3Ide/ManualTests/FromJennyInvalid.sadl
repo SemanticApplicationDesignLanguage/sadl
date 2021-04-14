@@ -14,7 +14,7 @@ CommercialFundingSource is a FundingSource with fundingSourceType Commercial.
 AssessedFundingSource is a FundingSource with fundingSourceType Assessed,
        described by assessedFundingType with a single value of type AssessedFundingType.
  
-// Is it possible to say something like “if a FundingSource has fundingSourceType Government, then it is a GovernmentFundingSource”?
+// Is it possible to say something like ï¿½if a FundingSource has fundingSourceType Government, then it is a GovernmentFundingSourceï¿½?
 
 A FundingSource is a GovernmentFundingSource only if fundingSourceType always has value Government.
 
