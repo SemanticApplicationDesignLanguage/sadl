@@ -92,12 +92,17 @@ public interface IConfigurationManager {
 	 */
 	public abstract IReasoner getOtherReasoner(String reasonerClassName) throws ConfigurationException;
 
-		/** Clear the current reasoner (if any) because something may have changed and a new
+	/** Clear the current translator (if any) because something may have changed and a new
+	 * translator needs to be created for translation to occur reproducibly. (So variable names are consistent.)
+	 * @return
+	 */
+	public abstract boolean clearTranslator();
+
+	/** Clear the current reasoner (if any) because something may have changed and a new
 	 * reasoner needs to be created for inference to occur.
 	 * @return
 	 */
 	public abstract boolean clearReasoner();
-
 	/**
 	 * Method to return the fully qualified name of the class for the current IReasoner as specified in the configuration.
 	 * @return

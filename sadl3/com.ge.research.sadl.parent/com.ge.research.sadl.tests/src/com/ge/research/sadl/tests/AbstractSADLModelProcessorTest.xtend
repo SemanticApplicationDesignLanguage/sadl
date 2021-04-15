@@ -36,6 +36,7 @@ abstract class AbstractSADLModelProcessorTest extends AbstractSADLParsingTest {
 		val gcm = processor.getClass.getDeclaredMethod("getConfigMgr") as Method
 		gcm.accessible = true
 		val cm = gcm.invoke(processor, null) as ConfigurationManagerForIDE;
+		cm.clearTranslator	// this is needed so that variable naming always starts from 0
 		val trans =cm.translator as ITranslator
 		trans
 	}

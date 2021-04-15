@@ -5028,7 +5028,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					Object rest = null;
 					if (leftTranslatedDefn == null) {
-						leftTranslatedDefn = processExpression(leftVariableDefn);
+						leftTranslatedDefn = applyPulledUpOperations(processExpression(leftVariableDefn));
+						if (expressionIsNegatedClass(leftVariableDefn, leftTranslatedDefn)) {
+							// this can only be true if leftTranslatedDefn is a BuiltinElement so case on next line is OK
+							TripleElement trel = negatedClassAndVariableToTripleElement(leftVar, (BuiltinElement) leftTranslatedDefn);
+							return trel;
+						}
 					}
 					if (varkey != null) {
 						setVariableInDefinition(varkey, null);
@@ -5678,7 +5683,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (lexpr != null && rexpr != null) {
 			isDefiningDeclaration = isDefiningDeclaration(lexpr, rexpr, op);
 			// no need to do type checking if this is a defining declaration
-			if(!isDefiningDeclaration && 
+			if(!isDefiningDeclaration && !isNegation(rexpr) &&
 					!getModelValidator().validateBinaryOperationByParts(container, lexpr, rexpr, op, errorMessage, false)){
 				addTypeCheckingError(errorMessage.toString(), container);
 			}
@@ -5837,16 +5842,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				assignedNode = validateNode((Node)lobj);
 				pattern = new TripleElement(assignedNode, new RDFTypeNode(), ((VariableNode) robj).getType());
 			}
-			else if (rexpr instanceof UnaryExpression && ((UnaryExpression)rexpr).getOp().equals("not") && 
-					((UnaryExpression)rexpr).getExpr() instanceof Declaration && !(robj instanceof VariableNode)) {
+			else if (expressionIsNegatedClass(rexpr, robj)) {
 				// this is like the case below only negated
 				if (robj instanceof BuiltinElement && ((BuiltinElement)robj).getArguments().size() == 1) {
 //					this should always be true, error checking only
-					Node effectiveRobj = ((BuiltinElement)robj).getArguments().get(0);
-					TripleElement trel = new TripleElement((Node) lobj, new RDFTypeNode(), effectiveRobj);
-					trel.setType(TripleElement.TripleModifierType.Not);
-					trel.setSourceType(TripleSourceType.ITC);
-					if (lobj instanceof VariableNode && robj instanceof NamedNode && ((NamedNode)robj).getNodeType().equals(NodeType.ClassNode)) {
+					TripleElement trel = negatedClassAndVariableToTripleElement((Node)lobj, (BuiltinElement)robj);
+					if (lobj instanceof VariableNode && robj instanceof NamedNode && 
+							(((NamedNode)robj).getNodeType().equals(NodeType.ClassNode) ||
+									((NamedNode)robj).getNodeType().equals(NodeType.ClassListNode))) {
 						// this is a restriction on the variable type
 						((VariableNode)lobj).addDefinition(nodeCheck(trel));
 						try {
@@ -6275,9 +6278,44 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
+	/**
+	 * Method to take a Node (lobj) and a negated class (robj) and create a corresponding TripleElement
+	 * @param lobj
+	 * @param robj
+	 * @return
+	 * @throws InvalidTypeException
+	 */
+	private TripleElement negatedClassAndVariableToTripleElement(Node lobj, BuiltinElement robj) throws InvalidTypeException {
+		Node effectiveRobj = ((BuiltinElement)robj).getArguments().get(0);
+		TripleElement trel = new TripleElement((Node) lobj, new RDFTypeNode(), effectiveRobj);
+		trel.setType(TripleElement.TripleModifierType.Not);
+		trel.setSourceType(TripleSourceType.ITC);
+		return trel;
+	}
+
+	/**
+	 * Method to determine if the Expression rexpr, with translation 
+	 * (negation ignored in translationto robj, to be pulled up)
+	 * is a negated class ("not a Someclass")
+	 * @param rexpr
+	 * @param robj
+	 * @return
+	 */
+	private boolean expressionIsNegatedClass(Expression rexpr, Object robj) {
+		if (rexpr instanceof UnaryExpression && ((UnaryExpression)rexpr).getOp().equals("not") && 
+		((UnaryExpression)rexpr).getExpr() instanceof Declaration && 
+		robj instanceof BuiltinElement && ((BuiltinElement)robj).getArguments() != null &&
+		((BuiltinElement)robj).getArguments().size() == 1 &&
+		((BuiltinElement)robj).getArguments().get(0) instanceof NamedNode &&
+		(((NamedNode)((BuiltinElement)robj).getArguments().get(0)).getNodeType().equals(NodeType.ClassNode) || 
+				((NamedNode)((BuiltinElement)robj).getArguments().get(0)).getNodeType().equals(NodeType.ClassListNode))) {
+			return true;
+		}
+		return false;
+	}
+
 	private boolean isDefiningDeclaration(Expression lexpr, Expression rexpr, String op) {
-		if (op.equals("is") && lexpr instanceof Name && 
-				declarationExtensions.getDeclaration(((Name)lexpr).getName().getName()).equals(((Name)lexpr).getName()) &&
+		if (op.equals("is") && lexpr instanceof Name && declarationExtensions.getDeclaration((Name)lexpr).equals(lexpr) &&
 				lexpr.eContainer().equals(rexpr.eContainer())) {
 			return true;
 		}
@@ -7723,7 +7761,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				try {
 					if (expr.eContainer() instanceof BinaryOperation &&
 							((BinaryOperation)expr.eContainer()).getOp().equals("is") &&
-							typenode instanceof NamedNode && 
 							(((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) ||
 									((NamedNode)typenode).getNodeType().equals(NodeType.ClassListNode)) &&
 							((BinaryOperation)expr.eContainer()).getLeft() instanceof Name &&
@@ -7731,6 +7768,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.VARIABLE))) {
 						// this is of the form "something is a class" where so return the class (typenode)
 						//	where the something must be an instance or an explicit variable
+						return typenode;
+					}
+					else if ((!isUseArticlesInValidation() || !isDefiniteArticle(article)) &&
+							expr.eContainer() instanceof UnaryExpression &&
+							((UnaryExpression)expr.eContainer()).getOp().equals("not") &&
+							(((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) ||
+									((NamedNode)typenode).getNodeType().equals(NodeType.ClassListNode))) {
+						// this is the negation of a class or class list node, e.g., "not a SomeClass"
 						return typenode;
 					}
 				} catch (CircularDefinitionException e1) {
