@@ -431,6 +431,15 @@ public class ConfigurationManager implements IConfigurationManager {
 		return false;
 	}
 	
+	@Override
+	public boolean clearTranslator() {
+		if (translator != null) {
+			translator = null;
+			return true;
+		}
+		return false;
+	}
+
 	protected Resource getReasonerSpecResource() {
 		if (getConfigModel() != null) {
             Resource type = getConfigModel().createResource(CATEGORY_KW);
@@ -1956,4 +1965,5 @@ public class ConfigurationManager implements IConfigurationManager {
 			otherProjectConfigurationManagers.clear();
 		}
 	}
+
 }

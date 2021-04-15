@@ -291,4 +291,79 @@ then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulev
 		]
 	}
 
+	@Test
+	def void testIsNotA_01() {
+		'''
+		 uri "http://sadl.org/gh633b.sadl" alias gh633b.
+		 
+		 B is a class.
+		 C is a class.
+		 D is a class.
+		 
+		 Rule r:
+		 if x is a B and x is not a C
+		 then x is a D.
+		 
+		 Ask: select x where x is not a C.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(rules !== null)
+			assertTrue(rules.size() == 1)
+			println(rules.get(0))
+			val rexp = "Rule r:  if rdf(x, rdf:type, gh633b:B) and not(rdf(x, rdf:type, gh633b:C)) then rdf(x, rdf:type, gh633b:D)."
+			assertTrue(processor.compareTranslations(rules.get(0).toString(), rexp))
+			assertTrue(cmds !== null)
+			
+			for (cmd : cmds) {
+				println(cmd.toString)
+				if (cmd instanceof Query) {
+					val query = getTranslator(processor).translateQuery(jenaModel, "http://sadl.org/gh633b.sadl", cmd as Query)
+					println(query)
+					val expected = "select ?x where {?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?v1 . FILTER (!EXISTS { ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.org/gh633b.sadl#C> })}"
+					assertTrue(processor.compareTranslations(expected.trim, query.toString.trim))
+				}
+			}
+		]
+	}
+	
+	@Test
+	def void testIsNotA_02() {
+		'''
+		 uri "http://sadl.org/gh633b.sadl" alias gh633b.
+		 
+		 B is a class.
+		 C is a class.
+		 D is a class.
+		 
+		 Rule r:
+		 if x is a B and x is not a C
+		 then x is a D.
+		 
+		 Ask: select x where x is a B and x is not a C.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(cmds !== null)
+			
+			for (cmd : cmds) {
+				println(cmd.toString)
+				if (cmd instanceof Query) {
+					val query = getTranslator(processor).translateQuery(jenaModel, "http://sadl.org/gh633b.sadl", cmd as Query)
+					println(query)
+					val expected = "select ?x where {?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.org/gh633b.sadl#B> . FILTER (!EXISTS { ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://sadl.org/gh633b.sadl#C> })}"
+					assertTrue(processor.compareTranslations(expected.trim, query.toString.trim))
+				}
+			}
+		]
+	}
+	
 }

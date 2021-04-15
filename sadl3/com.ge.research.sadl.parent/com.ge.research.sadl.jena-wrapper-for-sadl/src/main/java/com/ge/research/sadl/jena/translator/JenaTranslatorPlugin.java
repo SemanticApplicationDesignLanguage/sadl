@@ -619,6 +619,24 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 		if (sbfilter.length() > 0) {
 			sbfilter.insert(0, "FILTER ("); sbfilter.append(")");
+			if (tripleCtr == 0) {
+				// only a filter was created; need something in the where clause
+				for (int i = 0; elements != null && i < elements.size(); i++) {
+					GraphPatternElement gpe = elements.get(i);
+					if (gpe instanceof TripleElement && 
+							((TripleElement)gpe).getModifierType().equals(TripleModifierType.Not)) {
+						TripleElement whereTriple = new TripleElement(((TripleElement)gpe).getSubject(), 
+								((TripleElement)gpe).getPredicate(), null);
+						if (query.getVariables().contains(((TripleElement)gpe).getSubject())) {
+							whereTriple.setObject(new VariableNode(getNewVariableForQuery()));
+						}
+						else if (query.getVariables().contains(((TripleElement)gpe).getObject())) {
+							whereTriple.setSubject(new VariableNode(getNewVariableForQuery()));
+						}
+						tripleCtr = processGraphPatternElement(whereTriple, sbmain, sbfilter, tripleCtr);
+					}
+				}	
+			}
 			if (!sbmain.toString().trim().endsWith(".")) {
 				sbmain.append(" . ");
 			}
@@ -659,7 +677,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 		else if (gpe instanceof TripleElement) {
 			if (tripleCtr++ > 0) sbmain.append(" . ");
 			String jenaStr = graphPatternElementToJenaQueryString(gpe, sbfilter, TranslationTarget.QUERY_TRIPLE, RulePart.NOT_A_RULE);
-			sbmain.append(jenaStr);
+			if (jenaStr.length() > 0) {
+				sbmain.append(jenaStr);
+			}
+			else {
+				tripleCtr--;
+			}
 		}
 		else if (gpe instanceof BuiltinElement) {
 //					if (builtinCtr++ > 0) {

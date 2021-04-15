@@ -112,6 +112,10 @@ public abstract class SadlActionHandler extends AbstractHandler {
 	        if (!(selection instanceof IStructuredSelection)) {
 	    		IWorkbenchPage page =  window.getActivePage();
 	    		IEditorPart editorPart = page.getActiveEditor();
+	    		if (editorPart == null) {
+	    		    console.print(MessageType.ERROR, "Invalid selection.\n");
+	    		    return null;
+	    		}
 	    		if (editorPart.isDirty()) {
 	    		    console.print(MessageType.ERROR, "Model has unsaved changes. Please save before running tests.\n");
 	    		    return null;
