@@ -571,6 +571,7 @@ public class ConfigurationManager implements IConfigurationManager {
 			if (translatorClass == null) {
 				throw new ConfigurationException("Unable to instantiate Translator '" + translatorClassName + "'");
 			}
+			translatorClass.setConfigurationManager(this);
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 			throw new ConfigurationException("Unable to instantiate Translator '" + translatorClassName + "'", e);
