@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Ask Statement</title>
+  </head>
+  <body>
+    <h1>The Ask Statement</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->4/13/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p><br>
+      The Ask Statement is a statement in the <a href="SADLGrammar.html">SADL
+        grammar</a> that is used to create a persistent query as part of a SADL
+      model. The query can be executed against an inferred model created from
+      the model containing the Ask Statement by the menu item <a href="TestModel.html">Test
+        Model</a>.</p>
+    <p>The Ask Statement begins with the keyword <em>Ask</em> followed by a
+      colon. This may be followed by a query in one of two forms.</p>
+    <ol>
+      <li>The query can be a quoted string containing a largely opaque query in
+        a format supported natively by the reasoner/translator pair selected.
+        For Jena-based reasoner/translator pairs, the supported syntax is
+        SPARQL. The SWI-Prolog reasoner/translator pair supports either SPARQL
+        or Prolog queries.</li>
+      <li>The query can be written as an expression in the SADL grammar. The
+        SADL grammar supports a subset of SPARQL and so can only be used for
+        relatively simple queries. A query in SADL syntax is translated by the
+        selected translator into a query supported by the selected reasoner.</li>
+    </ol>
+    <h3>Examples of Native SPARQL Queries</h3>
+    <p><br>
+    </p>
+    <h3>Examples of Queries in SADL Syntax</h3>
+  </body>
+</html>

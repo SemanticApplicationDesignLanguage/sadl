@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Reasoner/Translator Pairs</title>
+  </head>
+  <body>
+    <h1>Reasoner/Translator Pairs in SADL</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->4/13/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p>The SADL IDE is architected to allow a variety of reasoners to be used.
+      Each reasoner must be wrapped in Java code implementing the IReasoner Java
+      Interface class so that it can be invoked from the IDE or from SadlServer.
+      In the SADL IDE, each reasoner must also have an associated translator
+      capable of translating rules and queries from the SADL Intermediate Form,
+      generated from the SADL grammar, to a form compatible with the reasoner.
+      The translator must be wrapped in Java code implementing the ITranslator
+      Java Interface class. This plug-in architecture is illustrated in the
+      diagram below.</p>
+    <img src="developer/images/SadlAn3.jpg">
+    <p>The presence of multiple reasoner/translator pairs implies that a
+      selection is possible.&nbsp; In the Eclipse-based IDE, this selection
+      process is accessed through the project properties.</p>
+    <ol>
+      <li>Right-click on the desired project in the Project Explorer and select
+        "Properties" or select the project and then click on Project, then
+        Properties on the menu bar. In either case, the result will be the
+        project properties dialog window.</li>
+      <li>Expand the SADL item by clicking on the arrow in front of it.</li>
+      <li>Click on Reasoner Preferences.</li>
+      <li>Check the box in front of the desired reasoner in the upper portion of
+        the dialog. The default translator for the selected reasoner will be
+        automatically selected in the lower portion of the dialog.</li>
+      <li>Change the translator selection if desired.</li>
+      <li>Edit the reasoner configuration options, if any are available.</li>
+    </ol>
+    <p>For more information and illustrations, see <a href="PreferenceAndProjectProperties.html">Preferences
+        (and Project Properties)</a>.</p>
+  </body>
+</html>
