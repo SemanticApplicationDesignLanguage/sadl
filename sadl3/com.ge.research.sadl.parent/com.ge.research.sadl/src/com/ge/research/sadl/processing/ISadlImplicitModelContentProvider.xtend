@@ -132,7 +132,7 @@ interface ISadlImplicitModelContentProvider {
 				described by externalURL with values of type anyURI.
 				
 			AugmentedType is a class.
-			augTypeUnits describes AugmentedType with a single value of type string List.
+«««			augTypeUnits describes AugmentedType with a single value of type string List.
 			SemanticType (note "allows direct specification of the semantic type of an argument") is a type of AugmentedType, 
 				described by semType with a single value of type class.
 			GraphPattern is a class.

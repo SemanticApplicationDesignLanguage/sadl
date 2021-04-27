@@ -8777,6 +8777,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				// this node came from rest, return the rest
 				return listToSingleJunction(((Object[]) result)[1]);
 			}
+			else if (((Object[])result)[0] instanceof GraphPatternElement &&
+					((Object[])result)[1] instanceof GraphPatternElement) {
+				List<GraphPatternElement> lst = new ArrayList<GraphPatternElement>();
+				lst.add((GraphPatternElement) ((Object[])result)[0]);
+				lst.add((GraphPatternElement) ((Object[])result)[1]);
+				return listToSingleJunction(lst);
+			}
 		}
 		if (result instanceof GraphPatternElement) {
 			return (GraphPatternElement) result;
