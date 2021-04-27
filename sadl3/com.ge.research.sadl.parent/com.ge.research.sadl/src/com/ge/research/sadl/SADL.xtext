@@ -77,7 +77,7 @@ fragment EquationSignature returns AbstractSadlEquation:
 ;
 
 SadlParameterDeclaration:
-		type=SadlPrimaryTypeReference name=SadlResource ('(' augtype=ExpressionParameterized<false,false>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')?
+		type=SadlPrimaryTypeReference name=SadlResource ('(' augtype=ExpressionParameterized<true,true>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')?
 //		type=SadlPrimaryTypeReference ('(' augtype=PropOfSubject<false,false>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')? name=SadlResource
 //		('(' type=PropOfSubject<false,false>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')' | type=SadlPrimaryTypeReference) name=SadlResource
 	|   unknown='--'
@@ -85,7 +85,7 @@ SadlParameterDeclaration:
 ;
 
 SadlReturnDeclaration:
-		type=SadlPrimaryTypeReference ('(' augtype=ExpressionParameterized<false,false>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')?
+		type=SadlPrimaryTypeReference ('(' augtype=ExpressionParameterized<true,true>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')?
 //		('(' type=PropOfSubject<false,false> ('{' units+=UNIT (',' units+=UNIT)* '}')? ')' | type=SadlPrimaryTypeReference)
 	|   none ='None'
 	|   unknown='--'

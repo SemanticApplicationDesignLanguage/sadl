@@ -1,0 +1,77 @@
+ uri "http://sadl.org/SOSEq.sadl" alias soseq.
+
+ PhysicalThing is a class,
+ 	described by temperature with values of type Temperature.
+ {Substance, PhysicalObject} are types of PhysicalThing.
+  Gas is a type of Substance,
+ 	described by gamma with values of type float,
+ 	described by gasConstant with values of type GasConstant,
+ 	described by sos (alias "speed of sound in the gas") with values of type Speed.
+ Air is a type of Gas.
+ Movement is a class,
+ 	described by objectMoving with values of type PhysicalObject,
+ 	described by medium with values of type Substance,
+ 	described by speed with values of type Speed.
+ movesIn describes PhysicalObject with values of type Substance.
+ speed describes PhysicalObject with values of type Speed.
+ mach describes PhysicalObject with values of type float.
+ 
+ Temperature is a type of UnittedQuantity.
+ GasConstant is a type of UnittedQuantity.
+ Speed is a type of UnittedQuantity.
+ 
+ Equation SOS (float gam, float R, float T) returns float: sqrt(gam * R * T).
+ 
+ Equation SOSAug (float gam (gamma of a Gas), 
+ 				  float R (gasConstant of the Gas {"m2/s2/Kelvin"}),
+ 				  float T (temperature of the Gas {Kelvin})) 
+ 				  returns float (sos of the Gas {"m/s"}):
+ 				  sqrt(gam * R * T).
+ 				  
+
+ Equation MachNumber(float v, float ^a) returns float: v/^a.
+ 
+ Equation MachNumberAug(float v (speed of a Movement with objectMoving a PhysicalObject, with medium some Air {"m/s"}), 
+ 						float ^a (sos of the Air {"m/s"})) 
+ 						returns float (mach of the PhysicalObject): 
+ 						v/^a. 
+ 
+ Equation MachNumberAug2(float v (speed of a Movement with objectMoving a PhysicalObject, with medium some Air), 
+ 						float ^a (unit of sos of the Air is unit of speed of the Movement)) 
+ 						returns float (mach of the PhysicalObject): 
+ 						v/^a. 
+ 						
+ Rule x: if s is the speed of a Movement with objectMoving a PhysicalObject
+ then print s.
+ 
+ Expr: speed of a Movement with objectMoving a PhysicalObject.
+ 
+ altitude describes PhysicalObject with values of type UnittedQuantity.
+ 
+ Equation troposphereTemperature(decimal alt (^value of altitude of some Air and alt <= 36152 {ft}))
+    returns decimal (^value of temperature of the Air {F}): return 59 - .00356 * alt.
+
+ Equation lowerStratosphereTemperature(decimal alt (^value of altitude of some Air and alt > 36152 and alt <= 82345 {ft}))
+    returns decimal (^value of temperature of the Air {F}) : return -70.
+
+ Equation upperStratosphereTemperature(decimal alt (^value of altitude of some Air and alt > 82345 {ft}))
+    returns decimal (^value of temperature of the Air {F}) : return -205.05+.00164 * alt.
+ 
+ staticTemperature describes Air with values of type UnittedQuantity.
+ 
+ Data1 is a table
+   [double alt (alias "Alt") (altitude of a PhysicalObject {"ft"}),
+    double u0 (speed of a Movement with objectMoving the PhysicalObject, with medium some Air {"mph"}),
+    double tt (staticTemperature of the Air {"R"})]
+  with data located at "http://datasource/statictemperatureobservations/data1".
+
+  Data2 is a table
+   [double alt (alias "Alt") (altitude of a PhysicalObject {"ft"}),
+    double u0 (speed of a Movement with objectMoving the PhysicalObject, with medium some Air {"mph"}),
+    double tt (staticTemperature of the Air {"R"})] 
+    with data 
+    {
+    	[25000, 400, 500],
+    	[35000, 500, 450]
+    }.
+ 

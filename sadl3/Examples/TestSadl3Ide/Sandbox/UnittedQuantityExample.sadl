@@ -1,0 +1,10 @@
+ uri "http://sadl.org/UnittedQuantityExample.sadl" alias uqe.
+ 
+ Person is a class described by age with values of type UnittedQuantity,
+ 	described by weight with values of type UnittedQuantity.
+ 	
+ George is a Person with age 23 years, with weight 165 lbs.
+
+ Jim is a Person with age 2 days, with weight 9.5 lbs.
+
+ 	
