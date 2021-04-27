@@ -17,11 +17,13 @@
         known as functions (see <a href="Tutorial/FCSM_Outline.html">Foundational
           Concepts in Semantic Modeling</a>, Part 2), are snippets of procedural
         code that provide instructions for computing an output from a set of
-        inputs. The inputs are typed variables. The output is implicit but its
-        type is the return type. These functions can be very important in
-        modeling a domain. For example, many reasoners allow rules to have
-        built-in functions to handle math operations, and without the ability to
-        do math operations it may not be possible to construct a useful model.</span></p>
+        inputs. The inputs are typed variables. The output is unnamed but its
+        type is the return type. Actually, in the general case an equation can
+        return multiple values as can be the case in Python. Functions can be
+        very important in modeling a domain. For example, many reasoners allow
+        rules to have built-in functions to handle math operations, and without
+        the ability to do math operations it may not be possible to construct a
+        useful model.</span></p>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;">Equations
         vs. External Equations</span></h2>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;"></span></h2>
@@ -77,7 +79,11 @@
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
         style="font-family: &quot;Times New Roman&quot;, serif;">As the example
         illustrates, one<span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>may
-        use another in its body. Here the<span>&nbsp;</span><b><span style="font-size: 10pt; line-height: 14.2667px; color: rgb(128, 20, 128);">volumeOfCircle</span></b><span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>uses<span>&nbsp;</span></span><span
+        use another in its body. Here the<span> </span></span><span style="font-family: &quot;Times New Roman&quot;, serif;"><span><span
+            style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span></span></span><b><span
+              style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);">volumeOfCylinder</span></b><span
+            style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span></span></span></span><span>
+        </span><i>Equation</i><span>&nbsp;</span>uses<span>&nbsp;</span></span><span
         style="font-family: &quot;Times New Roman&quot;, serif;"><b><span style="font-size: 10pt; color: rgb(128, 20, 128);">areaOfCircle</span></b><span>&nbsp;</span>in
         its body.</span></p>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
@@ -87,8 +93,8 @@
         ontology, the complete specification may be found. Consistent with the
         W3C practice of identity by URI, the instance of<span>&nbsp;</span><i>External</i><span>&nbsp;</span>is
         given an<span> </span><span></span>identifying URI. It may also have an
-        optional<span>&nbsp;</span>location<span>&nbsp;</span>to help code using
-        the<span>&nbsp;</span><i>External</i><span>&nbsp;</span>to find it.</span></p>
+        optional<span>&nbsp;</span>location<span>&nbsp;</span>to help a user of
+        the <span></span><i>External</i><span>&nbsp;</span>to find it.</span></p>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; margin: 0in 0in 0.0001pt 0.5in;"><span
         style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">External</span><span
         style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
@@ -459,8 +465,8 @@
               style="background: #e6f0ff">1</span></font></font></font><font color="#4c4c4c"><font
           face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
         color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">value</font></font></font><font
-        color="#00cc00"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font><font
-        color="#00cc00"><font face="Monospace"><font style="font-size: 10pt" size="2">d<br>
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font><font
+        color="#00cc00"><font face="Monospace"><font style="font-size: 10pt" size="2"><br>
             <b>descriptorVariable</b></font></font></font><font color="#4c4c4c"><font
           face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
         color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
@@ -484,25 +490,28 @@
     <div style="margin-left: 40px;"> </div>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
         style="font-family: &quot;Times New Roman&quot;, serif;"></span> The
-      variables which are arguments of an equation have an explicit order.
-      Therefore the OWL representation of the <em>arguments</em> of an equation
-      must be a list in order to make the order explicit--in this case a <em>DataDescriptor
-        List</em>. The same is true of <em>returnedTypes</em> as it is possible
-      that more than one value will be returned. The scope of a variable in an
-      equation is limited to that equation. Two equations in a SADL model (which
-      corresponds to an XML namespace by SADL design) might have arguments with
-      the same name but they are distinct, unrelated instances. Therefore, we
+      variables which are arguments of an equation have an explicit order which
+      must be preserved in the OWL representation. Therefore the <em>arguments</em>
+      of an equation are a list in order to make the order explicit--in this
+      case a <em>DataDescriptor List</em>. The same is true of <em>returnedTypes</em>
+      as it is possible that more than one value will be returned. The scope of
+      a variable in an equation is limited to that equation. Two equations in a
+      SADL model (which corresponds to an XML namespace by SADL design) might
+      have argument variables with the same name but they are distinct,
+      unrelated variable instances. Therefore, in the OWL representation we
       cannot just use the variable name as it appears in the signature as the
       unique identifier of the variable since the scope of the name can be no
       more narrow than the current namespace. However, since equation names must
       be unique within a SADL model, we can create unique identifiers by
-      concatenating the variable name with the equation name. This information
-      is aggregated together in the <em>DataDescriptor</em> class. The actual
+      concatenating the variable name with the equation name. This concatenated
+      name becomes the local name of the value of the <em>descriptorVarible</em>
+      property of instances of the <em>DataDescriptor</em> class. The actual
       name as it appears in the equation signature is preserved as the value of
-      <em>localDescriptorName</em>. An instance of a GPVariable (not shown in
-      the meta-model above) is created and given the unique URI constructed from
-      the equation localname plus the argument local name. This is the value of
-      the <em>descriptorVariable</em> property.</p>
+      <em>localDescriptorName</em>. An instance of a GPVariable (definition not
+      shown in the meta-model above, see <span style="font-family: &quot;Times New Roman&quot;, serif;">
+        <a href="AugmentedTypes.html">augmented types</a></span>) is created and
+      given the unique URI constructed from the namespace URI and the
+      concatenation of the equation localname and the argument local name.</p>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
         style="font-family: &quot;Times New Roman&quot;, serif;">Use of this
         meta-model is illustrated by the following OWL snippet showing the

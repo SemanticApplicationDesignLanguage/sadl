@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>n-Ary Relationships</title>
+  </head>
+  <body>
+    <h1>Representing n-Ary Relationships with Binary Predicates</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->4/22/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p>Many relationships of interest to modelers are not binary in nature. As
+      an example, consider a marriage event. While one can represent the
+      relationship between two spouses as a binary relationship, there are other
+      relationships of interest, such as when, where, etc. To capture as a
+      single event such information using a graph language like OWL, whose
+      predicates are restricted to arity two, one resorts to what are sometimes
+      called mediating classes. In the model below, <em>Marriage</em> is just
+      such a mediating class.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"><b>Person</b></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">class</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.<br>
+            {</font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Man</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Woman</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">}
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">are</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">types</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Marriage</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">class <br>
+            &nbsp;&nbsp; described</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">by</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>husband</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Man</b></font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">,<br>
+            &nbsp;&nbsp; described</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">by</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>wife</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Woman</b></font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">,<br>
+            &nbsp;&nbsp; described</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">by</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>^date</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">date</font></font></font><font color="#800080"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">,<br>
+            &nbsp;&nbsp; described</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">by</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>location</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">string</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> <font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">GeorgeWashington</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Man</b></font></font></font><font
+        color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">.<br>
+            MarthaDandridge</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#800080"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Woman</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">A</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Marriage</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>husband</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">GeorgeWashington</font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">,<br>
+            &nbsp;&nbsp; with</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#008000"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>wife</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">MarthaDandridge</font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">,<br>
+            &nbsp;&nbsp; with</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#008000"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>^date</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"5
+January
+              1759"</span></font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">,<br>
+            &nbsp;&nbsp; with</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#008000"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>location</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"White
+House
+              plantation"</span></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left">Of course
+      representing information using such mediating concepts can make retrieving
+      information by querying more difficult. To find out who is the wife of <em>GeorgeWashington</em>
+      on would need to compose a query with graph patterns going from the <em>Man</em>
+      to the <em>Marriage</em> to the <em>Woman</em> via the <em>husband</em>
+      and the the <em>wife</em> relationships. However, it is relatively easy
+      to infer simpler relationships using rules. Here is a rule to infer spouse
+      relationships.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> </font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>spouse</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">describes</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> <font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;"><font color="#4c4c4c">
+      </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Rule</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#0000ff"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>SpouseFromMarriage</b></font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">:<br>
+            &nbsp;&nbsp; if</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#ff00ff"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>m</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Marriage</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">and</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>m</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">has</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>husband</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>h</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">and</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>m</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">has</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>wife</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b><font color="#ff00ff"><font face="Monospace"><font
+                    style="font-size: 10pt" size="2"><b>w</b></font></font></font><font
+                color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                    size="2"></font></font></font></b><br>
+            &nbsp;&nbsp; then</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#ff00ff"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>h</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">has</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>spouse</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>w</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">and</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>w</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">has</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>spouse</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>h</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.
+          </font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"></p>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left"><br>
+    </p>
+    <p> </p>
+  </body>
+</html>
