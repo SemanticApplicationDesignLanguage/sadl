@@ -769,9 +769,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 			}
 			if (wrapInCurleyBrackets) {
 				sbjunct.append("{");
-			}			
-			sbjunct.append(graphPatternElementToJenaQueryString((GraphPatternElement) lhsobj, sbfilter, TranslationTarget.QUERY_TRIPLE, RulePart.NOT_A_RULE));
-			sbjunct.append(connector);
+			}		
+			String lhsStr = graphPatternElementToJenaQueryString((GraphPatternElement) lhsobj, sbfilter, TranslationTarget.QUERY_TRIPLE, RulePart.NOT_A_RULE);
+			if (lhsStr.length() > 0) {
+				sbjunct.append(lhsStr);
+				sbjunct.append(connector);
+			}
 			sbjunct.append(graphPatternElementToJenaQueryString((GraphPatternElement) rhsobj, sbfilter, TranslationTarget.QUERY_TRIPLE, RulePart.NOT_A_RULE));					
 			if (wrapInCurleyBrackets) {
 				sbjunct.append("}");
