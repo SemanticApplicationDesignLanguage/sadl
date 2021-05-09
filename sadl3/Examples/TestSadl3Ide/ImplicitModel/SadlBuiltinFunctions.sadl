@@ -36,9 +36,6 @@ External listEntry(string X, int X) returns string:
 External listEqual(string X, string X) returns boolean:
 "org.apache.jena.reasoner.rulesys.builtins#listEqual".
 
-External listLength(string X) returns int:
-"org.apache.jena.reasoner.rulesys.builtins#listLength".
-
 External listMapAsObject(string X, string X, string X) returns boolean:
 "org.apache.jena.reasoner.rulesys.builtins#listMapAsObject".
 

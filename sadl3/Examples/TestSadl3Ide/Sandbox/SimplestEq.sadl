@@ -1,0 +1,3 @@
+ uri "http://sadl.org/SimplestEq.sadl" alias simplesteq.
+ 
+ Equation simplest(float arg ( {ft}))returns float ({ft}): arg+1.  

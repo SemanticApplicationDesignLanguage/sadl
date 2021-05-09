@@ -1,0 +1,64 @@
+ uri "http://sadl.org/ListLengthQuery.sadl" alias listlengthquery.
+ 
+ Scores is a type of int List.
+// NonTypedList is a type of List.
+ 
+ MyScores is the Scores [25, 54, 86].
+ 
+ Person is a class described by scores with values of type Scores.
+ 
+ Jane is a Person with scores MyScores.
+ 
+// Rule testListVar:
+// 	if x is the Scores [23, 45, 68]
+// 	   and y is length of MyScores
+// 	then
+// 	   print("length of list is ", y).
+ 
+// Ask: select x where x is a Scores. 
+// Ask: "select ?p ?l where {?p <rdf:type> <Person> . ?p <scores> ?l}".
+// Ask: "select (count(?m) as ?count) where {?l <sadllistmodel:rest>*/<sadllistmodel:first>+ ?m}".
+// Ask: "select (count(?a) as ?count) where {?p <scores> ?l . ?l <sadllistmodel:first>+ ?a}".
+ 
+// Ask: "select ?l ?count where {
+//	{select ?l where {?l <rdf:type> <Scores>}}
+//	UNION{
+//		(count(?a) as ?count) where {?l <rdf:type> <Scores> . ?l <sadllistmodel:first>+ ?a}
+//	}".
+ 
+// Ask ListMembers: "select ?l ?m where {?l <rdf:type> <Scores> . ?l <sadllistmodel:first> ?m}".
+// Ask CountMembers: "select (count(?l) as ?cnt) where {?l <sadllistmodel:first> ?m}".
+// 
+// Ask: "SELECT (COUNT(?member) AS ?count) 
+//		WHERE {
+//		  ?list  <sadllistmodel:rest>*/<sadllistmodel:first>  ?member .
+//		}".
+		
+Ask: "SELECT ?member 
+		WHERE {
+		  ?list <rdf:type> <Scores> . ?list  <sadllistmodel:rest>*/<sadllistmodel:first>  ?member .
+			filter not exists {?before <sadllistmodel:rest> ?list}
+		}".
+
+Ask: "SELECT ?list (count(?member) as ?cnt)
+		WHERE {
+		  ?list <rdf:type> <Scores> . ?list  <sadllistmodel:rest>*/<sadllistmodel:first>  ?member .
+			filter not exists {?before <sadllistmodel:rest> ?list}
+		} group by ?list".
+		
+//Ask: "SELECT ?member 
+//		WHERE {
+//		  ?list <rdf:type> <Scores> . ?list  <sadllistmodel:first>+  ?member
+//		}".
+//		
+//Ask: "SELECT (count(?member) as ?cnt)
+//		WHERE {
+//		  ?list <rdf:type> <Scores> . ?list  <sadllistmodel:first>+  ?member
+//		}".
+//		
+//Ask: "SELECT ?list (count(?member) as ?cnt)
+//		WHERE {
+//		  ?list <rdf:type> <Scores> . ?list  <sadllistmodel:first>+  ?member
+//		} group by ?list".
+//		
+		

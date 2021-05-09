@@ -1793,7 +1793,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else if (element instanceof ExpressionStatement) {
 				clearCruleVariables();
 				Object rawResult = postProcessTranslationResult(
-						processExpression(((ExpressionStatement) element).getExpr()));
+						applyPulledUpOperations(processExpression(((ExpressionStatement) element).getExpr())));
 				if (isSyntheticUri(null, element.eResource())) {
 					// for tests, do not expand; expansion, if desired, will be done upon retrieval
 					addIntermediateFormResult(rawResult);
@@ -2604,7 +2604,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			} else if (EcoreUtil2.getContainerOfType(sr, QueryStatement.class) == null
 					&& EcoreUtil2.getContainerOfType(sr, SelectExpression.class)== null 
-					&& EcoreUtil2.getContainerOfType(sr, RuleStatement.class) == null) {
+					&& EcoreUtil2.getContainerOfType(sr, RuleStatement.class) == null
+					&& EcoreUtil2.getContainerOfType(sr, ExpressionStatement.class)== null ) {
 				addError("Variable '" + var.getName() + "' is not defined", sr);
 			}
 			if (tci != null && tci.getTypeCheckType() instanceof NamedNode) {

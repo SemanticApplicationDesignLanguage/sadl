@@ -2,5 +2,18 @@ uri "http://sadl.org/Shapes/Rule" alias rule version "$Revision:$ Last modified 
 
 import "http://sadl.org/Shapes/Rectangle". 
 
-Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x .
- 
+//Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x .
+//
+//Rule AreaOfRect2: then area of a Rectangle = height of the Rectangle * width of the Rectangle.
+//
+Expr: x+y. 
+
+
+
+
+Expr: height of x. 
+
+
+
+
+Expr: height of x * width of x.

@@ -3464,6 +3464,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		String conceptUri = declarationExtensions.getConceptUri(sr);
 		EObject expression = sr.eContainer();
 		if (conceptUri == null) {
+			if (reference instanceof Name) {
+				String reflname = declarationExtensions.getConcreteName((Name)reference);
+				OntConceptType refltype = declarationExtensions.getOntConceptType((Name)reference);
+				if (reflname != null && refltype != null && refltype.equals(OntConceptType.VARIABLE)) {
+					return null;
+				}
+			}
 			getModelProcessor().addTypeCheckingError(SadlErrorMessages.UNIDENTIFIED.toString(), (reference != null ? reference : sr));
 			if (metricsProcessor != null) {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.TYPE_CHECK_FAILURE_URI);
@@ -4866,8 +4873,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return true;
 			}
 		}
-		else if (leftTypeCheckInfo.getRangeValueType() != null &&
+		else if (leftTypeCheckInfo != null && leftTypeCheckInfo.getRangeValueType() != null &&
 				leftTypeCheckInfo.rangeValueType.equals(RangeValueType.LIST) &&
+				rightTypeCheckInfo != null && 
 				rightTypeCheckInfo.getRangeValueType() != null &&
 				rightTypeCheckInfo.rangeValueType.equals(RangeValueType.LIST)) {	// don't use getters here as they go into compound types
 			// This is a list comparison. At least for now (until common patterns are discovered), handle differently

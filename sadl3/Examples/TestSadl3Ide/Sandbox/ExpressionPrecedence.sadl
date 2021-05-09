@@ -1,0 +1,11 @@
+ uri "http://sadl.org/ExpressionPrecedence.sadl"  alias expressionprecedence.
+ 
+// Expr: w + x * y + z.
+ 
+ Expr: not 2.  
+ 
+// Expr: only 3.
+// 
+ Expr: not (only 4).
+// 
+ 
