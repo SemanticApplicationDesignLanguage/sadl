@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Expressions in SADL</title>
+  </head>
+  <body>
+    <h1><a id="mozTocId441067" class="mozTocH1"></a>Expressions in SADL</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->4/27/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <ul id="mozToc" class="readonly">
+      <!--mozToc h2 2 h3 3-->
+      <li><a href="#mozTocId586768">Introduction</a>
+        <ul>
+          <li><a href="#mozTocId526156">Expression Precedence</a></li>
+          <li><a href="#mozTocId346682">Using Expr Statements to Validate
+              Expressions</a></li>
+        </ul>
+      </li>
+    </ul>
+    <h2>Introduction </h2>
+    <p>The SADL grammar has an expression language that is used in <em>Rule</em>,
+      <a href="AskStatement.html"> <em>Ask</em></a>, <em>Graph</em>, <em>Update</em>,
+      <em>Test</em>, <em>Explain</em>, and <a href="Equations.html"><em>Equation</em>
+        and <em>External Equations</em></a>, as well as&nbsp; <a href="#Expr"><em>Expr</em></a>
+      statements. This grammar combines the often-encountered junction,
+      comparison, negation, and mathematical expressions with graph patterns and
+      list operations. The result is a rich expression language described
+      herein.</p>
+    <h2><a id="mozTocId526156" class="mozTocH2"></a>Expression Precedence</h2>
+    <p>The SADL expression grammar can be thought of as a hierarchy of
+      operations. The precedence of operations determines the order, in the
+      absence of parentheses, in which multiple operations are carried out. For
+      example, computing the value of this expression depends upon the
+      precedence of the operations of addition and multiplication.</p>
+    <p style="margin-left: 40px;">2 + 4 * 5 + 6 = ?</p>
+    <p>Since multiplication has precedence over addition,</p>
+    <p style="margin-left: 40px;">2 + 4 * 5 + 6 = 2 + 20 + 6 = 28</p>
+    <p>However, if addition had precedence over multiplication, the answer would
+      be 66.</p>
+    <p>As with many expression grammars, the SADL grammar uses parentheses to
+      override precedence defaults. So, one could write the expression</p>
+    <p style="margin-left: 40px;">(2 + 4) * (5 + 6)</p>
+    <p>which would evaluate to 66. The use of parentheses shows up as the
+      PrimaryExpression "embedded expression" in the precedence hierarchy below.</p>
+    <p>From lowest precedence to highest precedence, the operations supported by
+      the SADL grammar include the following.</p>
+    <ul>
+      <li>Expression</li>
+      <ul>
+        <li>OrExpression ("||", "or")</li>
+        <ul>
+          <li>AndExpression ("&amp;&amp;", "and")</li>
+          <ul>
+            <li>EqualityExpression ("==", "!=", "=", "is", "is unique in", "is
+              not unique in", "contains", "does not contain")</li>
+            <ul>
+              <li>RelationalExpression ("&gt;=", "&lt;=", "&gt;s", "&lt;")</li>
+              <ul>
+                <li>Addition ("+", "-")</li>
+                <ul>
+                  <li>Multiplication ("*", "/", "%")</li>
+                  <ul>
+                    <li>Power ("^")</li>
+                    <ul>
+                      <li>PropOfSubject (&lt;property&gt; "of" &lt;subject&gt;,
+                        &lt;property&gt; "for" &lt;subject&gt;, &lt;property&gt;
+                        "in" &lt;subject&gt;, "&lt;subject&gt; with
+                        &lt;property&gt;, &lt;subject&gt; "has &lt;property&gt;</li>
+                      <ul>
+                        <li>ElementInList("element before", "element after")</li>
+                        <ul>
+                          <li>UnitExpression </li>
+                          <ul>
+                            <li>UnaryExpression ("not", "!", "only")</li>
+                            <ul>
+                              <li>PrimaryExpression</li>
+                            </ul>
+                          </ul>
+                        </ul>
+                      </ul>
+                    </ul>
+                  </ul>
+                </ul>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+    <div style="margin-left: 40px;">where PrimaryExpression can be one of</div>
+    <div style="margin-left: 40px;">
+      <ul>
+        <li> an embedded expression--an expression inside parentheses, meaning
+          that what's inside the parentheses is evaluated first</li>
+        <li>a Declaration--one of the following</li>
+        <ul>
+          <li>an article ("A", "a", "An", "an", "any", "some", "another") ,
+            optionally followed by an ordinal ("first", "second", "other",
+            "third", ... "tenth"), followed by a class or data type. </li>
+          <ul>
+            <li>If the declaration is of a list it can be followed by a "...
+              length m-n..." where <em>m</em> is a number and <em>n</em> is a
+              larger number or "*" and the expression specifies the minimum and
+              maximum lengths of the list or no maximum if <em>n</em> is "*"
+              (see <a href="ListsInSADL.html">Lists in SADL</a>)</li>
+          </ul>
+          <ul>
+            <li>If the declaration is of an instance of a list it can be
+              followed by a specification of the elements of the list (a
+              ValueRow--a comma-separated list of expressions starting with "["
+              and ending with "]") (see <a href="ListsInSADL.html">Lists in
+                SADL</a>)</li>
+          </ul>
+        </ul>
+        <li>a StringLiteral (a quoted string, delimited with either single or
+          double quotes)</li>
+        <li>a NumberLiteral</li>
+        <li>a BooleanLiteral ("true", "false")</li>
+        <li>a Constant ("PI", "known", "e", "--", "None", "a type", "type",
+          &lt;article&gt; "type", "length", &lt;article&gt; "length", "count",
+          &lt;article&gt; "count", "index", &lt;article&gt; "index", "first
+          element", "last element", &lt;article&gt; "element", &lt;article&gt;
+          &lt;ordinal&gt; "element", "value")</li>
+        <li>ValueTable (a ValueRow or a set of comma-separated ValueRows
+          starting with "{" and ending with "}")</li>
+      </ul>
+    </div>
+    <p>Notice that the PropOfSubject operation has a fairly high precedence.
+      This allows one to write expressions such as the following without
+      parentheses, since the PropOfSubject operation has higher precedence than
+      math operations such as multiplication.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#008000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"><b>area</b></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Rectangle</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            = </font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>height</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">the</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Rectangle</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            * </font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>width</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">the</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Rectangle</b></font></font></font></p>
+    <p style="margin-bottom: 0in; line-height: 100%"> </p>
+    <p style="margin-left: 40px;"></p>
+    <h2><a id="mozTocId346682" class="mozTocH2"></a><a id="Expr">Using Expr
+        Statements to Validate Expressions</a></h2>
+    <p>The <em>Expr Statement</em> in the SADL grammar is used only to provide
+      validation of expressions using the SADL expression grammar in the
+      development environment. The keyword <em>Expr</em> followed by a colon
+      can be followed by any valid SADL expression followed by a period (end of
+      statement). An information marker in the editor will contain the
+      translation of the expression to the Intermediate Form, a
+      reasoner/translator independent functional expression language that is
+      ordinarily passed to the selected translator for translation to the target
+      rule or query language. In the case of Expr Statements, the final result
+      is the display of the Intermediate Form to the user in the information
+      marker as a means of feedback to the user concerning the meaning of the
+      expression.</p>
+    <p>Here are three examples of Expr Statements along with the Info Marker
+      content for each.</p>
+    <p style="margin-left: 40px;"><img src="images/ExprStmtEx1.png" alt=""></p>
+    <p style="margin-left: 40px;"><img src="images/ExprStmtEx2.png" alt=""></p>
+    <div style="margin-left: 40px;"><img src="images/ExprStmtEx3.png" alt=""><br>
+    </div>
+    <p>Note that the SADL expression grammar is somewhat disjoint from the
+      grammar for declaring classes, instances, properties, and property
+      restrictions. Only expressions using the SADL expression grammar are valid
+      in an <em>Expr Statement</em>.</p>
+  </body>
+</html>
