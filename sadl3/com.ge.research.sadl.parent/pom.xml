@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.ge.research.sadl</groupId>
@@ -39,7 +40,7 @@
     <module>com.ge.research.sadl.xtextgenerator</module>
   </modules>
 
-  <!-- Set properties used by all modules -->
+  <!-- Set properties for all modules -->
   <properties>
     <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
     <maven.compiler.release>11</maven.compiler.release>
@@ -49,16 +50,24 @@
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <sadlOsgiVersion>3.5.0</sadlOsgiVersion>
-    <tychoVersion>2.2.0</tychoVersion>
-    <xtextAntlrVersion>2.1.1</xtextAntlrVersion>
-    <xtextMwe2Version>2.12.0</xtextMwe2Version>
-    <xtextVersion>2.24.0</xtextVersion>
+    <version.mwe2>2.12.0</version.mwe2>
+    <version.sadl>3.5.0</version.sadl>
+    <version.tycho>2.3.0</version.tycho>
+    <version.xtext>2.24.0</version.xtext>
+    <version.xtext-antlr>2.1.1</version.xtext-antlr>
   </properties>
 
-  <!-- Lock down dependencies for consistent builds -->
+  <!-- Set dependencies for all modules -->
   <dependencyManagement>
     <dependencies>
+      <!-- Import Xtext dependencies from Xtext BOM -->
+      <dependency>
+        <groupId>org.eclipse.xtext</groupId>
+        <artifactId>xtext-dev-bom</artifactId>
+        <version>${version.xtext}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>com.ge.research.sadl</groupId>
         <artifactId>com.ge.research.jena</artifactId>
@@ -98,7 +107,7 @@
       <dependency>
         <groupId>com.sun.activation</groupId>
         <artifactId>jakarta.activation</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.1</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -113,7 +122,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.11</version>
+        <version>3.12.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.jena</groupId>
@@ -135,22 +144,22 @@
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-api</artifactId>
-        <version>2.14.0</version>
+        <version>2.14.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-core</artifactId>
-        <version>2.14.0</version>
+        <version>2.14.1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-slf4j-impl</artifactId>
-        <version>2.14.0</version>
+        <version>2.14.1</version>
       </dependency>
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.17.2</version>
+        <version>3.19.0</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.woodstox</groupId>
@@ -160,7 +169,7 @@
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-server</artifactId>
-        <version>11.0.1</version>
+        <version>11.0.2</version>
       </dependency>
       <!-- Needed to make Mwe2Launcher 2.12.0 work with Xtext 2.24.0 -->
       <dependency>
@@ -198,45 +207,35 @@
         <artifactId>slf4j-simple</artifactId>
         <version>1.7.30</version>
       </dependency>
-      <!-- Import Xtext dependencies from Xtext BOM -->
-      <dependency>
-        <groupId>org.eclipse.xtext</groupId>
-        <artifactId>xtext-dev-bom</artifactId>
-        <version>${xtextVersion}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
   <build>
-    <finalName>${project.artifactId}-${sadlOsgiVersion}.${maven.build.timestamp}</finalName>
+    <finalName>${project.artifactId}-${version.sadl}.${maven.build.timestamp}</finalName>
     <!-- Lock down plugins for consistent builds -->
     <pluginManagement>
       <plugins>
         <plugin>
           <groupId>com.github.ekryd.sortpom</groupId>
           <artifactId>sortpom-maven-plugin</artifactId>
-          <version>2.13.1</version>
+          <version>3.0.0</version>
           <configuration>
             <createBackupFile>false</createBackupFile>
-            <encoding>${project.build.sourceEncoding}</encoding>
-            <keepBlankLines>true</keepBlankLines>
+            <indentSchemaLocation>true</indentSchemaLocation>
             <lineSeparator>\n</lineSeparator>
             <predefinedSortOrder>custom_1</predefinedSortOrder>
             <sortDependencies>scope,groupId,artifactId</sortDependencies>
+            <sortDependencyExclusions>groupId,artifactId</sortDependencyExclusions>
             <sortModules>true</sortModules>
             <sortPlugins>groupId,artifactId</sortPlugins>
             <sortProperties>true</sortProperties>
           </configuration>
           <executions>
             <execution>
-              <?m2e execute onConfiguration?>
               <id>default-sort</id>
               <goals>
                 <goal>sort</goal>
               </goals>
-              <phase>verify</phase>
             </execution>
           </executions>
         </plugin>
@@ -261,7 +260,7 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>5.1.1</version>
+          <version>5.1.2</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -310,6 +309,14 @@
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>3.0.0-M5</version>
+          <configuration>
+            <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
           <version>3.0.0-M1</version>
         </plugin>
@@ -340,12 +347,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.2.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.9.0</version>
+          <version>3.9.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -386,27 +393,27 @@
             <dependency>
               <groupId>org.eclipse.emf</groupId>
               <artifactId>org.eclipse.emf.mwe2.launch</artifactId>
-              <version>${xtextMwe2Version}</version>
+              <version>${version.mwe2}</version>
             </dependency>
             <dependency>
               <groupId>org.eclipse.xtext</groupId>
               <artifactId>org.eclipse.xtext.common.types</artifactId>
-              <version>${xtextVersion}</version>
+              <version>${version.xtext}</version>
             </dependency>
             <dependency>
               <groupId>org.eclipse.xtext</groupId>
               <artifactId>org.eclipse.xtext.xbase</artifactId>
-              <version>${xtextVersion}</version>
+              <version>${version.xtext}</version>
             </dependency>
             <dependency>
               <groupId>org.eclipse.xtext</groupId>
               <artifactId>org.eclipse.xtext.xtext.generator</artifactId>
-              <version>${xtextVersion}</version>
+              <version>${version.xtext}</version>
             </dependency>
             <dependency>
               <groupId>org.eclipse.xtext</groupId>
               <artifactId>xtext-antlr-generator</artifactId>
-              <version>${xtextAntlrVersion}</version>
+              <version>${version.xtext-antlr}</version>
             </dependency>
           </dependencies>
           <executions>
@@ -428,7 +435,7 @@
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>target-platform-configuration</artifactId>
-          <version>${tychoVersion}</version>
+          <version>${version.tycho}</version>
           <configuration>
             <environments>
               <environment>
@@ -459,7 +466,7 @@
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-compiler-plugin</artifactId>
-          <version>${tychoVersion}</version>
+          <version>${version.tycho}</version>
           <configuration>
             <useProjectSettings>false</useProjectSettings>
           </configuration>
@@ -467,17 +474,17 @@
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-maven-plugin</artifactId>
-          <version>${tychoVersion}</version>
+          <version>${version.tycho}</version>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-p2-director-plugin</artifactId>
-          <version>${tychoVersion}</version>
+          <version>${version.tycho}</version>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-p2-plugin</artifactId>
-          <version>${tychoVersion}</version>
+          <version>${version.tycho}</version>
           <executions>
             <execution>
               <id>default-p2-metadata</id>
@@ -491,22 +498,22 @@
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-p2-publisher-plugin</artifactId>
-          <version>${tychoVersion}</version>
+          <version>${version.tycho}</version>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-p2-repository-plugin</artifactId>
-          <version>${tychoVersion}</version>
+          <version>${version.tycho}</version>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-packaging-plugin</artifactId>
-          <version>${tychoVersion}</version>
+          <version>${version.tycho}</version>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-source-plugin</artifactId>
-          <version>${tychoVersion}</version>
+          <version>${version.tycho}</version>
           <executions>
             <execution>
               <id>default-plugin-source</id>
@@ -519,7 +526,7 @@
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-surefire-plugin</artifactId>
-          <version>${tychoVersion}</version>
+          <version>${version.tycho}</version>
           <configuration>
             <failIfNoTests>false</failIfNoTests>
           </configuration>
@@ -527,7 +534,7 @@
         <plugin>
           <groupId>org.eclipse.xtend</groupId>
           <artifactId>xtend-maven-plugin</artifactId>
-          <version>${xtextVersion}</version>
+          <version>${version.xtext}</version>
           <configuration>
             <outputDirectory>${basedir}/xtend-gen</outputDirectory>
             <testOutputDirectory>${basedir}/xtend-gen</testOutputDirectory>
@@ -551,7 +558,7 @@
     </pluginManagement>
 
     <plugins>
-      <!-- Keep our poms tidy looking -->
+      <!-- Keep our poms looking tidy -->
       <plugin>
         <groupId>com.github.ekryd.sortpom</groupId>
         <artifactId>sortpom-maven-plugin</artifactId>
