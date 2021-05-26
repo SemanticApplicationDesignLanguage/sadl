@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Test Statement</title>
+  </head>
+  <body>
+    <h1>Test Statement<br>
+    </h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->5/25/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p>The <a href="SADLGrammar.html">SADL grammar</a> supports <em>Test</em>
+      statements consisting of the <em>Test</em> keyword, followed by a colon,
+      followed by the test to be executed. There are two kinds of <em>Test</em>
+      statements in SADL. The first kind is a statement in a SADL model (a .sadl
+      file) and consists of an expression in the <a href="ExpressionsInSADL.html">SADL
+        expression grammar</a> that will evaluate to <em>true</em> or <em>false</em>.
+      Upon running inference (executing <em>Test Model</em>), if the statement
+      evaluates to <em>true</em>, the test passes. Otherwise the test fails.
+      The screen shot below showed a <em>Test</em> statement of this type and
+      the results of running T<em>est Model</em> on the SADL model.</p>
+    <img src="images/TestModel3.png" alt="">
+    <p>The second kind is a statement in a test suite (a .test file). In this
+      case "Test:" is&nbsp; followed by the URI of a SADL model containing <em>Test</em>
+      statements of the first kind. This causes all of the
+      <em> Test</em> statements in the specified SADL model to be executed as
+      part of the test suite. Individual test results as well as summary
+      information is displayed in the console window. This is illustrated in the
+      screen shot below showing a test suite referencing three SADL models.</p>
+    <p><img src="images/TestModel4.png" alt=""></p>
+    <p>The Eclipse-based SADL IDE includes a Test Suite Editor which can be used
+      to open and edit files ending with ".test". This editor has content assist
+      and hyperlinking to referenced SADL models. Content assist in shown in the
+      screen capture below.</p>
+    <img src="images/TestSuiteEditor.png" alt="">
+  </body>
+</html>

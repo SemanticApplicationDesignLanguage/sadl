@@ -7,14 +7,38 @@
   <body>
     <h1>Test Model</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->4/13/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->5/26/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <p><br>
-      The "Test Model" command is invoked to create an inferred model, using the
-      selected reasoner, from the currently selected SADL model and execute any
-      Ask, Explain, Graph, Print, Read, Test, Update, or Write statements that
-      the host SADL model contains. If the selected SADL model does not contain
-      any statements, an inferred model is not created.</p>
+      &nbsp;<em>Test Model</em> is a user command that can be executed in the
+      context of a selected SADL model file or in the context of a selected test
+      suite file. The command can be activated from the menu bar's SADL dropdown
+      menu when in the SADL perspective, as shown below.</p>
+    <p><img src="images/TestStatement1.png" alt=""></p>
+    <p><em>Test Model </em>may also be selected from the SADL tool bar icon.</p>
+    <p><img src="images/TestStatement2.png" alt=""></p>
+    <p>If the currently selected file in the IDE is a .sadl file, that file must
+      contain at least one command statement, e.g., <em>Ask</em>, <em>Test</em>,
+      etc. Upon execution of the <em>Test Model</em> commend on a valid SADL
+      model, inference will be run on the model to create an inferred model. If
+      the selected SADL model does not contain any command statements, an
+      inferred model is not created. Once created, the inferred model is used to
+      process the command statements, ie. to run queries, run tests, etc., with
+      the results being displayed in the console window. The screen capture
+      below shows a model with a <em>Test</em> statement and an <em>Ask</em>
+      statement. The results of running <em>Test Model </em>are displayed in
+      the console window.</p>
+    <img src="images/TestModel3.png" alt=""><br>
+    <p>If the currently selected file in the IDE is a test suite (a .test file),
+      the file should contain one or more <em>Test</em> statements with the URI
+      of a SADL model as object of the test. The referenced SADL model should
+      contain one or more <em>Test</em> statements. The screen capture below
+      shows a test suite referencing three SADL models. The results of running
+      Test Model is shown in the console window. Note that one test in the suite
+      failed.</p>
+    <img src="images/TestModel4.png" alt="">
+    <p><br>
+    </p>
     <p><br>
     </p>
   </body>
