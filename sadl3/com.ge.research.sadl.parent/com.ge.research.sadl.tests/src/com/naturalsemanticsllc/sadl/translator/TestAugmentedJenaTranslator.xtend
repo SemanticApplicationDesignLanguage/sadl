@@ -194,11 +194,11 @@ public class TestAugmentedJenaTranslator extends AbstractSADLModelProcessorTest 
 				for (rule : ruleLst) {
 					println(rule)
 					if (lv == 0) {
-						val expected = "[http://sadl.imp/TestThreeLevelDefaults#Thingy_dp_default_lvl0: (?i rdf:type http://sadl.imp/TestThreeLevelDefaults#Thingy), noValue(?i,http://sadl.imp/TestThreeLevelDefaults#dp) -> (?i http://sadl.imp/TestThreeLevelDefaults#dp 2.3)]"
+						val expected = "[http://sadl.imp/TestThreeLevelDefaults#Thingy_dp_default_lvl0: (?i rdf:type http://sadl.imp/TestThreeLevelDefaults#Thingy), noValue(?i,http://sadl.imp/TestThreeLevelDefaults#dp) -> (?i http://sadl.imp/TestThreeLevelDefaults#dp'2.3'^^http://www.w3.org/2001/XMLSchema#float)]"
 						assertTrue(processor.compareTranslations(expected.trim, rule.toString.trim))
 					}
 					else if (lv == 1) {
-						val expected = "[http://sadl.imp/TestThreeLevelDefaults#Thingy_ready_default_lvl1: (?i rdf:type http://sadl.imp/TestThreeLevelDefaults#Thingy), noValue(?i,http://sadl.imp/TestThreeLevelDefaults#ready) -> (?i http://sadl.imp/TestThreeLevelDefaults#ready true)]"
+						val expected = "[http://sadl.imp/TestThreeLevelDefaults#Thingy_ready_default_lvl1: (?i rdf:type http://sadl.imp/TestThreeLevelDefaults#Thingy), noValue(?i,http://sadl.imp/TestThreeLevelDefaults#ready) -> (?i http://sadl.imp/TestThreeLevelDefaults#ready 'true'^^http://www.w3.org/2001/XMLSchema#boolean)]"
 						assertTrue(processor.compareTranslations(expected.trim, rule.toString.trim))
 					}
 					else if (lv == 2) {
