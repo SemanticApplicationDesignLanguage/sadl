@@ -366,9 +366,10 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin implemen
 	}
 	
 	private String literalToString(OntModel model, Literal litval) {
+		TranslationTarget target = TranslationTarget.RULE_TRIPLE;
 		String dturi = litval.asLiteral().getDatatypeURI();
 		boolean forceQuotes = dturi != null ? isRDFDatatypeString(model, dturi, litval) : true;
-		if (litval.asLiteral().getDatatypeURI() == null) {
+		if (dturi == null) {
 			String lf = litval.asLiteral().getLexicalForm();
 			if (forceQuotes || lf.contains(" ") || lf.contains("\"")) {
 				String s = litval.asLiteral().getLexicalForm();
@@ -376,12 +377,31 @@ public class JenaAugmentedTranslatorPlugin extends JenaTranslatorPlugin implemen
 			}
 			return litval.asLiteral().getLexicalForm();
 		}
-		if (forceQuotes || litval.asLiteral().getDatatypeURI().equals(XSD.xstring.getURI())) {
-			String s = litval.asLiteral().getLexicalForm();
-			if (s.startsWith("\"") && s.endsWith("\"")) {
-				s = s.substring(1, s.length() - 2);
-			}
-			return makeStringDoubleQuoted(s); 
+		String lexform = litval.asLiteral().getLexicalForm();
+		if (forceQuotes
+				|| dturi.equals(XSD.xstring.getURI())
+				) {
+			return literalValueToString(lexform, target);
+		}
+		else if (dturi.equals(XSD.xboolean.getURI())) {
+			Boolean bool = Boolean.parseBoolean(lexform);
+			return literalValueToString(bool, target);
+		}
+		else if (dturi.equals(XSD.xlong.getURI())) {
+			Long lng = Long.parseLong(lexform);
+			return literalValueToString(lng, target);
+		}
+		else if (dturi.equals(XSD.xint.getURI())) {
+			Integer ntgr = Integer.parseInt(lexform);
+			return literalValueToString(ntgr, target);
+		}
+		else if (dturi.equals(XSD.xdouble.getURI())) {
+			Double dbl = Double.parseDouble(lexform);
+			return literalValueToString(dbl, target);
+		}
+		else if (dturi.equals(XSD.xfloat.getURI())) {
+			Float flt = Float.parseFloat(lexform);
+			return literalValueToString(flt, target);
 		}
 		else {
 			return litval.asLiteral().getLexicalForm();
