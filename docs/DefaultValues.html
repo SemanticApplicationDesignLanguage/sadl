@@ -5,10 +5,10 @@
     <title>Default Values in SADL</title>
   </head>
   <body>
-    <h1>Default Values and Staged Rules in SADL Jena Augmented
+    <h1>Default Values and Staged Rules in the SADL Jena Augmented
       Reasoner/Translator</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->4/21/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->5/29/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <ul id="mozToc">
       <!--mozToc h2 2 h3 3-->
@@ -33,9 +33,9 @@
     <h2><a id="mozTocId703387" class="mozTocH2"></a>SADL Grammar Syntax</h2>
     <h3><a id="mozTocId277708" class="mozTocH3"></a>Staged Rules</h3>
     <p>Staging of rules means that one set of rules is loaded into the reasoner
-      and inference ran before another stage of rules is loaded and inference
-      ran. This enables the modeler to control more precisely the order in which
-      rules are considered for firing. Consider this made-up model.</p>
+      and inference is run before another stage of rules is added and inference
+      is run again. This enables the modeler to control more precisely the order
+      in which rules are considered for firing. Consider this made-up model.</p>
     <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
       <font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
             size="2"><b>Thingy</b></font></font></font><font color="#4c4c4c"><font
@@ -411,9 +411,9 @@
     <p style="margin-left: 40px;"></p>
     <p></p>
     <p>Now, if the Jena Augmented Reasoner/Translator pair is used, <em>RuleOne</em>
-      will first be applied to the data and then <em>RuleTwo</em> will be
-      applied. This ensures that <em>MyThing1</em> will be <em>Green</em> and
-      <em>MyThing2</em> will be <em>Black</em>.<br>
+      will first be applied to the data and then <em>RuleTwo</em> will be added
+      to the loaded rules and applied. This ensures that <em>MyThing1</em> will
+      be <em>Green</em> and <em>MyThing2</em> will be <em>Black</em>.<br>
     </p>
     <h3><a id="mozTocId207822" class="mozTocH3"></a>Default Values</h3>
     <p>The SADL grammar allows default values to be given to a property or
@@ -750,9 +750,9 @@
       higher level to illustrate the syntax of levels, not because the example
       requires it.</p>
     <p style="margin-bottom: 0in; line-height: 100%" align="left">To illustrate
-      the result of using default values when a reasoner supporting them, such
-      as the Jena Augmented Reasoner/Translator pair, is used, consider this
-      sample data.</p>
+      the result of using default values when a reasoner/translator pair
+      supporting them, such as the Jena Augmented Reasoner/Translator pair, is
+      used, consider this sample data.</p>
     <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
       <font color="#4c4c4c"> </font><font color="#0000ff"><font face="Monospace"><font
             style="font-size: 10pt" size="2">MyFBF</font></font></font><font color="#4c4c4c"><font
@@ -966,16 +966,17 @@
     <div style="margin-left: 40px;"> </div>
     <div style="margin-left: 40px;"> </div>
     <h2><a id="mozTocId682144" class="mozTocH2"></a>Translating</h2>
-    <p>A rule without an explicit stage is given the stage value of 0. A default
-      value without an explicit level is given the level value 0. If there are
-      rules at multiple stages, then the translator will create multiple rule
-      files with sequential file names, one for each rule stage and one for each
-      default value level. These rule files give preference to rule stages over
-      default value levels. In other words, if there are rules with stage 1 and
-      default values with level 1, the sequence of rule files will first have a
-      file containing the rules with stage 1 and then a file containing the
-      rules derived from the default values with level 1. The result will be a
-      set of files of the form</p>
+    <p>This section describes how translation is performed by the Jean Augmented
+      Translator. A rule without an explicit stage is given the stage value of
+      0. A default value without an explicit level is given the level value 0.
+      If there are rules at multiple stages, then the translator will create
+      multiple rule files with sequential file names, one for each rule stage
+      and one for each default value level. These rule files give preference to
+      rule stages over default value levels. In other words, if there are rules
+      with stage 1 and default values with level 1, the sequence of rule files
+      will first have a file containing the rules with stage 1 and then a file
+      containing the rules derived from the default values with level 1. The
+      result will be a set of files of the form</p>
     <ul>
       <li>&lt;base-file-name&gt;.rules-stage0</li>
       <li>&lt;base-file-name&gt;.rules-stage1</li>
