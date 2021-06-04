@@ -1,20 +1,14 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=windows-1252">
-    <meta http-equiv="Content-Language" content="en-us">
-    <meta name="GENERATOR" content="Microsoft FrontPage 5.0">
-    <meta name="ProgId" content="FrontPage.Editor.Document">
-    <title>Installation Instructions for SADL</title>
+    <title>Temporary Installation Instructions</title>
   </head>
   <body>
-    <h2>Installation Instructions for SADL-IDE, Version 3</h2>
-    <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->6/4/2021<!--webbot bot="Timestamp" endspan i-checksum="12567" -->.
-      <a href="contact.html">Contact us</a>.</h5>
-    <p><span style="color: #cc0000;"><b>Note</b>: installation is currently not
-        working as expected and as documented below. For a workaround, please
-        follow <a href="TempInstallInstructions.html">these instructions</a>.</span></p>
-    <p>To Install SADL Version 3 do the following:</p>
+    <h1>Temporary Installation Instructions </h1>
+    <p> Workaround for <a href="https://github.com/SemanticApplicationDesignLanguage/sadl/issues/646">Github
+        Issue 646</a>.</p>
+    <h5>Last revised 6/4/2021. <a href="contact.html">Contact us</a>.</h5>
+    To Install SADL Version 3 do the following:
     <ol style="color: rgb(0, 0, 0); font-family: Times New Roman; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-style: initial; text-decoration-color: initial">
       <li>If not already installed, download and install a <b>Java Developer
           Kit (JDK)</b> from&nbsp;<a style="box-sizing: border-box;" href="https://www.oracle.com/technetwork/java/javase/downloads/index.html"
@@ -26,25 +20,19 @@
         <li>See&nbsp;<a href="CheckJavaVersion.html">How to check Java Version</a>.</li>
       </ul>
       <li>Download and install Eclipse from&nbsp;<a href="http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</a>&nbsp;.
-        This can be Eclipse IDE for Java Developers or Eclipse IDE for Java and
-        DSL Developers.</li>
+        This should be Eclipse IDE for Java Developers.</li>
       <ol>
         <li>For SADL 3.5.0 and later, Eclipse 2020-12 is recommended.</li>
-        <li>For versions before 3.5.0, 2020-03 is recommended and newer versions
-          will probably not work as Xtext cannot be newer than 2.21.0.</li>
       </ol>
+      <li>Download and install Xtext 2.24 and its related components from <a href="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.24.0">http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.24.0</a>.</li>
       <li>Download the latest SADL V3 installation ZIP file from <a href="https://github.com/SemanticApplicationDesignLanguage/sadl/releases">
-          https://github.com/SemanticApplicationDesignLanguage/sadl/releases</a>.
-      </li>
-      <ul>
-        <li>Note: to install the latest bleeding edge automated build, go to <a
-            href="https://github.com/SemanticApplicationDesignLanguage/sadl/actions">Actions</a>,
-          click on the latest (or any desired) result, scroll down to Artifacts,
-          and download the ZIP file for installation.</li>
-      </ul>
+          https://github.com/SemanticApplicationDesignLanguage/sadl/releases</a>
+        or to install the latest bleeding edge automated build, go to <a href="https://github.com/SemanticApplicationDesignLanguage/sadl/actions">Actions</a>,
+        click on the latest (or any desired) result, scroll down to Artifacts,
+        and download the ZIP file for installation.</li>
       <li>Start Eclipse, go to Help -&gt; Install New Software. Click on Add...
         to create a new update site. Then click on Archive and browse to the ZIP
-        file downloaded in step 3. Click OK to install SADL. Select all
+        file downloaded in step 4. Click OK to install SADL. Select all
         features, accept the license agreement, confirm installation and
         restart.</li>
       <li><b><font color="#ff0000">Note that the Eclipse workspace path must NOT
@@ -112,5 +100,6 @@
     <p>You might want to install a graphing package to help you visualize your
       models. See the <a href="../Visualization.html">Model Visualization</a>,
       section for SADL V3.</p>
+    <p></p>
   </body>
 </html>
