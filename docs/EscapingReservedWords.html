@@ -1,0 +1,194 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <title>Escaping Reserved Words</title>
+  </head>
+  <body>
+    <h1>Escaping Reserved Words</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->6/4/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p>The <a href="SADLGrammar.html">SADL grammar</a> includes a number of
+      words, which are listed below. These words cannot, therefore, be directly
+      used as domain concept names since the parser would see them as keywords
+      in the grammar. For example, since "before" is a keyword, it is not
+      possible to define a domain property by saying</p>
+    <img src="images/Escape1.png" alt="">
+    <p>However, Xtext resolves this problem by allowing the escaping of words in
+      the grammar by preceding the word with "^", the caret. Therefore one can
+      create a property named "before" with this statement.</p>
+    <img src="images/Escape2.png" alt="">
+    <p>Note that the name of the concept is "before", not "^before". The caret
+      is dropped by the parser before the model is translated to OWL. It simply
+      tells the parser not to treat the word as a keyword in the grammar. Note
+      also that variable names are concept names and therefore "a" and "e"
+      cannot be used as variable names unless escaped with a caret.</p>
+    <h2>Reserved Words in the SADL Grammar</h2>
+    <p>The words currently used in the SADL grammar are the following.</p>
+    <ol>
+      <li>A</li>
+      <li>a</li>
+      <li>after</li>
+      <li>alias</li>
+      <li>always</li>
+      <li>an</li>
+      <li>An</li>
+      <li>and</li>
+      <li>annotation</li>
+      <li>another</li>
+      <li>any</li>
+      <li>anySimpleType</li>
+      <li>anyURI</li>
+      <li>are</li>
+      <li>as</li>
+      <li>asc</li>
+      <li>Ask</li>
+      <li>ask</li>
+      <li>at</li>
+      <li>base64Binary</li>
+      <li>be</li>
+      <li>before</li>
+      <li>boolean</li>
+      <li>by</li>
+      <li>byte</li>
+      <li>can</li>
+      <li>class</li>
+      <li>classes</li>
+      <li>construct</li>
+      <li>contain</li>
+      <li>contains</li>
+      <li>count</li>
+      <li>data</li>
+      <li>date</li>
+      <li>dateTime</li>
+      <li>decimal</li>
+      <li>Deductions</li>
+      <li>default</li>
+      <li>delete</li>
+      <li>desc</li>
+      <li>described</li>
+      <li>describes</li>
+      <li>disjoint</li>
+      <li>distinct</li>
+      <li>does</li>
+      <li>double</li>
+      <li>duration</li>
+      <li>E</li>
+      <li>e</li>
+      <li>eighth</li>
+      <li>element</li>
+      <li>Equation</li>
+      <li>exactly</li>
+      <li>exists</li>
+      <li>Explain:</li>
+      <li>Expr:</li>
+      <li>External</li>
+      <li>false</li>
+      <li>fifth</li>
+      <li>first</li>
+      <li>float</li>
+      <li>for</li>
+      <li>fourth</li>
+      <li>from</li>
+      <li>gDay</li>
+      <li>given</li>
+      <li>gMonth</li>
+      <li>gMonthDay</li>
+      <li>Graph</li>
+      <li>gYear</li>
+      <li>gYearMonth</li>
+      <li>has</li>
+      <li>hexBinary</li>
+      <li>if</li>
+      <li>import</li>
+      <li>in</li>
+      <li>index</li>
+      <li>insert</li>
+      <li>instances</li>
+      <li>int</li>
+      <li>integer</li>
+      <li>inverse</li>
+      <li>is</li>
+      <li>known</li>
+      <li>last</li>
+      <li>least</li>
+      <li>length</li>
+      <li>level</li>
+      <li>List</li>
+      <li>located</li>
+      <li>long</li>
+      <li>matching</li>
+      <li>Model</li>
+      <li>most</li>
+      <li>must</li>
+      <li>negativeInteger</li>
+      <li>ninth</li>
+      <li>None</li>
+      <li>nonNegativeInteger</li>
+      <li>nonPositiveInteger</li>
+      <li>not</li>
+      <li>note</li>
+      <li>of</li>
+      <li>one</li>
+      <li>only</li>
+      <li>or</li>
+      <li>order</li>
+      <li>other</li>
+      <li>PI</li>
+      <li>plus</li>
+      <li>positiveInteger</li>
+      <li>Print:</li>
+      <li>property</li>
+      <li>Read:</li>
+      <li>relationship</li>
+      <li>Relationship</li>
+      <li>return</li>
+      <li>returns</li>
+      <li>Rule</li>
+      <li>same</li>
+      <li>second</li>
+      <li>see</li>
+      <li>select</li>
+      <li>seventh</li>
+      <li>single</li>
+      <li>sixth</li>
+      <li>some</li>
+      <li>Stage</li>
+      <li>string</li>
+      <li>subject</li>
+      <li>sublist</li>
+      <li>symmetrical</li>
+      <li>table</li>
+      <li>tenth</li>
+      <li>Test:</li>
+      <li>The</li>
+      <li>the</li>
+      <li>then</li>
+      <li>there</li>
+      <li>third</li>
+      <li>time</li>
+      <li>to</li>
+      <li>top-level</li>
+      <li>transitive</li>
+      <li>true</li>
+      <li>type</li>
+      <li>types</li>
+      <li>unique</li>
+      <li>unsignedByte</li>
+      <li>unsignedInt</li>
+      <li>Update</li>
+      <li>uri</li>
+      <li>using</li>
+      <li>value</li>
+      <li>values</li>
+      <li>version</li>
+      <li>where</li>
+      <li>with</li>
+      <li>Write:
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      </li>
+    </ol>
+    <p><br>
+    </p>
+  </body>
+</html>
