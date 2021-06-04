@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <templates>
+        <template autoinsert="true" context="com.ge.research.sadl.SADL.SadlModelElement" deleted="false" 
+            description="Create a new class declaration" enabled="true" name="Create Class" id="CreateClass">${classname} is a class </template>
+        <template autoinsert="true" context="com.ge.research.sadl.SADL.SadlModelElement" deleted="false" 
+            description="Create a subclass of an existing class" enabled="true" name="Create Subclass" id="CreateSubclass">${subclassname} is a type of ${type:CrossReference(SadlSimpleTypeReference.type)} </template>
+        <template autoinsert="true" context="com.ge.research.sadl.SADL.SadlModelElement" deleted="false" 
+            description="Create a new property declaration" enabled="true" name="Create Property" id="CreateProperty">${propertyname} describes ${classname} with values of type </template>
+    </templates>
+
