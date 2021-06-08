@@ -17,16 +17,16 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.test.inference
 
+import com.ge.research.sadl.model.gp.TestResult
+import com.ge.research.sadl.preferences.SadlPreferences
+import com.ge.research.sadl.reasoner.ConfigurationItem
+import com.ge.research.sadl.reasoner.SadlCommandResult
 import com.ge.research.sadl.ui.tests.AbstractSadlPlatformTest
+import java.util.List
+import org.eclipse.xtext.preferences.PreferenceKey
 import org.junit.Test
 
 import static com.ge.research.sadl.ui.tests.GeneratedOutputFormat.*
-import java.util.List
-import com.ge.research.sadl.reasoner.ConfigurationItem
-import org.eclipse.xtext.preferences.PreferenceKey
-import com.ge.research.sadl.preferences.SadlPreferences
-import com.ge.research.sadl.reasoner.SadlCommandResult
-import com.ge.research.sadl.model.gp.TestResult
 
 /**
  * Test that demonstrate how to make assertions on the generated translator outputs, plus runs the inferencer too.
@@ -300,5 +300,162 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 
 	}
 	
+	@Test
+	def void testGH665() {
+		val pf = newArrayList(
+		false, 
+		true,
+		true,
+		true,
+		false,
+		false,
+		false,
+		
+		false,
+		true,
+		true,
+		true,
+		false,
+		false,
+		false,
+		true,
+		true
+		)
+		val grd1 = newArrayList(
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, PI)
+  \"Object\"
+-3.141592653589793
+ Eq? 3.141592653589793
+",
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, -3.141592653589793)
+",
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, null) != 3.141592653589793
+",
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, known)
+",
+"SADL Command Result:
+  not(rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, known))
+  known Neq? -3.141592653589793
+",
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, e)
+  \"Object\"
+-3.141592653589793
+ Eq? 2.718281828459045
+",
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, -2.718281828459045)
+  \"Object\"
+-3.141592653589793
+ Eq? -2.718281828459045
+",
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, PI)
+  \"Object\"
+-3.141592653589793
+ Eq? 3.141592653589793
+",
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, -3.141592653589793)
+",
+"SADL Command Result:
+  not(rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, PI))
+",
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, known)
+",
+"SADL Command Result:
+  not(rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, known))
+  known Neq? -3.141592653589793
+",
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, e)
+  \"Object\"
+-3.141592653589793
+ Eq? 2.718281828459045
+",
+"SADL Command Result:
+  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, -2.718281828459045)
+  \"Object\"
+-3.141592653589793
+ Eq? -2.718281828459045
+",
+"SADL Command Result:
+  not(rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, e))
+",
+"SADL Command Result:
+  not(rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, -2.718281828459045))
+"			
+		)
+		createFile('UseNumericConstants.sadl', '''
+			 uri "http://sadl.org/UsingNumericConstants.sadl" alias UsingNumericConstants.
+			 
+			 Foo is a class described by fprop with values of type decimal.
+			 
+			 MyFoo is a Foo with fprop PI.
+			 
+			// MyFoo2 is a Foo with fprop PI * -1 .	// this should not work--it involves a computation 
+			 
+			 MyFoo3 is a Foo with fprop -PI.	// grammar error: this should work just like the negative number below
+			 MyFoo4 is a Foo with fprop 3.14.
+			 MyFoo5 is a Foo with fprop -3.14.
+			 
+			 MyFoo5 is a Foo with fprop e.
+			 MyFoo5 has fprop -e.				// this should work 
+			 
+			 
+			 Test: fprop of MyFoo3 is PI.		// should fail
+			 Test: fprop of MyFoo3 is -PI.		// should pass
+			 Test: fprop of MyFoo3 is not PI.	// should pass
+			 Test: fprop of MyFoo3 is known.	// should pass
+			 Test: fprop of MyFoo3 is not known.	// should fail
+			 Test: fprop of MyFoo3 is e.		// should fail
+			 Test: fprop of MyFoo3 is -e.		// should fail
+			
+			 Test: MyFoo3 has fprop PI.			// should fail
+			 Test: MyFoo3 has fprop -PI.		// should pass
+			 Test: MyFoo3 has fprop not PI.		// should pass
+			 Test: MyFoo3 has fprop known.		// should pass
+			 Test: MyFoo3 has fprop not known.	// should fail
+			 Test: MyFoo3 has fprop e.			// should fail
+			 Test: MyFoo3 has fprop -e.			// should fail
+			 Test: MyFoo3 has fprop not e.		// should pass
+			 Test: MyFoo3 has fprop not (-e).	// should pass
+			''')
+			assertNoErrorsInWorkspace;
+			var List<ConfigurationItem> configItems = newArrayList
+			val String[] catHier = newArrayOfSize(1)
+			catHier.set(0, "Jena")
+			val ci = new ConfigurationItem(catHier)
+			ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+			configItems.add(ci)
+			assertInferencer('UseNumericConstants.sadl', null, configItems) [
+			var idx = 0
+			for (scr:it) {
+				println(scr.toString)
+				println(grd1.get(idx))
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof TestResult)
+//				println((tr as TestResult).passed + "; " + (tr as TestResult).toString)
+				println(idx + ": " + pf.get(idx) + "=?" + (tr as TestResult).passed)
+				assertEquals(pf.get(idx), (tr as TestResult).passed)
+				assertEquals(grd1.get(idx).trim, (scr as SadlCommandResult).toString.trim)
+				idx++
+			}
+			val scr = it.get(1)
+			assertTrue(scr instanceof SadlCommandResult)
+			val tr = (scr as SadlCommandResult).results
+//			assertTrue(tr instanceof TestResult)
+//			assertTrue((tr as TestResult).passed)
+			
+		];
+
+	}
+
 	
 }

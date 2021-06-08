@@ -19,9 +19,9 @@ Location is a class, described by latitude with a single value of type double,
 	
 Philadelphia is a Location with latitude 39.9522. 
 	
-Rule NorthernerAtHeart 
-	if     the latitude of the location of a Birth > latitude of Philadelphia  	  
-	then (a child of the Birth) likes "cold weather in the winter".
+//Rule NorthernerAtHeart 
+//	if     the latitude of the location of a Birth > latitude of Philadelphia  	  
+//	then (a child of the Birth) likes "cold weather in the winter".
 
 Rule NorthernerAtHeart2 
 	if    x is a Birth with location (a Location with latitude l)

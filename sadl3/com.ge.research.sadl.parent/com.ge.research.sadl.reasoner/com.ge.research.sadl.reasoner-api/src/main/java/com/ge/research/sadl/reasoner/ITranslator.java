@@ -34,6 +34,7 @@ import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
+import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.Rule;
 
@@ -278,6 +279,28 @@ public interface ITranslator {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Method to convert a Constant to a Literal, valid only at this time for PI and e
+	 * @param node
+	 * @return
+	 * @throws TranslationException
+	 */
+	public static Literal constantToLiteral(ConstantNode node) throws TranslationException {
+		if (node.getName().equals("PI")) {
+			Literal lit = new Literal();
+			lit.setValue(Math.PI);
+			lit.setOriginalText(node.getName());
+			return lit;
+		}
+		else if (node.getName().equals("e")) {
+			Literal lit = new Literal();
+			lit.setValue(Math.E);
+			lit.setOriginalText(node.getName());
+			return lit;
+		}
+		throw new TranslationException("Unknown constant '" + node.getName() + "' cannot be translated");
 	}
 
 	/**

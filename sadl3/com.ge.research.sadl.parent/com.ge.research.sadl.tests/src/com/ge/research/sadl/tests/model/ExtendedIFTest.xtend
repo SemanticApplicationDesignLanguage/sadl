@@ -730,10 +730,10 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 "+(2,*(3,4))",
 "*(+(2,3),4)",
 "+(-2,*(-3,-4))",
-"-(PI)",
-"-(PI)",
-"+(-(PI),*(3,-(e)))",
-"+(-(PI),*(3,-(e)))"
+"-3.141592653589793",
+"-3.141592653589793",
+"+(-3.141592653589793,*(3,-2.718281828459045))",
+"+(-3.141592653589793,*(3,-2.718281828459045))"
 		)
 		'''
 			 uri "http://sadl.org/Precedence.sadl" alias Precedence.
@@ -763,7 +763,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			}
 			var idx = 0
 			for (t:forTest) {
-				assertEquals(results.get(idx++).toString, t.toString)
+				assertEquals(t.toString, results.get(idx++).toString)
 			}
 		]
 	}

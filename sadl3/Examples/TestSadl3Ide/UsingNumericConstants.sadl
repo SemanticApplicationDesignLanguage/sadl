@@ -9,29 +9,30 @@
  MyFoo3 is a Foo with fprop -PI.	// grammar error: this should work just like the negative number below
  MyFoo4 is a Foo with fprop 3.14.
  MyFoo5 is a Foo with fprop -3.14.
- 
+  
+ Test: fprop of MyFoo3 is PI.		// should fail
+ Test: fprop of MyFoo3 is -PI.		// should pass
+ Test: fprop of MyFoo3 is not PI.	// should pass
+ Test: fprop of MyFoo3 is known.	// should pass
+ Test: fprop of MyFoo3 is not known.	// should fail
+ Test: fprop of MyFoo3 is e.		// should fail
+ Test: fprop of MyFoo3 is -e.		// should fail
+
+ Test: MyFoo3 has fprop PI.			// should fail
+ Test: MyFoo3 has fprop -PI.		// should pass
+ Test: MyFoo3 has fprop not PI.		// should pass
+ Test: MyFoo3 has fprop known.		// should pass
+ Test: MyFoo3 has fprop not known.	// should fail
+ Test: MyFoo3 has fprop e.			// should fail
+ Test: MyFoo3 has fprop -e.			// should fail
+ Test: MyFoo3 has fprop not e.		// should pass
+ Test: MyFoo3 has fprop not (-e).	// should pass
+
  MyFoo5 is a Foo with fprop e.
  MyFoo5 has fprop -e.				// this should work 
  
  
- Test: fprop of MyFoo3 is PI.
- Test: fprop of MyFoo3 is -PI.
- Test: fprop of MyFoo3 is not PI.
- Test: fprop of MyFoo3 is known.
- Test: fprop of MyFoo3 is not known.
- Test: fprop of MyFoo3 is e.
- Test: fprop of MyFoo3 is -e.
-
- Test: MyFoo3 has fprop PI.
- Test: MyFoo3 has fprop -PI.
- Test: MyFoo3 has fprop not PI.		// grammar error
- Test: MyFoo3 has fprop known.
- Test: MyFoo3 has fprop not known.	// grammar error
- Test: MyFoo3 has fprop e.
- Test: MyFoo3 has fprop -e.
- Test: MyFoo3 has fprop not e.		// grammar error
- Test: MyFoo3 has fprop not (-e).		// grammar error
  
 // Expr: not -e.
  
- 
+    
