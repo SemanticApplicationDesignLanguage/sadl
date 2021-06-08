@@ -1472,7 +1472,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 	private String nodeToString(Node node, TranslationTarget target) throws TranslationException {
 		if (node instanceof ConstantNode) {
-			Literal litval = constantToLiteral((ConstantNode)node);
+			Literal litval = ITranslator.constantToLiteral((ConstantNode)node);
 			return literalValueToString(litval, target);
 		}
 		else if (node instanceof NamedNode) {
@@ -1551,23 +1551,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 		return "<null>";
 	}
-
-	private Literal constantToLiteral(ConstantNode node) throws TranslationException {
-		if (node.getName().equals("PI")) {
-			Literal lit = new Literal();
-			lit.setValue(Math.PI);
-			lit.setOriginalText(node.getName());
-			return lit;
-		}
-		else if (node.getName().equals("e")) {
-			Literal lit = new Literal();
-			lit.setValue(Math.E);
-			lit.setOriginalText(node.getName());
-			return lit;
-		}
-		throw new TranslationException("Unknown constant '" + node.getName() + "' cannot be translated");
-	}
-
 
 	public static synchronized String literalValueToString(Object litObj, TranslationTarget target) {
 		if (litObj instanceof String) {

@@ -43,7 +43,6 @@ import org.apache.jena.vocabulary.XSD;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.debug.internal.ui.actions.ConfigureColumnsAction;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
@@ -59,6 +58,8 @@ import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
+import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.EndWrite;
 import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -70,7 +71,6 @@ import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Print;
-import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Read;
@@ -87,12 +87,12 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
 import com.ge.research.sadl.processing.OntModelProvider;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlInferenceException;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.query.SadlQueryHelper;
 import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
@@ -776,6 +776,14 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				}
 			} else {
 				TestResult testResult = new TestResult();
+				if (on instanceof ConstantNode && !((ConstantNode)on).getName().equals(SadlConstants.CONSTANT_KNOWN)) {
+					try {
+						Literal onlit = ITranslator.constantToLiteral((ConstantNode) on);
+						on = onlit;
+					} catch (TranslationException e) {
+						// OK testResult.setMsg(e.getMessage());
+					}
+				}
 				if (on instanceof com.ge.research.sadl.model.gp.Literal
 						|| on instanceof ValueTableNode
 						|| ITranslator.isKnownNode(on)) {
@@ -958,6 +966,50 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			IReasoner reasoner, Object obj, List<VariableNode> testVars)
 			throws TranslationException, ConfigurationException,
 			QueryParseException, TripleNotFoundException, QueryCancelledException {
+		if (obj instanceof ConstantNode) {
+			try {
+				obj = ITranslator.constantToLiteral((ConstantNode) obj);
+			} catch (TranslationException e) {
+				throw new TranslationException("Unable to convert ConstantNode to Literal: " + e.getMessage(), e);
+			}
+		}		
+		if (obj instanceof BuiltinElement && ((BuiltinElement)obj).getFuncType().equals(BuiltinType.Minus) &&
+				((BuiltinElement)obj).getArguments() != null &&
+				((BuiltinElement)obj).getArguments().size() == 1) {
+			// this is the negation of the argument
+			Node arg = ((BuiltinElement)obj).getArguments().get(0);
+			if (arg instanceof ConstantNode) {
+				arg = ITranslator.constantToLiteral((ConstantNode)arg);
+			}
+			if (arg instanceof Literal) {
+				Object val = ((Literal)arg).getValue();
+				if (val instanceof Double) {
+					val = ((Double)val).doubleValue() * -1.0;
+					((Literal)arg).setValue(val);
+					obj = arg;
+				}
+				else if (val instanceof Float) {
+					val = ((Float)val).floatValue() * -1.0;
+					((Literal)arg).setValue(val);
+					obj = arg;
+				}
+				else if (val instanceof Long) {
+					val = ((Long)val).longValue() * -1.0;
+					((Literal)arg).setValue(val);
+					obj = arg;
+				}
+				else if (val instanceof Integer) {
+					val = ((Integer)val).intValue() * -1.0;
+					((Literal)arg).setValue(val);
+					obj = arg;
+				}
+				else if (val instanceof Number) {
+					val = ((Number)val).doubleValue() * -1.0;
+					((Literal)arg).setValue(val);
+					obj = arg;
+				}
+			}
+		}
 		if (obj instanceof Query) {
 			if (((Query) obj).getVariables() == null && testVars != null) {
 				((Query) obj).setVariables(testVars);
@@ -1075,13 +1127,13 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 						Node subj = ((TripleElement) gpe).getSubject();
 						Node pred = ((TripleElement) gpe).getPredicate();
 						Node objval = ((TripleElement) gpe).getObject();
-						String strObjVal;
+						String strObjVal = null;
 						if (objval instanceof com.ge.research.sadl.model.gp.Literal) {
 							strObjVal = getTheJenaModel()
 									.createTypedLiteral(
 											((com.ge.research.sadl.model.gp.Literal) objval)
 													.getValue()).toString();
-						} else {
+						} else if (objval != null) {
 							strObjVal = ((NamedNode) objval)
 									.toFullyQualifiedString();
 						}
@@ -1089,7 +1141,10 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 								((NamedNode) subj).toFullyQualifiedString(),
 								((NamedNode) pred).toFullyQualifiedString(),
 								strObjVal);
-						if (results != null && results.hasNext()) {
+						if (strObjVal == null) {
+							obj = results;
+						}
+						else if (results != null && results.hasNext()) {
 							obj = new Boolean(true);
 						} else {
 							obj = new Boolean(false);

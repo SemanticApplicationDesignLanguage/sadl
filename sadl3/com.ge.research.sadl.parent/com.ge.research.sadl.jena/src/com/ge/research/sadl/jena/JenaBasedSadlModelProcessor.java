@@ -21,16 +21,16 @@ import static com.ge.research.sadl.processing.ISadlOntologyHelper.ContextBuilder
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.PROPOFSUBJECT_PROP;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.PROPOFSUBJECT_RIGHT;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLCARDINALITYCONDITION_CARDINALITY;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLHASVALUECONDITION_RESTRICTION;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLNESTEDINSTANCE_TYPE;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_PROPERTY;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLPROPERTYINITIALIZER_VALUE;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_CLASSES;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_CLASSORPROPERTY;
+import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_PROPCONDITIONS;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_SAMEAS;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_SUPERELEMENT;
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_TYPE;
-import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_PROPCONDITIONS;
-import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLHASVALUECONDITION_RESTRICTION;
-import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLNESTEDINSTANCE_TYPE;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -62,13 +62,11 @@ import java.util.stream.Collectors;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
-import org.apache.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import org.apache.jena.ext.xerces.impl.dv.InvalidDatatypeFacetException;
 import org.apache.jena.ext.xerces.impl.dv.ValidationContext;
 import org.apache.jena.ext.xerces.impl.dv.XSFacets;
 import org.apache.jena.ext.xerces.impl.dv.XSSimpleType;
 import org.apache.jena.ext.xerces.impl.dv.xs.XSSimpleTypeDecl;
-import org.apache.jena.ext.xerces.xs.XSObjectList;
 import org.apache.jena.ontology.AllValuesFromRestriction;
 import org.apache.jena.ontology.AnnotationProperty;
 import org.apache.jena.ontology.CardinalityRestriction;
@@ -2412,7 +2410,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						for (int i = 0; i < ((List<?>) testExpanded).size(); i++) {
 							expanded.add(((List<?>) testExpanded).get(i));
 						}
-					} else {
+					} else if (!((testExpanded instanceof List<?>) && ((List<?>)testExpanded).size() == 0)) {
 						expanded.add(testExpanded);
 					}
 
@@ -2693,7 +2691,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private boolean containsMultipleTests(List<GraphPatternElement> testtrans) {
-		if (testtrans.size() == 1) {
+		if (testtrans.size() == 1 || testtrans.size() == 0) {
 			return false;
 		}
 		List<VariableNode> vars = new ArrayList<VariableNode>();
@@ -2753,7 +2751,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
-		Object rhs = test.getLhs();
+		Object rhs = test.getRhs();
 		if (rhs instanceof GraphPatternElement) {
 			numErrors += validateGraphPatternElement(object, (GraphPatternElement) rhs);
 		} else if (rhs instanceof List<?>) {
@@ -6116,8 +6114,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					else {
 						applyImpliedAndExpandedProperties(container, lexpr, rexpr, left);
 						GraphPatternElement bi = createBinaryBuiltin(op, left, arg); 
-						Object ubi = createUnaryBuiltin(container, "not", bi);
-						return combineRest(ubi, rest);
+						if (bi == null && getTarget() instanceof Test) {
+							Test tst = (Test) getTarget();
+							tst.setCompName(BuiltinType.NotEqual);
+							return null;
+						}
+						else {
+							Object ubi = createUnaryBuiltin(container, "not", bi);
+							return combineRest(ubi, rest);
+						}
 					}
 				}
 			}
@@ -7643,7 +7648,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				TripleElement te = new TripleElement((Node) lobj, new RDFTypeNode(), ((VariableNode)robj).getType());
 				return te;
 			}
-				else {
+			else {
 				((Test)getTarget()).setLhs(lobj);
 				((Test)getTarget()).setRhs(robj);
 				((Test)getTarget()).setCompName(name);
@@ -9273,6 +9278,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// }
 		String op = expr.getOp();
 		Object val = null;
+		if (eobj instanceof ConstantNode && 
+				(((ConstantNode)eobj).getName().equals("PI") || ((ConstantNode)eobj).getName().equals("e"))) {
+			eobj = ITranslator.constantToLiteral((ConstantNode)eobj);
+		}
 		if (eobj != null && eobj instanceof com.ge.research.sadl.model.gp.Literal) {
 			val = ((com.ge.research.sadl.model.gp.Literal) eobj).getValue();
 		}
