@@ -6,17 +6,22 @@
   <body>
     <h1>Inference</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->6/4/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->6/9/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <p>Inference is the process of deriving new statements, in the form of RDF
       Triples, from existing statements. In SADL models, inferences can be based
-      on first order logic and set theory or it can be based on rules in the
-      model. Drawing inferences of these two types must be integrated within the
-      reasoner (the code that computes inferences) so that new statements from
-      either source may be used to draw additional inferences of either type.</p>
+      on first order logic and set theory or it can be based on if-then rules in
+      the SADL model. Drawing inferences of these two types must be integrated
+      within the reasoner (the code that computes inferences) so that new
+      statements from either source may be used to draw additional inferences of
+      either type. Note that if-then rules can have effects other than adding
+      triples. For example, an if-then rule might invoke a built-in function to
+      print to the console window.</p>
     <p>For a tutorial in inference in OWL see slides <a href="http://semanticapplicationdesignlanguage.github.io/sadl/Tutorial/FCSM_OWL.pdf">Part
         3: The Web Ontology Language (OWL)</a> or video <a href="https://www.youtube.com/watch?v=fOW07TezvsE&amp;list=PLkzKFnKjdsEs5XmdB2jPWHbQQ4UqKfp9U&amp;index=8">Entailments,
-        Rules, and Reasoning</a>.<br>
+        Rules, and Reasoning</a>.</p>
+    <p>Inference is initiated in the SADL Eclipse-based IDE by running the <a href="TestModel.html">Test
+        Model </a>command.<br>
     </p>
   </body>
 </html>

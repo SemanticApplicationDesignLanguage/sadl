@@ -1,0 +1,71 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <title>Importing Files into SADL</title>
+  </head>
+  <body>
+    <h1>Importing Files into SADL</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->6/9/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p>Note: for instructions on importing projects into SADL, see <a href="ExportingSadlProjects.html">Exporting
+        SADL Projects</a>.</p>
+    <p>The Eclipse-based SADL IDE supports importing two types of files: OWL
+      model files and CSV tabular data files.</p>
+    <h2>Importing OWL Model Files</h2>
+    <p>The Eclipse-based SADL IDE includes an exploratory capability to import
+      OWL models into a SADL project as SADL files. Note that this is NOT the
+      same as <a href="ExternalModels.html">using external OWL models</a>
+      within a project. Adding an external OWL model to a project makes that OWL
+      model available to be imported (as is, as an OWL model) into a SADL
+      model.&nbsp; By contract, importing an OWL model attempts to translate the
+      OWL model into a SADL representation. Since SADL only supports OWL 1 plus
+      qualified cardinality (see <a href="PropertyRestrictions.html">Property
+        Restrictions</a>), OWL 2 models may have content which is not translated
+      or is not translated correctly into the SADL grammar.</p>
+    <p>To import an OWL model into a SADL project, follow these steps.</p>
+    <ol>
+      <li>The OWL model to be translated should be available as an OWL file in a
+        supported format on the file system but NOT in the project to which it
+        is to be imported. </li>
+      <li>Select <em>File -&gt; Import</em> on the top menu bar <br>
+        <br>
+        <div style="margin-left: 40px;"><img src="images/Import2.png" alt="" style="width: 372px; height: 474px;"><br>
+          <br>
+        </div>
+        or right-click on the project and select <em>Import</em> on the
+        resulting context menu.<br>
+        <br>
+        <div style="margin-left: 40px;"><img src="images/Import1.png" alt="" style="width: 399px; height: 639px;"></div>
+        <br>
+      </li>
+      <li>Select <em>SADL -&gt; Owl Files</em> in the resulting modal dialog
+        window.<br>
+        <br>
+        <img src="images/Import3.png" alt="" style="width: 434px; height: 453px;"></li>
+      <br>
+      <li>Click <em>Next</em>.</li>
+      <li>In the resulting modal dialog, browse to the <u>folder</u> containing
+        the OWL file, then select the file to be imported. Make sure to set
+        "Into folder" to the project and possibly the subfolder into which the
+        resulting SADL files is to be created. <br>
+        <br>
+        <img src="images/Import4.png" alt="" style="width: 577px; height: 528px;"></li>
+      <br>
+      <li>Click on <em>Finish</em> to complete the import. If there are no
+        errors, a SADL file translation of the OWL file will be placed in the
+        target folder.</li>
+    </ol>
+    <h2>Importing CSV Tabular Data Files</h2>
+    <p>Tabular data in the form of a comma-separated-values (CSV) file can also
+      be imported to create either an OWL file or a SADL file. Doing so requires
+      a template file to specify the mappings between the values in the CSV file
+      and the semantic concepts identified in the resulting semantic model.
+      Importing CSV files is covered in detail in <a href="CsvDataImporter.html#ImportCSVWizard">The
+        SADL-IDE Import CSV Wizard</a> in the <a href="CsvDataImporter.html">CSV
+        Tabular Data Importer</a> document.<br>
+    </p>
+    <p><br>
+    </p>
+  </body>
+</html>
