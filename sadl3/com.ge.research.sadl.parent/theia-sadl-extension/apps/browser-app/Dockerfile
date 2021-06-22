@@ -1,5 +1,5 @@
 FROM node:16-alpine
-RUN apk add --no-cache make gcc g++ python
+RUN apk add --no-cache make gcc g++ python2
 WORKDIR /home/theia
 ADD package.json ./package.json
 ADD yarn.lock ./yarn.lock
