@@ -169,7 +169,7 @@
       <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-server</artifactId>
-        <version>11.0.2</version>
+        <version>11.0.5</version>
       </dependency>
       <!-- Needed to make Mwe2Launcher 2.12.0 work with Xtext 2.24.0 -->
       <dependency>
