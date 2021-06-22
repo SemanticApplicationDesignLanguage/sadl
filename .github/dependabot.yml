@@ -21,7 +21,11 @@ updates:
     directory: "/sadl3/com.ge.research.sadl.parent/" # Location of package manifests
     schedule:
       interval: "weekly"
+    # Allow up to 20 open pull requests for maven dependencies
+    open-pull-requests-limit: 20
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/sadl3/com.ge.research.sadl.parent/theia-sadl-extension/" # Location of package manifests
     schedule:
       interval: "weekly"
+    # Allow up to 20 open pull requests for npm dependencies
+    open-pull-requests-limit: 20
