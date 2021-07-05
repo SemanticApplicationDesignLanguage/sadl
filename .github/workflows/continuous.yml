@@ -96,7 +96,7 @@ jobs:
         path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository
 
     - name: Set up Node.js 10.x
-      uses: actions/setup-node@v2.1.5
+      uses: actions/setup-node@v2.2.0
       with:
         node-version: 10.15.3
         registry-url: https://registry.npmjs.org
