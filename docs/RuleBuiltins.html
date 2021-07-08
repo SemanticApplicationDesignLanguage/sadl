@@ -377,11 +377,20 @@
             triples with the same subject and predicate</td>
         </tr>
         <tr>
-          <td>oneOf(x, Class1, Class2, ...)<br>
+          <td>oneOf(x, val1, val2, ...)<br>
           </td>
           <td>OneOf</td>
-          <td>Returns true if the class bound to variable x matches the class
-            identified in a subsequent argument, else returns false.<br>
+          <td>In the Jena a rule cannot have a disjunction. The <em>oneOf</em>
+            built-in enables one kind of disjunction by returning true if the
+            first argument matches any of the subsequent arguments, either by
+            URI for instances and classes, or by string matching for literals.
+            Otherwise it returns false. The first argument is normally a bound
+            variable, which could be a class to which something belongs or the
+            value of a property, and the subsequent arguments are the values for
+            which the rule should fire. Note that <em>oneOf</em> only returns
+            true or false to allow or disallow rule firing. It does not bind a
+            value to an output variable. Without <em>oneOf</em>, a rule would
+            have to be written for each matching argument.<br>
           </td>
         </tr>
         <tr>
@@ -493,17 +502,14 @@
               size="2" color="#000080"><b>Velocity<br>
               </b></font>&nbsp;&nbsp;&nbsp; or<br>
             ...<font size="2" color="#800080">then</font><font size="2"> </font>
-            <font size="2" color="#800080">
-              <meta http-equiv="content-type" content="text/html; charset=utf-8">
-              <b style="color: rgb(128, 20, 128); font-family: &quot;Times New Roman&quot;; font-size: small; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;">thereExists</b></font><font
+            <font size="2" color="#800080"> <b style="color: rgb(128, 20, 128); font-family: &quot;Times New Roman&quot;; font-size: small; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;">thereExists</b></font><font
               size="2">(</font><font size="2" color="#000080"><b>Velocity</b></font><font
               size="2">, </font><font size="2" color="#008000"><b>^value</b></font><font
               size="2"><font size="2">,</font> </font> <font size="2" color="#ff00ff"><b>sosair</b></font><font
               size="2">,</font><font size="2"> </font> <font size="2" color="#008000"><b>unit</b></font><font
               size="2"><font size="2">,</font> "m/sec"</font><font size="2"><font
-                size="2">, </font></font><font size="2"><font size="2">
-                <meta http-equiv="content-type" content="text/html; charset=utf-8">
-                <span style="color: rgb(0, 0, 255); font-family: &quot;Times New Roman&quot;; font-size: small; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">Plus</span></font></font><font
+                size="2">, </font></font><font size="2"><font size="2"> <span
+                  style="color: rgb(0, 0, 255); font-family: &quot;Times New Roman&quot;; font-size: small; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: -webkit-left; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">Plus</span></font></font><font
               size="2"><font size="2"><font size="2">, </font></font></font><font
               size="2" color="#ff00ff"><b>air</b></font><font size="2"><font size="2"><font
                   size="2"><font size="2"><font size="2">,</font></font></font></font>
