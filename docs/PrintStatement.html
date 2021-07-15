@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Print Statement</title>
+  </head>
+  <body>
+    <p>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    </p>
+    <h1 style="text-align: left;"><a name="Print">Print Statement</a></h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->7/15/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    The print statement is a SADL grammar statement beginning with the keyword
+    "Print:". The keyword can be followed by any of three possible completions
+    to accomplish the objectives described below.<br>
+    <br>
+    <a name="Print"> </a>
+    <div style="margin-left: 40px;"><a href="#mozTocId930111">Print a String to
+        the Console Window</a><a href="#mozTocId805784"><br>
+      </a></div>
+    <div style="margin-left: 40px;"><a href="#mozTocId805784">Print the Entire
+        Inferred Model</a><a href="#mozTocId238379"><br>
+      </a></div>
+    <div style="margin-left: 40px;"><a href="#mozTocId238379">Print the
+        Deductions Model</a></div>
+    <h2 style="text-align: left;"><a id="mozTocId930111" class="mozTocH2"></a>Print
+      a String to the Console Window</h2>
+    <p align="left">One possibility is to print a specified string to the
+      console window. This allows comments to be placed in the inference results
+      that are output to the console window (or to a file, see Write Statement)
+      for easier readability of test results. Consider this example.</p>
+    <blockquote><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Print:</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"\nThese
+results
+              are from the definition of the named query 'Q1':"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.
+          </font></font></font> <br>
+      <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Ask</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#0000ff"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>Q1</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">:
+          </font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>area</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.
+          </font></font></font>
+      <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#800080"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">Print:</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"\nThese
+results
+                are from a reference to the named query 'Q1':"</span></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font>
+        <br>
+        <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+              size="2">Ask</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"> </font></font></font><font color="#0000ff"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"><b>Q1</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font>
+      </p>
+      <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#800080"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">Print:</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"\nThese
+are
+                all of the names of known rules:"</span></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font><br>
+        <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+              size="2">Ask</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">: </font></font></font><font color="#ff00ff"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#000080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><b>^Rule</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+      <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#800080"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">Print:</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"\nThese
+are
+                all of the instances of the Shape class:"</span></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font><br>
+        <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+              size="2">Ask</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">: </font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"select
+?s
+                where {?s </span></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"><u><span style="background: #e6f0ff">&lt;rdf:type&gt;</span></u></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+                style="background: #e6f0ff"> &lt;Shape&gt;}"</span></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+      <p align="left"> </p>
+    </blockquote>
+    <p align="left">The above SADL statements will result in output to the
+      console window that looks something like this.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">These results are from the definition of the named query
+            'Q1':<br>
+            Query: select ?v0 ?v1 where {?v0
+            &lt;http://sadl.org/Shapes.sadl#area&gt; ?v1}<br>
+            "v0","v1"<br>
+            "MyCircle","28.27433466911316"<br>
+            "MyRect","8.0"</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">These
+results
+            are from a reference to the named query 'Q1':<br>
+            Query: select ?v2 ?v3 where {?v2
+            &lt;http://sadl.org/Shapes.sadl#area&gt; ?v3}<br>
+            "v2","v3"<br>
+            "MyCircle","28.27433466911316"<br>
+            "MyRect","8.0"</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">These
+are
+            all of the names of known rules:<br>
+            Query: select ?x where {?x
+            &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt;
+            &lt;http://sadl.org/sadlimplicitmodel#Rule&gt;}<br>
+            "x"<br>
+            "AreaOfRectangle"<br>
+            "AreaOfCircle"</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">These
+are
+            all of the instances of the Shape class:<br>
+            Query: select ?s where {?s &lt;rdf:type&gt; &lt;Shape&gt;}<br>
+            "s"<br>
+            "MyRect"<br>
+            "MyCircle"</font></font></font></p>
+    <p align="left"></p>
+    <h2 style="text-align: left;"><a id="mozTocId805784" class="mozTocH2"></a>Print
+      the Entire Inferred Model<br>
+    </h2>
+    <p>Another usage of the print statement is to write the inferred model,
+      which will include the conceptual model, the instance data, and the
+      inferences, to an OWL model file in the project's Temp folder. The output
+      file name is derived from the model being inferred and ends in
+      "Model.owl.txt". The ".txt" is appended to ensure that the output model
+      file is not indexed by SADL as an OWL model available for use, which would
+      result in name conflicts. The statement consists of the keyword followed
+      by "Model".</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Print:</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#800080"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">Model</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%;" align="left">This
+      statement will result in output to the console window like the following,
+      and will cause the indicated file to be created.</p>
+    <p style="margin-bottom: 0in; line-height: 100%;" align="left"><br>
+    </p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Model written to
+'home/camfe/andy/ws/sadl/git/sadlos2/sadl3/Examples/TestSadl3Ide/Temp/Test2.sadl.Model.owl.txt'</font></font></font></p>
+    <br>
+    <p style="margin-bottom: 0in; line-height: 100%;" align="left"> </p>
+    <div style="margin-left: 40px;"> </div>
+    <h2><a id="mozTocId238379" class="mozTocH2"></a>Print the Deductions Model</h2>
+    <p>A third usage of the print statement is to write the deductions model,
+      which will include only those triples that are inferred by the reasoner,
+      to an OWL model file in the project's Temp folder. The file name is
+      derived from the model being inferred and ends in "Deductions.owl.txt".
+      The ".txt" is appended to ensure that the output model file is not indexed
+      by SADL as an OWL model available for use, which would result in name
+      conflicts. This statement consists of the keyword followed by
+      "Deductions".</p>
+    <p style="margin-left: 40px;"><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">Print:</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">Deductions</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font>
+    </p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%"></p>
+    <p> This statement will result in output to the console window like the
+      following, and will cause the indicated file to be created.</p>
+    <p style="margin-left: 40px;"><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">Deductions written to
+'home/camfe/andy/ws/sadl/git/sadlos2/sadl3/Examples/TestSadl3Ide/Temp/Test2.sadl.Deductions.owl.txt'</font></font></font></p>
+    <p style="margin-bottom: 0in; line-height: 100%"></p>
+    <p><br>
+    </p>
+    <p></p>
+    <p> </p>
+    <blockquote></blockquote>
+    <p></p>
+  </body>
+</html>
