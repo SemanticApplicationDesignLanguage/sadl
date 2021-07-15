@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Explain Statement</title>
+  </head>
+  <body>
+    <h1>Explain Statement</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->7/15/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p>The Explain Statement exists to help model developers debug their models.
+      It has two forms, one to explain how something was inferred or is known
+      and one to explain why a rule did or did not fire.</p>
+    <ul>
+      <li> <a href="#mozTocId196389">Explain: Followed by an Expression</a></li>
+      <li> <a href="#mozTocId779228">Explain: Followed by a Rule Identification</a>
+      </li>
+    </ul>
+    <h2><a id="mozTocId196389" class="mozTocH2"></a>Explain: Followed by an
+      Expression</h2>
+    <p>When Explain: is followed by an expression expressing a triple pattern,
+      inference is run and an attempt is made to find a derivation that match
+      the requested pattern. If such a derivation is found, it is displayed. For
+      example, suppose that we have this simple semantic model.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">uri</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+              style="background: #e6f0ff">"http://sadl.org/Shapes.sadl"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">alias</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>shp</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Shape</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">class</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">described</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">by</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>area</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">float</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">shp:comment</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">type</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">annotation</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Circle</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">type</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Shape</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">described</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">by</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>radius</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">float</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">Rule</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>AreaOfCircle</b></font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">:<br>
+            &nbsp;&nbsp; if</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#ff00ff"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>c</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Circle</b><br>
+            &nbsp;&nbsp; then</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#008000"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>area</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>c</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>radius</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>c</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            ^ </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">2</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            * </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">PI</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">MyCircle</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Circle</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>radius</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">3</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-left: 40px;"></p>
+    <p> Now suppose that we add the following explain statement.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Explain:</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#0000ff"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">MyCircle</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">has</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>area</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-left: 40px;"></p>
+    <p>In this statement <em>x </em>is an unbound variable, so we are asking
+      for an explanation of any triple that has <em>MyCircle</em> as subject
+      and <em>area</em> as predicate. Running inference with the Jena reasoner
+      produces these results.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> <font face="Monospace"><font style="font-size: 10pt"
+            size="2">Explanation of 'rdf(shp:MyCircle, shp:area, x)':<br>
+            &nbsp;&nbsp; Derivation of rdf(MyCircle, area, 28.27433466911316):<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; was concluded by: Rule AreaOfCircle<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; based on matching
+            conditions:<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            MyCircle type Circle<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            MyCircle radius 3</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left">We could have
+      made the triple pattern less specific.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Explain:</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#ff00ff"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><u><b>x</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>
+            </u></font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u>has</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>
+            </u></font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>area</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>
+            </u></font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>y</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <font color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><br>
+        </font></font></font>
+    <p>In this case we would have gotten the same results but for a more complex
+      model and/or more complex data, there might be other triples with <em>area</em>
+      as predicate and they might have different derivations.</p>
+    <p>Note that has we been very specific with the value</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Explain:</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#0000ff"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">MyCircle</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">has</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>area</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">28.27433466911316</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <p></p>
+    <p>We might have gotten results such as these.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> <font face="Monospace"><font style="font-size: 10pt"
+            size="2">Explanation of 'rdf(shp:MyCircle, shp:area,
+            28.27433466911316)':<br>
+            &nbsp; Possible inference of rdf(shp:MyCircle, shp:area,
+            28.27433466911316):<br>
+            Statement not found but might be inferred by rule 'AreaOfCircle'.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> <font face="Monospace"><font style="font-size: 10pt" size="2">Rule
+AreaOfCircle:
+            Premise 1 of 4: rdf(c, type, Circle):<br>
+            Premises through 1 had 1 matches.<br>
+            (SPARQL Query: select ?c where {?c
+            &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt;
+            &lt;http://sadl.org/Shapes.sadl#Circle&gt; })<br>
+            c<br>
+            http://sadl.org/Shapes.sadl#MyCircle</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> <font face="Monospace"><font style="font-size: 10pt" size="2">Rule
+AreaOfCircle:
+            Premise 2 of 4: rdf(c, radius, v0):<br>
+            Premises through 2 had 1 matches.<br>
+            (SPARQL Query: select ?c ?v0 where {?c
+            &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt;
+            &lt;http://sadl.org/Shapes.sadl#Circle&gt; . ?c
+            &lt;http://sadl.org/Shapes.sadl#radius&gt; ?v0 })<br>
+            c, v0<br>
+            http://sadl.org/Shapes.sadl#MyCircle, 3.0</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> <font face="Monospace"><font style="font-size: 10pt" size="2">Rule
+AreaOfCircle:
+            Premise 3 of 4 ignored: pow(v0,2,v1):<br>
+            Premises through 3 had 1 matches.<br>
+            (SPARQL Query: select ?c ?v0 where {?c
+            &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt;
+            &lt;http://sadl.org/Shapes.sadl#Circle&gt; . ?c
+            &lt;http://sadl.org/Shapes.sadl#radius&gt; ?v0 })<br>
+            c, v0<br>
+            http://sadl.org/Shapes.sadl#MyCircle, 3.0</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;"><font color="#4c4c4c">
+        <font face="Monospace"><font style="font-size: 10pt" size="2">Rule
+            AreaOfCircle: Premise 4 of 4 ignored: product(v1,3.1415927,v2):<br>
+            Premises through 4 had 1 matches.<br>
+            (SPARQL Query: select ?c ?v0 where {?c
+            &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt;
+            &lt;http://sadl.org/Shapes.sadl#Circle&gt; . ?c
+            &lt;http://sadl.org/Shapes.sadl#radius&gt; ?v0 })<br>
+            c, v0<br>
+            http://sadl.org/Shapes.sadl#MyCircle, 3.0</font></font></font></p>
+    <p><font color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Note that built-in functions such as <em>pow</em> and <em>product</em>
+            are ignored at this time as as they are not easily exercised outside
+            of an actual inference environment. <br>
+          </font></font></font></p>
+    <h2><a id="mozTocId779228" class="mozTocH2"></a>Explain: Followed by a Rule
+      Identification </h2>
+    <p>The <em>Explain:</em> keyword can also be followed by the keyword <em>Rule</em>
+      followed by the name of a rule.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Explain:</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#800080"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">Rule</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>AreaOfCircle</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <p>This explain statement will seek to explain why the specified rule did or
+      did not fire. If there are derivations that use the rule then those will
+      be reported. If the rule did not fire queries will be executed against the
+      model to try to determine which rule condition (rule body statement) was
+      not satisfied. Most built-in functions are ignored at this time.</p>
+    <p>This explain statement results in the following output when using the
+      Jena reasoner for the model above.</p>
+    <pre style="margin-left: 40px;">Explanation of Rule AreaOfCircle:
+    Rule AreaOfCircle: Premise 1 of 4:     rdf(c, type, Circle):
+    Rule AreaOfCircle: Premise 1 of 4:     rdf(c, type, Circle):
+Premises through 1 had 1 matches.
+(SPARQL Query: select ?c  where {?c <http: www.w3.org="" 1999="" 02="" 22-rdf-syntax-ns#type=""> <http:
+sadl.org="" shapes.sadl#circle=""> })
+c
+http://sadl.org/Shapes.sadl#MyCircle
+    Rule AreaOfCircle: Premise 2 of 4:     rdf(c, radius, v0):
+Premises through 2 had 1 matches.
+(SPARQL Query: select ?c ?v0  where {?c <http: www.w3.org="" 1999="" 02="" 22-rdf-syntax-ns#type=""> <http:
+sadl.org="" shapes.sadl#circle="">  . ?c <http: sadl.org="" shapes.sadl#radius=""> ?v0 })
+c, v0
+http://sadl.org/Shapes.sadl#MyCircle, 3.0
+    Rule AreaOfCircle: Premise 3 of 4 ignored:    pow(v0,2,v1):
+Premises through 3 had 1 matches.
+(SPARQL Query: select ?c ?v0  where {?c <http: www.w3.org="" 1999="" 02="" 22-rdf-syntax-ns#type=""> <http:
+sadl.org="" shapes.sadl#circle="">  . ?c <http: sadl.org="" shapes.sadl#radius=""> ?v0 })
+c, v0
+http://sadl.org/Shapes.sadl#MyCircle, 3.0
+    Rule AreaOfCircle: Premise 4 of 4 ignored:    product(v1,3.1415927,v2):
+Premises through 4 had 1 matches.
+(SPARQL Query: select ?c ?v0  where {?c <http: www.w3.org="" 1999="" 02="" 22-rdf-syntax-ns#type=""> <http:
+sadl.org="" shapes.sadl#circle="">  . ?c <http: sadl.org="" shapes.sadl#radius=""> ?v0 })
+c, v0
+http://sadl.org/Shapes.sadl#MyCircle, 3.0
+</http:></http:></http:></http:></http:></http:></http:></http:></http:></http:></http:></pre>
+    <p></p>
+    <p><br>
+    </p>
+    <p><br>
+    </p>
+    <br>
+    <p></p>
+  </body>
+</html>
