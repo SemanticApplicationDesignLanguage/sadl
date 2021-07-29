@@ -19,6 +19,7 @@ package com.ge.research.sadl.utils
 
 import com.google.common.base.Preconditions
 import java.io.ByteArrayInputStream
+import java.io.FileNotFoundException
 import java.io.InputStream
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -107,6 +108,9 @@ class ReferencedProjectsParser {
 		try {
 			is = path.toUri.toURL.openStream
 			return parse(is)
+		} catch (FileNotFoundException e) {
+			System.out.println(e.toString)
+			return newArrayList
 		} finally {
 			if (is !== null) {
 				is.close

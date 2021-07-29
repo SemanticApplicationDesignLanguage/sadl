@@ -16,7 +16,7 @@ RUN yarn \
     && yarn cache clean
 
 FROM node:10-alpine
-RUN apk add --no-cache git openssh bash openjdk8 unzip
+RUN apk add --no-cache git openssh bash openjdk11 unzip
 WORKDIR /home/theia
 COPY --from=0 /home/theia /home/theia
 EXPOSE 3000

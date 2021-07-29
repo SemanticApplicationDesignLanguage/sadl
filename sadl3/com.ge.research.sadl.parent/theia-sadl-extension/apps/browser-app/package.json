@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "browser-app",
-  "version": "0.1.9",
+  "version": "0.2.0-next.b603a974",
   "dependencies": {
     "@theia/core": "next",
     "@theia/editor": "next",
@@ -22,7 +22,7 @@
     "@theia/terminal": "next",
     "@theia/userstorage": "next",
     "@theia/workspace": "next",
-    "sadl-extension": "0.1.9"
+    "sadl-extension": "next"
   },
   "devDependencies": {
     "@theia/cli": "next"

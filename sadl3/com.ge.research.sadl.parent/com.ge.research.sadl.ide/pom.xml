@@ -12,11 +12,16 @@
   <artifactId>com.ge.research.sadl.ide</artifactId>
   <packaging>eclipse-plugin</packaging>
 
-  <!-- Needed by maven-dependency-plugin -->
+  <!-- Needed by maven-dependency-plugin and appassembler-maven-plugin -->
   <dependencies>
     <dependency>
       <groupId>com.ge.research.sadl</groupId>
       <artifactId>com.ge.research.jena</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.ge.research.sadl</groupId>
+      <artifactId>com.ge.research.sadl</artifactId>
+      <type>eclipse-plugin</type>
     </dependency>
     <dependency>
       <groupId>com.ge.research.sadl</groupId>
@@ -49,6 +54,10 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.core.runtime</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.xtext</groupId>
+      <artifactId>org.eclipse.xtext.ide</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jsoup</groupId>

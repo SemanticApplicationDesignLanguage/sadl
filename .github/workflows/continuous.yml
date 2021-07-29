@@ -116,8 +116,7 @@ jobs:
       if: github.ref == 'refs/heads/development'
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-      run: |
-        yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension run publish:next
+      run: yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension run publish:next
 
     - name: Build WebSADL Docker image
       if: github.ref == 'refs/heads/development'
