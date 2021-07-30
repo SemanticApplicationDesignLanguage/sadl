@@ -6,7 +6,7 @@
     "publish:next": "lerna publish --registry=https://registry.npmjs.org/ --exact --canary=next --npm-tag=next --force-publish --skip-git --yes"
   },
   "devDependencies": {
-    "lerna": "2.4.0"
+    "lerna": "4.0.0"
   },
   "resolutions": {
     "**/**/moment": "2.24.0",
