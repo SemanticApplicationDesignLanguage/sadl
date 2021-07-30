@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Referencing RDF, RDFS, and OWL Concepts in Expressions</title>
+  </head>
+  <body>
+    <h1>Referencing RDF, RDFS, and OWL Concepts in Expressions</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->7/30/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p>The SADL grammar includes controlled-English syntax to represent certain
+      concepts from the RDF, RDFS, and OWL models. For example, the
+      followingSADL statements result in RDF/XML statements that include the
+      highlighted concept from the RDF, RDFS, or OWL ontologies.</p>
+    <ul>
+      <li> <font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
+              size="2"><b>Cat</b></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">class</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.
+              translates to the RDF/XML snippet &lt;<em><strong>owl:Class</strong></em>
+              rdf:ID="Cat"/&gt;<br>
+            </font></font></font> </li>
+      <li> <font color="#0000ff"><font face="Monospace"><font style="font-size: 10pt"
+              size="2">Felix</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"> </font></font></font><font color="#800080"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Cat</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.
+              translates to the triple &lt;Felix, <em><strong>rdf:type</strong></em>,
+              Cat&gt;</font></font></font> </li>
+      <li> <font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
+              size="2"><b>Siamese</b></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> (</font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">note</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"originates
+from
+                Asia"</span></font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">) </font></font></font><font color="#800080"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Cat</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font>&nbsp;
+        <font color="#4c4c4c"><font face="Monospace"><font style=" font-size: 10pt"
+              size="2">translates to <br>
+              &lt;<em><strong>owl:Class</strong></em> rdf:ID="Siamese"&gt;</font></font></font>
+        <br>
+        &nbsp;&nbsp;&nbsp;&nbsp; <font color="#4c4c4c"><font face="Monospace"><font
+              style=" font-size: 10pt" size="2">&lt;<em><strong>rdfs:comment</strong></em>
+              xml:lang="en"&gt;originates from Asia&lt;/<em><strong>rdfs:comment</strong></em>&gt;<br>
+              &nbsp;&nbsp; &lt;<em><strong>rdfs:subClassOf</strong></em>
+              rdf:resource="#Cat"/&gt;<br>
+              &lt;/<em><strong>owl:Class</strong></em>&gt;<br>
+            </font></font></font></li>
+    </ul>
+    <p>However, in some circumstances it may be desirable to be able to
+      reference a concept from an ontology such as RDF, RDFS, or OWL directly.
+      This happens when using such a concept as an argument to a function or in
+      an expression in a rule, test, or query. For example, the function <em>countMatches</em>
+      takes the subjects, predicates, and objects of triple patterns as
+      arguments. Suppose one wanted to count the number of instances of Cat in a
+      model. One could do so with a rule:</p>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#4c4c4c">&nbsp;&nbsp;&nbsp;&nbsp;
+        </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">Rule</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#0000ff"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>CountCats</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">:
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>nc</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            = </font></font></font><font color="#801480"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>countMatches</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><b>x</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>,
+            </u></font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>rdf:type</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>,
+            </u></font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>Cat</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>)</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><br>
+      <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp; &nbsp; &nbsp; then</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#801480"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>print</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><span
+                style="background: #e6f0ff">"There are "</span></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>nc</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><span style="background: #e6f0ff">"
+                cats in the model."</span></u></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">).</font></font></font></p>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#4c4c4c">
+      </font>Note, however, that "rdf:type" is a variable, as indicated by its
+      color, and that it is unbound. Hence the rule will not fire. The model
+      needs to resolve "rdf:type" to a property in the
+      "http://www.w3.org/1999/02/22-rdf-syntax-ns" namespace. One could download
+      the RDF ontology and import it into the model containing the <em>CountCats</em>
+      rule. One could also
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+      create a subset of RDF and import that. Taking this approach, we create
+      this simple model. Note that the namespace and prefix of the model
+      correspond exactly to those expected for the RDF ontology.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">uri</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+              style="background: #e6f0ff">"http://www.w3.org/1999/02/22-rdf-syntax-ns"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">alias</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>rdf</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;"><font color="#4c4c4c">
+      </font><font color="#00cc00"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"><b>^type</b></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">property</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left"> </p>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left">Now we can add
+      an import to our model containing the rule:</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">uri</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+              style="background: #e6f0ff">"http://sadl.org/examples.sadl"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">alias</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>examples</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">import</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><b>"http</b></u></font></font></font><font
+        color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>://www.w3.org/1999/02/22-rdf-syntax-ns"</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            . </font></font></font> </p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Cat</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">class</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">Rule</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>CountCats</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">:
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>nc</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            = </font></font></font><font color="#801480"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>countMatches</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><b>x</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>,
+            </u></font></font></font><font color="#00cc00"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>rdf:type</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>,
+            </u></font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>Cat</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>)</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><br>
+      <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            then</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"> </font></font></font><font color="#801480"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><b>print</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><span
+                style="background: #e6f0ff">"There are "</span></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>nc</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><span style="background: #e6f0ff">"
+                cats in the model."</span></u></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">).</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left">Note that now
+      the argument "rdf:type" is known to be an RDF property, as indicated by
+      its coloring, and the rule will work as expected. A similar approach can
+      be adopted to use selected concepts from RDF, RDFS, OWL, or any other
+      ontology commonly referenced in semantic models.<br>
+    </p>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left"></p>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left"><br>
+    </p>
+    <p></p>
+  </body>
+</html>
