@@ -10,9 +10,9 @@
       <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->7/30/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <p>The SADL grammar includes controlled-English syntax to represent certain
-      concepts from the RDF, RDFS, and OWL models. For example, the
-      followingSADL statements result in RDF/XML statements that include the
-      highlighted concept from the RDF, RDFS, or OWL ontologies.</p>
+      concepts from the RDF, RDFS, and OWL models. For example, the following
+      SADL statements result in RDF/XML statements that include the highlighted
+      concepts from the RDF, RDFS, or OWL ontologies.</p>
     <ul>
       <li> <font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
               size="2"><b>Cat</b></font></font></font><font color="#4c4c4c"><font
@@ -79,22 +79,32 @@ from
       an expression in a rule, test, or query. For example, the function <em>countMatches</em>
       takes the subjects, predicates, and objects of triple patterns as
       arguments. Suppose one wanted to count the number of instances of Cat in a
-      model. One could do so with a rule:</p>
+      model. One could do so with a rule<sup>1</sup>:</p>
     <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#4c4c4c">&nbsp;&nbsp;&nbsp;&nbsp;
         </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
             size="2">Rule</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
             style="font-size: 10pt" size="2"> </font></font></font><font color="#0000ff"><font
           face="Monospace"><font style="font-size: 10pt" size="2"><b>CountCats</b></font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">:
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">if<span style="color: purple;"> </span><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
           </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>nc</b></font></font></font><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Cat</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><sup>1</sup>
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">and <b>nc</b></font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
             = </font></font></font><font color="#801480"><font face="Monospace"><font
             style="font-size: 10pt" size="2"><u><b>countMatches</b></u></font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
-        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><b>x</b></u></font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><b>y</b></u></font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>,
             </u></font></font></font><font color="#ff00ff"><font face="Monospace"><font
             style="font-size: 10pt" size="2"><u><b>rdf:type</b></u></font></font></font><font
@@ -198,15 +208,27 @@ from
           </font></font></font><font color="#0000ff"><font face="Monospace"><font
             style="font-size: 10pt" size="2"><b>CountCats</b></font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">:
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">if <b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
           </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>nc</b></font></font></font><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Cat</b></font></font></font><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b></b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><sup>1</sup></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">and<span style="color: purple;"> </span><b>nc</b></font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
             = </font></font></font><font color="#801480"><font face="Monospace"><font
             style="font-size: 10pt" size="2"><u><b>countMatches</b></u></font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
-        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><b>x</b></u></font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><b>y</b></u></font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>,
             </u></font></font></font><font color="#00cc00"><font face="Monospace"><font
             style="font-size: 10pt" size="2"><u><b>rdf:type</b></u></font></font></font><font
@@ -240,7 +262,12 @@ from
       ontology commonly referenced in semantic models.<br>
     </p>
     <p style="margin-bottom: 0in; line-height: 100%" align="left"></p>
-    <p style="margin-bottom: 0in; line-height: 100%" align="left"><br>
+    <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><sup>1</sup>Note
+            that this rule has the apparently unrelated body pattern "x is a
+            Cat". Without some kind of non-function rule body statement, the
+            inferred graph on which the function operates will not be populated.
+            This seems to be a characteristic of the Jena Reasoner.</font></font></font>
     </p>
     <p></p>
   </body>
