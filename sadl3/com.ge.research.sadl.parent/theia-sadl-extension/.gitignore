@@ -1,7 +1,7 @@
 node_modules
 .browser_modules
 lib
-*.log
+apps/browser-app/yarn.lock
 *-app/*
 !*-app/package.json
 !*-app/Dockerfile
