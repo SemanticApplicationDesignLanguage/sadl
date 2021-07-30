@@ -10291,6 +10291,20 @@ rxjs@^6.6.0:
   dependencies:
     tslib "^1.9.0"
 
+sadl-extension@next:
+  version "0.2.0-next.b48c34ac"
+  resolved "https://registry.yarnpkg.com/sadl-extension/-/sadl-extension-0.2.0-next.b48c34ac.tgz#fa245f7780221fef864d4091032a0565f48ee70f"
+  integrity sha512-IVuqF1616ovLAfKl7LPuzGzMpc3g//idOutL0JAwTVW3w2EJH9UefnFBYAm5lTjauLW6vSR6wMoiy4rtun/jFg==
+  dependencies:
+    "@theia/core" next
+    "@theia/editor" next
+    "@theia/filesystem" next
+    "@theia/languages" next
+    "@theia/monaco" next
+    "@theia/navigator" next
+    "@theia/output" next
+    valid-filename "^3.1.0"
+
 safe-buffer@5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.2.tgz#991ec69d296e0313747d59bdfd2b745c35f8828d"
