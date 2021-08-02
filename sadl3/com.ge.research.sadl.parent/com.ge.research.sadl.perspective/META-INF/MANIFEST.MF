@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: SADL Perspective
+Bundle-Name: com.ge.research.sadl.perspective
 Bundle-SymbolicName: com.ge.research.sadl.perspective;singleton:=true
 Bundle-Version: 3.5.0.qualifier
 Bundle-Vendor: GE Research

@@ -17,7 +17,7 @@
     <!-- We use Maven Surefire instead of Tycho Surefire to run the tests outside of the OSGi container. -->
     <!-- Source: https://wiki.eclipse.org/Tycho/FAQ#Can_I_run_eclipse-plugin_tests_also_outside_an_OSGi_container.3F -->
     <!-- GH issue: https://github.com/crapo/sadlos2/issues/370 -->
-    <!-- Maven Surefire expects test classes in ${project.build.directory}/test-classes by default. -->
+    <!-- Surefire expects test classes in ${project.build.directory}/test-classes by default -->
     <testOutputDirectory>${project.build.directory}/classes</testOutputDirectory>
     <plugins>
       <!-- Make sure the tests run as Maven Surefire tests. -->
@@ -25,11 +25,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <dependencies>
-          <!-- Explicitly declare the Maven Surefire provider for JUnit4, see http://maven.apache.org/surefire/maven-surefire-plugin/examples/providers.html -->
+          <!-- Explicitly declare Surefire provider for JUnit4, see http://maven.apache.org/surefire/maven-surefire-plugin/examples/providers.html -->
           <dependency>
             <groupId>org.apache.maven.surefire</groupId>
             <artifactId>surefire-junit4</artifactId>
-            <version>3.0.0-M5</version>
+            <version>${version.surefire}</version>
           </dependency>
         </dependencies>
         <executions>

@@ -124,7 +124,7 @@ public class ExecuteCommand implements IApplication {
             return null;
         }
 
-        // Set Eclipse Preferences to compatible values for SADL CLI
+        // Set Eclipse preferences to compatible values for SADL CLI
         setEclipsePreferences();
 
         // Import project if not already part of workspace
@@ -155,9 +155,9 @@ public class ExecuteCommand implements IApplication {
             }
         }
 
-        // Restore Eclipse Preferences
+        // Restore Eclipse preferences and save
         restoreEclipsePreferences();
-        refreshWorkspace();
+        saveWorkspace();
 
         LOGGER.info("SADL Command-Line Interface complete");
 
@@ -277,10 +277,22 @@ public class ExecuteCommand implements IApplication {
         try {
             IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
             workspaceRoot.refreshLocal(IResource.DEPTH_INFINITE, null);
+            return true;
         } catch (CoreException e) {
             LOGGER.error("Error refreshing workspace: " + e);
+            return false;
         }
-        return true;
+    }
+
+    private boolean saveWorkspace() {
+        try {
+            IWorkspace workspace = ResourcesPlugin.getWorkspace();
+            workspace.save(true, null);
+            return true;
+        } catch (CoreException e) {
+            LOGGER.error("Error saving workspace: " + e);
+            return false;
+        }
     }
 
     private void setEclipsePreferences() {

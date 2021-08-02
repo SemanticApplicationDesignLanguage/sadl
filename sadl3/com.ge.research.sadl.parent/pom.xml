@@ -3,11 +3,13 @@
      xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <!-- Define ourselves -->
   <groupId>com.ge.research.sadl</groupId>
   <artifactId>com.ge.research.sadl.parent</artifactId>
   <version>3.5.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <!-- Build ourselves -->
   <modules>
     <module>com.ge.research.jena</module>
     <module>com.ge.research.sadl</module>
@@ -40,9 +42,8 @@
     <module>com.ge.research.sadl.xtextgenerator</module>
   </modules>
 
-  <!-- Set properties for all modules -->
+  <!-- Set all properties in one place -->
   <properties>
-    <maven.build.timestamp.format>yyyyMMddHHmm</maven.build.timestamp.format>
     <maven.compiler.release>11</maven.compiler.release>
     <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
     <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
@@ -50,14 +51,18 @@
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <version.jena>3.17.0</version.jena>
+    <version.log4j>2.14.1</version.log4j>
     <version.mwe2>2.12.0</version.mwe2>
-    <version.sadl>3.5.0</version.sadl>
+    <version.sadl>${project.version}</version.sadl>
+    <version.slf4j>1.7.32</version.slf4j>
+    <version.surefire>3.0.0-M5</version.surefire>
     <version.tycho>2.4.0</version.tycho>
     <version.xtext>2.24.0</version.xtext>
     <version.xtext-antlr>2.1.1</version.xtext-antlr>
   </properties>
 
-  <!-- Set dependencies for all modules -->
+  <!-- Set all dependency versions in one place -->
   <dependencyManagement>
     <dependencies>
       <!-- Import Xtext dependencies from Xtext BOM -->
@@ -71,38 +76,38 @@
       <dependency>
         <groupId>com.ge.research.sadl</groupId>
         <artifactId>com.ge.research.jena</artifactId>
-        <version>${project.version}</version>
+        <version>${version.sadl}</version>
       </dependency>
       <dependency>
         <groupId>com.ge.research.sadl</groupId>
         <artifactId>com.ge.research.sadl</artifactId>
-        <version>${project.version}</version>
+        <version>${version.sadl}</version>
         <type>eclipse-plugin</type>
       </dependency>
       <dependency>
         <groupId>com.ge.research.sadl</groupId>
         <artifactId>com.ge.research.sadl.jena-wrapper-for-sadl</artifactId>
-        <version>${project.version}</version>
+        <version>${version.sadl}</version>
       </dependency>
       <dependency>
         <groupId>com.ge.research.sadl</groupId>
         <artifactId>reasoner-api</artifactId>
-        <version>${project.version}</version>
+        <version>${version.sadl}</version>
       </dependency>
       <dependency>
         <groupId>com.ge.research.sadl</groupId>
         <artifactId>reasoner-impl</artifactId>
-        <version>${project.version}</version>
+        <version>${version.sadl}</version>
       </dependency>
       <dependency>
         <groupId>com.ge.research.sadl</groupId>
         <artifactId>sadlserver-api</artifactId>
-        <version>${project.version}</version>
+        <version>${version.sadl}</version>
       </dependency>
       <dependency>
         <groupId>com.ge.research.sadl</groupId>
         <artifactId>sadlserver-impl</artifactId>
-        <version>${project.version}</version>
+        <version>${version.sadl}</version>
       </dependency>
       <dependency>
         <groupId>com.sun.activation</groupId>
@@ -127,14 +132,8 @@
       <dependency>
         <groupId>org.apache.jena</groupId>
         <artifactId>apache-jena-libs</artifactId>
-        <version>3.17.0</version>
+        <version>${version.jena}</version>
         <type>pom</type>
-        <exclusions>
-          <exclusion>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-          </exclusion>
-        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.apache.jena</groupId>
@@ -144,17 +143,17 @@
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-api</artifactId>
-        <version>2.14.1</version>
+        <version>${version.log4j}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-core</artifactId>
-        <version>2.14.1</version>
+        <version>${version.log4j}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>
         <artifactId>log4j-slf4j-impl</artifactId>
-        <version>2.14.1</version>
+        <version>${version.log4j}</version>
       </dependency>
       <dependency>
         <groupId>org.assertj</groupId>
@@ -194,25 +193,19 @@
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>${version.slf4j}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
-        <version>1.7.32</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <version>1.7.32</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-        <version>1.7.32</version>
+        <version>${version.slf4j}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
 
   <build>
-    <finalName>${project.artifactId}-${version.sadl}.${maven.build.timestamp}</finalName>
-    <!-- Lock down plugins for consistent builds -->
+    <!-- Set all plugin versions in one place -->
     <pluginManagement>
       <plugins>
         <plugin>
@@ -266,6 +259,29 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.1.0</version>
+          <!-- Clean all files built by Tycho -->
+          <configuration>
+            <filesets>
+              <fileset>
+                <directory>${basedir}</directory>
+                <includes>
+                  <include>plugin.xml_gen</include>
+                </includes>
+              </fileset>
+              <fileset>
+                <directory>lib</directory>
+              </fileset>
+              <fileset>
+                <directory>model/generated</directory>
+              </fileset>
+              <fileset>
+                <directory>src-gen</directory>
+              </fileset>
+              <fileset>
+                <directory>xtend-gen</directory>
+              </fileset>
+            </filesets>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -310,7 +326,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-failsafe-plugin</artifactId>
-          <version>3.0.0-M5</version>
+          <version>${version.surefire}</version>
           <configuration>
             <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
           </configuration>
@@ -370,7 +386,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.0.0-M5</version>
+          <version>${version.surefire}</version>
           <configuration>
             <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
           </configuration>
@@ -380,6 +396,7 @@
           <artifactId>appassembler-maven-plugin</artifactId>
           <version>2.1.0</version>
         </plugin>
+        <!-- Define classpath and configuration needed to run Mwe2Launcher -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
@@ -388,7 +405,7 @@
             <dependency>
               <groupId>com.ge.research.sadl</groupId>
               <artifactId>com.ge.research.sadl.xtextgenerator</artifactId>
-              <version>${project.version}</version>
+              <version>${version.sadl}</version>
             </dependency>
             <dependency>
               <groupId>org.eclipse.emf</groupId>
@@ -427,6 +444,7 @@
             </execution>
           </executions>
         </plugin>
+        <!-- Goals: mvn -N versions:display-{dependency,plugin,property}-updates -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>versions-maven-plugin</artifactId>
@@ -456,9 +474,9 @@
             </environments>
             <target>
               <artifact>
-                <groupId>${project.groupId}</groupId>
+                <groupId>com.ge.research.sadl</groupId>
                 <artifactId>com.ge.research.sadl.target</artifactId>
-                <version>${project.version}</version>
+                <version>${version.sadl}</version>
               </artifact>
             </target>
           </configuration>
@@ -475,11 +493,26 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-maven-plugin</artifactId>
           <version>${version.tycho}</version>
+          <extensions>true</extensions>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-p2-director-plugin</artifactId>
           <version>${version.tycho}</version>
+          <executions>
+            <execution>
+              <id>default-materialize-products</id>
+              <goals>
+                <goal>materialize-products</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>default-archive-products</id>
+              <goals>
+                <goal>archive-products</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
@@ -504,11 +537,18 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-p2-repository-plugin</artifactId>
           <version>${version.tycho}</version>
+          <configuration>
+            <includeAllDependencies>true</includeAllDependencies>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-packaging-plugin</artifactId>
           <version>${version.tycho}</version>
+          <configuration>
+            <!-- Replace SNAPSHOT version when packaging the final product -->
+            <finalName>${project.artifactId}_${unqualifiedVersion}.${buildQualifier}</finalName>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
@@ -523,6 +563,9 @@
             </execution>
           </executions>
         </plugin>
+        <!-- To skip running (and compiling) tests, use: -Dmaven.test.skip
+             To skip tests, but still compile them, use: -DskipTests
+             To run all tests but only fail at end, use: -fae -->
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-surefire-plugin</artifactId>
@@ -547,9 +590,9 @@
               </goals>
             </execution>
             <execution>
-              <id>default-testCompile</id>
+              <id>default-xtend-install-debug-info</id>
               <goals>
-                <goal>testCompile</goal>
+                <goal>xtend-install-debug-info</goal>
               </goals>
             </execution>
           </executions>
@@ -563,33 +606,6 @@
         <groupId>com.github.ekryd.sortpom</groupId>
         <artifactId>sortpom-maven-plugin</artifactId>
       </plugin>
-      <!-- Clean additional files built by Tycho -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-clean-plugin</artifactId>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${basedir}</directory>
-              <includes>
-                <include>plugin.xml_gen</include>
-              </includes>
-            </fileset>
-            <fileset>
-              <directory>lib</directory>
-            </fileset>
-            <fileset>
-              <directory>model/generated</directory>
-            </fileset>
-            <fileset>
-              <directory>src-gen</directory>
-            </fileset>
-            <fileset>
-              <directory>xtend-gen</directory>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
       <!-- Enforce Maven version -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -600,11 +616,10 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>target-platform-configuration</artifactId>
       </plugin>
-      <!-- Build OSGI bundles -->
+      <!-- Build Eclipse bundles with Tycho -->
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-maven-plugin</artifactId>
-        <extensions>true</extensions>
       </plugin>
       <!-- Run Eclipse plugin tests with Tycho -->
       <plugin>
