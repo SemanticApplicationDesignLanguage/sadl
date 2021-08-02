@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Jena 4 OSGi
+Bundle-Name: com.ge.research.jena
 Bundle-SymbolicName: com.ge.research.jena
 Bundle-Version: 3.5.0.qualifier
 Bundle-Vendor: GE Research

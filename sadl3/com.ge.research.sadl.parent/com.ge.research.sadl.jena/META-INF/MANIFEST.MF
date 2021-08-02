@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Jena
+Bundle-Name: com.ge.research.sadl.jena
 Bundle-SymbolicName: com.ge.research.sadl.jena;singleton:=true
 Bundle-Version: 3.5.0.qualifier
 Bundle-Vendor: GE Research

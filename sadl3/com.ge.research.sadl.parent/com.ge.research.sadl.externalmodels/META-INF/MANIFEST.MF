@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Externalmodels
+Bundle-Name: com.ge.research.sadl.externalmodels
 Bundle-SymbolicName: com.ge.research.sadl.externalmodels;singleton:=true
 Bundle-Version: 3.5.0.qualifier
 Bundle-Vendor: GE Research

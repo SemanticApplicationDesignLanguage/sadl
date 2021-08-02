@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Xtextgenerator
+Bundle-Name: com.ge.research.sadl.xtextgenerator
 Bundle-SymbolicName: com.ge.research.sadl.xtextgenerator
 Bundle-Vendor: GE Research
 Bundle-Version: 3.5.0.qualifier
