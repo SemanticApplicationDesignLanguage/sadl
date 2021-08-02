@@ -51,7 +51,7 @@
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <version.jena>3.17.0</version.jena>
+    <version.jena>4.1.0</version.jena>
     <version.log4j>2.14.1</version.log4j>
     <version.mwe2>2.12.0</version.mwe2>
     <version.sadl>${project.version}</version.sadl>
