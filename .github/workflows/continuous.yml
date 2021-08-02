@@ -98,7 +98,7 @@ jobs:
     - name: Set up Node.js 10.x
       uses: actions/setup-node@v2.3.0
       with:
-        node-version: 10.15.3
+        node-version: 10.19.0
         registry-url: https://registry.npmjs.org
 
     - name: Set up Python 2.7
@@ -110,7 +110,7 @@ jobs:
       env:
         PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: yarn --cwd ./sadl3/com.ge.research.sadl.parent/theia-sadl-extension
+      run: yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension install
 
     - name: Publish WebSADL npm package
       if: github.ref == 'refs/heads/development'

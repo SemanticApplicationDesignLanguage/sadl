@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "browser-app",
-  "version": "0.2.0-next.b603a974",
+  "version": "0.1.9",
   "dependencies": {
     "@theia/core": "next",
     "@theia/editor": "next",
