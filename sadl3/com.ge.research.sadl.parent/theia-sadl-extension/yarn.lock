@@ -11706,20 +11706,6 @@ rxjs@^6.3.1, rxjs@^6.6.0:
     tslib "^1.9.0"
 
 sadl-extension@next:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/sadl-extension/-/sadl-extension-0.1.10.tgz#fd88328cfaa11fb106da27b00088c10bbdfc7fb0"
-  integrity sha512-5/pUX7usxuXYIlqPn8rq6UgAG4vT4UzrEVYPxNcuka6ssEZJr9am2/M1n9OnM9O71a05S9ITsRcs5hlMitgfdg==
-  dependencies:
-    "@theia/core" next
-    "@theia/editor" next
-    "@theia/filesystem" next
-    "@theia/languages" next
-    "@theia/monaco" next
-    "@theia/navigator" next
-    "@theia/output" next
-    valid-filename "^3.1.0"
-
-sadl-extension@next:
   version "0.2.0-next.b48c34ac"
   resolved "https://registry.yarnpkg.com/sadl-extension/-/sadl-extension-0.2.0-next.b48c34ac.tgz#fa245f7780221fef864d4091032a0565f48ee70f"
   integrity sha512-IVuqF1616ovLAfKl7LPuzGzMpc3g//idOutL0JAwTVW3w2EJH9UefnFBYAm5lTjauLW6vSR6wMoiy4rtun/jFg==
@@ -13162,9 +13148,9 @@ uuid@^3.1.0, uuid@^3.3.2:
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
 
 uuid@^8.0.0:
-  version "8.3.1"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.1.tgz#2ba2e6ca000da60fce5a196954ab241131e05a31"
-  integrity sha512-FOmRr+FmWEIG8uhZv6C2bTgEVXsHk08kE7mPlrBbEe+c3r9pjceVPgupIfNIhc4yx55H69OXANrUaSuu9eInKg==
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
 v8-compile-cache@^1.1.2:
   version "1.1.2"
