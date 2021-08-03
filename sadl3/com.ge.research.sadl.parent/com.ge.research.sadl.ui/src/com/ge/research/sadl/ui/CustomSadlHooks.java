@@ -267,7 +267,7 @@ import com.google.inject.Inject;
 //			}
 //		}
 		implicitModelFolder.mkdir();
-		cleanBuiltinFunctionsImplicitModel(project);	// this is here so that built-in changes get get into
+		cleanBuiltinFunctionsImplicitModel(project);	// this is here so that built-in changes get into
 														// the file without doing a manual delete
 		checkForBuiltinFunctionImplicitModel(project);
 		checkForSadlImplicitModel(project);

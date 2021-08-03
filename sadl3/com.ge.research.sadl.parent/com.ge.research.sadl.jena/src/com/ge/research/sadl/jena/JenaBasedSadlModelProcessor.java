@@ -2378,6 +2378,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									test.setRhs(((BuiltinElement)realLp).getArguments().get(1));
 									((Query)testtrans).setPatterns(plst);
 								}
+//								if (whexpr instanceof BinaryOperation && isEqualOperator(((BinaryOperation)whexpr).getOp())) {
+//									// this is probably a test of query results with the RHS being parsed as part of query
+//									addWarning("Looks like perhaps the query needs to be placed in parentheses...", expr);
+//								}
+							
 								test.setCompName(((BuiltinElement)realLp).getFuncType());
 							}
 						}

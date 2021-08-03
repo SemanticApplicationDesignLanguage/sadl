@@ -1,0 +1,19 @@
+ uri "http://sadl.org/OneOf2.sadl" alias oneof2.
+ 
+ Person is a class described by age with values of type int.
+ 
+ atTransitionalAge describes Person with values of type boolean.
+ 
+ Rule AtTransition: if p is a Person and oneOf(age of p, 3, 8, 12, 18) then atTransitionalAge of p is true.
+ 
+ John is a Person with age 3.
+ Sue is a Person with age 6.
+ Sam is a Person with age 12.
+ George is a Person with age 21.
+ 
+ Ask: select p where p has atTransitionalAge true.
+ 
+ Test: (select p where p has atTransitionalAge true) is {[John], [Sam]}.
+// Test: select p where p has atTransitionalAge true is {[John], [Sam]}.
+ Test: "select ?p where {?p <atTransitionalAge> true}" is {[John],[Sam]}.
+ 

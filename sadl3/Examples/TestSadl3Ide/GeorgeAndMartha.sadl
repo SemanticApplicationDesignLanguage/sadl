@@ -66,6 +66,7 @@ A Birth has child Margie, has mother (a Person Mary),
 //Ask: select wv where wv is the ^value of the weight of the spouse of a friend of a child of John and wv < 150.
  
 Rule R2: if sp is spouse of friend of spouse of Margie then print("hello", sp).
-Ask: select p, s where p has likes s. 
-Explain: Rule NorthernerAtHeart.
+Ask: select p, s where p likes s. 
+//Explain: Rule NorthernerAtHeart.
+Ask: "select ?p ?s where {?p <likes> ?s}".
  

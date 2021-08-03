@@ -1,0 +1,16 @@
+uri "http://sadl.org/list_test2.sadl"
+    (note "This ontology was created from a SADL file 'list_test.sadl' and should not be directly edited.").
+
+
+
+// Class definitions:
+B is a class,
+    described by p with values of type LC List.
+LC is a class.
+
+
+// Individuals:
+i1 is a LC.
+i2 is a LC.
+i3 is a B,
+    has p [i1,i2].

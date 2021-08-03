@@ -1,0 +1,19 @@
+ uri "http://sadl.org/OneOf.sadl" alias onf.
+ 
+ PhysicalThing is a class.
+ Rock is a type of PhysicalThing.
+ Tree is a type of PhysicalThing.
+ Person is a type of PhysicalThing.
+ alive is a property with values of type boolean.
+ 
+ Rule InanimateRule: if x is a PhysicalThing and x is a t and oneOf(t, Rock) then x alive false and print(x, " is inanimate.").
+ 
+ Rule AliveRule: if x is a PhysicalThing and x is a t and oneOf(t, Tree, Person) then x alive true and print(x, " is alive.").
+ 
+ Jane is a Person.
+ Gibralter is a Rock.
+ AngelOak is a Tree.
+ 
+ Ask: "select ?x ?t where {?x <alive> ?t}".
+ 
+ 

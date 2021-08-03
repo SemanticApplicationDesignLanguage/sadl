@@ -35,11 +35,10 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 
 /**
- * Tests whether the first argument is an instance of the type specified 
- * (as a String URI) by the second argument.
+ * Tests whether the first argument matches any of the subsequent arguments.
  * 
- * @author <a href="mailto:der@hplb.hpl.hp.com">Dave Reynolds</a>
- * @version $Revision: 1.2 $ on $Date: 2015/05/21 14:10:22 $
+ * @author <a href="mailto:andy@naturalsemantics.com">Andy Crapo</a>
+ * @version Revised 2021/07/08
  */
 public class OneOf extends BaseBuiltin {
 

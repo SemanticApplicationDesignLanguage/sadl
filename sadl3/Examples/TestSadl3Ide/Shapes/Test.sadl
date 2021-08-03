@@ -4,13 +4,17 @@ import "http://sadl.org/Polygons.sadl".
 
 MyRect is a Rectangle with height 2, with width 4.
  
+Print: "\nThese results are from the definition of the named query 'Q1':". 
 Ask Q1: area. 	
 
+Print: "\nThese results are from a reference to the named query 'Q1':".
 Ask Q1.
 
 Ask: shp:Q1.
 
+Print: "\nThese are all of the names of known rules:".
 Ask: x is a ^Rule.
 
+Print: "\nThese are all of the instances of the Shape class:".
 Ask: "select ?s where {?s <rdf:type> <Shape>}".
-Ask: "select ?s ?a where {?s <area> ?a}".
+//Ask: "select ?s ?a where {?s <area> ?a}".

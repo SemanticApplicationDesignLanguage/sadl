@@ -1,0 +1,11 @@
+ uri "http://sadl.org/Test2.sadl" alias test2.
+ 
+ import "http://sadl.org/Polygons.sadl".
+
+MyRect is a Rectangle with height 2, with width 4.
+
+
+ 
+Print: Model.
+
+Print: Deductions .

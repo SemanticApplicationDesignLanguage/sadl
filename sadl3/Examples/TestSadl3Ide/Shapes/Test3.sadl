@@ -1,0 +1,7 @@
+ uri "http://sadl.org/Test3.sadl" alias test3.
+ 
+ Rock is a class.
+ MyRock is a Rock.
+ 
+ Ask: select x where x is a Rock.
+ Print: Model.

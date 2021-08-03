@@ -4,8 +4,11 @@
  
  George is a Person.
  
-// Ask: select p where age of p is not known.
-// Ask: select p where p is a Person and age of p is not known.
+ Ask: select p where age of p is not known.    
+ 
+ Ask: select p where p is a Person and age of p is not known.
+ 
+ Rule r1: if age of p is not known then print(p, " is not qualified").
  
  /*
   *  SELECT ?name
