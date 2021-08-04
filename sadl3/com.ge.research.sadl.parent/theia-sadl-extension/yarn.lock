@@ -11706,20 +11706,6 @@ rxjs@^6.3.1, rxjs@^6.6.0:
     tslib "^1.9.0"
 
 sadl-extension@next:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/sadl-extension/-/sadl-extension-0.1.10.tgz#fd88328cfaa11fb106da27b00088c10bbdfc7fb0"
-  integrity sha512-5/pUX7usxuXYIlqPn8rq6UgAG4vT4UzrEVYPxNcuka6ssEZJr9am2/M1n9OnM9O71a05S9ITsRcs5hlMitgfdg==
-  dependencies:
-    "@theia/core" next
-    "@theia/editor" next
-    "@theia/filesystem" next
-    "@theia/languages" next
-    "@theia/monaco" next
-    "@theia/navigator" next
-    "@theia/output" next
-    valid-filename "^3.1.0"
-
-sadl-extension@next:
   version "0.2.0-next.b48c34ac"
   resolved "https://registry.yarnpkg.com/sadl-extension/-/sadl-extension-0.2.0-next.b48c34ac.tgz#fa245f7780221fef864d4091032a0565f48ee70f"
   integrity sha512-IVuqF1616ovLAfKl7LPuzGzMpc3g//idOutL0JAwTVW3w2EJH9UefnFBYAm5lTjauLW6vSR6wMoiy4rtun/jFg==
@@ -12577,9 +12563,9 @@ tar-stream@^1.1.2:
     xtend "^4.0.0"
 
 tar@^4.0.0, tar@^4.0.2, tar@^4.4.12:
-  version "4.4.13"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.13.tgz#43b364bc52888d555298637b10d60790254ab525"
-  integrity sha512-w2VwSrBoHa5BsSyH+KxEqeQBAllHhccyMFVHtGtdMpF4W7IRWfZjFiQceJPChOeTsSDVUpER2T8FA93pr0L+QA==
+  version "4.4.15"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.15.tgz#3caced4f39ebd46ddda4d6203d48493a919697f8"
+  integrity sha512-ItbufpujXkry7bHH9NpQyTXPbJ72iTlXgkBAYsAjDXk3Ds8t/3NfO5P4xZGy7u+sYuQUbimgzswX4uQIEeNVOA==
   dependencies:
     chownr "^1.1.1"
     fs-minipass "^1.2.5"
