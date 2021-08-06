@@ -36,6 +36,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelGetter;
 import org.apache.jena.rdf.model.ModelReader;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.tdb.TDB;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.vocabulary.OWL;
@@ -237,10 +238,9 @@ public class SadlJenaModelGetter implements ModelGetter, ISadlJenaModelGetter {
     public OntModel getOntModel(String publicUri, String altUrl, String format) {
     	Model m = getModel(publicUri, new ModelReader() {
             @Override
-            public Model readModel( Model toRead, String URL ) {
-//            	toRead.getReader().read(toRead, URL);
-               configurationManager.getJenaDocumentMgr().getFileManager().readModel( toRead, URL );
-               return toRead;
+            public Model readModel(Model toRead, String url) {
+            	RDFDataMgr.read(toRead, url);
+            	return toRead;
             }
          });
     	if (m == null) {

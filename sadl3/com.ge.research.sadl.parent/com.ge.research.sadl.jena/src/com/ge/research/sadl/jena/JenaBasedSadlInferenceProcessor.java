@@ -1145,9 +1145,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 							obj = results;
 						}
 						else if (results != null && results.hasNext()) {
-							obj = new Boolean(true);
+							obj = Boolean.valueOf(true);
 						} else {
-							obj = new Boolean(false);
+							obj = Boolean.valueOf(false);
 						}
 					}
 				}

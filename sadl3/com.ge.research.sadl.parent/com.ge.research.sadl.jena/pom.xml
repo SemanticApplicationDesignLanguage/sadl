@@ -12,6 +12,14 @@
   <artifactId>com.ge.research.sadl.jena</artifactId>
   <packaging>eclipse-plugin</packaging>
 
+  <!-- Needed by serviceloader-maven-plugin -->
+  <dependencies>
+    <dependency>
+      <groupId>com.ge.research.sadl</groupId>
+      <artifactId>com.ge.research.sadl</artifactId>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <!-- Generate META-INF/services/... -->
@@ -25,14 +33,6 @@
             <param>com.ge.research.sadl.processing.ISadlInferenceProcessor</param>
           </services>
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>com.ge.research.sadl</groupId>
-            <artifactId>com.ge.research.sadl</artifactId>
-            <version>${version.sadl}</version>
-            <type>eclipse-plugin</type>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>

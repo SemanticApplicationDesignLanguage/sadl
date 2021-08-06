@@ -73,7 +73,7 @@ public class DoubleFieldEditor extends StringFieldEditor {
         minValidValue = min;
         maxValidValue = max;
         setErrorMessage(Messages.bind(Messages.doubleFieldEditorErrorMessageRange, 
-        		new Object[] { new Double(min), new Double(max) }));
+        		new Object[] { Double.valueOf(min), Double.valueOf(max) }));
     }
 
     /* (non-Javadoc)
@@ -137,7 +137,7 @@ public class DoubleFieldEditor extends StringFieldEditor {
     protected void doStore() {
         Text text = getTextControl();
         if (text != null) {
-            Double d = new Double(text.getText());
+            Double d = Double.valueOf(text.getText());
             getPreferenceStore().setValue(getPreferenceName(), d.doubleValue());
         }
     }
@@ -150,7 +150,7 @@ public class DoubleFieldEditor extends StringFieldEditor {
      *   contain a parsable double
      */
     public double getDoubleValue() throws NumberFormatException {
-        return new Double(getStringValue()).doubleValue();
+        return Double.valueOf(getStringValue()).doubleValue();
     }
 }
 

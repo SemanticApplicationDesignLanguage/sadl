@@ -82,7 +82,6 @@
         <groupId>com.ge.research.sadl</groupId>
         <artifactId>com.ge.research.sadl</artifactId>
         <version>${version.sadl}</version>
-        <type>eclipse-plugin</type>
       </dependency>
       <dependency>
         <groupId>com.ge.research.sadl</groupId>
@@ -398,6 +397,7 @@
         </plugin>
         <!-- Define classpath and configuration needed to run Mwe2Launcher -->
         <plugin>
+          <?m2e ignore?>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
           <version>3.0.0</version>
@@ -435,7 +435,6 @@
           </dependencies>
           <executions>
             <execution>
-              <?m2e ignore?>
               <id>default-java</id>
               <goals>
                 <goal>java</goal>
@@ -451,6 +450,7 @@
           <version>2.8.1</version>
         </plugin>
         <plugin>
+          <?m2e ignore?>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>target-platform-configuration</artifactId>
           <version>${version.tycho}</version>

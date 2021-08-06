@@ -118,7 +118,7 @@ class SadlRenameTest extends AbstractEditorTest {
 	}
 
 	protected def String readFile(IFile file) throws Exception {
-		return Files.toString(new File(file.locationURI), Charsets.UTF_8)
+		return Files.asCharSource(new File(file.locationURI), Charsets.UTF_8).read()
 	}
 
 	protected def void waitForReconciler(XtextEditor editor) {

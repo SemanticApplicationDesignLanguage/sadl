@@ -19,18 +19,12 @@
 package com.ge.research.sadl.jena;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
@@ -38,21 +32,17 @@ import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.utils.ResourceManager;
 import org.apache.jena.ontology.CardinalityRestriction;
 import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.IntersectionClass;
 import org.apache.jena.ontology.MaxCardinalityRestriction;
 import org.apache.jena.ontology.OntClass;
-import org.apache.jena.ontology.OntDocumentManager;
 import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.Restriction;
 import org.apache.jena.ontology.UnionClass;
 import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -63,7 +53,6 @@ import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 
 public class UtilsForJena {
-	protected static final Logger logger = LoggerFactory.getLogger(UtilsForJena.class);
 
 	public static final String OWL_MODELS_FOLDER_NAME = "OwlModels";
     public static final String ONT_POLICY_FILENAME = "ont-policy.rdf";
@@ -76,25 +65,7 @@ public class UtilsForJena {
 	// Constants used to manage mappings between model namespace (publicURI) and model file (altURL) in ont-policy.rdf file
     public static final String SADL = "SADL";
     public static final String EXTERNAL_URL = "ExternalUrl";
-	protected static final String OWL_ONT_MANAGER_PUBLIC_URINS = "http://www.w3.org/2002/07/owl";
-	protected static final String ONT_MANAGER_LANGUAGE = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#language";
-	protected static final String ONT_MANAGER_CREATED_BY = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#createdBy";
-	protected static final String ONT_MANAGER_ALT_URL = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#altURL";
-	protected static final String ONT_MANAGER_PUBLIC_URI = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#publicURI";
-	protected static final String ONT_MANAGER_PREFIX = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#prefix";
-	protected static final String ONT_MANAGER_ONTOLOGY_SPEC = "http://jena.hpl.hp.com/schemas/2003/03/ont-manager#OntologySpec";
 
-
-	protected RDFNode sadlNode = null;
-	protected Property createdBy;
-	protected Property altUrlProp;
-	protected Property publicUrlProp;
-	protected Property prefixProp;
-	protected RDFNode createdBySadlLiteral;
-
-	protected OntDocumentManager jenaDocumentMgr;
-	private OntModelSpec ontModelSpec = null;
-    
      /**
      * Call this method to remove double quotes from the beginning and end of a string so quoted.
      * @param quotedString -- the string from which quotes are to be removed
@@ -231,47 +202,6 @@ public class UtilsForJena {
     	return urlstr;
     }
 
-//	private String siblingFolderUrl(String modelFolder, String fileName, String lastToken) {
-//		if (modelFolder != null) {
-//			File folder = new File(modelFolder);
-//			File parent = folder.getParentFile();
-//			File[] siblings = parent.listFiles();
-//			for (int i = 0; i < siblings.length; i++) {
-//				if (siblings[i].getName().equals(lastToken)) {
-//					return fileNameToFileUrl(siblings[i].getAbsolutePath() + File.separator + fileName);
-//				}
-//			}
-//		}
-//		return null;
-//	}
-//	
-//	private void setupJenaFileManager(String modelFolder, Model mappingModel) throws IOException {
-//		getJenaDocumentMgr(mappingModel).getFileManager().addLocatorFile(modelFolder);
-//		getJenaDocumentMgr(mappingModel).getFileManager().addLocatorURL();
-//		SadlReadFailureHandler rfHandler = new SadlReadFailureHandler(logger );	
-////		rfHandler.setSadlConfigMgr(this);
-//		getJenaDocumentMgr(mappingModel).setReadFailureHandler(rfHandler);
-//	}
-//	
-//	public OntDocumentManager getJenaDocumentMgr(Model mappingModel) {
-//		if (jenaDocumentMgr == null) {
-//			if (mappingModel != null) {
-//				setJenaDocumentMgr(new OntDocumentManager());
-//				if (ontModelSpec != null) {
-//					ontModelSpec.setDocumentManager(getJenaDocumentMgr(mappingModel));
-//				}
-//			}
-//			else {
-//				setJenaDocumentMgr(OntDocumentManager.getInstance());
-//			}
-//		}
-//		return jenaDocumentMgr;
-//	}
-//
-//	private void setJenaDocumentMgr(OntDocumentManager docmgr) {
-//		jenaDocumentMgr = docmgr;
-//	}
-	
 	public String getPolicyFilename(org.eclipse.emf.ecore.resource.Resource somerojectResource) {
 		org.eclipse.emf.common.util.URI prjUri = ResourceManager.getProjectUri(somerojectResource);
 		if (prjUri != null) {
@@ -287,100 +217,6 @@ public class UtilsForJena {
 		}
 		return null;
 	}
-
-//	public String getNewPolicyFileContent(String policyFilename) throws IOException, URISyntaxException, JenaProcessorException {
-//		StringBuilder sb = new StringBuilder(getMinimalPolicyFileContent());
-//		sb = addExternalMappings(sb, new File(policyFilename).getParentFile().getParent());
-//		return sb.toString();
-//	}
-	
-//	public synchronized OntModel createAndInitializeJenaModel(String policyFilename, OntModelSpec omSpec, boolean loadImports) 
-//			throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
-//		File pf = null;
-//		if (policyFilename != null && policyFilename.length() > 0) {
-//			pf = new File(policyFilename);
-//			if (!pf.exists()) {
-//				String pfContent = getNewPolicyFileContent(policyFilename);
-//				File pfp = pf.getParentFile();
-//				pfp.mkdirs();
-//				new SadlUtils().stringToFile(pf, pfContent, false);
-//			}
-//		}
-//		else {
-//			logger.warn("Policy file name is invalid");
-//		}
-//		if (pf != null) {
-//			String modelFolder = pf.getParent();
-//			OntDocumentManager owlDocMgr = loadMappings(pf);
-//			OntModelSpec spec = new OntModelSpec(omSpec);
-//			spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolder));
-//			spec.setDocumentManager(owlDocMgr);
-//			owlDocMgr.setProcessImports(loadImports);
-//			OntModel theModel = ModelFactory.createOntologyModel(spec);
-//			return theModel;
-//		}
-//		else {
-//			OntModel theModel = ModelFactory.createOntologyModel(OntModelSpec.getDefaultSpec(OWL.getURI()));
-//			return theModel;
-//		}
-//	}
-
-	private StringBuilder addExternalMappings(StringBuilder sb, String prjDir) throws IOException, JenaProcessorException {
-		// find all .url files
-		FileFilter filter = new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				if (pathname.isDirectory()) {
-					return true;
-				}
-				return pathname.isFile() && pathname.getName().endsWith(".url");
-			}
-		};
-		List<File> urlFiles = findUrlFiles(new ArrayList<File>(), new File(prjDir), filter);
-		if (urlFiles != null && urlFiles.size() > 0) {
-			SadlUtils su = new SadlUtils();
-			for (int i = 0; urlFiles != null && i < urlFiles.size(); i++) {
-				File urlFile = urlFiles.get(i);
-				String content = su.fileToString(urlFile);
-				List<String>[] unp = su.getUrlsAndPrefixesFromExternalUrlContent(content);
-				if (unp != null) {
-					List<String> urls = unp[0];
-					List<String> prefixes = unp[1];
-					for (int j = 0; j < urls.size(); j++) {
-						String url = urls.get(j);
-						String prefix = (prefixes != null && prefixes.size() > j) ? prefixes.get(j) : null;
-						String urlFilename = su.getExternalModelRootFromUrlFilename(urlFile);
-						String altUrl = fileNameToFileUrl(prjDir + File.separator + urlFilename + File.separator + su.externalUrlToRelativePath(url));
-						String pubUri = su.getPublicUriFromUrl(url, altUrl);
-						System.out.println("Found external mapping: " + prefix  + " -> " + url + " at " + altUrl);
-//						sb.replace(0, sb.length(), addMappingToPolicyFile(sb.toString(), url, altUrl, prefix, EXTERNAL_URL));
-						// TODO this will break external models--must resolve alternate mapping addition using ConfigurationManagerForIDE
-					}
-				}
-			}
-		}
-		return sb;
-	}
-
-	private List<File> findUrlFiles(List<File> found, File folder, FileFilter filter) {
-		if (folder.isDirectory()) {
-			File[] matchingContents = folder.listFiles(filter);
-			for (int i = 0; i < matchingContents.length; i++) {
-				File mf = matchingContents[i];
-				if (mf.isDirectory()) {
-					found = findUrlFiles(found, mf, filter);
-				}
-				else {
-					found.add(mf);
-				}
-			}
-		}
-		return found;
-	}
-	
-	/*
-	 * Methods to handle SADL typed lists
-	 */
 
 	/**
 	 * Method to get the list type of a typed list

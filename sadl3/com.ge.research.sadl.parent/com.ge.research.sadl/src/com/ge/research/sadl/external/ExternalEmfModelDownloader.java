@@ -129,7 +129,7 @@ public class ExternalEmfModelDownloader {
 	private String readFileContent(URI modelDefinitionUri){
 		try {
 			File file = projectHelper.toPath(modelDefinitionUri).toFile();
-			return Files.toString(file, StandardCharsets.UTF_8);
+			return Files.asCharSource(file, StandardCharsets.UTF_8).read();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

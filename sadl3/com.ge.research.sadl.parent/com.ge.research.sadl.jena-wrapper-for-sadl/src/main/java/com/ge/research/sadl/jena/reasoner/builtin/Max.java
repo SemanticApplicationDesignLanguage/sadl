@@ -137,16 +137,16 @@ public class Max extends TypedBaseBuiltin {
         	return false;
         }
     	if (maxVal instanceof Float) {
-    		min = Utils.makeFloatNode(((Number) maxVal).floatValue());
+    		min = Utils.makeFloatNode((Float) maxVal);
     	}
     	else if ( maxVal instanceof Double) {
-    		min = Util.makeDoubleNode(((Number) maxVal).doubleValue());
+    		min = Util.makeDoubleNode(((Double) maxVal).doubleValue());
     	}
     	else if (maxVal instanceof XSDDateTime) {
-    		min = Utils.makeXSDDateTimeNode((XSDDateTime)maxVal);
+    		min = Utils.makeXSDDateTimeNode((XSDDateTime) maxVal);
     	}
     	else if ( maxVal instanceof Integer) {
-    		min = Util.makeIntNode(((Number) maxVal).intValue());
+    		min = Util.makeIntNode(((Integer) maxVal).intValue());
     	}
     	else {
     		min = Util.makeLongNode(((Number) maxVal).longValue());

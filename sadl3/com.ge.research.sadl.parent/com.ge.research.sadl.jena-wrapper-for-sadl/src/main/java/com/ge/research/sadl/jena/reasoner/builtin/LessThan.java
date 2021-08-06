@@ -75,7 +75,7 @@ public class LessThan extends org.apache.jena.reasoner.rulesys.builtins.LessThan
         	return retVal;
         }
         else {
-        	 Node booleanVal =  NodeFactory.createLiteral(LiteralLabelFactory.create(new Boolean(retVal)));
+        	 Node booleanVal =  NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(Boolean.valueOf(retVal)));
              return context.getEnv().bind(args[length - 1], booleanVal);
         }
     }

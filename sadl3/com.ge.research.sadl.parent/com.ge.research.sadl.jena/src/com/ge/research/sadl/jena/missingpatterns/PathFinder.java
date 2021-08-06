@@ -786,7 +786,7 @@ public class PathFinder {
 			}
 		}
 		if (target == null) {
-			Double idx = new Double(Math.random() * roots.size());
+			Double idx = Double.valueOf(Math.random() * roots.size());
 			target = roots.get(idx.intValue());
 		}
 		

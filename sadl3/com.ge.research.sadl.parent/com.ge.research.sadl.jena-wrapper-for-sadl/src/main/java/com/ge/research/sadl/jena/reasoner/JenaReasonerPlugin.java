@@ -99,12 +99,12 @@ import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.reasoner.rulesys.Rule.ParserException;
 import org.apache.jena.reasoner.rulesys.RuleDerivation;
 import org.apache.jena.reasoner.rulesys.builtins.Product;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.shared.RulesetNotFoundException;
 import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.update.UpdateAction;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
-import org.apache.jena.util.FileManager;
 import org.apache.jena.util.PrintUtil;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OWL;
@@ -853,7 +853,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		}
 		getReasonerOnlyWhenNeeded();
 		initializeDataModel();
-		dataModel.add(dataModel.getDocumentManager().getFileManager().loadModel(instanceDatafile));
+		dataModel.add(RDFDataMgr.loadModel(instanceDatafile));
 		addModelNamespaceToJenaMapAsEmptyPrefix(dataModel);
 		newInputFlag = true;
 		dataModelSourceCount++;
@@ -866,7 +866,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	public boolean loadInstanceData(URI instanceDatafile) throws IOException, ConfigurationException {
 		initializeDataModel();
-		dataModel.add(FileManager.get().loadModel(instanceDatafile.toString()));
+		dataModel.add(RDFDataMgr.loadModel(instanceDatafile.toString()));
 		addModelNamespaceToJenaMapAsEmptyPrefix(dataModel);
 		newInputFlag = true;
 		dataModelSourceCount++;
@@ -1434,7 +1434,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	public boolean isDeleteOrInsert(String queryStr) {
 		try {
 			Query query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
-			if (query.getQueryType() == Query.QueryTypeUnknown) {
+			if (query.isUnknownType()) {
 				// not an ask or a select or a construct or a describe--assume it's a delete or an insert (new version of Jena is problably more specific)
 				return true;
 			}
@@ -3146,7 +3146,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	public BuiltinInfo getBuiltinInfo(Class<?> bcls) {
 		try {
-			Builtin binst = (Builtin) this.getClass().getClassLoader().loadClass(bcls.getCanonicalName()).newInstance();
+			Builtin binst = (Builtin) this.getClass().getClassLoader().loadClass(bcls.getCanonicalName()).getDeclaredConstructor().newInstance();
 			BuiltinInfo binfo = new BuiltinInfo(binst.getName(), bcls.getCanonicalName(), getReasonerFamily(), binst.getArgLength());
 			if (binst instanceof TypedBaseBuiltin) {
 				binfo.setSignature(((TypedBaseBuiltin)binst).getFunctionSignatureString());
@@ -3155,13 +3155,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			else {
 				return binfo;
 			}
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}				

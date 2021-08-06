@@ -383,7 +383,7 @@ abstract class AbstractSadlPlatformTest extends Assert {
 		(String)=>void assert) {
 
 		val file = locationProvider.get(inputFilePath).file;
-		val content = Files.toString(Paths.get(file.locationURI).toFile, StandardCharsets.UTF_8);
+		val content = Files.asCharSource(Paths.get(file.locationURI).toFile, StandardCharsets.UTF_8).read();
 		assert.apply(content);
 	}
 

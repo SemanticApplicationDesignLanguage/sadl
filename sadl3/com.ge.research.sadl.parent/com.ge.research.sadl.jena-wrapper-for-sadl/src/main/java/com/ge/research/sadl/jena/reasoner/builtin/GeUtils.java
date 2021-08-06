@@ -76,7 +76,7 @@ public class GeUtils {
      */
     private static Node doMakeList(Node[] nodes, int next, RuleContext context) {
         if (next < nodes.length) {
-            Node listNode = NodeFactory.createAnon();
+            Node listNode = NodeFactory.createBlankNode();
             context.add(new Triple(listNode, RDF.Nodes.first, nodes[next]));
             context.add(new Triple(listNode, RDF.Nodes.rest, doMakeList(nodes, next+1, context)));
             return listNode;
@@ -90,7 +90,7 @@ public class GeUtils {
     		return null;
     	}
     	if (l == null) {
-        	Node listNode = NodeFactory.createAnon();
+        	Node listNode = NodeFactory.createBlankNode();
         	context.add(new Triple(listNode, RDF.Nodes.type, RDF.List.asNode()));
             context.add(new Triple(listNode, RDF.Nodes.first, e));
             context.add(new Triple(listNode, RDF.Nodes.rest, RDF.Nodes.nil));
@@ -193,7 +193,7 @@ public class GeUtils {
 			   					throw new BuiltinException(bi, context, "For complex patterns (more than one edge), the list variable must be in the object value position.");
 			   				}
 						}
-						variableCount.put(n, new Integer(cnt));
+						variableCount.put(n, Integer.valueOf(cnt));
 						listVar = n;
 					}
 					pattern[tripleIdx][inTripleIdx] = n;
@@ -392,7 +392,7 @@ public class GeUtils {
 			if (entirePatternExactMatch && varValues.size() == 0) {
 //				Node trueNode = Utils.makeBooleanNode(true);	// 10/20/2014, awc: don't know why this won't resolve....
 				Node[] result = new Node[1];
-				result[0] = NodeFactory.createLiteral(LiteralLabelFactory.create(new Boolean(true)));
+				result[0] = NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(Boolean.valueOf(true)));
 				varValues.put(null, result);
 			}
 		}

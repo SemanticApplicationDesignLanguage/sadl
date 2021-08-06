@@ -21,7 +21,6 @@
     <dependency>
       <groupId>com.ge.research.sadl</groupId>
       <artifactId>com.ge.research.sadl</artifactId>
-      <type>eclipse-plugin</type>
     </dependency>
     <dependency>
       <groupId>com.ge.research.sadl</groupId>

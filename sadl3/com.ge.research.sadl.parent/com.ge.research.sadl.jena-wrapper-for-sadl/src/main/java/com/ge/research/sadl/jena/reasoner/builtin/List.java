@@ -117,16 +117,16 @@ public class List extends BaseBuiltin {
 		        	if (nodes[i].isLiteral()) {
 		        		Object v = nodes[i].getLiteralValue();
 		        		if (v instanceof Float) {
-		        			nodes[i] = Util.makeDoubleNode(new Double(((Float)v).doubleValue()));
+		        			nodes[i] = Util.makeDoubleNode(((Float)v).doubleValue());
 		        		}
 		        		else if(v instanceof Double) {
-		        			nodes[i] = Util.makeDoubleNode(new Double(((Double)v).doubleValue()));
+		        			nodes[i] = Util.makeDoubleNode(((Double)v).doubleValue());
 		        		}
 		        		else if (v instanceof Long) {
-		        			nodes[i] = Util.makeLongNode(new Long((Long)v).longValue());
+		        			nodes[i] = Util.makeLongNode(((Long)v).longValue());
 		        		}
 		        		else if (v instanceof Integer) {
-		        			nodes[i] = Util.makeIntNode(new Integer((Integer)v).intValue());
+		        			nodes[i] = Util.makeIntNode(((Integer)v).intValue());
 		        		}
 		        	}
 		        }
