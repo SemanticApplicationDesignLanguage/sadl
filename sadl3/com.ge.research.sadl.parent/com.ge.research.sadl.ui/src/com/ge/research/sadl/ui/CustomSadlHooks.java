@@ -14,7 +14,7 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.Ontology;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.RDFWriterI;
 import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.resources.IBuildConfiguration;
 import org.eclipse.core.resources.IFile;
@@ -463,7 +463,7 @@ import com.google.inject.Inject;
 			String sadlMetricsMetadataModelName = SadlConstants.SADL_METRICS_METAMODEL_URI;;
 	
 			OntModel sadlMetricsMetamodel = getOntModelFromString(getSadlMetricsMetadataModel());
-			RDFWriter w = sadlMetricsMetamodel.getWriter(format);
+			RDFWriterI w = sadlMetricsMetamodel.getWriter(format);
 			w.setProperty("xmlbase", sadlMetricsMetadataModelName);
 			FileOutputStream out = new FileOutputStream(sadlMetricsMetadataFile);
 //						/****** temp *****/
@@ -496,7 +496,7 @@ import com.google.inject.Inject;
 				}
 				subMonitor.worked(1);
 			}
-			RDFWriter w3 = metricsModel.getWriter(format);
+			RDFWriterI w3 = metricsModel.getWriter(format);
 			w3.setProperty("xmlbase", modelName);
 			FileOutputStream out3 = new FileOutputStream(filename);
 			w3.write(metricsModel.getBaseModel(), out3, modelName);

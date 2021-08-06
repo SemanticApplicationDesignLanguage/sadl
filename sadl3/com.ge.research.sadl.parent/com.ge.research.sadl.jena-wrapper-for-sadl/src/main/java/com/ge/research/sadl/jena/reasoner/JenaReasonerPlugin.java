@@ -78,8 +78,8 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelGetter;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.RDFReader;
-import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.RDFReaderI;
+import org.apache.jena.rdf.model.RDFWriterI;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
@@ -895,11 +895,11 @@ public class JenaReasonerPlugin extends Reasoner{
 			initializeDataModel();
 			OntModel newModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
 			if (format != null) {
-				RDFReader reader = newModel.getReader(format);
+				RDFReaderI reader = newModel.getReader(format);
 				reader.read(newModel, is, base);
 			}
 			else {
-				RDFReader reader = newModel.getReader();
+				RDFReaderI reader = newModel.getReader();
 				reader.read(newModel, is, base);
 			}
 			dataModel.add(newModel);
@@ -2884,7 +2884,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 			String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	
 		    FileOutputStream fps = new FileOutputStream(filename);
-	        RDFWriter rdfw = m.getWriter(format);
+	        RDFWriterI rdfw = m.getWriter(format);
 	        rdfw.write(m, fps, modelname);
 	        try {
 				fps.close();
@@ -3622,7 +3622,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	
 	private void dumpInfModel(String filename, Model m, String modelname, String format) throws FileNotFoundException {
 	    FileOutputStream fps = new FileOutputStream(filename);
-        RDFWriter rdfw = m.getWriter(format);
+        RDFWriterI rdfw = m.getWriter(format);
         rdfw.write(m, fps, modelname);
         try {
 			fps.close();

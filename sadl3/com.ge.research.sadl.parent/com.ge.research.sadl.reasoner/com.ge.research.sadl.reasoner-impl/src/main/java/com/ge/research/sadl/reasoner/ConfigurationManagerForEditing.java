@@ -48,7 +48,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.RDFWriterI;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Seq;
 import org.apache.jena.rdf.model.Statement;
@@ -1646,7 +1646,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 			}
 
 			try {
-				RDFWriter rdfw = model.getWriter(format);
+				RDFWriterI rdfw = model.getWriter(format);
 				// NTripleWriter.setProperty always throws UnknownPropertyException; ditto for N3.
 				if (format.startsWith("RDF/XML")) {
 //					rdfw.setProperty("xmlbase", toNamespace(modelName)); 

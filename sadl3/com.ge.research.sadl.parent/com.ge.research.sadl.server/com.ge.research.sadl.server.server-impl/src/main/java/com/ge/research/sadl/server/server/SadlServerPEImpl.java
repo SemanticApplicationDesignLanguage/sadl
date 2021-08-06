@@ -79,8 +79,8 @@ import org.apache.jena.rdf.model.ModelGetter;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.RDFReader;
-import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.RDFReaderI;
+import org.apache.jena.rdf.model.RDFWriterI;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -390,7 +390,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			return addError(new ModelError("Failed to save model to file '" + fullyQualifiedOwlFilename + "': " + e.getLocalizedMessage(), ErrorType.ERROR));
 		}
 		try {
-		    RDFWriter rdfw = ontModel.getWriter(format);
+		    RDFWriterI rdfw = ontModel.getWriter(format);
 		    if (format.startsWith("RDF/XML")) {
 		        rdfw.setProperty("xmlbase", modelName); 
 		        rdfw.setProperty("relativeURIs", "");
@@ -1882,7 +1882,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 			boolean reasonerStat = reasoner.loadInstanceData(dataSrc.getInputStream(), inputFormat);
 			BufferedReader in = new BufferedReader(new InputStreamReader(dataSrc.getInputStream()));
 			String base = null;
-			RDFReader reader;
+			RDFReaderI reader;
 			try {
 				reader = getInstanceData().getReader();
 				reader.read(getInstanceData(), dataSrc.getInputStream(), base);
