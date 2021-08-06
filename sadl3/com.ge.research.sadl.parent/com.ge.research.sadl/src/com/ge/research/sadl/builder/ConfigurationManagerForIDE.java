@@ -28,6 +28,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -657,8 +658,13 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		}
 		
 		if (Platform.isRunning()) {
-			final Object instance = Platform.getBundle("com.ge.research.sadl").loadClass(name).newInstance();
-			return clazz.cast(instance);
+			try {
+				final Object instance = Platform.getBundle("com.ge.research.sadl").loadClass(name).getDeclaredConstructor().newInstance();
+				return clazz.cast(instance);
+			} catch (InvocationTargetException | NoSuchMethodException e) {
+				// Wrap and throw a CNFE
+				throw new ClassNotFoundException("Cannot find service class for name: " + name + " for service API " + clazz + ".", e);
+			}
 		}
 		
 		return super.getClassInstance(name, clazz);

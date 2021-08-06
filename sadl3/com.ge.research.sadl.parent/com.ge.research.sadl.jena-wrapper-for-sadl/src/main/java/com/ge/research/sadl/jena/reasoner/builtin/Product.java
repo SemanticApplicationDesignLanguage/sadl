@@ -54,7 +54,7 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
         BindingEnvironment env = context.getEnv();
     	if (GeUtils.isGraphPatternInput(this, args, length, context)) {
         	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
-        	Number nProd = new Long(1);
+        	Number nProd = Long.valueOf(1);
         	nProd = multiplyList(nProd, Arrays.asList(nodes), context);
         	Node prod = null;
         	if (nProd instanceof Float || nProd instanceof Double) {
@@ -106,7 +106,7 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
             if (n1 == null || n1.equals(RDF.Nodes.nil)) {
                 return false;
             } else {
-            	Number nProd = new Long(1);
+            	Number nProd = Long.valueOf(1);
             	nProd = multiplyList(nProd, n1, context);
             	Node prod = null;
             	if (nProd instanceof Float || nProd instanceof Double) {

@@ -177,7 +177,7 @@ public class OwlFileResourceImportPage1 extends WizardResourceImportPage
         GridData buttonData = new GridData(GridData.FILL_HORIZONTAL);
         button.setLayoutData(buttonData);
 
-        button.setData(new Integer(id));
+        button.setData(Integer.valueOf(id));
         button.setText(label);
 
         if (defaultButton) {

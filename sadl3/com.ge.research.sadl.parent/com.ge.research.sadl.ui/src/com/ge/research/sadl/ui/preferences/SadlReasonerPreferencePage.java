@@ -801,11 +801,11 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		String[] category = new String[]{"Jena"};
 		ConfigurationOption stringOption = new ConfigurationOption(category, "stringOption", "String option", "New string option");
 		config.put("stringOption", stringOption);
-		ConfigurationOption booleanOption = new ConfigurationOption(category, "booleanOption", "Boolean option", new Boolean(true));
+		ConfigurationOption booleanOption = new ConfigurationOption(category, "booleanOption", "Boolean option", Boolean.valueOf(true));
 		config.put("booleanOption", booleanOption);
-		ConfigurationOption integerOption = new ConfigurationOption(category, "integerOption", "Integer option", new Integer(567));
+		ConfigurationOption integerOption = new ConfigurationOption(category, "integerOption", "Integer option", Integer.valueOf(567));
 		config.put("integerOption", integerOption);
-		ConfigurationOption doubleOption = new ConfigurationOption(category, "doubleOption", "Double option", new Double(123.45));
+		ConfigurationOption doubleOption = new ConfigurationOption(category, "doubleOption", "Double option", Double.valueOf(123.45));
 		config.put("doubleOption", doubleOption);
 	}
 

@@ -85,6 +85,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.reasoner.rulesys.Rule;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.update.UpdateAction;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateRequest;
@@ -1932,11 +1933,11 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
     		}
     		try {
     			if (pubUri != null) {
-    				createInstanceModel(pubUri).add(getInstanceData().getDocumentManager().getFileManager().loadModel(serverDataLocator));
+    				createInstanceModel(pubUri).add(RDFDataMgr.loadModel(serverDataLocator));
     			}
     			else {
 					// no default
-					dataModel = getConfigurationMgr().getJenaDocumentMgr().getFileManager().loadModel(serverDataLocator);
+					dataModel = RDFDataMgr.loadModel(serverDataLocator);
 					if (dataModel != null) {
 						createInstanceModel(lastChanceDefaultInstanceUri);
 						try {
