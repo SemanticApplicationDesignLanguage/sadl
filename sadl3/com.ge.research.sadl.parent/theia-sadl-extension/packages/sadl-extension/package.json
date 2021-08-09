@@ -1,6 +1,6 @@
 {
   "name": "sadl-extension",
-  "version": "0.1.9",
+  "version": "0.2.0-next.3436+4cbff3cb",
   "description": "An extension for Theia connection language support for the SADL DSL",
   "license": "EPL-1.0",
   "keywords": [
@@ -41,5 +41,6 @@
       "frontend": "lib/browser/sadl-frontend-module",
       "backend": "lib/node/sadl-backend-module"
     }
-  ]
+  ],
+  "gitHead": "4cbff3cbac818def4023f31d5e69e84ed5f3f6e7"
 }
