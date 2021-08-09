@@ -1923,7 +1923,7 @@
     serialize-javascript "^1.4.0"
     webpack-sources "^1.0.1"
 
-"@theia/core@1.4.0", "@theia/core@^1.4.0", "@theia/core@next":
+"@theia/core@1.4.0", "@theia/core@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@theia/core/-/core-1.4.0.tgz#6b6267522595e7eed34838d910f6d9d6bf102953"
   integrity sha512-OL8738rAw6kst262nmQzfWUVWKtUUg5DVWlwPqmk77eJF+4yY37oX9hzF93ZdeMdml+TVrMUXq2iNT/JW9LCiQ==
@@ -1972,7 +1972,7 @@
     ws "^7.1.2"
     yargs "^11.1.0"
 
-"@theia/editor@1.4.0", "@theia/editor@^1.4.0", "@theia/editor@next":
+"@theia/editor@1.4.0", "@theia/editor@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@theia/editor/-/editor-1.4.0.tgz#cbc5603027d35c9fb12ec105c43fbef6b1e863b7"
   integrity sha512-aOzr6eYWkPtWPc3LAXcgqXIyAFCU4VKTj1v4yHorKC2awAZarp6f/QG4YfMUiv3JAClgslGbmEwlxdPhJz87PA==
@@ -1996,7 +1996,7 @@
     fuzzy "^0.1.3"
     vscode-ripgrep "^1.2.4"
 
-"@theia/filesystem@1.4.0", "@theia/filesystem@^1.4.0", "@theia/filesystem@next":
+"@theia/filesystem@1.4.0", "@theia/filesystem@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@theia/filesystem/-/filesystem-1.4.0.tgz#c76d33bd983f422768900b56ca390a670307298c"
   integrity sha512-o5bNs8p2cWL57CviXVbIFtAmvkNjAlf00Cj3IxJBU1guPHSS1+pUOlf4ONSr/T/QuIxeLHcDgtCXJxMi6x5Uyg==
@@ -2046,7 +2046,7 @@
     p-queue "^2.4.2"
     ts-md5 "^1.2.2"
 
-"@theia/languages@1.4.0", "@theia/languages@^1.4.0", "@theia/languages@next":
+"@theia/languages@1.4.0", "@theia/languages@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@theia/languages/-/languages-1.4.0.tgz#9d9034ccfc304bd9fb4380855e5695740227f189"
   integrity sha512-FKjzr9b7wVzvs6y5HJG9Ddu7ilScZwZXvRonEGu8ESxgicvf6vNjBZjHV2grSHdBE/PwYINfDGBfh9y2o9Obqw==
@@ -2097,7 +2097,7 @@
   resolved "https://registry.yarnpkg.com/@theia/monaco-editor-core/-/monaco-editor-core-0.19.3.tgz#8456aaa52f4cdc87c78697a0edfcccb9696a374d"
   integrity sha512-+2I5pvbK9qxWs+bLFUwto8nYubyI759/p0z86r2w0HnFdcMQ6rcqvcTupO/Cd/YAJ1/IU38PBWS7hwIoVnvCsQ==
 
-"@theia/monaco@1.4.0", "@theia/monaco@^1.4.0", "@theia/monaco@next":
+"@theia/monaco@1.4.0", "@theia/monaco@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@theia/monaco/-/monaco-1.4.0.tgz#b41113f6a52d7eb190d629ccdea05727e367790b"
   integrity sha512-Y0uvOq8JL/dbbk5S1kQtnO7EQ1dm5BDkBPwACcR23AS0qLLibn8IszpLCPAqKc8GlSsJLrlhCBs/5TspvyIRlw==
@@ -2116,7 +2116,7 @@
     onigasm "^2.2.0"
     vscode-textmate "^4.0.1"
 
-"@theia/navigator@1.4.0", "@theia/navigator@^1.4.0", "@theia/navigator@next":
+"@theia/navigator@1.4.0", "@theia/navigator@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@theia/navigator/-/navigator-1.4.0.tgz#a41e544e7c37a6192f37c79c624816db99ca8732"
   integrity sha512-6PExWqUxYwkfOQWWlMRdMRppHNv9kbf97V3ARcvyGYL8ZYEDNxFNLyEzvnenaJlo7nhaehf0NFtSF0A5pDKzFw==
@@ -2141,7 +2141,7 @@
   dependencies:
     "@theia/core" "^1.4.0"
 
-"@theia/output@1.4.0", "@theia/output@^1.4.0", "@theia/output@next":
+"@theia/output@1.4.0", "@theia/output@^1.4.0":
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/@theia/output/-/output-1.4.0.tgz#e4b3229ad2cc4ade93f6864e3eaf5aa995014b12"
   integrity sha512-h+3KRmjzYBojGKeUi3gKCztCsPRg+p4GDbDokjLC/AH55mXgSqU6srNR1qOpISkG81wcs4ZXp8j0ceqOE45XIQ==
@@ -11704,20 +11704,6 @@ rxjs@^6.3.1, rxjs@^6.6.0:
   integrity sha512-trsQc+xYYXZ3urjOiJOuCOa5N3jAZ3eiSpQB5hIT8zGlL2QfnHLJ2r7GMkBGuIausdJN1OneaI6gQlsqNHHmZQ==
   dependencies:
     tslib "^1.9.0"
-
-sadl-extension@^1.4.0:
-  version "0.2.0-next.0"
-  resolved "https://registry.yarnpkg.com/sadl-extension/-/sadl-extension-0.2.0-next.0.tgz#f622c2b792c2a7a8bd7f429814404015127b4f2c"
-  integrity sha512-70f0i/XZEsbxlwP0qUDuZW6/I9hKlBUpzlwDKr4+KQVmat2j7GUjb/pt07ceNwCYMD6tspsDLiiKXyhR/GwoBw==
-  dependencies:
-    "@theia/core" next
-    "@theia/editor" next
-    "@theia/filesystem" next
-    "@theia/languages" next
-    "@theia/monaco" next
-    "@theia/navigator" next
-    "@theia/output" next
-    valid-filename "^3.1.0"
 
 safe-buffer@5.1.2, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.2"
