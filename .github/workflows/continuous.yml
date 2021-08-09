@@ -66,6 +66,7 @@ jobs:
     steps:
     - name: Check out SADL source
       uses: actions/checkout@v2
+      fetch-depth: 0 # Needed by lerna to publish canary versions
 
     - name: Set up Java
       uses: actions/setup-java@v2.1.0
