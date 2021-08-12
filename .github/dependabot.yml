@@ -28,7 +28,7 @@ updates:
       interval: "daily"
 
   # Maintain dependencies for Yarn
-  - package-ecosystem: "yarn"
+  - package-ecosystem: "npm"
     # Location of package manifests
     directory: "/sadl3/com.ge.research.sadl.parent/theia-sadl-extension/"
     schedule:
