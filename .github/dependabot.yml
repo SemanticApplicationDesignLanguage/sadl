@@ -5,27 +5,33 @@
 
 version: 2
 updates:
-  - package-ecosystem: "docker" # See documentation for possible values
-    directory: "/" # Location of package manifests
+
+  # Maintain dependencies for Docker
+  - package-ecosystem: "docker"
+    # Location of Dockerfile
+    directory: "/sadl3/com.ge.research.sadl.parent/theia-sadl-extension/apps/browser-app/"
     schedule:
-      interval: "weekly"
-  - package-ecosystem: "docker" # See documentation for possible values
-    directory: "/sadl3/com.ge.research.sadl.parent/theia-sadl-extension/apps/browser-app/" # Location of package manifests
+      interval: "daily"
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    # Location of .github/workflows
+    directory: "/"
     schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions" # See documentation for possible values
-    directory: "/" # Location of package manifests
+      interval: "daily"
+
+  # Maintain dependencies for Maven
+  - package-ecosystem: "maven"
+    # Location of poms
+    directory: "/sadl3/com.ge.research.sadl.parent/"
     schedule:
-      interval: "weekly"
-  - package-ecosystem: "maven" # See documentation for possible values
-    directory: "/sadl3/com.ge.research.sadl.parent/" # Location of package manifests
+      interval: "daily"
+
+  # Maintain dependencies for Yarn
+  - package-ecosystem: "yarn"
+    # Location of package manifests
+    directory: "/sadl3/com.ge.research.sadl.parent/theia-sadl-extension/"
     schedule:
-      interval: "weekly"
-    # Allow up to 20 open pull requests for maven dependencies
-    open-pull-requests-limit: 20
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/sadl3/com.ge.research.sadl.parent/theia-sadl-extension/" # Location of package manifests
-    schedule:
-      interval: "weekly"
-    # Allow up to 20 open pull requests for npm dependencies
-    open-pull-requests-limit: 20
+      interval: "daily"
+    # Increase default limit of 5
+    open-pull-requests-limit: 25
