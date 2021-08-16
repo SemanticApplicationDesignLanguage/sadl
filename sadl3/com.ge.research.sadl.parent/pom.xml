@@ -232,11 +232,6 @@
           </executions>
         </plugin>
         <plugin>
-          <groupId>com.googlecode.addjars-maven-plugin</groupId>
-          <artifactId>addjars-maven-plugin</artifactId>
-          <version>1.0.5</version>
-        </plugin>
-        <plugin>
           <groupId>eu.somatik.serviceloader-maven-plugin</groupId>
           <artifactId>serviceloader-maven-plugin</artifactId>
           <version>1.4.0</version>
@@ -258,26 +253,26 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.1.0</version>
-          <!-- Clean all files built by Tycho -->
+          <!-- Clean extra files created by build -->
           <configuration>
             <filesets>
               <fileset>
-                <directory>${basedir}</directory>
+                <directory>${project.basedir}</directory>
                 <includes>
                   <include>plugin.xml_gen</include>
                 </includes>
               </fileset>
               <fileset>
-                <directory>lib</directory>
+                <directory>${project.basedir}/lib</directory>
               </fileset>
               <fileset>
-                <directory>model/generated</directory>
+                <directory>${project.basedir}/model/generated</directory>
               </fileset>
               <fileset>
-                <directory>src-gen</directory>
+                <directory>${project.basedir}/src-gen</directory>
               </fileset>
               <fileset>
-                <directory>xtend-gen</directory>
+                <directory>${project.basedir}/xtend-gen</directory>
               </fileset>
             </filesets>
           </configuration>
@@ -574,8 +569,9 @@
           <artifactId>xtend-maven-plugin</artifactId>
           <version>${version.xtext}</version>
           <configuration>
-            <outputDirectory>${basedir}/xtend-gen</outputDirectory>
-            <testOutputDirectory>${basedir}/xtend-gen</testOutputDirectory>
+            <outputDirectory>${project.basedir}/xtend-gen</outputDirectory>
+            <testOutputDirectory>${project.basedir}/xtend-gen</testOutputDirectory>
+            <xtendAsPrimaryDebugSource>true</xtendAsPrimaryDebugSource>
           </configuration>
           <executions>
             <execution>
