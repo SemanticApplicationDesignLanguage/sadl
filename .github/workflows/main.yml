@@ -1,90 +1,55 @@
-# Runs after every pull request or push (except tag-only pushes)
+name: SADL Main Workflow
 
-name: SADL Continuous Integration Workflow
+# Runs whenever the main branch has a change made to it (except for
+# tag-only pushes)
+
 on:
-  pull_request:
-    branches: [ development ]
   push:
     branches: [ development ]
     tags-ignore: [ '*' ]
   workflow_dispatch:
 
+# Runs a build job and uploads SADL build artifacts:
+# - Builds SADL source & runs unit tests
+# - Uploads SADL update repository
+# - Builds WebSADL extension
+# - Publishes WebSADL npm package
+# - Builds WebSADL Docker image
+# - Pushes WebSADL image to Docker Hub
+
 jobs:
-
-# Test job:
-#  - Builds SADL source
-#  - Runs unit tests
-
-  test:
-    strategy:
-      matrix:
-        distribution: [ temurin ]
-        java-version: [ 11 ]
-        os: [ macos-latest, windows-latest ]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-    - name: Check out SADL source
-      uses: actions/checkout@v2
-
-    - name: Set up Java
-      uses: actions/setup-java@v2.2.0
-      with:
-        distribution: ${{ matrix.distribution }}
-        java-version: ${{ matrix.java-version }}
-
-    - name: Cache local Maven repository
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2/repository
-        key: ${{ matrix.os }}-m2-${{ hashFiles('**/pom.xml') }}
-
-    - name: Build SADL source
-      uses: GabrielBB/xvfb-action@v1
-      with:
-        run: mvn -B package --file sadl3/com.ge.research.sadl.parent/pom.xml
-
-# Build job:
-#  - Builds SADL source
-#  - Runs unit tests
-#  - Uploads SADL update repository
-#  - Builds WebSADL extension
-#  - Publishes WebSADL npm package
-#  - Builds WebSADL Docker image
-#  - Pushes Docker image to Docker Hub
-
   build:
     strategy:
       matrix:
         distribution: [ temurin ]
         java-version: [ 11 ]
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-20.04 ]
 
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Check out SADL source
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0 # Needed by lerna to publish canary versions
-
     - name: Set up Java
       uses: actions/setup-java@v2.2.0
       with:
         distribution: ${{ matrix.distribution }}
         java-version: ${{ matrix.java-version }}
 
-    - name: Cache local Maven repository
-      uses: actions/cache@v2
+    - name: Set up Maven cache
+      uses: actions/cache@v2.1.6
       with:
         path: ~/.m2/repository
-        key: ${{ matrix.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-maven-
+
+    - name: Check out SADL source
+      uses: actions/checkout@v2.3.4
+      with:
+        fetch-depth: 0 # Needed by lerna to publish canary versions
 
     - name: Build SADL source
-      uses: GabrielBB/xvfb-action@v1
+      uses: GabrielBB/xvfb-action@v1.5
       with:
-        run: mvn -B package --file sadl3/com.ge.research.sadl.parent/pom.xml
+        run: mvn -B package -Dtycho.localArtifacts=ignore --file sadl3/com.ge.research.sadl.parent/pom.xml
 
     - name: Get SADL zip filename
       run: |
@@ -92,7 +57,7 @@ jobs:
         echo "sadlzip=$(echo com.ge.research.sadl.update*.zip | sed 's/.zip//')" >> $GITHUB_ENV
 
     - name: Upload SADL update repository
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v2.2.4
       with:
         name: ${{ env.sadlzip }}
         path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository
@@ -106,7 +71,7 @@ jobs:
         cache-dependency-path: '**/yarn.lock'
 
     - name: Set up Python 2.7
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v2.2.2
       with:
         python-version: 2.7
 
@@ -117,13 +82,11 @@ jobs:
       run: yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension install
 
     - name: Publish WebSADL npm package
-      if: github.ref == 'refs/heads/development'
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       run: yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension run publish:next
 
     - name: Build WebSADL Docker image
-      if: github.ref == 'refs/heads/development'
       run: |
         npm install --global node-gyp@6.0.1
         npm config set node_gyp "`npm prefix -g`/lib/node_modules/node-gyp/bin/node-gyp.js"
@@ -131,12 +94,10 @@ jobs:
         sadl3/com.ge.research.sadl.parent/theia-sadl-extension/scripts/build-docker.sh
 
     - name: Login to Docker Hub
-      if: github.ref == 'refs/heads/development'
-      uses: docker/login-action@v1
+      uses: docker/login-action@v1.10.0
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Push WebSADL image to Docker Hub
-      if: github.ref == 'refs/heads/development'
       run: docker push theiaide/sadl:next
