@@ -43,7 +43,7 @@ jobs:
         run: mvn -B package -Dtycho.localArtifacts=ignore --file sadl3/com.ge.research.sadl.parent/pom.xml
 
     - name: Upload SADL zip file to release assets
-      uses: softprops/action-gh-release@v0.1.12
+      uses: softprops/action-gh-release@v1
       with:
         fail_on_unmatched_files: true
         files: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/*.zip
