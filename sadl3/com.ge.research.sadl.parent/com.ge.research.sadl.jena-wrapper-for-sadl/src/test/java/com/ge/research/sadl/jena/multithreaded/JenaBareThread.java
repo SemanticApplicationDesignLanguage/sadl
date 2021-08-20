@@ -41,9 +41,9 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.reasoner.rulesys.Rule.ParserException;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.shared.Lock;
 import org.apache.jena.shared.RulesetNotFoundException;
-import org.apache.jena.util.FileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +86,7 @@ public class JenaBareThread extends Thread {
 		String rulefn = modelFolderDir + "/Rule.rules";
 		List<Rule> ruleList = new ArrayList<Rule>();
 		try {
-			InputStream in = FileManager.get().open(rulefn);
+			InputStream in = RDFDataMgr.open(rulefn);
 			if (in != null) {
 			    try {
 			    	InputStreamReader isr = new InputStreamReader(in);

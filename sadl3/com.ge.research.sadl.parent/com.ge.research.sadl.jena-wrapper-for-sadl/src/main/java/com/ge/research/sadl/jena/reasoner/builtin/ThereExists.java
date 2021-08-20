@@ -230,7 +230,7 @@ public class ThereExists extends CancellableBuiltin {
     	
     	// there were no matches so we need to create one and insert the required matching triples
     	if (theInst == null) {
-    		theInst = NodeFactory.createAnon();
+    		theInst = NodeFactory.createBlankNode();
 			if (_logger.isDebugEnabled()) {
 				_logger.debug("in Rule " + context.getRule().getName() + " created new bnode (" + theInst.toString() + " type will be " + pclass.toString());
 			}

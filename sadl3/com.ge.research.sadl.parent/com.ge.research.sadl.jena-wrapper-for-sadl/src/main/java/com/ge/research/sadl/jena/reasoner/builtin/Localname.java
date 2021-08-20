@@ -62,7 +62,7 @@ public class Localname extends BaseBuiltin {
          if (n1.isURI()) {
         	 String ln = n1.getLocalName();
              logger.debug("returning localname '" + ln + "'");
-             Node lnn = NodeFactory.createLiteral(LiteralLabelFactory.create(ln));
+             Node lnn = NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(ln));
              return env.bind(args[1], lnn);
         }
          else {

@@ -138,16 +138,16 @@ public class Min extends TypedBaseBuiltin {
         	return false;
         }
     	if (minVal instanceof Float) {
-    		min = Utils.makeFloatNode(((Number) minVal).floatValue());
+    		min = Utils.makeFloatNode((Float) minVal);
     	}
     	else if ( minVal instanceof Double) {
-    		min = Util.makeDoubleNode(((Number) minVal).doubleValue());
+    		min = Util.makeDoubleNode(((Double) minVal).doubleValue());
     	}
     	else if (minVal instanceof XSDDateTime) {
-    		min = Utils.makeXSDDateTimeNode((XSDDateTime)minVal);
+    		min = Utils.makeXSDDateTimeNode((XSDDateTime) minVal);
     	}
     	else if ( minVal instanceof Integer) {
-    		min = Util.makeIntNode(((Number) minVal).intValue());
+    		min = Util.makeIntNode(((Integer) minVal).intValue());
     	}
     	else {
     		min = Util.makeLongNode(((Number) minVal).longValue());

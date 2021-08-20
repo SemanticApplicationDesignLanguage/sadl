@@ -54,7 +54,7 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum {
         BindingEnvironment env = context.getEnv();
         if (GeUtils.isGraphPatternInput(this, args, length, context)) {
         	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
-        	Number nSum = new Long(0);
+        	Number nSum = Long.valueOf(0);
         	nSum = addList(nSum, Arrays.asList(nodes), context);
         	Node sum = null;
         	if (nSum instanceof Float || nSum instanceof Double) {
@@ -106,7 +106,7 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum {
         	if (n1 == null || n1.equals(RDF.Nodes.nil)) {
                 return false;
             } else {
-            	Number nSum = new Long(0);
+            	Number nSum = Long.valueOf(0);
             	nSum = addList(nSum, n1, context);
             	Node sum = null;
             	if (nSum instanceof Float || nSum instanceof Double) {

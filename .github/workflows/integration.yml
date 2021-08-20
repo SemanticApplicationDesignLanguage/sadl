@@ -1,22 +1,23 @@
-name: SADL Release Workflow
+name: SADL Integration Workflow
 
-# Runs whenever a release is published on GitHub
+# Runs whenever a pull request is created, reopened, or has a change
+# made to it
 
 on:
-  release:
-    types: [ published ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
-# Runs a build job and uploads SADL build artifacts:
+# Runs a build job as a CI check:
 # - Builds SADL source & runs unit tests
-# - Uploads SADL zip file to release assets
 
 jobs:
-  release:
+  build:
     strategy:
       matrix:
         distribution: [ temurin ]
         java-version: [ 11 ]
-        os: [ ubuntu-20.04 ]
+        os: [ macos-10.15, ubuntu-20.04, windows-2019 ]
 
     runs-on: ${{ matrix.os }}
 
@@ -41,9 +42,3 @@ jobs:
       uses: GabrielBB/xvfb-action@v1.5
       with:
         run: mvn -B package -Dtycho.localArtifacts=ignore --file sadl3/com.ge.research.sadl.parent/pom.xml
-
-    - name: Upload SADL zip file to release assets
-      uses: softprops/action-gh-release@v0.1.12
-      with:
-        fail_on_unmatched_files: true
-        files: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/*.zip

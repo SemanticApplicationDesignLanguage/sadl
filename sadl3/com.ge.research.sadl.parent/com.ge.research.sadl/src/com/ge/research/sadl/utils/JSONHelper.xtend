@@ -51,7 +51,7 @@ class JSONHelper {
 	 */
 	def Map<Object, Object> asMap(Path path) {
 		try {
-			val json = Files.toString(path.toFile, StandardCharsets.UTF_8);
+			val json = Files.asCharSource(path.toFile, StandardCharsets.UTF_8).read();
 			val result = getOrCreateEngine.eval('''Java.asJSONCompatible(«json»)''');
 			if (result === null) {
 				return emptyMap;

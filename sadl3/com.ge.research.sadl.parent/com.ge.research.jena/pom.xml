@@ -50,6 +50,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <excludeScope>system</excludeScope>
+          <outputDirectory>${project.basedir}/lib</outputDirectory>
+          <overWriteReleases>true</overWriteReleases>
+          <overWriteSnapshots>true</overWriteSnapshots>
+          <stripVersion>true</stripVersion>
+        </configuration>
         <executions>
           <execution>
             <?m2e ignore?>
@@ -58,13 +65,6 @@
               <goal>copy-dependencies</goal>
             </goals>
             <phase>generate-resources</phase>
-            <configuration>
-              <outputDirectory>${project.basedir}/lib/</outputDirectory>
-              <overWriteReleases>true</overWriteReleases>
-              <overWriteSnapshots>true</overWriteSnapshots>
-              <stripVersion>true</stripVersion>
-              <excludeScope>system</excludeScope>
-            </configuration>
           </execution>
         </executions>
       </plugin>

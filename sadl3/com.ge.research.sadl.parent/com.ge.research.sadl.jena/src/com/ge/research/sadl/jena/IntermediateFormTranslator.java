@@ -3082,8 +3082,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		else {
 			results[0] = gpe;
 		}
-		results[1] = new Boolean(foundFirst);
-		results[2] = new Integer(removalCnt);
+		results[1] = Boolean.valueOf(foundFirst);
+		results[2] = Integer.valueOf(removalCnt);
 		return results;
 	}
 
