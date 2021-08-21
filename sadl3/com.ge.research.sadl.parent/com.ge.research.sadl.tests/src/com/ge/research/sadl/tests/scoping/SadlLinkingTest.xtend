@@ -114,6 +114,29 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 
+	@Test
+	def void testLinkingEquations_03() {
+		'''
+			 uri "http://sadl.org/experiments3.sadl" alias experiments3.
+			 
+			 External getFreeStream0(): "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.Solver.getFreeStream0".
+			 getFreeStream0 has dependsOn <getCp>.
+			 
+			 External [getCp](double temp, int opt) returns double: "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.getCp".
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testLinkingEquations_04() {
+		'''
+			 uri "http://sadl.org/experiments3.sadl" alias experiments3.
+			 
+			 External getFreeStream0(): "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.Solver.getFreeStream0".
+			 External [getCp](double temp, int opt) returns double: "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.getCp".
+			 getFreeStream0 has dependsOn <getCp>.		 
+		'''.assertLinking[sadl]
+	}
+	
 	// https://github.com/crapo/sadlos2/issues/376
 	@Test
 	def void testExternalEquationStatement_GH_376() {
