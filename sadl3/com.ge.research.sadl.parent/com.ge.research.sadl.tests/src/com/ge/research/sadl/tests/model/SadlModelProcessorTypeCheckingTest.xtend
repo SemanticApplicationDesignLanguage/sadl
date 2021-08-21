@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
 import com.google.common.collect.Iterables
+import org.eclipse.xtext.diagnostics.Severity
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -396,7 +397,14 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		i3 is a D has p [i1,i2].
 		'''.sadl
 		val issues_1 = validate(sadlModel);
-		assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
+//      assertEquals(Iterables.toString(issues_1), 0, issues_1.size);
+		for (issue : issues_1) {
+			println(issue.message)
+		}
+		val errors = issues_1.filter[severity === Severity.ERROR]
+		assertEquals(Iterables.toString(errors), 1, errors.size);
+		assertEquals(errors.get(0).message,
+			"TypeCheckInfo(BC (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(http://sadl.org/list.sadl3#i1, range, B),TypeCheckInfo(http://sadl.org/list.sadl3#i2, range, C)].")
 	}
 	
 	@Test
@@ -437,7 +445,11 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		for (issue : issues) {
 			println(issue.message)
 		}
-		assertEquals(Iterables.toString(issues), 0, issues.size);
+//		assertEquals(Iterables.toString(issues), 0, issues.size);
+		val errors = issues.filter[severity === Severity.ERROR]
+		assertEquals(Iterables.toString(errors), 1, errors.size);
+		assertEquals(errors.get(0).message,
+			"TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i1 (type B and C),TypeCheckInfo(http://sadl.org/list.sadl#i2, range, B)].")
 	}
 	
 	@Test
