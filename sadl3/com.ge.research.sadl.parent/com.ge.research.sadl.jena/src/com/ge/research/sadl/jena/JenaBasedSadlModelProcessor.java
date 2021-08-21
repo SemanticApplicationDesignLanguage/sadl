@@ -9511,17 +9511,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				SadlResource decl = getDeclarationExtensions().getDeclaration(sr);
 				if (!(decl.equals(sr))) {
 					// defined already
-					try {
-						if (getDeclarationExtensions().getOntConceptType(decl).equals(OntConceptType.STRUCTURE_NAME)) {
-							addError("This is already a Named Structure", sr);
-						}
-						if (!getDeclarationExtensions().getConceptNamespace(sr).equals(getModelNamespace())) {
-							addError("Declaration of concepts in another namespace not supported", sr);
-						}
-					} catch (CircularDefinitionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					redeclarationHandler(sr, decl);
 				}
 				newNames.add(nm);
 				EList<SadlAnnotation> anns = sr.getAnnotations();
@@ -9848,6 +9838,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 
 		return rsrcList;
+	}
+
+	protected void redeclarationHandler(SadlResource sr, SadlResource decl) {
+		try {
+			if (getDeclarationExtensions().getOntConceptType(decl).equals(OntConceptType.STRUCTURE_NAME)) {
+				addError("This is already a Named Structure", sr);
+			}
+			if (!getDeclarationExtensions().getConceptNamespace(sr).equals(getModelNamespace())) {
+				addError("Declaration of concepts in another namespace not supported", sr);
+			}
+		} catch (CircularDefinitionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private Property processSadlProperty(OntResource subject, SadlProperty element) throws JenaProcessorException {
