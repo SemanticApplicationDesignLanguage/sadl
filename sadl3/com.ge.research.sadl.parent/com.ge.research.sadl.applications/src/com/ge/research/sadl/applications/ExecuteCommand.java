@@ -140,11 +140,9 @@ public class ExecuteCommand implements IApplication {
         }
 
         // Create Resources from sadl/sreq files and initiate Direct-Write
-        if (inferFlag) {
-            if (!importAndBuildSadlProject()) {
-                LOGGER.error("Failure on import and build of SADL Project");
-                return null;
-            }
+        if (!importAndBuildSadlProject()) {
+            LOGGER.error("Failure on import and build of SADL Project");
+            return null;
         }
 
         // Invoke SADL RunInference Tool
@@ -543,9 +541,6 @@ public class ExecuteCommand implements IApplication {
                 LOGGER.error("Given file for -infer argument was not valid");
                 return false;
             }
-        } else {
-            LOGGER.error("Argument is missing: -infer=[File to infer]");
-            return false;
         }
 
         return true;
