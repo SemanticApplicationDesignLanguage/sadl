@@ -11,7 +11,8 @@ on:
 
 # Runs a build job and uploads SADL build artifacts:
 # - Builds SADL source & runs unit tests
-# - Uploads SADL update repository
+# - Builds and pushes SADL-Eclipse Docker image
+# - Uploads SADL zip archive
 # - Builds WebSADL extension
 # - Publishes WebSADL npm package
 # - Builds WebSADL Docker image
@@ -28,35 +29,43 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Set up Java
-      uses: actions/setup-java@v2.2.0
-      with:
-        distribution: ${{ matrix.distribution }}
-        java-version: ${{ matrix.java-version }}
-
     - name: Check out SADL source
       uses: actions/checkout@v2.3.4
       with:
         fetch-depth: 0 # Needed by lerna to publish canary versions
 
-    - name: Set up Maven cache
-      uses: actions/cache@v2.1.6
+    - name: Set up Java
+      uses: actions/setup-java@v2.3.0
       with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-maven-
+        distribution: ${{ matrix.distribution }}
+        java-version: ${{ matrix.java-version }}
+        cache: maven
 
     - name: Build SADL source
       uses: GabrielBB/xvfb-action@v1.5
       with:
         run: mvn -B package -Dtycho.localArtifacts=ignore --file sadl3/com.ge.research.sadl.parent/pom.xml
 
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1.10.0
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push SADL-Eclipse Docker image
+      uses: docker/build-push-action@v2.7.0
+      with:
+        context: sadl/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
+        file: sadl/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
+        push: true
+        tags: theiaide/sadl-eclipse:latest
+
     - name: Get SADL zip filename
       run: |
         cd sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target
         echo "sadlzip=$(echo com.ge.research.sadl.update*.zip | sed 's/.zip//')" >> $GITHUB_ENV
 
-    - name: Upload SADL update repository
+    - name: Upload SADL zip archive
       uses: actions/upload-artifact@v2.2.4
       with:
         name: ${{ env.sadlzip }}
@@ -92,12 +101,6 @@ jobs:
         npm config set node_gyp "`npm prefix -g`/lib/node_modules/node-gyp/bin/node-gyp.js"
         echo "npm config get node_gyp -> `npm config get node_gyp`"
         sadl3/com.ge.research.sadl.parent/theia-sadl-extension/scripts/build-docker.sh
-
-    - name: Login to Docker Hub
-      uses: docker/login-action@v1.10.0
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Push WebSADL image to Docker Hub
       run: docker push theiaide/sadl:next

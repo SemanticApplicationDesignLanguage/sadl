@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="SADL Eclipse Platform" uid="sadl.product" id="org.eclipse.sdk.ide" application="org.eclipse.ui.ide.workbench" version="3.5.0.qualifier" useFeatures="true" includeLaunchers="true">
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <programArgs>--launcher.defaultAction openFile --launcher.appendVmargs
+      </programArgs>
+      <vmArgs>-Dosgi.requiredJavaVersion=11 -Dosgi.dataAreaRequiresExplicitInit=true -Dorg.eclipse.swt.graphics.Resource.reportNonDisposed=true -Xms256m -Xmx2048m --add-modules=ALL-SYSTEM
+      </vmArgs>
+      <vmArgsMac>-Xdock:icon=../Resources/Eclipse.icns -XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+      </vmArgsMac>
+   </launcherArgs>
+
+   <splash location="org.eclipse.platform" />
+   <launcher name="eclipse">
+      <win useIco="false">
+         <bmp/>
+      </win>
+   </launcher>
+
+   <vm>
+   </vm>
+
+   <plugins>
+   </plugins>
+
+   <features>
+      <feature id="org.eclipse.sdk" />
+      <feature id="com.ge.research.sadl.feature" />
+   </features>
+
+   <configurations>
+      <plugin id="org.apache.felix.scr" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="4" />
+      <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
+      <property name="eclipse.buildId" value="${unqualifiedVersion}.${buildQualifier}" />
+      <property name="org.eclipse.update.reconcile" value="false" />
+      <property name="osgi.bundles.defaultStartLevel" value="4" />
+   </configurations>
+
+</product>
