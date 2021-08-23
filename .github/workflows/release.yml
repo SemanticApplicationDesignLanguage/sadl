@@ -46,8 +46,8 @@ jobs:
     - name: Build and push SADL-Eclipse Docker image
       uses: docker/build-push-action@v2.7.0
       with:
-        context: sadl/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
-        file: sadl/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
+        context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
+        file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
         push: true
         tags: theiaide/sadl-eclipse:${{ github.event.release.tag_name }}
 
