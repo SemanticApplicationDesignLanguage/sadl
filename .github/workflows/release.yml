@@ -49,7 +49,16 @@ jobs:
         context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
         file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
         push: true
-        tags: theiaide/sadl-eclipse:${{ github.event.release.tag_name }}
+        tags: |
+          sadl/sadl-eclipse:latest
+          sadl/sadl-eclipse:${{ github.event.release.tag_name }}
+
+    - name: Rename SADL zip file
+      run: |
+        cd sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository/features
+        sadlversion=$(ls com.ge.research.sadl.feature_*.jar | sed 's/com.ge.research.sadl.feature_\(.*\).jar/\1/')
+        cd ../..
+        mv com.ge.research.sadl.update-*.zip com.ge.research.sadl.update-${sadlversion}.zip
 
     - name: Upload SADL zip archive to release assets
       uses: softprops/action-gh-release@v0.1.12

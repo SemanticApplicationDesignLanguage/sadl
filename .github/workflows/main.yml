@@ -58,17 +58,17 @@ jobs:
         context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
         file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
         push: true
-        tags: theiaide/sadl-eclipse:latest
+        tags: sadl/sadl-eclipse:dev
 
-    - name: Get SADL zip filename
+    - name: Get SADL version
       run: |
-        cd sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target
-        echo "sadlzip=$(echo com.ge.research.sadl.update*.zip | sed 's/.zip//')" >> $GITHUB_ENV
+        cd sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository/features
+        echo "sadlversion=$(ls com.ge.research.sadl.feature_*.jar | sed 's/com.ge.research.sadl.feature_\(.*\).jar/\1/')" >> $GITHUB_ENV
 
     - name: Upload SADL zip archive
       uses: actions/upload-artifact@v2.2.4
       with:
-        name: ${{ env.sadlzip }}
+        name: com.ge.research.sadl.update-${{ env.sadlversion }}.zip
         path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository
 
     - name: Set up Node.js 10.x
