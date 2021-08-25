@@ -14,17 +14,10 @@
 
   <build>
     <plugins>
+      <!-- Do build product and its zip archive -->
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-p2-director-plugin</artifactId>
-        <configuration>
-          <products>
-            <product>
-              <!-- The uid in the .product file, NOT the name of the .product file -->
-              <id>sadl.product</id>
-            </product>
-          </products>
-        </configuration>
         <executions>
           <execution>
             <id>default-materialize-products</id>
@@ -32,7 +25,22 @@
               <goal>materialize-products</goal>
             </goals>
           </execution>
+          <execution>
+            <id>default-archive-products</id>
+            <goals>
+              <goal>archive-products</goal>
+            </goals>
+          </execution>
         </executions>
+      </plugin>
+      <!-- Don't build repository and its zip archive -->
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-p2-repository-plugin</artifactId>
+        <configuration>
+          <createArtifactRepository>false</createArtifactRepository>
+          <skipArchive>true</skipArchive>
+        </configuration>
       </plugin>
     </plugins>
   </build>

@@ -8,8 +8,8 @@ on:
 
 # Runs a build job and uploads SADL build artifacts:
 # - Builds SADL source & runs unit tests
+# - Uploads SADL build artifacts to release assets
 # - Builds and pushes SADL-Eclipse Docker image
-# - Uploads SADL zip archive to release assets
 
 jobs:
   release:
@@ -37,6 +37,22 @@ jobs:
       with:
         run: mvn -B package -Dtycho.localArtifacts=ignore --file sadl3/com.ge.research.sadl.parent/pom.xml
 
+    - name: Rename SADL build artifacts
+      run: |
+        cd sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/target/products
+        mv *-linux.gtk.x86_64.zip sadl-eclipse-linux.gtk.x86_64-${{ github.event.release.tag_name }}.zip
+        mv *-macosx.cocoa.x86_64.zip sadl-eclipse-macosx.cocoa.x86_64-${{ github.event.release.tag_name }}.zip
+        mv *-win32.win32.x86_64.zip sadl-eclipse-win32.win32.x86_64-${{ github.event.release.tag_name }}.zip
+        cd ../../../com.ge.research.sadl.update/target
+        mv *.zip com.ge.research.sadl.update-${{ github.event.release.tag_name }}.zip
+
+    - name: Upload SADL build artifacts to release assets
+      uses: softprops/action-gh-release@v0.1.12
+      with:
+        files: |
+          sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/target/products/*.zip
+          sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/*.zip
+
     - name: Login to Docker Hub
       uses: docker/login-action@v1.10.0
       with:
@@ -52,16 +68,3 @@ jobs:
         tags: |
           sadl/sadl-eclipse:latest
           sadl/sadl-eclipse:${{ github.event.release.tag_name }}
-
-    - name: Rename SADL zip file
-      run: |
-        cd sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository/features
-        sadlversion=$(ls com.ge.research.sadl.feature_*.jar | sed 's/com.ge.research.sadl.feature_\(.*\).jar/\1/')
-        cd ../..
-        mv com.ge.research.sadl.update-*.zip com.ge.research.sadl.update-${sadlversion}.zip
-
-    - name: Upload SADL zip archive to release assets
-      uses: softprops/action-gh-release@v0.1.12
-      with:
-        fail_on_unmatched_files: true
-        files: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/*.zip

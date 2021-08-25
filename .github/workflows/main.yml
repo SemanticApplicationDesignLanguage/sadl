@@ -11,8 +11,8 @@ on:
 
 # Runs a build job and uploads SADL build artifacts:
 # - Builds SADL source & runs unit tests
+# - Uploads SADL build artifacts to workflow
 # - Builds and pushes SADL-Eclipse Docker image
-# - Uploads SADL zip archive
 # - Builds WebSADL extension
 # - Publishes WebSADL npm package
 # - Builds WebSADL Docker image
@@ -46,6 +46,23 @@ jobs:
       with:
         run: mvn -B package -Dtycho.localArtifacts=ignore --file sadl3/com.ge.research.sadl.parent/pom.xml
 
+    - name: Get SADL version
+      run: |
+        cd sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository/features
+        echo "sadlversion=$(ls com.ge.research.sadl.feature_*.jar | sed 's/com.ge.research.sadl.feature_\(.*\).jar/\1/')" >> $GITHUB_ENV
+
+    - name: Upload SADL product zip files
+      uses: actions/upload-artifact@v2.2.4
+      with:
+        name: sadl-eclipse-${{ env.sadlversion }}
+        path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/target/products/*.zip
+
+    - name: Upload SADL update repository
+      uses: actions/upload-artifact@v2.2.4
+      with:
+        name: com.ge.research.sadl.update-${{ env.sadlversion }}
+        path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository/
+
     - name: Login to Docker Hub
       uses: docker/login-action@v1.10.0
       with:
@@ -59,17 +76,6 @@ jobs:
         file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
         push: true
         tags: sadl/sadl-eclipse:dev
-
-    - name: Get SADL version
-      run: |
-        cd sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository/features
-        echo "sadlversion=$(ls com.ge.research.sadl.feature_*.jar | sed 's/com.ge.research.sadl.feature_\(.*\).jar/\1/')" >> $GITHUB_ENV
-
-    - name: Upload SADL zip archive
-      uses: actions/upload-artifact@v2.2.4
-      with:
-        name: com.ge.research.sadl.update-${{ env.sadlversion }}.zip
-        path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository
 
     - name: Set up Node.js 10.x
       uses: actions/setup-node@v2.4.0
