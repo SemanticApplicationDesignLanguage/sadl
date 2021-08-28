@@ -13,40 +13,40 @@ stable release.
 Here are two ways you can run `sadl/sadl-eclipse` on a SADL project.
 Note the project's name is `STEM` in the examples below.
 
-1. Update an existing SADL project's OWL files in place:
+  1. Update an existing SADL project's OWL files in place:
 
-```shell
-$ docker run --rm -v /existing/STEM:/STEM -v /existing/STEM:/app/workspace/STEM sadl/sadl-eclipse:dev -force -import=/STEM
-15:17:47 INFO  ExecuteCommand  :: Creating resources in memory
-15:17:47 INFO  ExecuteCommand  :: Resolving interdependencies between resources
-15:17:48 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/Run.sadl
-15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/ImplicitModel/SadlBuiltinFunctions.sadl
-15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/ImplicitModel/SadlImplicitModel.sadl
-15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/BaseModel.sadl
-15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/STEMRules.sadl
-15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/Queries.sadl
-15:17:49 INFO  SadlPreferenceStoreAccess :: Creating preference store access: Shared SADL preference store access [1062952993].
-15:17:51 INFO  ExecuteCommand  :: SADL Command-Line Interface complete
-```
+     ```shell
+     $ docker run --rm -v /existing/STEM:/STEM -v /existing/STEM:/app/workspace/STEM sadl/sadl-eclipse:dev -force -import=/STEM
+     15:17:47 INFO  ExecuteCommand  :: Creating resources in memory
+     15:17:47 INFO  ExecuteCommand  :: Resolving interdependencies between resources
+     15:17:48 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/Run.sadl
+     15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/ImplicitModel/SadlBuiltinFunctions.sadl
+     15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/ImplicitModel/SadlImplicitModel.sadl
+     15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/BaseModel.sadl
+     15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/STEMRules.sadl
+     15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/Queries.sadl
+     15:17:49 INFO  SadlPreferenceStoreAccess :: Creating preference store access: Shared SADL preference store access [1062952993].
+     15:17:51 INFO  ExecuteCommand  :: SADL Command-Line Interface complete
+     ```
 
-1. Copy an existing SADL project to a new place and update its OWL
-files in the new place instead (note that you must create the new
-place first before running this variation):
+  2. Copy an existing SADL project to a new place and update its OWL
+     files in the new place instead (note that you must create the new
+     place first before running this variation):
 
-```shell
-$ mkdir -p /new/STEM
-$ docker run --rm -v /existing/STEM:/STEM -v /new/STEM:/app/workspace/STEM sadl/sadl-eclipse:dev -force -import=/STEM
-15:17:47 INFO  ExecuteCommand  :: Creating resources in memory
-15:17:47 INFO  ExecuteCommand  :: Resolving interdependencies between resources
-15:17:48 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/Run.sadl
-15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/ImplicitModel/SadlBuiltinFunctions.sadl
-15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/ImplicitModel/SadlImplicitModel.sadl
-15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/BaseModel.sadl
-15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/STEMRules.sadl
-15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/Queries.sadl
-15:17:49 INFO  SadlPreferenceStoreAccess :: Creating preference store access: Shared SADL preference store access [1062952993].
-15:17:51 INFO  ExecuteCommand  :: SADL Command-Line Interface complete
-```
+     ```shell
+     $ mkdir -p /new/STEM
+     $ docker run --rm -v /existing/STEM:/STEM -v /new/STEM:/app/workspace/STEM sadl/sadl-eclipse:dev -force -import=/STEM
+     15:17:47 INFO  ExecuteCommand  :: Creating resources in memory
+     15:17:47 INFO  ExecuteCommand  :: Resolving interdependencies between resources
+     15:17:48 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/Run.sadl
+     15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/ImplicitModel/SadlBuiltinFunctions.sadl
+     15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/ImplicitModel/SadlImplicitModel.sadl
+     15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/BaseModel.sadl
+     15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/STEMRules.sadl
+     15:17:49 INFO  ExecuteCommand  :: Building file:/app/workspace/STEM/Queries.sadl
+     15:17:49 INFO  SadlPreferenceStoreAccess :: Creating preference store access: Shared SADL preference store access [1062952993].
+     15:17:51 INFO  ExecuteCommand  :: SADL Command-Line Interface complete
+     ```
 
 When you run either command, make sure you replace all occurrences of
 `STEM`, `/existing/STEM`, and `/new/STEM` with your existing/new SADL
