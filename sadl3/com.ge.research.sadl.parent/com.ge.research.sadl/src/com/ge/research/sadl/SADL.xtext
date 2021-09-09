@@ -188,7 +188,7 @@ SadlPropertyDeclarationInClass returns SadlProperty:
 
 SadlPropertyRestriction :
     	SadlCondition
-    |   {SadlTypeAssociation} ('describes'|'of') domain=SadlTypeReference
+    |   {SadlTypeAssociation} dmnkw=('describes'|'of') domain=SadlTypeReference
     |   {SadlRangeRestriction} ('has'|'with') ('a' singleValued?='single' 'value'|'values') 'of' 'type' ((typeonly=('class'|'data')) | range=SadlPrimaryTypeReference facet=SadlDataTypeFacet?)
     |   {SadlIsInverseOf}	'is' 'the' 'inverse' 'of' otherProperty=[SadlResource|QNAME]
     |   {SadlIsTransitive} 'is' 'transitive'
