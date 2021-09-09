@@ -10088,6 +10088,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							throw new JenaProcessorException(e.getMessage(), e);
 						}
 					}
+					if (spr1 instanceof SadlTypeAssociation) {
+						String dmnkw = ((SadlTypeAssociation)spr1).getDmnkw();
+						if (restricted != null && dmnkw!= null && dmnkw.equals("describes")) {
+							addPropertyDomain(props.get(0), restricted, spr1);
+						}
+					}
 					try {
 						if (sadlDefaultsModel == null) {
 							try {
@@ -10247,6 +10253,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							prop = getTheJenaModel().getProperty(propUri);
 						}
 						if (prop != null) {
+							String dmnkw = ((SadlTypeAssociation)spr1).getDmnkw();
+							if (dmnkw != null && dmnkw.equals("describes")) {
+								addPropertyDomain(prop, cls, domain);
+							}
 							OntClass condCls = sadlConditionToOntClass((SadlCondition) spr2, prop, propType);
 							if (condCls != null) {
 								cls.addSuperClass(condCls);
@@ -10273,6 +10283,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						OntClass cls = domainrsrc.as(OntClass.class);
 						Property prop = getTheJenaModel().getProperty(propUri);
 						if (prop != null) {
+							String dmnkw = ((SadlTypeAssociation)spr1).getDmnkw();
+							if (dmnkw != null && dmnkw.equals("describes")) {
+								addPropertyDomain(prop, cls, domain);
+							}
 							EList<SadlExplicitValue> values = ((SadlCanOnlyBeOneOf) spr2).getValues();
 							if (values != null) {
 								EnumeratedClass enumCls = sadlExplicitValuesToEnumeratedClass(values);
@@ -10304,6 +10318,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						OntClass cls = domainrsrc.as(OntClass.class);
 						Property prop = getTheJenaModel().getProperty(propUri);
 						if (prop != null) {
+							String dmnkw = ((SadlTypeAssociation)spr1).getDmnkw();
+							if (dmnkw != null && dmnkw.equals("describes")) {
+								addPropertyDomain(prop, cls, domain);
+							}
 							EList<SadlExplicitValue> values = ((SadlMustBeOneOf) spr2).getValues();
 							if (values != null) {
 								EnumeratedClass enumCls = sadlExplicitValuesToEnumeratedClass(values);
@@ -10337,6 +10355,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						OntClass cls = domainrsrc.as(OntClass.class);
 						Property prop = getTheJenaModel().getProperty(propUri);
 						if (prop != null) {
+							String dmnkw = ((SadlTypeAssociation)spr1).getDmnkw();
+							if (dmnkw != null && dmnkw.equals("describes")) {
+								addPropertyDomain(prop, cls, domain);
+							}
 							if (sadlDefaultsModel == null) {
 								try {
 									importSadlDefaultsModel(element.eResource());
@@ -12726,7 +12748,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private OntProperty createRdfProperty(String newName, String superSRUri) {
 		OntProperty newProp = getTheJenaModel().createOntProperty(newName);
-		logger.debug("New object property '" + newProp.getURI() + "' created");
+		logger.debug("New RDF property '" + newProp.getURI() + "' created");
 		if (superSRUri != null) {
 			Property superProp = getTheJenaModel().getProperty(superSRUri);
 			if (superProp == null) {
@@ -13723,12 +13745,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			else if (cardinality.equals("one")) {
 				// this is interpreted as a someValuesFrom restriction
+				SomeValuesFromRestriction svf = null;
 				if (type == null) {
 					throw new JenaProcessorException("'one' means some value from class so a type must be given");
 				}
-				SomeValuesFromRestriction svf = getTheJenaModel().createSomeValuesFromRestriction(null, prop, typersrc);
-				logger.debug("New some values from restriction on '" + prop.getURI() + "' to values of type '"
-						+ typersrc.toString() + "'");
+				else if (((SadlCardinalityCondition)cond).getOperator().equals("most")) {
+					addError("From the keyword 'most', it appears that a cardinality restriction is desired. Please use '1' rather than 'one' for cardinality.", cond);
+				}
+				else {
+					svf = getTheJenaModel().createSomeValuesFromRestriction(null, prop, typersrc);
+					logger.debug("New some values from restriction on '" + prop.getURI() + "' to values of type '"
+							+ typersrc.toString() + "'");
+				}
 				retval = svf;
 			} else {
 				// cardinality restriction
