@@ -1,0 +1,356 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <meta http-equiv="Content-Language" content="en-us">
+    <title>Web SADL</title>
+  </head>
+  <body>
+    <h1>WebSADL</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->9/13/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <h4>Table of Contents</h4>
+    <p><a href="#Introduction">Introduction</a><br>
+      <a href="#ConnectingWebSADLBackend">Connecting to the WebSADL Backend</a><br>
+      <a href="#UsingWebSADL">Using WebSADL</a><br>
+      &nbsp;&nbsp;&nbsp; <a href="#CreatingSADLProject">Creating a SADL Project</a><br>
+      &nbsp;&nbsp;&nbsp; <a href="#CreatingSADLModelFiles">Creating SADL Model
+        Files</a><br>
+      &nbsp;&nbsp;&nbsp; <a href="#TestingModel">Testing a Model</a><br>
+      <a href="#UsingGit">Using WebSADL with Git</a><br>
+      &nbsp;&nbsp;&nbsp; <a href="#GitSetup">Git Setup</a><br>
+      &nbsp;&nbsp;&nbsp; <a href="#GitAffordances">Git Affordances in WebSADL</a><br>
+      &nbsp;&nbsp; <a href="#Command-lineGitWebSADL">&nbsp;Command-line Git in
+        WebSADL</a></p>
+    <h2><a name="Introduction">Introduction</a></h2>
+    <p>WebSADL is a set of services that allow a SADL IDE to be instantiated in
+      a Web browser. The functionality mirrors that of the Eclipse-based SADL
+      IDE. WebSADL capabilities include the following.</p>
+    <ul>
+      <li>
+        <p class="MsoNormal">Authoring of SADL models (.sadl files) in a
+          feature-rich text editor.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Live model validation with error, warning, and
+          information markers in the editor.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Generation of OWL files from valid SADL models
+          (file format, i.e., .owl, .nt, etc., as specified in the SADL
+          preferences).</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Semantic highlighting of content in the SADL
+          editor, e.g., classes are dark blue bold, etc.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Hyperlinking between the SADL model concepts, both
+          from references to declaration and from declaration to references.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Content assist in the SADL editor.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Downloading and managing external OWL resources.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Preferences set via an editable JSON file.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Testing, querying, explanation of SADL models.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Reviewing the inferred model created by reasoning
+          over the OWL model generated from a SADL model via Ask and Test
+          statements.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Integration with Git through GUI items and the git
+          commands in the terminal window (collaboration with the Theia Git
+          extension).</p>
+      </li>
+    </ul>
+    <p>This document is primarily about using WebSADL in a browser. For more
+      information about setting up the WebSADL backend services, please see <a
+        href="WebSadlBackend.html">WebSADL Backend</a>.</p>
+    <h2><a name="ConnectingWebSADLBackend">Connecting to the WebSADL Backend</a></h2>
+    <p>The WebSADL client will run in a Web browser. Chrome is recommended and
+      is the browser that has been used in testing.</p>
+    <p>Connect to the WebSADL backend by entering the service URL of the form
+      "http://&lt;host&gt;:&lt;port&gt;, e.g.,</p>
+    <p>&nbsp;&nbsp;&nbsp; <a href="http://nsk1websadl01.crd.ge.com:3000">
+        http://nsk1websadl01.crd.ge.com:3000</a></p>
+    <p>If the backend services are running on the same machine, localhost can be
+      used.</p>
+    <p>&nbsp;&nbsp;&nbsp; <a href="http://localhost:3000">http://localhost:3000</a>
+    </p>
+    <p>The result should be a browser tab with menu items around content areas
+      as shown below.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img
+        src="images/WebSADLOverview.png" width="1031" height="738" border="0"></p>
+    <blockquote>
+      <blockquote>
+        <blockquote>
+          <blockquote>
+            <blockquote>
+              <p><b>Figure 1: WebSADL Browser Interface</b></p>
+            </blockquote>
+          </blockquote>
+        </blockquote>
+      </blockquote>
+    </blockquote>
+    <h2><a name="UsingWebSADL">Using WebSADL</a></h2>
+    <h3><a name="CreatingSADLProject">Creating a SADL Project</a></h3>
+    <p>To create a new SADL project, first make sure the&nbsp; Explorer is
+      visible using the Explorer Toggle. Select a folder under which the new
+      project is to be located and right-click to obtain a popup menu.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="images/WebSAD7.gif"
+        width="739" height="543" border="0"></p>
+    <blockquote>
+      <p><b>Figure 2: Creating a New SADL Project</b></p>
+    </blockquote>
+    <p>Click on "New SADL Project" to create a SADL project. Name your project
+      as requested. For purposes of this tutorial, you might want to name it
+      "Shapes". Note: SADL projects should not be nested within SADL projects.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img
+        src="images/WebSAD8.gif" width="636" height="198" border="0"></p>
+    <blockquote>
+      <p><b>Figure 3: SADL Project Creation Completed</b></p>
+    </blockquote>
+    <p>Note that in the new SADL project the "settings.json" file is created.
+      This contains the project's preference settings and can be opened in an
+      editor by clicking on the name of the file in the Explorer.</p>
+    <h3><a name="CreatingSADLModelFiles">Creating SADL Model Files</a></h3>
+    <p>Now that we have a SADL project, we can begin to create SADL model files.
+      Right-click on the project name (e.g., "Shapes") and select "New File". In
+      the naming dialog give the file a name ending in ".sadl", e.g.,
+      "ShapesTop.sadl". The result will be a new SADL model file opened in a
+      SADL editor window. This editor window will have content assist, error,
+      warning, and info markers, hyperlinking, etc., just like the Eclipse-based
+      SADL IDE. Holding down the Control key and pressing the space bar
+      activates content assistance. </p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img
+        src="images/WebSAD9.jpg" width="654" height="285" border="0"></p>
+    <blockquote>
+      <blockquote>
+        <blockquote>
+          <p><b>Figure 4: Creating a New Model File</b></p>
+        </blockquote>
+      </blockquote>
+    </blockquote>
+    <p>Pressing the Enter key will insert the selected suggestion into the model
+      file.</p>
+    <p>Defining a class "Shape" which is in the domain of property "area" with
+      range "float" results in the following state of the project.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img
+        src="images/WebSAD10.jpg" width="739" height="509" border="0"></p>
+    <blockquote>
+      <p><b>Figure 5: Creating a New Class and Property</b></p>
+    </blockquote>
+    <p>Note that an "OwlModels" folder has been created and contains the
+      translated OWL file for our newly created model as well as several other
+      files. The "ImplicitModel" folder contains the definition of the built-in
+      functions supported by the selected reasoner. It also contains the
+      SadlImplicitModel. These two editable files, along with SadlBaseModel.owl
+      and SadlListModel.owl in the OwlModels folder, are implicitly imported by
+      every SADL model. </p>
+    <p>To complete our simple demo project, we create a second SADL model file
+      which imports the first and defines Circle and Rectangle as subclasses of
+      Shape with defining properties. Finally we add a couple of rules to
+      compute the area of these types of Shape.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img
+        src="images/WebSAD11.jpg" width="802" height="238" border="0"></p>
+    <blockquote>
+      <p><b>Figure 6: Creating a Second Model File Importing the First</b></p>
+    </blockquote>
+    <h3>Search</h3>
+    <p>Search can be local to a particular file, in which case it can be
+      initiated with <i>control-f</i> or <i>Edit -&gt; Find</i> on the menu
+      bar. In either case, a popup allows text to be entered and arrows allow
+      movement from one matching occurrence to the next. The in-file text search
+      dialog can be dismissed by clicking on the "x" in the upper right corner.
+      Find and replace within a file works similarly. Note that concepts should
+      be renamed using the "Rename Symbol" popup menu choice to rename across
+      all references in the project rather than with find and replace.</p>
+    <p>Searching the workspace is initiated with <i>Search icon </i>or with<i>
+        control-shift-f </i>or<i> Edit -&gt; Find in Files.</i> The result will
+      be the appearance of the Search tab on the left of the content area and a
+      list of all of the matches to the entered string in the entire workspace.
+      Each occurrence is a hyperlink which, if clicked, will open the file
+      containing the match and highlight the matching text in that file. Icons
+      near the text input box allow additional control of the search.</p>
+    <h3>Bottom Panel</h3>
+    <p>The bottom panel in the browser can contain any of several tabs. The
+      bottom panel can be toggled in or out of view by clicking on the white
+      rectangle at the right end of the bar at the bottom of the browser. The
+      "SADL" before the rectangle indicates that the current language is SADL.</p>
+    <blockquote>
+      <p>&nbsp;&nbsp; <img src="images/WebSAD2.gif" width="80" height="21" border="0"></p>
+      <p><b>Figure 7: Bottom Panel Toggle</b></p>
+    </blockquote>
+    <h4>Output</h4>
+    <p>The Output tab shows the results of running queries and testing models.</p>
+    <h4>Problems</h4>
+    <p>The "Problems" tab shows a list of errors and warnings hyperlinked to the
+      location where each occurs. This tab is made visible by clicking on the
+      errors or warnings icon on the status bar across the bottom of the browser
+      window, as shown below.</p>
+    <blockquote>
+      <p><img src="images/WebSAD1.gif" width="80" height="24" border="0"></p>
+      <p><b>Figure 8: Problems Tab Toggle and Stats</b></p>
+    </blockquote>
+    <p>The icons shown above indicate that there is 1 error and 38 warnings in
+      the current workspace.</p>
+    <h4>Terminal</h4>
+    <p>The "Terminal" tab is a bash command window which can be used to do more
+      complex git operations.</p>
+    <h3><a name="TestingModel">Testing a Model</a></h3>
+    <p>We can test our model by creating a SADL file which contains some
+      instances of Shape and some tests to verify that the rules compute correct
+      areas.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img
+        src="images/WebSAD12.jpg" width="536" height="187" border="0"></p>
+    <blockquote>
+      <p dir="ltr"><b>Figure 9: Testing the Model</b></p>
+    </blockquote>
+    <p>By clicking on "SADL" in the menu bar and selecting "Test Model", with
+      the focus in the TestShapes.sadl editor, we can run inference. The results
+      are displayed in the Output window and include the test results.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img
+        src="images/WebSAD13.gif" width="490" height="48" border="0"></p>
+    <blockquote>
+      <p><b>Figure 10: Inference Results in Output Window</b></p>
+    </blockquote>
+    <h2><a name="UsingGit">Using WebSADL with Git</a></h2>
+    <p>Currently some setup is required to connect WebSADL with a Git
+      repository. The instructions below assume a repository on github.com, and
+      use the SadlDemo repo as an example. The setup can be done from a Terminal
+      window in the WebSADL interface. Note that the Terminal window provides a
+      command-line interface to the <a href="WebSadlBackend.html">SADL backend
+        server</a>. When interacting in the terminal window, you are acting as
+      the backend user, not necessarily as yourself.</p>
+    <h3><a name="GitSetup">Git Setup</a></h3>
+    <ol>
+      <li>Start a browser session by going to the WebSADL backend's URL, e.g., <a
+          href="http://nsk1websadl01.crd.ge.com:3000/">
+          http://nsk1websadl01.crd.ge.com:3000/</a>. </li>
+      <li>If it doesn't already exist create a folder for your projects under
+        the open Workspace.
+        <ul>
+          <li>If the Explorer pane isn't open on the left side, click on the </li>
+          <li>Right-click on the Explorer Toggle icon to open it (see Figure 1
+            above)</li>
+          <li>Note: it is important that you create your own folder within the
+            workspace for your projects so that your local git settings will not
+            collide with those of others.</li>
+        </ul>
+      </li>
+      <li>If a Terminal Window is not open, open a Terminal Window from the menu
+        bar "Terminal" pulldown menu.</li>
+      <li>In the Terminal Window, change directory to your personal folder
+        created in step 2.
+        <ul>
+          <li>Unix command "pwd" displays the current directory</li>
+          <li>Unix command "ls" lists the contents of the current directory.</li>
+          <li>Unix command "cd &lt;foldername&gt;" changes the current directory
+            to &lt;foldername&gt;, e.g., "cd WebSadlWS".</li>
+          <li>Tab key to auto-complete folder/file names.</li>
+        </ul>
+      </li>
+      <li>If you are running behind a firewall, you will need to set a proxy by
+        executing this command in the Terminal Window::
+        <ul>
+          <li> <span data-contrast="auto" class="TextRun  BCX0 SCXW205281120" xml:lang="X-NONE"
+              style="animation: 0s ease 0s 1 normal none running none; background-blend-mode: normal; border-radius: 0px; border-collapse: separate; bottom: auto; box-shadow: none; box-sizing: content-box; break-after: auto; break-before: auto; break-inside: auto; caption-side: top; clear: none; clip: auto; color: rgb(0, 0, 0); content: normal; cursor: text; direction: ltr; display: inline; empty-cells: show; float: none; font-family: Calibri, Calibri_MSFontService, sans-serif; font-kerning: none; font-optical-sizing: auto; font-size: 16px; font-stretch: 100%; font-style: normal; font-variant: no-common-ligatures no-discretionary-ligatures no-historical-ligatures no-contextual; font-weight: 400; height: auto; image-orientation: from-image; image-rendering: auto; isolation: auto; place-items: normal; place-self: auto; left: auto; letter-spacing: normal; line-height: 20.5042px; list-style-position: outside; list-style-type: disc; max-height: none; max-width: none; min-height: 0px; min-width: 0px; mix-blend-mode: normal; object-fit: fill; object-position: 50% 50%; offset: none 0px auto 0deg; opacity: 1; orphans: 2; outline: rgb(0, 0, '0) none 0px'; outline-offset: 0px; overflow-anchor: auto; overflow-wrap: break-word; overflow: visible; pointer-events: auto; position: static; resize: none; right: auto; scroll-behavior: auto; speak: normal; table-layout: auto; tab-size: 8; text-align: left; text-align-last: auto; text-decoration: 'none solid rgb(0', 0, 0); text-decoration-skip-ink: auto; text-underline-position: auto; text-indent: 0px; text-rendering: auto; text-shadow: none; text-size-adjust: auto; text-overflow: clip; text-transform: none; top: auto; touch-action: auto; transition: all 0s ease 0s; unicode-bidi: normal; vertical-align: baseline; visibility: visible; white-space: normal; widows: 2; width: auto; will-change: auto; word-break: normal; word-spacing: 0px; z-index: auto; zoom: 1; -webkit-appearance: none; backface-visibility: visible; border-spacing: 0px; -webkit-border-image: none; -webkit-box-align: stretch; -webkit-box-decoration-break: slice; -webkit-box-direction: normal; -webkit-box-flex: 0; -webkit-box-ordinal-group: 1; -webkit-box-orient: horizontal; -webkit-box-pack: start; columns: auto auto; gap: normal; column-rule: '0px none rgb(0', 0, 0); column-span: none; backdrop-filter: none; place-content: normal; flex: 0 1 auto; flex-flow: row nowrap; -webkit-font-smoothing: auto; grid-auto-columns: auto; grid-auto-flow: row; grid-auto-rows: auto; grid-area: auto auto auto auto; grid-template-areas: none; grid-template-columns: none; grid-template-rows: none; -webkit-highlight: none; hyphens: manual; -webkit-hyphenate-character: auto; -webkit-line-break: after-white-space; -webkit-locale: X-NONE; -webkit-mask-box-image-outset: 0; -webkit-mask-box-image-repeat: stretch; -webkit-mask-box-image-slice: 0 fill; -webkit-mask-box-image-source: none; -webkit-mask-box-image-width: auto; -webkit-mask: none 0% 0% auto repeat border-box border-box; -webkit-mask-composite: source-over; order: 0; perspective: none; perspective-origin: 0px 0px; -webkit-print-color-adjust: economy; -webkit-rtl-ordering: logical; shape-outside: none; shape-image-threshold: 0; shape-margin: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); -webkit-text-combine: none; -webkit-text-decorations-in-effect: none; -webkit-text-emphasis: 'none rgb(0', 0, 0); -webkit-text-emphasis-position: over right; -webkit-text-fill-color: rgb(0, 0, 0); -webkit-text-orientation: vertical-right; -webkit-text-security: none; -webkit-text-stroke: '0px rgb(0', 0, 0); transform: none; transform-origin: 0px 0px; transform-style: flat; -webkit-user-drag: none; -webkit-user-modify: read-write; user-select: text; -webkit-writing-mode: horizontal-tb; -webkit-app-region: none; buffered-rendering: auto; clip-path: none; clip-rule: nonzero; mask: none; filter: none; flood-color: rgb(0, 0, 0); flood-opacity: 1; lighting-color: rgb(255, 255, 255); stop-color: rgb(0, 0, 0); stop-opacity: 1; color-interpolation: srgb; color-interpolation-filters: linearrgb; color-rendering: auto; fill: rgb(0, 0, 0); fill-opacity: 1; fill-rule: nonzero; marker: none; mask-type: luminance; shape-rendering: auto; stroke: none; stroke-dasharray: none; stroke-dashoffset: 0px; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-opacity: 1; stroke-width: 1px; alignment-baseline: auto; baseline-shift: 0px; dominant-baseline: auto; text-anchor: start; writing-mode: horizontal-tb; vector-effect: none; paint-order: normal; d: none; cx: 0px; cy: 0px; x: 0px; y: 0px; r: 0px; rx: auto; ry: auto; caret-color: rgb(0, 0, 0); border: 0px none rgb(0, 0, 0); margin: 0px; padding: 0px; background: rgba(0 0% 0)"
+              lang="X-NONE"> <span class="NormalTextRun  BCX0 SCXW205281120" style="background-color: inherit;">
+                "export
+                https_proxy=&lt;proxy&gt;:&lt;port&gt;"&nbsp;&nbsp;&nbsp; //
+                e.g., export </span> </span> <span data-contrast="auto" class="TextRun  BCX0 SCXW205281120"
+              xml:lang="X-NONE" style="animation: 0s ease 0s 1 normal none running none; background-blend-mode: normal; border-radius: 0px; border-collapse: separate; box-shadow: none; box-sizing: content-box; break-after: auto; break-before: auto; break-inside: auto; caption-side: top; clear: none; clip: auto; color: rgb(0, 0, 0); content: normal; cursor: text; direction: ltr; display: inline; empty-cells: show; float: none; font-family: Calibri, Calibri_MSFontService, sans-serif; font-kerning: none; font-optical-sizing: auto; font-size: 16px; font-stretch: 100%; font-style: normal; font-variant: no-common-ligatures no-discretionary-ligatures no-historical-ligatures no-contextual; font-weight: 400; image-orientation: from-image; image-rendering: auto; isolation: auto; place-items: normal; place-self: auto; letter-spacing: normal; line-height: 20.5042px; list-style-position: outside; list-style-type: disc; max-height: none; max-width: none; min-height: 0px; min-width: 0px; mix-blend-mode: normal; object-fit: fill; object-position: 50% 50%; offset: none 0px auto 0deg; opacity: 1; orphans: 2; outline: rgb(0, 0, '0) none 0px'; outline-offset: 0px; overflow-anchor: auto; overflow-wrap: break-word; overflow: visible; pointer-events: auto; resize: none; scroll-behavior: auto; speak: normal; table-layout: auto; tab-size: 8; text-align: left; text-align-last: auto; text-decoration: 'none solid rgb(0', 0, 0); text-decoration-skip-ink: auto; text-underline-position: auto; text-indent: 0px; text-rendering: auto; text-shadow: none; text-size-adjust: auto; text-overflow: clip; text-transform: none; touch-action: auto; transition: all 0s ease 0s; unicode-bidi: normal; vertical-align: baseline; visibility: visible; white-space: normal; widows: 2; will-change: auto; word-break: normal; word-spacing: 0px; zoom: 1; -webkit-appearance: none; backface-visibility: visible; border-spacing: 0px; -webkit-border-image: none; -webkit-box-align: stretch; -webkit-box-decoration-break: slice; -webkit-box-direction: normal; -webkit-box-flex: 0; -webkit-box-ordinal-group: 1; -webkit-box-orient: horizontal; -webkit-box-pack: start; columns: auto auto; gap: normal; column-rule: '0px none rgb(0', 0, 0); column-span: none; backdrop-filter: none; place-content: normal; flex: 0 1 auto; flex-flow: row nowrap; -webkit-font-smoothing: auto; grid-auto-columns: auto; grid-auto-flow: row; grid-auto-rows: auto; grid-area: auto auto auto auto; grid-template-areas: none; grid-template-columns: none; grid-template-rows: none; -webkit-highlight: none; hyphens: manual; -webkit-hyphenate-character: auto; -webkit-line-break: after-white-space; -webkit-locale: X-NONE; -webkit-mask-box-image-outset: 0; -webkit-mask-box-image-repeat: stretch; -webkit-mask-box-image-slice: 0 fill; -webkit-mask-box-image-source: none; -webkit-mask-box-image-width: auto; -webkit-mask: none 0% 0% auto repeat border-box border-box; -webkit-mask-composite: source-over; order: 0; perspective: none; perspective-origin: 0px 0px; -webkit-print-color-adjust: economy; -webkit-rtl-ordering: logical; shape-outside: none; shape-image-threshold: 0; shape-margin: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); -webkit-text-combine: none; -webkit-text-decorations-in-effect: none; -webkit-text-emphasis: 'none rgb(0', 0, 0); -webkit-text-emphasis-position: over right; -webkit-text-fill-color: rgb(0, 0, 0); -webkit-text-orientation: vertical-right; -webkit-text-security: none; -webkit-text-stroke: '0px rgb(0', 0, 0); transform: none; transform-origin: 0px 0px; transform-style: flat; -webkit-user-drag: none; -webkit-user-modify: read-write; user-select: text; -webkit-writing-mode: horizontal-tb; -webkit-app-region: none; buffered-rendering: auto; clip-path: none; clip-rule: nonzero; mask: none; filter: none; flood-color: rgb(0, 0, 0); flood-opacity: 1; lighting-color: rgb(255, 255, 255); stop-color: rgb(0, 0, 0); stop-opacity: 1; color-interpolation: srgb; color-interpolation-filters: linearrgb; color-rendering: auto; fill: rgb(0, 0, 0); fill-opacity: 1; fill-rule: nonzero; marker: none; mask-type: luminance; shape-rendering: auto; stroke: none; stroke-dasharray: none; stroke-dashoffset: 0px; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-opacity: 1; stroke-width: 1px; alignment-baseline: auto; baseline-shift: 0px; dominant-baseline: auto; text-anchor: start; writing-mode: horizontal-tb; vector-effect: none; paint-order: normal; d: none; cx: 0px; cy: 0px; x: 0px; y: 0px; r: 0px; rx: auto; ry: auto; caret-color: rgb(0, 0, 0); background: rgba(0 0% 0)"
+              lang="X-NONE"> <span class="NormalTextRun  BCX0 SCXW205281120" style="background-color: inherit">
+                https_proxy=</span></span><span data-contrast="auto" class="TextRun  BCX0 SCXW205281120"
+              xml:lang="X-NONE" style="animation: 0s ease 0s 1 normal none running none; background-blend-mode: normal; border-radius: 0px; border-collapse: separate; bottom: auto; box-shadow: none; box-sizing: content-box; break-after: auto; break-before: auto; break-inside: auto; caption-side: top; clear: none; clip: auto; color: rgb(0, 0, 0); content: normal; cursor: text; direction: ltr; display: inline; empty-cells: show; float: none; font-family: Calibri, Calibri_MSFontService, sans-serif; font-kerning: none; font-optical-sizing: auto; font-size: 16px; font-stretch: 100%; font-style: normal; font-variant: no-common-ligatures no-discretionary-ligatures no-historical-ligatures no-contextual; font-weight: 400; height: auto; image-orientation: from-image; image-rendering: auto; isolation: auto; place-items: normal; place-self: auto; left: auto; letter-spacing: normal; line-height: 20.5042px; list-style-position: outside; list-style-type: disc; max-height: none; max-width: none; min-height: 0px; min-width: 0px; mix-blend-mode: normal; object-fit: fill; object-position: 50% 50%; offset: none 0px auto 0deg; opacity: 1; orphans: 2; outline: rgb(0, 0, '0) none 0px'; outline-offset: 0px; overflow-anchor: auto; overflow-wrap: break-word; overflow: visible; pointer-events: auto; position: static; resize: none; right: auto; scroll-behavior: auto; speak: normal; table-layout: auto; tab-size: 8; text-align: left; text-align-last: auto; text-decoration: 'none solid rgb(0', 0, 0); text-decoration-skip-ink: auto; text-underline-position: auto; text-indent: 0px; text-rendering: auto; text-shadow: none; text-size-adjust: auto; text-overflow: clip; text-transform: none; top: auto; touch-action: auto; transition: all 0s ease 0s; unicode-bidi: normal; vertical-align: baseline; visibility: visible; white-space: normal; widows: 2; width: auto; will-change: auto; word-break: normal; word-spacing: 0px; z-index: auto; zoom: 1; -webkit-appearance: none; backface-visibility: visible; border-spacing: 0px; -webkit-border-image: none; -webkit-box-align: stretch; -webkit-box-decoration-break: slice; -webkit-box-direction: normal; -webkit-box-flex: 0; -webkit-box-ordinal-group: 1; -webkit-box-orient: horizontal; -webkit-box-pack: start; columns: auto auto; gap: normal; column-rule: '0px none rgb(0', 0, 0); column-span: none; backdrop-filter: none; place-content: normal; flex: 0 1 auto; flex-flow: row nowrap; -webkit-font-smoothing: auto; grid-auto-columns: auto; grid-auto-flow: row; grid-auto-rows: auto; grid-area: auto auto auto auto; grid-template-areas: none; grid-template-columns: none; grid-template-rows: none; -webkit-highlight: none; hyphens: manual; -webkit-hyphenate-character: auto; -webkit-line-break: after-white-space; -webkit-locale: X-NONE; -webkit-mask-box-image-outset: 0; -webkit-mask-box-image-repeat: stretch; -webkit-mask-box-image-slice: 0 fill; -webkit-mask-box-image-source: none; -webkit-mask-box-image-width: auto; -webkit-mask: none 0% 0% auto repeat border-box border-box; -webkit-mask-composite: source-over; order: 0; perspective: none; perspective-origin: 0px 0px; -webkit-print-color-adjust: economy; -webkit-rtl-ordering: logical; shape-outside: none; shape-image-threshold: 0; shape-margin: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); -webkit-text-combine: none; -webkit-text-decorations-in-effect: none; -webkit-text-emphasis: 'none rgb(0', 0, 0); -webkit-text-emphasis-position: over right; -webkit-text-fill-color: rgb(0, 0, 0); -webkit-text-orientation: vertical-right; -webkit-text-security: none; -webkit-text-stroke: '0px rgb(0', 0, 0); transform: none; transform-origin: 0px 0px; transform-style: flat; -webkit-user-drag: none; -webkit-user-modify: read-write; user-select: text; -webkit-writing-mode: horizontal-tb; -webkit-app-region: none; buffered-rendering: auto; clip-path: none; clip-rule: nonzero; mask: none; filter: none; flood-color: rgb(0, 0, 0); flood-opacity: 1; lighting-color: rgb(255, 255, 255); stop-color: rgb(0, 0, 0); stop-opacity: 1; color-interpolation: srgb; color-interpolation-filters: linearrgb; color-rendering: auto; fill: rgb(0, 0, 0); fill-opacity: 1; fill-rule: nonzero; marker: none; mask-type: luminance; shape-rendering: auto; stroke: none; stroke-dasharray: none; stroke-dashoffset: 0px; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-opacity: 1; stroke-width: 1px; alignment-baseline: auto; baseline-shift: 0px; dominant-baseline: auto; text-anchor: start; writing-mode: horizontal-tb; vector-effect: none; paint-order: normal; d: none; cx: 0px; cy: 0px; x: 0px; y: 0px; r: 0px; rx: auto; ry: auto; caret-color: rgb(0, 0, 0); border: 0px none rgb(0, 0, 0); margin: 0px; padding: 0px; background: rgba(0 0% 0)"
+              lang="X-NONE"><span class="NormalTextRun  BCX0 SCXW205281120" style="background-color: inherit;">http://SomeName.proxy.company.com:80</span></span></li>
+        </ul>
+      </li>
+      <li>At this point a git repo can be cloned into your workspace using the
+        URL for the repo, see "Clone or download" button on repo's Web page:
+        <ul>
+          <li>git clone <span data-contrast="auto" class="TextRun SCXW268334380 BCX0"
+              xml:lang="X-NONE" style="animation: 0s ease 0s 1 normal none running none; background-blend-mode: normal; border-radius: 0px; border-collapse: separate; bottom: auto; box-shadow: none; box-sizing: content-box; break-after: auto; break-before: auto; break-inside: auto; caption-side: top; clear: none; clip: auto; color: rgb(0, 0, 0); content: normal; cursor: text; direction: ltr; display: inline; empty-cells: show; float: none; font-family: Calibri, Calibri_MSFontService, sans-serif; font-kerning: none; font-optical-sizing: auto; font-size: 16px; font-stretch: 100%; font-style: normal; font-variant: no-common-ligatures no-discretionary-ligatures no-historical-ligatures no-contextual; font-weight: 400; height: auto; image-orientation: from-image; image-rendering: auto; isolation: auto; place-items: normal; place-self: auto; left: auto; letter-spacing: normal; line-height: 20.5042px; list-style-position: outside; list-style-type: disc; max-height: none; max-width: none; min-height: 0px; min-width: 0px; mix-blend-mode: normal; object-fit: fill; object-position: 50% 50%; offset: none 0px auto 0deg; opacity: 1; orphans: 2; outline: rgb(0, 0, '0) none 0px'; outline-offset: 0px; overflow-anchor: auto; overflow-wrap: break-word; overflow: visible; pointer-events: auto; position: static; resize: none; right: auto; scroll-behavior: auto; speak: normal; table-layout: auto; tab-size: 8; text-align: left; text-align-last: auto; text-decoration: 'none solid rgb(0', 0, 0); text-decoration-skip-ink: auto; text-underline-position: auto; text-indent: 0px; text-rendering: auto; text-shadow: none; text-size-adjust: auto; text-overflow: clip; text-transform: none; top: auto; touch-action: auto; transition: all 0s ease 0s; unicode-bidi: normal; vertical-align: baseline; visibility: visible; white-space: normal; widows: 2; width: auto; will-change: auto; word-break: normal; word-spacing: 0px; z-index: auto; zoom: 1; -webkit-appearance: none; backface-visibility: visible; border-spacing: 0px; -webkit-border-image: none; -webkit-box-align: stretch; -webkit-box-decoration-break: slice; -webkit-box-direction: normal; -webkit-box-flex: 0; -webkit-box-ordinal-group: 1; -webkit-box-orient: horizontal; -webkit-box-pack: start; columns: auto auto; gap: normal; column-rule: '0px none rgb(0', 0, 0); column-span: none; backdrop-filter: none; place-content: normal; flex: 0 1 auto; flex-flow: row nowrap; -webkit-font-smoothing: auto; grid-auto-columns: auto; grid-auto-flow: row; grid-auto-rows: auto; grid-area: auto auto auto auto; grid-template-areas: none; grid-template-columns: none; grid-template-rows: none; -webkit-highlight: none; hyphens: manual; -webkit-hyphenate-character: auto; -webkit-line-break: after-white-space; -webkit-locale: X-NONE; -webkit-mask-box-image-outset: 0; -webkit-mask-box-image-repeat: stretch; -webkit-mask-box-image-slice: 0 fill; -webkit-mask-box-image-source: none; -webkit-mask-box-image-width: auto; -webkit-mask: none 0% 0% auto repeat border-box border-box; -webkit-mask-composite: source-over; order: 0; perspective: none; perspective-origin: 0px 0px; -webkit-print-color-adjust: economy; -webkit-rtl-ordering: logical; shape-outside: none; shape-image-threshold: 0; shape-margin: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); -webkit-text-combine: none; -webkit-text-decorations-in-effect: none; -webkit-text-emphasis: 'none rgb(0', 0, 0); -webkit-text-emphasis-position: over right; -webkit-text-fill-color: rgb(0, 0, 0); -webkit-text-orientation: vertical-right; -webkit-text-security: none; -webkit-text-stroke: '0px rgb(0', 0, 0); transform: none; transform-origin: 0px 0px; transform-style: flat; -webkit-user-drag: none; -webkit-user-modify: read-write; user-select: text; -webkit-writing-mode: horizontal-tb; -webkit-app-region: none; buffered-rendering: auto; clip-path: none; clip-rule: nonzero; mask: none; filter: none; flood-color: rgb(0, 0, 0); flood-opacity: 1; lighting-color: rgb(255, 255, 255); stop-color: rgb(0, 0, 0); stop-opacity: 1; color-interpolation: srgb; color-interpolation-filters: linearrgb; color-rendering: auto; fill: rgb(0, 0, 0); fill-opacity: 1; fill-rule: nonzero; marker: none; mask-type: luminance; shape-rendering: auto; stroke: none; stroke-dasharray: none; stroke-dashoffset: 0px; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-opacity: 1; stroke-width: 1px; alignment-baseline: auto; baseline-shift: 0px; dominant-baseline: auto; text-anchor: start; writing-mode: horizontal-tb; vector-effect: none; paint-order: normal; d: none; cx: 0px; cy: 0px; x: 0px; y: 0px; r: 0px; rx: auto; ry: auto; caret-color: rgb(0, 0, 0); border: 0px none rgb(0, 0, 0); margin: 0px; padding: 0px; background: rgba(0 0% 0)"
+              lang="X-NONE"> <span class="NormalTextRun SCXW268334380 BCX0" style="background-color: inherit;">
+                https://github.com/crapo/SadlDemo.git</span></span></li>
+        </ul>
+      </li>
+      <li><span class="NormalTextRun  BCX0 SCXW205281120"> <span style="font-family: Calibri, Calibri_MSFontService, sans-serif; letter-spacing: normal; visibility: visible; background-position-x: 0%">
+            Before you can commit and push changes, you must configure your git
+            user and email in the Terminal Window</span></span>
+        <ul>
+          <li><span class="NormalTextRun  BCX0 SCXW205281120"> <span style="font-family: Calibri, Calibri_MSFontService, sans-serif; letter-spacing: normal; visibility: visible; background-position-x: 0%">
+                git config --local user.name
+                "&lt;username&gt;"&nbsp;&nbsp;&nbsp; // e.g., git config --local
+                user.name "Andy Crapo"</span></span></li>
+          <li><span class="NormalTextRun  BCX0 SCXW205281120"> <span style="font-family: Calibri, Calibri_MSFontService, sans-serif; letter-spacing: normal; visibility: visible; background-position-x: 0%">
+                git config --local user.email
+                &lt;name&gt;@&lt;host&gt;&nbsp;&nbsp;&nbsp; // e.g., git config
+                --local user.email crapo@ge.com</span></span></li>
+        </ul>
+      </li>
+    </ol>
+    <p>Note that if the WebSADL backend running on a server is restarted, steps
+      5 and 7 must be repeated as they will be lost. Therefore it may be
+      desirable to create a shell script that will do these steps on demand.
+      Here is a template for such a script.</p>
+    <blockquote>
+      <p>#!/bin/bash<br>
+        export https_proxy=<span data-contrast="auto" class="TextRun  BCX0 SCXW205281120"
+          xml:lang="X-NONE" style="animation: 0s ease 0s 1 normal none running none; background-blend-mode: normal; border-radius: 0px; border-collapse: separate; bottom: auto; box-shadow: none; box-sizing: content-box; break-after: auto; break-before: auto; break-inside: auto; caption-side: top; clear: none; clip: auto; color: rgb(0, 0, 0); content: normal; cursor: text; direction: ltr; display: inline; empty-cells: show; float: none; font-family: Calibri, Calibri_MSFontService, sans-serif; font-kerning: none; font-optical-sizing: auto; font-size: 16px; font-stretch: 100%; font-style: normal; font-variant: no-common-ligatures no-discretionary-ligatures no-historical-ligatures no-contextual; font-weight: 400; height: auto; image-orientation: from-image; image-rendering: auto; isolation: auto; place-items: normal; place-self: auto; left: auto; letter-spacing: normal; line-height: 20.5042px; list-style-position: outside; list-style-type: disc; max-height: none; max-width: none; min-height: 0px; min-width: 0px; mix-blend-mode: normal; object-fit: fill; object-position: 50% 50%; offset: none 0px auto 0deg; opacity: 1; orphans: 2; outline: rgb(0, 0, '0) none 0px'; outline-offset: 0px; overflow-anchor: auto; overflow-wrap: break-word; overflow: visible; pointer-events: auto; position: static; resize: none; right: auto; scroll-behavior: auto; speak: normal; table-layout: auto; tab-size: 8; text-align: left; text-align-last: auto; text-decoration: 'none solid rgb(0', 0, 0); text-decoration-skip-ink: auto; text-underline-position: auto; text-indent: 0px; text-rendering: auto; text-shadow: none; text-size-adjust: auto; text-overflow: clip; text-transform: none; top: auto; touch-action: auto; transition: all 0s ease 0s; unicode-bidi: normal; vertical-align: baseline; visibility: visible; white-space: normal; widows: 2; width: auto; will-change: auto; word-break: normal; word-spacing: 0px; z-index: auto; zoom: 1; -webkit-appearance: none; backface-visibility: visible; border-spacing: 0px; -webkit-border-image: none; -webkit-box-align: stretch; -webkit-box-decoration-break: slice; -webkit-box-direction: normal; -webkit-box-flex: 0; -webkit-box-ordinal-group: 1; -webkit-box-orient: horizontal; -webkit-box-pack: start; columns: auto auto; gap: normal; column-rule: '0px none rgb(0', 0, 0); column-span: none; backdrop-filter: none; place-content: normal; flex: 0 1 auto; flex-flow: row nowrap; -webkit-font-smoothing: auto; grid-auto-columns: auto; grid-auto-flow: row; grid-auto-rows: auto; grid-area: auto auto auto auto; grid-template-areas: none; grid-template-columns: none; grid-template-rows: none; -webkit-highlight: none; hyphens: manual; -webkit-hyphenate-character: auto; -webkit-line-break: after-white-space; -webkit-locale: X-NONE; -webkit-mask-box-image-outset: 0; -webkit-mask-box-image-repeat: stretch; -webkit-mask-box-image-slice: 0 fill; -webkit-mask-box-image-source: none; -webkit-mask-box-image-width: auto; -webkit-mask: none 0% 0% auto repeat border-box border-box; -webkit-mask-composite: source-over; order: 0; perspective: none; perspective-origin: 0px 0px; -webkit-print-color-adjust: economy; -webkit-rtl-ordering: logical; shape-outside: none; shape-image-threshold: 0; shape-margin: 0px; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); -webkit-text-combine: none; -webkit-text-decorations-in-effect: none; -webkit-text-emphasis: 'none rgb(0', 0, 0); -webkit-text-emphasis-position: over right; -webkit-text-fill-color: rgb(0, 0, 0); -webkit-text-orientation: vertical-right; -webkit-text-security: none; -webkit-text-stroke: '0px rgb(0', 0, 0); transform: none; transform-origin: 0px 0px; transform-style: flat; -webkit-user-drag: none; -webkit-user-modify: read-write; user-select: text; -webkit-writing-mode: horizontal-tb; -webkit-app-region: none; buffered-rendering: auto; clip-path: none; clip-rule: nonzero; mask: none; filter: none; flood-color: rgb(0, 0, 0); flood-opacity: 1; lighting-color: rgb(255, 255, 255); stop-color: rgb(0, 0, 0); stop-opacity: 1; color-interpolation: srgb; color-interpolation-filters: linearrgb; color-rendering: auto; fill: rgb(0, 0, 0); fill-opacity: 1; fill-rule: nonzero; marker: none; mask-type: luminance; shape-rendering: auto; stroke: none; stroke-dasharray: none; stroke-dashoffset: 0px; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-opacity: 1; stroke-width: 1px; alignment-baseline: auto; baseline-shift: 0px; dominant-baseline: auto; text-anchor: start; writing-mode: horizontal-tb; vector-effect: none; paint-order: normal; d: none; cx: 0px; cy: 0px; x: 0px; y: 0px; r: 0px; rx: auto; ry: auto; caret-color: rgb(0, 0, 0); border: 0px none rgb(0, 0, 0); margin: 0px; padding: 0px; background: rgba(0 0% 0)"
+          lang="X-NONE"><span class="NormalTextRun  BCX0 SCXW205281120" style="background-color: inherit;">http://SomeName.proxy.company.com:80</span></span><br>
+        git config --local user.name "Andy Crapo"<br>
+        git config --local user.email crapo@ge.com</p>
+    </blockquote>
+    <p>For this script to work, it must be </p>
+    <ol>
+      <li>executable--if the file is named "setup.sh", it can be made executable
+        with the cmd "chmod +x setup.sh"</li>
+      <li>executed in the git repository folder. You can either create a script
+        in each repository or create it in your personal folder (the folder
+        above your git repositories) and execute it with "../setup.sh". </li>
+    </ol>
+    <h3><a name="GitAffordances">Git Affordances in WebSADL</a></h3>
+    <p>Once you have a git connection in your workspace, a couple of extra icons
+      will appear on the left side of the browser window.</p>
+    <blockquote>
+      <p><img src="images/WebSAD3.gif" width="48" height="99" border="0"></p>
+      <p><b>Figure 11: Git View and History</b></p>
+    </blockquote>
+    <p>The first of these causes a git view to be displayed in the left panel of
+      the browser window. In that view is shown the modifications, etc. The
+      second icon will cause a history of git interactions to be shown in the
+      left panel. In each of these views additional icons across the top of the
+      panel allow further graphical interactions with git.</p>
+    <h3><a name="Command-lineGitWebSADL">Command-line Git in WebSADL</a></h3>
+    <p>When the current directory of a Terminal Window is within a git
+      repository folder, git actions can be accomplished by typing in commands.
+      What follows is a bare-bones introduction to basic commands that can be
+      used to put changes to models made in WebSADL back into the remote
+      repository. Each command is shown as it would be typed into the Terminal
+      Window followed by an explanation starting with "//", which is not part of
+      the input.. There are many good sources of information on the git
+      command-line interface available on-line.</p>
+    <ul>
+      <li>git status&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // shows the
+        status of the repository, including what files have been modified and
+        number of commits that have been made</li>
+      <li>git add &lt;filename&gt;&nbsp;&nbsp;&nbsp; // add the named file to
+        files staged for commit</li>
+      <li>git commit -m "some description of changes"&nbsp;&nbsp;&nbsp; //
+        commit the staged files with the provided description</li>
+      <li>git push&nbsp;&nbsp;&nbsp; // push the committed changes to the remote
+        repository. You will be asked to authenticate</li>
+    </ul>
+    <p>&nbsp;</p>
+    <hr>
+  </body>
+</html>

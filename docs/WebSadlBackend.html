@@ -1,0 +1,181 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=windows-1252">
+    <title>WebSADL Backend Services</title>
+  </head>
+  <body>
+    <h1>WebSADL Backend Services</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->9/14/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <h2>Introduction</h2>
+    <p>WebSADL is a set of services that allow a SADL IDE to be instantiated in
+      a Web browser. The functionality mirrors that of the Eclipse-based SADL
+      IDE. WebSADL features include the following.</p>
+    <ul>
+      <li>
+        <p class="MsoNormal">Authoring of SADL model files in a feature-rich
+          text editor.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Live model instance validation.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Generation (OWL, N3, and NT) based on valid SADL
+          models.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">LS-based semantic highlighting.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Navigation between the SADL model elements.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Content assist in the SADL editors.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Downloading and managing external SADL resources
+          into the workspace.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Preferences.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Testing and querying SADL models.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Reviewing the output of any SADL model via Ask and
+          Test statements.</p>
+      </li>
+      <li>
+        <p class="MsoNormal">Collaboration with the Theia Git extension.</p>
+      </li>
+    </ul>
+    <p>This document is primarily about configuring and running the WebSADL
+      backend services. For more information about using WebSADL in a browser,
+      please see <a href="WebSADL.html">WebSADL</a>.</p>
+    <p>The WebSADL backend services are downloaded and run as a Docker image.</p>
+    <h2>Installation</h2>
+    <h3>Windows Pre-requisite</h3>
+    <p>If the server environment is Windows, Hyper-V must be enabled on the
+      host. Otherwise, Docker cannot run the WebSADL Linux-based containers. See
+      <a href="https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v/"
+        style="color: blue; text-decoration: underline; text-underline: single">
+https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v/</a>
+      for details. Administrator privileges are required so if you do not have
+      administrative privileges you will need help from a System Administrator.</p>
+    <h3>Docker Account</h3>
+    <p>If you don't already have one, create a Docker account. See <a href="https://success.docker.com/article/how-do-you-register-for-a-docker-id">
+        https://success.docker.com/article/how-do-you-register-for-a-docker-id</a>.
+      You will use your account ID to download the WebSADL image.</p>
+    <h3>Docker Installation</h3>
+    <p>If Docker is not already installed on the target server, download and
+      install. Go to <a href="https://docs.docker.com/engine/install/">https://docs.docker.com/engine/install/</a>
+      and select your OS or go to <a href="https://store.docker.com/search?type=edition&amp;offering=community">
+        https://store.docker.com/search?type=edition&amp;offering=community</a>.
+    </p>
+    <p>Test you installation of Docker to confirm that it is installed and
+      working correctly. See <a href="https://docs.docker.com/docker-for-windows/#test-your-installation">
+        https://docs.docker.com/docker-for-windows/#test-your-installation</a>.
+    </p>
+    <h3>Pull the Latest WebSADL Image</h3>
+    <p>In a cmd or terminal window, log into docker:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <em>docker login -u
+        &lt;your-docker-username&gt;</em></p>
+    <p>You will be prompted for your password.</p>
+    <font size="2"></font>
+    <p>In the cmd or terminal window, run: <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <em><span style="font-family: Courier New">docker
+          pull theiaide/sadl:next</span></em></p>
+    <p>Note that if you are behind a firewall, you may need to configure proxies
+      before you will be able to execute the pull. For information on docker
+      proxy settings, see <a href="https://docs.docker.com/config/daemon/systemd/#httphttps-proxy">
+        https://docs.docker.com/config/daemon/systemd/#httphttps-proxy</a>.</p>
+    <p>Note also that if you have previously pulled the docker image, you may
+      need to specify a tag to pull the latest, e.g., <em><span style="font-family: Courier New">docker
+          pull theiaide/sadl:next</span></em>. See <a href="https://hub.docker.com/r/theiaide/sadl/tags">
+        https://hub.docker.com/r/theiaide/sadl/tags</a> for tags.</p>
+    <h3>Run the WebSADL Image</h3>
+    <p>Change directory to the location of your SADL projects or the location
+      where you wish to create SADL projects. This is the host's <i>current
+        directory</i> (cd).</p>
+    <p>In a cmd or terminal window, run<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <em><span style="font-family: Courier New">docker
+          run -it -p &lt;host_port&gt;:&lt;container_port&gt; -v
+          "&lt;host_location&gt;:&lt;container_location"&nbsp;theiaide/sadl:next</span></em></p>
+    <p>For example, in a Windows environment one might run one of the following,
+      depending up the type of input window.</p>
+    <ol>
+      <li>cmd.exe window:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em> <span style="font-family: Courier New">docker
+            run -it -p 3000:3000 -v "%cd%:/home/project"&nbsp;theiaide/sadl:next</span></em></li>
+      <li>PowerShell window:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <em><span style="font-family: Courier New">docker
+            run -it -p 3000:3000 -v
+            "${PWD}:/home/project"&nbsp;theiaide/sadl:next</span></em></li>
+      <li class="MsoNormal">Git Bash window:&nbsp;<br>
+        <span style="font-family: Courier New">&nbsp;&nbsp;&nbsp; <em><font size="3">winpty&nbsp;docker
+              run -it -p 3000:3000 -v
+              "/$(pwd&nbsp;-W):/home/project"&nbsp;theiaide/sadl:next</font></em></span></li>
+    </ol>
+    <p>This would mean that the service is running on host port 3000, container
+      port 3000, host location <i>current directory </i>(directory in which
+      Docker was run), container location "/home/project".</p>
+    <p>In a Linux environment, the command would be:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <em><span style="font-family: Courier New">docker run -it -p 3000:3000 -v
+          "$(pwd):/home/project"&nbsp;theiaide/sadl:next</span></em></p>
+    <p>You can see a list of the images that are locally available with the
+      command:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <em><span style="font-family: Courier New">docker images</span></em></p>
+    <p>You can get information about currently running containers with the
+      command:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <em><span style="font-family: Courier New">docker ps</span></em></p>
+    The results of this command will reveal the name of the running container,
+    e.g. "angry_fermat" in the output below: <br>
+    <blockquote>
+      <table style="border-collapse: collapse" cellspacing="0" cellpadding="0" bordercolor="#111111"
+        border="1">
+        <tbody>
+          <tr>
+            <td width="14%" align="center"><b>CONTAINER ID</b></td>
+            <td width="14%" align="center"><b>IMAGE</b></td>
+            <td width="14%" align="center"><b>COMMAND</b></td>
+            <td width="14%" align="center"><b>CREATED</b></td>
+            <td width="14%" align="center"><b>STATUS</b></td>
+            <td width="15%" align="center"><b>PORTS</b></td>
+            <td width="15%" align="center"><b>NAMES</b></td>
+          </tr>
+          <tr>
+            <td width="14%" align="center">9ce78044d643</td>
+            <td width="14%" align="center">theiaide/sadl:next</td>
+            <td width="14%" align="center">&nbsp;"yarn theia start /h&hellip;"</td>
+            <td width="14%" align="center">7 minutes ago</td>
+            <td width="14%" align="center">Up 7 minutes</td>
+            <td width="15%" align="center">0.0.0.0:3000-&gt;3000/tcp</td>
+            <td width="15%" align="center">angry_fermat</td>
+          </tr>
+        </tbody>
+      </table>
+    </blockquote>
+    <p>This name can then be used to get more information or to stop the
+      container:</p>
+    <ul>
+      <li>Show logs: <em><span style="font-family: Courier New">docker logs
+            angry_fermat</span></em></li>
+      <li>Stop: <span style="font-family: Courier New">docker <em>stop
+            angry_fermat</em></span></li>
+    </ul>
+    <p>You can get information about containers, past and present, with the
+      command:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <em> <span style="font-family: Courier New">docker ps -a</span></em> </p>
+    <p>For more information see <a href="https://docs.docker.com/engine/reference/commandline/docker/">
+        https://docs.docker.com/engine/reference/commandline/docker/</a>. </p>
+    <h2>Using WebSADL with Git</h2>
+    <p>The WebSADL server docker images comes with Git (2.13.7). For information
+      on using git in WebSADL, see <a href="WebSADL.html#UsingGit">WebSADL.html#UsingGit</a>.</p>
+  </body>
+</html>
