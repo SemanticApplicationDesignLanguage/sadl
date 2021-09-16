@@ -13280,9 +13280,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (onDatatype != null) {
 			equivClass.addProperty(OWL2.onDatatype, onDatatype);
 			if (facet != null) {
-				org.apache.jena.rdf.model.Resource restrictions = facetsToRestrictionNode(newDatatypeUri, facet, onDatatype);
-				// Create a list containing the restrictions
-				RDFList list = getTheJenaModel().createList(new RDFNode[] { restrictions });
+				RDFList list = getTheJenaModel().createList(facetsToRestrictionNodes(newDatatypeUri, facet, onDatatype));
 				equivClass.addProperty(OWL2.withRestrictions, list);
 			}
 		} else if (unionOfTypes != null) {
@@ -13379,8 +13377,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
-	private org.apache.jena.rdf.model.Resource facetsToRestrictionNode(String newName, SadlDataTypeFacet facet, org.apache.jena.rdf.model.Resource onDatatype) {
-		org.apache.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
+	private RDFNode[] facetsToRestrictionNodes(String newName, SadlDataTypeFacet facet, org.apache.jena.rdf.model.Resource onDatatype) {
+		List<RDFNode> restrictions = new ArrayList<RDFNode>();
 		if (facet.getMin() != null) {
 			Literal minlit;
 			if (onDatatype.isURIResource()) {
@@ -13389,7 +13387,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else {
 				minlit = getTheJenaModel().createLiteral(facet.getMin());
 			}
+			org.apache.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
 			anon.addProperty(xsdProperty(facet.isMinInclusive() ? "minInclusive" : "minExclusive"), minlit); // "" +  facet.getMin());
+			restrictions.add(anon);
 		}
 		if (facet.getMax() != null) {
 			Literal maxlit;
@@ -13399,28 +13399,45 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else {
 				maxlit = getTheJenaModel().createLiteral(facet.getMax());
 			}
+			org.apache.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
 			anon.addProperty(xsdProperty(facet.isMaxInclusive() ? "maxInclusive" : "maxExclusive"), maxlit); // "" + facet.getMax());
+			restrictions.add(anon);
 		}
 		
 		if (facet.getLen() != null) {
+			org.apache.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
 			anon.addProperty(xsdProperty("length"), "" + facet.getLen());
+			restrictions.add(anon);
 		}
 		if (facet.getMinlen() != null) {
+			org.apache.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
 			anon.addProperty(xsdProperty("minLength"), "" + facet.getMinlen());
+			restrictions.add(anon);
 		}
 		if (facet.getMaxlen() != null && !facet.getMaxlen().equals("*")) {
+			org.apache.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
 			anon.addProperty(xsdProperty("maxLength"), "" + facet.getMaxlen());
+			restrictions.add(anon);
 		}
 		if (facet.getRegex() != null) {
+			org.apache.jena.rdf.model.Resource anon = getTheJenaModel().createResource();
 			anon.addProperty(xsdProperty("pattern"), "" + facet.getRegex());
+			restrictions.add(anon);
 		}
 		if (facet.getValues() != null) {
 			Iterator<String> iter = facet.getValues().iterator();
+			org.apache.jena.rdf.model.Resource anon = null;
 			while (iter.hasNext()) {
+				if (anon == null) {
+					anon = getTheJenaModel().createResource();
+				}
 				anon.addProperty(xsdProperty("enumeration"), iter.next());
 			}
+			if (anon != null) {
+				restrictions.add(anon);
+			}
 		}
-		return anon;
+		return restrictions.toArray(new RDFNode[0]);	
 	}
 
 	/**
