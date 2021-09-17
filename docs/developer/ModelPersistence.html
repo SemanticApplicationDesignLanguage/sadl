@@ -8,6 +8,7 @@
     <h5>Last revised
       <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->9/17/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
     </h5>
+    <h2>Overview of Classes Involved in SADL and External OWL Model Processing</h2>
     <p>The SADL IDE uses Apache Jena as the interface to in-memory OWL models
       created when a SADL model is processed by the Xtext model processor and as
       the interface to OWL model persistence. The in-memory OWL model, which
@@ -92,5 +93,22 @@
       method and the <em>SadlJenaModelGetter</em>'s <em>getModel</em> method.</p>
     <p><br>
     </p>
+    <h2>Persistence in Triple Stores (Rather than Files)</h2>
+    <h3>SADL Models</h3>
+    <p>SADL models are models stored in .sadl files. They are, when error free
+      and saved in the SADL editor, persisted to some type of triple storage.
+      Traditionally, the ontology concepts (classes, properties, instances,
+      axioms) have been written to OWL files and rules have been written to rule
+      files. When using a triple store for persistence, the ontology concepts in
+      the SADL model need to be added to the triple store as a named graph. The
+      rules must also be stored. It&nbsp; is unclear at present whether they can
+      remain as rule files, as they have in the past with TDB, or if they need
+      to be also added to the triple store's named graph.</p>
+    <h3>External OWL Files (ExternalEmfResources)</h3>
+    <p>SADL allows "external" OWL files to be added to a SADL project and then
+      imported into SADL models. Traditionally these OWL models have remained in
+      the same file format as a copy of the file within the project. When using
+      a triple store for persistence, these OWL files need to be added to the
+      triple store as named graphs.</p>
   </body>
 </html>
