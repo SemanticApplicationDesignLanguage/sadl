@@ -149,7 +149,6 @@ import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.ImplicitPropertySide;
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.TypeCheckInfo;
-import com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
@@ -208,12 +207,10 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.IReasoner;
-import com.ge.research.sadl.reasoner.ISadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.AskExpression;
@@ -637,25 +634,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				String owlFN = getOwlFilename(lastSeg, format);
 				SadlUtils su = new SadlUtils();
 				String modelFolder = getModelFolderPath(resource);
-				// // Output the OWL file for the ontology model
-				if (format != null && format.equals("Jena TDB")) {
-					ISadlJenaModelGetter modgetter = getConfigMgr().getModelGetter();
-					if (modgetter == null) {
-				    	modgetter = (ISadlJenaModelGetter) new com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter(getConfigMgr(), getConfigMgr().getTdbFolder(), format);
-				    	getConfigMgr().setModelGetter(modgetter);
-						getConfigMgr().getModelGetter().setTdbFolder(getConfigMgr().getTdbFolder());
-
-					}
-					if (!(modgetter instanceof com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter)) {
-						addError("Unable to save model to Jena TDB, invalid model getter.", null);
-					}
-					else {
-						String owlFullFN = getConfigMgr().getModelFolder() + "/" + owlFN;
-						((com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter) modgetter).saveModel(getTheJenaModel().getBaseModel(), getModelNamespace(), getModelName(), owlFullFN, format);
-					}
-				}
-				else {
+				// Persist the OWL model
+				if (format != null && !format.equals("Jena TDB")) {
 					getConfigMgr().cleanTdbFolder();
+				}
+//					ISadlJenaModelGetter modgetter = getConfigMgr().getModelGetter();
+//					if (modgetter == null) {
+//				    	modgetter = (ISadlJenaModelGetter) new com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter(getConfigMgr(), getConfigMgr().getTdbFolder(), format);
+//				    	getConfigMgr().setModelGetter(modgetter);
+//						getConfigMgr().getModelGetter().setTdbFolder(getConfigMgr().getTdbFolder());
+//
+//					}
+//					if (!(modgetter instanceof com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter)) {
+//						addError("Unable to save model to Jena TDB, invalid model getter.", null);
+//					}
+//					else {
+//						String owlFullFN = getConfigMgr().getModelFolder() + "/" + owlFN;
+//						((com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter) modgetter).saveModel(getTheJenaModel().getBaseModel(), getModelNamespace(), getModelName(), owlFullFN, format);
+//					}
+//				}
+//				else {
+//					getConfigMgr().cleanTdbFolder();
 					generateOwlFile(fsa, modelFolder, owlFN, getTheJenaModel().getBaseModel(), getModelName(), getModelAlias(), format);
 	
 					String fn = SadlConstants.SADL_BASE_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
@@ -720,7 +719,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI,
 								SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX);
 					}
-				}
+//				}
 				String[] mapping = new String[4];
 				mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + owlFN);
 				mapping[1] = getModelName();
@@ -792,7 +791,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return true;
 	}
 
-	private void generateOwlFile(IFileSystemAccess2 fsa, String modelFolder, String owlFN, Model model, String modelName, String modelAlias, String format) throws TranslationException {
+	private void generateOwlFile(IFileSystemAccess2 fsa, String modelFolder, String owlFN, Model model, String modelName, String modelAlias, String format) throws TranslationException, IOException {
 		if (isBinary(format)) {
 			// IFileSystemAccess2.generateFile doesn't appear to handle binary files.
 			String fs = modelFolder + "/" + owlFN;
@@ -828,7 +827,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private boolean isBinary(String format) {
 		if (format.equals("RDF Binary")) {
 			return true;
-		}
+		} else
+			try {
+				if (SadlSerializationFormat.getRDFFormat(format).equals(SadlSerializationFormat.TDB_PseudoFormat) ) {
+					return true;
+				}
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		return false;
 	}
 
@@ -1902,15 +1909,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									IReasoner.SADL_BUILTIN_FUNCTIONS_URI,
 									IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS);
 						} else {
-							IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
-							if (cm.getModelGetter() == null) {
-								cm.setModelGetter(new SadlJenaModelGetter(cm, null));
-							}
-							cm.getModelGetter().getOntModel(IReasoner.SADL_BUILTIN_FUNCTIONS_URI,
-									ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
-											.appendFragment(SadlConstants.OWL_BUILTIN_FUNCTIONS_FILENAME)
-											.toFileString(),
-									getOwlModelFormat(context));
+//							IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
+//							if (cm.getModelGetter() == null) {
+//								cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+//							}
+//							cm.getModelGetter().getOntModel(IReasoner.SADL_BUILTIN_FUNCTIONS_URI,
+//									ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
+//											.appendFragment(SadlConstants.OWL_BUILTIN_FUNCTIONS_FILENAME)
+//											.toFileString(),
+//									getOwlModelFormat(context));
+							throw new JenaProcessorException("When does this happen? Not sure it ever will...");
 						}
 					}
 				}
@@ -1980,14 +1988,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							OntModelProvider.attach(imrsrc, sadlImplicitModel, SadlConstants.SADL_IMPLICIT_MODEL_URI,
 									SadlConstants.SADL_IMPLICIT_MODEL_PREFIX);
 						} else {
-							IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
-							if (cm.getModelGetter() == null) {
-								cm.setModelGetter(new SadlJenaModelGetter(cm, null));
-							}
-							cm.getModelGetter().getOntModel(SadlConstants.SADL_IMPLICIT_MODEL_URI,
-									ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
-											.appendFragment(SadlConstants.OWL_IMPLICIT_MODEL_FILENAME).toFileString(),
-									getOwlModelFormat(context));
+//							IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
+//							if (cm.getModelGetter() == null) {
+//								cm.setModelGetter(new SadlJenaModelGetter(cm, null));
+//							}
+//							cm.getModelGetter().getOntModel(SadlConstants.SADL_IMPLICIT_MODEL_URI,
+//									ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
+//											.appendFragment(SadlConstants.OWL_IMPLICIT_MODEL_FILENAME).toFileString(),
+//									getOwlModelFormat(context));
+							throw new JenaProcessorException("When does this happen? Not sure it ever will...");
 						}
 					}
 				}

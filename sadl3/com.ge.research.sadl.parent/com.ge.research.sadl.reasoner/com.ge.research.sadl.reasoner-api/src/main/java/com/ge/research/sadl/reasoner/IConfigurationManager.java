@@ -339,14 +339,16 @@ public interface IConfigurationManager {
 	 * @param format--the OWL model peristence format
 	 * @return
 	 * @throws TranslationException 
+	 * @throws IOException 
 	 */
-	ISadlModelGetter getSadlModelGetter(String format) throws TranslationException;
+	ISadlModelGetter getSadlModelGetter(String format) throws TranslationException, IOException;
 	
 	/**
 	 * Method to get the ISadlModelGetterPutter for the given peristence format.
 	 * @param format--the OWL model peristence format
 	 * @return
 	 * @throws TranslationException 
+	 * @throws IOException 
 	 */
-	ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException;
+	ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException, IOException;
 }

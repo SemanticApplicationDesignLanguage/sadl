@@ -1834,11 +1834,14 @@ public class ConfigurationManager implements IConfigurationManager {
 	}
 
 	@Override
-	public ISadlModelGetter getSadlModelGetter(String format) throws TranslationException {
+	public ISadlModelGetter getSadlModelGetter(String format) throws TranslationException, IOException {
 		if (sadlModelGetter == null) {
 			if (SadlSerializationFormat.validateSadlFormat(format)) {
 				if (SadlSerializationFormat.getRDFFormat(format) != SadlSerializationFormat.TDB_PseudoFormat) {
 					sadlModelGetter = new SadlJenaFileGetter(this, format);
+				}
+				else if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+					sadlModelGetter = new SadlJenaTDBGetter(this, format);
 				}
 				else {
 					throw new TranslationException("Persistence format " + format + " not yet implemented");
@@ -1852,11 +1855,14 @@ public class ConfigurationManager implements IConfigurationManager {
 	}
 	
 	@Override
-	public ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException {
+	public ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException, IOException {
 		if (sadlModelGetterPutter == null) {
 			if (SadlSerializationFormat.validateSadlFormat(format)) {
 				if (SadlSerializationFormat.getRDFFormat(format) != SadlSerializationFormat.TDB_PseudoFormat) {
 					sadlModelGetterPutter = new SadlJenaFileGetterPutter(this, format);
+				}
+				else if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+					sadlModelGetterPutter = new SadlJenaTDBGetterPutter(this, format);
 				}
 				else {
 					throw new TranslationException("Persistence format " + format + " not yet implemented");
