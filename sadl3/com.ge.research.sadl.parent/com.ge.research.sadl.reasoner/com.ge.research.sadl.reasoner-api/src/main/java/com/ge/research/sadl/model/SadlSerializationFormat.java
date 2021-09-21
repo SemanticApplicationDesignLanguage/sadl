@@ -23,7 +23,7 @@ public class SadlSerializationFormat {
 	public static final String JENA_TDB_FORMAT = "Jena TDB";
 	public static final String JENA_TDB2_FORMAT = "Jena TDB2";
 	
-	static RDFFormat TDB_PseudoFormat = RDFFormat.RDFNULL;
+	public static RDFFormat TDB_PseudoFormat = RDFFormat.RDFNULL;
 		
 	/**
 	 * Method to get the jena RDFFormat type from the SADL format type string

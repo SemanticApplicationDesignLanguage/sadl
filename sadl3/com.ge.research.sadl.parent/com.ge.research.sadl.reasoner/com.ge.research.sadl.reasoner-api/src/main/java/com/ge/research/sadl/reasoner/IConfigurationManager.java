@@ -333,4 +333,20 @@ public interface IConfigurationManager {
 	 * @return
 	 */
 	boolean isNamespaceImplicit(String uri);
+	
+	/**
+	 * Method to get the ISadlModelGetter for the given persistence format.
+	 * @param format--the OWL model peristence format
+	 * @return
+	 * @throws TranslationException 
+	 */
+	ISadlModelGetter getSadlModelGetter(String format) throws TranslationException;
+	
+	/**
+	 * Method to get the ISadlModelGetterPutter for the given peristence format.
+	 * @param format--the OWL model peristence format
+	 * @return
+	 * @throws TranslationException 
+	 */
+	ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException;
 }

@@ -794,33 +794,36 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private void generateOwlFile(IFileSystemAccess2 fsa, String modelFolder, String owlFN, Model model, String modelName, String modelAlias, String format) throws TranslationException {
 		if (isBinary(format)) {
+			// IFileSystemAccess2.generateFile doesn't appear to handle binary files.
 			String fs = modelFolder + "/" + owlFN;
-	         writeOwlModelWithRDFDataMgr(model, format, fs);
+//	         writeOwlModelWithRDFDataMgr(model, format, fs);
+			getConfigMgr().getSadlModelGetterPutter(format).saveModel(model, modelName, modelName, owlFN, format);
 		}
 		else {
 			Charset charset = Charset.forName("UTF-8");
-			CharSequence seq = serializeModelToString(model, modelAlias, modelName, format, charset);
+//			CharSequence seq = serializeModelToString(model, modelAlias, modelName, format, charset);
+			CharSequence seq = getConfigMgr().getSadlModelGetterPutter(format).getModelAsString(model, modelAlias, modelName, format, charset);
 			fsa.generateFile(owlFN, seq);
 		}
 	}
 
-	/**
-	 * Method to write an OWL model to the designated file using the Jena RDFDataMgr
-	 * @param model -- the Jena Model
-	 * @param format -- the format (must be a valid format, e.g., RDF_XML_ABBREV_FORMAT; see getRDFFormat)
-	 * @param outputFilename -- the output filename
-	 * @throws TranslationException
-	 */
-	private void writeOwlModelWithRDFDataMgr(Model model, String format, String outputFilename) throws TranslationException {
-		try ( OutputStream out = new FileOutputStream(outputFilename) ) {
-		     RDFDataMgr.write(out, model, SadlSerializationFormat.getRDFFormat(format));
-		     out.close();
-		 } catch (FileNotFoundException e) {
-			System.err.println(e.getMessage());
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-		}
-	}
+//	/**
+//	 * Method to write an OWL model to the designated file using the Jena RDFDataMgr
+//	 * @param model -- the Jena Model
+//	 * @param format -- the format (must be a valid format, e.g., RDF_XML_ABBREV_FORMAT; see getRDFFormat)
+//	 * @param outputFilename -- the output filename
+//	 * @throws TranslationException
+//	 */
+//	private void writeOwlModelWithRDFDataMgr(Model model, String format, String outputFilename) throws TranslationException {
+//		try ( OutputStream out = new FileOutputStream(outputFilename) ) {
+//		     RDFDataMgr.write(out, model, SadlSerializationFormat.getRDFFormat(format));
+//		     out.close();
+//		 } catch (FileNotFoundException e) {
+//			System.err.println(e.getMessage());
+//		} catch (IOException e) {
+//			System.err.println(e.getMessage());
+//		}
+//	}
 
 	private boolean isBinary(String format) {
 		if (format.equals("RDF Binary")) {
@@ -829,27 +832,27 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	private CharSequence serializeModelToString(Model model, String prefix, String modelName, String format, Charset charset) throws TranslationException {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		if (format.equals(SadlSerializationFormat.RDF_XML_FORMAT) || 
-				format.equals(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT)) {
-			RDFWriter w2 = model.getWriter(format);
-			w2.setProperty("xmlbase", modelName);
-			w2.write(model, out, modelName);
-		}
-		else {
-			if (prefix != null) {
-				getTheJenaModel().getBaseModel().setNsPrefix(prefix, modelName);
-				if (prefix.length() > 0) {
-					// also add the empty string prefix to enable finding the URI of this model from the OWL file
-					getTheJenaModel().getBaseModel().setNsPrefix("", modelName);
-				}
-			}
-			RDFDataMgr.write(out, model, SadlSerializationFormat.getRDFFormat(format));
-		}	
-		CharSequence seq = new String(out.toByteArray(), charset);
-		return seq;
-	}
+//	private CharSequence serializeModelToString(Model model, String prefix, String modelName, String format, Charset charset) throws TranslationException {
+//		ByteArrayOutputStream out = new ByteArrayOutputStream();
+//		if (format.equals(SadlSerializationFormat.RDF_XML_FORMAT) || 
+//				format.equals(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT)) {
+//			RDFWriter w2 = model.getWriter(format);
+//			w2.setProperty("xmlbase", modelName);
+//			w2.write(model, out, modelName);
+//		}
+//		else {
+//			if (prefix != null) {
+//				getTheJenaModel().getBaseModel().setNsPrefix(prefix, modelName);
+//				if (prefix.length() > 0) {
+//					// also add the empty string prefix to enable finding the URI of this model from the OWL file
+//					getTheJenaModel().getBaseModel().setNsPrefix("", modelName);
+//				}
+//			}
+//			RDFDataMgr.write(out, model, SadlSerializationFormat.getRDFFormat(format));
+//		}	
+//		CharSequence seq = new String(out.toByteArray(), charset);
+//		return seq;
+//	}
 
 	protected String getOwlFilename(URI lastSeg, String format) throws TranslationException {
 		String owlFN = lastSeg.trimFileExtension().appendFileExtension(SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(format)))
@@ -1553,7 +1556,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 
 		try {
-			theJenaModel = prepareEmptyOntModel(resource);
+			theJenaModel = prepareEmptyOntModel(resource, context);
 		} catch (ConfigurationException e1) {
 			e1.printStackTrace();
 			addError(SadlErrorMessages.CONFIGURATION_ERROR.get(e1.getMessage()), model);
@@ -2135,7 +2138,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return aContent;
 	}
 
-	public OntModel prepareEmptyOntModel(Resource resource) throws ConfigurationException {
+	public OntModel prepareEmptyOntModel(Resource resource, ProcessorContext context) throws ConfigurationException {
 		try {
 			IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(getProcessorContext()));
 			OntDocumentManager owlDocMgr = cm.getJenaDocumentMgr();
@@ -2145,7 +2148,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (modelFolderPathname != null && !modelFolderPathname.startsWith(SYNTHETIC_FROM_TEST)) {
 				File mff = new File(modelFolderPathname);
 				mff.mkdirs();
-				spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolderPathname));
+//				spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolderPathname));		
+				spec.setImportModelGetter(getConfigMgr().getSadlModelGetterPutter(getOwlModelFormat(context)));
 			}
 			if (owlDocMgr != null) {
 				spec.setDocumentManager(owlDocMgr);
@@ -14696,7 +14700,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	public OntModel getOntModelFromString(Resource resource, String serializedModel)
 			throws IOException, ConfigurationException, URISyntaxException, JenaProcessorException {
-		OntModel listModel = prepareEmptyOntModel(resource);
+		OntModel listModel = prepareEmptyOntModel(resource, getProcessorContext());
 		InputStream stream = new ByteArrayInputStream(serializedModel.getBytes());
 		listModel.read(stream, null);
 		return listModel;

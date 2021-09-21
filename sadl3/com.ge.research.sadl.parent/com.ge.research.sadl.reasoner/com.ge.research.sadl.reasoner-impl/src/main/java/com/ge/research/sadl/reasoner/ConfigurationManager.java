@@ -59,6 +59,7 @@ import org.apache.jena.rdf.model.Seq;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.util.FileUtils;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OWL;
@@ -70,6 +71,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.ImportMapping;
+import com.ge.research.sadl.model.SadlSerializationFormat;
 
 /**
  * This is a general purpose configuration manager suitable for model deployment environments.
@@ -136,6 +138,10 @@ public class ConfigurationManager implements IConfigurationManager {
 	private String reasonerClassName = null;
 
 	private String translatorClassName = null;
+
+	private ISadlModelGetter sadlModelGetter;
+
+	private ISadlModelGetterPutter sadlModelGetterPutter;
 
 	/**
 	 * Required constructor for subclass call
@@ -1825,6 +1831,42 @@ public class ConfigurationManager implements IConfigurationManager {
 		if (otherProjectConfigurationManagers != null) {
 			otherProjectConfigurationManagers.clear();
 		}
+	}
+
+	@Override
+	public ISadlModelGetter getSadlModelGetter(String format) throws TranslationException {
+		if (sadlModelGetter == null) {
+			if (SadlSerializationFormat.validateSadlFormat(format)) {
+				if (SadlSerializationFormat.getRDFFormat(format) != SadlSerializationFormat.TDB_PseudoFormat) {
+					sadlModelGetter = new SadlJenaFileGetter(this, format);
+				}
+				else {
+					throw new TranslationException("Persistence format " + format + " not yet implemented");
+				}
+			}
+			else {
+				throw new TranslationException("Unsupported persistence format: " + format);
+			}
+		}
+		return sadlModelGetter;
+	}
+	
+	@Override
+	public ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException {
+		if (sadlModelGetterPutter == null) {
+			if (SadlSerializationFormat.validateSadlFormat(format)) {
+				if (SadlSerializationFormat.getRDFFormat(format) != SadlSerializationFormat.TDB_PseudoFormat) {
+					sadlModelGetterPutter = new SadlJenaFileGetterPutter(this, format);
+				}
+				else {
+					throw new TranslationException("Persistence format " + format + " not yet implemented");
+				}
+			}
+			else {
+				throw new TranslationException("Unsupported persistence format: " + format);
+			}
+		}
+		return sadlModelGetterPutter;
 	}
 
 }
