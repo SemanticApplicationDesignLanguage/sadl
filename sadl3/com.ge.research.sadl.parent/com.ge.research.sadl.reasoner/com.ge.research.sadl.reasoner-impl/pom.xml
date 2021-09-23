@@ -74,6 +74,7 @@
           <instructions>
             <Export-Package>com.ge.research.sadl.model,
                             com.ge.research.sadl.model.gp,
+                            com.ge.research.sadl.model.persistence,
                             com.ge.research.sadl.model.visualizer,
                             com.ge.research.sadl.reasoner</Export-Package>
           </instructions>
