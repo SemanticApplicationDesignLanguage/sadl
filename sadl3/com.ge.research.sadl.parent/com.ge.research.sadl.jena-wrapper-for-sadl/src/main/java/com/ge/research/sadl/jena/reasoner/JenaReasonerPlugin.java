@@ -45,8 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import jakarta.activation.DataSource;
-
 import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
@@ -59,7 +57,6 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntDocumentManager;
-import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.OntProperty;
@@ -75,7 +72,6 @@ import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.ModelGetter;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.RDFReader;
@@ -159,11 +155,11 @@ import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.RuleNotFoundException;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
-import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
+
+import jakarta.activation.DataSource;
 
 /**
  * This class implements the IReasoner interface (by extending Reasoner)
@@ -372,27 +368,9 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (!validateFormat(format)) {
 				throw new ConfigurationException("Format '" + format + "' is not supported by reasoner '" + getConfigurationCategory() + "'.");
 			}
-//			if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-				schemaModel = configurationMgr.getSadlModelGetter(format).getOntModel(getModelName());	
-				schemaModel.getDocumentManager().setProcessImports(true);
-				schemaModel.loadImports();
-//			}
-//			else {
-//				if (tbox.endsWith(".TDB/")) {
-//					// this is a cached inferred TDB model
-//					schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);
-//					schemaModelIsCachedInferredModel = true;
-//					return null;
-//				}
-//				else {
-//					schemaModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
-//					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
-//					schemaModel.getDocumentManager().setProcessImports(true);
-//					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
-//					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getSadlModelGetter(format));
-//					schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
-//				}
-//			}
+			schemaModel = configurationMgr.getSadlModelGetter(format).getOntModel(getModelName());	
+			schemaModel.getDocumentManager().setProcessImports(true);
+			schemaModel.loadImports();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}	
@@ -510,36 +488,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (tbox == null) {
 			throw new ConfigurationException("No mapping to an actual URL found for model '" + getModelName() + "'.");
 		}	
-		String format = repoType;
-		try {
-			String tdbFolder = configurationMgr.getTdbFolder();
-			if (configurationMgr.getModelGetter() == null) {
-//				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
-				configurationMgr.getSadlModelGetter(format);
-			}
-//			format = configurationMgr.getModelGetter().getFormat();
-//			if (repoType == null) repoType = format;	
-//			if (!format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-//				String ext = tbox.substring(tbox.lastIndexOf('.'));
-//				format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	// this will create a reader that will handle either RDF/XML or RDF/XML-ABBREV 
-//				if (ext.equalsIgnoreCase(".n3")) {
-//					format = "N3";
-//				}
-//				else if (ext.equalsIgnoreCase(".ntriple") || ext.equalsIgnoreCase(".nt")) {
-//					format = "N-TRIPLE";
-//				}
-//				else if (ext.equalsIgnoreCase(".jsonld")) {
-//					format = "JSON-LD";
-//				}
-//				configurationMgr.getModelGetter().setFormat(format);
-//			}
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		} catch (TranslationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		initialized = true;
 		
 		return 1;

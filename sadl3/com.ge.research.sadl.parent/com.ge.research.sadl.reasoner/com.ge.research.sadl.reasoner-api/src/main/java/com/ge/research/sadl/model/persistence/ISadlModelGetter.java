@@ -19,13 +19,18 @@ package com.ge.research.sadl.model.persistence;
 
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelGetter;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 public interface ISadlModelGetter extends ModelGetter{
@@ -68,6 +73,14 @@ public interface ISadlModelGetter extends ModelGetter{
 	 * @param uri
 	 * @return
 	 */
-	OntModel getOntModel(String uri);
-	
+	public abstract OntModel getOntModel(String uri);
+
+	/**
+	 * Method to get a hierarchical representation of the imports of this model
+	 * @param modelUri
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	public abstract HashMap<String, Map> getImportHierarchy(String modelUri) throws ConfigurationException;
+		
 }

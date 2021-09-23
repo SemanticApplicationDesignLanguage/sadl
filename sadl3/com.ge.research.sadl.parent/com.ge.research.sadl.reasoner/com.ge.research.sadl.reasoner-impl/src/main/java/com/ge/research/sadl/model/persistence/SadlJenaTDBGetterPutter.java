@@ -14,6 +14,7 @@ import org.apache.jena.tdb.TDB;
 import com.ge.research.sadl.model.persistence.ISadlModelGetterPutter;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 public class SadlJenaTDBGetterPutter extends SadlJenaTDBGetter implements ISadlModelGetterPutter {
@@ -58,6 +59,22 @@ public class SadlJenaTDBGetterPutter extends SadlJenaTDBGetter implements ISadlM
 		}
 		return true;
 	}
+	
+	@Override
+	public boolean removeModel(String uri) throws IOException {
+		if (getConfigMgr() instanceof IConfigurationManagerForEditing) {
+			if (ds.containsNamedModel(uri)) {
+				ds.begin(ReadWrite.WRITE);
+				ds.removeNamedModel(uri);
+				ds.commit();
+				TDB.sync(ds);
+				return true;
+			}
+		} else {
+			throw new IOException("Can't remove models with the current ConfigurationManager class: " + getConfigMgr().getClass().getCanonicalName());
+		}
+		return false;
+	}
 
     /**
      * Call this method to remove all named models from a TDB repository
@@ -76,12 +93,17 @@ public class SadlJenaTDBGetterPutter extends SadlJenaTDBGetter implements ISadlM
     		}
     		for (int i = 0; i < modelsToRemove.size(); i++) {
     			try {
+    				ds.begin(ReadWrite.WRITE);
    					ds.removeNamedModel(modelsToRemove.get(i));
    					cnt++;
     			}
     			catch (Throwable t) {
     				throw new ConfigurationException("Unexpected exception: " + t.getMessage());
     			}
+    			finally {
+    				ds.commit();
+    				TDB.sync(ds);
+   			}
     		}
     		return cnt;
     	}

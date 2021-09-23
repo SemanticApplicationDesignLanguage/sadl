@@ -36,13 +36,13 @@ public class SadlJenaTDBGetter extends SadlModelGetter {
 	
 	@Override
 	public Model getModel(String uri) {
-     	ds.begin(ReadWrite.READ);
+//     	ds.begin(ReadWrite.READ);
 		if(ds.containsNamedModel(uri)) {
 			Model m = ds.getNamedModel(uri);
-	     	ds.end();
+//	     	ds.end();
 			return m;
 		}
-     	ds.end();
+//     	ds.end();
 		return null;
 	}
 
@@ -53,7 +53,7 @@ public class SadlJenaTDBGetter extends SadlModelGetter {
 			return (OntModel)m;
 		}
 		else {
-			ds.begin(ReadWrite.READ);
+//			ds.begin(ReadWrite.READ);
 			getConfigMgr().getOntModelSpec(null).setImportModelGetter(this);
 			OntModel om = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
 //			om.getDocumentManager().setProcessImports(true);
@@ -71,12 +71,12 @@ public class SadlJenaTDBGetter extends SadlModelGetter {
 	
 	@Override
 	public boolean modelExists(String uri) throws ConfigurationException, MalformedURLException {
-     	ds.begin(ReadWrite.READ);
+//     	ds.begin(ReadWrite.READ);
 		if (ds.containsNamedModel(uri)) {
-			ds.end();
+//			ds.end();
 			return true;
 		}
-		ds.end();
+//		ds.end();
 		return false;
 	}
 

@@ -2,6 +2,10 @@ package com.ge.research.sadl.model.persistence;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
@@ -9,11 +13,13 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelGetter;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.vocabulary.OWL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.persistence.ISadlModelGetter;
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.TranslationException;
 
@@ -29,7 +35,8 @@ abstract public class SadlModelGetter implements ModelGetter, ISadlModelGetter {
 		setConfigMgr(mgr);
 		format = fmt;
 		modelSpec = mgr.getOntModelSpec(null);
-	}
+		originalModelGetter = OntModelSpec.getDefaultSpec(OWL.getURI()).getImportModelGetter();
+}
 	
 	@Override
 	public String getFormat() {
@@ -89,6 +96,23 @@ abstract public class SadlModelGetter implements ModelGetter, ISadlModelGetter {
 			return ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
 		}
 	
+	}
+
+	@Override
+	public HashMap<String, Map> getImportHierarchy(String modelUri) throws ConfigurationException {
+		String modelUrl = getConfigMgr().getAltUrlFromPublicUri(modelUri);
+		OntModel model = getOntModel(modelUri);
+		Set<String> imports = model.listImportedOntologyURIs();
+		if (imports != null) {
+			HashMap<String, Map> thisMap = new HashMap<String,Map>();
+			Iterator<String> impitr = imports.iterator();
+			while (impitr.hasNext()) {
+				String importUri = impitr.next();
+				thisMap.put(importUri, getImportHierarchy(importUri));
+			}
+			return thisMap;
+		}
+		return null;
 	}
 
 }

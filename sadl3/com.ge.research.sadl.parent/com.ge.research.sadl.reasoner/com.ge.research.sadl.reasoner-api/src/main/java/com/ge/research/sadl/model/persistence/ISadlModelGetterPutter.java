@@ -1,6 +1,8 @@
 package com.ge.research.sadl.model.persistence;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 import org.apache.jena.rdf.model.Model;
 
@@ -21,6 +23,17 @@ public interface ISadlModelGetterPutter extends ISadlModelGetter{
 	 * @return--true if successfully saved else false
 	 */
 	public abstract boolean saveModel(Model m, String modelNamespace, String publicUri, String OwlFileName, String format) throws TranslationException, IOException;
+
+	/**
+	 * Model to remove a Jena model from the persistent repository
+	 * @param uri
+	 * @return
+	 * @throws MalformedURLException 
+	 * @throws ConfigurationException 
+	 * @throws URISyntaxException 
+	 * @throws IOException 
+	 */
+	boolean removeModel(String uri) throws MalformedURLException, ConfigurationException, IOException, URISyntaxException;
 
 	/**
 	 * Call this method to remove all named models from a TDB repository

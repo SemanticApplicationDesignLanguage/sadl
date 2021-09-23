@@ -62,6 +62,7 @@ import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.SADLPackage;
@@ -296,7 +297,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 
 	public void graphSadlResource(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, SadlResource sr,
 			IProject project, IFile trgtFile, String owlFileName, String publicUri, int graphRadius, IProgressMonitor monitor)
-			throws CircularDefinitionException, ConfigurationException, IOException, InvalidNameException, URISyntaxException {
+			throws CircularDefinitionException, ConfigurationException, IOException, InvalidNameException, URISyntaxException, TranslationException {
 		String srnm = getSadlResourceConcreteName(sr);
 		OntConceptType srType = getSadlResourceOntConceptType(sr);
 		if (srType.equals(OntConceptType.CLASS)) {
@@ -472,7 +473,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 //		return hier;
 //	}
 
-	protected List<GraphSegment> getAnchoredImports(IConfigurationManagerForIDE configMgr, String publicUri, String prefix, IFile trgtFile, boolean derivedFN, int graphRadius) throws ConfigurationException, IOException {
+	protected List<GraphSegment> getAnchoredImports(IConfigurationManagerForIDE configMgr, String publicUri, String prefix, IFile trgtFile, boolean derivedFN, int graphRadius) throws ConfigurationException, IOException, TranslationException {
 		List<GraphSegment> importList = new ArrayList<GraphSegment>();
 		importList = findImports(importList, configMgr, publicUri, prefix, graphRadius);
 		findIncomingImports(trgtFile, importList, graphRadius);
@@ -590,7 +591,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 //	}
 
 	protected List<GraphSegment> findImports(List<GraphSegment> importList,
-			IConfigurationManagerForIDE configMgr, String parentPublicUri, String parentPrefix, int graphRadius) throws ConfigurationException, IOException {
+			IConfigurationManagerForIDE configMgr, String parentPublicUri, String parentPrefix, int graphRadius) throws ConfigurationException, IOException, TranslationException {
 		Map<String,String> map = configMgr.getImports(parentPublicUri, Scope.LOCALONLY);
 		if (map != null) {
 			Iterator<String> itr = map.keySet().iterator();

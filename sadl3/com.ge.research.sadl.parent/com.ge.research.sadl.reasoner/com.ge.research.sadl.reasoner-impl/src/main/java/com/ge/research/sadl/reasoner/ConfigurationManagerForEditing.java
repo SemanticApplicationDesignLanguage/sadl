@@ -714,33 +714,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * (java.lang.String)
 	 */
 	public boolean deleteModel(String publicUri) throws ConfigurationException,
-			IOException, URISyntaxException {
-		String altUrl = getAltUrlFromPublicUri(publicUri);
-		if (getRepoType().equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-			try {
-				OntModel modelToDelete = getModelGetter().getOntModel(
-						publicUri, altUrl, SadlSerializationFormat.JENA_TDB_FORMAT);
-				modelToDelete.removeAll();
-				getModelGetter().sync();
-			} catch (Throwable t) {
-				// ok to fail; may not exist
-			}
-		} else {
-			if (altUrl.startsWith("http:")) {
-				throw new IOException(
-						"Can't delete a model with only an 'http://' URL");
-			} else {
-				SadlUtils su = new SadlUtils();
-				File modelFile = new File(su.fileUrlToFileName(altUrl));
-				if (modelFile.exists()) {
-					if (!modelFile.delete()) {
-						throw new IOException("Unable to delete '" + altUrl
-								+ "'");
-					}
-				}
-			}
-		}
-		return deleteMapping(altUrl, publicUri);
+			IOException, URISyntaxException, TranslationException {
+		return getSadlModelGetterPutter(null).removeModel(publicUri);
 	}
 
 	/**

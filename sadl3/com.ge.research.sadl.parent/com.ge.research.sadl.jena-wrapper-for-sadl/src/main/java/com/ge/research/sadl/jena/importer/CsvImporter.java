@@ -38,6 +38,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -104,13 +105,13 @@ import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
 import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
-import com.ge.research.sadl.reasoner.ISadlJenaModelGetter;
+//import com.ge.research.sadl.reasoner.ISadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
+//import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
@@ -2181,36 +2182,57 @@ public class CsvImporter implements ITabularDataImporter {
 			throw new IOException("Import failed: " + e.getMessage(), e);
 		}
 		boolean success = false;
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		String content = null;
 		if (getConfigMgr() != null) {
-			ISadlJenaModelGetter modgetter = getConfigMgr().getModelGetter();
-			if (modgetter == null) {
-		    	modgetter = (ISadlJenaModelGetter) new com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter(getConfigMgr(), getConfigMgr().getTdbFolder(), format);
-		    	getConfigMgr().setModelGetter(modgetter);
-		    	getConfigMgr().getModelGetter().setTdbFolder(getConfigMgr().getTdbFolder());
-			}
-			if ((modgetter instanceof com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter)) {
-				((com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter) modgetter).saveModel(getModel(0), getModelNamespace(), getModelName(), format, out);
+			// need to convert the OWL model from getModel(0) to a String
+			Charset charset = Charset.forName("UTF-8");
+//			CharSequence seq = serializeModelToString(model, modelAlias, modelName, format, charset);
+			try {
+				CharSequence seq = getConfigMgr().getSadlModelGetterPutter(format).getModelAsString(getModel(0), "", getModelName(), format, charset);
+				content = seq.toString();
 				success = true;
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+//			ISadlJenaModelGetter modgetter = getConfigMgr().getModelGetter();
+//			if (modgetter == null) {
+//		    	modgetter = (ISadlJenaModelGetter) new com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter(getConfigMgr(), getConfigMgr().getTdbFolder(), format);
+//		    	getConfigMgr().setModelGetter(modgetter);
+//		    	getConfigMgr().getModelGetter().setTdbFolder(getConfigMgr().getTdbFolder());
+//			}
+//			if ((modgetter instanceof com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter)) {
+//				((com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter) modgetter).saveModel(getModel(0), getModelNamespace(), getModelName(), format, out);
+//				getConfigMgr().getSadlModelGetterPutter(format).saveModel(getModel(0), getModelNamespace(), getModelName(), OwlFileName, format);
+//				success = true;
+//			}
 		}
 		if (!success) {
-			if (owlModelFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-				Model m = getModelFromTdbDS();
-				m.write(out, format);
-			}
-			else {
-				getModel(0).write(out, format);
-			}
+//			if (owlModelFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+//				Model m = getModelFromTdbDS();
+//				m.write(out, format);
+//			}
+//			else {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			getModel(0).write(out, format);
+			content = out.toString();
+			
+//			}
 		}
-		String data = out.toString();
-		StringDataSource ds = new StringDataSource(data, "text/plain");
-		if (format.equals("RDF/XML") || format.equals("RDF/XML-ABBREV")) {
-			ds.setName("OWL");
-		}
-		else if (format.equals("N-TRIPLE") ||format.equals("N3")) {
+//		String data = out.toString();
+		StringDataSource ds = new StringDataSource(content, "text/plain");
+//		if (format.equals("RDF/XML") || format.equals("RDF/XML-ABBREV")) {
+//			ds.setName("OWL");
+//		}
+//		else if (format.equals("N-TRIPLE") ||format.equals("N3")) {
 			ds.setName(format);
-		}
+//		}
 		return ds;
 	}
 
@@ -3464,8 +3486,8 @@ public class CsvImporter implements ITabularDataImporter {
 						repoType = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
 					}
 					configMgr = new ConfigurationManager(modelFolderName, repoType);
-					SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configMgr, configMgr.getTdbFolder(), repoType);
-					configMgr.setModelGetter(modelGetter);
+//					SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(configMgr, configMgr.getTdbFolder(), repoType);
+//					configMgr.setModelGetter(modelGetter);
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 					throw new ConfigurationException("Failed to create ConfigurationManager: " + e.getMessage(), e);
@@ -3659,7 +3681,7 @@ public class CsvImporter implements ITabularDataImporter {
 
 								int iStatus = reas.initializeReasoner(
 										icfg.getModelFolder(), importsList[0],
-										icfg.getModelGetter().getFormat());
+										icfg.getSadlModelGetter(null).getFormat());
 								if (iStatus == 0) {
 									logger.error("Status from initializeReasoner is " + iStatus);
 								}

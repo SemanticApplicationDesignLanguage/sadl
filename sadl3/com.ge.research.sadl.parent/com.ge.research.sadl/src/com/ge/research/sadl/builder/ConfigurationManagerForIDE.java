@@ -75,8 +75,7 @@ import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.utils.ResourceManager;
@@ -733,10 +732,12 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	 * @param publicUri
 	 * @param altUrl
 	 * @return
-	 * @throws MalformedURLException 
+	 * @throws IOException 
+	 * @throws TranslationException 
+	 * @throws ConfigurationException 
 	 */
-	public boolean validateImport(String publicUri, String altUrl) throws MalformedURLException {
-		if (getModelGetter().modelExists(publicUri, altUrl)) {
+	public boolean validateImport(String publicUri, String altUrl) throws ConfigurationException, TranslationException, IOException {
+		if (getSadlModelGetter(null).modelExists(publicUri)) {
 			return true;
 		}
 		return false;
@@ -804,7 +805,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	}
 
 
-	public synchronized Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException {
+	public synchronized Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException, TranslationException {
 		OntModel theModel = getOntModel(publicUri, scope);
 		if (theModel != null) {
 			Ontology onto = theModel.getOntology(publicUri);
@@ -858,7 +859,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	
 	@Override
 	public List<ConceptName> getNamedConceptsInModel(String publicUri,
-			ConceptType cType, Scope scope) throws InvalidNameException, ConfigurationException, IOException {
+			ConceptType cType, Scope scope) throws InvalidNameException, ConfigurationException, IOException, TranslationException {
 		OntModel theModel = getOntModel(publicUri, scope);
 		if (theModel != null) {
 			return getNamedConceptsInModel(theModel, publicUri, cType, scope);
@@ -867,59 +868,37 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	}
 
 
-	public OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException {
+	public OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException, TranslationException {
 		OntModel theModel = null;
 		String altUrl = getAltUrlFromPublicUri(publicUri);
 		if (getRepoType() == null) {
 	    	setRepoType(ConfigurationManagerForIDE.getOWLFormat());	
-		    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), getRepoType());
-		    setModelGetter(modelGetter);
 		}
 		if (getRepoType() != null && getRepoType().equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 			try {
-				theModel = getModelGetter().getOntModel(publicUri, altUrl,
-						SadlSerializationFormat.JENA_TDB_FORMAT);
+				theModel = getSadlModelGetter(null).getOntModel(publicUri);
 			} catch (Throwable t) {
 				// ok to fail; may not exist
 			}
 		} else {
-			if (getModelGetter() == null) {
-			    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), getRepoType());
-			    setModelGetter(modelGetter);
+			boolean resetProcessImports = false;
+			boolean processImports = OntDocumentManager.getInstance().getProcessImports();
+			if (scope != null && scope.equals(Scope.LOCALONLY) && processImports) {
+				OntDocumentManager.getInstance().setProcessImports(false);
+				resetProcessImports = true;
 			}
-			if (getModelGetter() != null) {
-				boolean resetProcessImports = false;
-				boolean processImports = OntDocumentManager.getInstance().getProcessImports();
-				if (scope != null && scope.equals(Scope.LOCALONLY) && processImports) {
-					OntDocumentManager.getInstance().setProcessImports(false);
-					resetProcessImports = true;
-				}
-				else if (!processImports) {
-					OntDocumentManager.getInstance().setProcessImports(true);
-					resetProcessImports = true;
-				}
-				theModel = getModelGetter().getOntModel(publicUri, altUrl, getRepoType());
-				if (resetProcessImports) {
-					OntDocumentManager.getInstance().setProcessImports(processImports);
-				}
+			else if (!processImports) {
+				OntDocumentManager.getInstance().setProcessImports(true);
+				resetProcessImports = true;
+			}
+			theModel = getSadlModelGetter(null).getOntModel(publicUri);
+			if (resetProcessImports) {
+				OntDocumentManager.getInstance().setProcessImports(processImports);
 			}
 		}
 		return theModel;
 	}
 
-	@Override
-	public OntModel getOntModel(String publicUri, String serializedGraph, Scope scope, String format) {
-		Model m = ModelFactory.createDefaultModel()
-		        .read(new StringInputStream(serializedGraph), publicUri, format);
-    	if (m instanceof OntModel) {
-    		return (OntModel)m;
-    	}
-    	else {
-    		getOntModelSpec(null).setImportModelGetter(new SadlJenaModelGetter(this, null));
-     		return ModelFactory.createOntologyModel(getOntModelSpec(null), m);
-    	}
-	}
-	
 	/**
 	 * {@inheritDoc}
 	 */

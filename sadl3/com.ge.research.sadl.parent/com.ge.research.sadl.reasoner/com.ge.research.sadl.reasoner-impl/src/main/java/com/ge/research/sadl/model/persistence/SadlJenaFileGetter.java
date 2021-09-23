@@ -26,7 +26,11 @@ public class SadlJenaFileGetter extends SadlModelGetter {
     		if (m != null) {
     			return m;
     		}
-    	}
+            m = getModelSpec().getDocumentManager().getOntology(uri, getModelSpec());
+            if (m != null) {
+            	return m;
+            }
+		}
 		return null;
 	}
 

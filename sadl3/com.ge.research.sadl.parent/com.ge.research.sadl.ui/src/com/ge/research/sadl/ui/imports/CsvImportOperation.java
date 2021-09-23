@@ -73,7 +73,6 @@ import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.utils.ResourceManager;
@@ -670,7 +669,6 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
         CsvImporter csvImporter = null;
         String kbformat = null;	// the format of OWL files in the project
         String finalFormat = null;	// the format used by the CsvImporter
-        SadlJenaModelGetterPutter modelGetter = null;
         String jenaTDBFolder = null;
         String owlOutputFile = null;
         try {
@@ -693,8 +691,6 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
         		String modfldr = su.fileUrlToFileName(modelFolder);
         		owlOutputFile = targetPath.toPortableString();
         		cmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, ConfigurationManagerForIDE.getOWLFormat());  
-    	    	modelGetter = new SadlJenaModelGetterPutter(cmgr, cmgr.getTdbFolder(), kbformat);
-    	    	cmgr.setModelGetter(modelGetter);
         	}
         	csvImporter = new CsvImporter(cmgr);
         	if (debugOutput) {

@@ -32,6 +32,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -138,8 +139,6 @@ public class ConfigurationManager implements IConfigurationManager {
 	private String readError;
 	
 	private boolean inferenceCanceled = false;
-
-	private ISadlJenaModelGetter modelGetter;
 
 	private String reasonerClassName = null;
 
@@ -1600,12 +1599,6 @@ public class ConfigurationManager implements IConfigurationManager {
 		return getModelFolder() + "/TDB";
 	}
 
-	public ISadlJenaModelGetter getModelGetter() {
-		return modelGetter;
-	}
-	public void setModelGetter(ISadlJenaModelGetter modelGetter) {
-		this.modelGetter = modelGetter;
-	}
 	@Override
 	public boolean setInferenceCanceled(boolean canceled) {
 		boolean oldVal = inferenceCanceled;
@@ -1841,6 +1834,9 @@ public class ConfigurationManager implements IConfigurationManager {
 
 	@Override
 	public ISadlModelGetter getSadlModelGetter(String format) throws TranslationException, IOException {
+		if (format == null) {
+			format = getRepoType();
+		}
 		// is the format the same as the repoType?
 		if (format != null && repoType != null && !format.equals(repoType)) {
 			if (SadlSerializationFormat.validateSadlFormat(format)) {
@@ -1926,6 +1922,18 @@ public class ConfigurationManager implements IConfigurationManager {
 
 	@Override
 	public String getRepoType() {
+		if (repoType == null) {
+			// look at the mappings and see what type is present there
+			HashMap<String, String> mps = getMappings();
+			Collection<String> altUrls = mps.values();
+			for (String url: altUrls) {
+				String fmt = SadlSerializationFormat.getSadlSerializationFormatFromFilename(url);
+				if (SadlSerializationFormat.validateSadlFormat(fmt)) {
+					repoType = fmt;
+					break;
+				}
+			}
+		}
 		return repoType;
 	}
 

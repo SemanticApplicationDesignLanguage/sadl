@@ -75,7 +75,7 @@ import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
@@ -341,14 +341,17 @@ public class SadlServerImpl implements ISadlServer {
 
 	protected void setConfigurationManagerModelGetter()
 			throws ConfigurationException, MalformedURLException {
-		if (getConfigurationMgr().getModelGetter() == null) {
-        	try {
-				getConfigurationMgr().setModelGetter(new SadlJenaModelGetter(getConfigurationMgr(), getConfigurationMgr().getModelFolder() + "/TDB"));
-			} catch (IOException e) {
-				logger.error("Exception setting ModelGetter: " + e.getMessage());
-				e.printStackTrace();
-			}
-        }
+    	try {
+    		if (getConfigurationMgr().getSadlModelGetter(null) == null) {
+        		getConfigurationMgr().getSadlModelGetter(null);
+            }
+		} catch (IOException e) {
+			logger.error("Exception setting ModelGetter: " + e.getMessage());
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			logger.error("Exception setting ModelGetter: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 	
 	protected String getRepoType(String tdbFolder) throws MalformedURLException {

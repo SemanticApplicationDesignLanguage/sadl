@@ -252,18 +252,6 @@ public interface IConfigurationManager {
 	public abstract String getTdbFolder() throws IOException;
 	
 	/**
-	 * Call this method to get the model getter to be used to load models from the repository
-	 * @return
-	 */
-	public abstract ISadlJenaModelGetter getModelGetter();
-	
-	/**
-	 * Call this method to set the model getter to be used to load models from the repository
-	 * @param modelGetter
-	 */
-	public abstract void setModelGetter(ISadlJenaModelGetter modelGetter);
-
-	/**
 	 * Call this method to get the translator associated with a particular reasoner class
 	 * @param reasonerClassName
 	 * @return

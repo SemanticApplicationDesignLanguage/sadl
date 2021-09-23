@@ -72,6 +72,7 @@ import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.SadlResource;
 import com.ge.research.sadl.ui.handlers.SadlActionHandler;
@@ -155,7 +156,7 @@ public class GraphGenerator {
 	
 	public enum Orientation {TD, LR}
 
-	public GraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, ConceptName startNode) throws ConfigurationException, IOException {
+	public GraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, ConceptName startNode) throws ConfigurationException, IOException, TranslationException {
 		setModelUri(publicUri);
 		setConfigMgr(configMgr);
 		setVisualizer(visualizer);
@@ -166,7 +167,7 @@ public class GraphGenerator {
 		setAnchor(startNode);
 	}
 	
-	public GraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, ConceptName startNode, IProgressMonitor monitor) throws ConfigurationException, IOException {
+	public GraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, ConceptName startNode, IProgressMonitor monitor) throws ConfigurationException, IOException, TranslationException {
 		setModelUri(publicUri);
 		setConfigMgr(configMgr);
 		setVisualizer(visualizer);
@@ -179,7 +180,7 @@ public class GraphGenerator {
 		setProgressMonitor(monitor);
 	}
 	
-	public GraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, ConceptName startNode, IProgressMonitor monitor, Map<String,Boolean> prefValues) throws ConfigurationException, IOException {
+	public GraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, ConceptName startNode, IProgressMonitor monitor, Map<String,Boolean> prefValues) throws ConfigurationException, IOException, TranslationException {
 		setModelUri(publicUri);
 		setConfigMgr(configMgr);
 		setVisualizer(visualizer);
