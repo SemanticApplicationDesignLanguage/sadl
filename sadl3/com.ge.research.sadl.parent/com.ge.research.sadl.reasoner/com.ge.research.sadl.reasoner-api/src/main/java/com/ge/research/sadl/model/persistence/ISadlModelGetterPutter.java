@@ -1,8 +1,11 @@
-package com.ge.research.sadl.reasoner;
+package com.ge.research.sadl.model.persistence;
 
 import java.io.IOException;
 
 import org.apache.jena.rdf.model.Model;
+
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.TranslationException;
 
 public interface ISadlModelGetterPutter extends ISadlModelGetter{
 	
@@ -18,5 +21,12 @@ public interface ISadlModelGetterPutter extends ISadlModelGetter{
 	 * @return--true if successfully saved else false
 	 */
 	public abstract boolean saveModel(Model m, String modelNamespace, String publicUri, String OwlFileName, String format) throws TranslationException, IOException;
+
+	/**
+	 * Call this method to remove all named models from a TDB repository
+	 * @return
+	 * @throws ConfigurationException
+	 */
+	public abstract int clean() throws ConfigurationException;
 
 }

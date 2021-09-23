@@ -160,6 +160,7 @@ import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
@@ -336,7 +337,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		this.ruleList = new ArrayList<Rule>();
 		
 		try {
-			if (!configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
+			if (!configurationMgr.getSadlModelGetter(null).modelExists(getModelName())) {
 				if (tbox.equals(getModelName())) {
 					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
 				}
@@ -344,8 +345,10 @@ public class JenaReasonerPlugin extends Reasoner{
 					throw new ConfigurationException("The model with actual URL '" + tbox + "' and name '" + getModelName() + "' does not appear to exist.");
 				}
 			}
-		} catch (MalformedURLException e) {
-			throw new ConfigurationException("The actual file URL '" + tbox + "' for model '" + getModelName() + "' is not well-formed.");
+		} catch (ConfigurationException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ConfigurationException(e.getMessage(), e);
 		}
 		if (explanationsEnabled) {
 			derivationLogging = true;
@@ -369,27 +372,27 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (!validateFormat(format)) {
 				throw new ConfigurationException("Format '" + format + "' is not supported by reasoner '" + getConfigurationCategory() + "'.");
 			}
-			if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-				schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);	
+//			if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+				schemaModel = configurationMgr.getSadlModelGetter(format).getOntModel(getModelName());	
 				schemaModel.getDocumentManager().setProcessImports(true);
 				schemaModel.loadImports();
-			}
-			else {
-				if (tbox.endsWith(".TDB/")) {
-					// this is a cached inferred TDB model
-					schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);
-					schemaModelIsCachedInferredModel = true;
-					return null;
-				}
-				else {
-					schemaModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
-					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
-					schemaModel.getDocumentManager().setProcessImports(true);
-					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
-					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
-					schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
-				}
-			}
+//			}
+//			else {
+//				if (tbox.endsWith(".TDB/")) {
+//					// this is a cached inferred TDB model
+//					schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);
+//					schemaModelIsCachedInferredModel = true;
+//					return null;
+//				}
+//				else {
+//					schemaModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
+//					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
+//					schemaModel.getDocumentManager().setProcessImports(true);
+//					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
+//					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getSadlModelGetter(format));
+//					schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
+//				}
+//			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}	
@@ -511,26 +514,30 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			String tdbFolder = configurationMgr.getTdbFolder();
 			if (configurationMgr.getModelGetter() == null) {
-				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
+//				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
+				configurationMgr.getSadlModelGetter(format);
 			}
-			format = configurationMgr.getModelGetter().getFormat();
-			if (repoType == null) repoType = format;	
-			if (!format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-				String ext = tbox.substring(tbox.lastIndexOf('.'));
-				format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	// this will create a reader that will handle either RDF/XML or RDF/XML-ABBREV 
-				if (ext.equalsIgnoreCase(".n3")) {
-					format = "N3";
-				}
-				else if (ext.equalsIgnoreCase(".ntriple") || ext.equalsIgnoreCase(".nt")) {
-					format = "N-TRIPLE";
-				}
-				else if (ext.equalsIgnoreCase(".jsonld")) {
-					format = "JSON-LD";
-				}
-				configurationMgr.getModelGetter().setFormat(format);
-			}
+//			format = configurationMgr.getModelGetter().getFormat();
+//			if (repoType == null) repoType = format;	
+//			if (!format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+//				String ext = tbox.substring(tbox.lastIndexOf('.'));
+//				format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	// this will create a reader that will handle either RDF/XML or RDF/XML-ABBREV 
+//				if (ext.equalsIgnoreCase(".n3")) {
+//					format = "N3";
+//				}
+//				else if (ext.equalsIgnoreCase(".ntriple") || ext.equalsIgnoreCase(".nt")) {
+//					format = "N-TRIPLE";
+//				}
+//				else if (ext.equalsIgnoreCase(".jsonld")) {
+//					format = "JSON-LD";
+//				}
+//				configurationMgr.getModelGetter().setFormat(format);
+//			}
 		}
 		catch (IOException e) {
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		initialized = true;

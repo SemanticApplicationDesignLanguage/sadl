@@ -59,7 +59,6 @@ import org.apache.jena.rdf.model.Seq;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.util.FileUtils;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OWL;
@@ -72,6 +71,12 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.ISadlModelGetter;
+import com.ge.research.sadl.model.persistence.ISadlModelGetterPutter;
+import com.ge.research.sadl.model.persistence.SadlJenaFileGetter;
+import com.ge.research.sadl.model.persistence.SadlJenaFileGetterPutter;
+import com.ge.research.sadl.model.persistence.SadlJenaTDBGetter;
+import com.ge.research.sadl.model.persistence.SadlJenaTDBGetterPutter;
 
 /**
  * This is a general purpose configuration manager suitable for model deployment environments.
@@ -80,6 +85,7 @@ import com.ge.research.sadl.model.SadlSerializationFormat;
  * 2) Mappings of model namespaces to actual URLs for the translated model. 
  *    This is the Jena ont-policy.rdf file, although it may not be useful
  *    for all translations.
+ *    Note that in the case of non-file-based triple stores, the mappings aren't relevant.
  *    
  * @author crapo
  *
@@ -120,7 +126,7 @@ public class ConfigurationManager implements IConfigurationManager {
 //	private ISadlJenaModelGetter modelGetter = null;
 	private OntModelSpec ontModelSpec = null;
 	
-	protected String repoType = null;
+	private String repoType = null;
 
 	protected RDFNode sadlNode = null;
 	protected Property createdBy;
@@ -142,7 +148,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	private ISadlModelGetter sadlModelGetter;
 
 	private ISadlModelGetterPutter sadlModelGetterPutter;
-
+	
 	/**
 	 * Required constructor for subclass call
 	 */
@@ -157,7 +163,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @throws ConfigurationException 
 	 */
 	public ConfigurationManager(String modelFolderPathname, String _repoType) throws ConfigurationException {
-		repoType = _repoType;
+		setRepoType(_repoType);
 		validateModelFolderPath(modelFolderPathname);
 		setConfigModel(ModelFactory.createDefaultModel()) ;
 		getConfigModel().setNsPrefix("", CONFIG_NAMESPACE);
@@ -171,7 +177,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	}
 	
 	public ConfigurationManager(String modelFolderPathname, String _repoType, boolean noModelFolderNeeded) throws ConfigurationException {
-		repoType = _repoType;
+		setRepoType(_repoType);
 		if (!noModelFolderNeeded) {
 			validateModelFolderPath(modelFolderPathname);
 			setConfigModel(ModelFactory.createDefaultModel()) ;
@@ -1708,7 +1714,7 @@ public class ConfigurationManager implements IConfigurationManager {
    		if (rfh instanceof SadlReadFailureHandler) {
    			((SadlReadFailureHandler)rfh).setSadlConfigMgr(this);
    		}
-   		getModelGetter().configureToModel(importingModel);
+//   		getModelGetter().configureToModel(importingModel);
 		importingModel.loadImports();
 		if (readError != null) {
 			String err = readError;
@@ -1835,17 +1841,22 @@ public class ConfigurationManager implements IConfigurationManager {
 
 	@Override
 	public ISadlModelGetter getSadlModelGetter(String format) throws TranslationException, IOException {
-		if (sadlModelGetter == null) {
+		// is the format the same as the repoType?
+		if (format != null && repoType != null && !format.equals(repoType)) {
 			if (SadlSerializationFormat.validateSadlFormat(format)) {
-				if (SadlSerializationFormat.getRDFFormat(format) != SadlSerializationFormat.TDB_PseudoFormat) {
-					sadlModelGetter = new SadlJenaFileGetter(this, format);
-				}
-				else if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-					sadlModelGetter = new SadlJenaTDBGetter(this, format);
-				}
-				else {
-					throw new TranslationException("Persistence format " + format + " not yet implemented");
-				}
+				return getNewSadlModelGetterForFormat(format);
+			}
+			else {
+				throw new TranslationException("Unsupported persistence format: " + format);
+			}
+		}
+		else if (sadlModelGetter == null) {
+			if (sadlModelGetterPutter != null) {
+				// since the putter extends the getter, we don't need to create a new getter.
+				sadlModelGetter = sadlModelGetterPutter;
+			}
+			else if (SadlSerializationFormat.validateSadlFormat(format)) {
+				sadlModelGetter = getNewSadlModelGetterForFormat(format);
 			}
 			else {
 				throw new TranslationException("Unsupported persistence format: " + format);
@@ -1854,25 +1865,73 @@ public class ConfigurationManager implements IConfigurationManager {
 		return sadlModelGetter;
 	}
 	
+	/**
+	 * Method to create a new SadlModelGetter for this format
+	 * @param format
+	 * @return
+	 * @throws TranslationException
+	 * @throws IOException
+	 */
+	private ISadlModelGetter getNewSadlModelGetterForFormat(String format) throws TranslationException, IOException {
+		if (SadlSerializationFormat.getRDFFormat(format) != SadlSerializationFormat.TDB_PseudoFormat) {
+			return new SadlJenaFileGetter(this, format);
+		}
+		else if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+			return new SadlJenaTDBGetter(this, format);
+		}
+		else {
+			throw new TranslationException("Persistence format " + format + " not yet implemented");
+		}
+	}
+
 	@Override
 	public ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException, IOException {
-		if (sadlModelGetterPutter == null) {
+		if (format != null && repoType != null && !format.equals(repoType)) {
 			if (SadlSerializationFormat.validateSadlFormat(format)) {
-				if (SadlSerializationFormat.getRDFFormat(format) != SadlSerializationFormat.TDB_PseudoFormat) {
-					sadlModelGetterPutter = new SadlJenaFileGetterPutter(this, format);
-				}
-				else if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-					sadlModelGetterPutter = new SadlJenaTDBGetterPutter(this, format);
-				}
-				else {
-					throw new TranslationException("Persistence format " + format + " not yet implemented");
-				}
+				return getNewSadlModelGetterPutterForFormat(format);
+			}
+			else {
+				throw new TranslationException("Unsupported persistence format: " + format);
+			}
+		}
+		else if (sadlModelGetterPutter == null) {
+			if (SadlSerializationFormat.validateSadlFormat(format)) {
+				sadlModelGetterPutter = getNewSadlModelGetterPutterForFormat(format);
 			}
 			else {
 				throw new TranslationException("Unsupported persistence format: " + format);
 			}
 		}
 		return sadlModelGetterPutter;
+	}
+
+	/**
+	 * Method to create a new SadlModelGetterPutter for this format
+	 * @param format
+	 * @return
+	 * @throws TranslationException
+	 * @throws IOException
+	 */
+	private ISadlModelGetterPutter getNewSadlModelGetterPutterForFormat(String format) throws TranslationException, IOException {
+		if (SadlSerializationFormat.getRDFFormat(format) != SadlSerializationFormat.TDB_PseudoFormat) {
+			return new SadlJenaFileGetterPutter(this, format);
+		}
+		else if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+			return new SadlJenaTDBGetterPutter(this, format);
+		}
+		else {
+			throw new TranslationException("Persistence format " + format + " not yet implemented");
+		}
+	}
+
+	@Override
+	public String getRepoType() {
+		return repoType;
+	}
+
+	@Override
+	public void setRepoType(String repoType) {
+		this.repoType = repoType;
 	}
 
 }

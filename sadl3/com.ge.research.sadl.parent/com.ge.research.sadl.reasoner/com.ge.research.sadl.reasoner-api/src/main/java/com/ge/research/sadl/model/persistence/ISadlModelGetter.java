@@ -15,14 +15,18 @@
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
  ***********************************************************************/
-package com.ge.research.sadl.reasoner;
+package com.ge.research.sadl.model.persistence;
 
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelGetter;
+
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.TranslationException;
 
 public interface ISadlModelGetter extends ModelGetter{
 	
@@ -58,5 +62,12 @@ public interface ISadlModelGetter extends ModelGetter{
 	 * @return
 	 */
 	public abstract List<String> getAvailableModelNames();
+
+	/**
+	 * Method to get an OntModel for the given URI
+	 * @param uri
+	 * @return
+	 */
+	OntModel getOntModel(String uri);
 	
 }

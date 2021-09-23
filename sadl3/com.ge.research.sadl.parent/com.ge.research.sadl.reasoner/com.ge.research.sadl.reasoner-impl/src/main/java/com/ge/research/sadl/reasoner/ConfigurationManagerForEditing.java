@@ -716,7 +716,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	public boolean deleteModel(String publicUri) throws ConfigurationException,
 			IOException, URISyntaxException {
 		String altUrl = getAltUrlFromPublicUri(publicUri);
-		if (repoType.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+		if (getRepoType().equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 			try {
 				OntModel modelToDelete = getModelGetter().getOntModel(
 						publicUri, altUrl, SadlSerializationFormat.JENA_TDB_FORMAT);

@@ -1,13 +1,16 @@
-package com.ge.research.sadl.reasoner;
+package com.ge.research.sadl.model.persistence;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelReader;
 
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 public class SadlJenaFileGetter extends SadlModelGetter {
@@ -37,6 +40,19 @@ public class SadlJenaFileGetter extends SadlModelGetter {
         }
 
         return m;
+	}
+
+	@Override
+	public OntModel getOntModel(String uri) {
+		Model m = getModel(uri);
+		if (m instanceof OntModel) {
+			return (OntModel)m;
+		}
+		else {
+			getConfigMgr().getOntModelSpec(null).setImportModelGetter(this);
+			return ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
+		}
+	
 	}
 
 	@Override

@@ -14,6 +14,8 @@ import org.apache.jena.ontology.Ontology;
 import org.apache.jena.rdf.model.Model;
 
 import com.ge.research.sadl.model.ImportMapping;
+import com.ge.research.sadl.model.persistence.ISadlModelGetter;
+import com.ge.research.sadl.model.persistence.ISadlModelGetterPutter;
 
 public interface IConfigurationManager {
     public static final String SADL = "SADL";
@@ -351,4 +353,17 @@ public interface IConfigurationManager {
 	 * @throws IOException 
 	 */
 	ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException, IOException;
+
+	/**
+	 * Method to get the repository type, see SadlSerializationFormat class.
+	 * @return
+	 */
+	String getRepoType();
+
+	/**
+	 * Method to set the repository type, see SadlSerializationFormat class.
+	 * @param repoType
+	 */
+	void setRepoType(String repoType);
+
 }

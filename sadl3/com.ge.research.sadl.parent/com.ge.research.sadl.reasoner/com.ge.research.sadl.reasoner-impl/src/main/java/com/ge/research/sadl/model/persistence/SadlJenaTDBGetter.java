@@ -1,4 +1,4 @@
-package com.ge.research.sadl.reasoner;
+package com.ge.research.sadl.model.persistence;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -6,13 +6,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.ReadWrite;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelReader;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.vocabulary.OWL;
+
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 
 public class SadlJenaTDBGetter extends SadlModelGetter {
 
@@ -27,29 +32,51 @@ public class SadlJenaTDBGetter extends SadlModelGetter {
     		setOriginalModelGetter(OntModelSpec.getDefaultSpec(OWL.getURI()).getImportModelGetter());
     	}
      	ds = TDBFactory.createDataset(tdbFolder);
-     	ds.begin(ReadWrite.READ);
-     	ds.end();
 	}
 	
 	@Override
 	public Model getModel(String uri) {
+     	ds.begin(ReadWrite.READ);
 		if(ds.containsNamedModel(uri)) {
-			return ds.getNamedModel(uri);
+			Model m = ds.getNamedModel(uri);
+	     	ds.end();
+			return m;
 		}
+     	ds.end();
 		return null;
 	}
 
+	@Override
+	public OntModel getOntModel(String uri) {
+		Model m = getModel(uri);
+		if (m instanceof OntModel) {
+			return (OntModel)m;
+		}
+		else {
+			ds.begin(ReadWrite.READ);
+			getConfigMgr().getOntModelSpec(null).setImportModelGetter(this);
+			OntModel om = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
+//			om.getDocumentManager().setProcessImports(true);
+//			om.loadImports();
+//			ds.end();
+			return om;
+		}
+	
+	}
 	@Override
 	public Model getModel(String URL, ModelReader loadIfAbsent) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public boolean modelExists(String uri) throws ConfigurationException, MalformedURLException {
+     	ds.begin(ReadWrite.READ);
 		if (ds.containsNamedModel(uri)) {
+			ds.end();
 			return true;
 		}
+		ds.end();
 		return false;
 	}
 

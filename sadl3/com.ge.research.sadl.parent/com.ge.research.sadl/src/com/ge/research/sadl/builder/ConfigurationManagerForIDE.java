@@ -870,12 +870,12 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	public OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException {
 		OntModel theModel = null;
 		String altUrl = getAltUrlFromPublicUri(publicUri);
-		if (repoType == null) {
-	    	repoType = ConfigurationManagerForIDE.getOWLFormat();	
-		    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), repoType);
+		if (getRepoType() == null) {
+	    	setRepoType(ConfigurationManagerForIDE.getOWLFormat());	
+		    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), getRepoType());
 		    setModelGetter(modelGetter);
 		}
-		if (repoType != null && repoType.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+		if (getRepoType() != null && getRepoType().equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
 			try {
 				theModel = getModelGetter().getOntModel(publicUri, altUrl,
 						SadlSerializationFormat.JENA_TDB_FORMAT);
@@ -884,7 +884,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			}
 		} else {
 			if (getModelGetter() == null) {
-			    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), repoType);
+			    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), getRepoType());
 			    setModelGetter(modelGetter);
 			}
 			if (getModelGetter() != null) {
@@ -898,7 +898,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 					OntDocumentManager.getInstance().setProcessImports(true);
 					resetProcessImports = true;
 				}
-				theModel = getModelGetter().getOntModel(publicUri, altUrl, repoType);
+				theModel = getModelGetter().getOntModel(publicUri, altUrl, getRepoType());
 				if (resetProcessImports) {
 					OntDocumentManager.getInstance().setProcessImports(processImports);
 				}
