@@ -6,9 +6,10 @@
   <body>
     <h1>Connecting the SADL IDE with Persistent Storage of OWL Models and Rules</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->9/17/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->9/24/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
     </h5>
-    <h2>Overview of Classes Involved in SADL and External OWL Model Processing</h2>
+    <br>
+    <h2>Introduction</h2>
     <p>The SADL IDE uses Apache Jena as the interface to in-memory OWL models
       created when a SADL model is processed by the Xtext model processor and as
       the interface to OWL model persistence. The in-memory OWL model, which
@@ -16,21 +17,57 @@
       class, is persisted when the SADL model from which it was created is
       saved. There are multiple options for how this persistence is
       accomplished. The purpose of this document is to explain the mechanisms
-      for both persisting OWL models and for retrieving OWL models from the
-      persistence repository. OWL models must be retrieved whenever a SADL model
-      imports another model and when inference is run, queries are performed,
-      models are graphed, etc.</p>
+      for both retrieving OWL models from the persistence repository and for
+      persisting OWL models to the persistence repository. OWL models must be
+      retrieved in various operations such as when inference is run, queries are
+      performed, models are graphed, etc.</p>
+    <p style="margin-bottom: 0in; line-height: 100%">SADL and SadlServer use the
+      Jena <em>org.apache.jena.rdf.model.ModelGetter</em> Java Interface class
+      to retrieve OWL models from persistent storage, in the form of in-memory
+      Jena <em>org.apache.jena.ref.model.Model</em> and <em>org.apache.jena.ontology.OntModel</em>
+      instances. SADL extends this Interface class with the <em>com.ge.research.sadl.model.persistence.ISadlModelGetter</em>
+      Interface class, which is in turn extended by the <em>com.ge.research.sadl.model.persistence.ISadlModelGetterPutter</em>
+      Interface class, as shown in the figure below. The <em>ISadlModelGetterPutter</em>
+      Interface defines methods for persisting OWL models, where as the
+      ISadlModelGetter Interface only defines methods for retrieving OWL models
+      from the persistent store.</p>
+    <div style="margin-left: 40px;"><img src="images/ModelGetterPutterTypeHierarchy.png"
+        alt=""></div>
+    <p>The <em>ISadlModelGetter</em> is implemented by the abstract <em>com.ge.research.sadl.model.persistence.SadlModelGetter</em>
+      class. This class has an extension for each basic type of persistence,
+      e.g., file-based persistence and Jena TDB persistence, that provide the
+      actual implementations of the methods to retrieve OWL models from the
+      persistent store. Each of these implementations are also extended by
+      classes that implement the <em>com.ge.research.sadl.model.persistence.ISadlModelGetterPutter</em>
+      Interface and provide implementations for saving OWL models to the
+      persistent store.</p>
+    <p>These classes work in conjunction with the <em>com.ge.research.sadl.model.persistence.SadlPersistenceFormat
+        </em>class, which identifies the various persistence formats supported
+      and provides convenience methods for validating formats, converting from
+      the SADL identifier to those used by Jena in the case of file-based
+      persistence, etc.</p>
+    <h2>Adding a New Persistence Format to SADL</h2>
+    <p>To add a new persistence format to SADL, do the following.</p>
+    <ol>
+      <li>Add the format to the SadlPersistenceFormat class.</li>
+      <ul>
+        <li>Add a public static final String that identifies the format</li>
+        <li>Add to the class methods as needed, e.g., to validate the format</li>
+      </ul>
+      <li>Create an getter for the new format by extending the <em>SadlModelGetter</em>
+        class, as do the <em>SadJenaFileGetter</em> and the <em>SadlJenaTDBGetter</em>
+        classes.</li>
+      <li>Create a putter for the new format that extends the new format's
+        getter class and implements the <em>ISadlModelGetterPutter</em>
+        Interface class, as do the <em>SadlJenaFileGetterPutter</em> and the <em>SadlJenaTDBGetterPutter</em>
+        classes.</li>
+    </ol>
+    <h2>Overview of Classes Involved in SADL and External OWL Model Persistence</h2>
     Apache Jena includes the Java interface class <em>org.apache.jena.rdf.model.ModelGetter
       </em>to retrieve models from the persistence repository. The class
     documentation states, "A ModelGetter object can retrieve a Model given a URL
-    for it. If it doesn't have such a Model, it returns null." The SADL class <em>com.ge.research.sadl.jena.inference.SadlJenaModelGetter</em>
-    implements the <em>ModelGetter</em> interface class as well as the <em>com.ge.research.sadl.jena.inference.ISadlJenaModelGetter</em>
-    interface class. Jena's default persistence mechanism is as an OWL file in
-    any one of several serialization formats, as specified in the SADL
-    preferences. The <em>ISadlJenaModelGetter</em> interface adds methods to
-    support getting models from triple stores, e.g., Jena TDB. The class <em>com.ge.research.sadl.jena.inference.SadlJenaModelGetterPutter
-      </em>extends <em>SadlJenaModelGetter </em>by adding methods to support
-    saving a model to the target persistence repository.
+    for it. If it doesn't have such a Model, it returns null." The extensions
+    and implementations of this class used by SADL are described above.<br>
     <p>Jena also uses the class <em>org.apache.jena.ontology.OntModelSpec</em>,
       which "Encapsulates a description of the components of an ontology model,
       including the storage scheme, reasoner and language profile." This class
@@ -67,48 +104,22 @@
       processed to identify the ontological concepts found therein, and stored.
       This method of loading is necessary so that Xtext will have all of the
       information for hyperlinking referenced concepts to their definitions and
-      concept definitions to their references. Only in the case of an <em>ExternalEmfResource</em>
-      does the SADL IDE actually load an OWL model from an OWL model file. In
-      the case of a modified SADL model which is saved, the in-memory <em>OntModel</em>
-      is saved to the persistence repository as an OWL model using the <em>SadlJenaModelGetterPutter</em>
-      set in the <em>OntModelSpec</em> instance. An <em>ExteranEmfResource</em>
-      can also be saved to the persistence repository when that repository is
-      not a file. (<span style="color: #cc0000;">Note</span>: this is currently
-      broken, probably broken in the process of moving to Jena 3.)</p>
+      concept definitions to their references. In the case of an <em>ExternalEmfResource</em>,
+      the SADL IDE loads an OWL model from an OWL model from persistent storage.
+      In the case of a modified SADL model which is saved, the in-memory <em>OntModel</em>
+      is saved to the persistence repository as an OWL model using the <em>ISadlModelGetterPutter</em>
+      set in the <em>OntModelSpec</em> instance. </p>
     <p>This process works differently when, for example, a request is made to
       graph the models in a SADL project or when running inference not in the
       SADL IDE. In this case the in-memory <em>OntModel</em> instances
       necessary to create the graph(s) or do inference are loaded directly
-      from&nbsp; the persistence repository using the <em>SadlJenaModelGetter</em>.
+      from&nbsp; the persistence repository using the <em>ISadlModelGetter</em>.
       Import statements encountered in the <em>OntModel</em>'s triples result
       in additional OWL models being loaded using the instance of <em>SadlJenaModelGetterPutter</em>
       stored in the <em>OntModelSpec</em>. In other words, when Jena loads an
       OWL model from the persistence repository, again using the instance of <em>SadlJenaModelGetterPutter</em>
       in the <em>OntModelSpec</em>, Jena will also load all of the model's
-      imports in the same way. (<span style="color: #cc0000;">Note</span>: parts
-      of this are also broken for TDB.)</p>
-    <p>Because of the central role played by the <em>SadlJenaModelGetterPutter</em>,
-      support for additional triple store persistence repositories can be added
-      by extending the <em>SadlJenaModelGetterPutter</em>'s <em>saveModel</em>
-      method and the <em>SadlJenaModelGetter</em>'s <em>getModel</em> method.</p>
-    <p><br>
-    </p>
-    <h2>Persistence in Triple Stores (Rather than Files)</h2>
-    <h3>SADL Models</h3>
-    <p>SADL models are models stored in .sadl files. They are, when error free
-      and saved in the SADL editor, persisted to some type of triple storage.
-      Traditionally, the ontology concepts (classes, properties, instances,
-      axioms) have been written to OWL files and rules have been written to rule
-      files. When using a triple store for persistence, the ontology concepts in
-      the SADL model need to be added to the triple store as a named graph. The
-      rules must also be stored. It&nbsp; is unclear at present whether they can
-      remain as rule files, as they have in the past with TDB, or if they need
-      to be also added to the triple store's named graph.</p>
-    <h3>External OWL Files (ExternalEmfResources)</h3>
-    <p>SADL allows "external" OWL files to be added to a SADL project and then
-      imported into SADL models. Traditionally these OWL models have remained in
-      the same file format as a copy of the file within the project. When using
-      a triple store for persistence, these OWL files need to be added to the
-      triple store as named graphs.</p>
+      imports in the same way.</p>
+    <br>
   </body>
 </html>
