@@ -24,8 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
-import jakarta.activation.DataSource;
-
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.tdb.TDB;
@@ -65,7 +63,7 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.importer.AbortDataRowException;
 import com.ge.research.sadl.jena.importer.CsvImporter;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.processing.SadlImportProcessorProvider;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -77,6 +75,8 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.ui.internal.SadlActivator;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.inject.Inject;
+
+import jakarta.activation.DataSource;
 
 
 /**
@@ -706,7 +706,7 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
         	csvImporter.setImports(imports);
         	csvImporter.setTemplates(template); //(templateString);
         	finalFormat = csvImporter.getOwlModelFormat();
-        	if (finalFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+        	if (finalFormat.equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
         		jenaTDBFolder = csvImporter.getSaveAsFileName();
         		File newTargetFile = new File(jenaTDBFolder);
         		targetResource = containerResource.getFile(new Path(provider
@@ -796,7 +796,7 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
                	long numTriples = csvImporter.processImport();
                	if (numTriples > 0) {
                		if (kbformat != null && !kbformat.equals(finalFormat)) {
-                    	if (finalFormat.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+                    	if (finalFormat.equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
                     		File fout = new File(owlOutputFile);
                     		Dataset ds = TDBFactory.createDataset(jenaTDBFolder);
                     		Model mod = ds.getDefaultModel();

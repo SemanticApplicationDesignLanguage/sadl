@@ -11,7 +11,6 @@ import java.net.URISyntaxException;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
 
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.persistence.ISadlModelGetterPutter;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -28,7 +27,7 @@ public class SadlJenaFileGetterPutter extends SadlJenaFileGetter implements ISad
 	@Override
 	public boolean saveModel(Model m, String modelNamespace, String publicUri, String owlFileName, String format) throws TranslationException {
 		try ( OutputStream out = new FileOutputStream(owlFileName) ) {
-		     RDFDataMgr.write(out, m, SadlSerializationFormat.getRDFFormat(format));
+		     RDFDataMgr.write(out, m, SadlPersistenceFormat.getRDFFormat(format));
 		     out.close();
 		} catch (FileNotFoundException e) {
 			System.err.println(e.getMessage());

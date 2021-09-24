@@ -26,7 +26,7 @@ import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.ide.handlers.SadlRunQueryHandler;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
@@ -112,7 +112,7 @@ public class RunQuery extends SadlActionHandler {
 
 			if (trgtFile != null) {
 				String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString());
-				final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+				final String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 				IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
 				final XtextResource resource = getXtextResource(project, trgtFile);
 				if (resource == null) {

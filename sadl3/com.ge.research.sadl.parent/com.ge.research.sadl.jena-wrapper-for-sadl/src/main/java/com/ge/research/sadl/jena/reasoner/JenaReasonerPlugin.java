@@ -121,7 +121,6 @@ import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin.TranslationTarget;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.ImportMapping;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -132,6 +131,7 @@ import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
@@ -455,7 +455,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 
 	protected boolean validateFormat(String format) {
-		return SadlSerializationFormat.validateSadlFormat(format);
+		return SadlPersistenceFormat.validateSadlFormat(format);
 	}
 
 	public int initializeReasoner(String folderName, String _modelName, 
@@ -2837,7 +2837,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			else {
 				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), infModel);
 			}
-			String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	
+			String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;	
 		    FileOutputStream fps = new FileOutputStream(filename);
 	        RDFWriter rdfw = m.getWriter(format);
 	        rdfw.write(m, fps, modelname);
@@ -3483,8 +3483,8 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	public void setOutputFormat(String outputFmt) {
 		if (outputFmt != null && 
-				(outputFmt.equals(SadlSerializationFormat.JENA_TDB_FORMAT) ||
-				SadlSerializationFormat.validateSadlFormat(outputFmt))) {
+				(outputFmt.equals(SadlPersistenceFormat.JENA_TDB_FORMAT) ||
+				SadlPersistenceFormat.validateSadlFormat(outputFmt))) {
 			this.outputFormat = outputFmt;
 		}
 	}

@@ -17,7 +17,6 @@ import org.apache.jena.vocabulary.OWL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.persistence.ISadlModelGetter;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -80,7 +79,7 @@ abstract public class SadlModelGetter implements ModelGetter, ISadlModelGetter {
 				}
 			}
 		}
-		RDFDataMgr.write(out, m, SadlSerializationFormat.getRDFFormat(format));
+		RDFDataMgr.write(out, m, SadlPersistenceFormat.getRDFFormat(format));
 		CharSequence seq = new String(out.toByteArray(), charset);
 		return seq;
 	}

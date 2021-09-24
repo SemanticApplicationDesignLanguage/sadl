@@ -71,13 +71,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.ImportMapping;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.persistence.ISadlModelGetter;
 import com.ge.research.sadl.model.persistence.ISadlModelGetterPutter;
 import com.ge.research.sadl.model.persistence.SadlJenaFileGetter;
 import com.ge.research.sadl.model.persistence.SadlJenaFileGetterPutter;
 import com.ge.research.sadl.model.persistence.SadlJenaTDBGetter;
 import com.ge.research.sadl.model.persistence.SadlJenaTDBGetterPutter;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 
 /**
  * This is a general purpose configuration manager suitable for model deployment environments.
@@ -124,7 +124,6 @@ public class ConfigurationManager implements IConfigurationManager {
 	private ITranslator translator = null;
 	private IReasoner reasoner = null;
 	protected OntDocumentManager jenaDocumentMgr;
-//	private ISadlJenaModelGetter modelGetter = null;
 	private OntModelSpec ontModelSpec = null;
 	
 	private String repoType = null;
@@ -1839,7 +1838,7 @@ public class ConfigurationManager implements IConfigurationManager {
 		}
 		// is the format the same as the repoType?
 		if (format != null && repoType != null && !format.equals(repoType)) {
-			if (SadlSerializationFormat.validateSadlFormat(format)) {
+			if (SadlPersistenceFormat.validateSadlFormat(format)) {
 				return getNewSadlModelGetterForFormat(format);
 			}
 			else {
@@ -1851,7 +1850,7 @@ public class ConfigurationManager implements IConfigurationManager {
 				// since the putter extends the getter, we don't need to create a new getter.
 				sadlModelGetter = sadlModelGetterPutter;
 			}
-			else if (SadlSerializationFormat.validateSadlFormat(format)) {
+			else if (SadlPersistenceFormat.validateSadlFormat(format)) {
 				sadlModelGetter = getNewSadlModelGetterForFormat(format);
 			}
 			else {
@@ -1869,10 +1868,10 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @throws IOException
 	 */
 	private ISadlModelGetter getNewSadlModelGetterForFormat(String format) throws TranslationException, IOException {
-		if (SadlSerializationFormat.getRDFFormat(format) != SadlSerializationFormat.TDB_PseudoFormat) {
+		if (SadlPersistenceFormat.getRDFFormat(format) != SadlPersistenceFormat.TDB_PseudoFormat) {
 			return new SadlJenaFileGetter(this, format);
 		}
-		else if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+		else if (format.equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
 			return new SadlJenaTDBGetter(this, format);
 		}
 		else {
@@ -1883,7 +1882,7 @@ public class ConfigurationManager implements IConfigurationManager {
 	@Override
 	public ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException, IOException {
 		if (format != null && repoType != null && !format.equals(repoType)) {
-			if (SadlSerializationFormat.validateSadlFormat(format)) {
+			if (SadlPersistenceFormat.validateSadlFormat(format)) {
 				return getNewSadlModelGetterPutterForFormat(format);
 			}
 			else {
@@ -1891,7 +1890,7 @@ public class ConfigurationManager implements IConfigurationManager {
 			}
 		}
 		else if (sadlModelGetterPutter == null) {
-			if (SadlSerializationFormat.validateSadlFormat(format)) {
+			if (SadlPersistenceFormat.validateSadlFormat(format)) {
 				sadlModelGetterPutter = getNewSadlModelGetterPutterForFormat(format);
 			}
 			else {
@@ -1909,10 +1908,10 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @throws IOException
 	 */
 	private ISadlModelGetterPutter getNewSadlModelGetterPutterForFormat(String format) throws TranslationException, IOException {
-		if (SadlSerializationFormat.getRDFFormat(format) != SadlSerializationFormat.TDB_PseudoFormat) {
+		if (SadlPersistenceFormat.getRDFFormat(format) != SadlPersistenceFormat.TDB_PseudoFormat) {
 			return new SadlJenaFileGetterPutter(this, format);
 		}
-		else if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+		else if (format.equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
 			return new SadlJenaTDBGetterPutter(this, format);
 		}
 		else {
@@ -1927,8 +1926,8 @@ public class ConfigurationManager implements IConfigurationManager {
 			HashMap<String, String> mps = getMappings();
 			Collection<String> altUrls = mps.values();
 			for (String url: altUrls) {
-				String fmt = SadlSerializationFormat.getSadlSerializationFormatFromFilename(url);
-				if (SadlSerializationFormat.validateSadlFormat(fmt)) {
+				String fmt = SadlPersistenceFormat.getSadlPersistenceFormatFromFilename(url);
+				if (SadlPersistenceFormat.validateSadlFormat(fmt)) {
 					repoType = fmt;
 					break;
 				}

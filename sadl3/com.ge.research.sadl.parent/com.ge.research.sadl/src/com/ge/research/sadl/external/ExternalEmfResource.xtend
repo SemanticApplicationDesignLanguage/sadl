@@ -19,7 +19,6 @@ package com.ge.research.sadl.external
 
 import com.ge.research.sadl.builder.ConfigurationManagerForIDE
 import com.ge.research.sadl.model.OntConceptType
-import com.ge.research.sadl.model.SadlSerializationFormat
 import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.sADL.SADLFactory
 import com.ge.research.sadl.sADL.SadlModel
@@ -63,6 +62,7 @@ import org.eclipse.xtext.validation.IResourceValidator
 
 import static com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory.*
 import static org.eclipse.emf.common.util.URI.createURI
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat
 
 @Log
 class ExternalEmfResource extends ResourceImpl {
@@ -130,11 +130,11 @@ class ExternalEmfResource extends ResourceImpl {
 	 */
 	protected def getConfigurationManager(Map<?, ?> options) {
 		if (ResourceManager.isSyntheticUri(null, URI)) {
-			return getConfigurationManagerForIDE(null, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, true);
+			return getConfigurationManagerForIDE(null, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT, true);
 		}
 		val modelFolderUri = getModelFolderUri(URI, options);
 		val modelFolderPath = ResourceManager.toAbsoluteFilePath(modelFolderUri);
-		return getConfigurationManagerForIDE(modelFolderPath, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+		return getConfigurationManagerForIDE(modelFolderPath, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 	}
 
 	/**
@@ -243,7 +243,7 @@ class ExternalEmfResource extends ResourceImpl {
 
 	// TODO: duplicate of com.ge.research.sadl.builder.ConfigurationManagerForIDE.getOwlFormatFromFile(String)
 	private def getSerializationLanguage() {
-		return SadlSerializationFormat.getSadlSerializationFormatFromFilename(URI.path);
+		return SadlPersistenceFormat.getSadlPersistenceFormatFromFilename(URI.path);
 	}
 
 	// TODO this does not belong to here. Should go to a utility class.

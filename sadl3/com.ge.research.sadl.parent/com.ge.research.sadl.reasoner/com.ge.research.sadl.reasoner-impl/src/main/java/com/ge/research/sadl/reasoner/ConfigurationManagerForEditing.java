@@ -60,7 +60,7 @@ import org.apache.jena.vocabulary.RDF;
 import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.reasoner.AvailablePlugin.PluginType;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
@@ -178,7 +178,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 					+ File.separator + CONFIG_FILENAME;
 			// save model
 			fps = new FileOutputStream(configFilename);
-			getConfigModel().write(fps, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+			getConfigModel().write(fps, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 			return true;
 		} catch (Exception e) {
 			logger.error("Failed to save ont-policy file", e);
@@ -1194,7 +1194,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 			try {
 				// save model
 				fps = new FileOutputStream(configFile);
-				getConfigModel().write(fps, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+				getConfigModel().write(fps, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 				setConfigChanged(false);
 				return true;
 			} catch (Exception e) {
@@ -1233,7 +1233,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 			try {
 				// save model
 				fps = new FileOutputStream(mappingFile);
-				getMappingModel().write(fps, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+				getMappingModel().write(fps, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 				setMappingChanged(false);
 				logger.debug("saved mapping file '" + mappingFilename + "'");
 				return true;

@@ -396,7 +396,7 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract Object getPrivateKeyMapValueByResource(String key, URI rsrcUri);
 	
 	/**
-	 * Method to clean up the TDB folder if the SadlSerializationFormat isn't TDB
+	 * Method to clean up the TDB folder if the SadlPersistenceFormat isn't TDB
 	 * 
 	 * @return
 	 */

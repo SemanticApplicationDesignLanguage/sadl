@@ -52,7 +52,7 @@ import org.apache.jena.shared.RulesetNotFoundException;
 
 import com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin;
 import com.ge.research.sadl.model.ImportMapping;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.InvalidDerivationException;
@@ -366,7 +366,7 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		}
 
 		if (m != null) {
-			String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	
+			String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;	
 		    FileOutputStream fps = new FileOutputStream(filename);
 	        RDFWriter rdfw = m.getWriter(format);
 	        rdfw.write(m, fps, modelname);

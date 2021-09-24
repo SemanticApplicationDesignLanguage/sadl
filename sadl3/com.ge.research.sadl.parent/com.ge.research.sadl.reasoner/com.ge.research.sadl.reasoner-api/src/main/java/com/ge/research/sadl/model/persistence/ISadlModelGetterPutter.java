@@ -17,7 +17,7 @@ public interface ISadlModelGetterPutter extends ISadlModelGetter{
 	 * @param modelNamespace--the namespace of the model (SADL assumes a model has a single namespace)
 	 * @param publicUri--the model namespace with a "#" appended
 	 * @param OwlFileName--for file-based persistence, the OWL filename; otherwise null
-	 * @param format--the format used for persistence as defined in SadlSerializationFormat
+	 * @param format--the format used for persistence as defined in SadlPersistenceFormat
 	 * @throws TranslationException 
 	 * @throws IOException 
 	 * @return--true if successfully saved else false

@@ -1,14 +1,14 @@
-package com.ge.research.sadl.model;
+package com.ge.research.sadl.model.persistence;
 
 import org.apache.jena.riot.RDFFormat;
 
 import com.ge.research.sadl.reasoner.TranslationException;
 /**
  * Class to contain the various formats in which SADL models may be persisted
- * @author 200005201
+ * @author andy@naturalsemantics.com
  *
  */
-public class SadlSerializationFormat {
+public class SadlPersistenceFormat {
 	public static final String TURTLE_FORMAT = "Turtle";
 	public static final String N3_FORMAT = "N3";
 	public static final String N_TRIPLE_FORMAT = "N-Triples";
@@ -131,7 +131,7 @@ public class SadlSerializationFormat {
 		throw new TranslationException("Invalid format: " + rdfFormat);
 	}
 	
-	public static String getSadlSerializationFormatFromFilename(String owlFilename) {
+	public static String getSadlPersistenceFormatFromFilename(String owlFilename) {
 		if (owlFilename.endsWith(".owl")) return RDF_XML_FORMAT;
 		if (owlFilename.endsWith(".nt")) return N_TRIPLE_FORMAT;
 		if (owlFilename.endsWith(".turtle")) return TURTLE_FORMAT;
@@ -153,7 +153,7 @@ public class SadlSerializationFormat {
 	 * @return
 	 * @throws TranslationException
 	 */
-	public static String getSadlSerializationFormat(RDFFormat rdfFormat) throws TranslationException {
+	public static String getSadlPersistenceFormat(RDFFormat rdfFormat) throws TranslationException {
 		if (rdfFormat != null) {
 			if (rdfFormat.equals(RDFFormat.TURTLE)) {
 				return TURTLE_FORMAT;

@@ -343,13 +343,13 @@ public interface IConfigurationManager {
 	ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException, IOException;
 
 	/**
-	 * Method to get the repository type, see SadlSerializationFormat class.
+	 * Method to get the repository type, see SadlPersistenceFormat class.
 	 * @return
 	 */
 	String getRepoType();
 
 	/**
-	 * Method to set the repository type, see SadlSerializationFormat class.
+	 * Method to set the repository type, see SadlPersistenceFormat class.
 	 * @param repoType
 	 */
 	void setRepoType(String repoType);

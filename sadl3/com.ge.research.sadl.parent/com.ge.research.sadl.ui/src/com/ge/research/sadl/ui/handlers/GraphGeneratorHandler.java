@@ -52,8 +52,8 @@ import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -108,7 +108,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			Map<String,String> prefMap = getPreferences(trgtFile);
 			boolean derivedFN = false;
 			String fmt = prefMap.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
-			String fileExt = SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(fmt));
+			String fileExt = SadlPersistenceFormat.getFileExtension(SadlPersistenceFormat.getRDFFormat(fmt));
 			if (trgtFile.getName().endsWith(fileExt)) {
 				owlFileName = trgtFile.getFullPath().lastSegment();
 			}
@@ -132,7 +132,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			}	
 			
 			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-			final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+			final String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
 
 			IGraphVisualizer visualizer = getVisualizer(configMgr, prefMap);
@@ -661,7 +661,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		if (configMgr == null || !sameProject()) {
 			//create the configuration manager
 			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-			final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+			final String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 			setConfigMgr(ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format));
 		}
 		return configMgr;

@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.jena.importer.CsvImporter;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -360,11 +360,11 @@ public class SadlServerImpl implements ISadlServer {
     	File tdbFile = new File(fname);
     	if (tdbFile.exists()) {
     		logger.debug("Repo type set to TDB as the folder '" + fname + "' exists.");
-    		return SadlSerializationFormat.JENA_TDB_FORMAT;	
+    		return SadlPersistenceFormat.JENA_TDB_FORMAT;	
     	}
     	else {
     		logger.debug("Repo type set to RDF/XML ABBREV as folder '" + tdbFolder + "' does not exist.");
-    		return SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+    		return SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
     	}
 	}
 	

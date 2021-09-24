@@ -33,13 +33,9 @@ import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContext
 import static com.ge.research.sadl.processing.ISadlOntologyHelper.GrammarContextIds.SADLSTATEMENT_TYPE;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
@@ -98,11 +94,9 @@ import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.RDFWriter;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.JenaTransactionException;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OWL;
@@ -159,7 +153,6 @@ import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.SadlIntersectionClass;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.SadlUnionClass;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
@@ -192,6 +185,7 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.Update;
 import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
@@ -638,88 +632,70 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (format != null && !format.equals("Jena TDB")) {
 					getConfigMgr().cleanTdbFolder();
 				}
-//					ISadlJenaModelGetter modgetter = getConfigMgr().getModelGetter();
-//					if (modgetter == null) {
-//				    	modgetter = (ISadlJenaModelGetter) new com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter(getConfigMgr(), getConfigMgr().getTdbFolder(), format);
-//				    	getConfigMgr().setModelGetter(modgetter);
-//						getConfigMgr().getModelGetter().setTdbFolder(getConfigMgr().getTdbFolder());
-//
-//					}
-//					if (!(modgetter instanceof com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter)) {
-//						addError("Unable to save model to Jena TDB, invalid model getter.", null);
-//					}
-//					else {
-//						String owlFullFN = getConfigMgr().getModelFolder() + "/" + owlFN;
-//						((com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter) modgetter).saveModel(getTheJenaModel().getBaseModel(), getModelNamespace(), getModelName(), owlFullFN, format);
-//					}
-//				}
-//				else {
-//					getConfigMgr().cleanTdbFolder();
-					generateOwlFile(fsa, modelFolder, owlFN, getTheJenaModel().getBaseModel(), getModelName(), getModelAlias(), format);
-	
-					String fn = SadlConstants.SADL_BASE_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-					if (!fileExists(fsa, fn)) {
-						sadlBaseModel = OntModelProvider.getSadlBaseModel();
-						if (sadlBaseModel != null) {
-							generateOwlFile(fsa, modelFolder, fn, sadlBaseModel.getBaseModel(), 
-									SadlConstants.SADL_BASE_MODEL_URI, 
-									SadlConstants.SADL_BASE_MODEL_PREFIX, format);
-							addMapping(newMappings, su, modelFolder, fn, 
-									SadlConstants.SADL_BASE_MODEL_URI, 
-									SadlConstants.SADL_BASE_MODEL_PREFIX);
-						}
-					}
-					else if (!mappingExists(SadlConstants.SADL_BASE_MODEL_URI)) {
+				generateOwlFile(fsa, modelFolder, owlFN, getTheJenaModel().getBaseModel(), getModelName(), getModelAlias(), format);
+
+				String fn = SadlConstants.SADL_BASE_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
+				if (!fileExists(fsa, fn)) {
+					sadlBaseModel = OntModelProvider.getSadlBaseModel();
+					if (sadlBaseModel != null) {
+						generateOwlFile(fsa, modelFolder, fn, sadlBaseModel.getBaseModel(), 
+								SadlConstants.SADL_BASE_MODEL_URI, 
+								SadlConstants.SADL_BASE_MODEL_PREFIX, format);
 						addMapping(newMappings, su, modelFolder, fn, 
 								SadlConstants.SADL_BASE_MODEL_URI, 
 								SadlConstants.SADL_BASE_MODEL_PREFIX);
 					}
-					fn = SadlConstants.SADL_LIST_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-					if (!fileExists(fsa, fn)) {
-						sadlListModel = OntModelProvider.getSadlListModel();
-						if (sadlListModel != null) {
-							generateOwlFile(fsa, modelFolder, fn, sadlListModel.getBaseModel(), SadlConstants.SADL_LIST_MODEL_URI, SadlConstants.SADL_LIST_MODEL_PREFIX, format);
-							addMapping(newMappings, su, modelFolder, fn, 
-									SadlConstants.SADL_LIST_MODEL_URI,
-									SadlConstants.SADL_LIST_MODEL_PREFIX);
-						}
-					}
-					else if (!mappingExists(SadlConstants.SADL_LIST_MODEL_URI)) {
+				}
+				else if (!mappingExists(SadlConstants.SADL_BASE_MODEL_URI)) {
+					addMapping(newMappings, su, modelFolder, fn, 
+							SadlConstants.SADL_BASE_MODEL_URI, 
+							SadlConstants.SADL_BASE_MODEL_PREFIX);
+				}
+				fn = SadlConstants.SADL_LIST_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
+				if (!fileExists(fsa, fn)) {
+					sadlListModel = OntModelProvider.getSadlListModel();
+					if (sadlListModel != null) {
+						generateOwlFile(fsa, modelFolder, fn, sadlListModel.getBaseModel(), SadlConstants.SADL_LIST_MODEL_URI, SadlConstants.SADL_LIST_MODEL_PREFIX, format);
 						addMapping(newMappings, su, modelFolder, fn, 
 								SadlConstants.SADL_LIST_MODEL_URI,
 								SadlConstants.SADL_LIST_MODEL_PREFIX);
 					}
-					fn = SadlConstants.SADL_DEFAULTS_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-					if (!fileExists(fsa, fn)) {
-						sadlDefaultsModel = OntModelProvider.getSadlDefaultsModel();
-						if (sadlDefaultsModel != null) {
-							generateOwlFile(fsa, modelFolder, fn, sadlDefaultsModel.getBaseModel(), SadlConstants.SADL_DEFAULTS_MODEL_URI, SadlConstants.SADL_DEFAULTS_MODEL_PREFIX, format);
-							addMapping(newMappings, su, modelFolder, fn,
-									SadlConstants.SADL_DEFAULTS_MODEL_URI,
-								SadlConstants.SADL_DEFAULTS_MODEL_PREFIX);
-						}
-					}
-					else if (!mappingExists(SadlConstants.SADL_DEFAULTS_MODEL_URI)) {
+				}
+				else if (!mappingExists(SadlConstants.SADL_LIST_MODEL_URI)) {
+					addMapping(newMappings, su, modelFolder, fn, 
+							SadlConstants.SADL_LIST_MODEL_URI,
+							SadlConstants.SADL_LIST_MODEL_PREFIX);
+				}
+				fn = SadlConstants.SADL_DEFAULTS_MODEL_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
+				if (!fileExists(fsa, fn)) {
+					sadlDefaultsModel = OntModelProvider.getSadlDefaultsModel();
+					if (sadlDefaultsModel != null) {
+						generateOwlFile(fsa, modelFolder, fn, sadlDefaultsModel.getBaseModel(), SadlConstants.SADL_DEFAULTS_MODEL_URI, SadlConstants.SADL_DEFAULTS_MODEL_PREFIX, format);
 						addMapping(newMappings, su, modelFolder, fn,
 								SadlConstants.SADL_DEFAULTS_MODEL_URI,
 							SadlConstants.SADL_DEFAULTS_MODEL_PREFIX);
 					}
-					fn = SadlConstants.SADL_SERVICES_CONFIGURATION_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
-					if (!fileExists(fsa, fn)) {
-						sadlServicesConfigConceptModel = OntModelProvider.getSadlServicesConfigConceptsModel();
-						if (sadlServicesConfigConceptModel != null) {
-							generateOwlFile(fsa, modelFolder, fn, sadlServicesConfigConceptModel.getBaseModel(), SadlConstants.SADL_SERIVCES_CONFIGURATION_URI, SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX, format);
-							addMapping(newMappings, su, modelFolder, fn,
-									SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI,
-									SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX);
-						}
-					}
-					else if (!mappingExists(SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI)) {
+				}
+				else if (!mappingExists(SadlConstants.SADL_DEFAULTS_MODEL_URI)) {
+					addMapping(newMappings, su, modelFolder, fn,
+							SadlConstants.SADL_DEFAULTS_MODEL_URI,
+						SadlConstants.SADL_DEFAULTS_MODEL_PREFIX);
+				}
+				fn = SadlConstants.SADL_SERVICES_CONFIGURATION_FILENAME + "." + ResourceManager.getOwlFileExtension(format);
+				if (!fileExists(fsa, fn)) {
+					sadlServicesConfigConceptModel = OntModelProvider.getSadlServicesConfigConceptsModel();
+					if (sadlServicesConfigConceptModel != null) {
+						generateOwlFile(fsa, modelFolder, fn, sadlServicesConfigConceptModel.getBaseModel(), SadlConstants.SADL_SERIVCES_CONFIGURATION_URI, SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX, format);
 						addMapping(newMappings, su, modelFolder, fn,
 								SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI,
 								SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX);
 					}
-//				}
+				}
+				else if (!mappingExists(SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI)) {
+					addMapping(newMappings, su, modelFolder, fn,
+							SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_URI,
+							SadlConstants.SADL_SERIVCES_CONFIGURATION_CONCEPTS_PREFIX);
+				}
 				String[] mapping = new String[4];
 				mapping[0] = su.fileNameToFileUrl(modelFolder + "/" + owlFN);
 				mapping[1] = getModelName();
@@ -810,7 +786,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return true;
 		} else
 			try {
-				if (SadlSerializationFormat.getRDFFormat(format).equals(SadlSerializationFormat.TDB_PseudoFormat) ) {
+				if (SadlPersistenceFormat.getRDFFormat(format).equals(SadlPersistenceFormat.TDB_PseudoFormat) ) {
 					return true;
 				}
 			} catch (TranslationException e) {
@@ -821,7 +797,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	protected String getOwlFilename(URI lastSeg, String format) throws TranslationException {
-		String owlFN = lastSeg.trimFileExtension().appendFileExtension(SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(format)))
+		String owlFN = lastSeg.trimFileExtension().appendFileExtension(SadlPersistenceFormat.getFileExtension(SadlPersistenceFormat.getRDFFormat(format)))
 				.lastSegment().toString();
 		return owlFN;
 	}
@@ -1684,7 +1660,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (!isSyntheticUri(null, resource)) {
 						// don't do metrics on JUnit tests
 						if (getMetricsProcessor() != null) {
-							getMetricsProcessor().saveMetrics(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+							getMetricsProcessor().saveMetrics(SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 						}
 					}
 				}
@@ -1868,15 +1844,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									IReasoner.SADL_BUILTIN_FUNCTIONS_URI,
 									IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS);
 						} else {
-//							IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
-//							if (cm.getModelGetter() == null) {
-//								cm.setModelGetter(new SadlJenaModelGetter(cm, null));
-//							}
-//							cm.getModelGetter().getOntModel(IReasoner.SADL_BUILTIN_FUNCTIONS_URI,
-//									ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
-//											.appendFragment(SadlConstants.OWL_BUILTIN_FUNCTIONS_FILENAME)
-//											.toFileString(),
-//									getOwlModelFormat(context));
 							throw new JenaProcessorException("When does this happen? Not sure it ever will...");
 						}
 					}
@@ -1947,14 +1914,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							OntModelProvider.attach(imrsrc, sadlImplicitModel, SadlConstants.SADL_IMPLICIT_MODEL_URI,
 									SadlConstants.SADL_IMPLICIT_MODEL_PREFIX);
 						} else {
-//							IConfigurationManagerForIDE cm = getConfigMgr(resource, getOwlModelFormat(context));
-//							if (cm.getModelGetter() == null) {
-//								cm.setModelGetter(new SadlJenaModelGetter(cm, null));
-//							}
-//							cm.getModelGetter().getOntModel(SadlConstants.SADL_IMPLICIT_MODEL_URI,
-//									ResourceManager.getProjectUri(resource).appendSegment(ResourceManager.OWLDIR)
-//											.appendFragment(SadlConstants.OWL_IMPLICIT_MODEL_FILENAME).toFileString(),
-//									getOwlModelFormat(context));
 							throw new JenaProcessorException("When does this happen? Not sure it ever will...");
 						}
 					}
@@ -2116,7 +2075,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (modelFolderPathname != null && !modelFolderPathname.startsWith(SYNTHETIC_FROM_TEST)) {
 				File mff = new File(modelFolderPathname);
 				mff.mkdirs();
-//				spec.setImportModelGetter(new SadlJenaModelGetterPutter(spec, modelFolderPathname));		
 				spec.setImportModelGetter(getConfigMgr().getSadlModelGetterPutter(getOwlModelFormat(context)));
 			}
 			if (owlDocMgr != null) {
@@ -14374,7 +14332,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			projectRootPath = su.fileUrlToFileName(projectRootPath);
 		}
 		final File mfFolder = new File(projectRootPath + "/" + ResourceManager.OWLDIR);
-		final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+		final String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 		String fixedModelFolderName = mfFolder.getCanonicalPath().replace("\\", "/");
 		IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory
 				.getConfigurationManagerForIDE(fixedModelFolderName, format);
@@ -14693,7 +14651,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (configMgr == null) {
 			String modelFolderPathname = getModelFolderPath(resource);
 			if (format == null) {
-				format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT; // default
+				format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT; // default
 			}
 			if (isSyntheticUri(modelFolderPathname, resource)) {
 				modelFolderPathname = null;

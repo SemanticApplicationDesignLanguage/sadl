@@ -66,7 +66,7 @@ import org.eclipse.xtext.util.StringInputStream;
 import com.ge.research.sadl.external.XMLHelper;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -541,11 +541,11 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	public static String getOWLFormat() {
 		IPreferencesService service = Platform.isRunning() ? Platform.getPreferencesService() : null;
 		if (service != null) {
-			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, null);
+			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT, null);
 			return format;
 		}
 		else {
-			return SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+			return SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 		}
 	}
 
@@ -874,7 +874,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		if (getRepoType() == null) {
 	    	setRepoType(ConfigurationManagerForIDE.getOWLFormat());	
 		}
-		if (getRepoType() != null && getRepoType().equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+		if (getRepoType() != null && getRepoType().equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
 			try {
 				theModel = getSadlModelGetter(null).getOntModel(publicUri);
 			} catch (Throwable t) {
@@ -1129,7 +1129,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	}
 
 	private String getOwlFormatFromFile(String owlFilename) {
-		return SadlSerializationFormat.getSadlSerializationFormatFromFilename(owlFilename);
+		return SadlPersistenceFormat.getSadlPersistenceFormatFromFilename(owlFilename);
 	}
 	
 	public void addPrivateKeyValuePair(String key, Object value) {
