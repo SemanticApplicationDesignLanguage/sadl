@@ -18,7 +18,7 @@ import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
-public class SadlJenaFileGetterPutter extends SadlJenaFileGetter implements ISadlModelGetterPutter{
+public class SadlJenaFileGetterPutter extends SadlJenaFileGetter implements ISadlModelGetterPutter {
     
 	public SadlJenaFileGetterPutter(IConfigurationManager mgr, String format) {
 		super(mgr, format);

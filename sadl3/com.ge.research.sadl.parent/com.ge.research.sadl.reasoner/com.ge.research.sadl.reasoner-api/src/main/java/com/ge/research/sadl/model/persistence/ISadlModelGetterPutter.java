@@ -9,7 +9,7 @@ import org.apache.jena.rdf.model.Model;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.TranslationException;
 
-public interface ISadlModelGetterPutter extends ISadlModelGetter{
+public interface ISadlModelGetterPutter extends ISadlModelGetter {
 	
 	/**
 	 * Method to persist a Jena Model.
