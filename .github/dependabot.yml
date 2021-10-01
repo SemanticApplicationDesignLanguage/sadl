@@ -9,6 +9,12 @@ updates:
   # Maintain dependencies for Docker
   - package-ecosystem: "docker"
     # Location of Dockerfile
+    directory: "/sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "docker"
+    # Location of Dockerfile
     directory: "/sadl3/com.ge.research.sadl.parent/theia-sadl-extension/apps/browser-app/"
     schedule:
       interval: "daily"

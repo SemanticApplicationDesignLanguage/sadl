@@ -26,6 +26,7 @@
     <module>com.ge.research.sadl.jena</module>
     <module>com.ge.research.sadl.jena-wrapper-for-sadl</module>
     <module>com.ge.research.sadl.perspective</module>
+    <module>com.ge.research.sadl.product</module>
     <module>com.ge.research.sadl.reasoner</module>
     <module>com.ge.research.sadl.server</module>
     <module>com.ge.research.sadl.swi-prolog-plugin</module>
@@ -44,11 +45,11 @@
 
   <!-- Set all properties in one place -->
   <properties>
-    <maven.compiler.release>11</maven.compiler.release>
+    <maven.compiler.release>8</maven.compiler.release>
     <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
     <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <version.jena>3.17.0</version.jena>
@@ -57,7 +58,7 @@
     <version.sadl>${project.version}</version.sadl>
     <version.slf4j>1.7.32</version.slf4j>
     <version.surefire>3.0.0-M5</version.surefire>
-    <version.tycho>2.4.0</version.tycho>
+    <version.tycho>2.5.0</version.tycho>
     <version.xtext>2.24.0</version.xtext>
     <version.xtext-antlr>2.1.1</version.xtext-antlr>
   </properties>
@@ -157,7 +158,7 @@
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.20.2</version>
+        <version>3.21.0</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.woodstox</groupId>
@@ -168,7 +169,7 @@
       <dependency>
         <groupId>org.eclipse.platform</groupId>
         <artifactId>org.eclipse.core.resources</artifactId>
-        <version>3.15.0</version>
+        <version>3.15.100</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.xtext</groupId>
@@ -183,7 +184,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.14.2</version>
+        <version>1.14.3</version>
       </dependency>
       <dependency>
         <groupId>org.pojava</groupId>
@@ -338,7 +339,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.3.0</version>
+          <version>3.3.1</version>
           <configuration>
             <author>false</author>
             <docencoding>UTF-8</docencoding>
@@ -489,34 +490,11 @@
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-p2-director-plugin</artifactId>
           <version>${version.tycho}</version>
-          <executions>
-            <execution>
-              <id>default-materialize-products</id>
-              <goals>
-                <goal>materialize-products</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>default-archive-products</id>
-              <goals>
-                <goal>archive-products</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>
           <artifactId>tycho-p2-plugin</artifactId>
           <version>${version.tycho}</version>
-          <executions>
-            <execution>
-              <id>default-p2-metadata</id>
-              <goals>
-                <goal>p2-metadata</goal>
-              </goals>
-              <phase>package</phase>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho</groupId>

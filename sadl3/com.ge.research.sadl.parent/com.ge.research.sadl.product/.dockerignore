@@ -1,0 +1,4 @@
+# Ignore everything in the current directory except the specific files
+# which we want to copy to the image
+*
+!target/products/sadl.product/linux/gtk/x86_64/
