@@ -32,7 +32,8 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration imp
 		acceptor.acceptDefaultHighlighting(CLASS_ID, "Class", classTextStyle())
 		acceptor.acceptDefaultHighlighting(INSTANCE_ID, "Instance", instanceTextStyle())
 		acceptor.acceptDefaultHighlighting(STRUCTURE_NAME_ID, "Structure Name", structureInstanceTextStyle())
-		acceptor.acceptDefaultHighlighting(VARIABLE_ID, "Variable", variableTextStyle())
+		acceptor.acceptDefaultHighlighting(VARIABLE_DECL_ID, "Variable Decl", variableDeclerationTextStyle())
+		acceptor.acceptDefaultHighlighting(VARIABLE_REF_ID, "Variable Ref", variableReferenceTextStyle())
 		acceptor.acceptDefaultHighlighting(DATA_PROPERTY_ID, "Data Property", dataPropertyTextStyle())
 		acceptor.acceptDefaultHighlighting(OBJECT_PROPERTY_ID, "Object Property", objectPropertyTextStyle())
 		acceptor.acceptDefaultHighlighting(ANNOTATION_PROPERTY_ID, "Annotation Property", annotationPropertyTextStyle())
@@ -80,10 +81,18 @@ class SadlHighlightingConfiguration extends DefaultHighlightingConfiguration imp
 	}
 	
 	// SADL V1 used SWT.COLOR_MAGENTA and SWT.BOLD.
-	def TextStyle variableTextStyle() {
+	def TextStyle variableDeclerationTextStyle() {
 		var TextStyle textStyle = defaultTextStyle().copy()
 		textStyle.setColor(new RGB(255, 0, 255))
 		textStyle.setStyle(SWT.BOLD)
+//		textStyle.setStyle(SWT.UNDERLINE_SINGLE)
+		return textStyle
+	}
+
+	def TextStyle variableReferenceTextStyle() {
+		var TextStyle textStyle = defaultTextStyle().copy()
+		textStyle.setColor(new RGB(255, 0, 255))
+		textStyle.setStyle(SWT.ITALIC)
 		return textStyle
 	}
 
