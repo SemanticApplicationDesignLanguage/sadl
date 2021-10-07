@@ -467,13 +467,10 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				bChanged = true;
 			}
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (bChanged) {
@@ -575,10 +572,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				}
 			}
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
@@ -635,7 +630,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 					return aFile.getCanonicalPath();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -947,10 +941,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 						}
 					}
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -1031,7 +1023,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 					sbff.delete();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -1060,7 +1051,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -1073,7 +1063,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			FileInputStream is = new FileInputStream(new File(owlFilename));
 			return initOntModel(is, getOwlFormatFromFile(owlFilename));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
@@ -1094,7 +1083,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			FileInputStream is = new FileInputStream(new File(owlFilename));
 			return initOntModel(is, getOwlFormatFromFile(owlFilename), loadImports);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
@@ -1219,7 +1207,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 							}
 						}
 					} catch (MalformedURLException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -1230,7 +1217,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				super.saveOntPolicyFile();
 			}
 		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}
@@ -1247,7 +1233,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			}
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;

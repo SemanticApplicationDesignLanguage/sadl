@@ -607,6 +607,10 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (rules != null) {
 			loadRulesFromString(rules);
 		}
+		
+//		loadImports();
+//		loadRules(schemaModel, modelName);
+		
 		modelSpec = getModelSpec(preferences);	// get this for later use when creating InfModel
 
 		reasoner = new GenericRuleReasoner(ruleList);
