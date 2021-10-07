@@ -33,6 +33,8 @@ import org.apache.jena.vocabulary.XSD
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.model.gp.Query
+import org.apache.jena.vocabulary.RDFS
+import org.apache.jena.ontology.Individual
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -362,6 +364,680 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  				return
  			}
  			fail()
+ 		]
+	}
+
+	@Test
+	def void testCase1() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 1
+			 prop1 is a property.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop1")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertTrue(sitr1.isEmpty)
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+ 			assertTrue(sitr2.isEmpty)
+ 		]
+	}
+
+	@Test
+	def void testCase2() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 2
+			 {Domain2, Range2} are classes.
+			 relationship of Domain2 to Range2 is prop2.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain2")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop2")
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			val dmn = sitr1.next.object
+ 			assertTrue(dmn.asResource.URI.equals("http://sadl.org/test.sadl#Domain2"))
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+ 			val rng = sitr2.next.object
+ 			assertTrue(rng.asResource.URI.equals("http://sadl.org/test.sadl#Range2"))
+ 		]
+	}
+
+	@Test
+	def void testCase3a() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 3 (3a)
+			 Domain3a is a class.
+			 Range3a is a class.
+			 {RInst3aa, RInst3ab} are instances of Range3a.
+			 prop3a describes Domain3a must be one of { RInst3aa, RInst3ab}.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain3a")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop3a")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertFalse(sitr1.isEmpty)
+ 			val dmn = sitr1.next.object
+ 			assertTrue(dmn.asResource.URI.equals("http://sadl.org/test.sadl#Domain3a"))
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val svf = sc.getPropertyValue(OWL.someValuesFrom)
+ 			assertTrue(svf.^as(OntClass).isEnumeratedClass)
+ 			val eitr2 = svf.^as(OntClass).asEnumeratedClass.listOneOf
+ 			assertFalse(eitr2.isEmpty)
+ 			while (eitr2.hasNext) {
+ 				val el = eitr2.next
+ 				println(el.toString)
+ 				assertTrue(el.localName.equals("RInst3aa") || el.localName.equals("RInst3ab"))
+ 			}
+ 			
+ 		]
+	}
+
+	@Test
+	def void testCase3b() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 3 (3b)
+			 Domain3b is a class.
+			 Range3b is a class.
+			 RInst3b is a Range3b.
+			 prop3b describes Domain3b always has value RInst3b.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain3b")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop3b")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertFalse(sitr1.isEmpty)
+ 			val dmn = sitr1.next.object
+ 			assertTrue(dmn.asResource.URI.equals("http://sadl.org/test.sadl#Domain3b"))
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val svf = sc.getPropertyValue(OWL.hasValue)
+ 			assertTrue(svf.isResource)
+ 			assertTrue(svf.asResource.canAs(Individual))
+			assertTrue(svf.asResource.URI.equals("http://sadl.org/test.sadl#RInst3b"))
+ 		]
+	}
+
+	@Test
+	def void testCase3c() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 3 (3c)
+			 Domain3c is a class.
+			 Class3c is a class.
+			 prop3c describes Domain3c only has values of type Class3c.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain3c")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop3c")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertFalse(sitr1.isEmpty)
+ 			val dmn = sitr1.next.object
+ 			assertTrue(dmn.asResource.URI.equals("http://sadl.org/test.sadl#Domain3c"))
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val avf = sc.getPropertyValue(OWL.allValuesFrom)
+ 			assertTrue(avf.isResource)
+ 			assertTrue(avf.asResource.canAs(OntClass))
+			assertTrue(avf.asResource.URI.equals("http://sadl.org/test.sadl#Class3c"))
+ 		]
+	}
+
+	@Test
+	def void testCase3d() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 3 (3d)
+			 Domain3d is a class.
+			 Class3d is a class.
+			 prop3d describes Domain3d has at least one value of type Class3d.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain3d")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop3d")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertFalse(sitr1.isEmpty)
+ 			val dmn = sitr1.next.object
+ 			assertTrue(dmn.asResource.URI.equals("http://sadl.org/test.sadl#Domain3d"))
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val avf = sc.getPropertyValue(OWL.someValuesFrom)
+ 			assertTrue(avf.isResource)
+ 			assertTrue(avf.asResource.canAs(OntClass))
+			assertTrue(avf.asResource.URI.equals("http://sadl.org/test.sadl#Class3d"))
+ 		]
+	}
+
+	@Test
+	def void testCase3e() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 3 (3e)
+			 Domain3e is a class.
+			 Class3e is a class.
+			 prop3e describes Domain3e has at least 1 value of type Class3e.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain3e")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop3e")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertFalse(sitr1.isEmpty)
+ 			val dmn = sitr1.next.object
+ 			assertTrue(dmn.asResource.URI.equals("http://sadl.org/test.sadl#Domain3e"))
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val oc = sc.getPropertyValue(OWL2.onClass)
+ 			assertTrue(oc.isResource)
+ 			assertTrue(oc.asResource.canAs(OntClass))
+			assertTrue(oc.asResource.URI.equals("http://sadl.org/test.sadl#Class3e"))
+			val mqc = sc.getPropertyValue(OWL2.minQualifiedCardinality)
+			assertTrue(mqc.literal)
+			assertTrue(mqc.asLiteral.int == 1)
+ 		]
+	}
+
+	@Test
+	def void testCase3f() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 3 (3f)
+			 Domain3f is a class.
+			 Class3f is a class.
+			 prop3f describes Domain3f has at most 1 value of type Class3f.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain3f")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop3f")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertFalse(sitr1.isEmpty)
+ 			val dmn = sitr1.next.object
+ 			assertTrue(dmn.asResource.URI.equals("http://sadl.org/test.sadl#Domain3f"))
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val oc = sc.getPropertyValue(OWL2.onClass)
+ 			assertTrue(oc.isResource)
+ 			assertTrue(oc.asResource.canAs(OntClass))
+			assertTrue(oc.asResource.URI.equals("http://sadl.org/test.sadl#Class3f"))
+			val mqc = sc.getPropertyValue(OWL2.maxQualifiedCardinality)
+			assertTrue(mqc.literal)
+			assertTrue(mqc.asLiteral.int == 1)
+ 		]
+	}
+	
+	@Test
+	def void testCase4a() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 4a
+			 Domain4a is a class.
+			 Range4a is a class.
+			 {RInst4aa, RInst4ab, RInst4ac} are instances of Range4a.	
+			 prop4a of Domain4a must be one of { RInst4aa, RInst4ab}.	// called case 6 in code comment
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain4a")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop4a")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertTrue(sitr1.isEmpty)
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val svf = sc.getPropertyValue(OWL.someValuesFrom)
+ 			assertTrue(svf.^as(OntClass).isEnumeratedClass)
+ 			val eitr2 = svf.^as(OntClass).asEnumeratedClass.listOneOf
+ 			assertFalse(eitr2.isEmpty)
+ 			while (eitr2.hasNext) {
+ 				val el = eitr2.next
+ 				println(el.toString)
+ 				assertTrue(el.localName.equals("RInst4aa") || el.localName.equals("RInst4ab"))
+ 			}
+ 		]
+	}	
+
+	@Test
+	def void testCase4b() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 4 (4b)
+			 Domain4b is a class.
+			 Range4b is a class.
+			 RInst4b is a Range4b.
+			 prop4b of Domain4b always has value RInst4b.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain4b")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop4b")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertTrue(sitr1.isEmpty)
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val svf = sc.getPropertyValue(OWL.hasValue)
+ 			assertTrue(svf.isResource)
+ 			assertTrue(svf.asResource.canAs(Individual))
+			assertTrue(svf.asResource.URI.equals("http://sadl.org/test.sadl#RInst4b"))
+ 		]
+	}
+
+	@Test
+	def void testCase4c() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 4 (4c)
+			 Domain4c is a class.
+			 Class4c is a class.
+			 prop4c of Domain4c only has values of type Class4c.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain4c")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop4c")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertTrue(sitr1.isEmpty)
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val avf = sc.getPropertyValue(OWL.allValuesFrom)
+ 			assertTrue(avf.isResource)
+ 			assertTrue(avf.asResource.canAs(OntClass))
+			assertTrue(avf.asResource.URI.equals("http://sadl.org/test.sadl#Class4c"))
+ 		]
+	}
+
+	@Test
+	def void testCase4d() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 4 (4d)
+			 Domain4d is a class.
+			 Class4d is a class.
+			 prop4d of Domain4d has at least one value of type Class4d.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain4d")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop4d")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertTrue(sitr1.isEmpty)
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val avf = sc.getPropertyValue(OWL.someValuesFrom)
+ 			assertTrue(avf.isResource)
+ 			assertTrue(avf.asResource.canAs(OntClass))
+			assertTrue(avf.asResource.URI.equals("http://sadl.org/test.sadl#Class4d"))
+ 		]
+	}
+
+	@Test
+	def void testCase4e() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 4 (4e)
+			 Domain4e is a class.
+			 Class4e is a class.
+			 prop4e of Domain4e has at least 1 value of type Class4e.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain4e")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop4e")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertTrue(sitr1.isEmpty)
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val oc = sc.getPropertyValue(OWL2.onClass)
+ 			assertTrue(oc.isResource)
+ 			assertTrue(oc.asResource.canAs(OntClass))
+			assertTrue(oc.asResource.URI.equals("http://sadl.org/test.sadl#Class4e"))
+			val mqc = sc.getPropertyValue(OWL2.minQualifiedCardinality)
+			assertTrue(mqc.literal)
+			assertTrue(mqc.asLiteral.int == 1)
+ 		]
+	}
+
+	@Test
+	def void testCase4f() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 4 (4f)
+			 Domain4f is a class.
+			 Class4f is a class.
+			 prop4f of Domain4f has at most 1 value of type Class4f.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain4f")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop4f")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertTrue(sitr1.isEmpty)
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val oc = sc.getPropertyValue(OWL2.onClass)
+ 			assertTrue(oc.isResource)
+ 			assertTrue(oc.asResource.canAs(OntClass))
+			assertTrue(oc.asResource.URI.equals("http://sadl.org/test.sadl#Class4f"))
+			val mqc = sc.getPropertyValue(OWL2.maxQualifiedCardinality)
+			assertTrue(mqc.literal)
+			assertTrue(mqc.asLiteral.int == 1)
+ 		]
+	}
+	
+	@Test
+	def void testCase4g() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // case 4g
+			 Domain4g is a class.
+			 prop4g is a property.
+			 Class4g is a class.
+			 {Inst4ga, Inst4gb, Inst4gc} are instances of Class4g.
+			 prop4g of Domain4g can only be one of {Inst4ga, Inst4gb}.	// called case 5
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain4g")
+ 			assertNotNull(dcls)
+ 			val nn = null as RDFNode
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop4g")
+ 			assertNotNull(prop)
+ 			val sitr1 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertTrue(sitr1.isEmpty)
+  			val sitr2 = jenaModel.listStatements(prop, RDFS.range, nn)
+  			assertTrue(sitr2.isEmpty)
+ 			val eitr1 = dcls.listSuperClasses(true)
+ 			assertNotNull(eitr1)
+ 			val sc = eitr1.next
+ 			assertTrue(sc.canAs(Restriction))
+ 			val svf = sc.getPropertyValue(OWL.allValuesFrom)
+ 			assertTrue(svf.^as(OntClass).isEnumeratedClass)
+ 			val eitr2 = svf.^as(OntClass).asEnumeratedClass.listOneOf
+ 			assertFalse(eitr2.isEmpty)
+ 			while (eitr2.hasNext) {
+ 				val el = eitr2.next
+ 				println(el.toString)
+ 				assertTrue(el.localName.equals("Inst4ga") || el.localName.equals("Inst4gb"))
+ 			}
+ 		]
+	}	
+	@Test
+	def void testCase7a() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // Case 7 (7a)
+			 Domain7a is a class.
+			 prop7aa is a property.
+			 prop7ab is a property with values of type boolean.
+			 prop7ab of prop7aa of Domain7a has default true.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain7a")
+ 			val paa = jenaModel.getProperty("http://sadl.org/test.sadl#prop7aa")
+ 			assertNotNull(paa)
+ 			// to make sure that it is an RDF property only, test for other types
+ 			val paaep = jenaModel.getObjectProperty("http://sadl.org/test.sadl#prop7aa")
+ 			assertNull(paaep)
+ 			val paaop = jenaModel.getDatatypeProperty("http://sadl.org/test.sadl#prop7aa")
+ 			assertNull(paaop)
+ 			val paaap = jenaModel.getAnnotationProperty("http://sadl.org/test.sadl#prop7aa")
+ 			assertNull(paaap)
+ 			val nn = null as RDFNode
+ 			val sitr = jenaModel.listStatements(dcls, RDFS.seeAlso, nn)
+ 			val dvbn = sitr.next.object
+ 			val sitr2 = jenaModel.listStatements(dvbn.asResource, jenaModel.getProperty("http://research.ge.com/Acuity/defaults.owl#hasDefault"), nn)
+ 			val dv = sitr2.next.object
+ 			val dvstr = dv.toString
+ 			assertTrue(dvstr.startsWith("true"))
+ 			// make sure that the property prop7ab doesn't have a domain
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop7ab")
+ 			val sitr3 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertTrue(sitr3.isEmpty)
+ 			// now check interior of default value
+ 			val defns = "http://research.ge.com/Acuity/defaults.owl#"
+ 			val sitr4 = jenaModel.listStatements(dvbn.asResource, jenaModel.getProperty(defns+"appliesToPropertyChain"), nn)
+ 			assertFalse(sitr4.isEmpty)
+ 			val pce = sitr4.next.object
+ 			assertNotNull(pce)
+ 			val sitr5 = jenaModel.listStatements(pce.asResource, jenaModel.getProperty(defns + "propertyElement"), nn)
+ 			assertFalse(sitr5.isEmpty)
+ 			val pe = sitr5.next.object
+ 			assertTrue(pe.asResource.URI.equals(paa.URI))
+ 			val sitr6 = jenaModel.listStatements(pce.asResource, jenaModel.getProperty(defns + "nextPropertyChainElement"), nn)
+ 			assertFalse(sitr6.isEmpty)
+ 			val pce2 = sitr6.next.object
+ 			val sitr7 = jenaModel.listStatements(pce2.asResource, jenaModel.getProperty(defns + "propertyElement"), nn)
+ 			assertFalse(sitr7.isEmpty)
+ 			val pe2 = sitr7.next.object
+ 			assertTrue(pe2.asResource.URI.equals(prop.URI))
+ 		]
+	}
+
+	@Test
+	def void testCase7b() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // Case 7 (7b)
+			 Domain7b is a class.
+			 Class7b is a class.
+			 InstC7b is a Class7b.
+			 prop7ba is a property.
+			 prop7bb is a property with values of type Class7b.
+			 prop7bb of prop7ba of Domain7b has default InstC7b.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			for (issue : issues) {
+ 				println(issue.toString)
+ 			}
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain7b")
+ 			val paa = jenaModel.getProperty("http://sadl.org/test.sadl#prop7ba")
+ 			assertNotNull(paa)
+ 			// to make sure that it is an RDF property only, test for other types
+ 			val paaep = jenaModel.getObjectProperty("http://sadl.org/test.sadl#prop7ba")
+ 			assertNull(paaep)
+ 			val paaop = jenaModel.getDatatypeProperty("http://sadl.org/test.sadl#prop7ba")
+ 			assertNull(paaop)
+ 			val paaap = jenaModel.getAnnotationProperty("http://sadl.org/test.sadl#prop7ba")
+ 			assertNull(paaap)
+ 			val nn = null as RDFNode
+ 			val sitr = jenaModel.listStatements(dcls, RDFS.seeAlso, nn)
+ 			val dvbn = sitr.next.object
+ 			val sitr2 = jenaModel.listStatements(dvbn.asResource, jenaModel.getProperty("http://research.ge.com/Acuity/defaults.owl#hasDefault"), nn)
+ 			val dv = sitr2.next.object
+ 			val dvstr = dv.toString
+ 			assertTrue(dvstr.equals("http://sadl.org/test.sadl#InstC7b"))
+ 			// make sure that the property prop7bb doesn't have a domain
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop7bb")
+ 			val sitr3 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertTrue(sitr3.isEmpty)
+ 			// now check interior of default value
+ 			val defns = "http://research.ge.com/Acuity/defaults.owl#"
+ 			val sitr4 = jenaModel.listStatements(dvbn.asResource, jenaModel.getProperty(defns+"appliesToPropertyChain"), nn)
+ 			assertFalse(sitr4.isEmpty)
+ 			val pce = sitr4.next.object
+ 			assertNotNull(pce)
+ 			val sitr5 = jenaModel.listStatements(pce.asResource, jenaModel.getProperty(defns + "propertyElement"), nn)
+ 			assertFalse(sitr5.isEmpty)
+ 			val pe = sitr5.next.object
+ 			assertTrue(pe.asResource.URI.equals(paa.URI))
+ 			val sitr6 = jenaModel.listStatements(pce.asResource, jenaModel.getProperty(defns + "nextPropertyChainElement"), nn)
+ 			assertFalse(sitr6.isEmpty)
+ 			val pce2 = sitr6.next.object
+ 			val sitr7 = jenaModel.listStatements(pce2.asResource, jenaModel.getProperty(defns + "propertyElement"), nn)
+ 			assertFalse(sitr7.isEmpty)
+ 			val pe2 = sitr7.next.object
+ 			assertTrue(pe2.asResource.URI.equals(prop.URI))
+ 		]
+	}
+
+	@Test
+	def void testCase7c() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 // Case 7 (7c)
+			 Domain7c is a class.
+			 prop7c is a property with values of type boolean.
+			 prop7c describes Domain7c has default true.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out)
+ 			assertTrue(issues.size == 0)
+ 			val dcls = jenaModel.getOntClass("http://sadl.org/test.sadl#Domain7c")
+ 			val nn = null as RDFNode
+ 			val sitr = jenaModel.listStatements(dcls, RDFS.seeAlso, nn)
+ 			val dvbn = sitr.next.object
+ 			val sitr2 = jenaModel.listStatements(dvbn.asResource, jenaModel.getProperty("http://research.ge.com/Acuity/defaults.owl#hasDefault"), nn)
+ 			val dv = sitr2.next.object
+ 			val dvstr = dv.toString
+ 			assertTrue(dvstr.startsWith("true"))
+ 			val prop = jenaModel.getProperty("http://sadl.org/test.sadl#prop7c")
+ 			val sitr3 = jenaModel.listStatements(prop, RDFS.domain, nn)
+ 			assertFalse(sitr3.isEmpty)
+ 			val dmn = sitr3.next.object
+ 			assertTrue(dmn.asResource.URI.equals("http://sadl.org/test.sadl#Domain7c"))
+ 			// now check interior of default value
+ 			val defns = "http://research.ge.com/Acuity/defaults.owl#"
+ 			val sitr4 = jenaModel.listStatements(dvbn.asResource, jenaModel.getProperty(defns+"appliesToPropertyChain"), nn)
+ 			assertFalse(sitr4.isEmpty)
+ 			val pce = sitr4.next.object
+ 			assertNotNull(pce)
+ 			val sitr5 = jenaModel.listStatements(pce.asResource, jenaModel.getProperty(defns + "propertyElement"), nn)
+ 			assertFalse(sitr5.isEmpty)
+ 			val pe = sitr5.next.object
+ 			assertTrue(pe.asResource.URI.equals(prop.URI))
  		]
 	}
 

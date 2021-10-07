@@ -2,7 +2,7 @@ SADL Command-Line Interface
 
 Use the following command to execute the SADL Command-Line Interface:
 
-ExecuteCommand.sh [Force Overwrite Project flag, optional] [Import Directory Flag, mandatory] [SADL CLI Configuration flag, optional] [Command Flags, mandatory]
+ExecuteCommand.sh [Force Overwrite Project flag, optional] [Import Directory Flag, mandatory] [SADL CLI Configuration flag, optional] [Command Flags, optional]
 
 Force Overwrite Project Flag, Optional:
 -force
@@ -13,7 +13,7 @@ Import Directory Flag, Must be used:
 SADL CLI Configuration Flag, Optional:
 -config=<Path to SADL Configuration XML>
 
-Command Flags, one or more must be used:
+Command Flags, Optional:
 -infer=<Name of SADL file to run inference on>
 
 Notes:

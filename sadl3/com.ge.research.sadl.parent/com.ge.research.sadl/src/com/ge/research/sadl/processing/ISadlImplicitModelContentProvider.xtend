@@ -168,7 +168,7 @@ interface ISadlImplicitModelContentProvider {
 
 		override getContent() {
 			return fragmentProviders.fold(new StringBuilder(DEFAULT_CONTENT), [ sb, provider |
-				sb.append(lineSeparator.repeat(2)).append(provider.fragmentToAppend)
+				sb.append(lineSeparator).append(lineSeparator).append(provider.fragmentToAppend)
 			]).toString;
 		}
 
