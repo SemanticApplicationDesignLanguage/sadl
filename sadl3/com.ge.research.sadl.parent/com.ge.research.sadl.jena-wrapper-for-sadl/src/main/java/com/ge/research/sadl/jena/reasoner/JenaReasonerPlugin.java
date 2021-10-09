@@ -2853,7 +2853,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 
-	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException {
+	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException, ConfigurationException {
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e1) {
