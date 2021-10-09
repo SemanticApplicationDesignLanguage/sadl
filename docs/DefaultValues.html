@@ -1008,6 +1008,96 @@
         there are no more rule files to process.</li>
       <li>The final Jena InfModel is then used to run queries, tests, etc.</li>
     </ol>
-    <p></p>
+    <p>Note: the Jena Augmented Reasoner method getInferredModel(false), which
+      returns the deductions model, will only compute a deductions model if
+      there are, in fact, staged rules, if the configuration setting to enable
+      derivations is set to "Shallow" or "Deep". When working in the SADL IDE,
+      this can be set in the reasoner settings accessible from the project
+      properties menu. When not in the SADL IDE, a call to initialize the
+      reasoner with an in-memory OntModel by calling </p>
+    <p style="margin-bottom: 0in; line-height: 100%"> <font color="#000000"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">&nbsp;&nbsp;&nbsp;
+            <em> initializeReasoner(Object </em></font></font></font><em><font
+          color="#6a3e3e"><font face="Monospace"><font style="font-size: 10pt" size="2">kbase</font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+              String </font></font></font><font color="#6a3e3e"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">modelName</font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+              String </font></font></font><font color="#6a3e3e"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">rules</font></font></font><font color="#000000"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">,
+              List&lt;ConfigurationItem</font></font><font color="#6a3e3e"><font
+              face="Monospace"><font style="font-size: 10pt" size="2">preferences</font></font></font><font
+            color="#000000"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">).</font></font></font></font></em></p>
+    <font color="#000000"> &nbsp;&nbsp;&nbsp; <br>
+      <p>The Java code to create the required preference to pass in as the last
+        argument should be of this form:</p>
+    </font>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <em><font color="#7f0055"><font face="Monospace"><font style="font-size: 10pt"
+              size="2"><b>import</b></font></font></font><font color="#000000"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">
+              com.ge.research.sadl.reasoner.ConfigurationItem;</font></font></font><br>
+        ...<br>
+      </em></p>
+    <em> </em>
+    <div style="margin-left: 40px;"> </div>
+    <em> </em>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><em><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">List&lt;ConfigurationItem&gt;
+              </font></font></font><font color="#6a3e3e"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">preferences</font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+              = </font></font></font><font color="#7f0055"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><b>new</b></font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+              ArrayList&lt;ConfigurationItem&gt;();<br>
+              String[] </font></font></font><font color="#6a3e3e"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">catHier</font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+              = </font></font></font><font color="#7f0055"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><b>new</b></font></font></font><font
+          color="#6a3e3e"><font face="Monospace"><font style="font-size: 10pt" size="2">
+              String[1];<br>
+              catHier</font></font></font><font color="#000000"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">[0] = </font></font></font><font
+          color="#6a3e3e"><font face="Monospace"><font style="font-size: 10pt" size="2">reasoner</font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">.getReasonerFamily();<br>
+              ConfigurationItem </font></font></font><font color="#6a3e3e"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">ci</font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+              = </font></font></font><font color="#7f0055"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><b>new</b></font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+              ConfigurationItem(</font></font></font><font color="#6a3e3e"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">catHier</font></font></font><font
+          color="#6a3e3e"><font face="Monospace"><font style="font-size: 10pt" size="2">);<br>
+              ci</font></font></font><font color="#000000"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">.addNameValuePair(</font></font></font><font
+          color="#6a3e3e"><font face="Monospace"><font style="font-size: 10pt" size="2">ci</font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font><font
+          color="#7f0055"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>new</b></font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">
+              NameValuePair(</font></font></font><font color="#2a00ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">"pDerivationLogging"</font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+            </font></font></font><font color="#2a00ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">"Deep"</font></font></font><font
+          color="#6a3e3e"><font face="Monospace"><font style="font-size: 10pt" size="2">));&nbsp;
+              // could also be "Shallow"<br>
+              preferences</font></font></font><font color="#000000"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">.add(</font></font></font><font color="#6a3e3e"><font
+            face="Monospace"><font style="font-size: 10pt" size="2">ci</font></font></font><font
+          color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">);</font></font></font></em></p>
+    <p style="margin-bottom: 0in; line-height: 100%;" align="left"><em><font color="#000000"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"><br>
+            </font></font></font></em></p>
+    <font color="#000000">
+      <p> </p>
+      <ol>
+      </ol>
+      <p></p>
+    </font>
   </body>
 </html>
