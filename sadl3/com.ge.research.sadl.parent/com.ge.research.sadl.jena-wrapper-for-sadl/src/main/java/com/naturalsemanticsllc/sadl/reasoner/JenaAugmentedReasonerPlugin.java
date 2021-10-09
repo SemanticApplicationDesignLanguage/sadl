@@ -207,6 +207,22 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		return reasoner;
 	}
 
+	@Override
+	public Model getInferredModel(boolean deductionsOnly) throws ConfigurationException {
+		prepareInfModel();
+		if (deductionsOnly) {
+			if (deductionsModel != null) {
+				return deductionsModel;
+			}
+			else {
+				throw new ConfigurationException("Deductions model not available. Derivations must be enabled in the configuration to capture a deductions model.");
+			}
+		}
+		else {
+			return infModel;
+		}
+	}
+	
 	/**
 	 * Method to count the number of rules loaded from rule files
 	 * @return
@@ -375,24 +391,21 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 	}
 
 	@Override
-	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException {
+	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException, ConfigurationException {
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		OntModel m;
-		if (deductionsOnly) {
-			if (deductionsModel == null) {
-				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), ((InfModel) infModel).getDeductionsModel());				
-			}
-			else {
-				m = deductionsModel;
-			}
+		 
+		Model im = getInferredModel(deductionsOnly);
+		OntModel m = null;
+		if (im instanceof OntModel) {
+			m = (OntModel)im;
 		}
 		else {
-			m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), infModel);
+			m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), im);
 		}
 
 		if (m != null) {

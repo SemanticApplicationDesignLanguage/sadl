@@ -361,7 +361,7 @@ public interface IReasoner {
 	 * @return
 	 * @throws
 	 */
-	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException;
+	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException, ConfigurationException;
 
 	/**
 	 * Convert a Java object value to a String. This assumes that the Object is a type that can be converted to a TypedLiteral 
