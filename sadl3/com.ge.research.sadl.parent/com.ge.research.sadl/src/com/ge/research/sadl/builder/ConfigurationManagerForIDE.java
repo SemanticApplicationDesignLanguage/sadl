@@ -91,7 +91,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	
 	public static class Provider implements javax.inject.Provider<IConfigurationManagerForIDE> {
 		private String modelFolder;
-		private String repoType = ConfigurationManagerForIDE.getOWLFormat();
+		private String repoType = ConfigurationManagerForIDE.getPersistenceFormatFromPreferences();
 
 		public void setModelFolder(String modelFolder) {
 			this.modelFolder = modelFolder;
@@ -467,13 +467,10 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				bChanged = true;
 			}
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (bChanged) {
@@ -535,10 +532,11 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 
 
 	/**
-	 * Call this method to get the repository type (format) from preferences
+	 * Call this method to get the repository type (format) from preferences.
+	 * This method used to be called getOWLFormat
 	 * @return
 	 */
-	public static String getOWLFormat() {
+	public static String getPersistenceFormatFromPreferences() {
 		IPreferencesService service = Platform.isRunning() ? Platform.getPreferencesService() : null;
 		if (service != null) {
 			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT, null);
@@ -575,10 +573,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				}
 			}
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
@@ -635,7 +631,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 					return aFile.getCanonicalPath();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -872,7 +867,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		OntModel theModel = null;
 		String altUrl = getAltUrlFromPublicUri(publicUri);
 		if (getRepoType() == null) {
-	    	setRepoType(ConfigurationManagerForIDE.getOWLFormat());	
+	    	setRepoType(ConfigurationManagerForIDE.getPersistenceFormatFromPreferences());	
 		}
 		if (getRepoType() != null && getRepoType().equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
 			try {
@@ -899,6 +894,21 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return theModel;
 	}
 
+//	
+////	@Override
+//	public OntModel getOntModel(String publicUri, String serializedGraph, Scope scope, String format) {
+//		Model m = ModelFactory.createDefaultModel()
+//		        .read(new StringInputStream(serializedGraph), publicUri, format);
+//    	if (m instanceof OntModel) {
+//    		return (OntModel)m;
+//    	}
+//    	else {
+//    		getOntModelSpec(null).setImportModelGetter(new SadlJenaModelGetter(this, null));
+//     		return ModelFactory.createOntologyModel(getOntModelSpec(null), m);
+//    	}
+//	}
+//	
+	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -947,10 +957,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 						}
 					}
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -1031,7 +1039,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 					sbff.delete();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -1060,7 +1067,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -1073,7 +1079,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			FileInputStream is = new FileInputStream(new File(owlFilename));
 			return initOntModel(is, getOwlFormatFromFile(owlFilename));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
@@ -1094,7 +1099,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			FileInputStream is = new FileInputStream(new File(owlFilename));
 			return initOntModel(is, getOwlFormatFromFile(owlFilename), loadImports);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
@@ -1219,7 +1223,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 							}
 						}
 					} catch (MalformedURLException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -1230,7 +1233,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				super.saveOntPolicyFile();
 			}
 		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}
@@ -1247,7 +1249,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			}
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;

@@ -38,6 +38,7 @@ import java.util.Map;
 
 import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
@@ -51,6 +52,7 @@ import org.apache.jena.reasoner.rulesys.Rule.ParserException;
 import org.apache.jena.shared.RulesetNotFoundException;
 
 import com.ge.research.sadl.jena.reasoner.JenaReasonerPlugin;
+import com.ge.research.sadl.jena.reasoner.SadlReadFailureHandler;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.reasoner.ConfigurationException;
@@ -108,7 +110,7 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		}
 				
 		try {
-			if (!configurationMgr.getSadlModelGetter(null).modelExists(getModelName())) {
+			if (tbox != null && !configurationMgr.getSadlModelGetter(repoType).modelExists(getModelName())) {
 				if (tbox.equals(getModelName())) {
 					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
 				}
@@ -132,7 +134,7 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 
 		logger.debug("JenaReasonerPlugin.initializeReasoner, tbox = "+tbox);
 		try {
-			if (!tbox.startsWith("file:") && !tbox.startsWith("http:")) {
+			if (tbox != null && !tbox.startsWith("file:") && !tbox.startsWith("http:")) {
 				//assume local file
 				SadlUtils su = new SadlUtils();
 				tbox = su.fileNameToFileUrl(tbox);
@@ -143,9 +145,34 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 			if (!validateFormat(format)) {
 				throw new ConfigurationException("Format '" + format + "' is not supported by reasoner '" + getConfigurationCategory() + "'.");
 			}
-			schemaModel = configurationMgr.getSadlModelGetter(format).getOntModel(getModelName());	
-			schemaModel.getDocumentManager().setProcessImports(true);
-			schemaModel.loadImports();
+			if (format.equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
+				schemaModel = configurationMgr.getSadlModelGetter(format).getOntModel(tbox);	
+				schemaModel.getDocumentManager().setProcessImports(true);
+				schemaModel.loadImports();
+			}
+			else {
+				if (tbox != null && tbox.endsWith(".TDB/")) {
+					// this is a cached inferred TDB model
+					schemaModel = configurationMgr.getSadlModelGetter(format).getOntModel(tbox);
+					schemaModelIsCachedInferredModel = true;
+					return null;
+				}
+				else {
+					if (tbox != null) {
+						schemaModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
+					}
+					else if (getPreLoadedModel() != null) {
+						schemaModel = getPreLoadedModel();
+					}
+					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
+					schemaModel.getDocumentManager().setProcessImports(true);
+					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
+					schemaModel.getSpecification().setImportModelGetter(configurationMgr.getSadlModelGetterPutter(format));
+					if (tbox != null) {
+						schemaModel.read(tbox, SadlPersistenceFormat.getRDFFormat(format).toString());
+					}
+				}
+			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}	
@@ -171,9 +198,13 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "read " + numRules + " rules from file(s)", t3 - t2));
 		}
 		
-		// load only first stage rules at this point
+		// load only first stage rules at this point (and any preloaded rules
 		lastRuleStageLoaded = 0;
-		reasoner = createReasonerAndLoadRules(ruleListMap.get(lastRuleStageLoaded), 0);
+		List<Rule> stage0Rules = ruleListMap.get(lastRuleStageLoaded);
+		if (getPreLoadedRules() != null) {
+			stage0Rules.addAll(getPreLoadedRules());
+		}
+		reasoner = createReasonerAndLoadRules(stage0Rules, 0);
 		return reasoner;
 	}
 

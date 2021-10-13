@@ -41,7 +41,7 @@ class SadlIdeSemanticHighlightingCalculator implements ISemanticHighlightingCalc
 		val CLASS_STYLE = CLASS_ID;
 		val INSTANCE_STYLE = INSTANCE_ID;
 		val STRUCTURE_NAME_STYLE = STRUCTURE_NAME_ID;
-		val VARIABLE_STYLE = VARIABLE_ID;
+		val VARIABLE_STYLE = VARIABLE_DECL_ID;
 		val DATA_PROPERTY_STYLE = DATA_PROPERTY_ID;
 		val OBJECT_PROPERTY_STYLE = OBJECT_PROPERTY_ID;
 		val ANNOTATION_PROPERTY_STYLE = ANNOTATION_PROPERTY_ID;
@@ -122,7 +122,7 @@ class SadlIdeSemanticHighlightingCalculator implements ISemanticHighlightingCalc
 			switch v {
 				Name: {
 					// check what getName returns. If it returns itself or something of type Name
-					var highlightingId = VARIABLE_ID
+					var highlightingId = VARIABLE_DECL_ID
 					if (v.eContainer instanceof QueryStatement) {
 						highlightingId = DEFAULT_ID
 					} else if (v.function) {
@@ -130,6 +130,10 @@ class SadlIdeSemanticHighlightingCalculator implements ISemanticHighlightingCalc
 					}
 					var node = NodeModelUtils.findNodesForFeature(element, SADLPackage.Literals.SADL_RESOURCE__NAME).
 						head
+					var decl = declarationExtensions.getDeclaration(v.name)
+					if (!decl.equals(element)) {
+						highlightingId = VARIABLE_REF_ID
+					}
 					acceptor.addPosition(node.offset, node.length, highlightingId)
 				}
 				SadlResource: {
@@ -214,7 +218,7 @@ class SadlIdeSemanticHighlightingCalculator implements ISemanticHighlightingCalc
 				return FUNCTION_NAME_ID
 			}
 			default: {
-				return VARIABLE_ID
+				return VARIABLE_DECL_ID
 			}
 		}
 	}
