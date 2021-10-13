@@ -91,7 +91,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	
 	public static class Provider implements javax.inject.Provider<IConfigurationManagerForIDE> {
 		private String modelFolder;
-		private String repoType = ConfigurationManagerForIDE.getOWLFormat();
+		private String repoType = ConfigurationManagerForIDE.getPersistenceFormatFromPreferences();
 
 		public void setModelFolder(String modelFolder) {
 			this.modelFolder = modelFolder;
@@ -532,10 +532,11 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 
 
 	/**
-	 * Call this method to get the repository type (format) from preferences
+	 * Call this method to get the repository type (format) from preferences.
+	 * This method used to be called getOWLFormat
 	 * @return
 	 */
-	public static String getOWLFormat() {
+	public static String getPersistenceFormatFromPreferences() {
 		IPreferencesService service = Platform.isRunning() ? Platform.getPreferencesService() : null;
 		if (service != null) {
 			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT, null);
@@ -866,7 +867,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		OntModel theModel = null;
 		String altUrl = getAltUrlFromPublicUri(publicUri);
 		if (getRepoType() == null) {
-	    	setRepoType(ConfigurationManagerForIDE.getOWLFormat());	
+	    	setRepoType(ConfigurationManagerForIDE.getPersistenceFormatFromPreferences());	
 		}
 		if (getRepoType() != null && getRepoType().equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
 			try {
@@ -893,6 +894,21 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return theModel;
 	}
 
+//	
+////	@Override
+//	public OntModel getOntModel(String publicUri, String serializedGraph, Scope scope, String format) {
+//		Model m = ModelFactory.createDefaultModel()
+//		        .read(new StringInputStream(serializedGraph), publicUri, format);
+//    	if (m instanceof OntModel) {
+//    		return (OntModel)m;
+//    	}
+//    	else {
+//    		getOntModelSpec(null).setImportModelGetter(new SadlJenaModelGetter(this, null));
+//     		return ModelFactory.createOntologyModel(getOntModelSpec(null), m);
+//    	}
+//	}
+//	
+	
 	/**
 	 * {@inheritDoc}
 	 */
