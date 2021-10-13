@@ -22,7 +22,7 @@ public interface ISadlModelGetterPutter extends ISadlModelGetter {
 	 * @throws IOException 
 	 * @return--true if successfully saved else false
 	 */
-	public abstract boolean saveModel(Model m, String modelNamespace, String publicUri, String OwlFileName, String format) throws TranslationException, IOException;
+	public abstract boolean saveModel(Model m, String modelNamespace, String publicUri, String OwlFileName, String format) throws TranslationException, IOException, MalformedURLException;
 
 	/**
 	 * Model to remove a Jena model from the persistent repository

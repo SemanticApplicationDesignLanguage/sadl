@@ -685,12 +685,12 @@ public class CsvImportOperation extends WorkspaceModifyOperation {
         		}
         	} while (cont != null);
         	String modelFolder = projectUri.getRawPath() + File.separator + ResourceManager.OWLDIR;
-        	IConfigurationManager cmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, ConfigurationManagerForIDE.getOWLFormat());;
+        	IConfigurationManager cmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, ConfigurationManagerForIDE.getPersistenceFormatFromPreferences());;
 			SadlUtils su = new SadlUtils();
         	if (cmgr == null) {
         		String modfldr = su.fileUrlToFileName(modelFolder);
         		owlOutputFile = targetPath.toPortableString();
-        		cmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, ConfigurationManagerForIDE.getOWLFormat());  
+        		cmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, ConfigurationManagerForIDE.getPersistenceFormatFromPreferences());  
         	}
         	csvImporter = new CsvImporter(cmgr);
         	if (debugOutput) {

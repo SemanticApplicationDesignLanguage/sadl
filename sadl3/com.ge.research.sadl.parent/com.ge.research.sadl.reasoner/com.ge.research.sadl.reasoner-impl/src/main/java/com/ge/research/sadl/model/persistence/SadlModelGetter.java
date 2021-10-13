@@ -1,5 +1,6 @@
 package com.ge.research.sadl.model.persistence;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import com.ge.research.sadl.model.persistence.ISadlModelGetter;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.TranslationException;
+
 
 abstract public class SadlModelGetter implements ModelGetter, ISadlModelGetter {
 	protected static final Logger logger = LoggerFactory.getLogger(SadlModelGetter.class);
@@ -94,9 +96,21 @@ abstract public class SadlModelGetter implements ModelGetter, ISadlModelGetter {
 			getConfigMgr().getOntModelSpec(null).setImportModelGetter(this);
 			return ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
 		}
-	
 	}
 
+	@Override
+	public OntModel getOntModel(String publicUri, String serializedGraph, String format) {
+		Model m = ModelFactory.createDefaultModel().read(new ByteArrayInputStream(serializedGraph.getBytes()), publicUri, format);
+    	if (m instanceof OntModel) {
+    		return (OntModel)m;
+    	}
+    	else {
+    		getConfigMgr().getOntModelSpec(null).setImportModelGetter(this);
+     		return ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
+    	}
+	}
+	
+	
 	@Override
 	public HashMap<String, Map> getImportHierarchy(String modelUri) throws ConfigurationException {
 		String modelUrl = getConfigMgr().getAltUrlFromPublicUri(modelUri);

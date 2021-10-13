@@ -75,6 +75,8 @@ import com.ge.research.sadl.model.persistence.ISadlModelGetter;
 import com.ge.research.sadl.model.persistence.ISadlModelGetterPutter;
 import com.ge.research.sadl.model.persistence.SadlJenaFileGetter;
 import com.ge.research.sadl.model.persistence.SadlJenaFileGetterPutter;
+import com.ge.research.sadl.model.persistence.SadlJenaSemTKGetter;
+import com.ge.research.sadl.model.persistence.SadlJenaSemTKGetterPutter;
 import com.ge.research.sadl.model.persistence.SadlJenaTDBGetter;
 import com.ge.research.sadl.model.persistence.SadlJenaTDBGetterPutter;
 import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
@@ -1868,11 +1870,15 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @throws IOException
 	 */
 	private ISadlModelGetter getNewSadlModelGetterForFormat(String format) throws TranslationException, IOException {
-		if (SadlPersistenceFormat.getRDFFormat(format) != SadlPersistenceFormat.TDB_PseudoFormat) {
+		if (SadlPersistenceFormat.getRDFFormat(format) != SadlPersistenceFormat.TDB_PseudoFormat &&
+				SadlPersistenceFormat.getRDFFormat(format) != SadlPersistenceFormat.SEMTK_PseudoFormat) {
 			return new SadlJenaFileGetter(this, format);
 		}
 		else if (format.equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
 			return new SadlJenaTDBGetter(this, format);
+		}
+		else if (format.equals(SadlPersistenceFormat.SEMTK_FORMAT)) {
+			return new SadlJenaSemTKGetter(this, format);
 		}
 		else {
 			throw new TranslationException("Persistence format " + format + " not yet implemented");
@@ -1908,11 +1914,15 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @throws IOException
 	 */
 	private ISadlModelGetterPutter getNewSadlModelGetterPutterForFormat(String format) throws TranslationException, IOException {
-		if (SadlPersistenceFormat.getRDFFormat(format) != SadlPersistenceFormat.TDB_PseudoFormat) {
+		if (SadlPersistenceFormat.getRDFFormat(format) != SadlPersistenceFormat.TDB_PseudoFormat &&
+				SadlPersistenceFormat.getRDFFormat(format) != SadlPersistenceFormat.SEMTK_PseudoFormat) {
 			return new SadlJenaFileGetterPutter(this, format);
 		}
 		else if (format.equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
 			return new SadlJenaTDBGetterPutter(this, format);
+		}
+		else if (format.equals(SadlPersistenceFormat.SEMTK_FORMAT)) {
+			return new SadlJenaSemTKGetterPutter(this, format);
 		}
 		else {
 			throw new TranslationException("Persistence format " + format + " not yet implemented");

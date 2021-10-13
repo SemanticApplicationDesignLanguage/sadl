@@ -40,7 +40,10 @@ public class SadlPreferences {
 	public static final PreferenceKey TRIX = new PreferenceKey(SadlPersistenceFormat.TRIX_FORMAT, "");
 	public static final PreferenceKey RDF_BINARY = new PreferenceKey(SadlPersistenceFormat.RDF_BINARY_FORMAT, "");
 	public static final PreferenceKey JENA_TDB = new PreferenceKey(SadlPersistenceFormat.JENA_TDB_FORMAT, "");
-	
+	public static final PreferenceKey SEMTK = new PreferenceKey(SadlPersistenceFormat.SEMTK_FORMAT, "");
+	public static final PreferenceKey SEMTK_ENDPOINT = new PreferenceKey("endpoint", "http://leb1acdev.hpc.ge.com:3030");
+	public static final PreferenceKey SEMTK_STORE_TYPE = new PreferenceKey("storeType", "fuseki");
+
 	public static final PreferenceKey MODEL_NAMESPACES = new PreferenceKey("ns", "");
 	public static final PreferenceKey SADL_FILE_NAMES = new PreferenceKey("fn", "");
 	public static final PreferenceKey PREFIXES_ONLY_AS_NEEDED = new PreferenceKey("prefixesOnlyAsNeeded", "");
@@ -83,6 +86,9 @@ public class SadlPreferences {
 			TRIX,
 			RDF_BINARY,
 			JENA_TDB,
+			SEMTK,
+			SEMTK_ENDPOINT,
+			SEMTK_STORE_TYPE,
 			MODEL_NAMESPACES,
 			SADL_FILE_NAMES,
 			PREFIXES_ONLY_AS_NEEDED,

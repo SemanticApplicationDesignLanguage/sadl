@@ -19,7 +19,7 @@ public class SadlJenaFileGetter extends SadlModelGetter {
 		super(mgr, fmt);
 	}
 	
-	@Override
+//	@Override
 	public Model getModel(String uri) {
 		if (getOriginalModelGetter() != null) {
     		Model m = getOriginalModelGetter().getModel(uri);
@@ -34,7 +34,7 @@ public class SadlJenaFileGetter extends SadlModelGetter {
 		return null;
 	}
 
-	@Override
+//	@Override
 	public Model getModel(String uri, ModelReader loadIfAbsent) {
 		Model m = null;
     	if (loadIfAbsent != null) {
@@ -46,20 +46,19 @@ public class SadlJenaFileGetter extends SadlModelGetter {
         return m;
 	}
 
-	@Override
-	public OntModel getOntModel(String uri) {
-		Model m = getModel(uri);
-		if (m instanceof OntModel) {
-			return (OntModel)m;
-		}
-		else {
-			getConfigMgr().getOntModelSpec(null).setImportModelGetter(this);
-			return ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
-		}
-	
-	}
+//	@Override
+//	public OntModel getOntModel(String uri) {
+//		Model m = getModel(uri);
+//		if (m instanceof OntModel) {
+//			return (OntModel)m;
+//		}
+//		else {
+//			getConfigMgr().getOntModelSpec(null).setImportModelGetter(this);
+//			return ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
+//		}
+//	}
 
-	@Override
+//	@Override
 	public boolean modelExists(String namespace) throws ConfigurationException, MalformedURLException {
 		String publicUri;
 		if (namespace.endsWith("#")) {
@@ -80,7 +79,7 @@ public class SadlJenaFileGetter extends SadlModelGetter {
 		return false;
 	}
 
-	@Override
+//	@Override
 	public List<String> getAvailableModelNames() {
 		// TODO Auto-generated method stub
 		return null;

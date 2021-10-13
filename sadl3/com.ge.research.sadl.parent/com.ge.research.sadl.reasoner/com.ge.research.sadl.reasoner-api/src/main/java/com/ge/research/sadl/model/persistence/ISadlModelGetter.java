@@ -76,6 +76,15 @@ public interface ISadlModelGetter extends ModelGetter{
 	public abstract OntModel getOntModel(String uri);
 
 	/**
+	 * Method to get an OntModel for given public URI from a model as string and format
+	 * @param publicUri
+	 * @param serializedGraph
+	 * @param format
+	 * @return
+	 */
+	public abstract OntModel getOntModel(String publicUri, String serializedGraph, String format);
+	
+	/**
 	 * Method to get a hierarchical representation of the imports of this model
 	 * @param modelUri
 	 * @return

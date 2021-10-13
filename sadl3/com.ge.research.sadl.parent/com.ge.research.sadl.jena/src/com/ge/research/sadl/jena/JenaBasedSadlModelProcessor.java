@@ -550,7 +550,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			List<java.net.URI> projectDependencies = projectHelper.getReferencedProjectURIs(resource);
 			getConfigMgr().addProjectDependencies(projectDependencies);
 		} catch (Exception e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
 		
@@ -608,10 +607,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									queryInst.addProperty(RDFS.isDefinedBy, queryLit);
 									namedQueryList.add(queryInst.getURI());
 								} catch (TranslationException e) {
-									// TODO Auto-generated catch block
 									e.printStackTrace();
 								} catch (InvalidNameException e) {
-									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
 							}
@@ -619,7 +616,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 			} catch (ConfigurationException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
@@ -770,7 +766,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private void generateOwlFile(IFileSystemAccess2 fsa, String modelFolder, String owlFN, Model model, String modelName, String modelAlias, String format) throws TranslationException, IOException {
 		if (isBinary(format)) {
 			// IFileSystemAccess2.generateFile doesn't appear to handle binary files.
-			String fs = modelFolder + "/" + owlFN;
+//			String fs = modelFolder + "/" + owlFN;
 //	         writeOwlModelWithRDFDataMgr(model, format, fs);
 			getConfigMgr().getSadlModelGetterPutter(format).saveModel(model, modelName, modelName, owlFN, format);
 		}
@@ -786,11 +782,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return true;
 		} else
 			try {
-				if (SadlPersistenceFormat.getRDFFormat(format).equals(SadlPersistenceFormat.TDB_PseudoFormat) ) {
+				if (SadlPersistenceFormat.getRDFFormat(format).equals(SadlPersistenceFormat.TDB_PseudoFormat) 
+					|| SadlPersistenceFormat.getRDFFormat(format).equals(SadlPersistenceFormat.SEMTK_PseudoFormat)) {
 					return true;
 				}
 			} catch (TranslationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		return false;
@@ -1689,7 +1685,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				getModelValidator().clearImpliedPropertiesUsed();
 			}
 		} catch (TranslationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		try {
@@ -1774,7 +1769,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //		} catch (TranslationException e) {
 //			e.printStackTrace();
 //		} catch (CircularDefinitionException e) {
-//			// TODO Auto-generated catch block
 //			e.printStackTrace();
 		} catch (Throwable t) {
 			if (logger.isDebugEnabled()) {
@@ -1878,7 +1872,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} catch (Throwable t) {
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -2138,7 +2131,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				importPrefix = getConfigMgr(getCurrentResource(), getOwlModelFormat(getProcessorContext()))
 						.getGlobalPrefix(importUri);
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -3061,18 +3053,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									}
 								}
 							} catch (DontTypeCheckException e1) {
-								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							} catch (InvalidTypeException e1) {
-								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
 							// }
 							catch (TranslationException e2) {
-								// TODO Auto-generated catch block
 								e2.printStackTrace();
 							} catch (InvalidNameException e1) {
-								// TODO Auto-generated catch block
 								e1.printStackTrace();
 							}
 						}
@@ -3260,31 +3248,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					} catch (DontTypeCheckException e1) {
 						// OK to not type check
 					} catch (CircularDefinitionException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					} catch (URISyntaxException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					} catch (IOException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					} catch (ConfigurationException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					} catch (CircularDependencyException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (PropertyWithoutRangeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvalidNameException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (TranslationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvalidTypeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					if (!(var instanceof VariableNode)) {
@@ -3346,22 +3325,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							expr);
 				}
 			} catch (InvalidNameException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvalidTypeException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (TranslationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (PrefixNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else if (expr instanceof AskExpression) {
@@ -3378,32 +3351,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					int i = 0;
 				}
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (DontTypeCheckException e) {
 				// OK to not be able to type check
 			} catch (CircularDefinitionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (CircularDependencyException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (PropertyWithoutRangeException e) {
 				addTypeCheckingError(e.getMessage(), whexpr);
 			} catch (InvalidNameException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (TranslationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvalidTypeException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -3411,10 +3376,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		try {
 			pattern = postProcessTranslationResult(processExpression(whexpr));
 		} catch (InvalidNameException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (InvalidTypeException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (TranslationException e1) {
 			addError(e1.getMessage(), whexpr);
@@ -3534,7 +3497,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 			} catch (ConfigurationException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
@@ -3855,7 +3817,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							addError("Failed to create a SADL typed list for units", context);
 						}
 					} catch (JenaProcessorException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -3916,7 +3877,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						try {
 							gpes = IntermediateFormTranslator.junctionToList((Junction) gpe);
 						} catch (TranslationException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
@@ -3944,10 +3904,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //										ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI), obj.getName());
 										retNodes.add(obj);
 									} catch (TranslationException e) {
-										// TODO Auto-generated catch block
 										e.printStackTrace();
 									} catch (InvalidNameException e) {
-										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
 									getCurrentEquation().setReturnNodes(retNodes);
@@ -4013,13 +3971,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				gpes = IntermediateFormTranslator.junctionToList((Junction) ((List<?>)gpesOut).get(0));
 			}
 		} catch (TranslationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidNameException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidTypeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		for (GraphPatternElement gpe2 : gpes) {
@@ -4189,10 +4144,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						objrsrc = gpVarObject = getOrCreateGPVariableNode((VariableNode) obj, typeNode, true, false, context);
 						ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI), obj.getName());
 					} catch (TranslationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvalidNameException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -4558,7 +4511,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				modelErrorsToOutput(getCurrentResource(), errlist, true);
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		setTarget(null);
@@ -4929,7 +4881,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 			}
 		} catch (CircularDefinitionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -5141,27 +5092,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 					}
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ConfigurationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (DontTypeCheckException e) {
-					// TODO Auto-generated catch block
-	//				e.printStackTrace();
 				} catch (CircularDefinitionException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (CircularDependencyException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (PropertyWithoutRangeException e) {
 					addPropertyWithoutRangeError(leftVariableDefn, null, e);
 				} catch (PrefixNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				if (leftMultiVarIndex < variableNames.size() - 1) {
@@ -5221,29 +5164,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					return createBinaryBuiltin(expr.getOp(), rightVar, lobj);
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (PrefixNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (DontTypeCheckException e) {
 				if (!e.getMessage().startsWith("OK")) {
 					e.printStackTrace();
 				}
 			} catch (CircularDefinitionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (CircularDependencyException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (PropertyWithoutRangeException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -5407,7 +5343,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected boolean replaceVariable(TripleElement triple, VariableNode var)
 			throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException,
 			TranslationException, ConfigurationException {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -5746,12 +5681,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 										
 									}
 								} catch (CircularDependencyException e) {
-									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
 							}
 						} catch (CircularDependencyException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					
@@ -5784,7 +5717,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						try {
 							applyRestrictionToVariableType((VariableNode)lobj, (NamedNode) robj, rexpr);
 						} catch (CircularDependencyException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
@@ -5816,7 +5748,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							try {
 								applyRestrictionToVariableType((VariableNode)lobj, (NamedNode) robj, rexpr);
 							} catch (CircularDependencyException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
@@ -6697,7 +6628,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								}
 							}
 						} catch (DontTypeCheckException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
@@ -6739,7 +6669,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //								try {
 //									pred = getOrCreateDatatypeProperty(prnode.getURI());
 //								} catch (JenaProcessorException e) {
-//									// TODO Auto-generated catch block
 //									e.printStackTrace();
 //								}
 //							} else if (propType.equals(NodeType.PropertyNode)) {
@@ -6872,25 +6801,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						return;
 					}
 				} catch (DontTypeCheckException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (InvalidNameException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (URISyntaxException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ConfigurationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (CircularDefinitionException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (PropertyWithoutRangeException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} else if (predNode instanceof VariableNode) {
@@ -6935,25 +6857,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							return;
 						}
 					} catch (DontTypeCheckException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvalidNameException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (URISyntaxException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (ConfigurationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (CircularDefinitionException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (PropertyWithoutRangeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				} else if (predNode instanceof VariableNode) {
@@ -7055,10 +6970,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								throw new TranslationException("Unexpected error: range of property '" + ((NamedNode)pfpn).toFullyQualifiedString() + "' is not a named node (unions are not yet handled)");
 							}
 						} catch (DontTypeCheckException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} catch (InvalidNameException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					} else {
@@ -7092,25 +7005,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							}
 						}
 					} catch (InvalidNameException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (URISyntaxException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (ConfigurationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (DontTypeCheckException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (CircularDefinitionException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (PropertyWithoutRangeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -7344,7 +7250,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								}	
 							}
 						} catch (JenaProcessorException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
@@ -7373,7 +7278,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								}
 							}
 						} catch (JenaProcessorException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
@@ -7715,7 +7619,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						return typenode;
 					}
 				} catch (CircularDefinitionException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				VariableNode var = null;
@@ -7730,22 +7633,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 						setVarType(var, (NamedNode) typenode, isList((NamedNode) typenode, type), expr);
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (PrefixNotFoundException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvalidNameException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvalidTypeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (ConfigurationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (DontTypeCheckException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -8339,7 +8236,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						} catch (URISyntaxException | IOException | ConfigurationException | DontTypeCheckException
 								| CircularDefinitionException | CircularDependencyException
 								| PropertyWithoutRangeException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 
@@ -8769,19 +8665,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			try {
 				vn = createVariable(expr);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (PrefixNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvalidNameException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvalidTypeException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return vn;
@@ -9059,7 +8950,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		try {
 			validateTripleTypes(subj, pred, obj, tr, expr);
 		} catch (CircularDependencyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return shpTriples;
@@ -9779,7 +9669,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				addError("Declaration of concepts in another namespace not supported", sr);
 			}
 		} catch (CircularDefinitionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -10041,7 +9930,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							addError("Unable to create default for '" + restricted.getURI() + "'", element);
 						}
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						throw new JenaProcessorException(e.getMessage(), e);
 					}
 					return null;
@@ -10068,7 +9956,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							}
 						}
 					} catch (CircularDefinitionException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					OntResource domainrsrc = sadlTypeReferenceToOntResource(domain);
@@ -10515,7 +10402,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					throw new JenaTransactionException("Valid range not identified");
 				}
 			} catch (TranslationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} else {
@@ -11077,7 +10963,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				try {
 					type = getDeclarationExtensions().getOntConceptType(sr);
 				} catch (CircularDefinitionException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				if (type != null && !type.equals(OntConceptType.INSTANCE)) {
@@ -11091,7 +10976,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							differentFrom.add(inst);
 						}
 					} catch (CircularDefinitionException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -11247,13 +11131,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							columns.add(dd);
 							
 						} catch (TranslationException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} catch (InvalidNameException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} catch (InvalidTypeException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						
@@ -11264,7 +11145,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						addColumnDescriptorsToTable(inst, columns, type);
 						setTarget(oldtarget);
 					} catch (TranslationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					setHostEObject(null);
@@ -11403,7 +11283,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							cls = getTheJenaModel().getOntClass(cn.toFullyQualifiedString());
 						}
 					} catch (TranslationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -11739,31 +11618,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							}
 						}
 					} catch (InvalidNameException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (TranslationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (URISyntaxException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (ConfigurationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (DontTypeCheckException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvalidTypeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (CircularDependencyException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (PropertyWithoutRangeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 //					addListValues(inst, cls, (SadlValueList) val);  // This was replaced by the code above because the
@@ -11818,31 +11688,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							addError("Something is wrong with this property; there is confusion about its type", prop);
 						}
 					} catch (DontTypeCheckException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvalidNameException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (TranslationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (URISyntaxException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (ConfigurationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvalidTypeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (CircularDependencyException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (PropertyWithoutRangeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -11862,31 +11723,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						addListValues(lval, lstcls, (SadlValueList) val);
 						addInstancePropertyValue(inst, oprop, lval, val);
 					} catch (InvalidNameException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (TranslationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (URISyntaxException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (ConfigurationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (DontTypeCheckException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (InvalidTypeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (CircularDependencyException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					} catch (PropertyWithoutRangeException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 //					addListValues(inst, cls, (SadlValueList) val);	// This was replaced by the code above because the
@@ -11898,7 +11750,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							
 						}
 					} catch (TranslationException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				} else if (val instanceof SadlExplicitValue) {
@@ -13301,7 +13152,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				nst.applyFacets(facets, presentFacet, fixedFacet, context);
 				type = new SadlXSDDatatype(nst, ns);
 			} catch (InvalidDatatypeFacetException e) {
-				// TODO Auto-generated catch block
 				throw new JenaProcessorException(e.getMessage(), e);
 			}
 		}
@@ -13576,7 +13426,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									try {
 										val = processSadlInstance((SadlInstance) cont);
 									} catch (CircularDefinitionException e) {
-										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
 								} else if (cont instanceof SadlMustBeOneOf) {
@@ -13587,7 +13436,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 													(SadlClassOrPropertyDeclaration) cont);
 											eobjectPreprocessed(cont);
 										} catch (TranslationException e) {
-											// TODO Auto-generated catch block
 											e.printStackTrace();
 										}
 										val = getTheJenaModel().getIndividual(valUri);
@@ -13600,7 +13448,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 													(SadlClassOrPropertyDeclaration) cont);
 											eobjectPreprocessed(cont);
 										} catch (TranslationException e) {
-											// TODO Auto-generated catch block
 											e.printStackTrace();
 										}
 										val = getTheJenaModel().getIndividual(valUri);
@@ -13818,7 +13665,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return getModelValidator().checkDataPropertyValueInRange(getTheJenaModel(), null, prop, val);
 			}
 		} catch (TranslationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return true;
@@ -14061,7 +13907,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	}
 
 	private Model getMappingModel() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -14753,7 +14598,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				getModelValidator().resetValidatorState(element);
 			}
 		} catch (TranslationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -15261,7 +15105,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						continue;
 					}
 				} catch (CircularDefinitionException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				Iterator<SadlExplicitValue> cntntitr = ra.getContents().iterator();
@@ -15289,7 +15132,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							sb.append("\"");
 							cntr++;
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} // getTheJenaModel().createTypedLiteral(annvalue);
 					}
@@ -15509,10 +15351,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 												}
 											}
 										} catch (ConfigurationException e) {
-											// TODO Auto-generated catch block
 											e.printStackTrace();
 										} catch (IOException e) {
-											// TODO Auto-generated catch block
 											e.printStackTrace();
 										}
 									}
@@ -15578,7 +15418,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					addError("Expected a property as controlled variable in a Requirement shall statement", expr);
 				}
 			} catch (CircularDefinitionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

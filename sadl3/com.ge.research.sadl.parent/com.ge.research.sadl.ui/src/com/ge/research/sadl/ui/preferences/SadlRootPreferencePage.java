@@ -51,6 +51,10 @@ import static com.ge.research.sadl.preferences.SadlPreferences.TURTLE_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED;
 import static com.ge.research.sadl.preferences.SadlPreferences.TYPE_CHECKING_WARNING_ONLY;
 import static com.ge.research.sadl.preferences.SadlPreferences.VALIDATE_BEFORE_TEST;
+import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK;
+import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK_ENDPOINT;
+import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK_STORE_TYPE;
+
 
 import java.util.List;
 import java.util.Map;
@@ -170,8 +174,13 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 					{ TRIX.getId(), TRIX.getId() },
 					{ RDF_BINARY.getId(), RDF_BINARY.getId() },		// AWC 7/22/2020: This isn't working. Posted question on Jena users mailing list
 					{ JENA_TDB.getId(), JENA_TDB.getId() },
+					{ SEMTK.getId(), SEMTK.getId() },
 				}, generalSettings));
 
+		addField(new StringFieldEditorExt(SEMTK_STORE_TYPE.getId(), "SemTK triplestore type:", generalSettings));
+		addField(new StringFieldEditorExt(SEMTK_ENDPOINT.getId(), "SemTK endpoint:", generalSettings));
+
+		
 // This is not enabled in V3. Only URIs work.
 //	AWC 1/22/2021		
 //		addField(new RadioGroupFieldEditorExt("importBy", "Show import model list as:", 2,

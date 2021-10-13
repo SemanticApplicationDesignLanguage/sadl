@@ -2328,10 +2328,8 @@ public class JenaReasonerPlugin extends Reasoner{
 				dumpModelToLogger(model, fos);
 				fos.close();
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -2403,7 +2401,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				}
 			}
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
 //			e.printStackTrace();
 			addError(new ModelError(e.getMessage(), ErrorType.ERROR));
 		}
@@ -2429,31 +2426,24 @@ public class JenaReasonerPlugin extends Reasoner{
 				}
 			}
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}
