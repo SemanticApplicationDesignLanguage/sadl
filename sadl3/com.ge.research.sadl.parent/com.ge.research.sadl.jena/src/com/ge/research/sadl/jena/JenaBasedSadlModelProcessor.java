@@ -13140,7 +13140,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			if (lftNode instanceof OntResource && rhtNode instanceof OntResource) {
-				OntClass intersectCls = createIntersectionClass(lftNode, rhtNode);
+				// check to see if either is a subclass of the other. If so give a warning and use only the 
+				// more restrictive of the two
+				OntClass intersectCls = null;
+				if (lftNode.isURIResource() && rhtNode.isURIResource() && 
+						lftNode.asResource().getURI().equals(rhtNode.asResource().getURI())) {
+					addError("Intersection of a class with itself is invalid", sadlTypeRef);
+				} else {
+					try {
+						if (lftNode.canAs(OntClass.class) && 
+								classIsSubclassOfCached(lftNode.as(OntClass.class), (OntResource) rhtNode, true, null)) {
+							addWarning("Left class of intersection is a subclass of right class of intersection--using left class", sadlTypeRef);
+							intersectCls = lftNode.as(OntClass.class);
+						}
+						else if (rhtNode.canAs(OntClass.class) && 
+								classIsSubclassOfCached(rhtNode.as(OntClass.class), (OntResource) lftNode, true, null)) {
+							addWarning("Right class of intersection is a subclass of left class of intersection--using right class", sadlTypeRef);
+							intersectCls = rhtNode.as(OntClass.class);
+						}
+					} catch (CircularDependencyException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				if (intersectCls == null) {
+					intersectCls = createIntersectionClass(lftNode, rhtNode);
+				}
 				return intersectCls;
 			} else if (lftNode instanceof RDFNode && rhtNode instanceof RDFNode) {
 				List<RDFNode> rdfdatatypelist = new ArrayList<RDFNode>();
