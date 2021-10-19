@@ -22,7 +22,7 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.semtk.resultSet.Table;
 import com.ge.research.semtk.sparqlX.FusekiSparqlEndpointInterface;
-import com.ge.research.semtk.sparqlX.SparqlEndpointInterface;
+//import com.ge.research.semtk.sparqlX.SparqlEndpointInterface;
 
 public class SadlJenaSemTKGetter extends SadlModelGetter {
 

@@ -534,7 +534,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 
 
 	/**
-	 * Call this method to get the repository type (format) from preferences
+	 * Call this method to get the repository type (format) from preferences.
+	 * This method used to be called getOWLFormat
 	 * @return
 	 */
 	public static String getPersistenceFormatFromPreferences() {
@@ -936,8 +937,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		}
 		return theModel;
 	}
-	
-	
 	
 	/**
 	 * {@inheritDoc}
