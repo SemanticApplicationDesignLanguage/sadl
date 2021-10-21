@@ -25,4 +25,4 @@ COPY --chown=sadl:sadl target/products/sadl.product/linux/gtk/x86_64/ /app/
 
 USER sadl
 WORKDIR /app
-ENTRYPOINT ["dumb-init", "--", "/app/ExecuteCommand.sh"]
+ENTRYPOINT ["dumb-init", "--", "/app/SADLCli.sh"]

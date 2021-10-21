@@ -19,5 +19,5 @@ export LOG4J_CONFIGURATION_FILE
 # Go to this script's directory
 cd -P -- "$(dirname -- "$0")"
 
-# Run SADL with our command line arguments
-exec ${XRUN} ./eclipse -application com.ge.research.sadl.applications.ExecuteCommand -consolelog -data workspace -noSplash "$@"
+# Run SADLCli with our command line arguments
+exec ${XRUN} ./eclipse -application com.ge.research.sadl.applications.SADLCli -consolelog -data workspace -noSplash "$@"

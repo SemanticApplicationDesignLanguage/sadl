@@ -19,7 +19,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import static java.nio.file.StandardOpenOption.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -265,49 +267,9 @@ public class SadlUtils {
 	 * @throws IOException if problem encountered during write.
 	 */
 	public void stringToFile(File aFile, String contents, boolean writeProtect) throws IOException {
-		if (aFile == null) {
-			throw new IllegalArgumentException("File should not be null.");
-		}
-		if (aFile.exists() && !aFile.isFile()) {
-			throw new IllegalArgumentException("Should not be a directory: " + aFile);
-		}
-		try {
-			if (aFile.exists()) {
-				aFile.delete();
-			}
-			if (!aFile.exists()) {
-				aFile.createNewFile();
-			}
-			if (!aFile.canWrite()) {
-				throw new IllegalArgumentException("File cannot be written: " + aFile);
-			}
-	
-			//declared here only to make visible to finally clause; generic reference
-			Writer output = null;
-			try {
-				//use buffering
-				//FileWriter always assumes default encoding is OK!
-				output = new BufferedWriter( new FileWriter(aFile) );
-				output.write( contents );
-			}
-			finally {
-				//flush and close both "output" and its underlying FileWriter
-				if (output != null) output.close();
-			}
-			if (writeProtect) {
-				try {
-					aFile.setReadOnly();
-				}
-				catch (SecurityException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		catch (Exception e) {
-			System.err.println("Exception writing file '" + aFile.getAbsolutePath() + "'");
-			e.printStackTrace();
-			throw new IOException(e.getMessage(), e);
-		}
+            //AG: the default charset sometimes results in bad dot/svg files on Windows
+            // The UTF_8 charset seems to work fine on both MacOS and Windows.
+            stringToFile(aFile, contents, writeProtect, StandardCharsets.UTF_8);
 	}
 
 	public void stringToFile(File aFile, String contents, boolean writeProtect, Charset charset) throws IOException {
@@ -318,30 +280,11 @@ public class SadlUtils {
 			throw new IllegalArgumentException("Should not be a directory: " + aFile);
 		}
 		try {
-			if (aFile.exists()) {
-				aFile.delete();
-			}
-			if (!aFile.exists()) {
-				aFile.createNewFile();
-			}
-			if (!aFile.canWrite()) {
-				throw new IllegalArgumentException("File cannot be written: " + aFile);
-			}
+			Files.createDirectories(aFile.getParentFile().toPath());
+			Files.deleteIfExists(aFile.toPath());
 	
-			//declared here only to make visible to finally clause; generic reference
-			Writer output = null;
-			try {
-				//use buffering
-				//FileWriter always assumes default encoding is OK!
-				//output = new BufferedWriter( new FileWriter(aFile) );
-				//AG: the default charset sometimes results in bad dot/svg files on Windows
-				// The UTF_8 charset seems to work fine on both MacOS and Windows.
-				output = Files.newBufferedWriter(aFile.toPath(), charset);
-				output.write( contents );
-			}
-			finally {
-				//flush and close both "output" and its underlying FileWriter
-				if (output != null) output.close();
+			try (Writer output = Files.newBufferedWriter(aFile.toPath(), charset, CREATE_NEW)) {
+				output.write(contents);
 			}
 			if (writeProtect) {
 				try {
@@ -353,9 +296,8 @@ public class SadlUtils {
 			}
 		}
 		catch (Exception e) {
-			System.err.println("Exception writing file '" + aFile.getAbsolutePath() + "'");
-			e.printStackTrace();
-			throw new IOException(e.getMessage(), e);
+			String msg = "Exception writing file '" + aFile.getAbsolutePath() + "': " + e;
+			throw new IOException(msg, e);
 		}
 	}
 	
@@ -379,24 +321,8 @@ public class SadlUtils {
 			throw new IllegalArgumentException("Should not be a directory: " + aFile);
 		}
 		try {
-			if (!aFile.exists()) {
-				aFile.createNewFile();
-			}
-			if (!aFile.canWrite()) {
-				throw new IllegalArgumentException("File cannot be written: " + aFile);
-			}
-	
-			//declared here only to make visible to finally clause; generic reference
-			Writer output = null;
-			try {
-				//use buffering
-				//FileWriter always assumes default encoding is OK!
-				output = new BufferedWriter( new FileWriter(aFile, true) );
-				output.write( contents );
-			}
-			finally {
-				//flush and close both "output" and its underlying FileWriter
-				if (output != null) output.close();
+			try (Writer output = Files.newBufferedWriter(aFile.toPath(), StandardCharsets.UTF_8, CREATE, APPEND)) {
+				output.write(contents);
 			}
 			if (writeProtect) {
 				try {
@@ -408,9 +334,8 @@ public class SadlUtils {
 			}
 		}
 		catch (Exception e) {
-			System.err.println("Exception writing file '" + aFile.getAbsolutePath() + "'");
-			e.printStackTrace();
-			throw new IOException(e.getMessage(), e);
+			String msg = "Exception writing file '" + aFile.getAbsolutePath() + "': " + e;
+			throw new IOException(msg, e);
 		}		
 	}
 
