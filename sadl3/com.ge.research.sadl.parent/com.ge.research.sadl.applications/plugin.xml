@@ -2,14 +2,14 @@
 <?eclipse version="3.4"?>
 <plugin>
     <extension
-        id="ExecuteCommand"
+        id="SADLCli"
         point="org.eclipse.core.runtime.applications">
         <application
             cardinality="singleton-global"
             thread="main"
             visible="true">
             <run
-                class="com.ge.research.sadl.applications.ExecuteCommand">
+                class="com.ge.research.sadl.applications.SADLCli">
             </run>
         </application>
     </extension>

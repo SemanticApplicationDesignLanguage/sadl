@@ -991,7 +991,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 				else if (lhs instanceof GraphPatternElement) {
 					sb.append(graphPatternElementToJenaRuleString((GraphPatternElement) lhs, rulePart));
 				}
-				else {
+				else if (lhs != null) {
 					throw new TranslationException("Unexpected junction lhs type: " + lhs.getClass());
 				}
 				Object rhs = ((Junction)gpe).getRhs();
@@ -1006,7 +1006,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 					sb.append(", ");
 					sb.append(graphPatternElementToJenaRuleString((GraphPatternElement) rhs, rulePart));
 				}
-				else {
+				else if (rhs != null) {
 					throw new TranslationException("Unexpected junction rhs type: " + rhs.getClass());					
 				}
 			}
