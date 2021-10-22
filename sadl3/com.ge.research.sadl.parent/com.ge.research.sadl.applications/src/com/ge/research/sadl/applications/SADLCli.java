@@ -36,7 +36,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.URIUtil;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -534,14 +533,14 @@ public class SADLCli implements IApplication {
 
     /** Builds specified projects */
     protected boolean buildProjects(Set<IProject> projects, final XtextResourceSet resourceSet,
-            final IProgressMonitor monitor, final int buildType, List<String> allBuildErrors) throws CoreException {
+            final IProgressMonitor monitor, final int buildType, Set<String> allBuildErrors) {
         boolean buildSuccessful = true;
 
         SubMonitor progress = SubMonitor.convert(monitor, 100).setWorkRemaining(projects.size());
         for (IProject project : projects) {
             buildSadlProject(project, resourceSet, progress.split(1), buildType);
-            buildSuccessful = buildSuccessful && isProjectSuccesfullyBuilt(project);
-            accumulateErrorMarkers(project, allBuildErrors);
+            buildSuccessful = buildSuccessful && isProjectSuccesfullyBuilt(resourceSet);
+            accumulateErrorMarkers(resourceSet, allBuildErrors);
         }
 
         return buildSuccessful;
@@ -576,7 +575,7 @@ public class SADLCli implements IApplication {
     private void writeAsOwl(Resource aResource, File owlDirectory) {
         if (aResource instanceof XtextResource) {
             XtextResource resource = (XtextResource)aResource;
-            System.out.println("Building " + resource.getURI());
+            System.out.println("Building " + resource.getURI().path());
 
             // Generate the OWL file
             GeneratorDelegate generator = resource.getResourceServiceProvider().get(GeneratorDelegate.class);
@@ -628,33 +627,28 @@ public class SADLCli implements IApplication {
     }
 
     /** Checks whether project was successfully built */
-    protected boolean isProjectSuccesfullyBuilt(IProject project) {
-        try {
-            int findMaxProblemSeverity = project.findMaxProblemSeverity(null, true, IResource.DEPTH_INFINITE);
-            if (findMaxProblemSeverity >= IMarker.SEVERITY_ERROR) {
-                return false;
-            }
-        } catch (CoreException e) {
-            System.err.println("Error checking for problems in project: " + e);
-            return false;
+    protected boolean isProjectSuccesfullyBuilt(XtextResourceSet resourceSet) {
+        boolean noErrors = true;
+
+        for (Resource resource : resourceSet.getResources()) {
+            noErrors = noErrors && resource.getErrors().isEmpty();
         }
-        return true;
+
+        return noErrors;
     }
 
     /** Accumulates error markers after building project */
-    protected void accumulateErrorMarkers(IProject project, List<String> allBuildErrors) {
-        try {
-            IMarker[] findMarkers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
-            for (IMarker marker : findMarkers) {
-                int severity = marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
-                if (severity >= IMarker.SEVERITY_ERROR) {
-                    // the string format of Markers is not API and recommended only for debugging, but
-                    // it suits our purpose here.
-                    allBuildErrors.add(marker.toString());
-                }
+    protected void accumulateErrorMarkers(XtextResourceSet resourceSet, Set<String> allBuildErrors) {
+        StringBuilder sb = new StringBuilder();
+        for (Resource resource : resourceSet.getResources()) {
+            for (Resource.Diagnostic error : resource.getErrors()) {
+                sb.setLength(0);
+                sb.append(error.getLocation()).append(":");
+                sb.append(error.getLine()).append(":");
+                sb.append(error.getColumn()).append(": ");
+                sb.append(error.getMessage());
+                allBuildErrors.add(sb.toString());
             }
-        } catch (CoreException e) {
-            System.err.println("Error accumulating error markers in project: " + e);
         }
     }
 
@@ -663,7 +657,11 @@ public class SADLCli implements IApplication {
     public Object start(IApplicationContext context) throws Exception {
         // Return whether projects were built successfully
         boolean buildSuccessful = true;
-        List<String> allBuildErrors = new ArrayList<>();
+        Set<String> allBuildErrors = new LinkedHashSet<>();
+
+        // Suppress log4j initialization warning and debug logs
+        org.apache.log4j.BasicConfigurator.configure();
+        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
 
         // Check whether workspace is being used in a running IDE
         if (!checkInstanceLocation())
@@ -730,7 +728,7 @@ public class SADLCli implements IApplication {
             }
 
             // Clean projects
-            buildProjects(projectsToBuild, resourceSet, monitor, IncrementalProjectBuilder.CLEAN_BUILD, new ArrayList<>());
+            buildProjects(projectsToBuild, resourceSet, monitor, IncrementalProjectBuilder.CLEAN_BUILD, new LinkedHashSet<>());
 
             // Find projects user wanted built
             if (buildAll) {
@@ -746,8 +744,8 @@ public class SADLCli implements IApplication {
             }
 
             // Build projects using two passes in order to resolve dependencies between projects
-            buildSuccessful = buildProjects(projectsToBuild, resourceSet, monitor, IncrementalProjectBuilder.INCREMENTAL_BUILD, allBuildErrors);
-            buildSuccessful = buildSuccessful && buildProjects(projectsToBuild, resourceSet, monitor, IncrementalProjectBuilder.FULL_BUILD, allBuildErrors);
+            buildProjects(projectsToBuild, resourceSet, monitor, IncrementalProjectBuilder.INCREMENTAL_BUILD, new LinkedHashSet<>());
+            buildSuccessful = buildProjects(projectsToBuild, resourceSet, monitor, IncrementalProjectBuilder.FULL_BUILD, allBuildErrors);
         } finally {
             // Wait for any outstanding jobs to finish
             while (!Job.getJobManager().isIdle()) {
@@ -769,6 +767,8 @@ public class SADLCli implements IApplication {
             for (String buildError : allBuildErrors) {
                 System.err.println(buildError);
             }
+            // Don't print "Eclipse:\nJVM terminated. Exit code=1" message
+            System.getProperties().put("eclipse.exitdata", "");
         }
 
         return buildSuccessful ? OK : ERROR;
