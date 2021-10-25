@@ -24,7 +24,7 @@ import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.ge.research.semtk.sparqlX.FusekiSparqlEndpointInterface;
+//import com.ge.research.semtk.sparqlX.FusekiSparqlEndpointInterface;
 
 public class SadlJenaSemTKGetterPutter extends SadlJenaSemTKGetter implements ISadlModelGetterPutter {
     
@@ -60,12 +60,12 @@ public class SadlJenaSemTKGetterPutter extends SadlJenaSemTKGetter implements IS
 				ByteArrayOutputStream os = new ByteArrayOutputStream();
 				rdfw.write(om.getBaseModel(), os, publicUri);
 
-				try {
-					FusekiSparqlEndpointInterface sei = new FusekiSparqlEndpointInterface("http://leb1acdev.hpc.ge.com:3030/ML4M", publicUri);
-					sei.uploadOwlModelNoClear(os.toByteArray());
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+//				try {
+//					FusekiSparqlEndpointInterface sei = new FusekiSparqlEndpointInterface("http://leb1acdev.hpc.ge.com:3030/ML4M", publicUri);
+//					sei.uploadOwlModelNoClear(os.toByteArray());
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
 				return true;
 			}
 		
@@ -87,17 +87,17 @@ public class SadlJenaSemTKGetterPutter extends SadlJenaSemTKGetter implements IS
 			// Check if model exists in store
 			//Model modelToRemove = 
 			// If  model exists, we delete it
-			try {
-				FusekiSparqlEndpointInterface sei = new FusekiSparqlEndpointInterface("http://leb1acdev.hpc.ge.com:3030/ML4M", uri);
-				sei.clearGraph();
-
-				return true;
-			
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			throw new IOException("Can't remove models with the current ConfigurationManager class: " + getConfigMgr().getClass().getCanonicalName());
+//			try {
+//				FusekiSparqlEndpointInterface sei = new FusekiSparqlEndpointInterface("http://leb1acdev.hpc.ge.com:3030/ML4M", uri);
+//				sei.clearGraph();
+//
+//				return true;
+//			
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		} else {
+//			throw new IOException("Can't remove models with the current ConfigurationManager class: " + getConfigMgr().getClass().getCanonicalName());
 		}
 		return false;
 	}

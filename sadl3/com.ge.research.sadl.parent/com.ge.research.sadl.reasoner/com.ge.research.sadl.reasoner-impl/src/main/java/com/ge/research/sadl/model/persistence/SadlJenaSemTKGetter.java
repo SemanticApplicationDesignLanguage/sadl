@@ -20,8 +20,8 @@ import org.apache.jena.vocabulary.OWL;
 
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
-import com.ge.research.semtk.resultSet.Table;
-import com.ge.research.semtk.sparqlX.FusekiSparqlEndpointInterface;
+//import com.ge.research.semtk.resultSet.Table;
+//import com.ge.research.semtk.sparqlX.FusekiSparqlEndpointInterface;
 //import com.ge.research.semtk.sparqlX.SparqlEndpointInterface;
 
 public class SadlJenaSemTKGetter extends SadlModelGetter {
@@ -67,13 +67,13 @@ public class SadlJenaSemTKGetter extends SadlModelGetter {
 
 	private String getNamedModel(String uri) {
 		//TODO
-		try {
-			FusekiSparqlEndpointInterface sei = new FusekiSparqlEndpointInterface("http://leb1acdev.hpc.ge.com:3030/ML4M", "http://kdl.ge.com/IPD");
-			String res = sei.executeQueryToRdf(retrieveGraphQry);
-			return res;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		try {
+//			FusekiSparqlEndpointInterface sei = new FusekiSparqlEndpointInterface("http://leb1acdev.hpc.ge.com:3030/ML4M", "http://kdl.ge.com/IPD");
+//			String res = sei.executeQueryToRdf(retrieveGraphQry);
+//			return res;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		return null;
 	}
 
@@ -110,18 +110,18 @@ public class SadlJenaSemTKGetter extends SadlModelGetter {
 
 //	@Override
 	public List<String> getAvailableModelNames()  {
-		try {
-			FusekiSparqlEndpointInterface sei = new FusekiSparqlEndpointInterface("http://leb1acdev.hpc.ge.com:3030/ML4M", "http://kdl.ge.com/IPD");
-			Table res = sei.executeQueryToTable(allGraphsQry);
-			List<String> models = new ArrayList<String>();
-
-			for (int i=0; i<res.getNumRows(); i++) {
-				models.add(res.getCell(i, 0));
-			}
-			return models;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		try {
+//			FusekiSparqlEndpointInterface sei = new FusekiSparqlEndpointInterface("http://leb1acdev.hpc.ge.com:3030/ML4M", "http://kdl.ge.com/IPD");
+//			Table res = sei.executeQueryToTable(allGraphsQry);
+//			List<String> models = new ArrayList<String>();
+//
+//			for (int i=0; i<res.getNumRows(); i++) {
+//				models.add(res.getCell(i, 0));
+//			}
+//			return models;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 
 //		if (existingNames.hasNext()) {
 //			List<String> names = new ArrayList<String>();
