@@ -36,6 +36,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.URIUtil;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -539,8 +540,8 @@ public class SADLCli implements IApplication {
         SubMonitor progress = SubMonitor.convert(monitor, 100).setWorkRemaining(projects.size());
         for (IProject project : projects) {
             buildSadlProject(project, resourceSet, progress.split(1), buildType);
-            buildSuccessful = buildSuccessful && isProjectSuccesfullyBuilt(resourceSet);
-            accumulateErrorMarkers(resourceSet, allBuildErrors);
+            buildSuccessful = buildSuccessful && isProjectSuccesfullyBuilt(project, resourceSet);
+            accumulateErrorMessages(project, resourceSet, allBuildErrors);
         }
 
         return buildSuccessful;
@@ -627,9 +628,18 @@ public class SADLCli implements IApplication {
     }
 
     /** Checks whether project was successfully built */
-    protected boolean isProjectSuccesfullyBuilt(XtextResourceSet resourceSet) {
+    protected boolean isProjectSuccesfullyBuilt(IProject project, XtextResourceSet resourceSet) {
         boolean noErrors = true;
 
+        // Check for error markers
+        try {
+            int maxProblemSeverity = project.findMaxProblemSeverity(null, true, IResource.DEPTH_INFINITE);
+            noErrors = maxProblemSeverity < IMarker.SEVERITY_ERROR;
+        } catch (CoreException e) {
+            System.err.println("Error finding error markers in project: " + e);
+        }
+
+        // Check for resource errors
         for (Resource resource : resourceSet.getResources()) {
             noErrors = noErrors && resource.getErrors().isEmpty();
         }
@@ -637,13 +647,27 @@ public class SADLCli implements IApplication {
         return noErrors;
     }
 
-    /** Accumulates error markers after building project */
-    protected void accumulateErrorMarkers(XtextResourceSet resourceSet, Set<String> allBuildErrors) {
+    /** Accumulates error messages after building project */
+    protected void accumulateErrorMessages(IProject project, XtextResourceSet resourceSet, Set<String> allBuildErrors) {
+        // Get error markers
+        try {
+            IMarker[] findMarkers = project.findMarkers(null, true, IResource.DEPTH_INFINITE);
+            for (IMarker marker : findMarkers) {
+                int severity = marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
+                if (severity >= IMarker.SEVERITY_ERROR) {
+                    allBuildErrors.add(marker.toString());
+                }
+            }
+        } catch (CoreException e) {
+            System.err.println("Error getting error markers in project: " + e);
+        } 
+
+        // Get resource errors
         StringBuilder sb = new StringBuilder();
         for (Resource resource : resourceSet.getResources()) {
             for (Resource.Diagnostic error : resource.getErrors()) {
                 sb.setLength(0);
-                sb.append(error.getLocation()).append(":");
+                sb.append(resource.getURI().path()).append(":");
                 sb.append(error.getLine()).append(":");
                 sb.append(error.getColumn()).append(": ");
                 sb.append(error.getMessage());
