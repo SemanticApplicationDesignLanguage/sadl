@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Ambiguous Names</title>
+  </head>
+  <body>
+    <h1>Ambiguous Names</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/25/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <h2>Introduction</h2>
+    <p>The SADL grammar does not require names to be complete URLs. In fact, it
+      does not support complete URLs as concept names. However, it does support
+      qualified names, also know as QNames. QNames are of the form <em>&lt;prefix&gt;:&lt;name&gt;</em>,
+      e.g., <em>owl:Class</em>. Of course for this to be useful, there must be
+      a unique and known mapping between the <em>prefix</em> and a namespace.
+      In OWL RDF/XML syntax, this mapping is provided by a line in rdf:RDF
+      header of the form</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;"> <font
+        face="Monospace"><font style="font-size: 10pt" size="2">xmlns:owl="http://www.w3.org/2002/07/owl#".</font></font></p>
+    <p></p>
+    <p>Usually SADL models refer to concepts by their local name only, as is the
+      case for the concepts <em>Person</em> and <em>age</em> in this
+      statement:</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+    </p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#0000ff"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">George</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>age</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">25</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 80px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"></font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-left: 40px;"> </p>
+    <p>The model processor will look for a namespace containing the concepts <em>Person</em>
+      and <em>age</em>, starting with the namespace of the current model and
+      expanding the search to imported models if necessary.</p>
+    <p>However, there are two circumstances in which it is necessary to use
+      QNames for referenced concepts.</p>
+    <ol>
+      <li>When a SADL model imports multiple models that define concepts with
+        the same local name</li>
+      <li>When a SADL model imports a model defining a name which the modeler
+        wishes reuse in defining a new concept in the current model.</li>
+    </ol>
+    <h2>Ambiguous Name Warnings</h2>
+    <p>Consider the following simple set of models.</p>
+    <h3>Chemistry Model</h3>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">uri</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"http://sadl.org/Chemistry.sadl"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">alias</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>chemistry</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c">
+      </font><font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"><b>Agent</b></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+            (</font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">note</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"a
+chemically
+              active power, principle, or substance"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">)
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">class</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <h3 style="margin-bottom: 0in; line-height: 100%; text-align: left;">Entertainment
+      Model<br>
+    </h3>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c">
+      </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">uri</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"http://sadl.org/Entertainment.sadl"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">alias</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>entertainment</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c">
+      </font><font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"><b>Agent</b></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+            (</font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">note</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"a
+business
+              representative of an entertainer"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">)
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">class</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <h3 style="margin-bottom: 0in; line-height: 100%; text-align: left;">Government
+      Model<br>
+    </h3>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">uri</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"http://sadl.org/Government.sadl"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">alias</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>government</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c">
+      </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">import</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>"http://sadl.org/Chemistry.sadl"</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            .</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c">
+      </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">import</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>"http://sadl.org/Entertainment.sadl"</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            .</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c">
+      </font><font color="#0000ff"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">BenedictArnold</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">an</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>Agent</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <p style="margin-bottom: 0in; line-height: 100%;" align="left"><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">Moving the
+            cursor over the the error:<br>
+          </font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;"><img src="images/GovernmentAmbiguous.png"
+        alt=""></p>
+    <p style="margin-bottom: 0in; line-height: 100%">This illustrates the first
+      condition noted above, when a named concept is defined in multiple
+      imports. If we intended to use either <em>chemistry:Agent</em> or <em>entertainment:Agent</em>,
+      we could just pick the appropriate QName to replace <em>Agent</em> and
+      the model would be without error.</p>
+    <p style="margin-bottom: 0in; line-height: 100%">Suppose, however, that we
+      realize that we intend a third use of the word agent and so we wish to
+      define a new concept. We can do this using a QName, which is the second
+      condition above.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">uri</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"http://sadl.org/Government.sadl"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">alias</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>government</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c">
+      </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">import</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>"http://sadl.org/Chemistry.sadl"</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            .</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c">
+      </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">import</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>"http://sadl.org/Entertainment.sadl"</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            .</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c">
+      </font><font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"><b>government:Agent</b></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">class</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c">
+      </font><font color="#0000ff"><font face="Monospace"><font style="font-size: 10pt"
+            size="2">BenedictArnold</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">an</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>government:Agent</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;">
+    </div>
+    <p style="margin-bottom: 0in; line-height: 100%">Now there is no ambiguity.<br>
+    </p>
+    <p style="margin-bottom: 0in; line-height: 100%"></p>
+    <p style="margin-bottom: 0in; line-height: 100%"><br>
+    </p>
+    <p style="margin-bottom: 0in; line-height: 100%"><br>
+    </p>
+    <p style="margin-bottom: 0in; line-height: 100%"><br>
+    </p>
+    <p></p>
+    <p></p>
+  </body>
+</html>
