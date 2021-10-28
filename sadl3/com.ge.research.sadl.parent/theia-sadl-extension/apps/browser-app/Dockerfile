@@ -1,4 +1,4 @@
-FROM node:10-alpine
+FROM node:17-alpine
 RUN apk add --no-cache make gcc g++ python
 WORKDIR /home/theia
 ADD package.json ./package.json
@@ -15,7 +15,7 @@ RUN yarn \
     && yarn theia build \
     && yarn cache clean
 
-FROM node:10-alpine
+FROM node:17-alpine
 RUN apk add --no-cache git openssh bash openjdk11 unzip
 WORKDIR /home/theia
 COPY --from=0 /home/theia /home/theia
