@@ -40,6 +40,7 @@ import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.server.ISadlServer;
 import com.ge.research.sadl.server.SessionNotFoundException;
@@ -480,8 +481,9 @@ public interface ISadlServerPE extends ISadlServer {
 	 * @throws IOException 
 	 * @throws ConfigurationException
 	 * @throws SessionNotFoundException
+	 * @throws TranslationException 
 	 */
-	boolean deleteModel(String modelName) throws ConfigurationException, IOException, SessionNotFoundException;
+	boolean deleteModel(String modelName) throws ConfigurationException, IOException, SessionNotFoundException, TranslationException;
 	
 	/**
 	 * Method to add or update the rdfs:label for the ontology Resource identified by uri and of the specified language

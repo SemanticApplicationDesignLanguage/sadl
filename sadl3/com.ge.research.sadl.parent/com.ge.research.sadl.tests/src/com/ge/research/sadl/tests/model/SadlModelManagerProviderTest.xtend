@@ -17,7 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.tests.model
 
-import com.ge.research.sadl.model.SadlSerializationFormat
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat
 import com.ge.research.sadl.processing.SadlConstants
 import com.ge.research.sadl.tests.AbstractSADLModelProcessorTest
 import com.ge.research.sadl.tests.SADLInjectorProvider
@@ -525,7 +525,7 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 				found = true;
 			}
 //			if (!found) {
-				jenaModel.write(System.out, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT)
+				jenaModel.write(System.out, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT)
 //			}
 			assertTrue(found);
 		]

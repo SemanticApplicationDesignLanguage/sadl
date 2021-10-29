@@ -308,6 +308,9 @@
                 <version>[3.6.3,)</version>
               </requireMavenVersion>
             </rules>
+            <!-- rules>
+              <dependencyConvergence></dependencyConvergence>
+            </rules-->
           </configuration>
           <executions>
             <execution>

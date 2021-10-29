@@ -60,7 +60,7 @@ import org.apache.jena.vocabulary.RDF;
 import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.reasoner.AvailablePlugin.PluginType;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
@@ -178,7 +178,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 					+ File.separator + CONFIG_FILENAME;
 			// save model
 			fps = new FileOutputStream(configFilename);
-			getConfigModel().write(fps, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+			getConfigModel().write(fps, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 			return true;
 		} catch (Exception e) {
 			logger.error("Failed to save ont-policy file", e);
@@ -714,33 +714,8 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 	 * (java.lang.String)
 	 */
 	public boolean deleteModel(String publicUri) throws ConfigurationException,
-			IOException, URISyntaxException {
-		String altUrl = getAltUrlFromPublicUri(publicUri);
-		if (repoType.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-			try {
-				OntModel modelToDelete = getModelGetter().getOntModel(
-						publicUri, altUrl, SadlSerializationFormat.JENA_TDB_FORMAT);
-				modelToDelete.removeAll();
-				getModelGetter().sync();
-			} catch (Throwable t) {
-				// ok to fail; may not exist
-			}
-		} else {
-			if (altUrl.startsWith("http:")) {
-				throw new IOException(
-						"Can't delete a model with only an 'http://' URL");
-			} else {
-				SadlUtils su = new SadlUtils();
-				File modelFile = new File(su.fileUrlToFileName(altUrl));
-				if (modelFile.exists()) {
-					if (!modelFile.delete()) {
-						throw new IOException("Unable to delete '" + altUrl
-								+ "'");
-					}
-				}
-			}
-		}
-		return deleteMapping(altUrl, publicUri);
+			IOException, URISyntaxException, TranslationException {
+		return getSadlModelGetterPutter(null).removeModel(publicUri);
 	}
 
 	/**
@@ -1219,7 +1194,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 			try {
 				// save model
 				fps = new FileOutputStream(configFile);
-				getConfigModel().write(fps, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+				getConfigModel().write(fps, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 				setConfigChanged(false);
 				return true;
 			} catch (Exception e) {
@@ -1258,7 +1233,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 			try {
 				// save model
 				fps = new FileOutputStream(mappingFile);
-				getMappingModel().write(fps, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+				getMappingModel().write(fps, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 				setMappingChanged(false);
 				logger.debug("saved mapping file '" + mappingFilename + "'");
 				return true;

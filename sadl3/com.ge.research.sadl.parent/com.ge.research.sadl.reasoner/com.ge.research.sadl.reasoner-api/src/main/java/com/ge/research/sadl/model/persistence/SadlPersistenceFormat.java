@@ -1,14 +1,14 @@
-package com.ge.research.sadl.model;
+package com.ge.research.sadl.model.persistence;
 
 import org.apache.jena.riot.RDFFormat;
 
 import com.ge.research.sadl.reasoner.TranslationException;
 /**
  * Class to contain the various formats in which SADL models may be persisted
- * @author 200005201
+ * @author andy@naturalsemantics.com
  *
  */
-public class SadlSerializationFormat {
+public class SadlPersistenceFormat {
 	public static final String TURTLE_FORMAT = "Turtle";
 	public static final String N3_FORMAT = "N3";
 	public static final String N_TRIPLE_FORMAT = "N-Triples";
@@ -22,9 +22,14 @@ public class SadlSerializationFormat {
 	public static final String RDF_BINARY_FORMAT = "RDF Binary";
 	public static final String JENA_TDB_FORMAT = "Jena TDB";
 	public static final String JENA_TDB2_FORMAT = "Jena TDB2";
+	public static final String SEMTK_FORMAT = "SemTK";
 	
-	static RDFFormat TDB_PseudoFormat = RDFFormat.RDFNULL;
-		
+	public static RDFFormat TDB_PseudoFormat = RDFFormat.RDFNULL;
+	public static RDFFormat SEMTK_PseudoFormat = RDFFormat.RDFXML_PLAIN;
+	
+	public static final String SEMTK_STORE_DEFAULT_TYPE = "fuseki";
+	public static final String SEMTK_DEFAULT_ENDPOINT = "http://leb1acdev.hpc.ge.com:3030";
+	
 	/**
 	 * Method to get the jena RDFFormat type from the SADL format type string
 	 * @param sadlFormat
@@ -59,6 +64,8 @@ public class SadlSerializationFormat {
 				return TDB_PseudoFormat;
 			} else if (sadlFormat.equals(JENA_TDB2_FORMAT)) {
 				return TDB_PseudoFormat;
+			} else if (sadlFormat.equals(SEMTK_FORMAT)) {
+				return SEMTK_PseudoFormat;
 			}
 		}
 		throw new TranslationException("Invalid format: " + sadlFormat);
@@ -127,11 +134,15 @@ public class SadlSerializationFormat {
 			else if (rdfFormat.equals(TDB_PseudoFormat)) {
 				return "tdb";
 			}
+			else if (rdfFormat.equals(SEMTK_PseudoFormat)) {
+				return "semtk";
+			}
+
 		}
 		throw new TranslationException("Invalid format: " + rdfFormat);
 	}
 	
-	public static String getSadlSerializationFormatFromFilename(String owlFilename) {
+	public static String getSadlPersistenceFormatFromFilename(String owlFilename) {
 		if (owlFilename.endsWith(".owl")) return RDF_XML_FORMAT;
 		if (owlFilename.endsWith(".nt")) return N_TRIPLE_FORMAT;
 		if (owlFilename.endsWith(".turtle")) return TURTLE_FORMAT;
@@ -144,6 +155,7 @@ public class SadlSerializationFormat {
 		if (owlFilename.endsWith(".trix")) return TRIX_FORMAT;
 		if (owlFilename.endsWith(".trdf")) return RDF_BINARY_FORMAT;
 		if (owlFilename.endsWith(".tdb")) return JENA_TDB_FORMAT;
+		if (owlFilename.endsWith(".semtk")) return SEMTK_FORMAT;
 		return "RDF/XML";	// default
 
 	}
@@ -153,7 +165,7 @@ public class SadlSerializationFormat {
 	 * @return
 	 * @throws TranslationException
 	 */
-	public static String getSadlSerializationFormat(RDFFormat rdfFormat) throws TranslationException {
+	public static String getSadlPersistenceFormat(RDFFormat rdfFormat) throws TranslationException {
 		if (rdfFormat != null) {
 			if (rdfFormat.equals(RDFFormat.TURTLE)) {
 				return TURTLE_FORMAT;
@@ -187,6 +199,9 @@ public class SadlSerializationFormat {
 			}
 			else if (rdfFormat.equals(TDB_PseudoFormat)) {
 				return JENA_TDB_FORMAT;
+			}
+			else if (rdfFormat.equals(SEMTK_PseudoFormat)) {
+				return SEMTK_FORMAT;
 			}
 		}
 		throw new TranslationException("Unsupported format: " + rdfFormat);

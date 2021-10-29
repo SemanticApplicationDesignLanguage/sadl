@@ -56,7 +56,6 @@ import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.model.Explanation;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.ConstantNode;
@@ -84,6 +83,7 @@ import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.ISadlInferenceProcessor;
 import com.ge.research.sadl.processing.OntModelProvider;
@@ -173,10 +173,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			checkIfExplanationNeeded(cmds);
 			applyPreferences();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (ReasonerNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 			
@@ -468,7 +466,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 
 	private String getOwlFormat() {
 		if (_repoType == null) {
-			_repoType = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+			_repoType = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 			if (preferenceMap != null) {
 				if (preferenceMap.containsKey(SadlPreferences.OWL_MODEL_FORMAT.getId())) {
 					String rt = preferenceMap.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
@@ -1609,7 +1607,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 	protected IConfigurationManagerForIDE getConfigMgr(String format) throws ConfigurationException {
 		if (configMgr == null) {
 			if (format == null) {
-				format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT; // default
+				format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT; // default
 			}
 			if ((getModelFolderPath() == null && 
 					getCurrentResource().getURI().toString().startsWith("synthetic")) ||

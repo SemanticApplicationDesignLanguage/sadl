@@ -55,7 +55,7 @@ import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.server.ISadlServerPE;
@@ -156,18 +156,6 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		return selectServiceModel(knowledgeBaseIdentifier, modelName, null);
     }
 
-	protected void setConfigurationManagerModelGetter()
-			throws ConfigurationException, MalformedURLException {
-		if (getConfigurationMgr().getModelGetter() == null) {
-        	try {
-				getConfigurationMgr().setModelGetter(new SadlJenaModelGetterPutter(getConfigurationMgr(), getConfigurationMgr().getModelFolder() + "/TDB"));
-			} catch (IOException e) {
-				logger.error("Exception setting ModelGetter: " + e.getMessage());
-				e.printStackTrace();
-			}
-        }
-	}
-	
 	public boolean persistInstanceModel(String owlInstanceFileName, String globalPrefix) 
 				throws ConfigurationException, SessionNotFoundException, IOException {
 		return persistInstanceModel(getDefaultModelName(), owlInstanceFileName, globalPrefix);
@@ -563,7 +551,13 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		if (altUrl != null) {
 			OntModel ontModel = ModelFactory.createOntologyModel(getConfigurationMgr().getOntModelSpec(null));
 			altUrl = getConfigurationMgr().fileNameToFileUrl(altUrl);
-			ontModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
+			try {
+				ontModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getSadlModelGetter(null));
+			} catch (IOException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new IOException(e.getMessage(), e);
+			}
 			ontModel.read(altUrl);
 			ontModel.getDocumentManager().setProcessImports(true);
 			ontModel.loadImports();
@@ -1955,7 +1949,7 @@ public class SadlServerPEImpl extends SadlServerImpl implements ISadlServerPE {
 		throw new ReasonerNotFoundException("No reasoner found.");
     }
 
-	public boolean deleteModel(String modelName) throws ConfigurationException, IOException {
+	public boolean deleteModel(String modelName) throws ConfigurationException, IOException, TranslationException {
 		try {
 			return getConfigurationMgr().deleteModel(modelName);
 		} catch (ConfigurationException e) {

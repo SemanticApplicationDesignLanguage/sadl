@@ -36,7 +36,7 @@ import org.eclipse.emf.common.EMFPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.osgi.framework.Bundle;
 
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.google.common.base.Predicate;
@@ -308,7 +308,7 @@ public class ResourceManager {
 	}
 
 	public static String getOwlFileExtension(String format) throws TranslationException {
-		return SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(format));
+		return SadlPersistenceFormat.getFileExtension(SadlPersistenceFormat.getRDFFormat(format));
 	}
 
 //    /**

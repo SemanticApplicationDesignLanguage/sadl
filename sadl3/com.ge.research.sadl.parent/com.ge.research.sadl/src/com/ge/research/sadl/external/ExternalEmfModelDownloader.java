@@ -81,7 +81,7 @@ public class ExternalEmfModelDownloader {
 		String modelFolderPath = modelsFolder.toString();
 		IConfigurationManagerForIDE cm = null;
 		try {
-			cm = getConfigMgr(modelFolderPath, ConfigurationManagerForIDE.getOWLFormat());
+			cm = getConfigMgr(modelFolderPath, ConfigurationManagerForIDE.getPersistenceFormatFromPreferences());
 		} catch (ConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

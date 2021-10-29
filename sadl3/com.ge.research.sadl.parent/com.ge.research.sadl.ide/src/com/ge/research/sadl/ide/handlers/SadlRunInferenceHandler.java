@@ -40,7 +40,6 @@ import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.builder.MessageManager.SadlMessage;
 import com.ge.research.sadl.jena.importer.CsvImporter;
 import com.ge.research.sadl.model.Explanation;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.EndWrite;
 import com.ge.research.sadl.model.gp.Explain;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -49,6 +48,7 @@ import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.Read;
 import com.ge.research.sadl.model.gp.SadlCommand;
 import com.ge.research.sadl.model.gp.TestResult;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
@@ -84,7 +84,7 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 			// *** NOTE: Copied from com.ge.research.sadl.ui.handlers.RunInference.execute(ExecutionEvent) *** 
 			String frmt = properties.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
 			if (frmt != null && frmt.length() > 0) {	// awc 2020/11/10: in some cases this is an empty string, treat same as null
-				String ext = SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(frmt));
+				String ext = SadlPersistenceFormat.getFileExtension(SadlPersistenceFormat.getRDFFormat(frmt));
 				if (ext != null) {
 					frmt = "." + ext;
 				}
@@ -130,7 +130,7 @@ public class SadlRunInferenceHandler extends SadlIdeActionHandler {
 							String modelFolderPath = getOwlModelsFolderPath(path).toString();
 							String owlModelPath = modelFolderPath + "/" + path.getFileName().toString().replaceFirst("[.][^.]+$", frmt);
 							if (configMgr == null) {
-								configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderPath, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+								configMgr = ConfigurationManagerFactory.getConfigurationManager(modelFolderPath, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 							}
 							String actualUrl = new SadlUtils().fileUrlToFileName(configMgr.getAltUrlFromPublicUri(SadlUtils.stripQuotes(testfile)));
 							File actualFile = new File(actualUrl);
