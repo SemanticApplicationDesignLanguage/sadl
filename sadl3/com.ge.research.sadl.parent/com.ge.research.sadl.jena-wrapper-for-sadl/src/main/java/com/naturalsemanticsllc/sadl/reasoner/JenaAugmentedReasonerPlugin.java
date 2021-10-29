@@ -203,6 +203,9 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		if (getPreLoadedRules() != null) {
 			stage0Rules.addAll(getPreLoadedRules());
 		}
+		else {
+			stage0Rules = new ArrayList<Rule>();	// otherwise an NPE occurs in Jena
+		}
 		reasoner = createReasonerAndLoadRules(stage0Rules, 0);
 		return reasoner;
 	}
@@ -214,8 +217,11 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 			if (deductionsModel != null) {
 				return deductionsModel;
 			}
-			else {
+			else if (!derivationLogging){
 				throw new ConfigurationException("Deductions model not available. Derivations must be enabled in the configuration to capture a deductions model.");
+			}
+			else {
+				return null; 
 			}
 		}
 		else {
@@ -404,7 +410,7 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		if (im instanceof OntModel) {
 			m = (OntModel)im;
 		}
-		else {
+		else if (im != null){
 			m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), im);
 		}
 
@@ -420,6 +426,10 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 				e.printStackTrace();
 			}
 	        return true;
+		}
+		else {
+			// no inferred model found
+			addError(new ModelError("No inferred model found", ErrorType.WARNING));
 		}
 		return false;
 	}
