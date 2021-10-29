@@ -454,7 +454,6 @@ public class JenaReasonerPlugin extends Reasoner{
 //					traceAppender.setImmediateFlush(false);
 //					traceAppender.activateOptions();
 //				} catch (IOException e) {
-//					// TODO Auto-generated catch block
 //					e.printStackTrace();
 //					traceAppender = null;
 //				}
@@ -544,7 +543,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				logger.debug(aString);
 			}
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		msg = "\n\nImports of model '" + baseUri + "':\n";
@@ -729,7 +727,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				getReasonerOnlyWhenNeeded().setRules(ruleList);
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		newInputFlag = true;
@@ -743,7 +740,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			deleteRule(newRule.getName());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		ruleList.add(newRule);
@@ -756,7 +752,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				getReasonerOnlyWhenNeeded().setRules(ruleList);
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		newInputFlag = true;
@@ -769,7 +764,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			getReasonerOnlyWhenNeeded();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		for (int i=0; i<ruleList.size();i++){			
@@ -786,7 +780,6 @@ public class JenaReasonerPlugin extends Reasoner{
 						getReasonerOnlyWhenNeeded().setRules(ruleList);
 					}
 				} catch (ConfigurationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				newInputFlag = true;
@@ -1007,7 +1000,6 @@ public class JenaReasonerPlugin extends Reasoner{
 						try {
 							prepareInfModel();
 						} catch (ConfigurationException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						if (infModel != null) {
@@ -1060,7 +1052,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				results.add(new ModelError("Failed to obtain an inferred model on which to do a validity check.", ErrorType.ERROR));
 			}
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		return results;
@@ -1074,7 +1065,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		Model results = null;
@@ -1195,7 +1185,6 @@ public class JenaReasonerPlugin extends Reasoner{
 			finally { if (!cancelled && qexec != null) qexec.close();	}
 			endTrace();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		finally {
@@ -1312,7 +1301,6 @@ public class JenaReasonerPlugin extends Reasoner{
 			finally { if (!cancelled && qexec != null) qexec.close();	}
 			endTrace();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		finally {
@@ -1459,7 +1447,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		long t1 = 0L;
@@ -1590,7 +1577,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				return explanations;
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -1696,19 +1682,14 @@ public class JenaReasonerPlugin extends Reasoner{
 						explains.get(startingIndex + testingThruPremise).setExplanations(explanations);
 					}
 				} catch (QueryCancelledException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (QueryParseException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (InvalidNameException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ConfigurationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (AmbiguousNameException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -1956,7 +1937,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				return explanations;
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -2004,7 +1984,6 @@ public class JenaReasonerPlugin extends Reasoner{
 					try {
 						obj = SadlUtils.getLiteralMatchingDataPropertyRange(schemaModel, prop.as(OntProperty.class), ((com.ge.research.sadl.model.gp.Literal)on).getValue());
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -2136,7 +2115,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				return ((matchingRules != null && matchingRules.size() > 0) ? matchingRules : null);
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -2804,7 +2782,6 @@ public class JenaReasonerPlugin extends Reasoner{
 					getReasonerOnlyWhenNeeded().setDerivationLogging(bVal);
 				}
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -2821,7 +2798,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		if (infModel != null) {
@@ -2839,7 +2815,6 @@ public class JenaReasonerPlugin extends Reasoner{
 	        try {
 				fps.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	        return true;
@@ -2920,7 +2895,6 @@ public class JenaReasonerPlugin extends Reasoner{
 					try {
 						val = SadlUtils.getLiteralMatchingDataPropertyRange(schemaModel, pred, objValue);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -3106,7 +3080,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				return binfo;
 			}
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}				
 		return null;
@@ -3134,25 +3107,18 @@ public class JenaReasonerPlugin extends Reasoner{
 					implbltins.add(bi);
 				}
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -3236,7 +3202,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				return ds;
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 		return null;
@@ -3577,7 +3542,6 @@ public class JenaReasonerPlugin extends Reasoner{
         try {
 			fps.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
