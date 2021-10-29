@@ -12101,12 +12101,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			
 			getModelValidator().checkPropertyDomain(getTheJenaModel(), inst, prop, null, false, null, false, true);
 		} catch (InvalidTypeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (CircularDependencyException e) {
 			addTypeCheckingError(e.getMessage(), ctx);
 		} catch (TranslationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

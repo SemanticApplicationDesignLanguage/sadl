@@ -2146,7 +2146,15 @@ public class OwlToSadl {
 						if (itercnt++ > 0) {
 							sb.append(" and ");
 						}
-						sb.append(uriToSadlString(concepts, type.asResource()));
+						if (type.asResource().canAs(Restriction.class)) {
+							sb.append("(");
+							sb.append(uriToSadlString(concepts, type.asResource()));
+							sb.append(")");
+							
+						}
+						else {
+							sb.append(uriToSadlString(concepts, type.asResource()));
+						}
 						statementsProcessed.add(nextStmt);
 					}
 				}
@@ -4148,14 +4156,15 @@ public class OwlToSadl {
 			ln = rsrc.getLocalName();
 		}
 		String prefix = null;
-		if (!sameNs(ns, getBaseUri())) {
+		if (!sameNs(ns, getBaseUri()) && !isRDFDatatypeString(rsrc.getURI(), null)) {
 			// don't include NS if in the base model.
 			if (prefix == null) {
 				prefix = theModel.getNsURIPrefix(ns);
 			}
 			prefix = sadlizePrefix(prefix);
 		}
-		if (allTokens.contains(ln)) {
+		
+		if (!isRDFDatatypeString(rsrc.getURI(), null) && allTokens.contains(ln)) {
 			ln = "^" + ln;
 		}
 		if (prefix != null && prefix.length() > 0) {
