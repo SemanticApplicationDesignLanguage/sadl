@@ -549,11 +549,11 @@ public class SADLCli implements IApplication {
 
     /** Cleans implicit/owl files since they will be regenerated automatically */
     private void cleanDirectory(File directory) {
-        // Keep only files ending with ".rdf"
-        final String keepExtension = ".rdf";
+        // Keep only files ending with ".rdf", ".xml", or ".yaml"
+        final String keepExtensions = ".*\\.(rdf|xml|yaml)";
         if (directory.exists() && directory.isDirectory()) {
             for (File file : directory.listFiles()) {
-                if (file.isFile() && !file.getName().endsWith(keepExtension)) {
+                if (file.isFile() && !file.getName().matches(keepExtensions)) {
                     if (file.delete()) System.out.println("Cleaning " + file);
                 }
             }
