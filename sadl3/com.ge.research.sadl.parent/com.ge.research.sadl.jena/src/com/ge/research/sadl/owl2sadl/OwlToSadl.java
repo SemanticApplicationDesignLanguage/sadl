@@ -1968,7 +1968,7 @@ public class OwlToSadl {
 			try {
 				IReasoner reasoner = iConfigurationManager.getReasoner();
 				if (!reasoner.isInitialized()) {
-					reasoner.initializeReasoner(theModel, getBaseUri(), null, null);
+					reasoner.initializeReasoner(theModel, getBaseUri(), null, null, iConfigurationManager.getRepoType());
 				}
 				List<Object> params = Arrays.asList(new NamedNode(eqUri));
 				String pq = reasoner.parameterizeQuery(SparqlQueries.ARGUMENTS_QUERY, params);

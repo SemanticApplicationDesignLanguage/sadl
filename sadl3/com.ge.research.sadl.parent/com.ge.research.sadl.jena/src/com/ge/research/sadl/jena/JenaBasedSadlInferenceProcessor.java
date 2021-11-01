@@ -1519,7 +1519,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				reasoner.initializeReasoner(getModelFolderPath(), getModelName(), getOwlFormat());
 			}
 			else if (getTheJenaModel() != null) {
-				reasoner.initializeReasoner(getTheJenaModel(), getModelName(), null, null);
+				reasoner.initializeReasoner(getTheJenaModel(), getModelName(), null, null,getConfigMgr(getOwlFormat()).getRepoType());
 			}
 			else {
 				throw new ConfigurationException("No model folder path, no model, can't initialize a reasoner.");
