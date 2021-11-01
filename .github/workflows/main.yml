@@ -12,14 +12,10 @@ on:
 # Runs a build job and uploads SADL build artifacts:
 # - Builds SADL source & runs unit tests
 # - Uploads SADL build artifacts to workflow
-# - Builds and pushes SADL-Eclipse Docker image
-# - Builds WebSADL extension
-# - Publishes WebSADL npm package
-# - Builds WebSADL Docker image
-# - Pushes WebSADL image to Docker Hub
+# - Builds SADL-Eclipse Docker image and pushes it
 
 jobs:
-  build:
+  main:
     strategy:
       matrix:
         distribution: [ temurin ]
@@ -31,8 +27,6 @@ jobs:
     steps:
     - name: Check out SADL source
       uses: actions/checkout@v2.3.5
-      with:
-        fetch-depth: 0 # Needed by lerna to publish canary versions
 
     - name: Set up Java
       uses: actions/setup-java@v2.3.1
@@ -69,44 +63,10 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push SADL-Eclipse Docker image
+    - name: Build SADL-Eclipse Docker image and push it
       uses: docker/build-push-action@v2.7.0
       with:
         context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
         file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
         push: true
         tags: sadl/sadl-eclipse:dev
-
-    - name: Set up Node.js 10.x
-      uses: actions/setup-node@v2.4.1
-      with:
-        node-version: 10.19.0
-        registry-url: https://registry.npmjs.org
-        cache: 'yarn'
-        cache-dependency-path: '**/yarn.lock'
-
-    - name: Set up Python 2.7
-      uses: actions/setup-python@v2.2.2
-      with:
-        python-version: 2.7
-
-    - name: Build WebSADL extension
-      env:
-        PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension install
-
-    - name: Publish WebSADL npm package
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-      run: yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension run publish:next
-
-    - name: Build WebSADL Docker image
-      run: |
-        npm install --global node-gyp@6.0.1
-        npm config set node_gyp "`npm prefix -g`/lib/node_modules/node-gyp/bin/node-gyp.js"
-        echo "npm config get node_gyp -> `npm config get node_gyp`"
-        sadl3/com.ge.research.sadl.parent/theia-sadl-extension/scripts/build-docker.sh
-
-    - name: Push WebSADL image to Docker Hub
-      run: docker push theiaide/sadl:next
