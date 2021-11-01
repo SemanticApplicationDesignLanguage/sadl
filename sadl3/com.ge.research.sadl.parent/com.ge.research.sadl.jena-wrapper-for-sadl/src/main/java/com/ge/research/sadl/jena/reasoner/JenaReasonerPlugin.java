@@ -609,12 +609,13 @@ public class JenaReasonerPlugin extends Reasoner{
 
 
 	@Override
-	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences)
+	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences, String _repoType)
 			throws ReasonerNotFoundException, ConfigurationException {
 		if (!(kbase instanceof OntModel)) {
 			throw new ConfigurationException("The kbase Object passed into JenaReasonerPlugin must be a Jena OntModel.");
 		}
 		this.preferences = preferences;
+		repoType = _repoType;
 		setModelName(modelName);
 		if (timingInfo == null) {
 			timingInfo = new ArrayList<ReasonerTiming>();
