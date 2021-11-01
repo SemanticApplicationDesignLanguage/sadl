@@ -444,7 +444,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				SadlUtils su = new SadlUtils();
 				tboxfile = new File(su.fileUrlToFileName(tbox));
 			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 //			if (tboxfile != null && tboxfile.exists()) {
@@ -578,7 +577,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				imports = configurationMgr.loadImportedModel(schemaModel.getOntology(modelName), 
 								schemaModel, modelName, null);
 			} catch (Throwable t) {
-				// TODO Auto-generated catch block
 				t.printStackTrace();
 			}
 		}
@@ -630,6 +628,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			setPreLoadedRules(loadRulesFromString(rules));
 		}
 
+		//TODO: AG: this block of code was commented out in GH-794
 //		String format = repoType;
 //		try {
 //			String tdbFolder = configurationMgr.getTdbFolder();
@@ -3527,7 +3526,6 @@ public class JenaReasonerPlugin extends Reasoner{
 //				}
 //				return infMinus;
 //			} catch (FileNotFoundException e) {
-//				// TODO Auto-generated catch block
 //				e.printStackTrace();
 //				throw new ConfigurationException("filed to reduce infModel", e);
 //			}
