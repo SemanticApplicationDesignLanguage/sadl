@@ -9,7 +9,7 @@ on:
 # Runs a build job and uploads SADL build artifacts:
 # - Builds SADL source & runs unit tests
 # - Uploads SADL build artifacts to release assets
-# - Builds and pushes SADL-Eclipse Docker image
+# - Builds SADL-Eclipse Docker image and pushes it
 
 jobs:
   release:
@@ -59,7 +59,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push SADL-Eclipse Docker image
+    - name: Build SADL-Eclipse Docker image and push it
       uses: docker/build-push-action@v2.7.0
       with:
         context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
