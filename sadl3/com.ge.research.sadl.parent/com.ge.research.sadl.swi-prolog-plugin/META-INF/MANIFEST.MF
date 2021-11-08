@@ -26,7 +26,8 @@ Export-Package: com.ge.research.sadl.swi_prolog.fileinterface,
    org.apache.jena.rdf.model,
    org.apache.jena.ontology",
  com.ge.research.sadl.swi_prolog.translator
-Import-Package: com.ge.research.sadl.model,
+Import-Package: com.ge.research.sadl.importer,
+ com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
  com.ge.research.sadl.reasoner,
  jakarta.activation
