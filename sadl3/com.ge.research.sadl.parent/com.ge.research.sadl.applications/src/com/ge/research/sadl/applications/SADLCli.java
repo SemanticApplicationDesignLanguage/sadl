@@ -27,6 +27,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.utils.ResourceManager;
@@ -36,10 +38,17 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.URIUtil;
+import org.eclipse.core.internal.resources.ICoreConstants;
+import org.eclipse.core.internal.resources.ResourceException;
+import org.eclipse.core.internal.resources.Workspace;
+import org.eclipse.core.internal.utils.Policy;
+import org.eclipse.core.resources.IBuildConfiguration;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -47,6 +56,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -696,13 +706,47 @@ public class SADLCli implements IApplication {
         IWorkspaceDescription desc = root.getWorkspace().getDescription();
         final boolean isAutoBuilding = root.getWorkspace().isAutoBuilding();
         IProgressMonitor monitor = new PrintingProgressMonitor();
+//		IProgressMonitor monitor = currentJob.getProgressMonitor();
+
         try {
             // Check whether workspace can be read and written
             if (!root.isAccessible()) {
                 System.err.println("Workspace: " + root.getLocationURI().toString() + " is not accessible");
                 return ERROR;
             }
-
+            
+            IWorkspace ws = ResourcesPlugin.getWorkspace();
+            if (ws instanceof Workspace) {
+             	IStatus result = Status.OK_STATUS;
+             	int trigger = IncrementalProjectBuilder.AUTO_BUILD;
+               	try {
+               		IBuildConfiguration[] buildOrder = ((Workspace)ws).getBuildOrder();
+               		for (IBuildConfiguration bc : buildOrder) {
+               			IProject prj = bc.getProject();
+               	        URI projectURI = prj.getLocationURI();
+               	        File projectDirectory = new File(projectURI.getSchemeSpecificPart());
+               	        File owlDirectory = new File(projectDirectory, ResourceManager.OWLDIR);
+               			String modelFolder = owlDirectory.getCanonicalPath();
+               			ConfigurationManagerForIDE cfgmgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, null);
+            			List<String> sources = new ArrayList<String>();
+            			sources.add("SADL");
+            			sources.add("SADL_Metrics");
+            			cfgmgr.cleanNonExisting(sources);
+               		}
+            		SubMonitor subMonitor = SubMonitor.convert(monitor, buildOrder.length + 1);
+               		result = ((Workspace)ws).getBuildManager().build(buildOrder, 
+            			ICoreConstants.EMPTY_BUILD_CONFIG_ARRAY, trigger, subMonitor);
+               	}
+               	finally {
+    				//always send POST_BUILD if there has been a PRE_BUILD
+    				((Workspace)ws).broadcastBuildEvent((Workspace)ws, IResourceChangeEvent.POST_BUILD, trigger);
+               	}
+    			if (!result.isOK()) {
+    				throw new ResourceException(result);
+    			}
+    			return OK;
+            }
+ 
             // Turn off workspace auto-build and refresh workspace
             desc.setAutoBuilding(false);
             root.getWorkspace().setDescription(desc);
