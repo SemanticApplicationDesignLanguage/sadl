@@ -60,10 +60,28 @@ import org.eclipse.xtext.resource.XtextResource
 import org.eclipse.xtext.util.internal.EmfAdaptable
 import com.ge.research.sadl.sADL.SadlCardinalityCondition
 import com.ge.research.sadl.sADL.SadlSameAs
+import java.util.HashMap
 
 class DeclarationExtensions {
 	
 	@Inject ValueConverterService.QNameConverter converter
+	
+	var cache = new HashMap<SadlResource, OntConceptType>
+	
+	/**
+	 * Add SadlResource as key, OntConceptType as value to the cache, return the OntConceptType
+	 */
+	def OntConceptType cacheOntConceptType(SadlResource it, OntConceptType type) {
+		cache.put(it, type)
+		return type
+	}
+	
+	/**
+	 * Clear the cache of OntConceptTypes by SadlResource key
+	 */
+	def void clearOntConceptTypeCache() {
+		cache.clear
+	}
 	
 	/**
 	 * Returns with the concrete name of the SADL resource argument. Any leading prefixes will be removed
@@ -231,8 +249,14 @@ class DeclarationExtensions {
 	ThreadLocal<Set<SadlResource>> recursionDetection = new ThreadLocal<Set<SadlResource>>();
 	
 	def OntConceptType getOntConceptType(SadlResource resource) throws CircularDefinitionException {
+		val sadlcli = "com.ge.research.sadl.applications.SADLCli".equals(System.getProperty("eclipse.application"))
+		if (sadlcli && cache.containsKey(resource)) {
+			return cache.get(resource)
+		}
+		
 		if (resource.isExternal) {
-			return resource.getExternalResourceAdapter.type
+			val exttype = resource.getExternalResourceAdapter.type
+			return cacheOntConceptType(resource, exttype)
 		}
 		if (recursionDetection.get === null) {
 			recursionDetection.set(new HashSet)
@@ -245,55 +269,62 @@ class DeclarationExtensions {
 		try {
 			if (resource instanceof Name) {
 				if (resource.eContainer instanceof QueryStatement) {
-					return OntConceptType.INSTANCE
+					return cacheOntConceptType(resource, OntConceptType.INSTANCE)
 				}
 				else if (resource.function) {
-					return OntConceptType.FUNCTION_DEFN
+					return cacheOntConceptType(resource, OntConceptType.FUNCTION_DEFN)
 				}
 				else if (resource.name !== null && (resource !== resource.name)) {
-					return getOntConceptType(resource.name)
+					return cacheOntConceptType(resource, getOntConceptType(resource.name))
 				}
-				return OntConceptType.VARIABLE
+				return cacheOntConceptType(resource, OntConceptType.VARIABLE)
 			}
+			
+			// for debug only awc 11/17/21
+//			var uri = getConceptUri(resource);
+//			if (uri === null) {
+//				var ln = getConcreteName(resource);
+//				println("uri is null, ln=" + ln + "(" + resource.toString() + ")")
+//			}
 			
 			switch e: resource.declaration?.eContainer {
 				
 				EquationStatement, 
 				ExternalEquationStatement :
-					OntConceptType.FUNCTION_DEFN
+					cacheOntConceptType(resource, OntConceptType.FUNCTION_DEFN)
 					
 				SadlClassOrPropertyDeclaration case e.restrictions.exists[it instanceof SadlIsAnnotation],
 				SadlProperty case e.restrictions.exists[it instanceof SadlIsAnnotation]:
-					OntConceptType.ANNOTATION_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.ANNOTATION_PROPERTY)
 					
 				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY]:
-					OntConceptType.CLASS_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.CLASS_PROPERTY)
 					
-				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY]:
-					OntConceptType.CLASS_PROPERTY
+//				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.CLASS_PROPERTY]:
+//					OntConceptType.CLASS_PROPERTY
 				
 				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.DATATYPE_PROPERTY]:
-					OntConceptType.DATATYPE_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.DATATYPE_PROPERTY)
 					 
 				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.ANNOTATION_PROPERTY]:
-					OntConceptType.ANNOTATION_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.ANNOTATION_PROPERTY)
 					 
 				SadlClassOrPropertyDeclaration case e.superElement.referencedSadlResources.exists[ontConceptType === OntConceptType.RDF_PROPERTY]:
-					OntConceptType.RDF_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.RDF_PROPERTY)
 					 
 				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.list: //e.superElement.isList: 
-					if (e.superElement.isDatatype) OntConceptType.DATATYPE_LIST
-					else OntConceptType.CLASS_LIST
+					if (e.superElement.isDatatype) cacheOntConceptType(resource, OntConceptType.DATATYPE_LIST)
+					else cacheOntConceptType(resource, OntConceptType.CLASS_LIST)
 				
 				SadlClassOrPropertyDeclaration case e.superElement!==null && e.superElement.isDatatype: 
-					OntConceptType.DATATYPE
+					cacheOntConceptType(resource, OntConceptType.DATATYPE)
 					
 				SadlClassOrPropertyDeclaration case e.oftype !== null && e.oftype.equals('instances'):
-					OntConceptType.INSTANCE
+					cacheOntConceptType(resource, OntConceptType.INSTANCE)
 						
 				SadlNecessaryAndSufficient,
 				SadlClassOrPropertyDeclaration:
-					OntConceptType.CLASS						
+					cacheOntConceptType(resource, OntConceptType.CLASS)					
 					
 				SadlSameAs case (e as SadlSameAs).sameAs !== null:
 					getOntConceptType((e as SadlSameAs).sameAs.referencedSadlResources.get(0))
@@ -309,41 +340,41 @@ class DeclarationExtensions {
 	//				conditions below
 					
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[typeonly=="class"]: 
-					OntConceptType.CLASS_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.CLASS_PROPERTY)
 					
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[typeonly=="data"]: 
-					OntConceptType.DATATYPE_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.DATATYPE_PROPERTY)
 					
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[range.isDatatype]: 
-					OntConceptType.DATATYPE_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.DATATYPE_PROPERTY)
 
 				SadlProperty case e.restrictions.filter(SadlRangeRestriction).exists[!range.isDatatype]: 
-					OntConceptType.CLASS_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.CLASS_PROPERTY)
 					
 				SadlProperty case e.restrictions.filter(SadlCardinalityCondition).exists[type instanceof SadlSimpleTypeReference && (type as SadlSimpleTypeReference).type instanceof SadlResource]:
-					OntConceptType.CLASS_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.CLASS_PROPERTY)
 				SadlProperty case (e.to instanceof SadlUnionType || e.to instanceof SadlIntersectionType):
-					OntConceptType.CLASS_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.CLASS_PROPERTY)
 					
 				SadlProperty case e.hasFromToRestriction:
-					e.inferrConceptTypeFromToType
+					cacheOntConceptType(resource, e.inferrConceptTypeFromToType)
 
 				SadlProperty: 
-					OntConceptType.RDF_PROPERTY
+					cacheOntConceptType(resource, OntConceptType.RDF_PROPERTY)
 					
 				SadlParameterDeclaration:
-					OntConceptType.VARIABLE				
+					cacheOntConceptType(resource, OntConceptType.VARIABLE)			
 					
 				SadlInstance,
 				SadlCanOnlyBeOneOf,
 				SadlValueList,
 				SadlMustBeOneOf:
-					OntConceptType.INSTANCE
+					cacheOntConceptType(resource, OntConceptType.INSTANCE)
 					
 				QueryStatement,
 				UpdateStatement,
 				RuleStatement:
-					OntConceptType.STRUCTURE_NAME					
+					cacheOntConceptType(resource, OntConceptType.STRUCTURE_NAME)				
 					
 				default: {
 					if (resource !== null && resource.eResource instanceof XtextResource) {
@@ -352,11 +383,11 @@ class DeclarationExtensions {
 						if (contribution !== null) {
 							val ontConceptType = contribution.getOntConceptType(e);
 							if (ontConceptType !== null) {
-								return ontConceptType;
+								return cacheOntConceptType(resource, ontConceptType)
 							}
 						}
 					}
-					OntConceptType.VARIABLE // linking errors and the like
+					cacheOntConceptType(resource, OntConceptType.VARIABLE) // linking errors and the like
 				}
 			}
 		} finally {
