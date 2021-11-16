@@ -38,6 +38,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.URIUtil;
+import org.eclipse.core.internal.resources.BuildConfiguration;
 import org.eclipse.core.internal.resources.ICoreConstants;
 import org.eclipse.core.internal.resources.ResourceException;
 import org.eclipse.core.internal.resources.Workspace;
@@ -715,12 +716,28 @@ public class SADLCli implements IApplication {
                 return ERROR;
             }
             
+            // Get user provided arguments
+            final String[] args = (String[]) context.getArguments().get(IApplicationContext.APPLICATION_ARGS);
+            if (!getArguments(args))
+                return SHOW_USAGE;
+
+            // Configure SADL preferences from SADL configuration file
+            if (!loadPreferences()) {
+                return ERROR;
+            }
+
             IWorkspace ws = ResourcesPlugin.getWorkspace();
             if (ws instanceof Workspace) {
              	IStatus result = Status.OK_STATUS;
              	int trigger = IncrementalProjectBuilder.AUTO_BUILD;
                	try {
-               		IBuildConfiguration[] buildOrder = ((Workspace)ws).getBuildOrder();
+               		IBuildConfiguration[] buildOrder;
+               		if (cleanAll) {
+               			buildOrder = ((Workspace)ws).getBuildOrder();
+               		}
+               		else {
+               			buildOrder = buildOrderFromArgs(root);
+               		}
                		for (IBuildConfiguration bc : buildOrder) {
                			IProject prj = bc.getProject();
                	        URI projectURI = prj.getLocationURI();
@@ -752,15 +769,15 @@ public class SADLCli implements IApplication {
             root.getWorkspace().setDescription(desc);
             root.refreshLocal(IResource.DEPTH_INFINITE, monitor);
 
-            // Get user provided arguments
-            final String[] args = (String[]) context.getArguments().get(IApplicationContext.APPLICATION_ARGS);
-            if (!getArguments(args))
-                return SHOW_USAGE;
-
-            // Configure SADL preferences from SADL configuration file
-            if (!loadPreferences()) {
-                return ERROR;
-            }
+//            // Get user provided arguments
+//            final String[] args = (String[]) context.getArguments().get(IApplicationContext.APPLICATION_ARGS);
+//            if (!getArguments(args))
+//                return SHOW_USAGE;
+//
+//            // Configure SADL preferences from SADL configuration file
+//            if (!loadPreferences()) {
+//                return ERROR;
+//            }
 
             // Import project trees
             for (String projURIStr : projectTreeToImport) {
@@ -842,7 +859,33 @@ public class SADLCli implements IApplication {
         return buildSuccessful ? OK : ERROR;
     }
 
-    @Override
+    private IBuildConfiguration[] buildOrderFromArgs(IWorkspaceRoot root) {
+        // Find projects user wanted cleaned
+        IProject[] allProjects = root.getProjects();
+        Set<IProject> projectsToBuild = new LinkedHashSet<>();
+        if (cleanAll) {
+            System.out.println("Cleaning all projects...");
+
+            // Match all projects in workspace
+            matchProjects(".*", allProjects, projectsToBuild); //$NON-NLS-1$
+        } else {
+            // Match regular expressions against project names
+            for (String regEx : projectRegExToClean) {
+                matchProjects(regEx, allProjects, projectsToBuild);
+            }
+        }
+        if (!projectsToBuild.isEmpty()) {
+        	IBuildConfiguration[] buildConfigArray = new IBuildConfiguration[projectsToBuild.size()];
+        	int idx = 0;
+        	for (IProject prj : projectsToBuild) {
+        		buildConfigArray[idx++] = new BuildConfiguration(prj);
+        	}
+        	return buildConfigArray;
+        }
+		return null;
+	}
+
+	@Override
     public void stop() {
         // do nothing
     }
