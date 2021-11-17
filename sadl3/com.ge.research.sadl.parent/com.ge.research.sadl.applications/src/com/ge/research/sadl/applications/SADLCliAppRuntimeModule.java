@@ -37,8 +37,6 @@ import org.eclipse.xtext.builder.clustering.CurrentDescriptions;
 import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.resource.containers.IAllContainersState.Provider;
 import org.eclipse.xtext.resource.containers.ResourceSetBasedAllContainersStateProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Customized SADL runtime module that contains a workaround for the
@@ -46,6 +44,11 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("restriction")
 public class SADLCliAppRuntimeModule extends SADLRuntimeModule {
+
+    /** Always print to original System.out despite any redirection */
+    private static final PrintStream OUT = System.out;
+    /** Always print to original System.err despite any redirection */
+    private static final PrintStream ERR = System.err;
 
     @Override
     public Class<? extends Provider> bindIAllContainersState$Provider() {
@@ -73,22 +76,21 @@ public class SADLCliAppRuntimeModule extends SADLRuntimeModule {
     }
 
     public static class MySadlConsole implements SadlConsole {
-        private static final Logger LOGGER = LoggerFactory.getLogger(MySadlConsole.class);
 
         @Override
         public void print(final MessageManager.MessageType type, final String message) {
             switch (type) {
                 case ERROR:
-                    LOGGER.error(message);
+                    ERR.println("ERROR " + message);
                     break;
                 case WARN:
-                    LOGGER.warn(message);
+                    ERR.println("WARN  " + message);
                     break;
                 case INFO:
-                    LOGGER.info(message);
+                    OUT.println("INFO  " + message);
                     break;
                 default:
-                    LOGGER.debug(message);
+                    OUT.println("DEBUG " + message);
                     break;
             }
         }
