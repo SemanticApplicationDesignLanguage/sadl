@@ -27,6 +27,7 @@ import com.google.inject.ConfigurationException;
 import com.google.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
