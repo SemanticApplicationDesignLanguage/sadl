@@ -402,9 +402,10 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			println(issue.message)
 		}
 		val errors = issues_1.filter[severity === Severity.ERROR]
-		assertEquals(Iterables.toString(errors), 1, errors.size);
-		assertEquals(errors.get(0).message,
-			"TypeCheckInfo(BC (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(http://sadl.org/list.sadl3#i1, range, B),TypeCheckInfo(http://sadl.org/list.sadl3#i2, range, C)].")
+		assertTrue(errors.empty)
+//		assertEquals(Iterables.toString(errors), 1, errors.size);
+//		assertEquals(errors.get(0).message,
+//			"TypeCheckInfo(BC (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(http://sadl.org/list.sadl3#i1, range, B),TypeCheckInfo(http://sadl.org/list.sadl3#i2, range, C)].")
 	}
 	
 	@Test
@@ -447,9 +448,10 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		}
 //		assertEquals(Iterables.toString(issues), 0, issues.size);
 		val errors = issues.filter[severity === Severity.ERROR]
-		assertEquals(Iterables.toString(errors), 1, errors.size);
-		assertEquals(errors.get(0).message,
-			"TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i1 (type B and C),TypeCheckInfo(http://sadl.org/list.sadl#i2, range, B)].")
+		assertTrue(errors.empty)
+//		assertEquals(Iterables.toString(errors), 1, errors.size);
+//		assertEquals(errors.get(0).message,
+//			"TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i1 (type B and C),TypeCheckInfo(http://sadl.org/list.sadl#i2, range, B)].")
 	}
 	
 	@Test
@@ -472,7 +474,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			println(issue.message)
 		}
 		// expect error on last line as i5 could be a C
-		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i1 (type B and C),TypeCheckInfo(http://sadl.org/list.sadl#i2, range, B),TypeCheckInfo(http://sadl.org/list.sadl#i3, range, C)].")
+		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i1, instance of class, {B and C}),TypeCheckInfo(i2, instance of class, B),TypeCheckInfo(i3, instance of class, C)].")
 	}
 	
 	@Test
@@ -502,6 +504,90 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i5 (type B or C)].")
 	}
 
+	@Test
+	def void testTypedList_11() {
+		val sadlModel0 = '''
+		 uri "http://sadl.org/Model.sadl".
+		
+		 Node is a class
+		 	described by description with a single value of type string
+		  	described by identifier with a single value of type string.
+		 
+		 ExpNode is a type of Node
+			described by var_name with a single value of type string
+			described by exp_node_type with a single value of type string
+			described by children with values of type ExpNode List. 	
+		
+		Variable is a type of ExpNode.
+		'''.sadl
+		
+		val sadlModel = '''
+		 uri "http://sadl.org/Test2.sadl" alias test2.
+		 
+		 import "http://sadl.org/Model.sadl".
+		
+		X1 is a ExpNode
+		    has exp_node_type "VARIABLE"
+		    has var_name "Ki_M".
+		    
+		Y1 is a ExpNode 
+		    has children [X0,X1]
+		    has exp_node_type "DEFINITION".
+		    
+		X0 is a ExpNode
+		    has exp_node_type "VARIABLE"
+		    has var_name "Kp_M". 
+		'''.sadl
+		val issues = validate(sadlModel)
+		for (issue : issues) {
+			println(issue.message)
+		}
+		// expect error on last line as i5 could be a C
+//		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i5 (type B or C)].")
+	}
+	
+		@Test
+	def void testTypedList_12() {
+		val sadlModel0 = '''
+		 uri "http://sadl.org/Model.sadl".
+		
+		 Node is a class
+		 	described by description with a single value of type string
+		  	described by identifier with a single value of type string.
+		 
+		 ExpNode is a type of Node
+			described by var_name with a single value of type string
+			described by exp_node_type with a single value of type string
+			described by children with values of type ExpNode List. 	
+		
+		Variable is a type of ExpNode.
+		'''.sadl
+		
+		val sadlModel = '''
+		uri "http://sadl.org/Test".
+		
+		import "http://sadl.org/Model.sadl".
+		
+		Y1 is a ExpNode 
+		    has children [X0,X1]
+		    has exp_node_type "DEFINITION".
+		    
+		X0 is a {ExpNode and Node and Variable}
+		    has exp_node_type "VARIABLE"
+		    has var_name "Kp_M".
+		        
+		X1 is a {ExpNode and Node and Variable}
+		    has exp_node_type "VARIABLE"
+		    has var_name "Ki_M".
+		'''.sadl
+		val issues = validate(sadlModel)
+		for (issue : issues) {
+			println(issue.message)
+		}
+		// expect error on last line as i5 could be a C
+//		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i5 (type B or C)].")
+	}
+	
 	@Test
 	def void testFirstElement_01() {
 		'''
