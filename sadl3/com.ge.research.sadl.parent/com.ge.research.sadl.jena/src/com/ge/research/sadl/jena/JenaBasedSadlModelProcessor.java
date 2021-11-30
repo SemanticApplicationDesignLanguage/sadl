@@ -11198,6 +11198,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private Individual processSadlInstance(SadlInstance element)
 			throws JenaProcessorException, CircularDefinitionException {
+		if (isEObjectPreprocessed(element)) {
+			return null;
+		}
 		// this has multiple forms:
 		// 1) <name> is a <type> ...
 		// 2) a <type> <name> ....
