@@ -568,7 +568,7 @@ public class SADLCli implements IApplication {
     @Override
     public Object start(IApplicationContext context) throws Exception {
         // Return whether projects were built successfully
-        boolean buildSuccessful = true;
+        boolean buildSuccessful = false;
         Set<String> allBuildErrors = new LinkedHashSet<>();
 
         // Suppress log4j initialization warning and debug logs
@@ -635,8 +635,19 @@ public class SADLCli implements IApplication {
                 buildSuccessful = buildProjects(workspace, monitor, allBuildErrors);
             }
         } finally {
+            if (buildSuccessful) {
+                OUT.println("Build completed successfully");
+            } else {
+                OUT.println("Build failed with " + allBuildErrors.size() + " errors");
+                for (String buildError : allBuildErrors) {
+                    ERR.println(buildError);
+                }
+                // Don't print "Eclipse:\nJVM terminated. Exit code=1" message
+                System.getProperties().put("eclipse.exitdata", "");
+            }
+    
             // Wait for any outstanding jobs to finish
-            while (!Job.getJobManager().isIdle()) {
+            if (!Job.getJobManager().isIdle()) {
                 Thread.sleep(10);
             }
 
@@ -644,19 +655,8 @@ public class SADLCli implements IApplication {
             desc.setAutoBuilding(isAutoBuilding);
             workspace.setDescription(desc);
 
-            // Save modified workspace
-            workspace.save(true, monitor);
-        }
-
-        if (buildSuccessful) {
-            OUT.println("Build completed successfully");
-        } else {
-            OUT.println("Build encountered " + allBuildErrors.size() + " errors");
-            for (String buildError : allBuildErrors) {
-                ERR.println(buildError);
-            }
-            // Don't print "Eclipse:\nJVM terminated. Exit code=1" message
-            System.getProperties().put("eclipse.exitdata", "");
+            // We sometimes hang if we save modified workspace, so just exit forcefully
+            System.exit(buildSuccessful ? OK : ERROR);
         }
 
         return buildSuccessful ? OK : ERROR;

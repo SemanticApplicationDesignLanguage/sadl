@@ -26,14 +26,14 @@ jobs:
       uses: actions/checkout@v2.4.0
 
     - name: Set up Java
-      uses: actions/setup-java@v2.3.1
+      uses: actions/setup-java@v2.4.0
       with:
         distribution: ${{ matrix.distribution }}
         java-version: ${{ matrix.java-version }}
         cache: maven
 
     - name: Build SADL source
-      uses: GabrielBB/xvfb-action@v1.5
+      uses: GabrielBB/xvfb-action@v1.6
       with:
         run: mvn -B package -Dtycho.localArtifacts=ignore --file sadl3/com.ge.research.sadl.parent/pom.xml
 

@@ -1,0 +1,28 @@
+uri "http://sadl.org/cycle_exemption.sadl" alias cycle_excemption.
+
+ 
+
+ N is a class.
+
+ S is a type of N
+
+   described by p with values of type N.
+
+   
+
+ F is a type of S.
+
+ NB is a type of S.
+
+ 
+
+ i1 is a {F and N}
+// i1 is a F
+// i1 is a N
+
+   has p i2.
+
+   
+
+ i2 is a N.
+  

@@ -249,7 +249,8 @@ class DeclarationExtensions {
 	ThreadLocal<Set<SadlResource>> recursionDetection = new ThreadLocal<Set<SadlResource>>();
 	
 	def OntConceptType getOntConceptType(SadlResource resource) throws CircularDefinitionException {
-		if (cache.containsKey(resource)) {
+		val sadlcli = "com.ge.research.sadl.applications.SADLCli".equals(System.getProperty("eclipse.application"))
+		if (sadlcli && cache.containsKey(resource)) {
 			return cache.get(resource)
 		}
 		
