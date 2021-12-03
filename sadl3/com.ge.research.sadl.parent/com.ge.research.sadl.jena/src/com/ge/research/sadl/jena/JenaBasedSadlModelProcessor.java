@@ -10735,7 +10735,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				} catch (CircularDefinitionException e) {
 					throw new JenaProcessorException("Unexpected error, please report: " + e.getMessage());
 				}
-			}			RDFNode nodeval = sadlExplicitValueToRdfNode(value, null, true);
+			}
+			RDFNode nodeval = sadlExplicitValueToRdfNode(value, null, true);
 			if (nodeval.canAs(Individual.class)) {
 				nodevals.add(nodeval.as(Individual.class));
 			} else {
