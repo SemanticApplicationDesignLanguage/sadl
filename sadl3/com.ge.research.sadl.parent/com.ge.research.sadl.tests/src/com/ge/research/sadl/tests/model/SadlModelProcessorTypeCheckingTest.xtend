@@ -542,11 +542,10 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		for (issue : issues) {
 			println(issue.message)
 		}
-		// expect error on last line as i5 could be a C
-//		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i5 (type B or C)].")
-	}
+		assertTrue(issues.isEmpty)
+	}	
 	
-		@Test
+	@Test
 	def void testTypedList_12() {
 		val sadlModel0 = '''
 		 uri "http://sadl.org/Model.sadl".
@@ -584,10 +583,13 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		for (issue : issues) {
 			println(issue.message)
 		}
-		// expect error on last line as i5 could be a C
-//		sadlModel.assertError("TypeCheckInfo(B (List), type of an unnamed typed list class, range of property p), cannot be compared (is) with TypeCheckInfo(the List [TypeCheckInfo(i5 (type B or C)].")
+		assertTrue(issues.size == 4) {
+			for (issue : issues) {
+				assertTrue(issue.message.contains("class of intersection is a subclass of"))
+			}
+		}
 	}
-	
+		
 	@Test
 	def void testFirstElement_01() {
 		'''
