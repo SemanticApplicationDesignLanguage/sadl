@@ -10726,7 +10726,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		List<RDFNode> nodevals = new ArrayList<RDFNode>();
 		for (int i = 0; i < values.size(); i++) {
 			SadlExplicitValue value = values.get(i);
-			RDFNode nodeval = sadlExplicitValueToRdfNode(value, null, true);
+			if (value instanceof SadlResource) {
+				try {
+					OntConceptType vtype = getDeclarationExtensions().getOntConceptType((SadlResource)value);
+					if (!vtype.equals(OntConceptType.INSTANCE)) {
+						addError("Expected an instance in the enumeration of the class", value);
+					}
+				} catch (CircularDefinitionException e) {
+					throw new JenaProcessorException("Unexpected error, please report: " + e.getMessage());
+				}
+			}			RDFNode nodeval = sadlExplicitValueToRdfNode(value, null, true);
 			if (nodeval.canAs(Individual.class)) {
 				nodevals.add(nodeval.as(Individual.class));
 			} else {
