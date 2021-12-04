@@ -1,10 +1,13 @@
 #!/bin/sh
-##############################################################################
-## This shell script is the main entry point into SADL command-line interface.
-##############################################################################
+###################################################################
+## This shell script runs SADL's command-line interface application
+###################################################################
 
 # Ensure errors stop execution
 set -eu
+
+# Go to this script's directory
+cd -P -- "$(dirname -- "$0")"
 
 # Ensure DISPLAY is defined
 XRUN=
@@ -16,8 +19,6 @@ fi
 LOG4J_CONFIGURATION_FILE=log4j2.properties
 export LOG4J_CONFIGURATION_FILE
 
-# Go to this script's directory
-cd -P -- "$(dirname -- "$0")"
-
-# Run SADLCli with our command line arguments
+# Run SADLCli application with given command line arguments
+# shellcheck disable=SC2086
 exec ${XRUN} ./eclipse -application com.ge.research.sadl.applications.SADLCli -consolelog -data workspace -noSplash "$@"

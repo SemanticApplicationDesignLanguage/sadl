@@ -70,3 +70,11 @@ jobs:
         file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
         push: true
         tags: sadl/sadl-eclipse:dev
+
+    - name: Update Docker Hub description
+      uses: peter-evans/dockerhub-description@v2.4.3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        repository: sadl/sadl-eclipse
+        readme-filepath: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/README.md
