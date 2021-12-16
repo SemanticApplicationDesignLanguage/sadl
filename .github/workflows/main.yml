@@ -46,13 +46,13 @@ jobs:
         echo "sadlversion=$(ls com.ge.research.sadl.feature_*.jar | sed 's/com.ge.research.sadl.feature_\(.*\).jar/\1/')" >> $GITHUB_ENV
 
     - name: Upload SADL product zip files
-      uses: actions/upload-artifact@v2.3.0
+      uses: actions/upload-artifact@v2.3.1
       with:
         name: sadl-eclipse-${{ env.sadlversion }}
         path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/target/products/*.zip
 
     - name: Upload SADL update repository
-      uses: actions/upload-artifact@v2.3.0
+      uses: actions/upload-artifact@v2.3.1
       with:
         name: com.ge.research.sadl.update-${{ env.sadlversion }}
         path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository/
