@@ -26,6 +26,5 @@ Bundle-Activator: com.ge.research.sadl.applications.Activator
 Import-Package: com.ge.research.sadl.ide.handlers,
  com.ge.research.sadl.jena,
  com.ge.research.sadl.ui.handlers,
- jakarta.activation,
- org.apache.log4j
+ jakarta.activation
 Automatic-Module-Name: com.ge.research.sadl.applications

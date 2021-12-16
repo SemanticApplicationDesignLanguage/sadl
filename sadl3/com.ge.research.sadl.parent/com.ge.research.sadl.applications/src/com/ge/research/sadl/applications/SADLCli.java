@@ -571,10 +571,6 @@ public class SADLCli implements IApplication {
         boolean buildSuccessful = false;
         Set<String> allBuildErrors = new LinkedHashSet<>();
 
-        // Suppress log4j initialization warning and debug logs
-        org.apache.log4j.BasicConfigurator.configure();
-        org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
-
         // Check whether workspace is being used in a running IDE
         if (!checkInstanceLocation())
             return ERROR;
