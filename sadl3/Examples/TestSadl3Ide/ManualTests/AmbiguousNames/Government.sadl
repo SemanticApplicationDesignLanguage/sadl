@@ -1,0 +1,9 @@
+ uri "http://sadl.org/Government.sadl" alias government.
+ 
+ import "http://sadl.org/Chemistry.sadl" .
+ import "http://sadl.org/Entertainment.sadl" .
+ 
+ government:Agent is a class.
+ 
+ BenedictArnold is an government:Agent.
+ 

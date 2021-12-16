@@ -1,0 +1,16 @@
+ uri "http://sadl.org/GH837.sadl" alias gh837.
+ 
+ Latitude is a type of double [-90, 90].
+ Longitude is a type of double [-180,180].
+ Coordinate is a class, described by longitude with values of type Longitude, described by latitute with values of type Latitude.
+ Location is a class, 
+ 	described by gps-coordinates with values of type Coordinate.
+ When is a type of {dateTime or duration}.	
+ WhenWhere is a class, described by when with values of type When, described by ^where with values of type Location.
+ location is a property with values of type Location.
+ 
+ Event is a class, described by whenWhere with values of type WhenWhere.
+ 
+ Christmas is an Event with whenWhere (a WhenWhere with when "Dec 25, 2021").
+ 
+ 

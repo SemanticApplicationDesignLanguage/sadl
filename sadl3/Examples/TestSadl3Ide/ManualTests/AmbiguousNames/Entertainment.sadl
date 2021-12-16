@@ -1,0 +1,5 @@
+ uri "http://sadl.org/Entertainment.sadl" alias entertainment.
+ 
+ Agent (note "a business representative of an entertainer") is a class.
+ 
+ 
