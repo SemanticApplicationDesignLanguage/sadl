@@ -65,7 +65,6 @@ public abstract class ErrorGeneratorBase {
 	
 	protected final static String REQUIREMENTS_PREFIX = "Requirements";
 	protected final static String SADL_PREFIX = "Sadl";
-	private String errorListHtmlFileContent = "";
 	
 	/**
 	 * This method is used for Java 1.7 and 1.8 compatibility

@@ -24,6 +24,7 @@ import com.google.inject.Singleton
 import org.eclipse.emf.common.EMFPlugin
 import org.eclipse.emf.common.util.URI
 import org.eclipse.xtext.util.internal.Log
+import org.slf4j.LoggerFactory
 
 import static extension com.google.common.base.Strings.nullToEmpty
 
@@ -42,9 +43,10 @@ interface ExternalEmfResourcePredicate extends Predicate<URI> {
 	 */
 	override boolean apply(URI resourceUri);
 
-	@Log
 	@Singleton
 	static class DispatchingExternalEmfResourcePredicate implements ExternalEmfResourcePredicate {
+
+		static val LOGGER = LoggerFactory.getLogger(DispatchingExternalEmfResourcePredicate);
 
 		@Inject
 		Default headless;
@@ -63,7 +65,7 @@ interface ExternalEmfResourcePredicate extends Predicate<URI> {
 			val isFile = uri.scheme.nullToEmpty.equalsIgnoreCase('file');
 			if (EMFPlugin.IS_ECLIPSE_RUNNING) {
 				if (isFile) {
-					LOG.info('''Got a file URI while running in Eclipse. Falling back to headless case. URI: «uri»''');
+					LOGGER.info('''Got a file URI while running in Eclipse. Falling back to headless case. URI: «uri»''');
 					return headless;
 				}
 				return eclipse;

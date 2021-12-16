@@ -26,6 +26,5 @@ Export-Package: com.ge.research.sadl.ide,
  com.ge.research.sadl.ide.editor.coloring,
  com.ge.research.sadl.ide.editor.contentassist,
  com.ge.research.sadl.ide.handlers
-Import-Package: jakarta.activation,
- org.apache.log4j
+Import-Package: jakarta.activation
 Automatic-Module-Name: com.ge.research.sadl.ide

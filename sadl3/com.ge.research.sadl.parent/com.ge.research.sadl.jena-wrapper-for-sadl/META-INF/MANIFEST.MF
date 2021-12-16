@@ -8,7 +8,6 @@ Bundle-Vendor: GE Research
 Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
  com.ge.research.sadl.jena,
- org.apache.log4j,
  org.eclipse.core.runtime,
  org.eclipse.osgi,
  org.junit;bundle-version="4.12.0";resolution:=optional
