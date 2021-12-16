@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 
 import jakarta.activation.DataSource;
 
+import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.ontology.AnnotationProperty;
@@ -603,18 +604,41 @@ public class SadlUtils {
     }
     
     public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, String rnguri, Object v) throws TranslationException {
+        RDFDatatype rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
+        Resource rng = null;
+        if (rdftype != null) {
+	        rng = m.getResource(rnguri);
+        	List<RDFNode> unionMembers = getRDFDatatypeUnionMembers(m, rng, rdftype);
+        	if (unionMembers != null) {
+	        	for (RDFNode member : unionMembers) {
+	        		if (member.isURIResource()) {
+	        			String memberUri = member.asResource().getURI();
+	        			Literal val = getLiteralMatchingDataPropertyRange(m, memberUri, v);
+	        			try {
+		        			if (val.getValue() != null) {
+		        				return val;
+		        			}
+	        			}
+	        			catch (DatatypeFormatException e) {
+	        				// do nothing--this isn't a matching type
+	        			}
+	        		}
+	        	}
+        	}
+        }
     	v = preProcessValueString(rnguri, v.toString());
         Literal val = null;
         String errMsg = null;
         boolean rdfTypeValid = false;
         boolean isNumeric = isNumericRange(rnguri);
-        RDFDatatype rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
         if (rdftype != null) {
          	val = m.createTypedLiteral(v, rdftype);
         	if (val != null) {
         		return val;
          	}
-	        Resource rng = m.getResource(rnguri);
+	        if (rng ==  null) {
+	        	rng = m.getResource(rnguri);
+	        }
 			OntClass eqcls = null;
 			if (rng.canAs(OntClass.class)) {
 				eqcls = rng.as(OntClass.class).getEquivalentClass();
@@ -929,6 +953,31 @@ public class SadlUtils {
             throw new TranslationException(errMsg);
         }
         return val;
+    }
+    
+    /**
+     * Method to get the members of a RDFDatatype union
+     * @param m -- the OntModel
+     * @param rng -- the range Resource
+     * @param rdfdt - the RDFDatatype in question
+     * @return -- list of union members else null 
+     */
+    private static List<RDFNode> getRDFDatatypeUnionMembers(OntModel m, Resource rng, RDFDatatype rdfdt) {
+		OntClass eqcls = null;
+		if (rng.canAs(OntClass.class)) {
+			eqcls = rng.as(OntClass.class).getEquivalentClass();
+		}
+		if (eqcls != null) {
+			Statement uof = eqcls.getProperty(OWL2.unionOf);
+			if (uof != null) {
+				RDFNode uofnode = uof.getObject();
+				if (uofnode.isResource()) {
+					java.util.List<RDFNode> l = convertList(uofnode, m);
+					return l;
+				}
+			}
+		}
+		return null;
     }
     
     /*
