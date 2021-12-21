@@ -20,191 +20,211 @@
       These correspond to existential and universal quantification,
       respectively, in predicate logic.</p>
     <h3>Some Values From in SADL</h3>
-    <p>In the SADL grammar, there are two forms of the some values from
-      constraint. The first form places the property restriction inside the
-      declaration of the class, <i>Parent</i> in the first example below. The
-      declaration also defines the domain (<em>Parent</em>) and range (<em>Person</em>)
-      of the <i>child</i> property. In the second form, second example below,
-      the class <i>Parent</i> is declared and identified as the domain of the <i>child</i>
-      property, with range <em>Person</em>, in the first statement. The
-      property restriction is then added as a second statement.&nbsp; </p>
-    <ol>
-      <li><font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
-              size="2"><b>Parent</b></font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,</font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">
-              <br>
-              &nbsp;&nbsp;&nbsp; described</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">by</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#008000"><font face="Monospace"><font
-              style="font-size: 10pt" size="2"><b>child</b></font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">at</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">least</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">one</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">value</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">type</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font>
-      </li>
-      <li><font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
-              size="2"><b>Parent</b></font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,</font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
-                style="color: #4c4c4c;"> </span><br>
-              &nbsp;&nbsp;&nbsp; described</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">by</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#008000"><font face="Monospace"><font
-              style="font-size: 10pt" size="2"><b>child</b></font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#000080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font><font
-          color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><br>
-              <b>child</b></font></font></font><font color="#4c4c4c"><font face="Monospace"><font
-              style="font-size: 10pt" size="2"> </font></font></font><font color="#800080"><font
-            face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#000080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2"><b>Parent</b></font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">has</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">at</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">least</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">one</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">value</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">type</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-          color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
-          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.
-            </font></font></font> </li>
-    </ol>
-    <ol>
-    </ol>
-    <p style="margin-left: 40px;"></p>
-    <p>
-      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <p>In the SADL grammar, there are several forms that a some values from
+      constraint can take. Suppose we have the following model snippet.</p>
+    <p style="margin-left: 40px;"><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Parent</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">type</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,</font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+              style="color: #4c4c4c;"> </span><br>
+            &nbsp;&nbsp;&nbsp; described</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">by</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>child</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"></font></font></font></p>
+    <p>We might further say</p>
+    <p style="margin-left: 40px;"><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>child</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Parent</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">has</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">at</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">least</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">one</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">value</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">type</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <p>This will result in an OWL some values from property restriction. In OWL
+      RDF/XML format, this is:</p>
+    <p>&nbsp; &lt;owl:Class rdf:ID="Parent"&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;rdfs:subClassOf&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:Restriction&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:someValuesFrom&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:Class
+      rdf:ID="Person"/&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/owl:someValuesFrom&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;owl:onProperty&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &lt;owl:ObjectProperty rdf:ID="child"/&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/owl:onProperty&gt;<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/owl:Restriction&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;/rdfs:subClassOf&gt;<br>
+      &nbsp;&nbsp;&nbsp; &lt;rdfs:subClassOf rdf:resource="#Person"/&gt;<br>
+      &nbsp; &lt;/owl:Class&gt;.</p>
+    <p>Note that we could have put the property restriction inside the class
+      declaration, like this.</p>
+    <p style="margin-left: 40px;"><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Parent</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">type</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,</font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            <br>
+            &nbsp;&nbsp;&nbsp; described</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">by</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>child</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">at</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">least</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">one</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">value</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">type</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <p><span style="font-family: monospace;"><span style="font-family: serif;">In
+          this case, t</span></span>he declaration defines the domain (<em>Parent</em>)
+      of the property <em>child</em> but does not define the range. It does
+      establish that <em>child</em> is an object property, but otherwise all
+      that is know is that for instances of type <em>Parent</em>, <em>child</em>
+      must have some value of type <em>Person</em>. </p>
+    <p><span style="font-family: Arial;">It is possible to create a some values
+        from restriction to an enumerated class in a single statement as long as
+        the range of the property is known. This statement is an example.</span></p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> </font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>gender</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">describes</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><br>
+            <b>Gender</b></font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">.</font></font></font> <font color="#4c4c4c">
+      </font><font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"><b>Gender</b></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">class</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font><br>
+      <font color="#4c4c4c"> </font><font color="#008000"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>gender</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>Person</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">must</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">be</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">one</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            {</font></font></font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">Male</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+        color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2">Female</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">}.</font></font></font></p>
+    <p style="margin-bottom: 0in; line-height: 100%">&lt;once JBSMP is fixed to
+      generate correct OWL, put in translation here&gt;<br>
     </p>
-    <p>The OWL generated from these two forms is identical. Note that <i>Parent</i>
-      is a subclass both of <i>Person</i> and of all things which have some
-      value (at least one value) of <em>child</em> coming from the <em>Person</em>
-      class.</p>
-    <p>
-      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <p><span style="font-family: Arial;"></span>******* fix ***************<br>
     </p>
-    <p>
-      <meta charset="utf-8">
-    </p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"
-      id="docs-internal-guid-7f545f9f-7fff-1955-d202-1ec5d9b4aca9"><span style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&lt;owl:Class rdf:ID="Parent"&gt;</span></p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&lt;rdfs:subClassOf&gt;</span></p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;</span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&lt;owl:Restriction&gt;</span></p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp;&nbsp;</span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&lt;owl:someValuesFrom rdf:resource="#Person"/&gt;</span></p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp;&nbsp;</span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&lt;owl:onProperty&gt;</span></p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&lt;owl:ObjectProperty rdf:ID="child"/&gt;</span></p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp;&nbsp;</span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&lt;/owl:onProperty&gt;</span></p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;</span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&lt;/owl:Restriction&gt;</span></p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&lt;/rdfs:subClassOf&gt;</span></p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&nbsp; </span><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&lt;rdfs:subClassOf rdf:resource="#Person"/&gt;</span></p>
-    <p dir="ltr" style="line-height: 1.38; margin-left: 18.72pt; margin-top: 0pt; margin-bottom: 0pt;"><span
-style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&nbsp;&nbsp;&lt;/owl:Class&gt;</span></p>
     <p></p>
     <h3>All Values From in SADL</h3>
     <p>In the SADL grammar, the all values from constraint is similar to the
@@ -322,12 +342,8 @@ style="font-size:11pt;font-family:Arial;color:#000000;background-color:transpare
     <p>Once again, the OWL generated from these two forms is identical and <em>EligibleAthlete</em>
       is a subclass both of <em>Student</em> and of all things that have all
       values of <em>grade</em> coming from the <em>PasingGrade</em> class.</p>
-    <p>
-      <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    </p>
-    <p>
-      <meta charset="utf-8">
-    </p>
+    <p> </p>
+    <p> </p>
     <p dir="ltr" style="line-height: 1.38; margin-left: 42.24pt; margin-top: 0pt; margin-bottom: 0pt;"
       id="docs-internal-guid-ff4e293b-7fff-f034-8038-e378ffd7f09d"><span style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">&lt;owl:Class rdf:ID="EligibleAthlete"&gt;</span></p>
     <p dir="ltr" style="line-height: 1.38; margin-left: 42.24pt; margin-top: 0pt; margin-bottom: 0pt;"><span
@@ -465,40 +481,35 @@ style="font-size:11pt;font-family:Arial;color:#000000;background-color:transpare
       </li>
       <li><font color="#000080"><font face="Monospace"><font style="font-size: 10pt"
               size="2"><b>Bicycle</b></font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2">
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">is</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
             </font></font></font><font color="#800080"><font face="Monospace"><font
               style="font-size: 10pt" size="2">a</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">class</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2">
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">class</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
             </font></font></font><font color="#800080"><font face="Monospace"><font
               style="font-size: 10pt" size="2">described</font></font></font><font
           color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
             </font></font></font><font color="#800080"><font face="Monospace"><font
               style="font-size: 10pt" size="2">by</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#00cc00"><font face="Monospace"><font
-              style="font-size: 10pt" size="2"><b>seat</b></font></font></font><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#00cc00"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>seat</b></font></font></font><font
           color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
             </font></font></font><font color="#800080"><font face="Monospace"><font
               style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">at</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">least</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2">
-            </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
-              style="font-size: 10pt" size="2"><span style="background: #e6f0ff">1</span></font></font></font><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">at</font></font></font><font
           color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
             </font></font></font><font color="#800080"><font face="Monospace"><font
-              style="font-size: 10pt" size="2">value</font></font></font><font color="#4c4c4c"><font
-            face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font>
+              style="font-size: 10pt" size="2">least</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+                style="background: #e6f0ff">1</span></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">value</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font>
       </li>
       <li><font color="#008000"><font face="Monospace"><font style="font-size: 10pt"
               size="2"><b>wheel</b></font></font></font><font color="#4c4c4c"><font
