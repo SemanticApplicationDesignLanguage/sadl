@@ -2267,4 +2267,39 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			}
 		]
 	}
+	
+	@Test
+	def void testGH_828a() {
+		val sadlModel = '''
+			 uri "http://sadl.org/GH828.sadl" alias gh828.
+			 Person is a class.
+			 gender of Person must be one of {Male, Female}. 
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertFalse(issues.empty)
+			assertTrue(issues.size == 2)
+			for (issue : issues) {
+				println(issue.message)
+				assertTrue(issue.severity.equals(Severity.ERROR))
+				assertTrue(issue.message.contains("Unable to determine type of instance, the property has no range"))
+			}
+		]
+	}
+
+	@Test
+	def void testGH_828b() {
+		val sadlModel = '''
+			 uri "http://sadl.org/GH828.sadl" alias gh828.
+			 Person is a class.
+			 age of Person must be one of {"young", "old"}. 
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertFalse(issues.empty)
+			assertTrue(issues.size == 2)
+			for (issue : issues) {
+				println(issue.message)
+				assertTrue(issue.severity.equals(Severity.WARNING))
+				assertTrue(issue.message.contains("Can't find range of property to create typed Literal"))
+			}
+		]
+	}
+	
 }

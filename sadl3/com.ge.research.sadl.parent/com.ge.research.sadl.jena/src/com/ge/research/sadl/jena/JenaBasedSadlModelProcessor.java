@@ -10737,10 +10737,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			RDFNode nodeval = sadlExplicitValueToRdfNode(value, prop, true);
-			if (nodeval.canAs(Individual.class)) {
-				nodevals.add(nodeval.as(Individual.class));
-			} else {
-				nodevals.add(nodeval);
+			if (nodeval != null) {
+				if (nodeval.canAs(Individual.class)) {
+					nodevals.add(nodeval.as(Individual.class));
+				} else {
+					nodevals.add(nodeval);
+				}
 			}
 		}
 		RDFNode[] enumedArray = nodevals.toArray(new RDFNode[nodevals.size()]);
@@ -10753,8 +10755,40 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			throws JenaProcessorException {
 		if (value instanceof SadlResource) {
 			String uri = getDeclarationExtensions().getConceptUri((SadlResource) value);
-			org.apache.jena.rdf.model.Resource rsrc = getTheJenaModel().getResource(uri);
-			return rsrc;
+			Individual theInst = getTheJenaModel().getIndividual(uri);
+			if (theInst != null) {
+				return theInst;
+			}
+			else {
+				// Indiividual doesn't exist; don't create an Individual unless we can determine a class.
+				if (prop != null) {
+					StmtIterator rngitr = getTheJenaModel().listStatements(prop, RDFS.range, (RDFNode)null);
+					int cntr = 0;
+					if (rngitr.hasNext()) {
+						while (rngitr.hasNext()) {
+							RDFNode objnode = rngitr.nextStatement().getObject();
+							if (objnode.canAs(OntClass.class)) {
+								if (theInst == null) {
+									theInst = getTheJenaModel().createIndividual(uri, objnode.as(OntClass.class));								
+								}
+								else if (theInst != null){
+									theInst.addProperty(RDF.type, objnode.as(OntClass.class));
+								}
+							}
+							else {
+								addError("Unable to determine type of instance from property range", value);
+							}
+						}
+					}
+					else {
+						addError("Unable to determine type of instance, the property has no range", value);
+					}
+				}
+				else {
+					addError("Unable to determine type of instance, no property and range defined", value);
+				}
+			}
+			return theInst;
 		}
 		else {
 			if (prop != null) {
@@ -10886,7 +10920,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (existingRngItr.hasNext()) {
 			RDFNode existingRngNode = existingRngItr.next().getObject();
 			rangeExists = true;
-			// property already has a range know to this model
+			// property already has a range known to this model
 			if (rngNode.equals(existingRngNode) || (rngResource != null && rngResource.equals(existingRngNode))) {
 				// do nothing-- rngNode is already in range
 				return;
