@@ -10289,7 +10289,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							}
 							EList<SadlExplicitValue> values = ((SadlCanOnlyBeOneOf) spr2).getValues();
 							if (values != null) {
-								EnumeratedClass enumCls = sadlExplicitValuesToEnumeratedClass(values);
+								EnumeratedClass enumCls = sadlExplicitValuesToEnumeratedClass(values, prop);
 								AllValuesFromRestriction avf = getTheJenaModel().createAllValuesFromRestriction(null,
 										prop, enumCls);
 								if (avf != null) {
@@ -10324,7 +10324,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							}
 							EList<SadlExplicitValue> values = ((SadlMustBeOneOf) spr2).getValues();
 							if (values != null) {
-								EnumeratedClass enumCls = sadlExplicitValuesToEnumeratedClass(values);
+								EnumeratedClass enumCls = sadlExplicitValuesToEnumeratedClass(values, prop);
 								SomeValuesFromRestriction svf = getTheJenaModel().createSomeValuesFromRestriction(null,
 										prop, enumCls);
 								if (svf != null) {
@@ -10721,7 +10721,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return def;
 	}
 
-	private EnumeratedClass sadlExplicitValuesToEnumeratedClass(EList<SadlExplicitValue> values)
+	private EnumeratedClass sadlExplicitValuesToEnumeratedClass(EList<SadlExplicitValue> values, Property prop)
 			throws JenaProcessorException {
 		List<RDFNode> nodevals = new ArrayList<RDFNode>();
 		for (int i = 0; i < values.size(); i++) {
@@ -10736,7 +10736,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					throw new JenaProcessorException("Unexpected error, please report: " + e.getMessage());
 				}
 			}
-			RDFNode nodeval = sadlExplicitValueToRdfNode(value, null, true);
+			RDFNode nodeval = sadlExplicitValueToRdfNode(value, prop, true);
 			if (nodeval.canAs(Individual.class)) {
 				nodevals.add(nodeval.as(Individual.class));
 			} else {
