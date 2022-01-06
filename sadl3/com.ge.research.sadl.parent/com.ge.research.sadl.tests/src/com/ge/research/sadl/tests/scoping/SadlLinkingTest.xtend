@@ -1137,6 +1137,17 @@ class SadlLinkingTest extends AbstractLinkingTest {
 	}
 
 	@Test
+	def void testGH_XtextScopesDoc() {
+		'''
+			 uri "http://sadl.org/scopes.sadl" alias scopes.
+			 [Cls] is a class described by  [objProp] with values of type <Cls>.
+			 [i1] is a <Cls>.
+			 <i2> has <objProp> <i1>.
+			 [i2] is a <Cls>.
+		'''.assertLinking[sadl]
+	}
+
+	@Test
 	def void testLinkingQnamesNeeded() {
 		'''
 			uri "http://sadl.org/NS1.sadl" alias ns1.
