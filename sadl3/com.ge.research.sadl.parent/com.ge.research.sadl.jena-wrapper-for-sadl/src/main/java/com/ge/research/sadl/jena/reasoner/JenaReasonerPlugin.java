@@ -268,6 +268,8 @@ public class JenaReasonerPlugin extends Reasoner{
 	protected List<ConfigurationItem> preferences = null;
 	protected OntModel tboxModelWithSpec;
 	private List<ModelError> newErrors = null;
+	private List<Rule> preLoadedRules = null;
+	private OntModel preLoadedModel = null;
 	
 	public JenaReasonerPlugin() {
 		// these will have been loaded by the translator and added to the configuration if they are needed
@@ -336,7 +338,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		this.ruleList = new ArrayList<Rule>();
 		
 		try {
-			if (!configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
+			if (tbox != null && !configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
 				if (tbox.equals(getModelName())) {
 					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
 				}
@@ -358,7 +360,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 		logger.debug("JenaReasonerPlugin.initializeReasoner, tbox = "+tbox);
 		try {
-			if (!tbox.startsWith("file:") && !tbox.startsWith("http:")) {
+			if (tbox != null && !tbox.startsWith("file:") && !tbox.startsWith("http:")) {
 				//assume local file
 				SadlUtils su = new SadlUtils();
 				tbox = su.fileNameToFileUrl(tbox);
@@ -375,19 +377,27 @@ public class JenaReasonerPlugin extends Reasoner{
 				schemaModel.loadImports();
 			}
 			else {
-				if (tbox.endsWith(".TDB/")) {
+				if (tbox != null && tbox.endsWith(".TDB/")) {
 					// this is a cached inferred TDB model
 					schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);
 					schemaModelIsCachedInferredModel = true;
 					return null;
 				}
 				else {
-					schemaModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
+					if (tbox != null) {
+						schemaModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
+					}
+					else if (getPreLoadedModel() != null) {
+						schemaModel = getPreLoadedModel();
+					}
+
 					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
 					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
-					schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
+					if (tbox != null) {
+						schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
+					}
 				}
 			}
 		} catch (Exception e1) {
@@ -642,65 +652,37 @@ public class JenaReasonerPlugin extends Reasoner{
 		else {
 			timingInfo.clear();
 		}
-		schemaModel = (OntModel)kbase;		
+		setPreLoadedModel((OntModel)kbase);		
 		
-		long t2 = System.currentTimeMillis();
-		
-		this.ruleFilesLoaded = new ArrayList<String>();
-		this.ruleList = new ArrayList<Rule>();
-
 		if (rules != null) {
-			loadRulesFromString(rules);
-		}
-		modelSpec = getModelSpec(preferences);	// get this for later use when creating InfModel
-
-		reasoner = new GenericRuleReasoner(ruleList);
-		reasoner.setDerivationLogging(derivationLogging);
-		logger.debug("JenaReasonerPluging.initialize, size of ruleList from reasoner = "+reasoner.getRules().size());
-		reasoner.setMode(getRuleMode(preferences));
-		long t3 = System.currentTimeMillis();
-		if (collectTimingInfo) {
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_MODEL, "load ontology model", t2 - tboxLoadTime));
-			int numRules = ruleList.size();
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "load " + numRules + " rules", t3 - t2));
+			setPreLoadedRules(loadRulesFromString(rules));
 		}
 
-		long t4;
-		if (collectTimingInfo) {
-			t4 = System.currentTimeMillis();
-			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "bind schema to reasoner", t4 - t3));			
-		}
-		boolean transitiveClosure = getBooleanConfigurationValue(preferences, pTransitiveClosureCaching, false);
-		reasoner.setTransitiveClosureCaching(transitiveClosure);
-		reasoner.setOWLTranslation(getBooleanConfigurationValue(preferences, pOWLTranslation, false));
-		if (getBooleanConfigurationValue(preferences, pUseLuceneIndexer, false)) {
-			luceneIndexerClass = getStringConfigurationValue(preferences, pLuceneIndexerClass, "com.ge.research.sadl.jena.reasoner.LuceneModelIndexerImpl");
-		}
-		
-		String strTimeOut = getStringConfigurationValue(preferences, pTimeOut, "-1");
+		String format = repoType;
 		try {
-			queryTimeout = Long.parseLong(strTimeOut.trim());
+			String tdbFolder = configurationMgr.getTdbFolder();
+			if (configurationMgr.getModelGetter() == null) {
+				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
+			}
+			format = configurationMgr.getModelGetter().getFormat();
+			if (repoType == null) repoType = format;	
+			if (format != null && !format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+				configurationMgr.getModelGetter().setFormat(format);
+			}
 		}
-		catch (NumberFormatException e) {
-			String msg = "Invalid timeout value '" + strTimeOut + "'";
-			logger.error(msg); addError(new ModelError(msg, ErrorType.ERROR));
-
+		catch (IOException e) {
+			e.printStackTrace();
 		}
 		initialized = true;
 		
 		return 1;
 	}
 	
-	private boolean loadRulesFromString(String rulesStr) {
+	private List<Rule> loadRulesFromString(String rulesStr) {
 		Reader ruleReader = new StringReader(rulesStr);
 		BufferedReader br = new BufferedReader(ruleReader);
 		List<Rule> rules = Rule.parseRules(Rule.rulesParserFromReader(br));
-		if (rules != null) {
-			ruleList.addAll(rules);
-			newInputFlag = true;
-			return true;
-		}
-		return false;
+		return rules;
 	}
 
 	public boolean loadRules(String ruleFileName) throws IOException {
@@ -2413,6 +2395,10 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (altUrl == null) {
 				throw new ConfigurationException("Model URI '" + modelName + "' not found in mappings!");
 			}
+			
+			if (getPreLoadedRules() != null) {
+				ruleList.addAll(getPreLoadedRules());
+			}
 
 			if (altUrl != null) {
 				logger.debug("modelName: " + modelName);
@@ -2867,7 +2853,7 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 
-	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException {
+	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException, ConfigurationException {
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e1) {
@@ -3698,6 +3684,22 @@ public class JenaReasonerPlugin extends Reasoner{
 			}
 		}
 		return null;
+	}
+
+	protected List<Rule> getPreLoadedRules() {
+		return preLoadedRules;
+	}
+
+	protected void setPreLoadedRules(List<Rule> preLoadedRules) {
+		this.preLoadedRules = preLoadedRules;
+	}
+
+	protected OntModel getPreLoadedModel() {
+		return preLoadedModel;
+	}
+
+	protected void setPreLoadedModel(OntModel preLoadedModel) {
+		this.preLoadedModel = preLoadedModel;
 	}
 
 }

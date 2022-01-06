@@ -2,7 +2,6 @@ package com.ge.research.sadl.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.log4j.Logger;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -24,6 +23,8 @@ import org.eclipse.xtext.ui.refactoring.impl.Messages;
 import org.eclipse.xtext.ui.refactoring.ui.RenameRefactoringExecuter;
 import org.eclipse.xtext.ui.refactoring.ui.SyncUtil;
 import org.eclipse.xtext.ui.refactoring.ui.WorkbenchRunnableAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
@@ -38,7 +39,7 @@ public class SadlRenameRefactoringExecuter extends RenameRefactoringExecuter {
 	@Inject
 	private EclipseRefactoringHelper refactoringHelper;
 
-	private static final Logger LOG = Logger.getLogger(SadlRenameRefactoringExecuter.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SadlRenameRefactoringExecuter.class);
 
 	public void execute(IEditorPart editor, ProcessorBasedRefactoring refactoring) throws InterruptedException {
 		Assert.isTrue(Display.getCurrent() != null);

@@ -111,7 +111,7 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		}
 				
 		try {
-			if (!configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
+			if (tbox != null && !configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
 				if (tbox.equals(getModelName())) {
 					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
 				}
@@ -133,7 +133,7 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 
 		logger.debug("JenaReasonerPlugin.initializeReasoner, tbox = "+tbox);
 		try {
-			if (!tbox.startsWith("file:") && !tbox.startsWith("http:")) {
+			if (tbox != null && !tbox.startsWith("file:") && !tbox.startsWith("http:")) {
 				//assume local file
 				SadlUtils su = new SadlUtils();
 				tbox = su.fileNameToFileUrl(tbox);
@@ -150,19 +150,26 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 				schemaModel.loadImports();
 			}
 			else {
-				if (tbox.endsWith(".TDB/")) {
+				if (tbox != null && tbox.endsWith(".TDB/")) {
 					// this is a cached inferred TDB model
 					schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);
 					schemaModelIsCachedInferredModel = true;
 					return null;
 				}
 				else {
-					schemaModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
+					if (tbox != null) {
+						schemaModel = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null));
+					}
+					else if (getPreLoadedModel() != null) {
+						schemaModel = getPreLoadedModel();
+					}
 					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
 					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
-					schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
+					if (tbox != null) {
+						schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
+					}
 				}
 			}
 		} catch (Exception e1) {
@@ -190,12 +197,38 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 			timingInfo.add(new ReasonerTiming(TIMING_LOAD_RULES, "read " + numRules + " rules from file(s)", t3 - t2));
 		}
 		
-		// load only first stage rules at this point
+		// load only first stage rules at this point (and any preloaded rules
 		lastRuleStageLoaded = 0;
-		reasoner = createReasonerAndLoadRules(ruleListMap.get(lastRuleStageLoaded), 0);
+		List<Rule> stage0Rules = ruleListMap.get(lastRuleStageLoaded);
+		if (getPreLoadedRules() != null) {
+			stage0Rules.addAll(getPreLoadedRules());
+		}
+		else {
+			stage0Rules = new ArrayList<Rule>();	// otherwise an NPE occurs in Jena
+		}
+		reasoner = createReasonerAndLoadRules(stage0Rules, 0);
 		return reasoner;
 	}
 
+	@Override
+	public Model getInferredModel(boolean deductionsOnly) throws ConfigurationException {
+		prepareInfModel();
+		if (deductionsOnly) {
+			if (deductionsModel != null) {
+				return deductionsModel;
+			}
+			else if (!derivationLogging){
+				throw new ConfigurationException("Deductions model not available. Derivations must be enabled in the configuration to capture a deductions model.");
+			}
+			else {
+				return null; 
+			}
+		}
+		else {
+			return infModel;
+		}
+	}
+	
 	/**
 	 * Method to count the number of rules loaded from rule files
 	 * @return
@@ -364,24 +397,21 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 	}
 
 	@Override
-	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException {
+	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException, ConfigurationException {
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		OntModel m;
-		if (deductionsOnly) {
-			if (deductionsModel == null) {
-				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), ((InfModel) infModel).getDeductionsModel());				
-			}
-			else {
-				m = deductionsModel;
-			}
+		 
+		Model im = getInferredModel(deductionsOnly);
+		OntModel m = null;
+		if (im instanceof OntModel) {
+			m = (OntModel)im;
 		}
-		else {
-			m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), infModel);
+		else if (im != null){
+			m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), im);
 		}
 
 		if (m != null) {
@@ -396,6 +426,10 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 				e.printStackTrace();
 			}
 	        return true;
+		}
+		else {
+			// no inferred model found
+			addError(new ModelError("No inferred model found", ErrorType.WARNING));
 		}
 		return false;
 	}

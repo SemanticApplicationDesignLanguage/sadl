@@ -27,6 +27,7 @@ import org.eclipse.xtend.lib.annotations.Data
 import org.eclipse.xtext.util.IAcceptor
 import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.util.internal.Log
+import org.slf4j.LoggerFactory
 import org.w3c.dom.Attr
 import org.w3c.dom.Node
 
@@ -39,9 +40,10 @@ import org.w3c.dom.Node
  * {@code xmlns="http://prefix/Something"} construct. It tries to locate the
  * {@code xml:base="http://prefix/Something"} construct. 
  */
-@Log
 @Singleton
 class XMLHelper {
+
+	static val LOGGER = LoggerFactory.getLogger(XMLHelper);
 
 	static val BASE = 'xml:base';
 
@@ -86,7 +88,7 @@ class XMLHelper {
 			fis = new FileInputStream(path.toFile);
 			return fis.tryReadBaseUri;
 		} catch (Exception e) {
-			LOG.error('''Error when trying to locate base URL in file: «path»''', e);
+			LOGGER.error('''Error when trying to locate base URL in file: «path»''', e);
 			return Optional.absent;
 		} finally {
 			if (fis !== null) {

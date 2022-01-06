@@ -1111,6 +1111,32 @@ class SadlLinkingTest extends AbstractLinkingTest {
 	}
 
 	@Test
+	def void testGH_773a() {
+		'''
+			 uri "http://sadl.org/GH-773.sadl" alias gh-773.
+			 
+			 dependsOn describes ^Equation with values of type ^Equation.
+			 
+			 External getFreeStream0(): "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.Solver.getFreeStream0".
+			 External [getCp](double temp, int opt) returns double: "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.getCp".
+			 getFreeStream0 has dependsOn <getCp>.
+		'''.assertLinking[sadl]
+	}
+
+	@Test
+	def void testGH_773b() {
+		'''
+			 uri "http://sadl.org/GH-773.sadl" alias gh-773.
+			 
+			 dependsOn describes ^Equation with values of type ^Equation.
+			 
+			 External getFreeStream0(): "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.Solver.getFreeStream0".
+			 getFreeStream0 has dependsOn <getCp>.
+			 External [getCp](double temp, int opt) returns double: "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.getCp".
+		'''.assertLinking[sadl]
+	}
+
+	@Test
 	def void testLinkingQnamesNeeded() {
 		'''
 			uri "http://sadl.org/NS1.sadl" alias ns1.

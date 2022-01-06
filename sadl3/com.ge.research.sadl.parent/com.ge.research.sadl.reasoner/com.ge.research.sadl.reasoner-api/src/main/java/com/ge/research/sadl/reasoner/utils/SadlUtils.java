@@ -19,7 +19,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import static java.nio.file.StandardOpenOption.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -28,6 +30,7 @@ import java.util.StringTokenizer;
 
 import jakarta.activation.DataSource;
 
+import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.ontology.AnnotationProperty;
@@ -265,49 +268,9 @@ public class SadlUtils {
 	 * @throws IOException if problem encountered during write.
 	 */
 	public void stringToFile(File aFile, String contents, boolean writeProtect) throws IOException {
-		if (aFile == null) {
-			throw new IllegalArgumentException("File should not be null.");
-		}
-		if (aFile.exists() && !aFile.isFile()) {
-			throw new IllegalArgumentException("Should not be a directory: " + aFile);
-		}
-		try {
-			if (aFile.exists()) {
-				aFile.delete();
-			}
-			if (!aFile.exists()) {
-				aFile.createNewFile();
-			}
-			if (!aFile.canWrite()) {
-				throw new IllegalArgumentException("File cannot be written: " + aFile);
-			}
-	
-			//declared here only to make visible to finally clause; generic reference
-			Writer output = null;
-			try {
-				//use buffering
-				//FileWriter always assumes default encoding is OK!
-				output = new BufferedWriter( new FileWriter(aFile) );
-				output.write( contents );
-			}
-			finally {
-				//flush and close both "output" and its underlying FileWriter
-				if (output != null) output.close();
-			}
-			if (writeProtect) {
-				try {
-					aFile.setReadOnly();
-				}
-				catch (SecurityException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		catch (Exception e) {
-			System.err.println("Exception writing file '" + aFile.getAbsolutePath() + "'");
-			e.printStackTrace();
-			throw new IOException(e.getMessage(), e);
-		}
+            //AG: the default charset sometimes results in bad dot/svg files on Windows
+            // The UTF_8 charset seems to work fine on both MacOS and Windows.
+            stringToFile(aFile, contents, writeProtect, StandardCharsets.UTF_8);
 	}
 
 	public void stringToFile(File aFile, String contents, boolean writeProtect, Charset charset) throws IOException {
@@ -318,30 +281,11 @@ public class SadlUtils {
 			throw new IllegalArgumentException("Should not be a directory: " + aFile);
 		}
 		try {
-			if (aFile.exists()) {
-				aFile.delete();
-			}
-			if (!aFile.exists()) {
-				aFile.createNewFile();
-			}
-			if (!aFile.canWrite()) {
-				throw new IllegalArgumentException("File cannot be written: " + aFile);
-			}
+			Files.createDirectories(aFile.getParentFile().toPath());
+			Files.deleteIfExists(aFile.toPath());
 	
-			//declared here only to make visible to finally clause; generic reference
-			Writer output = null;
-			try {
-				//use buffering
-				//FileWriter always assumes default encoding is OK!
-				//output = new BufferedWriter( new FileWriter(aFile) );
-				//AG: the default charset sometimes results in bad dot/svg files on Windows
-				// The UTF_8 charset seems to work fine on both MacOS and Windows.
-				output = Files.newBufferedWriter(aFile.toPath(), charset);
-				output.write( contents );
-			}
-			finally {
-				//flush and close both "output" and its underlying FileWriter
-				if (output != null) output.close();
+			try (Writer output = Files.newBufferedWriter(aFile.toPath(), charset, CREATE_NEW)) {
+				output.write(contents);
 			}
 			if (writeProtect) {
 				try {
@@ -353,9 +297,8 @@ public class SadlUtils {
 			}
 		}
 		catch (Exception e) {
-			System.err.println("Exception writing file '" + aFile.getAbsolutePath() + "'");
-			e.printStackTrace();
-			throw new IOException(e.getMessage(), e);
+			String msg = "Exception writing file '" + aFile.getAbsolutePath() + "': " + e;
+			throw new IOException(msg, e);
 		}
 	}
 	
@@ -379,24 +322,8 @@ public class SadlUtils {
 			throw new IllegalArgumentException("Should not be a directory: " + aFile);
 		}
 		try {
-			if (!aFile.exists()) {
-				aFile.createNewFile();
-			}
-			if (!aFile.canWrite()) {
-				throw new IllegalArgumentException("File cannot be written: " + aFile);
-			}
-	
-			//declared here only to make visible to finally clause; generic reference
-			Writer output = null;
-			try {
-				//use buffering
-				//FileWriter always assumes default encoding is OK!
-				output = new BufferedWriter( new FileWriter(aFile, true) );
-				output.write( contents );
-			}
-			finally {
-				//flush and close both "output" and its underlying FileWriter
-				if (output != null) output.close();
+			try (Writer output = Files.newBufferedWriter(aFile.toPath(), StandardCharsets.UTF_8, CREATE, APPEND)) {
+				output.write(contents);
 			}
 			if (writeProtect) {
 				try {
@@ -408,9 +335,8 @@ public class SadlUtils {
 			}
 		}
 		catch (Exception e) {
-			System.err.println("Exception writing file '" + aFile.getAbsolutePath() + "'");
-			e.printStackTrace();
-			throw new IOException(e.getMessage(), e);
+			String msg = "Exception writing file '" + aFile.getAbsolutePath() + "': " + e;
+			throw new IOException(msg, e);
 		}		
 	}
 
@@ -678,18 +604,41 @@ public class SadlUtils {
     }
     
     public static synchronized Literal getLiteralMatchingDataPropertyRange(OntModel m, String rnguri, Object v) throws TranslationException {
+        RDFDatatype rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
+        Resource rng = null;
+        if (rdftype != null) {
+	        rng = m.getResource(rnguri);
+        	List<RDFNode> unionMembers = getRDFDatatypeUnionMembers(m, rng, rdftype);
+        	if (unionMembers != null) {
+	        	for (RDFNode member : unionMembers) {
+	        		if (member.isURIResource()) {
+	        			String memberUri = member.asResource().getURI();
+	        			Literal val = getLiteralMatchingDataPropertyRange(m, memberUri, v);
+	        			try {
+		        			if (val.getValue() != null) {
+		        				return val;
+		        			}
+	        			}
+	        			catch (DatatypeFormatException e) {
+	        				// do nothing--this isn't a matching type
+	        			}
+	        		}
+	        	}
+        	}
+        }
     	v = preProcessValueString(rnguri, v.toString());
         Literal val = null;
         String errMsg = null;
         boolean rdfTypeValid = false;
         boolean isNumeric = isNumericRange(rnguri);
-        RDFDatatype rdftype = TypeMapper.getInstance().getTypeByName(rnguri);
         if (rdftype != null) {
          	val = m.createTypedLiteral(v, rdftype);
         	if (val != null) {
         		return val;
          	}
-	        Resource rng = m.getResource(rnguri);
+	        if (rng ==  null) {
+	        	rng = m.getResource(rnguri);
+	        }
 			OntClass eqcls = null;
 			if (rng.canAs(OntClass.class)) {
 				eqcls = rng.as(OntClass.class).getEquivalentClass();
@@ -1004,6 +953,31 @@ public class SadlUtils {
             throw new TranslationException(errMsg);
         }
         return val;
+    }
+    
+    /**
+     * Method to get the members of a RDFDatatype union
+     * @param m -- the OntModel
+     * @param rng -- the range Resource
+     * @param rdfdt - the RDFDatatype in question
+     * @return -- list of union members else null 
+     */
+    private static List<RDFNode> getRDFDatatypeUnionMembers(OntModel m, Resource rng, RDFDatatype rdfdt) {
+		OntClass eqcls = null;
+		if (rng.canAs(OntClass.class)) {
+			eqcls = rng.as(OntClass.class).getEquivalentClass();
+		}
+		if (eqcls != null) {
+			Statement uof = eqcls.getProperty(OWL2.unionOf);
+			if (uof != null) {
+				RDFNode uofnode = uof.getObject();
+				if (uofnode.isResource()) {
+					java.util.List<RDFNode> l = convertList(uofnode, m);
+					return l;
+				}
+			}
+		}
+		return null;
     }
     
     /*
