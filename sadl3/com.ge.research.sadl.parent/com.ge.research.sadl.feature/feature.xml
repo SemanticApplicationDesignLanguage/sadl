@@ -20,8 +20,7 @@ semantic models.
 
 SADL is built on Xtext and includes Xtext language elements used under the Eclipse Public License.
 
-SADL includes Apache Jena licensed under Apache License V2.0:
-Apache Jena, Copyright 2011, 2012, 2013 The Apache Software Foundation
+SADL includes Apache Jena licensed under Apache License V2.0:Apache Jena, Copyright 2011-2021 The Apache Software Foundation.
 
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
@@ -38,7 +37,7 @@ PluggedIn Software under a BSD license.
 This product includes software developed by Mort Bay Consulting Pty. Ltd.
    Copyright (c) 2004-2009 Mort Bay Consulting Pty. Ltd.
 
-SADL also includes POJava licensed under Apache License V2.0.
+SADL also includes POJava and OpenCSV, licensed under Apache License V2.0.
    </license>
 
    <url>
