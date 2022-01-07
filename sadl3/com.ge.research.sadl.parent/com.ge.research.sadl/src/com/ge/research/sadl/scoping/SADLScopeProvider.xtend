@@ -390,12 +390,6 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val iter = resource.allContents
 		while (iter.hasNext) {
 			val it = iter.next
-			
-				// for debug only
-				val ec = eContainer
-				val ecf = eContainingFeature
-//				val nm = it instanceof SadlResource ? it.name.concreteName : null
-
 			if (isIncluded.apply(it)) {			
 				val context = new ScopeContext(it, namespace, parentScope, importScope, checkAmbiguity, map, isIncluded, iter);
 				val objSwitch = doSwitch(context);
