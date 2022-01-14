@@ -456,6 +456,4 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 		];
 
 	}
-
-	
 }

@@ -2008,6 +2008,33 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  	
  	}
  	
+  	@Test
+ 	def void testGH_518() {
+ 		val sadlModel1 = '''
+			 uri "http://sadl.org/JavaExternal.sadl" alias javaexternal.
+			 
+			 External min(decimal n1, decimal n2) returns decimal : "java.lang.Math.min".
+			 
+			 Expr: min(2,3).
+			 
+			 Rule testRule: then print(min(2,3)).
+ 		'''.sadl
+		val sadlModel2 = '''
+			 uri "http://sadl.org/JavaExternalImported.sadl" alias javaexternalimported.
+			 
+			 import "http://sadl.org/JavaExternal.sadl" .
+			 
+			 Expr: min(2,3).
+ 		'''.sadl
+ 		val issues1 = _validationTestHelper.validate(sadlModel1)
+		val issues2 = _validationTestHelper.validate(sadlModel2)
+// 		assertTrue(issues1.empty)
+// 		assertFalse(issues2.empty)
+// 		assertTrue(issues2.toString.contains("Declaration of concepts in another namespace not supported"))
+ 		val numiss1 = issues1.size
+ 		val numiss2 = issues2.size
+ 	}
+ 	
  	@Test
  	def void testUserDefined01() {
  		val sadlModel = '''

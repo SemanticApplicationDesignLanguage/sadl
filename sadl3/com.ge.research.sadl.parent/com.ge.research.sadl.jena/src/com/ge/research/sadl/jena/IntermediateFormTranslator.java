@@ -1621,6 +1621,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			GraphPatternElement tgpe) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (tgpe.isEmbedded()) {
 			results.remove(tgpe);
+			if (rule.getIfs() ==  null) {
+				rule.setIfs(new ArrayList<GraphPatternElement>());
+			}
 			rule.getIfs().add(tgpe);			
 		}
 		else {

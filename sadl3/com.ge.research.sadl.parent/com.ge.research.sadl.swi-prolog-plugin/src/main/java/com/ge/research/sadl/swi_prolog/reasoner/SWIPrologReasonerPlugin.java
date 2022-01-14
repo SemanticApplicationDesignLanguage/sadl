@@ -31,8 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.Explanation;
+import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
+import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -1209,6 +1211,12 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 
 	private void setRepoType(String repoType) {
 		this.repoType = repoType;
+	}
+
+	@Override
+	public Node evaluateSadlEquation(BuiltinElement bi) {
+		addError(new ModelError(this.getClass().getCanonicalName() + " does not support evaluation of SADL equations", ErrorType.ERROR));
+		return null;
 	}
 
 }

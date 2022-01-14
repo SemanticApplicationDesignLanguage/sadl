@@ -401,4 +401,23 @@ then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulev
 		]
 	}
 	
+	@Test
+	def void testEvaluateSadlEquation_01() {
+		 val sadlModel1 = '''
+			 uri "http://sadl.org/JavaExternal.sadl" alias javaexternal.
+			 
+			 External min(decimal n1, decimal n2) returns decimal : "java.lang.Math.min".
+			 
+			 Expr: min(2,3).
+			 
+			 Rule testRule: then print(min(2,3)).
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(rules)
+ 			assertTrue(rules.size == 1)
+ 			val rule = getTranslator(processor).translateRule(jenaModel, "http://sadl.org/JavaExternal.sadl", rules.get(0))
+ 			println(rule.toString)
+ 			assertEquals(rule.toString, "[testRule: evaluateSadlEquation('java.lang.Math.min'^^http://www.w3.org/2001/XMLSchema#string, 2, 3, ?v0) -> print(?v0)]")
+ 		]
+		
+	}
 }

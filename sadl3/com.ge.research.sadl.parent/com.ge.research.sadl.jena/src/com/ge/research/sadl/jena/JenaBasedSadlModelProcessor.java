@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -1793,7 +1794,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				Object rawResult = postProcessTranslationResult(
 						applyPulledUpOperations(processExpression(((ExpressionStatement) element).getExpr())));
 				if (isSyntheticUri(null, element.eResource())) {
-					// for tests, do not expand; expansion, if desired, will be done upon retrieval
+					// for JUnit tests, do not expand; expansion, if desired, will be done upon retrieval
 					addIntermediateFormResult(rawResult);
 				} else if (rawResult != null) {
 					// for IDE, expand and also add as info marker
@@ -1806,7 +1807,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								if (!(((List<?>)intForm).size() == 1 && ((List<?>)intForm).get(0).toString().equals(rawResult.toString()))) {
 									addInfo(intForm.toString(), element);
 								}
-								return;
 							}
 						}
 					}
@@ -1814,6 +1814,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						addInfo(((VariableNode) rawResult).toDescriptiveString(), element);
 					} else {
 						addInfo(rawResult.toString(), element);
+					}
+				}
+				if (rawResult instanceof BuiltinElement) {
+					String evalResult = evaluateExpression((BuiltinElement)rawResult, ((ExpressionStatement) element).getExpr());
+					if (evalResult !=  null) {
+						addInfo(evalResult, element);
 					}
 				}
 			} else {
@@ -1839,6 +1845,41 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 	}
 
+	/**
+	 * Method to evaluate, if possible, a BuiltinElement
+	 * @param bi
+	 * @param expression 
+	 * @return
+	 */
+	private String evaluateExpression(BuiltinElement bi, Expression expression) {
+		if (bi != null && bi.getInModelReferencedEquation() != null) {
+			try {
+				IReasoner reasoner = getConfigMgr().getReasoner();
+				Node evalNode = reasoner.evaluateSadlEquation(bi);
+				if (evalNode != null) {
+					addInfo("Evaluates to: " + evalNode.toString(), expression);
+				}
+				List<com.ge.research.sadl.reasoner.ModelError> errLst = reasoner.getErrors();
+				if (errLst != null) {
+					for (com.ge.research.sadl.reasoner.ModelError err : errLst) {
+						if (err.getErrorType().equals(ErrorType.ERROR)) {
+							addError(err.getErrorMsg(), expression);
+						}
+						else if (err.getErrorType().equals(ErrorType.WARNING)) {
+							addWarning(err.getErrorMsg(), expression);
+						}
+						else {
+							addInfo(err.getErrorMsg(), expression);
+						}
+					}
+				}
+			} catch (ConfigurationException e) {
+				addError(e.getMessage(), expression);
+			}			
+		}
+		return null;
+	}
+	
 	private void setDefaultEObject(EObject element) {
 		this.setDefaultEObject = element;
 	}
@@ -7347,6 +7388,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	protected Object processFunction(Name expr)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
+		// This method is only called when a function is referenced, not when an equation is declared.
+		
 		EList<Expression> arglist = expr.getArglist();
 		Node fnnode = processExpression(expr.getName());
 		BuiltinElement builtin = new BuiltinElement();
@@ -7360,6 +7403,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else {
 			builtin.setFuncName(fnnode.toString());
 		}
+		Equation eq = getEquation(expr.getName());		// Retrieve the equation if it was declared in this or an imported model.
+		builtin.setInModelReferencedEquation(eq);
 		if (arglist != null && arglist.size() > 0) {
 			List<Object> args = new ArrayList<Object>();
 			for (int i = 0; i < arglist.size(); i++) {
@@ -14905,6 +14950,132 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	public List<Equation> getEquations() {
 		return getEquations(getCurrentResource());
+	}
+
+	/**
+	 * Method to get an Equation. First attempt is to get it from the OntModelProvider cache. 
+	 * That failing, one is constructed from the OWL model.
+	 * @param eqSr
+	 * @return
+	 */
+	private Equation getEquation(SadlResource eqSr) {
+		Resource rsrc = eqSr.eResource();
+		if (rsrc.getContents() != null && !rsrc.getContents().isEmpty() &&
+				rsrc.getContents().get(0) instanceof SadlModel) {
+			SadlModel sm = (SadlModel) rsrc.getContents().get(0);	
+			if (sm.getBaseUri().equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)) {
+				return null;
+			}
+		}
+		List<Equation> eqns = getEquations(rsrc);
+		String eqUri = getDeclarationExtensions().getConceptUri(eqSr);
+		Equation eqcached = null;
+		for (Equation eq : eqns) {
+			if (eq.getUri().equals(eqUri)) {
+				return eq;
+//				eqcached = eq;
+//				break;
+			}
+		}
+//		return getEquationFromOwl(eqSr);
+		Equation eqFromOwl = getEquationFromOwl(eqSr);
+		
+		return eqcached;
+	}
+
+	/**
+	 * Method to get an Equation instance by constructing it from the OWL models
+	 * @param eqUri
+	 * @return
+	 */
+	private Equation getEquationFromOwl(SadlResource sr) {
+		String eqUri = getDeclarationExtensions().getConceptUri(sr);
+		String eqName =  getDeclarationExtensions().getConcreteName(sr);
+		Individual eqInst = getTheJenaModel().getIndividual(eqUri);
+		if (eqInst !=  null) {
+			boolean isExternal = false;
+			Equation eq = new Equation(eqName);
+			eq.setNamespace(eqInst.getNameSpace());
+			eq.setUri(eqInst.getURI());
+			RDFNode exturi = eqInst.getPropertyValue(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNALURL_PROPERTY_URI));
+			if (exturi != null) {
+				isExternal = true;
+				eq.setExternal(true);
+				eq.setExternalUri(exturi.asLiteral().getValue().toString());
+				RDFNode loc = eqInst.getPropertyValue(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_LOCATION_PROPERTY_URI));
+				if (loc != null) {
+					eq.setLocation(loc.asLiteral().getValue().toString());
+				}
+			}
+			List<Node> arguments = new ArrayList<Node>();
+			List<Node> argumentTypes = new ArrayList<Node>();
+			RDFNode argsNode = eqInst.getPropertyValue(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI));
+			while (argsNode != null) {
+				if (argsNode.isResource()) {
+					org.apache.jena.rdf.model.Resource frst = argsNode.asResource().getPropertyResourceValue(getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI));
+					Statement dtstmt = frst.getProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DATATYPE_PROPERTY_URI));
+					if (dtstmt != null) {
+						RDFNode dtnode = dtstmt.getObject();
+						if (dtnode != null && dtnode.isLiteral()) {
+							String dtstr = dtnode.asLiteral().getValue().toString();
+							Node nnode = new NamedNode(dtstr, NodeType.DataTypeNode);
+							argumentTypes.add(nnode);
+							Statement dnstmt = frst.getProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI));
+							if (dnstmt != null) {
+								RDFNode dnnode = dnstmt.getObject();
+								if (dnnode != null && dnnode.isLiteral()) {
+									String dnstr = dnnode.asLiteral().getValue().toString();
+									VariableNode vNode = new VariableNode(dnstr);
+									try {
+										vNode.setType(nnode);
+									} catch (TranslationException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									vNode.setNamespace(eqInst.getNameSpace());
+									arguments.add(vNode);
+								}
+							}
+						}
+					}
+					org.apache.jena.rdf.model.Resource rst = argsNode.asResource().getPropertyResourceValue(getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI));
+					if (rst != null && rst.isResource()) {
+						argsNode = rst.asResource();
+					}
+					else {
+						argsNode = null;
+					}
+				}
+			}
+			eq.setArguments(arguments);
+			eq.setArgumentTypes(argumentTypes);
+			List<Node> returnTypes = new ArrayList<Node>();
+			RDFNode retTypesNode = eqInst.getPropertyValue(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI));
+			while (retTypesNode != null) {
+				if (retTypesNode.isResource()) {
+					org.apache.jena.rdf.model.Resource frst = retTypesNode.asResource().getPropertyResourceValue(getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI));
+					Statement dtstmt = frst.getProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DATATYPE_PROPERTY_URI));
+					if (dtstmt != null) {
+						RDFNode dtnode = dtstmt.getObject();
+						if (dtnode != null && dtnode.isLiteral()) {
+							String dtstr = dtnode.asLiteral().getValue().toString();
+							Node nnode = new NamedNode(dtstr, NodeType.DataTypeNode);
+							returnTypes.add(nnode);
+						}
+					}
+					org.apache.jena.rdf.model.Resource rst = retTypesNode.asResource().getPropertyResourceValue(getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI));
+					if (rst != null && rst.isResource()) {
+						retTypesNode = rst.asResource();
+					}
+					else {
+						retTypesNode = null;
+					}
+				}
+			}
+			eq.setReturnTypes(returnTypes);
+			return eq;
+		}
+		return null;
 	}
 
 	protected boolean isClass(OntConceptType oct) {

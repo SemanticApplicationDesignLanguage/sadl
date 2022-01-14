@@ -1349,11 +1349,6 @@ public class OwlToSadl {
 		}
 	}
 	
-	public static final String SADL_BASE_MODEL_URI = "http://sadl.org/sadlbasemodel";
-	public static final String SADL_LIST_MODEL_URI = "http://sadl.org/sadllistmodel";
-	public static final String SADL_IMPLICIT_MODEL_URI = "http://sadl.org/sadlimplicitmodel";
-	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
-
 	private ModelConcepts concepts;
 
 	private IConfigurationManager configMgr = null;
@@ -1366,16 +1361,16 @@ public class OwlToSadl {
 	}
 
 	private boolean isImplicitUri(String impUri) {
-		if (impUri.equals(SADL_BASE_MODEL_URI)) {
+		if (impUri.equals(SadlConstants.SADL_BASE_MODEL_URI)) {
 			return true;
 		}
-		else if (impUri.equals(SADL_BUILTIN_FUNCTIONS_URI)) {
+		else if (impUri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)) {
 			return true;
 		}
-		else if (impUri.equals(SADL_IMPLICIT_MODEL_URI)) {
+		else if (impUri.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI)) {
 			return true;
 		}
-		else if (impUri.equals(SADL_LIST_MODEL_URI)) {
+		else if (impUri.equals(SadlConstants.SADL_LIST_MODEL_URI)) {
 			return true;
 		}
 		return false;
@@ -1874,7 +1869,7 @@ public class OwlToSadl {
 	private boolean isaSadlList(Individual lstInst) {
 		StmtIterator pitr = lstInst.listProperties();
 		while (pitr.hasNext()) {
-			if (pitr.nextStatement().getPredicate().getURI().equals(SADL_LIST_MODEL_URI + "#first")) {
+			if (pitr.nextStatement().getPredicate().getURI().equals(SadlConstants.SADL_LIST_MODEL_URI + "#first")) {
 				return  true;
 			}
 		}
@@ -1885,7 +1880,7 @@ public class OwlToSadl {
 		StmtIterator pitr = lstInst.listProperties();
 		while (pitr.hasNext()) {
 			Statement nxtStmt = pitr.nextStatement();
-			if (nxtStmt.getPredicate().getURI().equals(SADL_LIST_MODEL_URI + "#rest")) {
+			if (nxtStmt.getPredicate().getURI().equals(SadlConstants.SADL_LIST_MODEL_URI + "#rest")) {
 				statementsProcessed.add(nxtStmt);
 				return nxtStmt.getObject();
 			}
@@ -1897,7 +1892,7 @@ public class OwlToSadl {
 		StmtIterator pitr = lstInst.listProperties();
 		while (pitr.hasNext()) {
 			Statement nxtStmt = pitr.nextStatement();
-			if (nxtStmt.getPredicate().getURI().equals(SADL_LIST_MODEL_URI + "#first")) {
+			if (nxtStmt.getPredicate().getURI().equals(SadlConstants.SADL_LIST_MODEL_URI + "#first")) {
 				statementsProcessed.add(nxtStmt);
 				return nxtStmt.getObject();
 			}
@@ -4335,10 +4330,10 @@ public class OwlToSadl {
 				uri.equals("http://www.w3.org/2002/07/owl#") ||
 				uri.startsWith("http://purl.org/dc/elements/1.1") ||
 				uri.startsWith("http://www.w3.org/2001/XMLSchema#") ||
-				nm.equals(SADL_BASE_MODEL_URI) ||
-				nm.equals(SADL_BUILTIN_FUNCTIONS_URI) ||
-				nm.equals(SADL_IMPLICIT_MODEL_URI) ||
-				nm.equals(SADL_LIST_MODEL_URI) ||
+				nm.equals(SadlConstants.SADL_BASE_MODEL_URI) ||
+				nm.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI) ||
+				nm.equals(SadlConstants.SADL_IMPLICIT_MODEL_URI) ||
+				nm.equals(SadlConstants.SADL_LIST_MODEL_URI) ||
 				uri.equals("")) {
 			return true;
 		}

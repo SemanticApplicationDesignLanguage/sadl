@@ -33,6 +33,8 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -44,8 +46,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import jakarta.activation.DataSource;
 
 import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.datatypes.DatatypeFormatException;
@@ -127,9 +127,11 @@ import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
+import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
@@ -163,6 +165,10 @@ import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
+import com.ge.research.sadl.sADL.Constant;
+import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquationUtils;
+
+import jakarta.activation.DataSource;
 
 /**
  * This class implements the IReasoner interface (by extending Reasoner)
@@ -3700,6 +3706,19 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	protected void setPreLoadedModel(OntModel preLoadedModel) {
 		this.preLoadedModel = preLoadedModel;
+	}
+
+	@Override
+	public Node evaluateSadlEquation(BuiltinElement bi) {
+		EvaluateSadlEquationUtils ese = new EvaluateSadlEquationUtils();
+		Node retval = ese.evaluateSadlEquation(bi);
+		List<ModelError> errors = ese.getErrors();
+		if (errors != null && errors.size() > 0) {
+			for (ModelError error : errors) {
+				addError(error);
+			}
+		}
+		return retval;
 	}
 
 }

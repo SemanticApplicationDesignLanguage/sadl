@@ -95,6 +95,7 @@ public class SadlConstants {
 
 	public static final String SADL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.sadl";
 	public static final String OWL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.owl";
+	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
 	
 	public static final String CONSTANT_NONE = "None";
 	public static final String CONSTANT_PI = "PI";

@@ -2259,11 +2259,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return new TypeCheckInfo(constantConceptName, tctype, this, expression);
 		}
 		else if(constant.equals("length") || constant.equals("count") ||
-				   constant.equals("index")){
-					NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.xint.getURI(), NodeType.DataTypeNode));
-					ConceptName constantConceptName = getModelProcessor().namedNodeToConceptName(tctype);
-					return new TypeCheckInfo(constantConceptName, tctype, this, expression);
-				}
+		   constant.equals("index")){
+			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.xint.getURI(), NodeType.DataTypeNode));
+			ConceptName constantConceptName = getModelProcessor().namedNodeToConceptName(tctype);
+			return new TypeCheckInfo(constantConceptName, tctype, this, expression);
+		}
 		else if(constant.endsWith("element") && (constant.startsWith("first") || constant.startsWith("last"))){
 			//Handle list types???
 			ConceptName declarationConceptName = new ConceptName(constant);
