@@ -1423,4 +1423,25 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		]
 	}
 	
+	@Test
+	def void testGH_858() {
+		'''
+			 uri "http://sadl.org/OtherTypesBug.sadl" alias othertypesbug.
+			 
+			 Rule R1: then print("Multiple built-in args: ", 1 + 2, 3 + 4).
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults()
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			for (rule:rules) {
+				println(rule.toString)
+			}
+			assertTrue(rules.size == 1)
+			assertEquals("Rule R1:  if +(1,2,v0) and +(3,4,v1) then print(\"Multiple built-in args: \",v0,v1).", rules.get(0).toString)
+		]
+	}
+	
 }
