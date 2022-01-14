@@ -19,6 +19,7 @@
  package com.ge.research.sadl.jena;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -967,9 +968,16 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					if (((List<?>)results).size() == 1 && ((List<?>)results).get(0) instanceof Junction) {
 						results = junctionToList((Junction) ((List<?>)results).get(0));
 					}
-					for (int i = 0; i < ((List<?>)results).size(); i++) {
-						GraphPatternElement tgpe = (GraphPatternElement) ((List<?>)results).get(i);
-						results = moveEmbeddedGPEsToIfs(rule, (List<?>) results, tgpe);
+					
+					// this removal is recursive in some cases, so it isn't safe to operate over the same list
+					//   that is being passed in for removal
+					if (results instanceof List<?>) {
+						List<GraphPatternElement>copyOfResults = new ArrayList<GraphPatternElement>();
+						copyOfResults.addAll((Collection<? extends GraphPatternElement>) results);
+						for (int i = 0; i < ((List<?>)copyOfResults).size(); i++) {
+							GraphPatternElement tgpe = (GraphPatternElement) ((List<?>)copyOfResults).get(i);
+							results = moveEmbeddedGPEsToIfs(rule, (List<?>) results, tgpe);
+						}
 					}
 					rule.setThens((List<GraphPatternElement>) results);
 				}
@@ -1620,9 +1628,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private List<?> moveEmbeddedGPEsToIfs(Rule rule, List<?> results,
 			GraphPatternElement tgpe) throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (tgpe.isEmbedded()) {
-			results.remove(tgpe);
-			if (rule.getIfs() ==  null) {
-				rule.setIfs(new ArrayList<GraphPatternElement>());
+			if (results.remove(tgpe)) {
+				if (rule.getIfs() ==  null) {
+				      rule.setIfs(new ArrayList<GraphPatternElement>());
+				}
 			}
 			rule.getIfs().add(tgpe);			
 		}
