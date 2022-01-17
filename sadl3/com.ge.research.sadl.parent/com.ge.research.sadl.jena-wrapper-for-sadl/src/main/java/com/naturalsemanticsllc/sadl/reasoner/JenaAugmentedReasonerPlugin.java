@@ -110,7 +110,11 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		}
 				
 		try {
+//<<<<<<< HEAD
 			if (tbox != null && !configurationMgr.getSadlModelGetter(repoType).modelExists(getModelName())) {
+//=======
+//			if (tbox != null && !configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
+//>>>>>>> development
 				if (tbox.equals(getModelName())) {
 					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
 				}
@@ -174,9 +178,15 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
+//<<<<<<< HEAD
 					schemaModel.getSpecification().setImportModelGetter(configurationMgr.getSadlModelGetterPutter(format));
 					if (tbox != null) {
 						schemaModel.read(tbox, SadlPersistenceFormat.getRDFFormat(format).toString());
+//=======
+//					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
+//					if (tbox != null) {
+//						schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
+//>>>>>>> development
 					}
 				}
 			}
@@ -211,7 +221,11 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		if (getPreLoadedRules() != null) {
 			stage0Rules.addAll(getPreLoadedRules());
 		}
+//<<<<<<< HEAD
 		else if (stage0Rules == null) {
+//=======
+//		else {
+//>>>>>>> development
 			stage0Rules = new ArrayList<Rule>();	// otherwise an NPE occurs in Jena
 		}
 		reasoner = createReasonerAndLoadRules(stage0Rules, 0);

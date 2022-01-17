@@ -6,7 +6,7 @@ ARG BUILDKIT_INLINE_CACHE=1
 
 # Base our image on Ubuntu 20.04 with latest Temurin JDK 11 build
 
-FROM eclipse-temurin:11.0.12_7-jdk-focal
+FROM eclipse-temurin:11.0.13_8-jdk-focal
 
 # Install packages needed to run SADL
 
@@ -25,4 +25,4 @@ COPY --chown=sadl:sadl target/products/sadl.product/linux/gtk/x86_64/ /app/
 
 USER sadl
 WORKDIR /app
-ENTRYPOINT ["dumb-init", "--", "/app/ExecuteCommand.sh"]
+ENTRYPOINT ["dumb-init", "--", "/app/entrypoint.sh"]

@@ -114,6 +114,29 @@ class SadlLinkingTest extends AbstractLinkingTest {
 		'''.assertLinking[sadl]
 	}
 
+	@Test
+	def void testLinkingEquations_03() {
+		'''
+			 uri "http://sadl.org/experiments3.sadl" alias experiments3.
+			 
+			 External getFreeStream0(): "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.Solver.getFreeStream0".
+			 getFreeStream0 has dependsOn <getCp>.
+			 
+			 External [getCp](double temp, int opt) returns double: "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.getCp".
+		'''.assertLinking[sadl]
+	}
+	
+	@Test
+	def void testLinkingEquations_04() {
+		'''
+			 uri "http://sadl.org/experiments3.sadl" alias experiments3.
+			 
+			 External getFreeStream0(): "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.Solver.getFreeStream0".
+			 External [getCp](double temp, int opt) returns double: "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.getCp".
+			 getFreeStream0 has dependsOn <getCp>.		 
+		'''.assertLinking[sadl]
+	}
+	
 	// https://github.com/crapo/sadlos2/issues/376
 	@Test
 	def void testExternalEquationStatement_GH_376() {
@@ -1084,6 +1107,43 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			  
 			
 			//EndSectionObject
+		'''.assertLinking[sadl]
+	}
+
+	@Test
+	def void testGH_773a() {
+		'''
+			 uri "http://sadl.org/GH-773.sadl" alias gh-773.
+			 
+			 dependsOn describes ^Equation with values of type ^Equation.
+			 
+			 External getFreeStream0(): "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.Solver.getFreeStream0".
+			 External [getCp](double temp, int opt) returns double: "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.getCp".
+			 getFreeStream0 has dependsOn <getCp>.
+		'''.assertLinking[sadl]
+	}
+
+	@Test
+	def void testGH_773b() {
+		'''
+			 uri "http://sadl.org/GH-773.sadl" alias gh-773.
+			 
+			 dependsOn describes ^Equation with values of type ^Equation.
+			 
+			 External getFreeStream0(): "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.Solver.getFreeStream0".
+			 getFreeStream0 has dependsOn <getCp>.
+			 External [getCp](double temp, int opt) returns double: "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.getCp".
+		'''.assertLinking[sadl]
+	}
+
+	@Test
+	def void testGH_XtextScopesDoc() {
+		'''
+			 uri "http://sadl.org/scopes.sadl" alias scopes.
+			 [Cls] is a class described by  [objProp] with values of type <Cls>.
+			 [i1] is a <Cls>.
+			 <i2> has <objProp> <i1>.
+			 [i2] is a <Cls>.
 		'''.assertLinking[sadl]
 	}
 

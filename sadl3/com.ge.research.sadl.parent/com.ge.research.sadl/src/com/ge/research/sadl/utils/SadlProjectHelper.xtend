@@ -26,6 +26,7 @@ import java.util.List
 import org.eclipse.emf.common.EMFPlugin
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.util.internal.Log
+import org.slf4j.LoggerFactory
 
 import static extension com.google.common.base.Strings.nullToEmpty
 
@@ -70,9 +71,10 @@ interface SadlProjectHelper {
 		return getReferencedProjectURIs(new URI(resource.URI.toString()));
 	}
 
-	@Log
 	@Singleton
 	class DispatchingProjectHelper implements SadlProjectHelper {
+
+		static val LOGGER = LoggerFactory.getLogger(DispatchingProjectHelper);
 
 		@Inject
 		Noop headless;
@@ -107,7 +109,7 @@ interface SadlProjectHelper {
 			val isFile = uri.scheme.nullToEmpty.equalsIgnoreCase('file');
 			if (EMFPlugin.IS_ECLIPSE_RUNNING) {
 				if (isFile) {
-					LOG.info('''Got a file URI while running in Eclipse. Falling back to headless case. URI: «uri»''');
+					LOGGER.info('''Got a file URI while running in Eclipse. Falling back to headless case. URI: «uri»''');
 					return headless;
 				}
 				return eclipse;

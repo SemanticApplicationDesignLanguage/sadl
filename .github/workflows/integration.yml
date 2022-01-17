@@ -11,10 +11,9 @@ on:
 # Runs a build job as a CI check:
 # - Builds SADL source & runs unit tests
 # - Builds SADL-Eclipse Docker image
-# - Builds WebSADL extension
 
 jobs:
-  build:
+  integration:
     strategy:
       matrix:
         distribution: [ temurin ]
@@ -25,17 +24,17 @@ jobs:
 
     steps:
     - name: Check out SADL source
-      uses: actions/checkout@v2.3.5
+      uses: actions/checkout@v2.4.0
 
     - name: Set up Java
-      uses: actions/setup-java@v2.3.1
+      uses: actions/setup-java@v2.5.0
       with:
         distribution: ${{ matrix.distribution }}
         java-version: ${{ matrix.java-version }}
         cache: maven
 
     - name: Build SADL source
-      uses: GabrielBB/xvfb-action@v1.5
+      uses: GabrielBB/xvfb-action@v1.6
       with:
         run: mvn -B package -Dtycho.localArtifacts=ignore --file sadl3/com.ge.research.sadl.parent/pom.xml
 
@@ -46,22 +45,3 @@ jobs:
         file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
         push: false
         tags: sadl/sadl-eclipse:ci
-
-    - name: Set up Node.js 10.x
-      uses: actions/setup-node@v2.4.1
-      with:
-        node-version: 10.19.0
-        registry-url: https://registry.npmjs.org
-        cache: 'yarn'
-        cache-dependency-path: '**/yarn.lock'
-
-    - name: Set up Python 2.7
-      uses: actions/setup-python@v2.2.2
-      with:
-        python-version: 2.7
-
-    - name: Build WebSADL extension
-      env:
-        PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: yarn --cwd sadl3/com.ge.research.sadl.parent/theia-sadl-extension install

@@ -30,11 +30,9 @@ import java.net.URL
 import java.net.URLClassLoader
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
-import org.apache.log4j.Logger
 
 class JFlexLoader {
 	
-	final static Logger log = Logger.getLogger(typeof(JFlexLoader))
 	static final String DOWNLOAD_URL = "https://jflex.de/jflex-1.4.3.zip"
 	static final String MAIN_CLASS = "JFlex.Main"
 	ClassLoader loader = JFlexLoader.getClassLoader
@@ -116,9 +114,9 @@ class JFlexLoader {
 				}
 			}
 		}
-		log.info('''downloading JFlex 1.4.3 from '«»«DOWNLOAD_URL»' ...'''.toString)
+		System.out.println('''downloading JFlex 1.4.3 from '«»«DOWNLOAD_URL»' ...'''.toString)
 		copyIntoFileAndCloseStream(new URL(DOWNLOAD_URL).openStream(), tempFile)
-		log.info('''finished downloading. Now extracting to «downloadTo»'''.toString)
+		System.out.println('''finished downloading. Now extracting to «downloadTo»'''.toString)
 		val ZipFile zipFile = new ZipFile(tempFile)
 		try {
 			val ZipEntry entry = zipFile.getEntry("jflex/lib/JFlex.jar")

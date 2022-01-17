@@ -135,14 +135,19 @@ import com.ge.research.sadl.sADL.impl.TestStatementImpl;
 import com.ge.research.sadl.utils.SadlASTUtils;
 
 public class JenaBasedSadlModelValidator implements ISadlModelValidator {
+	// possible values of typeToExprRelationship
+	private static final String DOMAIN = "domain";
 	public static final String RANGE = "range";
 	public static final String SELF = "self";
+	private static final String EXPLICIT_VALUE = "explicit value";
 	public static final String RESTRICTED_TO = "restriction to";
+	private static final String INSTANCE_OF_CLASS = "instance of class";
 	public static final String INSTANCE_OF_LIST = "instance of typed list of type";
 	public static final String NAMED_LIST_OF_TYPE = "type of a named typed list class";
 	public static final String UNAMED_LIST_OF_TYPE = "type of an unnamed typed list class";
 	public static final String FUNCTION_RETURN = "function return";
 	public static final String FUNCTION_AS_ARGUMENT = "function as argument";
+
 	private static final int MIN_INT = -2147483648;
 	private static final int MAX_INT = 2147483647;
 	private static final long MIN_LONG = -9223372036854775808L;
@@ -172,11 +177,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	/**
 	 * This inner class captures the information about the left or right hand side of an expression that is subject
-	 * to type checking, e.g., and assignment, a comparison, etc.
+	 * to type checking, e.g., an assignment, a comparison, etc.
 	 * 
 	 */
 	public class TypeCheckInfo {
-		private EObject context = null;							// the parsetree element from which this is derived, 
+		private EObject context = null;							// the parse tree element from which this is derived, 
 																//	used to add an error, warning, or info so that a marker can be placed in the editor
  
 		private ConceptIdentifier expressionType = null;		// the identity, type, etc. of the concept that determines the type, 
@@ -196,15 +201,22 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
      	private List<ConceptName> implicitProperties = null;	// Implied properties, if any, that apply to this expressionType
  
-    	private List<TypeCheckInfo> compoundTypes = null;		// If this is a disjunction of multiple types, this contains the next
-    															//	lower level of TypeCheckInfos in the hierarchy, e.g., a property whose
-    															//	range is a union of classes or which is given range in multiple imports
+    	private List<TypeCheckInfo> compoundTypes = null;		// This can contain multiple TypeCheckInfo instances for multiple reasons.
+    															// 1. If this the type of something that is a disjunction of multiple types, 
+    															//    this contains the next lower level of TypeCheckInfos in the hierarchy, 
+    															//    e.g., a property whose range is a union of classes or which is given 
+    															//    range in multiple imports.
+    															// 2. If this is the type of an instance of a List whose members are not all
+    															//    of the same type, this is the type of each of the members of the list.
+    															// Note that compound type TypeCheckInfo instances can be nested, as in when
+    															// the members of a List belong to a union or intersection class.
     	
     	private String typeToExprRelationship = RANGE;			// the relationship between the typeCheckType and the expressionType, e.g., range (the default)
     															//	for explicit UnittedQuantity this will be the units 
+    	
     	private String additionalInformation = null;			// any additional information to explain the contents of the instance of the class.
  
-    	private NamedNode listElementType = null;					// if the type is a List, this is the type of the elements of the list
+    	private NamedNode listElementType = null;				// if the type is a List, this is the type of the elements of the list
     	
     	private Severity severity = null;						// Guidance offered on the severity of any type mismatch involving this instance of the class.
     	
@@ -247,7 +259,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
     			setTypeToExprRelationship(RESTRICTED_TO);
     		}
     		else {
-    			setTypeToExprRelationship("explicit value");
+    			setTypeToExprRelationship(EXPLICIT_VALUE);
     		}
 		}
 
@@ -376,7 +388,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							else {
 								sb.append(tci.expressionType);
 							}
-							sb.append(" (type ");
+							if (typeToExprRelationship != null) {
+								sb.append(", instance of class, {");
+							}
+							else {
+								sb.append(", type, {");
+							}
 							sb.append(tci.typeCheckType.getName());
 						}
 						else {
@@ -384,7 +401,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							sb.append(tci.typeCheckType.getName());
 						}
 					}
-					sb.append(")");
+					sb.append("})");
 					return sb.toString();
 				}
 				else if (rangeValueType.equals(RangeValueType.INTERSECTION_OF_CLASSES)) {
@@ -398,7 +415,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							else {
 								sb.append(tci.expressionType);
 							}
-							sb.append(" (type ");
+							if (typeToExprRelationship != null) {
+								sb.append(", instance of class, {");
+							}
+							else {
+								sb.append(", type, {");
+							}
 							sb.append(tci.typeCheckType.getName());
 						}
 						else {
@@ -406,7 +428,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							sb.append(tci.typeCheckType.getName());
 						}
 					}
-					sb.append(")");
+					sb.append("})");
 					return sb.toString();
 				}
 				else {
@@ -430,7 +452,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				sb.append("TypeCheckInfo(");
 				if (rangeValueType.equals(RangeValueType.LIST)) {
 					if (typeToExprRelationship.equals(INSTANCE_OF_LIST)) {
-						sb.append(expressionType != null ? expressionType.toString() : "unknown instance");
+						if (expressionType instanceof ConceptName) {
+							sb.append(((ConceptName)expressionType).getName());
+						}
+						else if (expressionType != null) {
+							sb.append(expressionType.toString());
+						}
+						else {
+							sb.append("unknown instance");
+						}
 						sb.append(" ");
 						sb.append(typeToExprRelationship);
 						sb.append(" ");
@@ -475,7 +505,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //					sb.append(" of values of type, ");
 //				}
 				if (expressionType != null) {
-					sb.append(expressionType.toString());
+					if (expressionType instanceof ConceptName) {
+						sb.append(((ConceptName)expressionType).getName());
+					}
+					else {
+						sb.append(expressionType.toString());
+					}
 					sb.append(", ");
 				}
 				if (typeToExprRelationship != null) {
@@ -1609,6 +1644,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (vals != null) {
 				if (vals.size() > 0) {
 					TypeCheckInfo svltci = valueListToCompoundTypeCheckInfo(vals);	
+					svltci.setContext(this, expression);
 					return convertElementOfListToListType(svltci);
 				}
 			}
@@ -1693,16 +1729,57 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, 
 			DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		TypeCheckInfo tci = new TypeCheckInfo(new ConceptName("ValueList"));
-		tci.setRangeValueType(RangeValueType.LIST);
+		tci.setTypeToExprRelationship(INSTANCE_OF_LIST);
+		List<TypeCheckInfo> listElementTypes = new ArrayList<TypeCheckInfo>();
+		boolean allSameType = true;
+		Node lastType = null;
+		
 		for (SadlExplicitValue val : vals) {
 			TypeCheckInfo rttci = getType(val);
 			if (rttci != null) {
-				if (tci.getTypeCheckType() == null) {
-					tci.setTypeCheckType(rttci.getTypeCheckType());
+				if (lastType == null) {
+					lastType = rttci.getTypeCheckType();
 				}
-				tci.addCompoundType(rttci);
+				else if (!rttci.getTypeCheckType().equals(lastType)) {
+					allSameType = false;
+					lastType = rttci.getTypeCheckType();
+				}
+				listElementTypes.add(rttci);
+//				if (tci.getTypeCheckType() == null) {
+//					tci.setTypeCheckType(rttci.getTypeCheckType());
+//				}
+//				tci.addCompoundType(rttci);
 			}
-		}	
+		}
+		if (allSameType) {
+			if (lastType != null) {
+				try {
+					Node clonedNode = (Node) lastType.clone();
+					if (clonedNode instanceof NamedNode) {
+						((NamedNode) clonedNode).setList(true);
+						tci.setTypeCheckType(clonedNode);
+						tci.listElementType = (NamedNode) lastType;
+						tci.setRangeValueType(RangeValueType.LIST);
+					}
+				} catch (CloneNotSupportedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else {
+				// do the list element types have a common supertype?
+				for (TypeCheckInfo t : listElementTypes) {
+					tci.addCompoundType(t);
+				}
+			}
+		}
+		else {
+			// type must be complex
+			for (TypeCheckInfo t : listElementTypes) {
+				tci.addCompoundType(t);
+			}
+			tci.setRangeValueType(RangeValueType.LIST);
+		}
 		return tci;
 	}
 
@@ -2908,7 +2985,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						else {						
 							leftTypeCheckInfo = createTypeCheckInfoForNonUriPropertyRange(domainList.get(0), cn1, predicate, cn1.getType());
 						}
-						leftTypeCheckInfo.setTypeToExprRelationship("domain");
+						leftTypeCheckInfo.setTypeToExprRelationship(DOMAIN);
 					}
 					else {
 						leftTypeCheckInfo = new TypeCheckInfo(createTypedConceptName(propuri, oct), this, predicate);
@@ -2917,13 +2994,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							if (dmn.isURIResource()) {
 								TypeCheckInfo tci = new TypeCheckInfo(createTypedConceptName(propuri, oct), getModelProcessor().validateNamedNode(new NamedNode(domainList.get(i).getURI(), NodeType.ClassNode)), this, predicate);
 								leftTypeCheckInfo.addCompoundType(tci);
-								leftTypeCheckInfo.setTypeToExprRelationship("domain");
+								leftTypeCheckInfo.setTypeToExprRelationship(DOMAIN);
 							}
 							else {
 								ConceptName cn = createTypedConceptName(propuri, oct);
 								TypeCheckInfo tci = createTypeCheckInfoForNonUriPropertyRange(dmn, cn, predicate, cn.getType());
 								leftTypeCheckInfo.addCompoundType(tci);
-								leftTypeCheckInfo.setTypeToExprRelationship("domain");
+								leftTypeCheckInfo.setTypeToExprRelationship(DOMAIN);
 							}
 						}
 					}
@@ -3568,8 +3645,23 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if(conceptType.equals(OntConceptType.INSTANCE)){
 			// this is an instance--if it is already in the ontology we can get its type. If not maybe we can get it from its declaration
 			Individual individual = getTheJenaModel().getIndividual(conceptUri);
+			SadlResource qnmDecl = declarationExtensions.getDeclaration(sr);
+			if (individual == null && qnmDecl != null && !(qnmDecl.equals(sr))) {
+				// the declaration must be before this reference, so pre-process declaration and see if that yields a individual
+				EObject cont = qnmDecl.eContainer();
+				while (cont !=  null && cont.eContainer() != null ) {
+					if (cont.eContainer() instanceof SadlModel) {
+						break;
+					}
+					cont = cont.eContainer();
+				}
+				if (cont != null && cont instanceof SadlInstance) {
+					getModelProcessor().processModelElement((SadlModelElement) cont);
+					getModelProcessor().eobjectPreprocessed(cont);
+					individual = getTheJenaModel().getIndividual(conceptUri);
+				}
+			}
 			if(individual == null){
-				SadlResource qnmDecl = declarationExtensions.getDeclaration(sr);
 				if (qnmDecl != null) {
 					if (qnmDecl.eContainer() instanceof SadlInstance) {
 						SadlTypeReference typeref = ((SadlInstance)qnmDecl.eContainer()).getType();
@@ -3743,6 +3835,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				NamedNode tltype = getModelProcessor().getTypedListType(ontResource);
 				tci.setListElementType(tltype);
 			}
+			else {
+				tci.setTypeToExprRelationship(INSTANCE_OF_CLASS);
+			}
 		}
 		return tci;
 	}
@@ -3760,7 +3855,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						NamedNode uclsnn = new NamedNode(uclsmember.getURI());
 						uclsnn.setNodeType(NodeType.ClassNode);
 						TypeCheckInfo utci = new TypeCheckInfo(instConceptName, uclsnn, this, expression);
-						utci.setTypeToExprRelationship("instance of class");
+						utci.setTypeToExprRelationship(INSTANCE_OF_CLASS);
 						tci.addCompoundType(utci);
 					}
 					else {
@@ -3784,13 +3879,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (eitr.hasNext()) {
 				tci = new TypeCheckInfo(instConceptName, this, expression);
 				tci.setRangeValueType(RangeValueType.INTERSECTION_OF_CLASSES);
+				tci.setTypeToExprRelationship(INSTANCE_OF_CLASS);
 				while (eitr.hasNext()) {
 					OntClass uclsmember = eitr.next();
 					if (uclsmember.isURIResource()) {
 						NamedNode uclsnn = new NamedNode(uclsmember.getURI());
 						uclsnn.setNodeType(NodeType.ClassNode);
 						TypeCheckInfo utci = new TypeCheckInfo(instConceptName, uclsnn, this, expression);
-						utci.setTypeToExprRelationship("instance of class");
+						utci.setTypeToExprRelationship(INSTANCE_OF_CLASS);
 						tci.addCompoundType(utci);
 					}
 					else {
@@ -4264,7 +4360,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(domain.getURI(), NodeType.ClassNode));
 		if (tci == null) {
 			tci = new TypeCheckInfo(propConceptName, tctype, this, expression);
-			tci.setTypeToExprRelationship("domain");
+			tci.setTypeToExprRelationship(DOMAIN);
 		}
 		if (isTypedListSubclass(domain)) {
 			tci.setRangeValueType(RangeValueType.LIST);
@@ -4336,7 +4432,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (element.isURIResource()) {
 					TypeCheckInfo tciinner = typeCheckInfoFromRDFDatatypeOrUnion(propConceptName, element, expression);
 					tci.addCompoundType(tciinner);
-					tci.setTypeToExprRelationship("range");
+					tci.setTypeToExprRelationship(RANGE);
 				}
 				else {
 					getModelProcessor().addTypeCheckingError("Unexpected non-URI range element in union, please report.", expression); 

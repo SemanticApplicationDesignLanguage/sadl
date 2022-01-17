@@ -336,7 +336,11 @@ public class JenaReasonerPlugin extends Reasoner{
 		this.ruleList = new ArrayList<Rule>();
 		
 		try {
+//<<<<<<< HEAD
 			if (tbox != null && !configurationMgr.getSadlModelGetter(repoType).modelExists(tbox)) {
+//=======
+//			if (tbox != null && !configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
+//>>>>>>> development
 				if (tbox.equals(getModelName())) {
 					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
 				}
@@ -394,9 +398,15 @@ public class JenaReasonerPlugin extends Reasoner{
 					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
+//<<<<<<< HEAD
 					schemaModel.getSpecification().setImportModelGetter(configurationMgr.getSadlModelGetterPutter(format));
 					if (tbox != null) {
 						schemaModel.read(tbox, SadlPersistenceFormat.getRDFFormat(format).toString());
+//=======
+//					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
+//					if (tbox != null) {
+//						schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
+//>>>>>>> development
 					}
 				}
 			}
@@ -629,6 +639,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			setPreLoadedRules(loadRulesFromString(rules));
 		}
 
+//<<<<<<< HEAD
 		//TODO: AG: this block of code was commented out in GH-794
 //		String format = repoType;
 //		try {
@@ -645,6 +656,23 @@ public class JenaReasonerPlugin extends Reasoner{
 //		catch (IOException e) {
 //			e.printStackTrace();
 //		}
+//=======
+//		String format = repoType;
+//		try {
+//			String tdbFolder = configurationMgr.getTdbFolder();
+//			if (configurationMgr.getModelGetter() == null) {
+//				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
+//			}
+//			format = configurationMgr.getModelGetter().getFormat();
+//			if (repoType == null) repoType = format;	
+//			if (format != null && !format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+//				configurationMgr.getModelGetter().setFormat(format);
+//			}
+//		}
+//		catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//>>>>>>> development
 		initialized = true;
 		
 		return 1;

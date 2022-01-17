@@ -59,13 +59,15 @@ import org.eclipse.xtext.util.StringInputStream
 import org.eclipse.xtext.util.internal.EmfAdaptable
 import org.eclipse.xtext.util.internal.Log
 import org.eclipse.xtext.validation.IResourceValidator
+import org.slf4j.LoggerFactory
 
 import static com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory.*
 import static org.eclipse.emf.common.util.URI.createURI
 import com.ge.research.sadl.model.persistence.SadlPersistenceFormat
 
-@Log
 class ExternalEmfResource extends ResourceImpl {
+
+	static val LOGGER = LoggerFactory.getLogger(ExternalEmfResource);
 
 	val Map<String, SadlModel> modelMapping = newHashMap();
 
@@ -79,7 +81,7 @@ class ExternalEmfResource extends ResourceImpl {
 		try {
 			super.load(options);
 		} catch (Exception e) {
-			LOG.error('''Error occurred while loading the resource. URI:«uri»''', e);
+			LOGGER.error('''Error occurred while loading the resource. URI:«uri»''', e);
 		}
 	}
 
