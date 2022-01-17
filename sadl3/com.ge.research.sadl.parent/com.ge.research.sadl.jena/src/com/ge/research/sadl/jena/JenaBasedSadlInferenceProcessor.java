@@ -144,10 +144,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			setCurrentResource(resource);
 			setModelName(getConfigMgr(getOwlFormat()).getPublicUriFromActualUrl(new SadlUtils().fileNameToFileUrl(owlModelPath)));
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
@@ -155,7 +153,6 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		try {
 			getConfigMgr(getOwlFormat()).clearReasoner();
 		} catch (ConfigurationException e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
 		OntModel om = OntModelProvider.find(resource);
@@ -176,10 +173,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			checkIfExplanationNeeded(cmds);
 			applyPreferences();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (ReasonerNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 			
@@ -290,10 +285,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					timingInfoPreviousSize = latestTimingInfo.size();
 				}
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ReasonerNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}		
@@ -636,7 +629,6 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 //	}
 //} catch (
 //		private void addError(ModelError modelError) {
-//		// TODO Auto-generated method stub
 //		
 //	}
 //TranslationException e) {
@@ -688,31 +680,22 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 //}
 		
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TranslationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidNameException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ReasonerNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (QueryParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (QueryCancelledException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (TripleNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidTypeException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (AmbiguousNameException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		result.setResults(testResult);
@@ -1470,13 +1453,10 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			result.setDerivations(getInitializedReasoner().getDerivations());
 			
 		} catch (InvalidDerivationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ReasonerNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 		return result;
@@ -1539,7 +1519,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				reasoner.initializeReasoner(getModelFolderPath(), getModelName(), getOwlFormat());
 			}
 			else if (getTheJenaModel() != null) {
-				reasoner.initializeReasoner(getTheJenaModel(), getModelName(), null, null);
+				reasoner.initializeReasoner(getTheJenaModel(), getModelName(), null, null,getConfigMgr(getOwlFormat()).getRepoType());
 			}
 			else {
 				throw new ConfigurationException("No model folder path, no model, can't initialize a reasoner.");
@@ -1765,7 +1745,6 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 							try {
 								val = SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), ((Literal)objNode).getValue());
 							} catch (TranslationException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
@@ -1802,7 +1781,6 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 							try {
 								val = SadlUtils.getLiteralMatchingDataPropertyRange(getTheJenaModel(), rng.getURI(), ((Literal)objNode).getValue());
 							} catch (TranslationException e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
@@ -1903,10 +1881,8 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				}
 				return null;
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (ReasonerNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -1977,7 +1953,6 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				return reasonerInfo;
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

@@ -1934,13 +1934,18 @@ public class ConfigurationManager implements IConfigurationManager {
 		if (repoType == null) {
 			// look at the mappings and see what type is present there
 			HashMap<String, String> mps = getMappings();
-			Collection<String> altUrls = mps.values();
-			for (String url: altUrls) {
-				String fmt = SadlPersistenceFormat.getSadlPersistenceFormatFromFilename(url);
-				if (SadlPersistenceFormat.validateSadlFormat(fmt)) {
-					repoType = fmt;
-					break;
+			if (mps != null) {
+				Collection<String> altUrls = mps.values();
+				for (String url: altUrls) {
+					String fmt = SadlPersistenceFormat.getSadlPersistenceFormatFromFilename(url);
+					if (SadlPersistenceFormat.validateSadlFormat(fmt)) {
+						repoType = fmt;
+						break;
+					}
 				}
+			}
+			else {
+				repoType = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;	// default assumed
 			}
 		}
 		return repoType;

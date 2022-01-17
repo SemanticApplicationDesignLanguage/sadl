@@ -146,6 +146,13 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 			}
 
 			String format = repoType;
+			
+			//TODO: AG: added this temporarily to avoid repoType==null exception
+			if(format == null) {
+				format = repoType = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
+			}
+			
+			
 			if (!validateFormat(format)) {
 				throw new ConfigurationException("Format '" + format + "' is not supported by reasoner '" + getConfigurationCategory() + "'.");
 			}
@@ -214,12 +221,9 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		if (getPreLoadedRules() != null) {
 			stage0Rules.addAll(getPreLoadedRules());
 		}
-//<<<<<<< HEAD
-//=======
-		else {
+		else if (stage0Rules == null) {
 			stage0Rules = new ArrayList<Rule>();	// otherwise an NPE occurs in Jena
 		}
-//>>>>>>> development
 		reasoner = createReasonerAndLoadRules(stage0Rules, 0);
 		return reasoner;
 	}

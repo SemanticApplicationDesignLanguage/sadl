@@ -454,7 +454,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				SadlUtils su = new SadlUtils();
 				tboxfile = new File(su.fileUrlToFileName(tbox));
 			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 //			if (tboxfile != null && tboxfile.exists()) {
@@ -620,12 +619,13 @@ public class JenaReasonerPlugin extends Reasoner{
 
 
 	@Override
-	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences)
+	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences, String _repoType)
 			throws ReasonerNotFoundException, ConfigurationException {
 		if (!(kbase instanceof OntModel)) {
 			throw new ConfigurationException("The kbase Object passed into JenaReasonerPlugin must be a Jena OntModel.");
 		}
 		this.preferences = preferences;
+		repoType = _repoType;
 		setModelName(modelName);
 		if (timingInfo == null) {
 			timingInfo = new ArrayList<ReasonerTiming>();
@@ -639,7 +639,7 @@ public class JenaReasonerPlugin extends Reasoner{
 			setPreLoadedRules(loadRulesFromString(rules));
 		}
 
-//<<<<<<< HEAD
+		//TODO: AG: this block of code was commented out in GH-794
 //		String format = repoType;
 //		try {
 //			String tdbFolder = configurationMgr.getTdbFolder();
@@ -3553,7 +3553,6 @@ public class JenaReasonerPlugin extends Reasoner{
 //				}
 //				return infMinus;
 //			} catch (FileNotFoundException e) {
-//				// TODO Auto-generated catch block
 //				e.printStackTrace();
 //				throw new ConfigurationException("filed to reduce infModel", e);
 //			}
@@ -3568,7 +3567,6 @@ public class JenaReasonerPlugin extends Reasoner{
         try {
 			fps.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
