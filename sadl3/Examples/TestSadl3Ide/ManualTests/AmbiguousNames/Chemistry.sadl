@@ -1,0 +1,4 @@
+ uri "http://sadl.org/Chemistry.sadl"  alias chemistry.
+ 
+ Agent (note "a chemically active power, principle, or substance") is a class.
+ 

@@ -2150,4 +2150,156 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			assertTrue(issues.size == 2)
 		]
 	}
+
+	@Test
+	def void testGH_823a() {
+		val sadlModel = '''
+			 uri "http://sadl.org/Test.sadl" alias test.
+			 
+			 Agent is a class.
+			 Person is a type of Agent.
+			 Organization is a type of Agent.
+			 
+			 FileCreation is a class.
+			 Package is a type of FileCreation.
+			 
+			 performedBy describes FileCreation with values of type Agent.
+			 
+			George is a Person.
+			GE is an Organization.
+			performedBy of Package must be one of {George, GE}.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertTrue(issues.empty)
+
+			val pkgcls = jenaModel.getOntClass("http://sadl.org/Test.sadl#Package")
+			val sitr = jenaModel.listStatements(pkgcls, RDFS.subClassOf, null as RDFNode)
+			val restr = sitr.nextStatement.object
+			assertTrue(restr.^as(OntClass).restriction)
+//			jenaModel.write(System.out)
+			val avfcls = jenaModel.getProperty(restr.^as(OntClass), OWL.allValuesFrom)
+			assertNull(avfcls)
+			val svfcls = jenaModel.getProperty(restr.^as(OntClass), OWL.someValuesFrom)
+			assertNotNull(svfcls)
+		]
+	}
+
+	@Test
+	def void testGH_823b() {
+		val sadlModel = '''
+			 uri "http://sadl.org/Test.sadl" alias test.
+			 
+			 Agent is a class.
+			 Person is a type of Agent.
+			 Organization is a type of Agent.
+			 
+			 FileCreation is a class.
+			 Package is a type of FileCreation.
+			 
+			 performedBy describes FileCreation with values of type Agent.
+			 
+			George is a Person.
+			GE is an Organization.
+			performedBy of Package can only be one of {George, GE}.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertTrue(issues.empty)
+
+			val pkgcls = jenaModel.getOntClass("http://sadl.org/Test.sadl#Package")
+			val sitr = jenaModel.listStatements(pkgcls, RDFS.subClassOf, null as RDFNode)
+			val restr = sitr.nextStatement.object
+			assertTrue(restr.^as(OntClass).restriction)
+//			jenaModel.write(System.out)
+			val avfcls = jenaModel.getProperty(restr.^as(OntClass), OWL.allValuesFrom)
+			assertNotNull(avfcls)
+			val svfcls = jenaModel.getProperty(restr.^as(OntClass), OWL.someValuesFrom)
+			assertNull(svfcls)
+		]
+	}
+
+
+	@Test
+	def void testGH_823c() {
+		val sadlModel = '''
+			 uri "http://sadl.org/Test.sadl" alias test.
+			 
+			 Agent is a class.
+			 Person is a type of Agent.
+			 Organization is a type of Agent.
+			 
+			 FileCreation is a class.
+			 Package is a type of FileCreation.
+			 
+			 performedBy describes FileCreation with values of type Agent.
+			 
+			performedBy of Package can only be one of {Person, Organization}.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertFalse(issues.empty)
+			assertTrue(issues.size == 2)
+			for (issue : issues) {
+				println(issue.message)
+				assertTrue(issue.message.contains("Expected an instance in the enumeration of the class"))
+			}
+		]
+	}
+
+	@Test
+	def void testGH_823d() {
+		val sadlModel = '''
+			 uri "http://sadl.org/Test.sadl" alias test.
+			 
+			 Agent is a class.
+			 Person is a type of Agent.
+			 Organization is a type of Agent.
+			 
+			 FileCreation is a class.
+			 Package is a type of FileCreation.
+			 
+			 performedBy describes FileCreation with values of type Agent.
+			 
+			 prop1 is a property.
+			 prop2 is a property.
+			performedBy of Package can only be one of {prop1, prop2}.
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertFalse(issues.empty)
+			assertTrue(issues.size == 2)
+			for (issue : issues) {
+				println(issue.message)
+				assertTrue(issue.message.contains("Expected an instance in the enumeration of the class"))
+			}
+		]
+	}
+	
+	@Test
+	def void testGH_828a() {
+		val sadlModel = '''
+			 uri "http://sadl.org/GH828.sadl" alias gh828.
+			 Person is a class.
+			 gender of Person must be one of {Male, Female}. 
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertFalse(issues.empty)
+			assertTrue(issues.size == 2)
+			for (issue : issues) {
+				println(issue.message)
+				assertTrue(issue.severity.equals(Severity.ERROR))
+				assertTrue(issue.message.contains("Unable to determine type of instance, the property has no range"))
+			}
+		]
+	}
+
+	@Test
+	def void testGH_828b() {
+		val sadlModel = '''
+			 uri "http://sadl.org/GH828.sadl" alias gh828.
+			 Person is a class.
+			 age of Person must be one of {"young", "old"}. 
+		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertFalse(issues.empty)
+			assertTrue(issues.size == 2)
+			for (issue : issues) {
+				println(issue.message)
+				assertTrue(issue.severity.equals(Severity.WARNING))
+				assertTrue(issue.message.contains("Can't find range of property to create typed Literal"))
+			}
+		]
+	}
+	
 }

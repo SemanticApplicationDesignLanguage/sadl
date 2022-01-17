@@ -129,6 +129,15 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	val LocalScopeProvider localScope_03 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope) [
 			if (it instanceof SadlResource) {
+				val ec = eContainer
+// Do we need to check eContainingFeature? awc 1/6/2022				
+//				val ecf = eContainingFeature
+//				val ecfb1 = ecf == EQUATION_STATEMENT
+//				val ecfb2 = ecf == EXTERNAL_EQUATION_STATEMENT
+				if ((ec instanceof EquationStatement && (ec as EquationStatement).name.equals(it)) || 
+					(ec instanceof ExternalEquationStatement && (ec as ExternalEquationStatement).name.equals(it))) {
+						return true;
+				}
 				if ((eContainer instanceof SadlNecessaryAndSufficient && eContainingFeature == SADL_NECESSARY_AND_SUFFICIENT__OBJECT)) {
 					return true;
 				}
@@ -381,7 +390,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		val iter = resource.allContents
 		while (iter.hasNext) {
 			val it = iter.next
-			if (isIncluded.apply(it)) {
+			if (isIncluded.apply(it)) {			
 				val context = new ScopeContext(it, namespace, parentScope, importScope, checkAmbiguity, map, isIncluded, iter);
 				val objSwitch = doSwitch(context);
 				if (objSwitch !== null) {

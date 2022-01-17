@@ -110,7 +110,11 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		}
 				
 		try {
+//<<<<<<< HEAD
 			if (tbox != null && !configurationMgr.getSadlModelGetter(repoType).modelExists(getModelName())) {
+//=======
+//			if (tbox != null && !configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
+//>>>>>>> development
 				if (tbox.equals(getModelName())) {
 					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
 				}
@@ -167,9 +171,15 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
+//<<<<<<< HEAD
 					schemaModel.getSpecification().setImportModelGetter(configurationMgr.getSadlModelGetterPutter(format));
 					if (tbox != null) {
 						schemaModel.read(tbox, SadlPersistenceFormat.getRDFFormat(format).toString());
+//=======
+//					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
+//					if (tbox != null) {
+//						schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
+//>>>>>>> development
 					}
 				}
 			}
@@ -204,10 +214,35 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		if (getPreLoadedRules() != null) {
 			stage0Rules.addAll(getPreLoadedRules());
 		}
+//<<<<<<< HEAD
+//=======
+		else {
+			stage0Rules = new ArrayList<Rule>();	// otherwise an NPE occurs in Jena
+		}
+//>>>>>>> development
 		reasoner = createReasonerAndLoadRules(stage0Rules, 0);
 		return reasoner;
 	}
 
+	@Override
+	public Model getInferredModel(boolean deductionsOnly) throws ConfigurationException {
+		prepareInfModel();
+		if (deductionsOnly) {
+			if (deductionsModel != null) {
+				return deductionsModel;
+			}
+			else if (!derivationLogging){
+				throw new ConfigurationException("Deductions model not available. Derivations must be enabled in the configuration to capture a deductions model.");
+			}
+			else {
+				return null; 
+			}
+		}
+		else {
+			return infModel;
+		}
+	}
+	
 	/**
 	 * Method to count the number of rules loaded from rule files
 	 * @return
@@ -250,7 +285,6 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 				SadlUtils su = new SadlUtils();
 				tboxfile = new File(su.fileUrlToFileName(tbox));
 			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}
@@ -376,24 +410,20 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 	}
 
 	@Override
-	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException {
+	public boolean saveInferredModel(String filename, String modelname, boolean deductionsOnly) throws FileNotFoundException, ConfigurationException {
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		OntModel m;
-		if (deductionsOnly) {
-			if (deductionsModel == null) {
-				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), ((InfModel) infModel).getDeductionsModel());				
-			}
-			else {
-				m = deductionsModel;
-			}
+		 
+		Model im = getInferredModel(deductionsOnly);
+		OntModel m = null;
+		if (im instanceof OntModel) {
+			m = (OntModel)im;
 		}
-		else {
-			m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), infModel);
+		else if (im != null){
+			m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), im);
 		}
 
 		if (m != null) {
@@ -404,10 +434,13 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 	        try {
 				fps.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	        return true;
+		}
+		else {
+			// no inferred model found
+			addError(new ModelError("No inferred model found", ErrorType.WARNING));
 		}
 		return false;
 	}
@@ -457,7 +490,6 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 			ds.setName("Derivations");
 			return ds;
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 		return null;
@@ -548,7 +580,6 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 				}
 			}
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
 //			e.printStackTrace();
 			addError(new ModelError(e.getMessage(), ErrorType.ERROR));
 		}

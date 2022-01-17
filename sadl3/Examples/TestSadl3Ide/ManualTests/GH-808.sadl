@@ -1,0 +1,6 @@
+ uri "http://sadl.org/GH-808.sadl" alias gh-808.
+ 
+ Rule WhatEffect: then print("this is a rule").
+ 
+ Print: Deductions .
+ 

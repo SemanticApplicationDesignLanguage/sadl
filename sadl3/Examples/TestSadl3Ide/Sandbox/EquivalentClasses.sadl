@@ -1,0 +1,6 @@
+ uri "http://sadl.org/EquivalentClasses.sadl" alias equivalentclasses.
+ 
+ USCommanderInChief is a class.
+
+ USPresident is the same as USCommanderInChief.
+ 

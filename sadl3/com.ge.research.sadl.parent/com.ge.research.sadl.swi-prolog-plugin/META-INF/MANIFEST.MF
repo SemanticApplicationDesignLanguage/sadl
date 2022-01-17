@@ -7,7 +7,6 @@ Bundle-Activator: com.ge.research.sadl.swi_prolog.plugin.Activator
 Bundle-Vendor: GE Research
 Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
- org.apache.log4j,
  org.eclipse.core.runtime,
  org.eclipse.osgi,
  org.junit;bundle-version="4.12.0";resolution:=optional
@@ -26,7 +25,8 @@ Export-Package: com.ge.research.sadl.swi_prolog.fileinterface,
    org.apache.jena.rdf.model,
    org.apache.jena.ontology",
  com.ge.research.sadl.swi_prolog.translator
-Import-Package: com.ge.research.sadl.model,
+Import-Package: com.ge.research.sadl.importer,
+ com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
  com.ge.research.sadl.reasoner,
  jakarta.activation
