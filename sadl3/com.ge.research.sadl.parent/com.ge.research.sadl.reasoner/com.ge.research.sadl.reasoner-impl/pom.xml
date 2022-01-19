@@ -17,11 +17,11 @@
       <groupId>com.ge.research.sadl</groupId>
       <artifactId>reasoner-api</artifactId>
     </dependency>
-    <dependency>
+    <!-- dependency>
       <groupId>com.ge.research.semtk</groupId>
       <artifactId>connectionUtils</artifactId>
       <version>2.3.0-SNAPSHOT</version>
-    </dependency>
+    </dependency-->
     <dependency>
       <groupId>com.sun.activation</groupId>
       <artifactId>jakarta.activation</artifactId>
