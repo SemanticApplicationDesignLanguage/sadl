@@ -38,7 +38,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 
 	@Test
 	def void testSadlEquationInRule_01() {
-		createFile('UseNumericConstants.sadl', '''
+		createFile('JavaExternal.sadl', '''
 		uri "http://sadl.org/JavaExternal.sadl" alias javaexternal.
 		
 		External min(decimal n1, decimal n2) returns decimal : "java.lang.Math.min".
@@ -76,7 +76,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 		val ci = new ConfigurationItem(catHier)
 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
 		configItems.add(ci)
-		assertInferencer('UseNumericConstants.sadl', null, configItems) [
+		assertInferencer('JavaExternal.sadl', null, configItems) [
 			var idx = 0
 			for (scr : it) {
 				println(scr.toString)
@@ -96,7 +96,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 		
 	@Test
 	def void testSadlEquationInRule_02() {
-		createFile('UseNumericConstants.sadl', '''
+		createFile('StringFunctions.sadl', '''
 		uri "http://sadl.org/StringFunctions.sadl" alias stringfunctions.
 		
 		External indexOf(string str, string match) returns int : "java.lang.String.indexOf".
@@ -118,7 +118,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 			if (issues !== null) {
 				for (issue : issues) {
 					System.out.println(issue.message)
-					if (issue.message.equals("Evaluates to: \"15\"")) {
+					if (issue.message.equals("Evaluates to: 15")) {
 						evaluationsFound++
 					}
 					else if (issue.message.equals("Evaluates to: \"localname\"")) {
@@ -144,7 +144,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 		val ci = new ConfigurationItem(catHier)
 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
 		configItems.add(ci)
-		assertInferencer('UseNumericConstants.sadl', null, configItems) [
+		assertInferencer('StringFunctions.sadl', null, configItems) [
 			var idx = 0
 			for (scr : it) {
 				println(scr.toString)
@@ -160,7 +160,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	
 	@Test
 	def void testSadlEquationInRule_03() {
-		createFile('UseNumericConstants.sadl', '''
+		createFile('StringFormat.sadl', '''
 			 uri "http://sadl.org/StringFormat.sadl" alias stringformat.
 			 
 			 External formatString(string fmt, ...) returns string : "java.lang.String.format".
@@ -213,7 +213,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 		val ci = new ConfigurationItem(catHier)
 	 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
 	 		configItems.add(ci)
-	 		assertInferencer('UseNumericConstants.sadl', null, configItems) [
+	 		assertInferencer('StringFormat.sadl', null, configItems) [
 	 			var idx = 0
 	 			for (scr : it) {
 	 				println(scr.toString)
@@ -229,8 +229,8 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	
 	@Test
 	def void testSadlEquationInRule_04() {
-		createFile('UseNumericConstants.sadl', '''
-			 uri "http://sadl.org/OtherTypes.sadl" alias othertypes.
+		createFile('BooleanTypes.sadl', '''
+			 uri "http://sadl.org/BooleanTypes.sadl" alias booleantypes.
 			 
 			 External booleanToString(boolean b) returns string : "java.lang.Boolean.toString".
 			 External booleanToString2(boolean b) returns string : "java.lang.String.valueOf".
@@ -238,29 +238,33 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 			 Expr: booleanToString(false).
 			 Expr: booleanToString2(true).
 			  
-			 Rule R1: then print("Rule output: ", booleanToString(false), ", ", booleanToString2(true)).
+			 ClassWithBooleanProps is a class, described by shouldBeTrue with values of type string,
+			 	described by shouldBeFalse with values of type string.
+			 	
+			 MyCWBP is a ClassWithBooleanProps.
+			 	 
+			 Rule R1: if x is a ClassWithBooleanProps 
+			 	then shouldBeFalse of x is booleanToString(false)
+			 		and shouldBeTrue of x is booleanToString2(true).
 			 
+			 Ask: select x, p, v where x is a ClassWithBooleanProps and x has p v.
 		''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 	 			assertNotNull(jenaModel)
-	 			var evaluationsFound = 0
+	 			var evaluatesTrue = 0
+	 			var evaluatesFalse = 0
 	 			if (issues !== null) {
 	 				for (issue : issues) {
 	 					System.out.println(issue.message)
-	 					if (issue.message.equals("Evaluates to: \"name is sonoo\"")) {
-	 						evaluationsFound++
+	 					if (issue.message.equals("Evaluates to: \"false\"")) {
+	 						evaluatesFalse++
 	 					}
-	 					else if (issue.message.equals("Evaluates to: \"value is 32.334340\"")) {
-	 						evaluationsFound++
-	 					}
-	 					else if (issue.message.equals("Evaluates to: \"value is                  32.334340000000\"")) {
-	 						evaluationsFound++
-	 					}
-	 					else if (issue.message.equals("Evaluates to: \"value is                  32.334340000000 != 23.456000\"")) {
-	 						evaluationsFound++
+	 					else if (issue.message.equals("Evaluates to: \"true\"")) {
+	 						evaluatesTrue++
 	 					}
 	 				}
 	 			}
-//	 			assertEquals(4, evaluationsFound)
+	 			assertEquals(1, evaluatesTrue)
+	 			assertEquals(1, evaluatesFalse)
 	 			if (rules !== null) {
 	 				for (rule : rules) {
 	 					System.out.println(rule.toString)
@@ -278,17 +282,170 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 		val ci = new ConfigurationItem(catHier)
 	 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
 	 		configItems.add(ci)
-	 		assertInferencer('UseNumericConstants.sadl', null, configItems) [
+	 		assertInferencer('BooleanTypes.sadl', null, configItems) [
 	 			var idx = 0
 	 			for (scr : it) {
-	 				println(scr.toString)
-	 				assertTrue(scr instanceof SadlCommandResult)
-	 				val tr = (scr as SadlCommandResult).results
-	 				assertTrue(tr instanceof ResultSet)
-//	 				assertEquals("\"x\",\"y\"
-//\"http://sadl.org/StringFormat.sadl#TestInst\",\"value is                  32.334339141846 != 23.455999\"", tr.toString.trim)
-	 				idx++
+	 				if (scr != null) {
+		 				println(scr.toString)
+		 				assertTrue(scr instanceof SadlCommandResult)
+		 				val tr = (scr as SadlCommandResult).results
+		 				assertTrue(tr instanceof ResultSet)
+	//	 				assertEquals("\"x\",\"y\"
+	//\"http://sadl.org/StringFormat.sadl#TestInst\",\"value is                  32.334339141846 != 23.455999\"", tr.toString.trim)
+		 			}
+		 			idx++
 	 			}
 	 		];		
 	 }
+	 
+	@Test
+	def void testSadlEquationInRule_05() {
+		createFile('DoubleFunctions.sadl', '''
+			 uri "http://sadl.org/DoubleFunctions.sadl" alias doublefunctions.
+			 
+			 External doubleToLongBits(double d) returns long : "java.lang.Double.doubleToLongBits".
+			 External doubleCompare(double d1, double d2) returns int : "java.lang.Double.compareTo".
+			 
+			 Expr: doubleToLongBits(3.14159).
+			 Expr: doubleCompare(3.14159, 3.141591).
+			 
+			 
+			 ShowResults is a class described by dtlb with values of type long, described by dc with values of type int.
+			 
+			 Rule R1: if x is a ShowResults then dtlb of x is doubleToLongBits(3.14159).
+			 Rule R2: if x is a ShowResults then dc of x is doubleCompare(3.14159, 3.141591).
+			 
+			 DoItNow is a ShowResults.
+			 
+			 Ask: select x, p, v where x is a ShowResults.
+		''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+	 			assertNotNull(jenaModel)
+	 			var evaluationsFound = 0
+	 			if (issues !== null) {
+	 				for (issue : issues) {
+	 					System.out.println(issue.message)
+	 					if (issue.message.equals("Evaluates to: 4614256650576692846")) {
+	 						evaluationsFound++
+	 					}
+	 					else if (issue.message.equals("Evaluates to: \"-1\"")) {
+	 						evaluationsFound++
+	 					}
+	 				}
+	 			}
+//	 			assertEquals(2, evaluationsFound)
+	 			if (rules !== null) {
+	 				for (rule : rules) {
+	 					System.out.println(rule.toString)
+	 				}
+	 			}
+	 			assertTrue(rules.size == 2)
+//	 			assertTrue(
+//	 				processor.compareTranslations(rules.get(0).toString(),
+//	 					"Rule R1:  if rdf(x, rdf:type, stringformat:TestClass) and formatString(\"value is %32.12f != %f\",32.33434,23.456,v0) then rdf(x, stringformat:formatedString, v0)."))
+	 		]
+	 
+	 		var List<ConfigurationItem> configItems = newArrayList
+	 		val String[] catHier = newArrayOfSize(1)
+	 		catHier.set(0, "Jena")
+	 		val ci = new ConfigurationItem(catHier)
+	 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+	 		configItems.add(ci)
+	 		assertInferencer('DoubleFunctions.sadl', null, configItems) [
+	 			var idx = 0
+	 			for (scr : it) {
+	 				if (scr != null) {
+		 				println(scr.toString)
+		 				assertTrue(scr instanceof SadlCommandResult)
+		 				val tr = (scr as SadlCommandResult).results
+		 				assertTrue(tr instanceof ResultSet)
+	//	 				assertEquals("\"x\",\"y\"
+	//\"http://sadl.org/StringFormat.sadl#TestInst\",\"value is                  32.334339141846 != 23.455999\"", tr.toString.trim)
+		 			}
+		 			idx++
+	 			}
+	 		];		
+	 }
+	 	
+	@Test
+	def void testSadlEquationInRule_06() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		createFile('BooleanTypes.sadl', '''
+			 uri "http://sadl.org/BooleanTypes.sadl" alias booleantypes.
+			 
+			 External booleanToString(boolean b) returns string : "java.lang.Boolean.toString".
+			 External booleanToString2(boolean b) returns string : "java.lang.String.valueOf".
+			 
+			 Expr: booleanToString(false).
+			 Expr: booleanToString2(true).
+			  
+			 ClassWithBooleanProps is a class, described by shouldBeTrue with values of type boolean,
+			 	described by shouldBeFalse with values of type boolean.
+			 	
+			 MyCWBP is a ClassWithBooleanProps.
+			 	 
+			 Rule R1: if x is a ClassWithBooleanProps 
+			 	then shouldBeFalse of x is booleanToString(false)
+			 		and shouldBeTrue of x is booleanToString2(true).
+			 
+			 Ask: select x, p, v where x is a ClassWithBooleanProps and x has p v.
+		''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+	 			assertNotNull(jenaModel)
+	 			var evaluatesTrue = 0
+	 			var evaluatesFalse = 0
+	 			var typeError1 = 0
+	 			var typeError2 = 0
+	 			if (issues !== null) {
+	 				for (issue : issues) {
+	 					System.out.println(issue.message)
+	 					if (issue.message.equals("Evaluates to: \"false\"")) {
+	 						evaluatesFalse++
+	 					}
+	 					else if (issue.message.equals("Evaluates to: \"true\"")) {
+	 						evaluatesTrue++
+	 					}
+	 					else if (issue.message.equals("booleantypes:shouldBeFalse, a datatype property with range  xsd:boolean, cannot be compared (is) with sadlimplicitmodel:ExternalEquation returning xsd:string.")) {
+	 						typeError1++
+	 					}
+	 					else if (issue.message.equals("booleantypes:shouldBeTrue, a datatype property with range  xsd:boolean, cannot be compared (is) with sadlimplicitmodel:ExternalEquation returning xsd:string.")) {
+	 						typeError2++
+	 					}
+	 				}
+	 			}
+	 			assertEquals(1, evaluatesTrue)
+	 			assertEquals(1, evaluatesFalse)
+	 			assertEquals(1, typeError1)
+	 			assertEquals(1, typeError2)
+	 			if (rules !== null) {
+	 				for (rule : rules) {
+	 					System.out.println(rule.toString)
+	 				}
+	 			}
+	 			assertTrue(rules.size == 1)
+//	 			assertTrue(
+//	 				processor.compareTranslations(rules.get(0).toString(),
+//	 					"Rule R1:  if rdf(x, rdf:type, stringformat:TestClass) and formatString(\"value is %32.12f != %f\",32.33434,23.456,v0) then rdf(x, stringformat:formatedString, v0)."))
+	 		]
+	 
+	 		var List<ConfigurationItem> configItems = newArrayList
+	 		val String[] catHier = newArrayOfSize(1)
+	 		catHier.set(0, "Jena")
+	 		val ci = new ConfigurationItem(catHier)
+	 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+	 		configItems.add(ci)
+	 		assertInferencer('BooleanTypes.sadl', null, configItems) [
+	 			var idx = 0
+	 			for (scr : it) {
+	 				if (scr != null) {
+		 				println(scr.toString)
+		 				assertTrue(scr instanceof SadlCommandResult)
+		 				val tr = (scr as SadlCommandResult).results
+		 				assertTrue(tr instanceof ResultSet)
+	//	 				assertEquals("\"x\",\"y\"
+	//\"http://sadl.org/StringFormat.sadl#TestInst\",\"value is                  32.334339141846 != 23.455999\"", tr.toString.trim)
+		 			}
+		 			idx++
+	 			}
+	 		];		
+	 }
+	 
 }

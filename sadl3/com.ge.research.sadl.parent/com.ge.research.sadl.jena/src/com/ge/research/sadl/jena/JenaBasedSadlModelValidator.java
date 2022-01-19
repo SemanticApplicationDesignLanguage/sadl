@@ -1417,6 +1417,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else if (ct.equals(ConceptType.VARIABLE)) {
 					sb1.append(", a variable of type ");
 					sb2 = new StringBuilder();				}
+				else if (ct.equals(ConceptType.FUNCTION_DEFN)) {
+					if (typeCheckInfo.getTypeToExprRelationship() != null && 
+							typeCheckInfo.getTypeToExprRelationship().equals(FUNCTION_RETURN)) {
+						sb1.append(" returning ");
+						sb1.append(typeCheckInfo.getTypeCheckType().toString());
+					}
+				}
 			}
 			if (typeCheckInfo.getCompoundTypes() != null) {
 				List<String> compoundTypeList = new ArrayList<String>();

@@ -31,6 +31,7 @@ public class Equation {
 	private String namespace = null;
 	private List<Node> arguments = null;
 	private List<Node> argumentTypes = null;
+	private boolean varArgs = false;		// does this equation have a variable number or arguments?
 	private List<Node> returnTypes = null;
 	private List<GraphPatternElement> body = null;
 	private List<VariableNode> equationVariables = null;
@@ -431,5 +432,13 @@ public class Equation {
 
 	public void setExternalUri(String externalUri) {
 		this.externalUri = externalUri;
+	}
+
+	public boolean isVarArgs() {
+		return varArgs;
+	}
+
+	public void setVarArgs(boolean varArgs) {
+		this.varArgs = varArgs;
 	}
 }

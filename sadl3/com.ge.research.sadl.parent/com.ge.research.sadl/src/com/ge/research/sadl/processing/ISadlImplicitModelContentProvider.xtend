@@ -123,7 +123,8 @@ interface ISadlImplicitModelContentProvider {
 			Script is a class, described by language with a single value of type Language,
 				described by script with a single value of type string.
 			^Equation is a class,
-				described by expression with values of type Script.
+				described by expression with values of type Script,
+				described by variableNumArguments with a single value of type boolean.
 			arguments describes ^Equation with a single value of type DataDescriptor List.
 			returnTypes describes ^Equation with a single value of type DataDescriptor List.
 			

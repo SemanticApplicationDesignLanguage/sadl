@@ -416,7 +416,7 @@ then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulev
  			assertTrue(rules.size == 1)
  			val rule = getTranslator(processor).translateRule(jenaModel, "http://sadl.org/JavaExternal.sadl", rules.get(0))
  			println(rule.toString)
- 			assertEquals(rule.toString, "[testRule: evaluateSadlEquation('java.lang.Math.min'^^http://www.w3.org/2001/XMLSchema#string, 2, 3, ?v0) -> print(?v0)]")
+ 			assertEquals(rule.toString, "[testRule: evaluateSadlEquation('http://sadl.org/JavaExternal.sadl#min'^^http://www.w3.org/2001/XMLSchema#string, 2, 3, ?v0) -> print(?v0)]")
  		]
 		
 	}

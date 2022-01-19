@@ -289,7 +289,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 						BuiltinElement bi = (BuiltinElement) elements.get(idx);
 						bi.setFuncName("evaluateSadlEquation");
 						com.ge.research.sadl.model.gp.Literal eqUri = new com.ge.research.sadl.model.gp.Literal(LiteralType.StringLiteral);
-						eqUri.setValue(bi.getInModelReferencedEquation().getExternalUri());
+						eqUri.setValue(bi.getFuncUri()); // getInModelReferencedEquation().getExternalUri());
 						bi.getArguments().add(0, eqUri);
 						bi.getArgumentTypes().add(0, new NamedNode("http://www.w3.org/2001/XMLSchema#string", NodeType.DataTypeNode));
 						sb.append(graphPatternElementToJenaRuleString(bi, rulePart));
