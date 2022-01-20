@@ -23,7 +23,7 @@ import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.Ontology;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.RDFWriterI;
 
 public class MetricsProcessor implements IMetricsProcessor {
 	private String filename;
@@ -104,7 +104,7 @@ public class MetricsProcessor implements IMetricsProcessor {
 	 */
 	@Override
 	public boolean saveMetrics(String format) throws IOException, ConfigurationException, URISyntaxException {
-		RDFWriter w = getTheJenaModel().getWriter(format);
+		RDFWriterI w = getTheJenaModel().getWriter(format);
 		w.setProperty("xmlbase", baseUri);
 		FileOutputStream out = new FileOutputStream(filename);
 		w.write(getTheJenaModel().getBaseModel(), out, baseUri);

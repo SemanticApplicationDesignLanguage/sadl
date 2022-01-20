@@ -98,7 +98,7 @@ import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.RDFWriterI;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -833,7 +833,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		if (format.equals(SadlSerializationFormat.RDF_XML_FORMAT) || 
 				format.equals(SadlSerializationFormat.RDF_XML_ABBREV_FORMAT)) {
-			RDFWriter w2 = model.getWriter(format);
+			RDFWriterI w2 = model.getWriter(format);
 			w2.setProperty("xmlbase", modelName);
 			w2.write(model, out, modelName);
 		}

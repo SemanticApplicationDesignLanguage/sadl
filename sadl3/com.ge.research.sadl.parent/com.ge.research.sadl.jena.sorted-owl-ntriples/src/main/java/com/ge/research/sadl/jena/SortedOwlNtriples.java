@@ -14,7 +14,7 @@ import java.util.HashMap;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.RDFWriterI;
 
 public class SortedOwlNtriples {
 
@@ -52,7 +52,7 @@ public class SortedOwlNtriples {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		RDFWriter w = om.getWriter(N_TRIPLE_FORMAT);
+		RDFWriterI w = om.getWriter(N_TRIPLE_FORMAT);
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		w.write(om, out, format);
 		Charset charset = Charset.forName("UTF-8"); 
