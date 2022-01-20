@@ -137,6 +137,11 @@
       </dependency>
       <dependency>
         <groupId>org.apache.jena</groupId>
+        <artifactId>jena-arq</artifactId>
+        <version>${version.jena}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.jena</groupId>
         <artifactId>jena-larq</artifactId>
         <version>1.0.0-incubating</version>
       </dependency>
