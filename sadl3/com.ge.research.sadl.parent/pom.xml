@@ -54,7 +54,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <version.jena>4.3.2</version.jena>
     <version.log4j>2.17.1</version.log4j>
-    <version.mwe2>2.12.0</version.mwe2>
+    <version.mwe2>2.12.1</version.mwe2>
     <version.sadl>${project.version}</version.sadl>
     <version.slf4j>1.7.33</version.slf4j>
     <version.surefire>3.0.0-M5</version.surefire>
@@ -189,12 +189,6 @@
         <groupId>org.codehaus.woodstox</groupId>
         <artifactId>wstx-asl</artifactId>
         <version>3.2.9</version>
-      </dependency>
-      <!-- Needed to make Mwe2Launcher 2.12.0 work with Xtext 2.24.0 -->
-      <dependency>
-        <groupId>org.eclipse.platform</groupId>
-        <artifactId>org.eclipse.core.resources</artifactId>
-        <version>3.16.0</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.xtext</groupId>
