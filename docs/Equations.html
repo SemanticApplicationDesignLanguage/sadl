@@ -7,124 +7,216 @@
   <body>
     <h1>Equations and External Equations</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->4/21/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/20/2022<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <p> </p>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;">Introduction</span></h2>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;"></span></h2>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">Equations, also
-        known as functions (see <a href="Tutorial/FCSM_Outline.html">Foundational
-          Concepts in Semantic Modeling</a>, Part 2), are snippets of procedural
-        code that provide instructions for computing an output from a set of
-        inputs. The inputs are typed variables. The output is unnamed but its
-        type is the return type. Actually, in the general case an equation can
-        return multiple values as can be the case in Python. Functions can be
-        very important in modeling a domain. For example, many reasoners allow
-        rules to have built-in functions to handle math operations, and without
-        the ability to do math operations it may not be possible to construct a
-        useful model.</span></p>
+    <p>Equations, also known as functions (see <a href="Tutorial/FCSM_Outline.html">Foundational
+        Concepts in Semantic Modeling</a>, Part 2), are snippets of procedural
+      code that provide instructions for computing an output from a set of
+      inputs. The inputs are typed variables. The output is unnamed but its type
+      is the return type. Actually, in the general case an equation can return
+      multiple values as can be the case in Python. Functions can be very
+      important in modeling a domain. For example, many reasoners allow rules to
+      have built-in functions to handle math operations, and without the ability
+      to do math operations it may not be possible to construct a useful model.</p>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;">Equations
         vs. External Equations</span></h2>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;"></span></h2>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">The SADL
-        grammar supports two kinds of equations, one in which the body of the
-        function<span>&nbsp;</span></span><span style="font-family: &quot;Times New Roman&quot;, serif;">(the
-        set of instructions for computing)<span>&nbsp;</span></span><span style="font-family: &quot;Times New Roman&quot;, serif;">is
-        defined in the SADL statement, and another where the body of the
-        function exists somewhere outside of the ontology. The first kind uses
-        the<span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>keyword.</span></p>
+    <p>The SADL grammar supports two kinds of equations, one in which the body
+      of the function<span>&nbsp;</span>&lt;(the set of instructions for
+      computing)&nbsp;&gt;is defined in the SADL statement, and another where
+      the body of the function exists somewhere outside of the ontology. The
+      first kind uses the<span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>keyword.</p>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; line-height: normal; margin: 0in 0in 0.0001pt 0.5in;"><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">Equation</span><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
-          style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);">areaOfCircle</span></b><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span>(</span><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
-          style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">radius</span></b><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: black;">)<span>&nbsp;</span></span><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">returns</span><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: black;">:<span>&nbsp;</span></span><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">PI</span><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: black;">*</span><b><span
-          style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">radius</span></b><span
-        style="font-size: 10pt; font-family: &quot;Times New Roman&quot;, serif; color: black;">^2
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">Equation</span><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
+          style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);">areaOfCircle</span></b><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span>(</span><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
+          style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">radius</span></b><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: black;">)<span>&nbsp;</span></span><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">returns</span><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: black;">:<span>&nbsp;</span></span><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">PI</span><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: black;">*</span><b><span
+          style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">radius</span></b><span
+        style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: black;">^2
         .</span></p>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; margin: 0in 0in 0.0001pt 0.5in;"><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">Equation</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
-          style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);">volumeOfCylinder</span></b><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span>(</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
-          style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">radius</span></b><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">,<span>&nbsp;</span></span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
-          style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">height</span></b><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">)<span>&nbsp;</span></span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">returns</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">:</span><b><span
-          style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);"><span>&nbsp;</span>areaOfCircle</span></b><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">(</span><b><span
-          style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">radius</span></b><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">)
-        *<span>&nbsp;</span></span><b><span style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">height</span></b><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">.</span></p>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">As the example
-        illustrates, one<span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>may
-        use another in its body. Here the<span> </span></span><span style="font-family: &quot;Times New Roman&quot;, serif;"><span><span
-            style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span></span></span><b><span
-              style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);">volumeOfCylinder</span></b><span
-            style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span></span></span></span><span>
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">Equation</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
+          style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);">volumeOfCylinder</span></b><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span>(</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
+          style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">radius</span></b><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">,<span>&nbsp;</span></span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
+          style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">height</span></b><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">)<span>&nbsp;</span></span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">returns</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">:</span><b><span
+          style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);"><span>&nbsp;</span>areaOfCircle</span></b><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">(</span><b><span
+          style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">radius</span></b><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">)
+        *<span>&nbsp;</span></span><b><span style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">height</span></b><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">.</span></p>
+    <p>As the example illustrates, one<span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>may
+      use another in its body. Here the<span> </span><span style="font-family: &quot;Times New Roman&quot;, serif;"><span><span
+            style="font-size: 12pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span></span></span><b><span
+              style="font-size: 12pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);">volumeOfCylinder</span></b><span
+            style="font-size: 12pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span></span></span></span><span>
         </span><i>Equation</i><span>&nbsp;</span>uses<span>&nbsp;</span></span><span
-        style="font-family: &quot;Times New Roman&quot;, serif;"><b><span style="font-size: 10pt; color: rgb(128, 20, 128);">areaOfCircle</span></b><span>&nbsp;</span>in
+        style="font-family: &quot;Times New Roman&quot;, serif;"><b><span style="font-size: 12pt; color: rgb(128, 20, 128);">areaOfCircle</span></b><span>&nbsp;</span>in
         its body.</span></p>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">The second kind
-        of equation uses the<span>&nbsp;</span><i>External</i><span>&nbsp;</span>keyword.
-        This kind of equation needs a means of specifying where, outside of the
-        ontology, the complete specification may be found. Consistent with the
-        W3C practice of identity by URI, the instance of<span>&nbsp;</span><i>External</i><span>&nbsp;</span>is
-        given an<span> </span><span></span>identifying URI. It may also have an
-        optional<span>&nbsp;</span>location<span>&nbsp;</span>to help a user of
-        the <span></span><i>External</i><span>&nbsp;</span>to find it.</span></p>
+    <p>The second kind of equation uses the<span>&nbsp;</span><i>External</i><span>&nbsp;</span>keyword.
+      This kind of equation needs a means of specifying the identity of the
+      specification of the body (computational instructions) of the equation.
+      The location, outside of the ontology, where the complete specification
+      can be found may also be given. Consistent with the W3C practice of
+      identity by URI, the instance of<span>&nbsp;</span><i>External</i><span>&nbsp;</span>is
+      given an<span> </span><span></span>identifying URI. It may also have a<span>
+      </span>location<span>, given by URL, </span>to help the <span></span><i>External</i><span>&nbsp;</span>to
+      be found.</p>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; margin: 0in 0in 0.0001pt 0.5in;"><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">External</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
-          style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);">abs</span></b><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span>(</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
-          style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">x</span></b><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">)<span>&nbsp;</span></span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">returns</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">:
-        "http://java.lang.Math.abs"</span><span style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;"><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; located</span><span style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">at</span><span
-        style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span>"java.lang.Math.abs".</span></p>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">The named
-        functions declared with either the<span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>or<span>&nbsp;</span><i>External</i><span>&nbsp;</span>keyword
-        can be used in expressions in SADL or derivative grammars. Using the
-        functions to do actual computation is a task for the reasoner or other
-        related processors.</span></p>
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">External</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
+          style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: rgb(128, 20, 128);">abs</span></b><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span>(</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
+          style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: fuchsia;">x</span></b><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">)<span>&nbsp;</span></span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">returns</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">float</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">:
+        "java.lang.Math.abs"</span><span style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;"><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; located</span><span style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">at</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span>"</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span
+          style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">http://</span>java.lang.Math".</span></p>
+    <p><strong>Note</strong>: the external identity URI is, in this example as
+      in practice when the functions are in Java, not strictly a URI but rather
+      is the Java package, class, and method name of the external Java method.
+      For information on how to wrap any Java class method that takes primitive
+      data as inputs and outputs in a SADL External declaration, making it
+      available for use, see <a href="ExternalWrappingJavaForJena.html">Wrapping
+        Java Class Methods for the Jena Reasoner</a>.</p>
+    <p>The named functions declared with either the<span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>or<span>&nbsp;</span><i>External</i><span>&nbsp;</span>keyword
+      can be used in expressions in SADL or derivative grammars. Using the
+      functions to do actual computation is a task for the reasoner or other
+      related processors.</p>
+    <h2><span style="font-family: &quot;Times New Roman&quot;, serif;">Additional
+        Argument and Return Type Information</span></h2>
+    <p>The SADL grammar supports additional information about function arguments
+      and return types. There is support for three special cases.</p>
+    <ol>
+      <li>It is possible that a function does not return a value. In this case
+        the SADL grammar allows the "None" keyword to be used as the return
+        type, e.g., <span style="font-size: 12pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">returns
+          None</span><span style="font-size: 12pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>
+          </span></span>.</li>
+      <li>It is possible that a function is ill-defined, especially in the case
+        of built-in functions provided by the reasoner and declared in the
+        SadlBuiltinFunctions.sadl file in the ImplicitModel folder. Either
+        forcamfe370 one or more arguments or for the return type,"--" may be
+        used to indicate that the argument or the return type is unknown, or is
+        of a type which cannot be represented in the grammar, such as a list. <br>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font color="#800080"><font
+              face="Monospace"><font style="font-size: 9pt">External</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 9pt">
+              </font></font></font><font color="#801480"><font face="Monospace"><font
+                style="font-size: 9pt"><b>sadlListToString</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 9pt">(--)
+                </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 9pt">returns</font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 9pt"> </font></font></font><font
+            color="#800080"><font face="Monospace"><font style="font-size: 9pt">string</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 9pt">:
+                <span style="background: #e6f0ff">"com.naturalsemantics.sadl.jena.reasoner.builtin#sadlListToString"</span></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 9pt">.</font></font></font></p>
+        <br>
+      </li>
+      <li>Some functions may have a variable number of arguments. In Java, this
+        is called "VarArgs". In SADL this is indicated with an ellipsis.The
+        ellipsis may follow a type and precede an argument name, or it may
+        appear as an argument by itself. In the first instance the ellipsis
+        indicates that there are a variable number of arguments of the specified
+        type. In the second case the ellipsis indicates that the arguments can
+        be of any type. In any case, there can only be one argument that uses
+        the ellipsis, that is represents a variable number of arguments, and it
+        must be the last declared argument. Examples include: <br>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> </p>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font style="font-size: 9pt"
+            size="2"><font color="#800080"><font face="Monospace">External</font></font><font
+              color="#4c4c4c"><font face="Monospace"> </font></font><font color="#801480"><font
+                face="Monospace"><b>formatString&lt;</b></font></font><font color="#4c4c4c"><font
+                face="Monospace">(</font></font><font color="#800080"><font face="Monospace">string</font></font><font
+              color="#4c4c4c"><font face="Monospace"> </font></font><font color="#ff00ff"><font
+                face="Monospace"><b>fmt</b></font></font><font color="#4c4c4c"><font
+                face="Monospace">, </font></font></font><font style="font-size: 9pt"
+            size="2"><font color="#4c4c4c"><font face="Monospace">...</font></font></font><font
+            style="font-size: 9pt" size="2"><font color="#4c4c4c"><font face="Monospace">)
+              </font></font><font color="#800080"><font face="Monospace">returns</font></font><font
+              color="#4c4c4c"><font face="Monospace"> </font></font><font color="#800080"><font
+                face="Monospace">string</font></font><font color="#4c4c4c"><font
+                face="Monospace">: <span style="background: #e6f0ff">"java.lang.String.format"</span></font></font><font
+              color="#4c4c4c"><font face="Monospace"><span style="background: #e8f2fe">.</span></font></font><br>
+            <span style="color: #6c7e6c;">// The first argument is a string,
+              followed by any number of arguments of any type.</span></font></p>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font style="font-size: 9pt"
+            size="2"><font color="#800080"><font face="Monospace">External</font></font><font
+              color="#4c4c4c"><font face="Monospace"> </font></font><font color="#801480"><font
+                face="Monospace"><b>strConcat</b></font></font><font color="#4c4c4c"><font
+                face="Monospace">(</font></font><font color="#800080"><font face="Monospace">string</font></font><font
+              color="#4c4c4c"><font face="Monospace"> </font></font><font color="#ff00ff"><font
+                face="Monospace"><b>str1</b></font></font><font color="#4c4c4c"><font
+                face="Monospace">, </font></font></font><font style="font-size: 9pt"
+            size="2"><font color="#4c4c4c"><font face="Monospace"><font style="font-size: 9pt"
+                  size="2"><font color="#800080"><font face="Monospace">string</font></font><font
+                    color="#4c4c4c"><font face="Monospace"> </font></font></font>...
+                </font></font></font><font style="font-size: 9pt" size="2"><font
+              color="#4c4c4c"><font face="Monospace"><font style="font-size: 9pt"
+                  size="2"><font color="#ff00ff"><font face="Monospace"><b>moreStrs</b></font></font></font>)
+              </font></font><font color="#800080"><font face="Monospace">returns</font></font><font
+              color="#4c4c4c"><font face="Monospace"> </font></font><font color="#800080"><font
+                face="Monospace">string</font></font><font color="#4c4c4c"><font
+                face="Monospace">: <span style="background: #e6f0ff">"org.apache.jena.reasoner.rulesys.builtins#strConcat"</span></font></font><font
+              color="#4c4c4c"><font face="Monospace">.</font></font><br>
+            <span style="color: #6c7e6c;">// The first argument is a string,
+              followed by any number of arguments of type string.</span></font></p>
+      </li>
+    </ol>
+    <p>These may be combined, of course, as in this example of a method that
+      takes any type of first argument followed by any number of additional
+      arguments of any type.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font style="font-size: 9pt" size="2"><font color="#800080"><font face="Monospace"><span
+              style="background: #e8f2fe">External</span></font></font><font color="#4c4c4c"><font
+            face="Monospace"> </font></font><font color="#801480"><font face="Monospace"><b>print</b></font></font><font
+          color="#4c4c4c"><font face="Monospace">(--, ...) </font></font><font
+          color="#800080"><font face="Monospace">returns</font></font><font color="#4c4c4c"><font
+            face="Monospace"> --: <span style="background: #e6f0ff">"com.ge.research.sadl.jena.reasoner.builtin#print"</span></font></font><font
+          color="#4c4c4c"><font face="Monospace">.</font></font></font></p>
+    <p></p>
+    <ol>
+    </ol>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;">Translation
         to OWL</span></h2>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;"></span></h2>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">Translation of
-        equations and external equations to OWL uses the meta-model defined in
-        the </span><span style="font-family: &quot;Times New Roman&quot;, serif;"><a
+    <p>Translation of equations and external equations to OWL uses the
+      meta-model defined in the <span style="font-family: &quot;Times New Roman&quot;, serif;"><a
           href="SadlImplicitModel.html">SADL Implicit Model</a>. Excluding <a href="AugmentedTypes.html">augmented
           types</a>, the meta-model is the following.<br>
       </span></p>
@@ -396,13 +488,8 @@
           </font></font></font><font color="#800080"><font face="Monospace"><font
             style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
           face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">single</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
         color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">value</font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">s
           </font></font></font><font color="#800080"><font face="Monospace"><font
             style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
           face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
@@ -420,14 +507,9 @@
             style="font-size: 10pt" size="2"><b>dataType</b></font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
           </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
-        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#800080"><font face="Monospace"><font
-            style="font-size: 10pt" size="2">single</font></font></font><font color="#4c4c4c"><font
-          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
-        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">value</font></font></font><font
+            style="font-size: 10pt" size="2">with</font></font></font><span style="font-family: monospace;"><span
+          style="color: #4c4c4c;"><font size="2"> </font></span></span><font color="#800080"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
           </font></font></font><font color="#800080"><font face="Monospace"><font
             style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
@@ -436,19 +518,64 @@
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
           </font></font></font><font color="#800080"><font face="Monospace"><font
             style="font-size: 10pt" size="2">anyURI</font></font></font><font color="#800080"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">,</font></font></font><font
-        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2"><br>
-            &nbsp; described</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"> </font></font></font><font color="#800080"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">by</font></font></font><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><br>
+          </font></font></font></div>
+    <div style="margin-left: 40px;"><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">&nbsp; described</font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
-          </font></font></font><font color="#00cc00"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"><b>descriptorVariable</b></font></font></font><font
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">by</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>variableNumArguments</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">with</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">values</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">type</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">boolean</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">,</font></font></font></div>
+    <div style="margin-left: 40px;"><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">&nbsp; described</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">by</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#00cc00"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>descriptorVariable</b></font></font></font><font
         color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font><font
         color="#008000"><font face="Monospace"><font style="font-size: 10pt" size="2"><br>
-            <b>dataType</b></font></font></font><font color="#4c4c4c"><font face="Monospace"><font
-            style="font-size: 10pt" size="2"> </font></font></font><font color="#800080"><font
-          face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
+            <b></b></font></font></font>
+      <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font color="#008000"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"><b>localDescriptorName</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#000080"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>DataDescriptor</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">has</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">at</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">most</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+                style="background: #e6f0ff">1</span></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">value</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+      <font color="#008000"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"><b>dataType</b></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">of</font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
           </font></font></font><font color="#000080"><font face="Monospace"><font
             style="font-size: 10pt" size="2"><b>DataDescriptor</b></font></font></font><font
@@ -488,57 +615,48 @@
         color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">value</font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></div>
     <div style="margin-left: 40px;"> </div>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;"></span> The
-      variables which are arguments of an equation have an explicit order which
-      must be preserved in the OWL representation. Therefore the <em>arguments</em>
+    <p> The variables which are arguments of an equation have an explicit order
+      which must be preserved in the OWL representation. Therefore the <em>arguments</em>
       of an equation are a list in order to make the order explicit--in this
       case a <em>DataDescriptor List</em>. The same is true of <em>returnedTypes</em>
-      as it is possible that more than one value will be returned. The scope of
-      a variable in an equation is limited to that equation. Two equations in a
-      SADL model (which corresponds to an XML namespace by SADL design) might
-      have argument variables with the same name but they are distinct,
-      unrelated variable instances. Therefore, in the OWL representation we
-      cannot just use the variable name as it appears in the signature as the
-      unique identifier of the variable since the scope of the name can be no
-      more narrow than the current namespace. However, since equation names must
-      be unique within a SADL model, we can create unique identifiers by
-      concatenating the variable name with the equation name. This concatenated
-      name becomes the local name of the value of the <em>descriptorVarible</em>
+      as it is possible that more than one value will be returned by equations
+      in some languages. The scope of a variable in an equation is limited to
+      that equation. Two equations in a SADL model (which corresponds to an XML
+      namespace by SADL design) might have argument variables with the same name
+      but they are distinct, unrelated variable instances. Therefore, in the OWL
+      representation we cannot just use the variable name as it appears in the
+      signature as the unique identifier of the variable since the scope of the
+      name can be no more narrow than the current namespace. However, since
+      equation names must be unique within a SADL model, we can create unique
+      identifiers by concatenating the variable name with the equation name.
+      This concatenated name becomes the local name of the value of the <em>descriptorVarible</em>
       property of instances of the <em>DataDescriptor</em> class. The actual
       name as it appears in the equation signature is preserved as the value of
       <em>localDescriptorName</em>. An instance of a GPVariable (definition not
-      shown in the meta-model above, see <span style="font-family: &quot;Times New Roman&quot;, serif;">
-        <a href="AugmentedTypes.html">augmented types</a></span>) is created and
-      given the unique URI constructed from the namespace URI and the
-      concatenation of the equation localname and the argument local name.</p>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">Use of this
-        meta-model is illustrated by the following OWL snippet showing the
-        translation of the areaOfCircle equation above.</span></p>
+      shown in the meta-model above, see <a href="AugmentedTypes.html">augmented
+        types</a>) is created and given the unique URI constructed from the
+      namespace URI and the concatenation of the equation localname and the
+      argument local name.</p>
+    <p>Use of this meta-model is illustrated by the following OWL snippet
+      showing the translation of the areaOfCircle equation above.</p>
     <div style="margin-left: 40px;"> <img src="images/EqnTrans1.png" alt=""></div>
     <p><br>
     </p>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">Observe that
-        the <em>sadlimplicitmodel:arguments</em> and <em>sadlimplicitmodel:returnTypes</em>
-        properties have values of type <em>_:b0</em>, a subclass of the <em>sadllistmodel:List</em>.
-        Each element of these lists is an instance of a <em>sadlimplicitmodel:DataDescriptor</em>,
-        which captures the variable local and model name, for the argument, and
-        the type, <em>xsd:float</em>, for both the argument and returned value.</span></p>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">The translation
-        of the external equation <em>abs</em> provides a second example.</span></p>
+    <p>Observe that the <em>sadlimplicitmodel:arguments</em> and <em>sadlimplicitmodel:returnTypes</em>
+      properties have values of type <em>_:b0</em>, a subclass of the <em>sadllistmodel:List</em>.
+      Each element of these lists is an instance of a <em>sadlimplicitmodel:DataDescriptor</em>,
+      which captures the variable local and model name, for the argument, and
+      the type, <em>xsd:float</em>, for both the argument and returned value.</p>
+    <p>The translation of the external equation <em>abs</em> provides a second
+      example.</p>
     <div style="margin-left: 40px;"><img src="images/EqnTrans2.png" alt=""><br>
     </div>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">In this case
-        there is no <em>expression</em> with a <em>language</em> and <em>script</em>
-        but instead there is an <em>externalURI</em> (identity of the equation)
-        and an <em>externalURL</em> (where to find the equation).<br>
-      </span></p>
-    <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
-        style="font-family: &quot;Times New Roman&quot;, serif;">See also:</span></p>
+    <p>In this case there is no <em>expression</em> with a <em>language</em>
+      and <em>script</em> but instead there is an <em>externalURI</em>
+      (identity of the equation) and an <em>externalURL</em> (where to find the
+      equation).<br>
+    </p>
+    <p>See also:</p>
     <ol>
       <li><span style="font-family: &quot;Times New Roman&quot;, serif;"><a href="AugmentedTypes.html">Augmented
             types</a>: capturing additional knowledge in equation declarations</span></li>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>temp</title>
+  </head>
+  <body>
+    <h1>Wrapping Java Class Methods for the Jena Reasoner</h1>
+    <h5>Last revised
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/20/2022<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <a href="contact.html">Contact us</a>.</h5>
+    <p>When a Jena-based reasoner is selected, methods of any class on the Java
+      classpath can be wrapped in a SADL External equation and thereby be made
+      available for use in rules. The arguments of the method and its return
+      type must be XML datatypes that are compatible with Java data types. The
+      XSD datatypes and their Java types currently supported are</p>
+    <ol>
+      <li>int</li>
+      <li>long</li>
+      <li>float</li>
+      <li>double</li>
+      <li>boolean</li>
+      <li>string (char in Java, but compatible with String class)</li>
+    </ol>
+    <p>The SADL <em>External</em> class property <em>externalUri</em>
+      identifies the Java package, class, and method being wrapped. The SADL
+      argument types and the return type are used to check for compatibility
+      with the Java method at evaluation time. The actual Jena Literals passed
+      in to the method on evaluation are translated to the appropriate Java
+      instances for a Java reflection invocation of the method. The Java package
+      referenced must be on the Java classpath in order to be found by the
+      reflection invocation.</p>
+    <h2>Examples</h2>
+    <p>Here are a number of examples of <em>External</em> declarations that use
+      common Java classes and methods.</p>
+    <ol>
+      <li>Random number generator, no arguments:<br>
+        <br>
+        <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+              size="2"><span style="color: black;"><span style="font-family: serif;">
+                </span></span>External</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#801480"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>random</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">()
+              </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">returns</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">float</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> : </font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+                style="background: #e6f0ff">"java.lang.Math.random"</span></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font>
+      </li>
+      <br>
+      <li>Boolean to string, single argument:<br>
+        <br>
+        <font style="font-size: 9pt" size="2"><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><span style="color: black;"><span
+                    style="font-family: serif;"> </span></span>External</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#801480"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><b>booleanToString</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">(</font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">boolean</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><b>b</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">) </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">returns</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">string</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> : </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"java.lang.Boolean.toString"</span></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">.</font></font></font></font> </li>
+      <br>
+      <li>Double number comparison, two arguments:<br>
+        <br>
+        <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+              size="2"><span style="color: black;"><span style="font-family: serif;">
+                </span></span>External</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+          color="#801480"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>doubleCompare</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+          color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">double</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><b>d1</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">double</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><b>d2</b></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">)
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">returns</font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            </font></font></font><font color="#800080"><font face="Monospace"><font
+              style="font-size: 10pt" size="2">int</font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"> : </font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+                style="background: #e6f0ff">"java.lang.Double.compareTo"</span></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font>
+      </li>
+      <br>
+      <li>Two methods of Java String class that can be nested to the get local
+        name fragment from a URI:
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font color="#4c4c4c"><span
+              style="background: #e8f2fe"> </span></font><font style="font-size: 9pt"
+            size="2"><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                  size="2">External</font></font></font><font color="#4c4c4c"><font
+                face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+              color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+                  size="2"><b>indexOf</b></font></font></font><font color="#4c4c4c"><font
+                face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+              color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                  size="2">string</font></font></font><font color="#4c4c4c"><font
+                face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+              color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt"
+                  size="2"><b>str</b></font></font></font><font color="#4c4c4c"><font
+                face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+              color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                  size="2">string</font></font></font><font color="#4c4c4c"><font
+                face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+              color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt"
+                  size="2"><b>match</b></font></font></font><font color="#4c4c4c"><font
+                face="Monospace"><font style="font-size: 10pt" size="2">) </font></font></font><font
+              color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                  size="2">returns</font></font></font><font color="#4c4c4c"><font
+                face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+              color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                  size="2">int</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                  style="font-size: 10pt" size="2"> : </font></font></font><font
+              color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                  size="2"><span style="background: #e6f0ff">"java.lang.String.indexOf"</span></font></font></font><font
+              color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                  size="2">.</font></font></font></font></p>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#4c4c4c">
+          </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">External</font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><b>substring</b></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+            color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">string</font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><b>str</b></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2">, </font></font></font><font
+            color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">int</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"> </font></font></font><font color="#ff00ff"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><b>start</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">) </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">returns</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">string</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> : </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"java.lang.String.substring"</span></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">. </font></font></font></p>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font color="#4c4c4c">
+          </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">Rule</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"> </font></font></font><font color="#0000ff"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><b>R1</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">: </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><b>x</b></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">is</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"> </font></font></font><font color="#800080"><font
+              face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#000080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><b>URI</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">and</font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><b>y</b></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">is</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"> </font></font></font><font color="#008000"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><b>^uri</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><i>x</i></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">then</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"> </font></font></font><font color="#008000"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><b>ln</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"> </font></font></font><font color="#800080"><font face="Monospace"><font
+                style="font-size: 10pt" size="2">of</font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><i>x</i></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+            color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">is</font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"> </font></font></font><font color="#801480"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><b>substring</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">(</font></font></font><font color="#ff00ff"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><i>y</i></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">, </font></font></font><font color="#801480"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><b>indexOf</b></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">(</font></font></font><font color="#ff00ff"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><i>y</i></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">, </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"#"</span></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">) + </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+                style="font-size: 10pt" size="2"><span style="background: #e6f0ff">1</span></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2">).</font></font></font></p>
+      </li>
+      <br>
+      <li>Method to put any number of argument values of any type into a
+        formatted string: <br>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font style="font-size: 9pt"
+            size="2"><font color="#800080"><font face="Monospace"><span style="background: #e8f2fe">External</span></font></font><font
+              color="#4c4c4c"><font face="Monospace"><span style="background: #e8f2fe">
+                </span></font></font><font color="#801480"><font face="Monospace"><b><span
+                    style="background: #e8f2fe">formatString</span></b></font></font><font
+              color="#4c4c4c"><font face="Monospace"><span style="background: #e8f2fe">(</span></font></font><font
+              color="#800080"><font face="Monospace"><span style="background: #e8f2fe">string</span></font></font><font
+              color="#4c4c4c"><font face="Monospace"><span style="background: #e8f2fe">
+                </span></font></font><font color="#ff00ff"><font face="Monospace"><b><span
+                    style="background: #e8f2fe">fmt</span></b></font></font><font
+              color="#4c4c4c"><font face="Monospace"><span style="background: #e8f2fe">,
+                  ...) </span></font></font><font color="#800080"><font face="Monospace"><span
+                  style="background: #e8f2fe">returns</span></font></font><font
+              color="#4c4c4c"><font face="Monospace"><span style="background: #e8f2fe">
+                </span></font></font><font color="#800080"><font face="Monospace"><span
+                  style="background: #e8f2fe">string</span></font></font><font color="#4c4c4c"><font
+                face="Monospace"><span style="background: #e8f2fe"> : </span></font></font><font
+              color="#4c4c4c"><font face="Monospace"><span style="background: #e6f0ff">"java.lang.String.format"</span></font></font><font
+              color="#4c4c4c"><font face="Monospace"><span style="background: #e8f2fe">.</span></font></font></font></p>
+      </li>
+    </ol>
+    <h2>Testing Wrapped Java Methods with Expr Statements</h2>
+    <p>The SADL <em>Expr</em> statement can be used to test an External that
+      wraps a Java class method. Note that the reasoner is not invoked and the
+      arguments in the Expr statement must be simple primitive data values, not
+      more complex expressions such as triple patterns. The External with the
+      provided arguments is evaluated and the result displayed as an Info marker
+      on that line in the editor window. For each of the methods in the examples
+      above, shown are an Expr statement that tests the External along with the
+      evaluation results.</p>
+    <ol>
+      <li>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> </p>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font color="#800080"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u>Expr:</u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u> </u></font></font></font><font color="#801480"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u><b>random</b></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>()</u></font></font></font><font color="#4c4c4c"><font
+              face="Ubuntu, serif"><font style="font-size: 11pt" size="2">.&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp; //&nbsp; <span style="font-family: monospace;">E</span>valuates
+to:
+                0.673450890873411</font></font></font></p>
+      </li>
+      <li>
+        <p> <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>Expr:</u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u> </u></font></font></font><font
+            color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><b>booleanToString</b></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>(</u></font></font></font><font color="#800080"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u>false</u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>)</u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2">. //</font></font></font><font
+            color="#4c4c4c"><font face="Ubuntu, serif"><font style="font-size: 11pt"
+                size="2"><span style="font-family: monospace;"> </span>Evaluates
+                to: "false"</font></font></font></p>
+      </li>
+      <li>
+        <p> <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>Expr:</u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u> </u></font></font></font><font
+            color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><b>doubleCompare</b></u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><span style="background: #e6f0ff">3.14159</span></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>, </u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u><span style="background: #e6f0ff">3.141591</span></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>)</u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2">.&nbsp; //</font></font></font><font
+            color="#4c4c4c"><font face="Ubuntu, serif"><font style="font-size: 11pt"
+                size="2"><span style="font-family: monospace;"> </span>Evaluates
+                to: -1</font></font></font></p>
+      </li>
+      <li><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+              size="2"><u>Expr:</u></font></font></font><font color="#4c4c4c"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"><u> </u></font></font></font><font
+          color="#801480"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><b>indexOf</b></u></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><span
+                  style="background: #e6f0ff">"http://test.org#localname"</span></u></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>,
+              </u></font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><u><span style="background: #e6f0ff">"#"</span></u></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>)</u></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.
+              //</font></font></font><font color="#4c4c4c"><font face="Ubuntu, serif"><font
+              style="font-size: 11pt" size="2"><span style="font-family: monospace;">
+              </span>Evaluates to: 15 <br>
+            </font></font></font><br>
+        <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+              size="2"><u>Expr:</u></font></font></font><font color="#801480"><font
+            face="Monospace"><font style="font-size: 10pt" size="2"><u><b>substring</b></u></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><span
+                  style="background: #e6f0ff">"http://test.org#localname"</span></u></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>,
+              </u></font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+              style="font-size: 10pt" size="2"><u><span style="background: #e6f0ff">16</span></u></font></font></font><font
+          color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>)</u></font></font></font><font
+          color="#4c4c4c"><font face="Ubuntu, serif"><font style="font-size: 11pt"
+              size="2">. &nbsp;&nbsp;&nbsp; //&nbsp; <span style="font-family: monospace;"></span>Evaluates
+to:
+              "localname"</font></font></font></li>
+      <li>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font color="#4c4c4c">
+          </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>Expr:</u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u> </u></font></font></font><font
+            color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><b>formatString</b></u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><span style="background: #e6f0ff">"name is %s"</span></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>, </u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u><span style="background: #e6f0ff">"sonoo"</span></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>)</u></font></font></font><font color="#4c4c4c"><font
+              face="Ubuntu, serif"><font style="font-size: 11pt" size="2">.&nbsp;&nbsp;&nbsp;
+                //&nbsp; <span style="font-family: monospace;"></span>Evaluates
+                to: "name is sonoo"</font></font></font></p>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#4c4c4c">
+          </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>Expr:</u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u> </u></font></font></font><font
+            color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><b>formatString</b></u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><span style="background: #e6f0ff">"value is %f"</span></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>,</u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u><span style="background: #e6f0ff">32.33434</span></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>)</u></font></font></font><font color="#4c4c4c"><font
+              face="Ubuntu, serif"><font style="font-size: 11pt" size="2">.
+                &nbsp;&nbsp;&nbsp; //<span style="font-family: monospace;"> </span>Evaluates
+to:
+                "value is 32.334340"</font></font></font></p>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> </p>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#4c4c4c">
+          </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>Expr:</u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u> </u></font></font></font><font
+            color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><b>formatString</b></u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><span style="background: #e6f0ff">"value is %32.12f"</span></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>,</u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u><span style="background: #e6f0ff">32.33434</span></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>)</u></font></font></font><font color="#4c4c4c"><font
+              face="Ubuntu, serif"><font style="font-size: 11pt" size="2">.&nbsp;
+                //<span style="font-family: monospace;"> </span>Evaluates to:
+                "value is 32.334340000000"</font></font></font></p>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"> </p>
+        <p style="margin-bottom: 0in; line-height: 100%" align="left"><font color="#4c4c4c">
+          </font><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>Expr:</u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u> </u></font></font></font><font
+            color="#801480"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><b>formatString</b></u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><span style="background: #e6f0ff">"value is %32.12f
+                    is not null is %b"</span></u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u>, </u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><span style="background: #e6f0ff">32.33434</span></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>, </u></font></font></font><font color="#4c4c4c"><font
+              face="Monospace"><font style="font-size: 10pt" size="2"><u><span style="background: #e6f0ff">23.456</span></u></font></font></font><font
+            color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u>)</u></font></font></font><font style="font-size: 9pt"
+            size="2"><font color="#4c4c4c"><font face="Ubuntu, serif">.
+                &nbsp;&nbsp;&nbsp; //<span style="font-family: monospace;"> </span><font
+                  style="font-size: 11pt" size="2">Evaluates to:
+                  "value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  32.334339141846 is not null&nbsp; is true"</font></font></font></font><br>
+          <br>
+          <font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                size="2"><u><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
+                        size="2"><u>Expr:</u></font></font></font><font color="#4c4c4c"><font
+                      face="Monospace"><font style="font-size: 10pt" size="2"><u>
+                        </u></font></font></font><font color="#801480"><font face="Monospace"><font
+                        style="font-size: 10pt" size="2"><u><b>formatString</b></u></font></font></font><font
+                    color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                        size="2"><u>(</u></font></font></font><font color="#4c4c4c"><font
+                      face="Monospace"><font style="font-size: 10pt" size="2"><u><span
+                            style="background: #e6f0ff">"value is %32.12f != %f"</span></u></font></font></font><font
+                    color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                        size="2"><u>, </u></font></font></font><font color="#4c4c4c"><font
+                      face="Monospace"><font style="font-size: 10pt" size="2"><u><span
+                            style="background: #e6f0ff">32.33434</span></u></font></font></font><font
+                    color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                        size="2"><u>, </u></font></font></font><font color="#4c4c4c"><font
+                      face="Monospace"><font style="font-size: 10pt" size="2"><u><span
+                            style="background: #e6f0ff">23.456</span></u></font></font></font><font
+                    color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt"
+                        size="2"><u>)</u></font></font></font><font style="font-size: 9pt"
+                    size="2"><font color="#4c4c4c"><font face="Ubuntu, serif">.
+                        &nbsp;&nbsp;&nbsp; //<span style="font-family: monospace;">
+                        </span><font style="font-size: 11pt" size="2">Evaluates
+                          to: "value is 32.334340000000 != 23.456000"</font></font></font></font><br>
+                  <br>
+                </u></font></font></font></p>
+      </li>
+    </ol>
+    <p>All of the examples above use Java classes that are normally on the Java
+      classpath. To build custom built-in functions for a Jena-based reasoner,
+      one can create classes that extend the Jena BaseBuiltin class (see ), or
+      one can code a pure Java custom class and method, put them into a jar on
+      the Eclipse classpath, and wrap them in an External equation.<br>
+    </p>
+  </body>
+</html>
