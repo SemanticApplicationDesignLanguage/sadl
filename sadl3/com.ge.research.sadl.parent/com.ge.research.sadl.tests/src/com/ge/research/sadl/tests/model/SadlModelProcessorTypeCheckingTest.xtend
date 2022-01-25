@@ -188,7 +188,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			 
 			 primitiveData is a type of {decimal or boolean or string}.
 			 
-			 External cg(ExternalEquation eq, primitiveData arg, ...) returns decimal: "http://com.ge.research.darpa.aske.sos".
+			 External cg(ExternalEquation eq, primitiveData ... arg) returns decimal: "http://com.ge.research.darpa.aske.sos".
 			 
 			 External sosfromalt(decimal alt) returns decimal: "http://com.ge.research.darpa.aske.kchain.sosairfromalt".
 			 

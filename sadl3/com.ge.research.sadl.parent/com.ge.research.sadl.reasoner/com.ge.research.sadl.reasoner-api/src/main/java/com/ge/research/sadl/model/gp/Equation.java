@@ -31,7 +31,6 @@ public class Equation {
 	private String namespace = null;
 	private List<Node> arguments = null;
 	private List<Node> argumentTypes = null;
-	private boolean varArgs = false;		// does this equation have a variable number or arguments?
 	private List<Node> returnTypes = null;
 	private List<GraphPatternElement> body = null;
 	private List<VariableNode> equationVariables = null;
@@ -134,8 +133,11 @@ public class Equation {
 					Node nt = argtypes.get(i);
 					if (i > 0) sb.append(",");
 					sb.append(nt != null ? nt.toString() : "<error>");
-					sb.append(" ");
-					sb.append(n != null ? n.toString() : "<error>");
+					if (!(n instanceof UntypedEllipsisNode)) {
+						// for an untyped ellipsis, n and nt will both be an UntypedEllipsisNode; don't serialize both
+						sb.append(" ");
+						sb.append(n != null ? n.toString() : "<error>");
+					}
 				}
 			}
 		}
@@ -432,13 +434,5 @@ public class Equation {
 
 	public void setExternalUri(String externalUri) {
 		this.externalUri = externalUri;
-	}
-
-	public boolean isVarArgs() {
-		return varArgs;
-	}
-
-	public void setVarArgs(boolean varArgs) {
-		this.varArgs = varArgs;
 	}
 }

@@ -68,6 +68,7 @@ import org.apache.jena.ext.xerces.impl.dv.ValidationContext;
 import org.apache.jena.ext.xerces.impl.dv.XSFacets;
 import org.apache.jena.ext.xerces.impl.dv.XSSimpleType;
 import org.apache.jena.ext.xerces.impl.dv.xs.XSSimpleTypeDecl;
+import org.apache.jena.ext.xerces.xs.XSObject;
 import org.apache.jena.ontology.AllValuesFromRestriction;
 import org.apache.jena.ontology.AnnotationProperty;
 import org.apache.jena.ontology.CardinalityRestriction;
@@ -191,6 +192,8 @@ import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
+import com.ge.research.sadl.model.gp.TypedEllipsisNode;
+import com.ge.research.sadl.model.gp.UntypedEllipsisNode;
 import com.ge.research.sadl.model.gp.Update;
 import com.ge.research.sadl.model.gp.ValueTableNode;
 import com.ge.research.sadl.model.gp.VariableNode;
@@ -3773,13 +3776,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (augtype != null) {
 						augTypeObj = processExpression(augtype);
 					}
-					if (pn != null && prtnode != null) {
-						// must have a name and a type
-						paramDataDescriptors.add(new DataDescriptor((Node) pn, prtnode, param.getUnits(), augTypeObj));
-					}
-					else if (param.getEllipsis() == null) {
-						int k = 0;
-					}
+					paramDataDescriptors.add(new DataDescriptor((Node) pn, prtnode, param.getUnits(), augTypeObj));
 				}
 			}
 			// clear current equation
@@ -3909,10 +3906,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
-		Property varArgsProp = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VARIABLE_NUM_ARGUMENTS_PROPERTY_URI);
-		if (eq.isVarArgs()) {
-			eqinst.addProperty(varArgsProp, getTheJenaModel().createTypedLiteral(true));
-		}
 		if (eqinst != null) {
 			addEquationPropertiesToJenaModel(nm, eq, eqinst, paramInstances, retInstances);
 		}
@@ -3940,6 +3933,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					dd.setGpVariable(getOrCreateGPVariableNode((VariableNode) nameNode, dd.getType(), true, true, context));
 					ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DESCRIPTOR_VARIABLE_PROPERTY_URI), dd.getGpVariable());
 				}
+				if (nameNode instanceof TypedEllipsisNode) {
+					Property varnumargs = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VARIABLE_NUM_ARGUMENTS_PROPERTY_URI);
+					ddInst.addProperty(varnumargs, getTheJenaModel().createTypedLiteral(true));
+				}
 			}
 			if (nameNode == null && isReturnValueDescriptor) {
 				// this is a return DataDescriptor and has no name.
@@ -3948,6 +3945,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			Node typeNode = dd.getType();
 			if (typeNode == null) {
 				addError("Argument has no type", context);
+			}
+			else if (typeNode instanceof UntypedEllipsisNode) {
+				Property varnumargs = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VARIABLE_NUM_ARGUMENTS_PROPERTY_URI);
+				ddInst.addProperty(varnumargs, getTheJenaModel().createTypedLiteral(true));
 			}
 			else {
 				ddInst.addProperty(typeProp, typeNode.getURI());
@@ -4055,8 +4056,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									String nvar = getNewVar(context);
 									try {
 										VariableNode obj = addCruleVariable((NamedNode) typeNode, 1, nvar, context, getHostEObject());
-//										Individual gpVarObject = getOrCreateGPVariableNode(obj, typeNode, true, context);
-//										ddInst.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI), obj.getName());
 										retNodes.add(obj);
 									} catch (TranslationException e) {
 										// TODO Auto-generated catch block
@@ -4238,9 +4237,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		String uniqueInNamespace = uniquifier + "_" + varName;
 		Individual varInstance = getTheJenaModel().createIndividual(createUri(uniqueInNamespace), gpVarCls);
 		org.apache.jena.rdf.model.Resource typeCls = getTheJenaModel().getOntClass(type.toFullyQualifiedString());
-//		if (typeCls == null) {
-//			typeCls = getTheJenaModel().getResource(type.toFullyQualifiedString());
-//		}
 		if (typeCls != null) {
 			varInstance.addRDFType(typeCls);
 		}
@@ -4381,9 +4377,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected void processStatement(ExternalEquationStatement element)
 			throws JenaProcessorException, InvalidNameException, InvalidTypeException, TranslationException {
 		String uri = element.getUri();
-		// if(uri.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)){
-		// return;
-		// }
 		setHostEObject(element);
 		clearCruleVariables();
 		SadlResource nm = element.getName();
@@ -4450,19 +4443,26 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				for (int i = 0; i < params.size(); i++) {
 					SadlParameterDeclaration param = params.get(i);
 					SadlResource pr = param.getName();
-					Object pn = null;
+					Node pn = null;
 					Node prtnode = null;
 					if (pr != null) {
 						pn = processExpression(pr);
 						args.add((Node) pn);
 						SadlTypeReference prtype = param.getType();
-						prtnode = sadlTypeReferenceToNode(prtype);
+						prtnode = sadlTypeReferenceToNode(prtype);				
 						if (prtnode != null) {
-							argtypes.add(prtnode);
+							if (param.getTypedEllipsis() != null) {
+								argtypes.add(createTypedEllipsisNodeFromVariableNode(pn, prtnode));
+							}
+							else {
+								argtypes.add(prtnode);
+							}
 						}
 					}
 					else if (param.getEllipsis() != null) {
-						eq.setVarArgs(true);
+						Node uten = new UntypedEllipsisNode();
+						args.add(uten);
+						argtypes.add(uten);
 					}
 				}
 				eq.setArguments(args);
@@ -4485,13 +4485,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if (augtype != null) {
 							augTypeObj = processExpression(augtype);
 						}
-						if (pn != null && prtnode != null) {
-							// must have a name and a type
-							paramDataDescriptors.add(new DataDescriptor((Node) pn, prtnode, param.getUnits(), augTypeObj));
-						}
-						else if (param.getEllipsis() == null) {
-							int k = 0;
-						}
+						paramDataDescriptors.add(new DataDescriptor((Node) pn, prtnode, param.getUnits(), augTypeObj));
 				}
 			}
 				// clear current equation
@@ -4525,6 +4519,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		logger.debug("External Equation: " + eq.toFullyQualifiedString());
 		setCurrentEquation(null);
 		return eq;
+	}
+
+	private Node createTypedEllipsisNodeFromVariableNode(Node pn, Node type) throws TranslationException {
+		TypedEllipsisNode tevn = new TypedEllipsisNode(type.getURI());
+		if (type instanceof VariableNode) {
+			tevn.setHostObject(((VariableNode)type).getHostObject());
+		}
+		return tevn;
 	}
 
 	private NamedNode sadlTypeReferenceToNode(SadlTypeReference rtype)
@@ -5529,15 +5531,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	// private VariableNode setListTypeInfo(VariableNode var, NamedNode type,
-	// TypeCheckInfo varTci) throws TranslationException {
-	// var.setType(type);
-	// var.setListLength(type.getListLength());
-	// var.setMinListLength(type.getMinListLength());
-	// var.setMaxListLength(type.getMaxListLength());
-	// return var;
-	// }
-	//
 	public void setVarType(VariableNode var, Node vartype, Boolean isList, EObject defn) throws TranslationException, InvalidNameException, DontTypeCheckException, InvalidTypeException {
 		// if it hasn't been set before just set it
 		if (vartype instanceof NamedNode) {
@@ -6393,10 +6386,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							}
 						}
 					}
-//					else {
-//						((VariableNode)vobj).setType(null); // this clears without an exception
-//						((VariableNode)vobj).setType(restrictionType);	// this sets to new value
-//					}
 				}
 			}
 		}
@@ -6849,23 +6838,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							processExpression(container);
 						}
 						eobjectPreprocessed(container);
-//						if (prnode != null && prnode instanceof NamedNode) {
-//							NodeType propType = ((NamedNode)prnode).getNodeType();
-//							if (propType.equals(NodeType.ObjectProperty)) {
-//								pred = getOrCreateObjectProperty(prnode.getURI());
-//							} else if (propType.equals(NodeType.DataTypeProperty)) {
-//								try {
-//									pred = getOrCreateDatatypeProperty(prnode.getURI());
-//								} catch (JenaProcessorException e) {
-//									// TODO Auto-generated catch block
-//									e.printStackTrace();
-//								}
-//							} else if (propType.equals(NodeType.PropertyNode)) {
-//								pred = getOrCreateRdfProperty(prnode.getURI());
-//							} else if (propType.equals(OntConceptType.ANNOTATION_PROPERTY)) {
-//								return; 	// anything is OK for an annotation (OWL 1)
-//							}				
-//						}
 						pred = tr.getPredicate() != null ? getTheJenaModel().getOntProperty(tr.getPredicate().toFullyQualifiedString()) : null;
 					}
 					if (pred == null) {
@@ -7462,8 +7434,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							if (typ != null) {
 								NamedNode typnode = sadlTypeReferenceToNode(typ);
 								if (typnode != null) {
-									argTypeNodes.add(typnode);
+									if (spd.getTypedEllipsis() != null) {
+										argTypeNodes.add(createTypedEllipsisNodeFromVariableNode(null, typnode));
+									}
+									else {
+										argTypeNodes.add(typnode);										
+									}
 								}	
+							}
+							else if (spd.getEllipsis()!= null) {
+								argTypeNodes.add(new UntypedEllipsisNode());
 							}
 						} catch (JenaProcessorException e) {
 							// TODO Auto-generated catch block
@@ -9340,8 +9320,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (op.equals("-") && val instanceof Number) {
 			if (val instanceof BigDecimal) {
 				val = ((BigDecimal) val).negate();
-			} else {
-				val = -1.0 * ((Number) val).doubleValue();
+			} else if (val instanceof Double) {
+				val = -1.0 * ((Double) val).doubleValue();
+			} else if (val instanceof Float) {
+				val = -1.0 * ((Float)val).floatValue();
+			}
+			else if (val instanceof Long) {
+				val = -1 * ((Long)val).longValue();
+			}
+			else if (val instanceof Integer) {
+				val = -1 * ((Integer)val).intValue();
+			}
+			else {
+				val = -1.0 * ((Number) val).doubleValue();				
 			}
 			((com.ge.research.sadl.model.gp.Literal) eobj).setValue(val);
 			((com.ge.research.sadl.model.gp.Literal) eobj)
@@ -11412,7 +11403,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								if (augtype instanceof GraphPatternElement) {
 									updateAugmentedTypePatterns((GraphPatternElement)augtype, nm, coldesc);
 								}
-//								System.out.println(augtype.toString());
 							}
 							DataDescriptor dd = new DataDescriptor(nm, (Node)typ, units, augtype);
 							columns.add(dd);
@@ -15049,6 +15039,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								arguments.add(vNode);
 							}
 						}
+						Statement varargsstmt = frst.getProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARG_VALUES_PROPERTY_URI));
+						if (varargsstmt != null) {
+							if (varargsstmt.getObject().asLiteral().getBoolean()) {
+//								eq.setVarArgs(true);
+							}
+						}
+
 					}
 				}
 				
@@ -15087,12 +15084,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		eq.setReturnTypes(returnTypes);
-		Statement varargsstmt = eqInst.getProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARG_VALUES_PROPERTY_URI));
-		if (varargsstmt != null) {
-			if (varargsstmt.getObject().asLiteral().getBoolean()) {
-				eq.setVarArgs(true);
-			}
-		}
 		return eq;
 	}
 

@@ -202,7 +202,7 @@ External countUniqueMatches(...) returns --:
 External noSubjectsOtherThan(...) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin#noSubjectsOtherThan".
 
-External print(--, ...) returns --:
+External print(...) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin#print".
 
 External atan(...) returns --:

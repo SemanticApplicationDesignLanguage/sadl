@@ -30,29 +30,35 @@ import org.apache.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.graph.impl.LiteralLabelFactory;
-import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.vocabulary.XSD;
 
-import com.ge.research.sadl.jena.reasoner.builtin.Utils;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.Equation;
-import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.model.gp.TypedEllipsisNode;
+import com.ge.research.sadl.model.gp.UntypedEllipsisNode;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.sADL.Constant;
 
 /**
- * This class is used to evaluate a SADL equation. An equation can be evaluated in two different circumstances:
- *   1. During editing with an Expr: statement.
- *   2. During inference when used in a Jena rule.
+ * This class is used to evaluate a SADL equation. An equation can be evaluated in two different circumstances
+ * with different inputs for the arguments and argument types:
+ * 
+ *   1. During editing with an "Expr: <equation statement>.": arguments are SADL Node instances and 
+ *   	argument types are from the SADL enum LiteralType (BooleanLiteral, StringLiteral, NumberLiteral) 
+ *   2. During inference when used in a Jena rule: arguments are Jena Node_Literal instances and 
+ *   	argument types are obtained from the Node_Literal
  * 
  * @author Natural Semantics, LLC
  *
  */
 public class EvaluateSadlEquationUtils {
+	
+	enum PossibleDataTypes {INT, LONG, FLOAT, DOUBLE, BOOLEAN, STRING, NUMBER}
 
 	private List<ModelError> newErrors = null;
 
@@ -72,6 +78,8 @@ public class EvaluateSadlEquationUtils {
 	/**
 	 * Method to evaluate a BuiltinElement containing a SADL Equation directly, 
 	 * as in the processing of an "Expr: <builtin>." statement.
+	 * 
+	 * The 
 	 * 
 	 * @param bi -- the BuiltinElement to be evaluated
 	 * @return -- a SADL Node containing the result of the evaluation
@@ -137,26 +145,30 @@ public class EvaluateSadlEquationUtils {
 								result = bestMatch.invoke(clazz.getDeclaredConstructor().newInstance(), args);								
 							}
 							return convertResultToNode(result, bi);
-						} catch (IllegalAccessException e) {
-							addError(new ModelError(e.getMessage(), ErrorType.ERROR));
-						} catch (IllegalArgumentException e) {
-							addError(new ModelError(e.getMessage(), ErrorType.ERROR));
-						} catch (InvocationTargetException e) {
-							addError(new ModelError(e.getMessage(), ErrorType.ERROR));
-						} catch (InstantiationException e) {
-							addError(new ModelError(e.getMessage(), ErrorType.ERROR));
-						} catch (NoSuchMethodException e) {
-							addError(new ModelError(e.getMessage(), ErrorType.ERROR));
-						} catch (SecurityException e) {
-							addError(new ModelError(e.getMessage(), ErrorType.ERROR));
-						}
+						} catch (Exception e) {
+							if (e.getMessage() == null) {
+								if (e.getSuppressed() != null && e.getSuppressed().length > 0) {
+									for (Throwable t : e.getSuppressed()) {
+										addError(new ModelError(t.getMessage(), ErrorType.ERROR));
+									}
+								}
+								else if (e instanceof InvocationTargetException) {
+									addError(new ModelError(((InvocationTargetException)e).getTargetException().getMessage(), ErrorType.ERROR));
+								}
+							}
+							else {
+								addError(new ModelError(e.getMessage(), ErrorType.ERROR));
+							}
+						} 
+					}
+					else {
+						addError(new ModelError("no method found matching '" + externaluri + "'", ErrorType.ERROR));						
 					}
 				}
 				else {
 					addError(new ModelError("Invalid class identifier: " + externaluri, ErrorType.ERROR));
 				}
 			}
-			addError(new ModelError("no method found matching '" + externaluri + "'", ErrorType.ERROR));
 		}
 		return null;
 	}
@@ -171,59 +183,48 @@ public class EvaluateSadlEquationUtils {
 		if (arg instanceof com.ge.research.sadl.model.gp.Literal) {
 			LiteralType dt = ((com.ge.research.sadl.model.gp.Literal)arg).getLiteralType();
 			if (dt != null && paramClass != null) {
-				if (dt.equals(LiteralType.StringLiteral)) {
-					return ((com.ge.research.sadl.model.gp.Literal)arg).getOriginalText();
-				}
-				else if (dt.equals(LiteralType.BooleanLiteral)) {
-					try {
-						Boolean b = Boolean.valueOf(((com.ge.research.sadl.model.gp.Literal)arg).getOriginalText());
-						return b;
-					}
-					catch (Exception e) {	
-					}
-				}
-				else if (dt.equals(LiteralType.NumberLiteral)) {
-					String numberText = ((com.ge.research.sadl.model.gp.Literal)arg).getOriginalText();
-					return stringValueToTypedNumber(paramClass, numberText);
-				}
+				String numberText = ((com.ge.research.sadl.model.gp.Literal)arg).getOriginalText();
+				return stringValueToTypedValue(paramClass, numberText);
 			}
 		}
 		return null;
 	}
 
-	protected Object stringValueToTypedNumber(Class<?> paramClass, String numberText) {
-		if (paramClass.equals(Double.class)) {
-			try {
-				Double d = Double.parseDouble(numberText);
-				return d;
+	protected Object stringValueToTypedValue(Class<?> paramClass, Object val) {
+		try {
+			if (paramClass != null) {
+				if (paramClass.equals(Double.class)) {
+					Double d = Double.parseDouble(val.toString());
+					return d;
+				}
+				else if (paramClass.equals(Float.class)) {
+					Float f = Float.parseFloat(val.toString());
+					return f;
+				}
+				else if (paramClass.equals(Integer.class)) {
+					Integer i = Integer.parseInt(val.toString());
+					return i;
+				}
+				else if (paramClass.equals(Long.class)) {
+					Long l = Long.parseLong(val.toString());
+					return l;
+				}
+				else if (paramClass.equals(Boolean.class)) {
+					Boolean b = Boolean.valueOf(val.toString());
+					return b;
+				}
+				else if (paramClass.equals(String.class)) {
+					return val.toString();
+				}
 			}
-			catch (Exception e) {			
-			}
-		}
-		else if (paramClass.equals(Float.class)) {
-			try {
-				Float f = Float.parseFloat(numberText);
-				return f;
-			}
-			catch (Exception e) {	
-			}
-		}
-		else if (paramClass.equals(Integer.class)) {
-			try {
-				Integer i = Integer.parseInt(numberText);
-				return i;
-			}
-			catch (Exception e) {	
-			}
-		}
-		else if (paramClass.equals(Long.class)) {
-			try {
-				Long l = Long.parseLong(numberText);
-				return l;
-			}
-			catch (Exception e) {
+			else {
+				return val;
 			}
 		}
+		catch (Exception e) {	
+			addError(new ModelError(e.getClass().getName() + ": " + e.getMessage(), ErrorType.ERROR));
+		}
+
 		return null;
 	}
 
@@ -232,13 +233,13 @@ public class EvaluateSadlEquationUtils {
 	 * EvaluateSadlEquation.
 	 * 
 	 * @param externaluri -- the package, class, and method name, e.g., "java.lang.String.substring", to be invoked
-	 * @param restOfArgs -- the arguments to be passed into the method
+	 * @param args -- the arguments to be passed into the method
 	 * @param argTypes 
 	 * @param varArgs 
 	 * @param returnTypes 
 	 * @return -- a Jena Node containing the results of the evaluation
 	 */
-	public org.apache.jena.graph.Node evaluateSadlEquation(String externaluri, List<org.apache.jena.graph.Node> restOfArgs, List<org.apache.jena.graph.Node> argTypes, boolean varArgs, List<org.apache.jena.graph.Node> returnTypes) {
+	public org.apache.jena.graph.Node evaluateSadlEquation(String externaluri, List<org.apache.jena.graph.Node> args, List<org.apache.jena.graph.Node> argTypes, boolean varArgs, List<org.apache.jena.graph.Node> returnTypes) {
 		int lastDot = externaluri.lastIndexOf('.');
 		if (lastDot > 0) {
 			String classname = externaluri.substring(0, lastDot);
@@ -246,14 +247,14 @@ public class EvaluateSadlEquationUtils {
 			Class<?> clazz = getMatchingClassOfExternalUri(classname);
 			Object arg0AsInstanceOfClazz = null;
 			List<Method> matchingStaticMethods = getMatchingMethodsOfExternalUri(clazz, methname, true);
-			Method bestMatch = getBestMatch(argTypes, restOfArgs, varArgs, matchingStaticMethods, false);	
+			Method bestMatch = getBestMatch(args, argTypes, varArgs, matchingStaticMethods, false);	
 			boolean methodOnClassOfFirstArgument = false;
 			if (bestMatch == null) {
 				Class<?> arg0Class = null;
 				int numArgs =0;
-				if (restOfArgs != null && restOfArgs.size() > 0) {
-					numArgs = restOfArgs.size();
-					org.apache.jena.graph.Node arg0 = restOfArgs.get(0);
+				if (args != null && args.size() > 0) {
+					numArgs = args.size();
+					org.apache.jena.graph.Node arg0 = args.get(0);
 					RDFDatatype dt = null;
 					if (arg0 instanceof Node_Literal) {
 						arg0AsInstanceOfClazz = jenaNodeAsInstanceOfArgClass(clazz, arg0);
@@ -272,20 +273,20 @@ public class EvaluateSadlEquationUtils {
 				List<Method> matchingMethods = getMatchingMethodsOfExternalUri(clazz, methname, false);
 				// now find one that matches the arguments if possible
 				
-				bestMatch = getBestMatch(argTypes, restOfArgs, varArgs, matchingMethods, methodOnClassOfFirstArgument);
+				bestMatch = getBestMatch(args, argTypes, varArgs, matchingMethods, methodOnClassOfFirstArgument);
 			}
 			if (bestMatch != null) {
 				bestMatch.setAccessible(true);
-		        Object[] args = getArgsFromJenaBuiltinCall(bestMatch, restOfArgs, varArgs, methodOnClassOfFirstArgument);
+		        Object[] invokeArgs = getArgsFromJenaBuiltinCall(bestMatch, args, varArgs, methodOnClassOfFirstArgument);
 				try {
 					Object result;
 					boolean isStatic = Modifier.isStatic(bestMatch.getModifiers());
 					if (isStatic) {
-						result = bestMatch.invoke(null, args);
+						result = bestMatch.invoke(null, invokeArgs);
 					}
 					else if (methodOnClassOfFirstArgument) {
 						if (arg0AsInstanceOfClazz != null) {
-							result = bestMatch.invoke(arg0AsInstanceOfClazz, args);
+							result = bestMatch.invoke(arg0AsInstanceOfClazz, invokeArgs);
 						}
 						else {
 							addError(new ModelError("first argument must be an instance of the class containing the method", ErrorType.ERROR));
@@ -293,7 +294,7 @@ public class EvaluateSadlEquationUtils {
 						}
 					}
 					else {
-						result = bestMatch.invoke(clazz.getDeclaredConstructor().newInstance(), args);								
+						result = bestMatch.invoke(clazz.getDeclaredConstructor().newInstance(), invokeArgs);								
 					}
 //			        Object inst = clazz.getConstructor(returnType.class).newInstance(base);
 					return convertResultToNode(result);
@@ -321,11 +322,17 @@ public class EvaluateSadlEquationUtils {
 		return null;
 	}
 
+	/**
+	 * Method to convert a Jena Node into an Object matching the parameter class.
+	 * @param paramClass
+	 * @param arg
+	 * @return
+	 */
 	private Object jenaNodeAsInstanceOfArgClass(Class<?> paramClass, org.apache.jena.graph.Node arg) {
 		if (arg instanceof Node_Literal) {
 			if (isNumber(paramClass)) {
 				String argValue = ((Node_Literal)arg).getLiteralValue().toString();
-				return stringValueToTypedNumber(paramClass, argValue);
+				return stringValueToTypedValue(paramClass, argValue);
 			}
 			else if (paramClass.equals(String.class)) {
 				return ((Node_Literal)arg).getLiteralValue().toString();
@@ -382,71 +389,58 @@ public class EvaluateSadlEquationUtils {
 	private Object[] getArgs(Method bestMatch, List<com.ge.research.sadl.model.gp.Node> arguments, Equation eq, boolean methodOnClassOfFirstArgument) {
 		Class<?>[] paramTypes = bestMatch.getParameterTypes();
 		int numParamTypes = paramTypes.length;
-		int numArguments = arguments.size();
+		int numArguments = arguments != null ? arguments.size() : 0;
 		int argIndexOffset = methodOnClassOfFirstArgument ? 1 : 0;
 		Object[] argsPlus = new Object[numParamTypes];
 		int variableNumArgsIndex = -1;
 		Object[] argArray = null;
+		Class<?> varArgType = null;
 		for(int i = argIndexOffset; i < numArguments; i++){
 			int ptIndex = variableNumArgsIndex < 0 ? i - argIndexOffset : variableNumArgsIndex;
 			Class<?> argtype = paramTypes[ptIndex];
 			Node arg = arguments.get(i);
 			if (arg instanceof com.ge.research.sadl.model.gp.Literal) {
 				Object val = ((com.ge.research.sadl.model.gp.Literal)arg).getValue();
-				if (eq != null && eq.getArgumentTypes() != null && eq.getArgumentTypes().size() > i) {
-					Node eqArgType = eq.getArgumentTypes().get(i);
-					if (eqArgType instanceof NamedNode) {
-						if(eqArgType.getURI().equals(XSD.xint.getURI())) {
-							argsPlus[ptIndex] = Integer.parseInt(val.toString());
-						}
-						else if (eqArgType.getURI().equals(XSD.xlong.getURI())) {
-							argsPlus[ptIndex] = Long.parseLong(val.toString());
-						}
-						else if (eqArgType.getURI().equals(XSD.xfloat.getURI())) {
-							argsPlus[ptIndex] = Float.parseFloat(val.toString());
-						}
-						else if (eqArgType.getURI().equals(XSD.xdouble.getURI())) {
-							argsPlus[ptIndex] = Double.parseDouble(val.toString());
-						}
-						else if (eqArgType.getURI().equals(XSD.xboolean.getURI())) {
-							argsPlus[ptIndex] = Boolean.parseBoolean(val.toString());
-						}
-						else if (eqArgType.getURI().equals(XSD.decimal.getURI())) {
-							// need to try to create an argument matching the expected argtype
-							Object simpleType;
-							if (((com.ge.research.sadl.model.gp.Literal) arg).getOriginalText() != null) {
-								simpleType = getSimpleTypeFromVal(arg, argtype, ((com.ge.research.sadl.model.gp.Literal) arg).getOriginalText());
-							}
-							else {
-								simpleType = getSimpleTypeFromVal(arg, argtype, val.toString());
-							}
-							if (simpleType != null) {
-								argsPlus[ptIndex] = simpleType;
-							}
-							else {
-								addError(new ModelError("Unable to convert xsd:decimal to desired type ("+ argtype.getCanonicalName() + ")", ErrorType.ERROR));
-							}
-						}
-						else if (eqArgType.getURI().equals(XSD.xstring.getURI())) {
-							argsPlus[ptIndex] = val.toString();
+				boolean isVarArgs = false;
+				if (eq != null && eq.getArgumentTypes() != null && 
+						eq.getArgumentTypes().size() > i && 
+						(eq.getArgumentTypes().get(i) instanceof UntypedEllipsisNode ||
+						eq.getArgumentTypes().get(i) instanceof TypedEllipsisNode)) {	
+					if (eq.getArgumentTypes().get(i) instanceof TypedEllipsisNode) {
+						varArgType = getClassFromXsdType(eq.getArgumentTypes().get(i));
+					}
+					isVarArgs = true;
+				}
+				else if (argtype.getName().contentEquals("[Ljava.lang.Object;")){
+					isVarArgs = true;
+				}
+				if (!isVarArgs) {
+					if (eq == null || eq.getArgumentTypes() == null || 
+						eq.getArgumentTypes().size() <= i) {
+						addError(new ModelError("Equation doesn't have an argument type for arg '" + val + "'", ErrorType.ERROR));
+					}
+					else {
+						Node eqArgType = eq.getArgumentTypes().get(i);
+						if (eqArgType instanceof NamedNode) {
+							argsPlus[ptIndex] = getSimpleTypeFromVal(eqArgType, argtype, val.toString());
 						}
 					}
 				}
 				else {
-					Object simpleType = getSimpleTypeFromVal(arg, argtype, val);
-					if (simpleType != null) {
-						argsPlus[ptIndex] = simpleType;
-					}
-					else if (argtype.getName().contentEquals("[Ljava.lang.Object;")){
+					// this is an argument in a variable arguments array
+					try {
 						if (argArray == null) {
 							argArray = new Object[numArguments - ptIndex];
-							argArray[0] = val;
+							argArray[0] = stringValueToTypedValue(varArgType, val);
 							argsPlus[ptIndex] = argArray;
 							variableNumArgsIndex = ptIndex;
 						}
 						else {
-							argArray[i - variableNumArgsIndex] = val;
+							argArray[i - variableNumArgsIndex] = stringValueToTypedValue(varArgType, val);
 						}
+					}
+					catch (Exception e) {
+						addError(new ModelError("Error processing variable argument '" + val.toString() + "': " + e.getMessage(), ErrorType.ERROR));
 					}
 				}
 			}
@@ -454,26 +448,56 @@ public class EvaluateSadlEquationUtils {
 		return argsPlus;
 	}
 
-	private Object getSimpleTypeFromVal(Node arg, Class<?> argtype, Object val) {
-		if (argtype.getCanonicalName().equals("long")) {
+	private Class<?> getClassFromXsdType(Node node) {
+		String typeUri = node.getURI();
+		if (typeUri.equals(XSD.xint.getURI())) {
+			return Integer.class;
+		}
+		else if (typeUri.equals(XSD.xlong.getURI())) {
+			return Long.class;
+		}
+		else if (typeUri.equals(XSD.xfloat.getURI())) {
+			return Float.class;
+		}
+		else if (typeUri.equals(XSD.xdouble.getURI())) {
+			return Double.class;
+		}
+		else if (typeUri.equals(XSD.xstring.getURI())) {
+			return String.class;
+		}
+		else if (typeUri.equals(XSD.xboolean.getURI())) {
+			return Boolean.class;
+		}
+		return String.class;
+	}
+
+	private Object getSimpleTypeFromVal(Node sadlArgType, Class<?> javaMethodParamType, Object val) {
+		if (javaMethodParamType.getName().equals("java.lang.Long") || javaMethodParamType.getName().equals("long")) {
 			return Long.parseLong(val.toString());
 		}
-		else if (argtype.getName().equals("int")) {
+		else if (javaMethodParamType.getName().equals("java.lang.Integer") || javaMethodParamType.getName().equals("int")) {
 			return Integer.parseInt(val.toString());
 		}
-		else if (argtype.getName().equals("float")) {
+		else if (javaMethodParamType.getName().equals("java.lang.Float") || javaMethodParamType.getName().equals("float")) {
 			return Float.parseFloat(val.toString());
 		}
-		else if (argtype.getName().equals("double")) {
+		else if (javaMethodParamType.getName().equals("java.lang.Double") || javaMethodParamType.getName().equals("double")) {
 			return Double.parseDouble(val.toString());
 		}
-		else if (argtype.getName().equals("boolean")) {
+		else if (javaMethodParamType.getName().equals("java.lang.Boolean") || javaMethodParamType.getName().equals("boolean")) {
 			return Boolean.parseBoolean(val.toString());
 		}
-		else if (argtype.getName().contentEquals("java.lang.String")) {
+		else if (javaMethodParamType.getName().contentEquals("java.lang.String") || javaMethodParamType.getName().equals("string")) {
 			return val.toString();
 		}
-		else if (argtype.getName().equals("java.lang.Object")) {
+		else if (javaMethodParamType.getName().equals("java.lang.Object")) {
+			if (sadlArgType != null) {
+				Class<?> sadlArgClass = getClassFromXsdType(sadlArgType);
+				Object sadlArgTypedVal = getSimpleTypeFromVal(null, sadlArgClass, val);
+				if (sadlArgTypedVal != null) {
+					return sadlArgTypedVal;
+				}
+			}
 			return val;
 		}
 		return null;
@@ -543,7 +567,8 @@ public class EvaluateSadlEquationUtils {
 	 */
 	private Method getBestMatch(BuiltinElement bi, List<Method> matchingMethods, boolean methodOnClassOfFirstArgument) {
 		if (matchingMethods != null) {
-			int effectiveNumArguments = methodOnClassOfFirstArgument ? bi.getArguments().size() - 1 : bi.getArguments().size();
+			int effectiveNumArguments = bi.getArguments() != null ? 
+					methodOnClassOfFirstArgument ? bi.getArguments().size() - 1 : bi.getArguments().size() : 0;
 			for (Method m : matchingMethods) {
 				Class<?>[] paramTypes = m.getParameterTypes();
 				int numParams = paramTypes.length;
@@ -602,6 +627,9 @@ public class EvaluateSadlEquationUtils {
 						return m;
 					}
 				}
+				else if (bi.getArguments() == null || bi.getArguments().size() == 0) {
+					return m;
+				}
 			}
 		}
 		return null;
@@ -609,14 +637,14 @@ public class EvaluateSadlEquationUtils {
 
 	/**
 	 * Method to determine the best match to the input arguments from among the matching methods of the identified Java Class
-	 * @param argTypes -- the arguments passed into the Jena built-in
 	 * @param args 
+	 * @param argTypes -- the arguments passed into the Jena built-in
 	 * @param varArgs 
 	 * @param matchingMethods -- the list of Java Methods matching the identifying URI
 	 * @param methodOnClassOfFirstArgument -- true if the method should be invoked on the instance of the class identified by the first argument
 	 * @return -- the Java Method best matching the args (if any)
 	 */
-	private Method getBestMatch(List<org.apache.jena.graph.Node> argTypes, List<org.apache.jena.graph.Node> args, boolean varArgs, List<Method> matchingMethods, boolean methodOnClassOfFirstArgument) {
+	private Method getBestMatch(List<org.apache.jena.graph.Node> args, List<org.apache.jena.graph.Node> argTypes, boolean varArgs, List<Method> matchingMethods, boolean methodOnClassOfFirstArgument) {
 		if (matchingMethods != null) {
 			int effectiveNumArguments = methodOnClassOfFirstArgument ? argTypes.size() - 1 : argTypes.size();
 			for (Method m : matchingMethods) {
@@ -685,6 +713,9 @@ public class EvaluateSadlEquationUtils {
 					if (match) {
 						return m;
 					}
+				}
+				else if (args != null && args.size() == 0) {
+					return m;
 				}
 			}
 		}

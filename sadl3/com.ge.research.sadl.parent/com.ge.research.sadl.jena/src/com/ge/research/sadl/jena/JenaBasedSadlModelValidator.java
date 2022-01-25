@@ -3317,22 +3317,28 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private void checkFunctionArguments(EList<SadlParameterDeclaration> params, EList<Expression> args, Name expression, boolean forceCheck)
 			throws InvalidTypeException, TranslationException, DontTypeCheckException {
-		boolean variableNumArgs = false;
+		boolean hasEllipsis = params.size() > 0 && 
+				(params.get(params.size() - 1).getTypedEllipsis() != null ||
+				params.get(params.size() - 1).getEllipsis() != null);
 		int minNumArgs = 0;
-		if (args.size() != params.size() || (params.size() > 1 && params.get(params.size() - 1).getEllipsis() != null)) {
-			boolean wrongNumArgs = true;
-			String ellipsis = params.size() > 0 ? params.get(params.size() - 1).getEllipsis() : null;
-			if ( ellipsis != null) {
-				minNumArgs = params.size() - 1;
-				variableNumArgs = true;
-				if (args.size() >= minNumArgs) {
-					wrongNumArgs = false;
+		if (args.size() != params.size()) {
+			// this could be a wrong number of arguments unless there's an ellipsis, typed or untyped
+			boolean wrongNumArgs = false;
+			if (!hasEllipsis) {
+				// if there is no typed or untyped ellipsis it is
+				wrongNumArgs = true;
+			}
+			else {
+				if (args.size() < params.size()) {
+					// if there aren't at least as many args as params it is
+					wrongNumArgs = true;
 				}
 			}
-			if (params.size() > 0 && params.get(0).getEllipsis() != null) {
-				getModelProcessor().addWarning("Number of arguments of function is unknown", expression);
+			
+			if (hasEllipsis) {
+				minNumArgs = params.size();
 			}
-			else if (wrongNumArgs) {
+			if (wrongNumArgs) {
 				getModelProcessor().addTypeCheckingError("Number of arguments does not match function declaration", expression);
 			}
 		}
@@ -3342,24 +3348,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			for (int i = 0; i < args.size(); i++) {
 				Expression arg = args.get(i);
 				SadlParameterDeclaration param = null;
-				if (variableNumArgs) {
+				int paramIndex = i >= params.size() ? params.size() - 1 : i;
+				if (isEllipsis(params.get(paramIndex))) {
 					param = (i >= minNumArgs && minNumArgs > 0) ? params.get(minNumArgs - 1) : params.get(i);
 				}
 				else if (i < params.size()) {
 					param = params.get(i);
 				}
 				if (param != null) {
-					if (param.getEllipsis() == null && param.getUnknown() == null) {
+					if (param.getUnknown() == null && (!isEllipsis(param) || param.getTypedEllipsis() != null)) {
 						validateBinaryOperationByParts(expression, arg, param.getType(), "argument", sb, false);
 						if (sb.length() > 0) {
 							getModelProcessor().addTypeCheckingError(sb.toString(), expression);
 						}
 					}
-					else if (param.getUnknown() != null) {			
+					else if (param.getUnknown() != null || param.getEllipsis() != null) {  //&& !isEllipsis(param)) {			
 						getModelProcessor().addWarning(SadlErrorMessages.TYPE_CHECK_BUILTIN_EXCEPTION.get("parameter " + (i + 1)), arg);
 					}
 					else {
-						// don't try to typecheck if it's an ellipsis
+						// don't try to typecheck if it's an untyped ellipsis
 						break;
 					}
 				}
@@ -3367,6 +3374,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
+	private boolean isEllipsis(SadlParameterDeclaration param) {
+		if (param.getEllipsis() != null || param.getTypedEllipsis() != null) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Method to examine the arguments of a built-in and determine if they match a graph pattern type built-in
 	 * @param args

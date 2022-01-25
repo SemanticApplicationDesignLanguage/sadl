@@ -112,6 +112,25 @@ public class EvaluateSadlEquation extends CancellableBuiltin {
 	    		return false;
 	    	}
 	    	ClosableIterator<Triple> citr = context.find(eqInst.asNode(), p.asNode(), null);
+	    	if (!citr.hasNext()) {
+	    		ClosableIterator<Triple> citrWhat = context.find(eqInst.asNode(), null, null);
+	    		boolean foundInst = false;
+	    		while (citrWhat.hasNext()) {
+	    			System.out.println(citrWhat.next().toString());
+	    			foundInst = true;
+	    		}
+	    		if (!foundInst) {
+	    			ClosableIterator<Triple> citrWhatWhat = context.find(null, null, null);
+	    			while (citrWhatWhat.hasNext()) {
+	    				System.out.println(citrWhatWhat.next().toString());
+	    			}
+	    			String lastChance = context.getGraph().toString();
+	    			System.out.println(lastChance);
+	    		}
+	    		System.err.append(this.getName() + ": " + p.getURI() + " of " + eqInst.getURI() + " not found.\n");
+	    		System.out.println(context.getGraph().getRawGraph().toString());
+	    		return false;
+	    	}
 	    	while (citr.hasNext()) {
 	    		Node javaUriLiteral = citr.next().getObject();
 	    		if (javaUriLiteral.isLiteral()) {
@@ -119,6 +138,7 @@ public class EvaluateSadlEquation extends CancellableBuiltin {
 	    			// now get the argument types
 	    			List<Node> restOfArgTypes = new ArrayList<Node>();
 	    			List<Node> returnTypes = new ArrayList<Node>();
+	    			boolean varArgs = false;
 	    			Property argsProp = ResourceFactory.createProperty(SadlConstants.SADL_IMPLICIT_MODEL_ARGUMENTS_PROPERTY_URI);
     				Property stlfirstProp = ResourceFactory.createProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
     				Property stlrestProp = ResourceFactory.createProperty(SadlConstants.SADL_LIST_MODEL_REST_URI);
@@ -135,6 +155,15 @@ public class EvaluateSadlEquation extends CancellableBuiltin {
 				    				Node dataType = citr5.next().getObject();
 				    				restOfArgTypes.add(dataType);
 				    			}
+				    			Property varArgsProp = ResourceFactory.createProperty(SadlConstants.SADL_IMPLICIT_MODEL_VARIABLE_NUM_ARGUMENTS_PROPERTY_URI);
+				    			ClosableIterator<Triple> citr9 = context.find(dtfirst, varArgsProp.asNode(), null);
+				    			while (citr9.hasNext()) {
+				    				Node va = citr9.next().getObject();
+				    				if (va.isLiteral() && va.getLiteral().getValue().equals(Boolean.TRUE)) {
+				    					varArgs = true;
+				    				}
+				    			}
+
 		    				}
 		    				ClosableIterator<Triple> citr6 = context.find(dt, stlrestProp.asNode(), null);
 		    				if (citr6.hasNext()) {
@@ -145,43 +174,32 @@ public class EvaluateSadlEquation extends CancellableBuiltin {
 		    				}
 		    				citr6.close();
 	    				}
-	    				
-	    				// now get the return types
-		    			Property returnTypesProp = ResourceFactory.createProperty(SadlConstants.SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI);
-		    			ClosableIterator<Triple> citr7 = context.find(eqInst.asNode(), returnTypesProp.asNode(), null);
-		    			while (citr7.hasNext()) {
-		    				Node rdt = citr7.next().getObject();
-		    				while (rdt != null) {
-			    				ClosableIterator<Triple> citr8 = context.find(rdt, stlfirstProp.asNode(), null);
-			    				while (citr8.hasNext()) {
-			    					Node rdtfirst = citr8.next().getObject();
-					    			ClosableIterator<Triple> citr9 = context.find(rdtfirst, dataTypeProp.asNode(), null);
-					    			while (citr9.hasNext()) {
-					    				Node rdataType = citr9.next().getObject();
-					    				returnTypes.add(rdataType);
-					    			}
-			    				}
-			    				ClosableIterator<Triple> citr6 = context.find(rdt, stlrestProp.asNode(), null);
-			    				if (citr6.hasNext()) {
-			    					rdt = citr6.next().getObject();
-			    				}
-			    				else {
-			    					rdt =  null;
-			    				}
-			    				citr6.close();
+	    			}
+    				// now get the return types
+	    			Property returnTypesProp = ResourceFactory.createProperty(SadlConstants.SADL_IMPLICIT_MODEL_RETURN_TYPES_PROPERTY_URI);
+	    			ClosableIterator<Triple> citr7 = context.find(eqInst.asNode(), returnTypesProp.asNode(), null);
+	    			while (citr7.hasNext()) {
+	    				Node rdt = citr7.next().getObject();
+	    				while (rdt != null) {
+		    				ClosableIterator<Triple> citr8 = context.find(rdt, stlfirstProp.asNode(), null);
+		    				while (citr8.hasNext()) {
+		    					Node rdtfirst = citr8.next().getObject();
+				    			ClosableIterator<Triple> citr9 = context.find(rdtfirst, dataTypeProp.asNode(), null);
+				    			while (citr9.hasNext()) {
+				    				Node rdataType = citr9.next().getObject();
+				    				returnTypes.add(rdataType);
+				    			}
 		    				}
-		    			}	    				
-	    			}
-	    			Property varArgsProp = ResourceFactory.createProperty(SadlConstants.SADL_IMPLICIT_MODEL_VARIABLE_NUM_ARGUMENTS_PROPERTY_URI);
-	    			ClosableIterator<Triple> citr9 = context.find(eqInst.asNode(), varArgsProp.asNode(), null);
-	    			boolean varArgs = false;
-	    			while (citr9.hasNext()) {
-	    				Node va = citr9.next().getObject();
-	    				if (va.isLiteral() && va.getLiteral().getValue().equals(Boolean.TRUE)) {
-	    					varArgs = true;
+		    				ClosableIterator<Triple> citr6 = context.find(rdt, stlrestProp.asNode(), null);
+		    				if (citr6.hasNext()) {
+		    					rdt = citr6.next().getObject();
+		    				}
+		    				else {
+		    					rdt =  null;
+		    				}
+		    				citr6.close();
 	    				}
-	    			}
-
+	    			}	    				
 	    			Node result = (new EvaluateSadlEquationUtils()).evaluateSadlEquation(javaUriStr, restOfArgs, restOfArgTypes, varArgs, returnTypes);
 	           		return context.getEnv().bind(args[length - 1], result);	     
 	    		}

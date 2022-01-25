@@ -38,7 +38,9 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 
 	@Test
 	def void testSadlEquationInRule_01() {
-		createFile('JavaExternal.sadl', '''
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
 		uri "http://sadl.org/JavaExternal.sadl" alias javaexternal.
 		
 		External min(decimal n1, decimal n2) returns decimal : "java.lang.Math.min".
@@ -76,7 +78,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 		val ci = new ConfigurationItem(catHier)
 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
 		configItems.add(ci)
-		assertInferencer('JavaExternal.sadl', null, configItems) [
+		assertInferencer(sfname, null, configItems) [
 			var idx = 0
 			for (scr : it) {
 				println(scr.toString)
@@ -169,6 +171,8 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 			 Expr: formatString("value is %f",32.33434). 
 			 Expr: formatString("value is %32.12f",32.33434).  
 			 Expr: formatString("value is %32.12f != %f", 32.33434, 23.456).
+			 Expr: formatString("value %32.12f is not null is %b", 32.33434, 23.456).
+			 
 			 TestClass is a class described by formatedString with values of type string.
 
 			 Rule R1: if x is a TestClass then formatedString of x is formatString("value is %32.12f != %f", 32.33434, 23.456).
@@ -184,18 +188,29 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 					if (issue.message.equals("Evaluates to: \"name is sonoo\"")) {
 	 						evaluationsFound++
 	 					}
-	 					else if (issue.message.equals("Evaluates to: \"value is 32.334340\"")) {
+	 					else if (issue.message.equals("Evaluates to: \"value is 32.334340\"") ||
+	 						issue.message.equals("Evaluates to: \"value is 32.334339\"")	// this is what comes out of formatString for float 32.334340 input
+	 					) {
 	 						evaluationsFound++
 	 					}
-	 					else if (issue.message.equals("Evaluates to: \"value is                  32.334340000000\"")) {
+	 					else if (issue.message.equals("Evaluates to: \"value is                  32.334340000000\"") ||
+	 						issue.message.equals("Evaluates to: \"value is                  32.334339141846\"")
+	 					) {
 	 						evaluationsFound++
 	 					}
-	 					else if (issue.message.equals("Evaluates to: \"value is                  32.334340000000 != 23.456000\"")) {
+	 					else if (issue.message.equals("Evaluates to: \"value is                  32.334340000000 != 23.456000\"") ||
+	 						issue.message.equals("Evaluates to: \"value is                  32.334339141846 != 23.455999\"")
+	 					) {
+	 						evaluationsFound++
+	 					}
+	 					else if (issue.message.equals("Evaluates to: \"value is                  32.334340000000 != 23.456000\"") ||
+	 						issue.message.equals("Evaluates to: \"value                  32.334339141846 is not null is true\"")
+	 					) {
 	 						evaluationsFound++
 	 					}
 	 				}
 	 			}
-	 			assertEquals(4, evaluationsFound)
+	 			assertEquals(5, evaluationsFound)
 	 			if (rules !== null) {
 	 				for (rule : rules) {
 	 					System.out.println(rule.toString)
@@ -448,4 +463,59 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 		];		
 	 }
 	 
+	@Test // this test checks a static Java method with no arguments
+	def void testSadlEquationInRule_07() {
+		createFile('MathRandom.sadl', '''
+			 uri "http://sadl.org/MathRandom.sadl" alias mathrandom.
+			 
+			 External random() returns float  : "java.lang.Math.random".
+			 
+			 ClassWithRandomValue is a class described by randomValue with values of type float.
+			 
+			 Rule R1: if x is a ClassWithRandomValue then randomValue of x is random().
+			 
+			 CWRV is a ClassWithRandomValue.
+			 
+			 Expr: random().
+			 
+			 Ask: select x, y where x is a ClassWithRandomValue and x has randomValue y.
+			''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			var evaluationsFound = 0
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule R1:  if rdf(x, rdf:type, mathrandom:ClassWithRandomValue) and random(v0) then rdf(x, mathrandom:randomValue, v0)."))
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+		configItems.add(ci)
+		assertInferencer('MathRandom.sadl', null, configItems) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof ResultSet)
+				assertTrue(tr.toString.trim.startsWith("\"x\",\"y\"
+\"http://sadl.org/MathRandom.sadl#CWRV\",0."))
+				idx++
+			}
+		];
+	}
+	
 }

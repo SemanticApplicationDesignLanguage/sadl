@@ -2354,10 +2354,22 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 	private void dumpModelToLogger(OntModel model) {
-		if (logger.isDebugEnabled()) {
+		boolean loggerEnabled = logger.isDebugEnabled();
+		if (loggerEnabled) {
 			FileOutputStream fos;
 			try {
-				fos = new FileOutputStream(new File("c://sadlalt2/logs/tboxDump.log"));
+				String tempFolderName = configurationMgr.getModelFolderPath().getParent() + "/Temp";
+				File tempFolder = new File(tempFolderName);
+				if (!tempFolder.exists()) {
+					tempFolder.mkdir();
+				}
+				String dumpFileName = tempFolderName + "/tboxDump.log";	
+				File dumpFile = new File(dumpFileName);
+				if (dumpFile.exists()) {
+					dumpFile.delete();
+				}
+				dumpFile = new File(dumpFileName);
+				fos = new FileOutputStream(dumpFile);
 				dumpModelToLogger(model, fos);
 				fos.close();
 			} catch (FileNotFoundException e) {

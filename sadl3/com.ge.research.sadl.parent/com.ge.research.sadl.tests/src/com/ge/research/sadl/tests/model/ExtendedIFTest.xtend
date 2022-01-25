@@ -1411,8 +1411,14 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 					println(issue.message)
 				}
 			}
- 			issues.assertHasIssues(1);
-			assertEquals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information", issues.head.message)
+ 			issues.assertHasIssues(7);
+ 			var param1issueFound = false;
+ 			for (issue : issues) {
+ 				if (issue.message.equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information")) {
+ 					param1issueFound = true;
+ 				}
+ 			}
+			assertTrue(param1issueFound) 
 			for (rule:rules) {
 				println(rule.toString)
 			}

@@ -110,12 +110,15 @@ interface ISadlImplicitModelContentProvider {
 				described by stddev with values of type decimal,
 				described by unit with values of type string.
 			
-			DataDescriptor is a class, described by localDescriptorName (note "If this DataDescriptor is associated with a named parameter, this is the name") with a single value of type string,
-				described by dataType (note "the simple data type, e.g., float") with a single value of type anyURI,
-				described by specifiedUnits (note "the array of possible units") with a single value of type string List,
+			DataDescriptor is a class, described by localDescriptorName (note "If this DataDescriptor is associated with a named parameter, this is the name") with values of type string,
+				described by dataType (note "the simple data type, e.g., float") with values of type anyURI,
+				described by variableNumArguments (note "true if this DataDescriptor represents one or more value else not present in model") with values of type boolean,
+				described by specifiedUnits (note "the array of possible units") with values of type string List,
 				described by augmentedType (note "ties the DataDescriptor to the semantic domain model") with values of type AugmentedType,
 				described by descriptorVariable (note "This identifies the GPVariable, if any, in the AugmentedType which is associated with this DataDescriptor").
+			localDescriptorName of DataDescriptor has at most 1 value.
 			dataType of DataDescriptor has at most 1 value.
+			specifiedUnits of DataDescriptor has at most 1 value.
 			descriptorVariable of DataDescriptor has at most 1 value.
 			
 			Language is a class.
@@ -123,10 +126,11 @@ interface ISadlImplicitModelContentProvider {
 			Script is a class, described by language with a single value of type Language,
 				described by script with a single value of type string.
 			^Equation is a class,
-				described by expression with values of type Script,
-				described by variableNumArguments with a single value of type boolean.
-			arguments describes ^Equation with a single value of type DataDescriptor List.
-			returnTypes describes ^Equation with a single value of type DataDescriptor List.
+				described by expression with values of type Script.
+			arguments describes ^Equation with values of type DataDescriptor List.
+			arguments of ^Equation has at most 1 value.
+			returnTypes describes ^Equation with values of type DataDescriptor List.
+			returnTypes of ^Equation has at most 1 value.
 			
 			ExternalEquation is a type of ^Equation,
 				described by externalURI with a single value of type anyURI,
