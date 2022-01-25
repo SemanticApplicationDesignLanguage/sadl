@@ -73,7 +73,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.RDFWriterI;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -2084,7 +2084,7 @@ public class CsvImporter implements ITabularDataImporter {
 				}
 
 				try {
-					RDFWriter rdfw = getOwlModel().getWriter(format);
+					RDFWriterI rdfw = getOwlModel().getWriter(format);
 					// NTripleWriter.setProperty always throws UnknownPropertyException; ditto for N3.
 					if (format.startsWith("RDF/XML")) {
 						rdfw.setProperty("xmlbase", importModelNS); 

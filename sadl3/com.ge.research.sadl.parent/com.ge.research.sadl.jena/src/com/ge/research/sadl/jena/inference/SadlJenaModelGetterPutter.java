@@ -31,7 +31,7 @@ import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.RDFWriterI;
 import org.apache.jena.tdb.TDB;
 import org.apache.jena.tdb.TDBFactory;
 
@@ -145,7 +145,7 @@ public class SadlJenaModelGetterPutter extends SadlJenaModelGetter {
     	}
     	else {
 			FileOutputStream fps = new FileOutputStream(owlFilename);
-			RDFWriter rdfw = m.getWriter(format);
+			RDFWriterI rdfw = m.getWriter(format);
 			// NTripleWriter.setProperty always throws UnknownPropertyException;
 			// ditto for N3.
 			if (format.startsWith("RDF/XML")) {

@@ -44,7 +44,7 @@ import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.ModelGetter;
-import org.apache.jena.rdf.model.RDFWriter;
+import org.apache.jena.rdf.model.RDFWriterI;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.reasoner.Derivation;
 import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
@@ -417,7 +417,7 @@ public class JenaAugmentedReasonerPlugin extends JenaReasonerPlugin implements I
 		if (m != null) {
 			String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	
 		    FileOutputStream fps = new FileOutputStream(filename);
-	        RDFWriter rdfw = m.getWriter(format);
+	        RDFWriterI rdfw = m.getWriter(format);
 	        rdfw.write(m, fps, modelname);
 	        try {
 				fps.close();
