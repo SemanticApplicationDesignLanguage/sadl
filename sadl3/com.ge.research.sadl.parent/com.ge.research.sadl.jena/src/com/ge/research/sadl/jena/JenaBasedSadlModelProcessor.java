@@ -193,6 +193,7 @@ import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.TypedEllipsisNode;
+import com.ge.research.sadl.model.gp.UnknownNode;
 import com.ge.research.sadl.model.gp.UntypedEllipsisNode;
 import com.ge.research.sadl.model.gp.Update;
 import com.ge.research.sadl.model.gp.ValueTableNode;
@@ -3950,7 +3951,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				Property varnumargs = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VARIABLE_NUM_ARGUMENTS_PROPERTY_URI);
 				ddInst.addProperty(varnumargs, getTheJenaModel().createTypedLiteral(true));
 			}
-			else {
+			else if (!(typeNode instanceof UnknownNode)){
 				ddInst.addProperty(typeProp, typeNode.getURI());
 			}
 			if (dd.getUnits() != null) {
@@ -4436,7 +4437,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		List<DataDescriptor> paramDataDescriptors = null;
 		if (params != null && params.size() > 0) {
-			if (params.get(0).getUnknown() == null) {
+//			if (params.get(0).getUnknown() == null) {
 				List<Node> args = new ArrayList<Node>();
 				List<Node> argtypes = new ArrayList<Node>();
 				paramDataDescriptors = new ArrayList<DataDescriptor>();
@@ -4463,6 +4464,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						Node uten = new UntypedEllipsisNode();
 						args.add(uten);
 						argtypes.add(uten);
+					}
+					else if (param.getUnknown() != null) {
+						Node ukn = new UnknownNode();
+						args.add(ukn);
+						argtypes.add(ukn);
 					}
 				}
 				eq.setArguments(args);
@@ -4491,7 +4497,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				// clear current equation
 				setCurrentEquation(null);
 			}
-		}
+//		}
 		List<Node> rtypes = new ArrayList<Node>();
 		List<DataDescriptor> retDataDescriptors = new ArrayList<DataDescriptor>();
 		for (SadlReturnDeclaration srd : rtype) {
@@ -4505,6 +4511,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (rt != null) {
 				rtnode = sadlTypeReferenceToNode(rt);
 				rtypes.add(rtnode);
+			}
+			else if (srd.getUnknown() != null) {
+				rtypes.add(new UnknownNode());
 			}
 			else {
 				rtypes.add(null);

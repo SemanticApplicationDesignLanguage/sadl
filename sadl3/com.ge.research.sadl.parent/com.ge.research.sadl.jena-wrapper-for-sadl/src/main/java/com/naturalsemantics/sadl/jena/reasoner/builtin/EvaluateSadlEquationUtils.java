@@ -38,6 +38,7 @@ import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.TypedEllipsisNode;
+import com.ge.research.sadl.model.gp.UnknownNode;
 import com.ge.research.sadl.model.gp.UntypedEllipsisNode;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ModelError;
@@ -421,7 +422,7 @@ public class EvaluateSadlEquationUtils {
 					}
 					else {
 						Node eqArgType = eq.getArgumentTypes().get(i);
-						if (eqArgType instanceof NamedNode) {
+						if (eqArgType instanceof NamedNode || eqArgType instanceof UnknownNode) {
 							argsPlus[ptIndex] = getSimpleTypeFromVal(eqArgType, argtype, val.toString());
 						}
 					}
@@ -586,7 +587,14 @@ public class EvaluateSadlEquationUtils {
 					for (int i = 0;  i < paramTypes.length; i++) {
 						Class<?> pt = paramTypes[i];
 						String ptstr = pt.getTypeName();
-						Node arg = methodOnClassOfFirstArgument ? bi.getArguments().get(i + 1) : bi.getArguments().get(i);
+						int argIndex = methodOnClassOfFirstArgument ? (i + 1) : i;
+						if (argIndex > bi.getArguments().size() - 1) {
+							if (!variableNumParams) {
+								match = false;
+							}
+							continue;
+						}
+						Node arg = bi.getArguments().get(argIndex);
 						LiteralType dt = null;
 						if (arg instanceof com.ge.research.sadl.model.gp.Literal) {
 							dt = ((com.ge.research.sadl.model.gp.Literal)arg).getLiteralType();
@@ -664,8 +672,14 @@ public class EvaluateSadlEquationUtils {
 					for (int i = 0;  i < paramTypes.length; i++) {
 						Class<?> pt = paramTypes[i];
 						String ptstr = pt.getTypeName();
-						int argIndex;
+						int argIndex = methodOnClassOfFirstArgument ? (i + 1) : i;
 						org.apache.jena.graph.Node argType = null;
+						if (argIndex > args.size() - 1) {
+							if (!variableNumParams) {
+								match = false;
+							}
+							continue;
+						}						
 						if (i >= paramTypes.length) {
 							// this is either an error or variable arguments
 							if (varArgs) {

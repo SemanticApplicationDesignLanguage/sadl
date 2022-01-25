@@ -3320,23 +3320,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		boolean hasEllipsis = params.size() > 0 && 
 				(params.get(params.size() - 1).getTypedEllipsis() != null ||
 				params.get(params.size() - 1).getEllipsis() != null);
+		boolean hasUnknown = params.size() > 0 && 
+				(params.get(params.size() - 1).getUnknown() != null);
 		int minNumArgs = 0;
 		if (args.size() != params.size()) {
-			// this could be a wrong number of arguments unless there's an ellipsis, typed or untyped
+			// this could be a wrong number of arguments unless there's an ellipsis, typed or untyped, or it's an unknown
 			boolean wrongNumArgs = false;
-			if (!hasEllipsis) {
+			if (!hasEllipsis && !hasUnknown) {
 				// if there is no typed or untyped ellipsis it is
 				wrongNumArgs = true;
 			}
 			else {
-				if (args.size() < params.size()) {
+				if (!hasEllipsis && !hasUnknown && args.size() < params.size()) {
 					// if there aren't at least as many args as params it is
 					wrongNumArgs = true;
 				}
 			}
 			
 			if (hasEllipsis) {
-				minNumArgs = params.size();
+				minNumArgs = params.size() - 1;	// the VarArgs can have no args
 			}
 			if (wrongNumArgs) {
 				getModelProcessor().addTypeCheckingError("Number of arguments does not match function declaration", expression);
@@ -3350,7 +3352,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				SadlParameterDeclaration param = null;
 				int paramIndex = i >= params.size() ? params.size() - 1 : i;
 				if (isEllipsis(params.get(paramIndex))) {
-					param = (i >= minNumArgs && minNumArgs > 0) ? params.get(minNumArgs - 1) : params.get(i);
+					param = (i >= minNumArgs) ? params.get(minNumArgs) : params.get(i);
 				}
 				else if (i < params.size()) {
 					param = params.get(i);

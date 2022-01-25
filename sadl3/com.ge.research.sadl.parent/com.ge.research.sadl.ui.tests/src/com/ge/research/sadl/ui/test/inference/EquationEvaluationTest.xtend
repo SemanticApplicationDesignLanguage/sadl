@@ -76,7 +76,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 		val String[] catHier = newArrayOfSize(1)
 		catHier.set(0, "Jena")
 		val ci = new ConfigurationItem(catHier)
-		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+		ci.addNameValuePair("pModelSpec", "OWL_MEM")
 		configItems.add(ci)
 		assertInferencer(sfname, null, configItems) [
 			var idx = 0
@@ -144,7 +144,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 		val String[] catHier = newArrayOfSize(1)
 		catHier.set(0, "Jena")
 		val ci = new ConfigurationItem(catHier)
-		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+		ci.addNameValuePair("pModelSpec", "OWL_MEM")
 		configItems.add(ci)
 		assertInferencer('StringFunctions.sadl', null, configItems) [
 			var idx = 0
@@ -226,7 +226,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 		val String[] catHier = newArrayOfSize(1)
 	 		catHier.set(0, "Jena")
 	 		val ci = new ConfigurationItem(catHier)
-	 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+	 		ci.addNameValuePair("pModelSpec", "OWL_MEM")
 	 		configItems.add(ci)
 	 		assertInferencer('StringFormat.sadl', null, configItems) [
 	 			var idx = 0
@@ -295,7 +295,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 		val String[] catHier = newArrayOfSize(1)
 	 		catHier.set(0, "Jena")
 	 		val ci = new ConfigurationItem(catHier)
-	 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+	 		ci.addNameValuePair("pModelSpec", "OWL_MEM")
 	 		configItems.add(ci)
 	 		assertInferencer('BooleanTypes.sadl', null, configItems) [
 	 			var idx = 0
@@ -363,7 +363,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 		val String[] catHier = newArrayOfSize(1)
 	 		catHier.set(0, "Jena")
 	 		val ci = new ConfigurationItem(catHier)
-	 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+	 		ci.addNameValuePair("pModelSpec", "OWL_MEM")
 	 		configItems.add(ci)
 	 		assertInferencer('DoubleFunctions.sadl', null, configItems) [
 	 			var idx = 0
@@ -445,7 +445,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 		val String[] catHier = newArrayOfSize(1)
 	 		catHier.set(0, "Jena")
 	 		val ci = new ConfigurationItem(catHier)
-	 		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+	 		ci.addNameValuePair("pModelSpec", "OWL_MEM")
 	 		configItems.add(ci)
 	 		assertInferencer('BooleanTypes.sadl', null, configItems) [
 	 			var idx = 0
@@ -502,7 +502,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 		val String[] catHier = newArrayOfSize(1)
 		catHier.set(0, "Jena")
 		val ci = new ConfigurationItem(catHier)
-		ci.addNameValuePair("pModelSpec", "OWL_MEM_MINI_RULE")
+		ci.addNameValuePair("pModelSpec", "OWL_MEM")
 		configItems.add(ci)
 		assertInferencer('MathRandom.sadl', null, configItems) [
 			var idx = 0
@@ -516,6 +516,146 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 				idx++
 			}
 		];
+	}
+	
+	@Test
+	def void testSadlEquationInRule_08() {
+		createFile('StringFormat.sadl', '''
+			 uri "http://sadl.org/StringFormat.sadl" alias stringformat.
+			 
+			 External formatString(string fmt, ...) returns string : "java.lang.String.format".
+			 
+			 Expr: formatString("no arguments for VarArgs").
+			 
+			 TestClass is a class described by formatedString with values of type string.
+
+			 Rule R1: if x is a TestClass then formatedString of x is formatString("no arguments for VarArgs").
+			 TestInst is a TestClass.
+
+			 Ask: select x, y where x is a TestClass and y is formatedString of x.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+	 			assertNotNull(jenaModel)
+	 			var evaluationsFound = 0
+	 			if (issues !== null) {
+	 				for (issue : issues) {
+	 					System.out.println(issue.message)
+	 					if (issue.message.equals("Evaluates to: \"no arguments for VarArgs\"")) {
+	 						evaluationsFound++
+	 					}
+	 				}
+	 			}
+	 			assertEquals(1, evaluationsFound)
+	 			if (rules !== null) {
+	 				for (rule : rules) {
+	 					System.out.println(rule.toString)
+	 				}
+	 			}
+	 			assertTrue(rules.size == 1)
+	 			assertTrue(
+	 				processor.compareTranslations(rules.get(0).toString(),
+	 					"Rule R1:  if rdf(x, rdf:type, stringformat:TestClass) and formatString(\"no arguments for VarArgs\",v0) then rdf(x, stringformat:formatedString, v0)."))
+	 		]
+	 
+	 		var List<ConfigurationItem> configItems = newArrayList
+	 		val String[] catHier = newArrayOfSize(1)
+	 		catHier.set(0, "Jena")
+	 		val ci = new ConfigurationItem(catHier)
+	 		ci.addNameValuePair("pModelSpec", "OWL_MEM")
+	 		configItems.add(ci)
+	 		assertInferencer('StringFormat.sadl', null, configItems) [
+	 			var idx = 0
+	 			for (scr : it) {
+	 				println(scr.toString)
+	 				assertTrue(scr instanceof SadlCommandResult)
+	 				val tr = (scr as SadlCommandResult).results
+	 				assertTrue(tr instanceof ResultSet)
+	 				assertEquals("\"x\",\"y\"
+\"http://sadl.org/StringFormat.sadl#TestInst\",\"no arguments for VarArgs\"", tr.toString.trim)
+	 				idx++
+	 			}
+	 		];
+	}
+	
+	@Test
+	def void testSadlEquationInRule_09() {
+		createFile('StringFormat.sadl', '''
+			 uri "http://sadl.org/StringFormat.sadl" alias stringformat.
+			 
+			 External formatString(--) returns -- : "java.lang.String.format".
+			 
+			 Expr: formatString("name is %s", "sonoo").
+			 Expr: formatString("value is %f",32.33434). 
+			 Expr: formatString("value is %32.12f",32.33434).  
+			 Expr: formatString("value is %32.12f != %f", 32.33434, 23.456).
+			 Expr: formatString("value %32.12f is not null is %b", 32.33434, 23.456).
+			 
+			 TestClass is a class described by formatedString with values of type string.
+
+			 Rule R1: if x is a TestClass then formatedString of x is formatString("value is %32.12f != %f", 32.33434, 23.456).
+			 TestInst is a TestClass.
+
+			 Ask: select x, y where x is a TestClass and y is formatedString of x.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+	 			assertNotNull(jenaModel)
+	 			var evaluationsFound = 0
+	 			if (issues !== null) {
+	 				for (issue : issues) {
+	 					System.out.println(issue.message)
+	 					if (issue.message.equals("Evaluates to: \"name is sonoo\"")) {
+	 						evaluationsFound++
+	 					}
+	 					else if (issue.message.equals("Evaluates to: \"value is 32.334340\"") ||
+	 						issue.message.equals("Evaluates to: \"value is 32.334339\"")	// this is what comes out of formatString for float 32.334340 input
+	 					) {
+	 						evaluationsFound++
+	 					}
+	 					else if (issue.message.equals("Evaluates to: \"value is                  32.334340000000\"") ||
+	 						issue.message.equals("Evaluates to: \"value is                  32.334339141846\"")
+	 					) {
+	 						evaluationsFound++
+	 					}
+	 					else if (issue.message.equals("Evaluates to: \"value is                  32.334340000000 != 23.456000\"") ||
+	 						issue.message.equals("Evaluates to: \"value is                  32.334339141846 != 23.455999\"")
+	 					) {
+	 						evaluationsFound++
+	 					}
+	 					else if (issue.message.equals("Evaluates to: \"value is                  32.334340000000 != 23.456000\"") ||
+	 						issue.message.equals("Evaluates to: \"value                  32.334339141846 is not null is true\"")
+	 					) {
+	 						evaluationsFound++
+	 					}
+	 				}
+	 			}
+	 			assertEquals(5, evaluationsFound)
+	 			if (rules !== null) {
+	 				for (rule : rules) {
+	 					System.out.println(rule.toString)
+	 				}
+	 			}
+	 			assertTrue(rules.size == 1)
+	 			assertTrue(
+	 				processor.compareTranslations(rules.get(0).toString(),
+	 					"Rule R1:  if rdf(x, rdf:type, stringformat:TestClass) and formatString(\"value is %32.12f != %f\",32.33434,23.456,v0) then rdf(x, stringformat:formatedString, v0)."))
+	 		]
+	 
+	 		var List<ConfigurationItem> configItems = newArrayList
+	 		val String[] catHier = newArrayOfSize(1)
+	 		catHier.set(0, "Jena")
+	 		val ci = new ConfigurationItem(catHier)
+	 		ci.addNameValuePair("pModelSpec", "OWL_MEM")
+	 		configItems.add(ci)
+	 		assertInferencer('StringFormat.sadl', null, configItems) [
+	 			var idx = 0
+	 			for (scr : it) {
+	 				println(scr.toString)
+	 				assertTrue(scr instanceof SadlCommandResult)
+	 				val tr = (scr as SadlCommandResult).results
+	 				assertTrue(tr instanceof ResultSet)
+	 				assertEquals("\"x\",\"y\"
+\"http://sadl.org/StringFormat.sadl#TestInst\",\"value is                  32.334339141846 != 23.455999\"", tr.toString.trim)
+	 				idx++
+	 			}
+	 		];
 	}
 	
 }
