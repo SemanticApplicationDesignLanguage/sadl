@@ -7,7 +7,7 @@
   <body>
     <h1>Equations and External Equations</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/20/2022<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/25/2022<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <p> </p>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;">Introduction</span></h2>
@@ -129,10 +129,10 @@
           </span></span>.</li>
       <li>It is possible that a function is ill-defined, especially in the case
         of built-in functions provided by the reasoner and declared in the
-        SadlBuiltinFunctions.sadl file in the ImplicitModel folder. Either
-        forcamfe370 one or more arguments or for the return type,"--" may be
-        used to indicate that the argument or the return type is unknown, or is
-        of a type which cannot be represented in the grammar, such as a list. <br>
+        SadlBuiltinFunctions.sadl file in the ImplicitModel folder. Either for
+        one or more arguments or for the return type,"--" may be used to
+        indicate that the argument or the return type is unknown, or is of a
+        type which cannot be represented in the grammar, such as a list. <br>
         <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font color="#800080"><font
               face="Monospace"><font style="font-size: 9pt">External</font></font></font><font
             color="#4c4c4c"><font face="Monospace"><font style="font-size: 9pt">
@@ -148,15 +148,15 @@
             color="#4c4c4c"><font face="Monospace"><font style="font-size: 9pt">.</font></font></font></p>
         <br>
       </li>
-      <li>Some functions may have a variable number of arguments. In Java, this
-        is called "VarArgs". In SADL this is indicated with an ellipsis.The
-        ellipsis may follow a type and precede an argument name, or it may
-        appear as an argument by itself. In the first instance the ellipsis
-        indicates that there are a variable number of arguments of the specified
-        type. In the second case the ellipsis indicates that the arguments can
-        be of any type. In any case, there can only be one argument that uses
-        the ellipsis, that is represents a variable number of arguments, and it
-        must be the last declared argument. Examples include: <br>
+      <li>Some functions may have a variable number of arguments, zero or more.
+        In Java, this is called "VarArgs". In SADL this is indicated with an
+        ellipsis.The ellipsis may follow a type and precede an argument name, or
+        it may appear as an argument by itself. In the first instance the
+        ellipsis indicates that there are a variable number of arguments of the
+        specified type. In the second case the ellipsis indicates that the
+        variable number of arguments can be of any type. In any case, there can
+        only be one argument that uses the ellipsis, either typed or untyped,
+        and it must be the last declared argument. Examples include: <br>
         <p style="margin-bottom: 0in; line-height: 100%" align="left"> </p>
         <p style="margin-bottom: 0in; line-height: 100%" align="left"> <font style="font-size: 9pt"
             size="2"><font color="#800080"><font face="Monospace">External</font></font><font
@@ -198,9 +198,10 @@
               followed by any number of arguments of type string.</span></font></p>
       </li>
     </ol>
-    <p>These may be combined, of course, as in this example of a method that
-      takes any type of first argument followed by any number of additional
-      arguments of any type.</p>
+    <p>While these could be combined, as in this example of a method that takes
+      any type of first argument followed by any number of additional arguments
+      of any type, care should be taken to match the use of special types with
+      what the underlying function actually expects.</p>
     <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
       <font style="font-size: 9pt" size="2"><font color="#800080"><font face="Monospace"><span
               style="background: #e8f2fe">External</span></font></font><font color="#4c4c4c"><font
