@@ -77,7 +77,7 @@ fragment EquationSignature returns AbstractSadlEquation:
 ;
 
 SadlParameterDeclaration:
-		type=SadlPrimaryTypeReference name=SadlResource ('(' (augtype=ExpressionParameterized<true,true>)?  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')?
+		type=SadlPrimaryTypeReference typedEllipsis = ('...')? name=SadlResource ('(' (augtype=ExpressionParameterized<true,true>)?  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')?
 //		type=SadlPrimaryTypeReference ('(' augtype=PropOfSubject<false,false>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')')? name=SadlResource
 //		('(' type=PropOfSubject<false,false>  ('{' units+=UNIT (',' units+=UNIT)* '}')? ')' | type=SadlPrimaryTypeReference) name=SadlResource
 	|   unknown='--'
