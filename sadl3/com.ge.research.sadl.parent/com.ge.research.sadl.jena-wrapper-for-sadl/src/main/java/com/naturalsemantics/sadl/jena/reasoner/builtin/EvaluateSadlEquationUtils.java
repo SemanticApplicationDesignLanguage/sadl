@@ -801,6 +801,17 @@ public class EvaluateSadlEquationUtils {
 
 	/**
 	 * Method to find the Java Class identified by a SADL External equation URI string
+	 * Note: for this to work, the class identified by classname must either already be on the SADL classpath,
+	 *   as would be the case, for example, for classes in java.lang.*, or be added by the user by placing
+	 *   the class(es) to be referenced in an Eclipse plug-in and adding the following to the plug-in's MANIFEST.MF file:
+	 *   
+	 *     Require-Bundle: com.ge.research.sadl.jena-wrapper-for-sadl
+	 *     Eclipse-RegisteredBuddy: com.ge.research.sadl.jena-wrapper-for-sadl
+	 *
+	 * The package containing the class(es) should also be exported with a MANIFEST.MF entry such as
+	 * 
+	 * 	   Export-Package: com.naturalsemantics.sadl.builtin.increment
+	 * 
 	 * @param exturistr
 	 * @return
 	 */
