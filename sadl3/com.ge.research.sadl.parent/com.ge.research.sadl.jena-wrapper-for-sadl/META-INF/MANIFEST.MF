@@ -11,34 +11,53 @@ Require-Bundle: com.ge.research.jena,
  org.eclipse.core.runtime,
  org.eclipse.osgi,
  org.junit;bundle-version="4.12.0";resolution:=optional
+Eclipse-BuddyPolicy: dependent
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: com.ge.research.sadl.jena.importer,
  com.ge.research.sadl.jena.multithreaded,
  com.ge.research.sadl.jena.reasoner;
-  uses:="org.apache.jena.reasoner,
+  uses:="org.apache.jena.ontology,
    com.ge.research.sadl.model.gp,
    org.slf4j,
-   org.apache.jena.graph,
    org.apache.jena.query,
-   org.apache.jena.reasoner.rulesys,
-   org.apache.jena.reasoner.rulesys.builtins,
-   org.apache.jena.rdf.model,
-   com.ge.research.sadl.reasoner,
-   org.apache.jena.ontology",
-   com.ge.research.sadl.jena.reasoner.builtin;
-  uses:="org.apache.jena.datatypes.xsd,
+   jakarta.activation,
    org.apache.jena.graph,
-   org.apache.jena.reasoner.rulesys.builtins,
    org.apache.jena.reasoner.rulesys,
+   org.apache.jena.rdf.model,
+   org.apache.jena.reasoner,
    com.ge.research.sadl.reasoner",
- com.ge.research.sadl.jena.translator;
+ com.ge.research.sadl.jena.reasoner.builtin;
   uses:="com.ge.research.sadl.model.gp,
+   org.slf4j,
+   org.apache.jena.datatypes.xsd,
+   org.apache.jena.reasoner.rulesys.builtins,
+   org.apache.jena.graph,
+   org.apache.jena.reasoner.rulesys,
+   com.ge.research.sadl.reasoner,
+   org.apache.jena.reasoner",
+ com.ge.research.sadl.jena.translator;
+  uses:="org.apache.jena.ontology,
+   com.ge.research.sadl.model.gp,
    org.slf4j,
    com.ge.research.sadl.reasoner,
    com.ge.research.sadl.model,
-   org.apache.jena.ontology"
+   org.apache.jena.rdf.model",
+ com.naturalsemantics.sadl.jena.reasoner.builtin;
+  uses:="com.ge.research.sadl.jena.reasoner.builtin,
+   com.ge.research.sadl.model.gp,
+   org.apache.jena.graph,
+   org.apache.jena.reasoner.rulesys,
+   com.ge.research.sadl.reasoner",
+ com.naturalsemanticsllc.sadl.reasoner;
+  uses:="org.apache.jena.ontology,
+   jakarta.activation,
+   org.apache.jena.reasoner.rulesys,
+   com.ge.research.sadl.reasoner,
+   com.ge.research.sadl.jena.reasoner,
+   org.apache.jena.rdf.model",
+ com.naturalsemanticsllc.sadl.translator
 Import-Package: com.ge.research.sadl.importer,
  com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,

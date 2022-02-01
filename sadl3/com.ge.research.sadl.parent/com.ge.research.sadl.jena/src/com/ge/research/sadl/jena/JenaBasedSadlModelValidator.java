@@ -3428,8 +3428,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if(es != null && !es.getReturnType().isEmpty()) {
 				TypeCheckInfo tci = getType(es.getReturnType());
 				ConceptName etcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI);
-				etcn.setType(ConceptType.FUNCTION_DEFN);
-				tci.setExpressionType(etcn);
+				if (etcn != null) {
+					etcn.setType(ConceptType.FUNCTION_DEFN);
+					tci.setExpressionType(etcn);
+				}
 				if (tci != null) {
 					tci.setTypeToExprRelationship(FUNCTION_RETURN);
 				}
@@ -3438,8 +3440,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				TypeCheckInfo tci = getConstantNoneTypeCheckInfo(es);
 				ConceptName etcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI);
-				etcn.setType(ConceptType.FUNCTION_DEFN);
-				tci.setExpressionType(etcn);
+				if (etcn != null) {
+					etcn.setType(ConceptType.FUNCTION_DEFN);
+					tci.setExpressionType(etcn);
+				}
 				if (tci != null) {
 					tci.setTypeToExprRelationship(FUNCTION_RETURN);
 				}
@@ -3451,8 +3455,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if(ees != null && !ees.getReturnType().isEmpty()) {
 				TypeCheckInfo tci = getType(ees.getReturnType());
 				ConceptName etcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI);
-				etcn.setType(ConceptType.FUNCTION_DEFN);
-				tci.setExpressionType(etcn);
+				if (etcn != null) {
+					etcn.setType(ConceptType.FUNCTION_DEFN);
+					tci.setExpressionType(etcn);
+				}
 				if (tci != null) {
 					tci.setTypeToExprRelationship(FUNCTION_RETURN);
 				}
@@ -3461,8 +3467,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				TypeCheckInfo tci = getConstantNoneTypeCheckInfo(ees);
 				ConceptName etcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI);
-				etcn.setType(ConceptType.FUNCTION_DEFN);
-				tci.setExpressionType(etcn);
+				if (etcn != null) {
+					etcn.setType(ConceptType.FUNCTION_DEFN);
+					tci.setExpressionType(etcn);
+				}
 				if (tci != null) {
 					tci.setTypeToExprRelationship(FUNCTION_RETURN);
 				}
