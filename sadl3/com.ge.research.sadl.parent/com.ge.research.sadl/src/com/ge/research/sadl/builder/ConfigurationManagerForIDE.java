@@ -66,7 +66,7 @@ import org.eclipse.xtext.util.StringInputStream;
 import com.ge.research.sadl.external.XMLHelper;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -75,8 +75,7 @@ import com.ge.research.sadl.reasoner.ConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.InvalidNameException;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetterPutter;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.utils.ResourceManager;
@@ -92,7 +91,9 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	
 	public static class Provider implements javax.inject.Provider<IConfigurationManagerForIDE> {
 		private String modelFolder;
-		private String repoType = ConfigurationManagerForIDE.getOWLFormat();
+		private String repoType = ConfigurationManagerForIDE.getPersistenceFormatFromPreferences();
+		//TODO: AG
+//		private String repoURL = ConfigurationManagerForIDE.getPersistenceSemTKServerUrlFromPreferences();
 
 		public void setModelFolder(String modelFolder) {
 			this.modelFolder = modelFolder;
@@ -468,13 +469,10 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				bChanged = true;
 			}
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (bChanged) {
@@ -536,20 +534,54 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 
 
 	/**
-	 * Call this method to get the repository type (format) from preferences
+	 * Call this method to get the repository type (format) from preferences.
+	 * This method used to be called getOWLFormat
 	 * @return
 	 */
-	public static String getOWLFormat() {
+	public static String getPersistenceFormatFromPreferences() {
 		IPreferencesService service = Platform.isRunning() ? Platform.getPreferencesService() : null;
 		if (service != null) {
-			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, null);
+			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT, null);
 			return format;
 		}
 		else {
-			return SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+			return SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 		}
 	}
 
+	
+	//TODO: AG: 
+//	/**
+//	 * Call this method to get the SemTK server type (e.g. Fuseki) from preferences
+//	 * @return
+//	 */
+//	public static String getPersistenceSemTKServerTypeFromPreferences() {
+//		IPreferencesService service = Platform.isRunning() ? Platform.getPreferencesService() : null;
+//		if (service != null) {
+//			String serverType = service.getString("com.ge.research.sadl.Sadl", "storeType", SadlPersistenceFormat.SEMTK_STORE_TYPE, null);
+//			return serverType;
+//		}
+//		else {
+//			return SadlPersistenceFormat.SEMTK_STORE_TYPE;
+//		}
+//	}
+//
+//	/**
+//	 * Call this method to get the SemTK server type (e.g. Fuseki) from preferences
+//	 * @return
+//	 */
+//	public static String getPersistenceSemTKServerUrlFromPreferences() {
+//		IPreferencesService service = Platform.isRunning() ? Platform.getPreferencesService() : null;
+//		if (service != null) {
+//			String serverType = service.getString("com.ge.research.sadl.Sadl", "endpoint", SadlPersistenceFormat.SEMTK_ENDPOINT, null);
+//			return serverType;
+//		}
+//		else {
+//			return SadlPersistenceFormat.SEMTK_ENDPOINT;
+//		}
+//	}
+	
+	
     private boolean isOwlFileCreatedBySadl(File file) {
 		try {
 			String val = getSadlUtils().fileNameToFileUrl(file.getCanonicalPath());
@@ -576,10 +608,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				}
 			}
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
@@ -636,7 +666,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 					return aFile.getCanonicalPath();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -733,10 +762,12 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	 * @param publicUri
 	 * @param altUrl
 	 * @return
-	 * @throws MalformedURLException 
+	 * @throws IOException 
+	 * @throws TranslationException 
+	 * @throws ConfigurationException 
 	 */
-	public boolean validateImport(String publicUri, String altUrl) throws MalformedURLException {
-		if (getModelGetter().modelExists(publicUri, altUrl)) {
+	public boolean validateImport(String publicUri, String altUrl) throws ConfigurationException, TranslationException, IOException {
+		if (getSadlModelGetter(null).modelExists(publicUri)) {
 			return true;
 		}
 		return false;
@@ -804,7 +835,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	}
 
 
-	public synchronized Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException {
+	public synchronized Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException, TranslationException {
 		OntModel theModel = getOntModel(publicUri, scope);
 		if (theModel != null) {
 			Ontology onto = theModel.getOntology(publicUri);
@@ -858,7 +889,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	
 	@Override
 	public List<ConceptName> getNamedConceptsInModel(String publicUri,
-			ConceptType cType, Scope scope) throws InvalidNameException, ConfigurationException, IOException {
+			ConceptType cType, Scope scope) throws InvalidNameException, ConfigurationException, IOException, TranslationException {
 		OntModel theModel = getOntModel(publicUri, scope);
 		if (theModel != null) {
 			return getNamedConceptsInModel(theModel, publicUri, cType, scope);
@@ -867,57 +898,44 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	}
 
 
-	public OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException {
+	public OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException, TranslationException {
 		OntModel theModel = null;
 		String altUrl = getAltUrlFromPublicUri(publicUri);
-		if (repoType == null) {
-	    	repoType = ConfigurationManagerForIDE.getOWLFormat();	
-		    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), repoType);
-		    setModelGetter(modelGetter);
+		if (getRepoType() == null) {
+	    	setRepoType(ConfigurationManagerForIDE.getPersistenceFormatFromPreferences());	
 		}
-		if (repoType != null && repoType.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+		if (getRepoType() != null && getRepoType().equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
 			try {
-				theModel = getModelGetter().getOntModel(publicUri, altUrl,
-						SadlSerializationFormat.JENA_TDB_FORMAT);
+				theModel = getSadlModelGetter(null).getOntModel(publicUri);
 			} catch (Throwable t) {
 				// ok to fail; may not exist
 			}
 		} else {
-			if (getModelGetter() == null) {
-			    SadlJenaModelGetterPutter modelGetter = new SadlJenaModelGetterPutter(this, getTdbFolder(), repoType);
-			    setModelGetter(modelGetter);
+			boolean resetProcessImports = false;
+			boolean processImports = OntDocumentManager.getInstance().getProcessImports();
+			if (scope != null && scope.equals(Scope.LOCALONLY) && processImports) {
+				OntDocumentManager.getInstance().setProcessImports(false);
+				resetProcessImports = true;
 			}
-			if (getModelGetter() != null) {
-				boolean resetProcessImports = false;
-				boolean processImports = OntDocumentManager.getInstance().getProcessImports();
-				if (scope != null && scope.equals(Scope.LOCALONLY) && processImports) {
-					OntDocumentManager.getInstance().setProcessImports(false);
-					resetProcessImports = true;
-				}
-				else if (!processImports) {
-					OntDocumentManager.getInstance().setProcessImports(true);
-					resetProcessImports = true;
-				}
-				theModel = getModelGetter().getOntModel(publicUri, altUrl, repoType);
-				if (resetProcessImports) {
-					OntDocumentManager.getInstance().setProcessImports(processImports);
-				}
+			else if (!processImports) {
+				OntDocumentManager.getInstance().setProcessImports(true);
+				resetProcessImports = true;
+			}
+			theModel = getSadlModelGetter(null).getOntModel(publicUri);
+			if (resetProcessImports) {
+				OntDocumentManager.getInstance().setProcessImports(processImports);
 			}
 		}
 		return theModel;
 	}
 
-	@Override
-	public OntModel getOntModel(String publicUri, String serializedGraph, Scope scope, String format) {
-		Model m = ModelFactory.createDefaultModel()
-		        .read(new StringInputStream(serializedGraph), publicUri, format);
-    	if (m instanceof OntModel) {
-    		return (OntModel)m;
-    	}
-    	else {
-    		getOntModelSpec(null).setImportModelGetter(new SadlJenaModelGetter(this, null));
-     		return ModelFactory.createOntologyModel(getOntModelSpec(null), m);
-    	}
+	public OntModel getOntModel(String publicUri, String serializedGraph, String format) {
+		OntModel theModel = null;
+		try {
+			theModel = getSadlModelGetter(null).getOntModel(publicUri, serializedGraph, format);
+		} catch (Throwable t) {
+		}
+		return theModel;
 	}
 	
 	/**
@@ -968,10 +986,8 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 						}
 					}
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -1052,7 +1068,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 					sbff.delete();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -1081,7 +1096,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -1094,7 +1108,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			FileInputStream is = new FileInputStream(new File(owlFilename));
 			return initOntModel(is, getOwlFormatFromFile(owlFilename));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
@@ -1115,7 +1128,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			FileInputStream is = new FileInputStream(new File(owlFilename));
 			return initOntModel(is, getOwlFormatFromFile(owlFilename), loadImports);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
@@ -1150,7 +1162,7 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	}
 
 	private String getOwlFormatFromFile(String owlFilename) {
-		return SadlSerializationFormat.getSadlSerializationFormatFromFilename(owlFilename);
+		return SadlPersistenceFormat.getSadlPersistenceFormatFromFilename(owlFilename);
 	}
 	
 	public void addPrivateKeyValuePair(String key, Object value) {
@@ -1240,7 +1252,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 							}
 						}
 					} catch (MalformedURLException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -1251,7 +1262,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 				super.saveOntPolicyFile();
 			}
 		} catch (URISyntaxException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 	}
@@ -1268,7 +1278,6 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			}
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;

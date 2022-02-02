@@ -548,7 +548,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		String configDir = project.getLocation().append(ResourceManager.OWLDIR).toPortableString(); 
 		try {
 			if (configurationManager == null) {
-				configurationManager = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getOWLFormat());
+				configurationManager = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getPersistenceFormatFromPreferences());
 			}
 		} catch (ConfigurationException e) {
 			// TODO Auto-generated catch block
@@ -725,7 +725,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		String configDir = project.getLocation().append(ResourceManager.OWLDIR).toPortableString(); 
 		try {
 			if (configurationManager == null) {
-				configurationManager = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getOWLFormat());
+				configurationManager = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(configDir, ConfigurationManagerForIDE.getPersistenceFormatFromPreferences());
 			}
 			reasoners = ConfigurationManagerForIDE.getAvailableReasoners();
 			logger.debug("Number of reasoners: "+reasoners.size());

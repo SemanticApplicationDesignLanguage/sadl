@@ -10,9 +10,11 @@ import org.apache.jena.ontology.OntModelSpec;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.ge.research.sadl.model.persistence.ISadlModelGetter;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 public class TestGetModelImports {
@@ -31,7 +33,7 @@ public class TestGetModelImports {
 
 //	@Ignore("https://github.com/crapo/sadlos2/issues/332")
 	@Test
-	public void test() throws ConfigurationException, URISyntaxException {
+	public void test() throws ConfigurationException, URISyntaxException, TranslationException, IOException {
 		String modelFolder = kbroot + "/Shapes";
 		String modelName = "Test.owl";
 		Map<String,Map>imports = getImportHierarch(modelFolder, modelName);
@@ -46,12 +48,14 @@ public class TestGetModelImports {
 	 * @return -- a Map with key the URI of an import, the value a Map of the imported models imports 
 	 * @throws ConfigurationException 
 	 * @throws URISyntaxException 
+	 * @throws IOException 
+	 * @throws TranslationException 
 	 */
-	private Map<String, Map> getImportHierarch(String modelFolder, String owlModelName) throws ConfigurationException, URISyntaxException {
+	private Map<String, Map> getImportHierarch(String modelFolder, String owlModelName) throws ConfigurationException, URISyntaxException, TranslationException, IOException {
 		IConfigurationManager configMgr = new ConfigurationManager(modelFolder, null);
-		ISadlJenaModelGetter getter = new SadlJenaModelGetter(OntModelSpec.OWL_MEM, modelFolder);
+		ISadlModelGetter getter = configMgr.getSadlModelGetter(null);
 		String modelUrl = new SadlUtils().fileNameToFileUrl(modelFolder + "/" + owlModelName);
-		Map<String,Map> imports = getter.getImportHierarchy(configMgr, configMgr.getPublicUriFromActualUrl(modelUrl));
+		Map<String,Map> imports = getter.getImportHierarchy(modelUrl);
 		return imports;
 	}
 

@@ -29,8 +29,8 @@ import org.eclipse.xtext.resource.XtextResource;
 import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
 import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.external.ExternalEmfResource;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.Query;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IReasoner;
@@ -67,8 +67,8 @@ public class SadlRunQueryHandler extends SadlIdeActionHandler {
 			String owlFileName = null;
 			boolean tryAddingOwlExtension = true;
 			String fmt = properties != null ? properties.get(SadlPreferences.OWL_MODEL_FORMAT.getId()) : null;
-			final String format = fmt != null ? fmt : SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
-			String ext = "." + SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(format));
+			final String format = fmt != null ? fmt : SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
+			String ext = "." + SadlPersistenceFormat.getFileExtension(SadlPersistenceFormat.getRDFFormat(format));
 			if (path.getFileName().toString().endsWith(".sadl")) {
 				// run query on this model
 //				Resource res = prepareActionHandler(target[2]);

@@ -47,14 +47,13 @@ import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorGenerator;
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.IModelProcessor;
 import com.ge.research.sadl.processing.ISadlImplicitModelContentProvider;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessorProvider;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
@@ -450,7 +449,7 @@ import com.google.inject.Inject;
 		try {
 			String filename = mfFolder + "/SrlSummaryMetrics.metrics.owl";
 			String modelName = "http://com.ge.research.sadl/srl/metricsummary";
-			final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+			final String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 			String fixedModelFolderName = mfFolder.getCanonicalPath().replace("\\", "/");
 			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(fixedModelFolderName, format);
 			//AATIM-2245

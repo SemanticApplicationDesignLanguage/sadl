@@ -37,7 +37,6 @@ import org.eclipse.xtext.resource.XtextSyntaxDiagnostic;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.OntConceptType;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -54,6 +53,7 @@ import com.ge.research.sadl.model.gp.Test.ComparisonType;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
@@ -90,7 +90,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	public abstract Object processExpression(EObject expr) throws InvalidNameException, InvalidTypeException, TranslationException ;
 	
 	public static String getOwlModelFormat(ProcessorContext context) {
-		String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT; // default
+		String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT; // default
 		if (context != null) {
 			String pv = context.getPreferenceValues().getPreference(SadlPreferences.OWL_MODEL_FORMAT);
 			if (pv != null && pv.length() > 0) {

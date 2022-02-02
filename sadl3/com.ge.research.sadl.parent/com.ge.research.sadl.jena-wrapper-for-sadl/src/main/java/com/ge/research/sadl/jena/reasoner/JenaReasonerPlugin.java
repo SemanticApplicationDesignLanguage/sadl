@@ -75,7 +75,6 @@ import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.ModelGetter;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.RDFReaderI;
@@ -125,7 +124,6 @@ import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin;
 import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin.TranslationTarget;
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.ImportMapping;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.FunctionSignature;
@@ -138,6 +136,7 @@ import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
@@ -161,12 +160,13 @@ import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.RuleNotFoundException;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
 import com.ge.research.sadl.sADL.Constant;
 import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquationUtils;
+
+import jakarta.activation.DataSource;
 
 import jakarta.activation.DataSource;
 
@@ -344,7 +344,11 @@ public class JenaReasonerPlugin extends Reasoner{
 		this.ruleList = new ArrayList<Rule>();
 		
 		try {
-			if (tbox != null && !configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
+//<<<<<<< HEAD
+			if (tbox != null && !configurationMgr.getSadlModelGetter(repoType).modelExists(tbox)) {
+//=======
+//			if (tbox != null && !configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
+//>>>>>>> development
 				if (tbox.equals(getModelName())) {
 					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
 				}
@@ -352,8 +356,10 @@ public class JenaReasonerPlugin extends Reasoner{
 					throw new ConfigurationException("The model with actual URL '" + tbox + "' and name '" + getModelName() + "' does not appear to exist.");
 				}
 			}
-		} catch (MalformedURLException e) {
-			throw new ConfigurationException("The actual file URL '" + tbox + "' for model '" + getModelName() + "' is not well-formed.");
+		} catch (ConfigurationException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ConfigurationException(e.getMessage(), e);
 		}
 		if (explanationsEnabled) {
 			derivationLogging = true;
@@ -377,15 +383,15 @@ public class JenaReasonerPlugin extends Reasoner{
 			if (!validateFormat(format)) {
 				throw new ConfigurationException("Format '" + format + "' is not supported by reasoner '" + getConfigurationCategory() + "'.");
 			}
-			if (format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-				schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);	
+			if (format.equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
+				schemaModel = configurationMgr.getSadlModelGetter(format).getOntModel(tbox);	
 				schemaModel.getDocumentManager().setProcessImports(true);
 				schemaModel.loadImports();
 			}
 			else {
 				if (tbox != null && tbox.endsWith(".TDB/")) {
 					// this is a cached inferred TDB model
-					schemaModel = configurationMgr.getModelGetter().getOntModel(getModelName(), tbox, format);
+					schemaModel = configurationMgr.getSadlModelGetter(format).getOntModel(tbox);
 					schemaModelIsCachedInferredModel = true;
 					return null;
 				}
@@ -400,9 +406,15 @@ public class JenaReasonerPlugin extends Reasoner{
 					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
-					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
+//<<<<<<< HEAD
+					schemaModel.getSpecification().setImportModelGetter(configurationMgr.getSadlModelGetterPutter(format));
 					if (tbox != null) {
-						schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
+						schemaModel.read(tbox, SadlPersistenceFormat.getRDFFormat(format).toString());
+//=======
+//					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
+//					if (tbox != null) {
+//						schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
+//>>>>>>> development
 					}
 				}
 			}
@@ -450,7 +462,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				SadlUtils su = new SadlUtils();
 				tboxfile = new File(su.fileUrlToFileName(tbox));
 			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 //			if (tboxfile != null && tboxfile.exists()) {
@@ -460,7 +471,6 @@ public class JenaReasonerPlugin extends Reasoner{
 //					traceAppender.setImmediateFlush(false);
 //					traceAppender.activateOptions();
 //				} catch (IOException e) {
-//					// TODO Auto-generated catch block
 //					e.printStackTrace();
 //					traceAppender = null;
 //				}
@@ -490,7 +500,7 @@ public class JenaReasonerPlugin extends Reasoner{
 
 
 	protected boolean validateFormat(String format) {
-		return SadlSerializationFormat.validateSadlFormat(format);
+		return SadlPersistenceFormat.validateSadlFormat(format);
 	}
 
 	public int initializeReasoner(String folderName, String _modelName, 
@@ -523,32 +533,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (tbox == null) {
 			throw new ConfigurationException("No mapping to an actual URL found for model '" + getModelName() + "'.");
 		}	
-		String format = repoType;
-		try {
-			String tdbFolder = configurationMgr.getTdbFolder();
-			if (configurationMgr.getModelGetter() == null) {
-				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
-			}
-			format = configurationMgr.getModelGetter().getFormat();
-			if (repoType == null) repoType = format;	
-			if (!format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-				String ext = tbox.substring(tbox.lastIndexOf('.'));
-				format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	// this will create a reader that will handle either RDF/XML or RDF/XML-ABBREV 
-				if (ext.equalsIgnoreCase(".n3")) {
-					format = "N3";
-				}
-				else if (ext.equalsIgnoreCase(".ntriple") || ext.equalsIgnoreCase(".nt")) {
-					format = "N-TRIPLE";
-				}
-				else if (ext.equalsIgnoreCase(".jsonld")) {
-					format = "JSON-LD";
-				}
-				configurationMgr.getModelGetter().setFormat(format);
-			}
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
 		initialized = true;
 		
 		return 1;
@@ -576,7 +560,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				logger.debug(aString);
 			}
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		msg = "\n\nImports of model '" + baseUri + "':\n";
@@ -612,7 +595,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				imports = configurationMgr.loadImportedModel(schemaModel.getOntology(modelName), 
 								schemaModel, modelName, null);
 			} catch (Throwable t) {
-				// TODO Auto-generated catch block
 				t.printStackTrace();
 			}
 		}
@@ -645,12 +627,13 @@ public class JenaReasonerPlugin extends Reasoner{
 
 
 	@Override
-	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences)
+	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences, String _repoType)
 			throws ReasonerNotFoundException, ConfigurationException {
 		if (!(kbase instanceof OntModel)) {
 			throw new ConfigurationException("The kbase Object passed into JenaReasonerPlugin must be a Jena OntModel.");
 		}
 		this.preferences = preferences;
+		repoType = _repoType;
 		setModelName(modelName);
 		if (timingInfo == null) {
 			timingInfo = new ArrayList<ReasonerTiming>();
@@ -664,21 +647,40 @@ public class JenaReasonerPlugin extends Reasoner{
 			setPreLoadedRules(loadRulesFromString(rules));
 		}
 
-		String format = repoType;
-		try {
-			String tdbFolder = configurationMgr.getTdbFolder();
-			if (configurationMgr.getModelGetter() == null) {
-				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
-			}
-			format = configurationMgr.getModelGetter().getFormat();
-			if (repoType == null) repoType = format;	
-			if (format != null && !format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-				configurationMgr.getModelGetter().setFormat(format);
-			}
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
+//<<<<<<< HEAD
+		//TODO: AG: this block of code was commented out in GH-794
+//		String format = repoType;
+//		try {
+//			String tdbFolder = configurationMgr.getTdbFolder();
+//			if (configurationMgr.getSadlModelGetter(format) == null) {
+//				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
+//			}
+//			format = configurationMgr.getModelGetter().getFormat();
+//			if (repoType == null) repoType = format;	
+//			if (format != null && !format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+//				configurationMgr.getModelGetter().setFormat(format);
+//			}
+//		}
+//		catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//=======
+//		String format = repoType;
+//		try {
+//			String tdbFolder = configurationMgr.getTdbFolder();
+//			if (configurationMgr.getModelGetter() == null) {
+//				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
+//			}
+//			format = configurationMgr.getModelGetter().getFormat();
+//			if (repoType == null) repoType = format;	
+//			if (format != null && !format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
+//				configurationMgr.getModelGetter().setFormat(format);
+//			}
+//		}
+//		catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//>>>>>>> development
 		initialized = true;
 		
 		return 1;
@@ -761,7 +763,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				getReasonerOnlyWhenNeeded().setRules(ruleList);
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		newInputFlag = true;
@@ -775,7 +776,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			deleteRule(newRule.getName());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		ruleList.add(newRule);
@@ -788,7 +788,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				getReasonerOnlyWhenNeeded().setRules(ruleList);
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		newInputFlag = true;
@@ -801,7 +800,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			getReasonerOnlyWhenNeeded();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		for (int i=0; i<ruleList.size();i++){			
@@ -818,7 +816,6 @@ public class JenaReasonerPlugin extends Reasoner{
 						getReasonerOnlyWhenNeeded().setRules(ruleList);
 					}
 				} catch (ConfigurationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				newInputFlag = true;
@@ -1039,7 +1036,6 @@ public class JenaReasonerPlugin extends Reasoner{
 						try {
 							prepareInfModel();
 						} catch (ConfigurationException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						if (infModel != null) {
@@ -1092,7 +1088,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				results.add(new ModelError("Failed to obtain an inferred model on which to do a validity check.", ErrorType.ERROR));
 			}
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		return results;
@@ -1106,7 +1101,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		Model results = null;
@@ -1227,7 +1221,6 @@ public class JenaReasonerPlugin extends Reasoner{
 			finally { if (!cancelled && qexec != null) qexec.close();	}
 			endTrace();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		finally {
@@ -1344,7 +1337,6 @@ public class JenaReasonerPlugin extends Reasoner{
 			finally { if (!cancelled && qexec != null) qexec.close();	}
 			endTrace();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		finally {
@@ -1491,7 +1483,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		long t1 = 0L;
@@ -1622,7 +1613,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				return explanations;
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -1728,19 +1718,14 @@ public class JenaReasonerPlugin extends Reasoner{
 						explains.get(startingIndex + testingThruPremise).setExplanations(explanations);
 					}
 				} catch (QueryCancelledException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (QueryParseException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (InvalidNameException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (ConfigurationException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (AmbiguousNameException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -1988,7 +1973,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				return explanations;
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -2036,7 +2020,6 @@ public class JenaReasonerPlugin extends Reasoner{
 					try {
 						obj = SadlUtils.getLiteralMatchingDataPropertyRange(schemaModel, prop.as(OntProperty.class), ((com.ge.research.sadl.model.gp.Literal)on).getValue());
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -2168,7 +2151,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				return ((matchingRules != null && matchingRules.size() > 0) ? matchingRules : null);
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -2373,10 +2355,8 @@ public class JenaReasonerPlugin extends Reasoner{
 				dumpModelToLogger(model, fos);
 				fos.close();
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -2452,7 +2432,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				}
 			}
 		} catch (Throwable e) {
-			// TODO Auto-generated catch block
 //			e.printStackTrace();
 			addError(new ModelError(e.getMessage(), ErrorType.ERROR));
 		}
@@ -2478,31 +2457,24 @@ public class JenaReasonerPlugin extends Reasoner{
 				}
 			}
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
 		}
@@ -2858,7 +2830,6 @@ public class JenaReasonerPlugin extends Reasoner{
 					getReasonerOnlyWhenNeeded().setDerivationLogging(bVal);
 				}
 			} catch (ConfigurationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -2875,7 +2846,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		try {
 			prepareInfModel();
 		} catch (ConfigurationException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		if (infModel != null) {
@@ -2886,14 +2856,13 @@ public class JenaReasonerPlugin extends Reasoner{
 			else {
 				m = ModelFactory.createOntologyModel(configurationMgr.getOntModelSpec(null), infModel);
 			}
-			String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;	
+			String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;	
 		    FileOutputStream fps = new FileOutputStream(filename);
 	        RDFWriterI rdfw = m.getWriter(format);
 	        rdfw.write(m, fps, modelname);
 	        try {
 				fps.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	        return true;
@@ -2974,7 +2943,6 @@ public class JenaReasonerPlugin extends Reasoner{
 					try {
 						val = SadlUtils.getLiteralMatchingDataPropertyRange(schemaModel, pred, objValue);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -3160,7 +3128,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				return binfo;
 			}
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}				
 		return null;
@@ -3188,25 +3155,18 @@ public class JenaReasonerPlugin extends Reasoner{
 					implbltins.add(bi);
 				}
 			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -3290,7 +3250,6 @@ public class JenaReasonerPlugin extends Reasoner{
 				return ds;
 			}
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 		return null;
@@ -3532,8 +3491,8 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	public void setOutputFormat(String outputFmt) {
 		if (outputFmt != null && 
-				(outputFmt.equals(SadlSerializationFormat.JENA_TDB_FORMAT) ||
-				SadlSerializationFormat.validateSadlFormat(outputFmt))) {
+				(outputFmt.equals(SadlPersistenceFormat.JENA_TDB_FORMAT) ||
+				SadlPersistenceFormat.validateSadlFormat(outputFmt))) {
 			this.outputFormat = outputFmt;
 		}
 	}
@@ -3616,7 +3575,6 @@ public class JenaReasonerPlugin extends Reasoner{
 //				}
 //				return infMinus;
 //			} catch (FileNotFoundException e) {
-//				// TODO Auto-generated catch block
 //				e.printStackTrace();
 //				throw new ConfigurationException("filed to reduce infModel", e);
 //			}
@@ -3631,7 +3589,6 @@ public class JenaReasonerPlugin extends Reasoner{
         try {
 			fps.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

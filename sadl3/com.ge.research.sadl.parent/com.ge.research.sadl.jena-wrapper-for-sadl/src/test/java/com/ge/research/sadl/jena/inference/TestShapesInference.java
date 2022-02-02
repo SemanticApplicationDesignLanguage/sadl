@@ -8,7 +8,7 @@ import java.net.URL;
 import org.apache.jena.rdf.model.Model;
 import org.junit.Test;
 
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
@@ -31,7 +31,7 @@ public class TestShapesInference {
 		IReasoner reasoner = configmgr.getReasoner();
 		if (!reasoner.isInitialized()) {
 			reasoner.setConfigurationManager(configmgr);
-			reasoner.initializeReasoner(kbid, modelName, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+			reasoner.initializeReasoner(kbid, modelName, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 		}
 		String query = reasoner.prepareQuery("select ?s ?p ?v where {?s <rdf:type> <Shape> . ?s ?p ?v}");
 		ResultSet rs = reasoner.ask(query);

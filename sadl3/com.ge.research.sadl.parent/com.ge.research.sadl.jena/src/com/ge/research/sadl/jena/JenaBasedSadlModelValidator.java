@@ -6223,8 +6223,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 								return true;
 							}
 						} catch (CircularDependencyException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+//							e.printStackTrace();
+							throw(e);
 						}
 					}
 				}
@@ -6282,7 +6282,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 //							return true;
 //						}
 					} catch (CircularDependencyException e) {
-						// TODO Auto-generated catch block
 //						e.printStackTrace();
 						throw e;
 					}
@@ -6300,8 +6299,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									return true;
 								}
 							} catch (CircularDependencyException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+//								e.printStackTrace();
+								throw(e);
 							}
 						}
 					}
