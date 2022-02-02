@@ -53,6 +53,7 @@ import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.TranslationException;
 
 /**
  * @author Tyler Dicks
@@ -69,8 +70,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * @param publicUri
 	 * @throws ConfigurationException
 	 * @throws IOException
+	 * @throws TranslationException 
 	 */
-	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project) throws ConfigurationException, IOException {
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project) throws ConfigurationException, IOException, TranslationException {
 		super(configMgr, visualizer, project, null, null);
 	}
 	
@@ -82,8 +84,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * @param monitor
 	 * @throws ConfigurationException
 	 * @throws IOException
+	 * @throws TranslationException 
 	 */
-	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, IProgressMonitor monitor) throws ConfigurationException, IOException {
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, IProgressMonitor monitor) throws ConfigurationException, IOException, TranslationException {
 		super(configMgr, visualizer, project, null, null, monitor);
 	}
 	
@@ -95,8 +98,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * @param project
 	 * @throws ConfigurationException
 	 * @throws IOException
+	 * @throws TranslationException 
 	 */
-	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri) throws ConfigurationException, IOException {
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri) throws ConfigurationException, IOException, TranslationException {
 		super(configMgr, visualizer, project, publicUri, null);
 		this.setConfigMgr(configMgr);
 	}
@@ -109,8 +113,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * @param monitor
 	 * @throws ConfigurationException
 	 * @throws IOException
+	 * @throws TranslationException 
 	 */
-	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, IProgressMonitor monitor) throws ConfigurationException, IOException {
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, IProgressMonitor monitor) throws ConfigurationException, IOException, TranslationException {
 		super(configMgr, visualizer, project, publicUri, null, monitor);
 		this.setConfigMgr(configMgr);
 	}
@@ -124,8 +129,9 @@ public class OntologyGraphGenerator extends GraphGenerator {
 	 * @param monitor
 	 * @throws ConfigurationException
 	 * @throws IOException
+	 * @throws TranslationException 
 	 */
-	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, IProgressMonitor monitor, Map<String,Boolean> prefValues) throws ConfigurationException, IOException {
+	public OntologyGraphGenerator(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, IProject project, String publicUri, IProgressMonitor monitor, Map<String,Boolean> prefValues) throws ConfigurationException, IOException, TranslationException {
 		super(configMgr, visualizer, project, publicUri, null, monitor);
 		this.setConfigMgr(configMgr);
 		setPreferenceValues(prefValues);

@@ -142,6 +142,11 @@
       </dependency>
       <dependency>
         <groupId>org.apache.jena</groupId>
+        <artifactId>jena-larq</artifactId>
+        <version>1.0.0-incubating</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.jena</groupId>
         <artifactId>jena-rdfconnection</artifactId>
         <version>${version.jena}</version>
       </dependency>
@@ -327,6 +332,9 @@
                 <version>[3.6.3,)</version>
               </requireMavenVersion>
             </rules>
+            <!-- rules>
+              <dependencyConvergence></dependencyConvergence>
+            </rules-->
           </configuration>
           <executions>
             <execution>

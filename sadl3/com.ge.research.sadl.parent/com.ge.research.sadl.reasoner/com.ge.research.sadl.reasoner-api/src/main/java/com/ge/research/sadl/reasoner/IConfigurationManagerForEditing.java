@@ -106,8 +106,17 @@ public interface IConfigurationManagerForEditing extends IConfigurationManager {
 	public abstract boolean addJenaMapping(String publicUri, String altUrl)
 			throws IOException, URISyntaxException, ConfigurationException;
 
+	/**
+	 * Method to remove a model from the persistence repository
+	 * @param publicUri
+	 * @return
+	 * @throws ConfigurationException
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws TranslationException
+	 */
 	public abstract boolean deleteModel(String publicUri)
-			throws ConfigurationException, IOException, URISyntaxException;
+			throws ConfigurationException, IOException, URISyntaxException, TranslationException;
 
 	/**
 	 * Method to get a list of all the available translator plugins for the current reasoner using a {@link ServiceLoader}

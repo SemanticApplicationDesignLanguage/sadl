@@ -9,22 +9,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntProperty;
+import org.apache.jena.ontology.OntResource;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.ModelError;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
-import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
 import com.ge.research.sadl.model.gp.JunctionList;
-import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.Literal;
+import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.NegatedExistentialQuantifier;
@@ -36,7 +40,7 @@ import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.VariableNode;
-import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -53,12 +57,6 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.swi_prolog.fileinterface.FileInterface;
 //import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologInterface;
 import com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntProperty;
-import org.apache.jena.ontology.OntResource;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.RDFS;
-import org.apache.jena.vocabulary.XSD;
 
 public class SWIPrologTranslatorPlugin implements ITranslator {
     public static final String SWI_RUN_PROLOG_SERVICE_PL = "swi-run-prolog-service.pl";
@@ -1809,7 +1807,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		if (!reasoner.isInitialized()) {
 			reasoner.setConfigurationManager(configurationMgr);
 			int iStatus = reasoner.initializeReasoner(
-					getTranslationFolder(), modelName, SadlSerializationFormat.RDF_XML_ABBREV_FORMAT);
+					getTranslationFolder(), modelName, SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT);
 		}
 		return reasoner;
 	}

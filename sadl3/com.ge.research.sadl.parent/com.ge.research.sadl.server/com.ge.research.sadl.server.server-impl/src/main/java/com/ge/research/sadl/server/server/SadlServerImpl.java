@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 import com.ge.research.sadl.importer.ITabularDataImporter;
 import com.ge.research.sadl.importer.TemplateException;
 import com.ge.research.sadl.jena.importer.CsvImporter;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -75,7 +75,7 @@ import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ReasonerTiming;
 import com.ge.research.sadl.reasoner.ResultSet;
-import com.ge.research.sadl.reasoner.SadlJenaModelGetter;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
@@ -341,14 +341,17 @@ public class SadlServerImpl implements ISadlServer {
 
 	protected void setConfigurationManagerModelGetter()
 			throws ConfigurationException, MalformedURLException {
-		if (getConfigurationMgr().getModelGetter() == null) {
-        	try {
-				getConfigurationMgr().setModelGetter(new SadlJenaModelGetter(getConfigurationMgr(), getConfigurationMgr().getModelFolder() + "/TDB"));
-			} catch (IOException e) {
-				logger.error("Exception setting ModelGetter: " + e.getMessage());
-				e.printStackTrace();
-			}
-        }
+    	try {
+    		if (getConfigurationMgr().getSadlModelGetter(null) == null) {
+        		getConfigurationMgr().getSadlModelGetter(null);
+            }
+		} catch (IOException e) {
+			logger.error("Exception setting ModelGetter: " + e.getMessage());
+			e.printStackTrace();
+		} catch (TranslationException e) {
+			logger.error("Exception setting ModelGetter: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 	
 	protected String getRepoType(String tdbFolder) throws MalformedURLException {
@@ -357,11 +360,11 @@ public class SadlServerImpl implements ISadlServer {
     	File tdbFile = new File(fname);
     	if (tdbFile.exists()) {
     		logger.debug("Repo type set to TDB as the folder '" + fname + "' exists.");
-    		return SadlSerializationFormat.JENA_TDB_FORMAT;	
+    		return SadlPersistenceFormat.JENA_TDB_FORMAT;	
     	}
     	else {
     		logger.debug("Repo type set to RDF/XML ABBREV as folder '" + tdbFolder + "' does not exist.");
-    		return SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+    		return SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
     	}
 	}
 	

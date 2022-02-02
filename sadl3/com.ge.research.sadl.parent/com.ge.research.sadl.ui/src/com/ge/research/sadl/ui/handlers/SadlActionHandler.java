@@ -62,7 +62,7 @@ import com.ge.research.sadl.builder.MessageManager.MessageType;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.ide.handlers.SadlGraphVisualizerHandler;
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer.Orientation;
 import com.ge.research.sadl.preferences.SadlPreferences;
@@ -539,7 +539,7 @@ public abstract class SadlActionHandler extends AbstractHandler {
 			throws ConfigurationException, IOException {
 		if (rs.getColumnCount() >= 3) {
 			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-			final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+			final String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
 	
 			IGraphVisualizer visualizer = getVisualizer(configMgr, prefMap);

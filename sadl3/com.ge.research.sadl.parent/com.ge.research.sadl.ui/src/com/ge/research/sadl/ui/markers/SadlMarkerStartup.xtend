@@ -24,7 +24,7 @@ import com.ge.research.sadl.markers.SadlMarkerLocationProvider
 import com.ge.research.sadl.markers.SadlMarkerLocationProvider.Location
 import com.ge.research.sadl.markers.SadlMarkerRefType
 import com.ge.research.sadl.markers.SadlMarkerSeverityMapper
-import com.ge.research.sadl.model.SadlSerializationFormat
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat
 import com.ge.research.sadl.reasoner.utils.SadlUtils
 import com.ge.research.sadl.sADL.SadlModel
 import com.google.common.collect.Iterables
@@ -197,7 +197,7 @@ class SadlMarkerStartup implements IStartup {
 
 	private def getConfigurationManager(IProject it) {
 		val modelFolder = '''«Paths.get(locationURI).resolve(OWL_MODELS_FOLDER_NAME)»''';
-		return ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, SadlSerializationFormat.RDF_XML_FORMAT);
+		return ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolder, SadlPersistenceFormat.RDF_XML_FORMAT);
 	}
 
 	private def getResourceUri(String modelUri, IProject project) {

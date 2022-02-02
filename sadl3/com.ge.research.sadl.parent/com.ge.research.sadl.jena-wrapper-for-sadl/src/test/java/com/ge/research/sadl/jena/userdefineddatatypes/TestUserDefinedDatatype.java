@@ -18,7 +18,6 @@
 package com.ge.research.sadl.jena.userdefineddatatypes;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
@@ -31,13 +30,9 @@ import org.apache.jena.datatypes.TypeMapper;
 //import org.apache.jena.datatypes.xsd.XSDDatatype.XSDGenericType;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.ontology.DatatypeProperty;
-import org.apache.jena.ontology.Individual;
-import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.ValidityReport;
@@ -45,17 +40,12 @@ import org.apache.jena.reasoner.ValidityReport.Report;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.reasoner.AmbiguousNameException;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.ConfigurationManagerFactory;
-import com.ge.research.sadl.reasoner.IConfigurationManager;
-import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.QueryCancelledException;
 import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
-import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 public class TestUserDefinedDatatype {

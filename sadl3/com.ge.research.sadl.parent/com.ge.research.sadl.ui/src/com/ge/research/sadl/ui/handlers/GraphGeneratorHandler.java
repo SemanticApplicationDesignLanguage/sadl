@@ -52,8 +52,8 @@ import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.DeclarationExtensions;
 import com.ge.research.sadl.model.OntConceptType;
-import com.ge.research.sadl.model.SadlSerializationFormat;
 import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.model.visualizer.IGraphVisualizer;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -62,6 +62,7 @@ import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ResultSet;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.SADLPackage;
@@ -107,7 +108,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			Map<String,String> prefMap = getPreferences(trgtFile);
 			boolean derivedFN = false;
 			String fmt = prefMap.get(SadlPreferences.OWL_MODEL_FORMAT.getId());
-			String fileExt = SadlSerializationFormat.getFileExtension(SadlSerializationFormat.getRDFFormat(fmt));
+			String fileExt = SadlPersistenceFormat.getFileExtension(SadlPersistenceFormat.getRDFFormat(fmt));
 			if (trgtFile.getName().endsWith(fileExt)) {
 				owlFileName = trgtFile.getFullPath().lastSegment();
 			}
@@ -131,7 +132,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 			}	
 			
 			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-			final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+			final String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 			IConfigurationManagerForIDE configMgr = ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format);
 
 			IGraphVisualizer visualizer = getVisualizer(configMgr, prefMap);
@@ -296,7 +297,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 
 	public void graphSadlResource(IConfigurationManagerForIDE configMgr, IGraphVisualizer visualizer, SadlResource sr,
 			IProject project, IFile trgtFile, String owlFileName, String publicUri, int graphRadius, IProgressMonitor monitor)
-			throws CircularDefinitionException, ConfigurationException, IOException, InvalidNameException, URISyntaxException {
+			throws CircularDefinitionException, ConfigurationException, IOException, InvalidNameException, URISyntaxException, TranslationException {
 		String srnm = getSadlResourceConcreteName(sr);
 		OntConceptType srType = getSadlResourceOntConceptType(sr);
 		if (srType.equals(OntConceptType.CLASS)) {
@@ -472,7 +473,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 //		return hier;
 //	}
 
-	protected List<GraphSegment> getAnchoredImports(IConfigurationManagerForIDE configMgr, String publicUri, String prefix, IFile trgtFile, boolean derivedFN, int graphRadius) throws ConfigurationException, IOException {
+	protected List<GraphSegment> getAnchoredImports(IConfigurationManagerForIDE configMgr, String publicUri, String prefix, IFile trgtFile, boolean derivedFN, int graphRadius) throws ConfigurationException, IOException, TranslationException {
 		List<GraphSegment> importList = new ArrayList<GraphSegment>();
 		importList = findImports(importList, configMgr, publicUri, prefix, graphRadius);
 		findIncomingImports(trgtFile, importList, graphRadius);
@@ -590,7 +591,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 //	}
 
 	protected List<GraphSegment> findImports(List<GraphSegment> importList,
-			IConfigurationManagerForIDE configMgr, String parentPublicUri, String parentPrefix, int graphRadius) throws ConfigurationException, IOException {
+			IConfigurationManagerForIDE configMgr, String parentPublicUri, String parentPrefix, int graphRadius) throws ConfigurationException, IOException, TranslationException {
 		Map<String,String> map = configMgr.getImports(parentPublicUri, Scope.LOCALONLY);
 		if (map != null) {
 			Iterator<String> itr = map.keySet().iterator();
@@ -660,7 +661,7 @@ public class GraphGeneratorHandler extends SadlActionHandler {
 		if (configMgr == null || !sameProject()) {
 			//create the configuration manager
 			String modelFolderUri = convertProjectRelativePathToAbsolutePath(project.getFullPath().append(ResourceManager.OWLDIR).toPortableString()); 
-			final String format = SadlSerializationFormat.RDF_XML_ABBREV_FORMAT;
+			final String format = SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT;
 			setConfigMgr(ConfigurationManagerForIdeFactory.getConfigurationManagerForIDE(modelFolderUri, format));
 		}
 		return configMgr;

@@ -14,6 +14,8 @@ import org.apache.jena.ontology.Ontology;
 import org.apache.jena.rdf.model.Model;
 
 import com.ge.research.sadl.model.ImportMapping;
+import com.ge.research.sadl.model.persistence.ISadlModelGetter;
+import com.ge.research.sadl.model.persistence.ISadlModelGetterPutter;
 
 public interface IConfigurationManager {
     public static final String SADL = "SADL";
@@ -250,18 +252,6 @@ public interface IConfigurationManager {
 	public abstract String getTdbFolder() throws IOException;
 	
 	/**
-	 * Call this method to get the model getter to be used to load models from the repository
-	 * @return
-	 */
-	public abstract ISadlJenaModelGetter getModelGetter();
-	
-	/**
-	 * Call this method to set the model getter to be used to load models from the repository
-	 * @param modelGetter
-	 */
-	public abstract void setModelGetter(ISadlJenaModelGetter modelGetter);
-
-	/**
 	 * Call this method to get the translator associated with a particular reasoner class
 	 * @param reasonerClassName
 	 * @return
@@ -333,4 +323,35 @@ public interface IConfigurationManager {
 	 * @return
 	 */
 	boolean isNamespaceImplicit(String uri);
+	
+	/**
+	 * Method to get the ISadlModelGetter for the given persistence format.
+	 * @param format--the OWL model peristence format
+	 * @return
+	 * @throws TranslationException 
+	 * @throws IOException 
+	 */
+	ISadlModelGetter getSadlModelGetter(String format) throws TranslationException, IOException;
+	
+	/**
+	 * Method to get the ISadlModelGetterPutter for the given peristence format.
+	 * @param format--the OWL model peristence format
+	 * @return
+	 * @throws TranslationException 
+	 * @throws IOException 
+	 */
+	ISadlModelGetterPutter getSadlModelGetterPutter(String format) throws TranslationException, IOException;
+
+	/**
+	 * Method to get the repository type, see SadlPersistenceFormat class.
+	 * @return
+	 */
+	String getRepoType();
+
+	/**
+	 * Method to set the repository type, see SadlPersistenceFormat class.
+	 * @param repoType
+	 */
+	void setRepoType(String repoType);
+
 }

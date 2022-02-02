@@ -22,6 +22,7 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.InvalidNameException;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 public interface IConfigurationManagerForIDE extends IConfigurationManagerForEditing {
@@ -127,9 +128,6 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @throws ConfigurationException 
 	 */
 	public abstract boolean addProjectDependencies(List<java.net.URI> dependencies) throws ConfigurationException;
-
-	public abstract boolean deleteModel(String publicUri)
-			throws ConfigurationException, IOException, URISyntaxException;
 
 	/**
 	 * Method to get a list of all the available translator plugins for the current reasoner using a {@link ServiceLoader}
@@ -251,8 +249,9 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @return
 	 * @throws ConfigurationException 
 	 * @throws IOException 
+	 * @throws TranslationException 
 	 */
-	public abstract Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException;
+	public abstract Map<String, String> getImports(String publicUri, Scope scope) throws ConfigurationException, IOException, TranslationException;
 
 	/**
 	 * Get the concept names of everything in the named model matching type and scope
@@ -263,9 +262,10 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @return
 	 * @throws InvalidNameException
 	 * @throws ConfigurationException 
+	 * @throws TranslationException 
 	 */
 	public abstract List<ConceptName> getNamedConceptsInModel(String publicUri, 
-			ConceptType cType, Scope scope) throws InvalidNameException, ConfigurationException, IOException;
+			ConceptType cType, Scope scope) throws InvalidNameException, ConfigurationException, IOException, TranslationException;
 	
 	/**
 	 * Gets the URI of a SADL resource for a public URI.
@@ -288,8 +288,11 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @param altUrl
 	 * @return
 	 * @throws MalformedURLException 
+	 * @throws IOException 
+	 * @throws TranslationException 
+	 * @throws ConfigurationException 
 	 */
-	public abstract boolean validateImport(String publicUri, String altUrl) throws MalformedURLException;
+	public abstract boolean validateImport(String publicUri, String altUrl) throws MalformedURLException, ConfigurationException, TranslationException, IOException;
 
 	/**
 	 * Call this method to get a list of the actual URLs (as class URI) of all RDF and OWL
@@ -320,19 +323,19 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	 * @return
 	 * @throws ConfigurationException
 	 * @throws IOException
+	 * @throws TranslationException 
 	 */
-	public abstract OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException;
+	public abstract OntModel getOntModel(String publicUri, Scope scope) throws ConfigurationException, IOException, TranslationException;
 
 	/**
-	 * Method to get an OntModel from a serialization of the model as a String
+	 * Method to get an OntModel for a publicURI from a model serialized as a string
 	 * @param publicUri
 	 * @param serializedGraph
-	 * @param scope
 	 * @param format
 	 * @return
 	 */
-	public abstract OntModel getOntModel(String publicUri, String serializedGraph, Scope scope, String format);
-
+	public abstract OntModel getOntModel(String publicUri, String serializedGraph, String format);
+	
 	/**
 	 * Call this method to find a file treating it first as an absolute path and that failing as a project-relative path
 	 * @param fn
@@ -402,7 +405,7 @@ public interface IConfigurationManagerForIDE extends IConfigurationManagerForEdi
 	public abstract Object getPrivateKeyMapValueByResource(String key, URI rsrcUri);
 	
 	/**
-	 * Method to clean up the TDB folder if the SadlSerializationFormat isn't TDB
+	 * Method to clean up the TDB folder if the SadlPersistenceFormat isn't TDB
 	 * 
 	 * @return
 	 */

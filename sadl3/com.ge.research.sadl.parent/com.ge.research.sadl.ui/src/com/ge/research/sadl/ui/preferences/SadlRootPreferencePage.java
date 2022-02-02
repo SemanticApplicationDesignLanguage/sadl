@@ -22,10 +22,8 @@ import static com.ge.research.sadl.preferences.SadlPreferences.CHECK_FOR_CARDINA
 import static com.ge.research.sadl.preferences.SadlPreferences.CONTENT_ASSIST__FILTER_IMPLICIT_MODEL;
 import static com.ge.research.sadl.preferences.SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES;
 import static com.ge.research.sadl.preferences.SadlPreferences.DEEP_VALIDATION_OFF;
-import static com.ge.research.sadl.preferences.SadlPreferences.DMY_ORDER_DMY;
-import static com.ge.research.sadl.preferences.SadlPreferences.DMY_ORDER_MDY;
-import static com.ge.research.sadl.preferences.SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS;
 import static com.ge.research.sadl.preferences.SadlPreferences.ENABLE_METRICS_COLLECTION;
+import static com.ge.research.sadl.preferences.SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS;
 import static com.ge.research.sadl.preferences.SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD;
 import static com.ge.research.sadl.preferences.SadlPreferences.GRAPH_IMPLICIT_ELEMENTS;
 import static com.ge.research.sadl.preferences.SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES;
@@ -34,27 +32,29 @@ import static com.ge.research.sadl.preferences.SadlPreferences.IGNORE_UNITTEDQUA
 import static com.ge.research.sadl.preferences.SadlPreferences.JENA_TDB;
 import static com.ge.research.sadl.preferences.SadlPreferences.JSON_LD;
 import static com.ge.research.sadl.preferences.SadlPreferences.METRICS_QUERY_FILENAME;
-import static com.ge.research.sadl.preferences.SadlPreferences.MODEL_NAMESPACES;
 import static com.ge.research.sadl.preferences.SadlPreferences.NAMESPACE_IN_QUERY_RESULTS;
 import static com.ge.research.sadl.preferences.SadlPreferences.N_QUAD;
 import static com.ge.research.sadl.preferences.SadlPreferences.N_TRIPLE_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.OWL_MODEL_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.PREFIXES_ONLY_AS_NEEDED;
 import static com.ge.research.sadl.preferences.SadlPreferences.P_USE_ARTICLES_IN_VALIDATION;
+import static com.ge.research.sadl.preferences.SadlPreferences.RDF_BINARY;
 import static com.ge.research.sadl.preferences.SadlPreferences.RDF_JSON;
 import static com.ge.research.sadl.preferences.SadlPreferences.RDF_XML_ABBREV_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.RDF_XML_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.SADL_BASE_URI;
-import static com.ge.research.sadl.preferences.SadlPreferences.SADL_FILE_NAMES;
 import static com.ge.research.sadl.preferences.SadlPreferences.SHOW_TIMING_INFORMATION;
 import static com.ge.research.sadl.preferences.SadlPreferences.TABULAR_DATA_IMPORTER_CLASS;
 import static com.ge.research.sadl.preferences.SadlPreferences.TRIG;
 import static com.ge.research.sadl.preferences.SadlPreferences.TRIX;
-import static com.ge.research.sadl.preferences.SadlPreferences.RDF_BINARY;
 import static com.ge.research.sadl.preferences.SadlPreferences.TURTLE_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED;
 import static com.ge.research.sadl.preferences.SadlPreferences.TYPE_CHECKING_WARNING_ONLY;
 import static com.ge.research.sadl.preferences.SadlPreferences.VALIDATE_BEFORE_TEST;
+import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK;
+import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK_ENDPOINT;
+import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK_STORE_TYPE;
+
 
 import java.util.List;
 import java.util.Map;
@@ -73,7 +73,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 
-import com.ge.research.sadl.model.SadlSerializationFormat;
+import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
@@ -174,8 +174,13 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 					{ TRIX.getId(), TRIX.getId() },
 					{ RDF_BINARY.getId(), RDF_BINARY.getId() },		// AWC 7/22/2020: This isn't working. Posted question on Jena users mailing list
 					{ JENA_TDB.getId(), JENA_TDB.getId() },
+					{ SEMTK.getId(), SEMTK.getId() },
 				}, generalSettings));
 
+		addField(new StringFieldEditorExt(SEMTK_STORE_TYPE.getId(), "SemTK triplestore type:", generalSettings));
+		addField(new StringFieldEditorExt(SEMTK_ENDPOINT.getId(), "SemTK endpoint:", generalSettings));
+
+		
 // This is not enabled in V3. Only URIs work.
 //	AWC 1/22/2021		
 //		addField(new RadioGroupFieldEditorExt("importBy", "Show import model list as:", 2,
@@ -274,7 +279,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		if (retVal && isPropertyPage()) {
 			// the changes apply only to the current project
 			IPreferencesService service = Platform.getPreferencesService();
-			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, null);
+			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT, null);
 //			if (visitor.getCurrentResource() != null) {
 //				try {
 //					String curResource = ResourceManager.getOwlModelsFolder(visitor.getCurrentResource().getURI());
@@ -316,7 +321,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		else {
 			// the changes apply to all projects
 			IPreferencesService service = Platform.getPreferencesService();
-			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlSerializationFormat.RDF_XML_ABBREV_FORMAT, null);
+			String format = service.getString("com.ge.research.sadl.Sadl", "OWL_Format", SadlPersistenceFormat.RDF_XML_ABBREV_FORMAT, null);
 			String dmyOrder = service.getString("com.ge.research.sadl.Sadl", "dmyOrder", "mdy", null);
 			String[] itemContent = new String[1];
 			itemContent[0] = IConfigurationManager.DateFormat;

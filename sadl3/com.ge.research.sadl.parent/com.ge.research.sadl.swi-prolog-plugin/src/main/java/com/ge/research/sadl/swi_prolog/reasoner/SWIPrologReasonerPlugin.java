@@ -96,7 +96,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	}
 
 	@Override
-	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences)
+	public int initializeReasoner(Object kbase, String modelName, String rules, List<ConfigurationItem> preferences, String _repoType)
 			throws ReasonerNotFoundException, ConfigurationException {
 		throw new ConfigurationException("This method of initializing the reasoner is not supported by " + this.getClass().getCanonicalName() + ".");
 	}
