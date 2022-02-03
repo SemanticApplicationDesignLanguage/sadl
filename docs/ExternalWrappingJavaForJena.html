@@ -7,13 +7,13 @@
   <body>
     <h1>Wrapping Java Class Methods as Jena Built-ins for the Jena Reasoner</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/25/2022<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->2/2/2022<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <p>When a Jena-based reasoner is selected, methods of any class on the Java
       classpath can be wrapped in a SADL External equation and thereby be made
-      available for use in rules. The arguments of the method and its return
-      type must be XML datatypes that are compatible with Java data types. The
-      XSD datatypes and their Java types currently supported are</p>
+      available for use as built-ins in Jena rules. The arguments of the method
+      and its return type must be XML datatypes that are compatible with Java
+      data types. The XSD datatypes and their Java types currently supported are</p>
     <ol>
       <li>int</li>
       <li>long</li>
@@ -22,14 +22,17 @@
       <li>boolean</li>
       <li>string (char in Java, but compatible with String class)</li>
     </ol>
-    <p>The SADL <em>External</em> class property <em>externalUri</em>
-      identifies the Java package, class, and method being wrapped. The SADL
-      argument types and the return type are used to check for compatibility
-      with the Java method at evaluation time. The actual Jena Literals passed
-      in to the method on evaluation are translated to the appropriate Java
-      instances for a Java reflection invocation of the method. The Java package
-      referenced must be on the Java classpath in order to be found by the
-      reflection invocation.</p>
+    <p>The SADL implicit model (<a href="SadlImplicitModel.html">SadlImplicitModel.sadl</a>)
+      contains the definition of the <em>External</em> class, which is in the
+      domain of the property <em>externalUri</em>. This property identifies the
+      Java package, class, and method being wrapped. The SADL argument types and
+      the return type are used to check for compatibility with the Java method
+      at evaluation time. The actual Jena Literals passed in to the method on
+      evaluation are translated to the appropriate Java instances for a Java
+      reflection invocation of the method. The Java package referenced must be
+      on the Java classpath in order to be found by the reflection invocation.
+      Java classes not on the SADL IDE classpath can be wrapped in an Eclipse
+      plug-in and made available, as described below. </p>
     <h2>Examples</h2>
     <p>Here are a number of examples of <em>External</em> declarations that use
       common Java classes and methods.</p>
@@ -459,12 +462,218 @@ to:
                 </u></font></font></font></p>
       </li>
     </ol>
+    <h2>Wrapping Java Classes in an Eclipse Plug-in</h2>
     <p>All of the examples above use Java classes that are normally on the Java
-      classpath. To build custom built-in functions for a Jena-based reasoner,
-      one can create classes that extend the Jena BaseBuiltin class (see <a href="developer/CustomJenaBuiltins.html">Creating
-        and Deploying Custom Jena Built-ins</a>), or one can code a pure Java
-      custom class and method, put them into a jar on the Eclipse classpath, and
-      wrap them in an External equation.<br>
+      classpath. To wrap Java classes not already on the build path it is
+      necessary to make them available to the Eclipse class loader. This is
+      accomplished by placing them in a separate Eclipse plug-in. Existing jar
+      files can be wrapped in an Eclipse plug-in and custom Java classes can be
+      developed in an Eclipse plug-in project. In either case, once property
+      placed in an Eclipse plug-in, the plug-in can be added to the Eclipse SADL
+      environment and the classes and methods can be referenced in SADL <em>External</em>
+      equations. Note that this is an alternative to developing custom Jena
+      built-ins that extend the Jena <em>BaseBuiltin</em> class, see <a href="developer/CustomJenaBuiltins.html">Creating
+        and Deploying Custom Jena Built-ins</a>. </p>
+    <p>As an example of how to create an Eclipse plugin providing the code for a
+      SADL <em>External</em> equation, we will walk through developing and
+      deploying a class and method to increment any integer by 2. The SADL <em>External</em>
+      equation definition, the test <em>Expr</em>[ession], and a rule using the
+      equation are as follows.</p>
+    <div style="margin-left: 40px;"><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">External</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#801480"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>increment</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">int</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>i</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">)
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">returns</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">int</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+            : </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><span style="background: #e6f0ff">"com.naturalsemantics.sadl.builtin.increment.Increment.increment"</span></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></div>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u>Expr:</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>
+            </u></font></font></font><font color="#801480"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>increment</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><span
+                style="background: #e6f0ff">3</span></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>)</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">Rule</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>R1</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">:
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">if</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>x</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>^Rule</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">then</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#801480"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>print</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">(</font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><i><u>x</u></i></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">,
+          </font></font></font><font color="#801480"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>increment</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u><span
+                style="background: #e6f0ff">3</span></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>)</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">).</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">Ask</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">: </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">select</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>r</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">where</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><b>r</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2">is</font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"> </font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">a</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>^Rule</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">.
+          </font></font></font><font color="#808080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><i>// this is just to allow testing
+              of the model</i></font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p></p>
+    <p>To illustrate, we start by creating a plug-in project. The Java class and
+      method are shown below.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#4c4c4c"> </font><font color="#0000ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u>package</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>
+            </u></font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>com.naturalsemantics.sadl.builtin.increment</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>;</u></font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"><u> </u></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>public</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>
+            </u></font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u>class</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>
+            </u></font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>Increment</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u>{</u></font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 80px;" align="left"><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><b>public</b></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#800080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u>int</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#801480"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>increment</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>(</u></font></font></font><font
+        color="#800080"><font face="Monospace"><font style="font-size: 10pt" size="2">int</font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>i</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>)</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u>{</u></font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 120px;" align="left"><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#000080"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>return</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>i</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>+</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><span
+              style="background: #e6f0ff">2</span></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2">;</font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 80px;" align="left"><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u>}</u></font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left"><font
+        color="#4c4c4c"> </font><font color="#4c4c4c"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u>}</u></font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;"><font color="#4c4c4c"><u>
+        </u></font><br>
+    </p>
+    <p></p>
+    <p>The content of the project's META_INF/MANIFEST.MF file are essential to
+      its function. It must contain the following lines, which allow the SADL
+      classloader to find the new class.</p>
+    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
+      <font color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt"
+            size="2"><u><b>Require-Bundle</b></u></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><u>:</u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
+          </font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u>com.ge.research.sadl.jena-wrapper-for-sadl
+              <br><b>Eclipse-RegisteredBuddy</b></u></font></font></font><font color="#4c4c4c"><font
+          face="Monospace"><font style="font-size: 10pt" size="2"><u>: </u></font></font></font><font
+        color="#0000ff"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>com.ge.research.sadl.jena-wrapper-for-sadl</u></font></font></font></p>
+    <div style="margin-left: 40px;"> </div>
+    <div style="margin-left: 40px;"><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>Export-Package</b></u></font></font></font><font
+        color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>:
+            </u></font></font></font><font color="#ff00ff"><font face="Monospace"><font
+            style="font-size: 10pt" size="2"><u><b>com.naturalsemantics.sadl.builtin.increment</b></u></font></font></font></div>
+    <div style="margin-left: 40px;"> </div>
+    <p style="margin-bottom: 0in; line-height: 100%"><br>
+    </p>
+    <p></p>
+    <p>It is also necessary to create an Eclipse feature project that references
+      our plug-in project. Finally, the feature must be added to an Eclipse
+      update project. Once this is completed, the update site can be built and
+      the update used to install new software in the Eclipse SADL IDE.</p>
+    <p><br>
+    </p>
+    <p>The three projects of this example are available for download in <a href="com.naturalsemantics.sadl.builtin.increment.zip">this
+        ZIP file</a>.</p>
+    <p><br>
+    </p>
+    <p><br>
     </p>
   </body>
 </html>
