@@ -464,21 +464,23 @@ to:
     </ol>
     <h2>Wrapping Java Classes in an Eclipse Plug-in</h2>
     <p>All of the examples above use Java classes that are normally on the Java
-      classpath. To wrap Java classes not already on the build path it is
-      necessary to make them available to the Eclipse class loader. This is
-      accomplished by placing them in a separate Eclipse plug-in. Existing jar
-      files can be wrapped in an Eclipse plug-in and custom Java classes can be
-      developed in an Eclipse plug-in project. In either case, once property
-      placed in an Eclipse plug-in, the plug-in can be added to the Eclipse SADL
-      environment and the classes and methods can be referenced in SADL <em>External</em>
+      classpath. In order to wrap Java classes not already on the classpath, it
+      is necessary to make them available to the Eclipse class loader of the
+      plug-in invoking the external Java class method, the Jena reasoner
+      plug-in. This is accomplished by placing the new class(es) in a separate
+      Eclipse plug-in and making that plug-in's class(es) visible to the
+      reasoner's class loader. Either existing jar files or custom Java classes
+      can be placed in an Eclipse plug-in project. Once properly placed in an
+      Eclipse plug-in, the plug-in can be added to the Eclipse SADL environment
+      and the classes and methods can be referenced in SADL <em>External</em>
       equations. Note that this is an alternative to developing custom Jena
       built-ins that extend the Jena <em>BaseBuiltin</em> class, see <a href="developer/CustomJenaBuiltins.html">Creating
         and Deploying Custom Jena Built-ins</a>. </p>
-    <p>As an example of how to create an Eclipse plugin providing the code for a
-      SADL <em>External</em> equation, we will walk through developing and
-      deploying a class and method to increment any integer by 2. The SADL <em>External</em>
-      equation definition, the test <em>Expr</em>[ession], and a rule using the
-      equation are as follows.</p>
+    <p>As an example of how to create an Eclipse plug-in providing the code for
+      a SADL <em>External</em> equation, we will walk through developing and
+      deploying a class and method to increment an input integer by 2. The SADL
+      <em>External</em> equation definition, the test <em>Expr</em>[ession],
+      and a rule using the equation are as follows.</p>
     <div style="margin-left: 40px;"><font color="#800080"><font face="Monospace"><font
             style="font-size: 10pt" size="2">External</font></font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2">
@@ -572,8 +574,11 @@ to:
               of the model</i></font></font></font></p>
     <div style="margin-left: 40px;"> </div>
     <p></p>
-    <p>To illustrate, we start by creating a plug-in project. The Java class and
-      method are shown below.</p>
+    <p>The result of the <em>Expr</em> statement will be displayed as an Info
+      marker:</p>
+    <p style="margin-left: 80px;"> <img src="images/ExprIncrement.png" alt=""></p>
+    <p>We start the development by creating a plug-in project. The Java class
+      and method to be executed are shown below.</p>
     <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
       <font color="#4c4c4c"> </font><font color="#0000ff"><font face="Monospace"><font
             style="font-size: 10pt" size="2"><u>package</u></font></font></font><font
@@ -636,13 +641,10 @@ to:
         color="#4c4c4c"> </font><font color="#4c4c4c"><font face="Monospace"><font
             style="font-size: 10pt" size="2"><u>}</u></font></font></font></p>
     <div style="margin-left: 40px;"> </div>
-    <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;"><font color="#4c4c4c"><u>
-        </u></font><br>
-    </p>
     <p></p>
-    <p>The content of the project's META_INF/MANIFEST.MF file are essential to
-      its function. It must contain the following lines, which allow the SADL
-      classloader to find the new class.</p>
+    <p>The content of the plug-in project's META_INF/MANIFEST.MF file are
+      essential to its function. It must contain the following lines, which
+      allow the SADL's reasoner classloader to find the new class.</p>
     <p style="margin-bottom: 0in; line-height: 100%; margin-left: 40px;" align="left">
       <font color="#ff00ff"><font face="Monospace"><font style="font-size: 10pt"
             size="2"><u><b>Require-Bundle</b></u></font></font></font><font color="#4c4c4c"><font
@@ -660,17 +662,25 @@ to:
             </u></font></font></font><font color="#ff00ff"><font face="Monospace"><font
             style="font-size: 10pt" size="2"><u><b>com.naturalsemantics.sadl.builtin.increment</b></u></font></font></font></div>
     <div style="margin-left: 40px;"> </div>
-    <p style="margin-bottom: 0in; line-height: 100%"><br>
+    <p style="margin-bottom: 0in; line-height: 100%">The first line indicates
+      that this plug-in is not valid unless the plug-in identified in <em>Require-Bundle</em>
+      is installed.</p>
+    <p style="margin-bottom: 0in; line-height: 100%">The second line indicates
+      that this plug-in has the reasoner plug-in as an Eclipse buddy, meaning
+      that the reasoner plug-in's class loader will look in this bundle.</p>
+    <p style="margin-bottom: 0in; line-height: 100%">The third line exports the
+      package containing our class and method so that they will be visible to
+      the reasoner's class loader.<br>
     </p>
     <p></p>
-    <p>It is also necessary to create an Eclipse feature project that references
-      our plug-in project. Finally, the feature must be added to an Eclipse
-      update project. Once this is completed, the update site can be built and
-      the update used to install new software in the Eclipse SADL IDE.</p>
-    <p><br>
-    </p>
-    <p>The three projects of this example are available for download in <a href="com.naturalsemantics.sadl.builtin.increment.zip">this
-        ZIP file</a>.</p>
+    <p>In order to be able to install the plug-in into an Eclipse SADL IDE, it
+      is also necessary to create an Eclipse feature project that references our
+      plug-in project. Finally, the feature must be added to an Eclipse update
+      project. Once this is completed, the update site can be built and the
+      update used to install the new plug-in into the Eclipse SADL IDE.</p>
+    <p>The three projects that implement this example are available for download
+      in <a href="com.naturalsemantics.sadl.builtin.increment.zip">this ZIP
+        file</a>.</p>
     <p><br>
     </p>
     <p><br>
