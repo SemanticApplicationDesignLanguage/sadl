@@ -1,10 +1,10 @@
 <html>
   <head>
     <meta http-equiv="content-type" content="text/html; charset=windows-1252">
-    <title>Rule Builtins</title>
+    <title>Rule Built-ins</title>
   </head>
   <body>
-    <h1>Rule Builtins</h1>
+    <h1>Rule Built-ins</h1>
     <h5>Last revised
       <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->7/8/2021<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
       <a href="contact.html">Contact us</a>.</h5>
@@ -62,6 +62,14 @@
       should not "fire" (cause the conclusions to be processed). In this case,
       the function also binds the result of the procedural computation
       (multiplication) to a new variable, <em>?v3</em>. </p>
+    <h2>Special Note for Jena Reasoner</h2>
+    <p><span style="color: #cc0000;">Note</span>: if a Jena rule has no triple
+      patterns in the rule body (conditions), the Jena reasoner will treat it as
+      an axiom and will not provide the current model to the condition
+      built-ins. This means that any built-in used in a rule body without triple
+      patterns will not be able to get any ontological information. If
+      necessary, a pseudo triple pattern can be placed in the rule body to force
+      the ontology to be available within the built-in.</p>
     <h2>Jena Reasoner Built-ins</h2>
     <p>The default reasoner for SADL Version 3 is the <a href="https://jena.apache.org/documentation/inference/#rules">Jena
         general purpose rule engine</a>. This reasoner comes with a number of
@@ -69,7 +77,7 @@
         primitives</a>". These built-in functions are all programmed in the Java
       language.</p>
     <p>When using Jena-provided built-ins, it is important to understand the
-      difference between the Jena syntax (see "Builtin Primitives" at<a href="http://jena.apache.org/documentation/inference/#RULEbuiltins">
+      difference between the Jena syntax (see "Built-in Primitives" at<a href="http://jena.apache.org/documentation/inference/#RULEbuiltins">
         http://jena.apache.org/documentation/inference/#RULEbuiltins</a> ) and
       the SADL syntax. In the actual Jena rule created from the SADL rule, which
       is what is shown in the Jena documentation at the link above, if an
@@ -403,7 +411,7 @@
         <tr>
           <td width="27%">print("hi there ", x)</td>
           <td width="24%">Print</td>
-          <td width="37%">Like the Jena print builtin, but overrides it to
+          <td width="37%">Like the Jena print built-in, but overrides it to
             output to stdout. For the IDE, this will be the console window.</td>
         </tr>
         <tr>
