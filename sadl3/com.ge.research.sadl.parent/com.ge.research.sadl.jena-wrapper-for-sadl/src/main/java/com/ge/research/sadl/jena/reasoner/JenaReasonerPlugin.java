@@ -33,6 +33,8 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -123,9 +125,11 @@ import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin.TranslationTarg
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
+import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
@@ -159,6 +163,10 @@ import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
+import com.ge.research.sadl.sADL.Constant;
+import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquationUtils;
+
+import jakarta.activation.DataSource;
 
 import jakarta.activation.DataSource;
 
@@ -2328,10 +2336,22 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 	private void dumpModelToLogger(OntModel model) {
-		if (logger.isDebugEnabled()) {
+		boolean loggerEnabled = logger.isDebugEnabled();
+		if (loggerEnabled) {
 			FileOutputStream fos;
 			try {
-				fos = new FileOutputStream(new File("c://sadlalt2/logs/tboxDump.log"));
+				String tempFolderName = configurationMgr.getModelFolderPath().getParent() + "/Temp";
+				File tempFolder = new File(tempFolderName);
+				if (!tempFolder.exists()) {
+					tempFolder.mkdir();
+				}
+				String dumpFileName = tempFolderName + "/tboxDump.log";	
+				File dumpFile = new File(dumpFileName);
+				if (dumpFile.exists()) {
+					dumpFile.delete();
+				}
+				dumpFile = new File(dumpFileName);
+				fos = new FileOutputStream(dumpFile);
 				dumpModelToLogger(model, fos);
 				fos.close();
 			} catch (FileNotFoundException e) {
@@ -3655,6 +3675,19 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	protected void setPreLoadedModel(OntModel preLoadedModel) {
 		this.preLoadedModel = preLoadedModel;
+	}
+
+	@Override
+	public Node evaluateSadlEquation(BuiltinElement bi) {
+		EvaluateSadlEquationUtils ese = new EvaluateSadlEquationUtils();
+		Node retval = ese.evaluateSadlEquation(bi);
+		List<ModelError> errors = ese.getErrors();
+		if (errors != null && errors.size() > 0) {
+			for (ModelError error : errors) {
+				addError(error);
+			}
+		}
+		return retval;
 	}
 
 }

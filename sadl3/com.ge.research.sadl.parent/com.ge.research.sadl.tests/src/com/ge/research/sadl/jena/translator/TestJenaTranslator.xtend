@@ -401,4 +401,83 @@ then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulev
 		]
 	}
 	
+	@Test
+	def void testEvaluateSadlEquation_01() {
+		 val sadlModel1 = '''
+			 uri "http://sadl.org/JavaExternal.sadl" alias javaexternal.
+			 
+			 External min(decimal n1, decimal n2) returns decimal : "java.lang.Math.min".
+			 
+			 Expr: min(2,3).
+			 
+			 Rule testRule: then print(min(2,3)).
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(rules)
+ 			assertTrue(rules.size == 1)
+ 			val rule = getTranslator(processor).translateRule(jenaModel, "http://sadl.org/JavaExternal.sadl", rules.get(0))
+ 			println(rule.toString)
+ 			assertEquals(rule.toString, "[testRule: evaluateSadlEquation('http://sadl.org/JavaExternal.sadl#min'^^http://www.w3.org/2001/XMLSchema#string, 2, 3, ?v0) -> print(?v0)]")
+ 		]
+		
+	}
+	
+	@Test
+	def void testEvaluateSadlEquation_02() {
+		// this tests the processing of an ellipsis without a type, meaning any number of arguments of any type
+		 val sadlModel1 = '''
+			 uri "http://sadl.org/StringFormat.sadl" alias stringformat.
+			 
+			 External formatString(string fmt, ...) returns string : "java.lang.String.format".
+			 
+			 Expr: formatString("name is %s", "sonoo").
+			 Expr: formatString("value is %f",32.33434). 
+			 Expr: formatString("value is %32.12f",32.33434).  
+			 Expr: formatString("value is %32.12f != %f", 32.33434, 23.456).
+			 
+			 TestClass is a class described by formatedString with values of type string.
+			 
+			 Rule R1: if x is a TestClass then formatedString of x is formatString("value is %32.12f != %f", 32.33434, 23.456).
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+ 			assertNotNull(rules)
+ 			assertTrue(rules.size == 1)
+ 			val rule = getTranslator(processor).translateRule(jenaModel, "http://sadl.org/JavaExternal.sadl", rules.get(0))
+ 			println(rule.toString)
+// 			assertEquals(rule.toString, "[testRule: evaluateSadlEquation('http://sadl.org/JavaExternal.sadl#min'^^http://www.w3.org/2001/XMLSchema#string, 2, 3, ?v0) -> print(?v0)]")
+ 		]
+		
+	}
+
+	@Test
+	def void testEvaluateSadlEquation_03() {
+		// this tests the processing of a typed ellipsis, meaning any number of arguments of the specified type
+		 val sadlModel1 = '''
+			 uri "http://sadl.org/StringFormat.sadl" alias stringformat.
+			 
+			 External formatString(string fmt, float ... vals) returns string : "java.lang.String.format".
+			 
+			 Expr: formatString("name is %s", "sonoo").
+			 Expr: formatString("value is %f",32.33434). 
+			 Expr: formatString("value is %32.12f",32.33434).  
+			 Expr: formatString("value is %32.12f != %f", 32.33434, 23.456).
+			 
+			 TestClass is a class described by formatedString with values of type string.
+			 
+			 Rule R1: if x is a TestClass then formatedString of x is formatString("value is %32.12f != %f", 32.33434, 23.456).
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+ 			var errorFound = false;
+ 			for (issue : issues) {
+ 				println(issue.toString)
+ 				if (issue.toString.startsWith("ERROR:java.lang.NumberFormatException: For input string: \"sonoo\"")) {
+ 					errorFound = true;
+ 				}
+ 			}
+ 			assertTrue(errorFound)
+ 			assertNotNull(rules)
+ 			assertTrue(rules.size == 1)
+ 			val rule = getTranslator(processor).translateRule(jenaModel, "http://sadl.org/JavaExternal.sadl", rules.get(0))
+ 			println(rule.toString)
+ 			assertEquals(rule.toString, "[R1: (?x rdf:type http://sadl.org/StringFormat.sadl#TestClass), evaluateSadlEquation('http://sadl.org/StringFormat.sadl#formatString'^^http://www.w3.org/2001/XMLSchema#string, 'value is %32.12f != %f'^^http://www.w3.org/2001/XMLSchema#string, 32.33434, 23.456, ?v0) -> (?x http://sadl.org/StringFormat.sadl#formatedString ?v0)]")
+ 		]
+		
+	}
 }

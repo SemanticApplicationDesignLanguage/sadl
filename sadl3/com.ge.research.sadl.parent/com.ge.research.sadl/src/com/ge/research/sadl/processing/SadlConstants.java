@@ -48,6 +48,7 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_LOCATION_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#externalURL";
 	public static final String SADL_IMPLICIT_MODEL_DATA_DESCRIPTOR_CLASS_URI = SADL_IMPLICIT_MODEL_URI + "#DataDescriptor";
 	public static final String SADL_IMPLICIT_MODEL_DATATYPE_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#dataType";
+	public static final String SADL_IMPLICIT_MODEL_VARIABLE_NUM_ARGUMENTS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#variableNumArguments";
 	public static final String SADL_IMPLICIT_MODEL_DERIVEDFROM_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#derivedFrom";
 	public static final String SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#localDescriptorName";
 	public static final String SADL_IMPLICIT_MODEL_SPECIFIED_UNITS_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#specifiedUnits";
@@ -95,6 +96,7 @@ public class SadlConstants {
 
 	public static final String SADL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.sadl";
 	public static final String OWL_BUILTIN_FUNCTIONS_FILENAME = "SadlBuiltinFunctions.owl";
+	public static final String SADL_BUILTIN_FUNCTIONS_URI = "http://sadl.org/builtinfunctions";
 	
 	public static final String CONSTANT_NONE = "None";
 	public static final String CONSTANT_PI = "PI";

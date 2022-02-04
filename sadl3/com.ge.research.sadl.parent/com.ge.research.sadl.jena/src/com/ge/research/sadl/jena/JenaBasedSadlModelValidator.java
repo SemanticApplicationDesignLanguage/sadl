@@ -1417,6 +1417,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else if (ct.equals(ConceptType.VARIABLE)) {
 					sb1.append(", a variable of type ");
 					sb2 = new StringBuilder();				}
+				else if (ct.equals(ConceptType.FUNCTION_DEFN)) {
+					if (typeCheckInfo.getTypeToExprRelationship() != null && 
+							typeCheckInfo.getTypeToExprRelationship().equals(FUNCTION_RETURN)) {
+						sb1.append(" returning ");
+						sb1.append(typeCheckInfo.getTypeCheckType().toString());
+					}
+				}
 			}
 			if (typeCheckInfo.getCompoundTypes() != null) {
 				List<String> compoundTypeList = new ArrayList<String>();
@@ -2259,11 +2266,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return new TypeCheckInfo(constantConceptName, tctype, this, expression);
 		}
 		else if(constant.equals("length") || constant.equals("count") ||
-				   constant.equals("index")){
-					NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.xint.getURI(), NodeType.DataTypeNode));
-					ConceptName constantConceptName = getModelProcessor().namedNodeToConceptName(tctype);
-					return new TypeCheckInfo(constantConceptName, tctype, this, expression);
-				}
+		   constant.equals("index")){
+			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.xint.getURI(), NodeType.DataTypeNode));
+			ConceptName constantConceptName = getModelProcessor().namedNodeToConceptName(tctype);
+			return new TypeCheckInfo(constantConceptName, tctype, this, expression);
+		}
 		else if(constant.endsWith("element") && (constant.startsWith("first") || constant.startsWith("last"))){
 			//Handle list types???
 			ConceptName declarationConceptName = new ConceptName(constant);
@@ -3310,22 +3317,30 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private void checkFunctionArguments(EList<SadlParameterDeclaration> params, EList<Expression> args, Name expression, boolean forceCheck)
 			throws InvalidTypeException, TranslationException, DontTypeCheckException {
-		boolean variableNumArgs = false;
+		boolean hasEllipsis = params.size() > 0 && 
+				(params.get(params.size() - 1).getTypedEllipsis() != null ||
+				params.get(params.size() - 1).getEllipsis() != null);
+		boolean hasUnknown = params.size() > 0 && 
+				(params.get(params.size() - 1).getUnknown() != null);
 		int minNumArgs = 0;
-		if (args.size() != params.size() || (params.size() > 1 && params.get(params.size() - 1).getEllipsis() != null)) {
-			boolean wrongNumArgs = true;
-			String ellipsis = params.size() > 0 ? params.get(params.size() - 1).getEllipsis() : null;
-			if ( ellipsis != null) {
-				minNumArgs = params.size() - 1;
-				variableNumArgs = true;
-				if (args.size() >= minNumArgs) {
-					wrongNumArgs = false;
+		if (args.size() != params.size()) {
+			// this could be a wrong number of arguments unless there's an ellipsis, typed or untyped, or it's an unknown
+			boolean wrongNumArgs = false;
+			if (!hasEllipsis && !hasUnknown) {
+				// if there is no typed or untyped ellipsis it is
+				wrongNumArgs = true;
+			}
+			else {
+				if (!hasEllipsis && !hasUnknown && args.size() < params.size()) {
+					// if there aren't at least as many args as params it is
+					wrongNumArgs = true;
 				}
 			}
-			if (params.size() > 0 && params.get(0).getEllipsis() != null) {
-				getModelProcessor().addWarning("Number of arguments of function is unknown", expression);
+			
+			if (hasEllipsis) {
+				minNumArgs = params.size() - 1;	// the VarArgs can have no args
 			}
-			else if (wrongNumArgs) {
+			if (wrongNumArgs) {
 				getModelProcessor().addTypeCheckingError("Number of arguments does not match function declaration", expression);
 			}
 		}
@@ -3335,24 +3350,25 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			for (int i = 0; i < args.size(); i++) {
 				Expression arg = args.get(i);
 				SadlParameterDeclaration param = null;
-				if (variableNumArgs) {
-					param = (i >= minNumArgs && minNumArgs > 0) ? params.get(minNumArgs - 1) : params.get(i);
+				int paramIndex = i >= params.size() ? params.size() - 1 : i;
+				if (isEllipsis(params.get(paramIndex))) {
+					param = (i >= minNumArgs) ? params.get(minNumArgs) : params.get(i);
 				}
 				else if (i < params.size()) {
 					param = params.get(i);
 				}
 				if (param != null) {
-					if (param.getEllipsis() == null && param.getUnknown() == null) {
+					if (param.getUnknown() == null && (!isEllipsis(param) || param.getTypedEllipsis() != null)) {
 						validateBinaryOperationByParts(expression, arg, param.getType(), "argument", sb, false);
 						if (sb.length() > 0) {
 							getModelProcessor().addTypeCheckingError(sb.toString(), expression);
 						}
 					}
-					else if (param.getUnknown() != null) {			
+					else if (param.getUnknown() != null || param.getEllipsis() != null) {  //&& !isEllipsis(param)) {			
 						getModelProcessor().addWarning(SadlErrorMessages.TYPE_CHECK_BUILTIN_EXCEPTION.get("parameter " + (i + 1)), arg);
 					}
 					else {
-						// don't try to typecheck if it's an ellipsis
+						// don't try to typecheck if it's an untyped ellipsis
 						break;
 					}
 				}
@@ -3360,6 +3376,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 	}
 	
+	private boolean isEllipsis(SadlParameterDeclaration param) {
+		if (param.getEllipsis() != null || param.getTypedEllipsis() != null) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Method to examine the arguments of a built-in and determine if they match a graph pattern type built-in
 	 * @param args
@@ -3405,8 +3428,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if(es != null && !es.getReturnType().isEmpty()) {
 				TypeCheckInfo tci = getType(es.getReturnType());
 				ConceptName etcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI);
-				etcn.setType(ConceptType.FUNCTION_DEFN);
-				tci.setExpressionType(etcn);
+				if (etcn != null) {
+					etcn.setType(ConceptType.FUNCTION_DEFN);
+					tci.setExpressionType(etcn);
+				}
 				if (tci != null) {
 					tci.setTypeToExprRelationship(FUNCTION_RETURN);
 				}
@@ -3415,8 +3440,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				TypeCheckInfo tci = getConstantNoneTypeCheckInfo(es);
 				ConceptName etcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI);
-				etcn.setType(ConceptType.FUNCTION_DEFN);
-				tci.setExpressionType(etcn);
+				if (etcn != null) {
+					etcn.setType(ConceptType.FUNCTION_DEFN);
+					tci.setExpressionType(etcn);
+				}
 				if (tci != null) {
 					tci.setTypeToExprRelationship(FUNCTION_RETURN);
 				}
@@ -3428,8 +3455,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if(ees != null && !ees.getReturnType().isEmpty()) {
 				TypeCheckInfo tci = getType(ees.getReturnType());
 				ConceptName etcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI);
-				etcn.setType(ConceptType.FUNCTION_DEFN);
-				tci.setExpressionType(etcn);
+				if (etcn != null) {
+					etcn.setType(ConceptType.FUNCTION_DEFN);
+					tci.setExpressionType(etcn);
+				}
 				if (tci != null) {
 					tci.setTypeToExprRelationship(FUNCTION_RETURN);
 				}
@@ -3438,8 +3467,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			else {
 				TypeCheckInfo tci = getConstantNoneTypeCheckInfo(ees);
 				ConceptName etcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI);
-				etcn.setType(ConceptType.FUNCTION_DEFN);
-				tci.setExpressionType(etcn);
+				if (etcn != null) {
+					etcn.setType(ConceptType.FUNCTION_DEFN);
+					tci.setExpressionType(etcn);
+				}
 				if (tci != null) {
 					tci.setTypeToExprRelationship(FUNCTION_RETURN);
 				}

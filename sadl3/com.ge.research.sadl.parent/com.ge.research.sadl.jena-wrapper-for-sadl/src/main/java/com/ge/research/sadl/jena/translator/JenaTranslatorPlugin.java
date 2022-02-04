@@ -44,6 +44,7 @@ import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
 import com.ge.research.sadl.model.gp.JunctionList;
 import com.ge.research.sadl.model.gp.Literal;
+import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.NegatedExistentialQuantifier;
@@ -103,7 +104,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 	public enum TranslationTarget {RULE_TRIPLE, RULE_BUILTIN, QUERY_TRIPLE, QUERY_FILTER}
     
-    private enum SpecialBuiltin {NOVALUE, NOVALUESPECIFIC, NOTONLY, ONLY, ISKNOWN, THEREEXISTS}
+    private enum SpecialBuiltin {NOVALUE, NOVALUESPECIFIC, NOTONLY, ONLY, ISKNOWN, THEREEXISTS, CONTAINS_SADL_EQUATION}
     
     private enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
     
@@ -280,10 +281,20 @@ public class JenaTranslatorPlugin implements ITranslator {
 				if (idx > 0) sb.append(", ");
 				SpecialBuiltin spb = processSpecialBuiltins(elements, idx);	// check for special handling required for some built-ins
 				if (spb != null) {
-					// get the triple in question
 					TripleElement trel = null;
 					if (elements.get(idx) instanceof TripleElement) {
 						trel = (TripleElement)elements.get(idx);
+					}
+					else if (spb.equals(SpecialBuiltin.CONTAINS_SADL_EQUATION)) {
+						BuiltinElement bi = (BuiltinElement) elements.get(idx);
+						bi.setFuncName("evaluateSadlEquation");
+						com.ge.research.sadl.model.gp.Literal eqUri = new com.ge.research.sadl.model.gp.Literal(LiteralType.StringLiteral);
+						eqUri.setValue(bi.getFuncUri()); // getInModelReferencedEquation().getExternalUri());
+						bi.getArguments().add(0, eqUri);
+						bi.getArgumentTypes().add(0, new NamedNode("http://www.w3.org/2001/XMLSchema#string", NodeType.DataTypeNode));
+						sb.append(graphPatternElementToJenaRuleString(bi, rulePart));
+						idx++;
+						continue;
 					}
 					else if (elements.get(idx) instanceof BuiltinElement && ((BuiltinElement)elements.get(idx)).getFuncName().equals(THERE_EXISTS)) {
 //						if (((BuiltinElement)elements.get(idx)).getArguments() == null || ((BuiltinElement)elements.get(idx)).getArguments().size() != 1) {
@@ -480,6 +491,10 @@ public class JenaTranslatorPlugin implements ITranslator {
 //		else if (elements.get(index) instanceof BuiltinElement && ((BuiltinElement)elements.get(index)).getFuncName().equals(THERE_EXISTS)) {
 //			return SpecialBuiltin.THEREEXISTS;
 //		}
+		else if (elements.get(index) instanceof BuiltinElement &&
+				((BuiltinElement)elements.get(index)).getInModelReferencedEquation() != null) {
+			return SpecialBuiltin.CONTAINS_SADL_EQUATION;
+		}
 		return null;
 	}
 	

@@ -125,10 +125,37 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 
 	protected Object processExpression(NumberLiteral expr) {
 		Literal lit = new Literal(LiteralType.NumberLiteral);
+		String origTxt = expr.getValue().toPlainString();
+		lit.setOriginalText(origTxt);
 		BigDecimal val = expr.getValue();
-		lit.setValue(val);
-		lit.setOriginalText(expr.getValue().toPlainString());
-		return lit;
+		try {
+			if (!origTxt.contains(".") && !origTxt.contains("e")) {
+				if (val.longValue() >= Integer.MAX_VALUE || val.longValue() <= Integer.MIN_VALUE) {
+					long lval = Long.parseLong(origTxt);
+					lit.setValue(lval);
+					return lit;
+				}
+				else {
+					int ival = Integer.parseInt(origTxt);
+					lit.setValue(ival);
+					return lit;
+				}
+			}
+			if (val.doubleValue() >= Float.MAX_VALUE || val.doubleValue() <= Float.MIN_VALUE) {
+				double dval = Double.parseDouble(origTxt);
+				lit.setValue(dval);
+				return lit;
+			}
+			else {
+				float fval = Float.parseFloat(origTxt);
+				lit.setValue(fval);
+				return lit;
+			}
+		}
+		catch (Throwable t) {
+			lit.setValue(val);
+			return lit;
+		}
 	}
 
 	protected Object processExpression(StringLiteral expr) {

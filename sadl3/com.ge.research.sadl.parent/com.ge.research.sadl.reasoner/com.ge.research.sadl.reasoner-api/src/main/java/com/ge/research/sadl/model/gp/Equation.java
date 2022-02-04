@@ -133,8 +133,11 @@ public class Equation {
 					Node nt = argtypes.get(i);
 					if (i > 0) sb.append(",");
 					sb.append(nt != null ? nt.toString() : "<error>");
-					sb.append(" ");
-					sb.append(n != null ? n.toString() : "<error>");
+					if (!(n instanceof UntypedEllipsisNode) && !(n instanceof UnknownNode)) {
+						// for an untyped ellipsis, n and nt will both be an UntypedEllipsisNode; don't serialize both
+						sb.append(" ");
+						sb.append(n != null ? n.toString() : "<error>");
+					}
 				}
 			}
 		}
