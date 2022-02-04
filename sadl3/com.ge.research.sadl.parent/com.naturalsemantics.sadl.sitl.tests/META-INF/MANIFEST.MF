@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: com.naturalsemantics.sadl.sitl.tests
+Bundle-ManifestVersion: 2
+Bundle-Name: com.naturalsemantics.sadl.sitl.tests
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: com.naturalsemantics.sadl.sitl.tests; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: com.naturalsemantics.sadl.sitl,
+ org.junit.jupiter.api;bundle-version="[5.1.0,6.0.0)",
+ org.eclipse.xtext.testing,
+ org.eclipse.xtext.xbase.testing,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
+ org.junit;bundle-version="4.13.0",
+ com.ge.research.sadl;bundle-version="3.5.0",
+ com.ge.research.sadl.ui;bundle-version="3.5.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Export-Package: com.naturalsemantics.sadl.sitl.tests;x-internal=true
