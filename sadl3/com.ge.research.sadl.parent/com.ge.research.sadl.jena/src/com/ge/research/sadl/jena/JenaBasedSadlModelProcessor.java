@@ -1768,7 +1768,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				} else if (rawResult != null) {
 					// for IDE, expand and also add as info marker
 					addInfo(rawResult.toString(), element);
+					getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
 					Object intForm = getIfTranslator().expandProxyNodes(rawResult, false, true);
+					setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 					if (intForm != null) {
 						if (intForm instanceof List<?>) {
 							if (((List<?>) intForm).size() > 0) {
@@ -2305,8 +2307,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 						else {
 							test.setCompName(((BuiltinElement) testtrans).getFuncType());
+							getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
 							Object lhsObj = getIfTranslator().expandProxyNodes(args.get(0), false, true);
 							Object rhsObj = getIfTranslator().expandProxyNodes(args.get(1), false, true);
+							setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 							test.setLhs(
 									(lhsObj != null && lhsObj instanceof List<?> && ((List<?>) lhsObj).size() > 0) ? lhsObj
 											: args.get(0));
@@ -2323,7 +2327,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							&& !((TripleElement) testtrans).getModifierType().equals(TripleModifierType.None)) {
 						// Filtered query with modification
 						TripleModifierType ttype = ((TripleElement) testtrans).getModifierType();
+						getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
 						Object trans = getIfTranslator().expandProxyNodes(testtrans, false, true);
+						setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 						if ((trans != null && trans instanceof List<?> && ((List<?>) trans).size() > 0)) {
 							if (ttype.equals(TripleModifierType.Not)) {
 								if (changeFilterDirection(trans)) {
@@ -2346,7 +2352,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					GraphPatternElement lp = ((Query)testtrans).getLastPattern();
 					GraphPatternElement realLp = null;
 					if (lp instanceof Junction) {
-						getIfTranslator();
 						JunctionList plst = IntermediateFormTranslator.junctionToList((Junction)lp);
 						if (plst.size() > 0) {
 							realLp = plst.get(plst.size() - 1);
@@ -2385,7 +2390,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (!done) {
 					// expand ProxyNodes and see what we can do with the expanded form
 					List<Object> expanded = new ArrayList<Object>();
+					getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
 					Object testExpanded = getIfTranslator().expandProxyNodes(testtrans, false, true);
+					setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 					boolean treatAsMultipleTests = false;
 					{
 						if (testExpanded instanceof List<?> && ((List<?>)testExpanded).size() == 1) {
@@ -3067,7 +3074,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					Node obj = ((TripleElement) e).getObject();
 					boolean implicitObject = false;
 					if (obj == null) {
-						obj = new VariableNode(getIfTranslator().getNewVar());
+						obj = new VariableNode(getIfTranslator().getNewVar());	// not sure why this uses IFT to get new var name awc 2/5/22
+						setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 						((TripleElement) e).setObject(obj);
 						implicitObject = true;
 					}
@@ -3459,7 +3467,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 		Object expandedPattern = null;
 		try {
+			getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
 			expandedPattern = getIfTranslator().expandProxyNodes(pattern, false, true);
+			setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 		} catch (InvalidNameException e) {
 			addError(SadlErrorMessages.INVALID_NAME.get("query", pattern.toString()), expr);
 			e.printStackTrace();
@@ -3493,6 +3503,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 			}
+			pattern = getIfTranslator().removeDuplicates((List<?>) pattern);
 			query.setPatterns((List<GraphPatternElement>) pattern);
 		} else if (pattern instanceof Literal) {
 			// this must be a SPARQL query
@@ -3520,7 +3531,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			q.setSparqlQueryString(qstr);
 		} else if (qobj instanceof NamedNode) {
 			if (isProperty(((NamedNode) qobj).getNodeType())) {
-				VariableNode sn = new VariableNode(getIfTranslator().getNewVar());
+				VariableNode sn = new VariableNode(getIfTranslator().getNewVar()); // not sure why this uses IFT to get new var name awc 2/5/22
+				setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 				TripleElement tr = new TripleElement(sn, (Node) qobj, null);
 				q.addPattern(tr);
 				List<VariableNode> vars = q.getVariables();
@@ -4571,6 +4583,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else {
 				rule = getIfTranslator().postProcessRule(rule, element);
 			}
+			setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 		}
 		catch (Exception e) {
 			addError("Fatal error post-processing rule. " + e.getMessage(), element);
@@ -4638,8 +4651,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	@Override
 	public GraphPatternElement expandNodesInIntermediateForm(Object rawIntermediateForm, boolean treatAsConclusion)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
-		getIfTranslator().resetIFTranslator();
+		getIfTranslator().resetIFTranslator();	// this resets varNum to 0
 		Object expansion = getIfTranslator().expandProxyNodes(rawIntermediateForm, treatAsConclusion, true);
+		setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 		if (expansion instanceof GraphPatternElement) {
 			return (GraphPatternElement) expansion;
 		} else
@@ -5156,10 +5170,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						}
 						if (!iterationComplete) {
 							if (leftTranslatedDefn instanceof TripleElement
-									&& ((TripleElement) leftTranslatedDefn).getSubject() instanceof VariableNode) {
+									&& (((TripleElement) leftTranslatedDefn).getSubject() instanceof VariableNode ||
+											((TripleElement)leftTranslatedDefn).getSubject() instanceof ProxyNode)) {
 								replaceVariable((TripleElement) leftTranslatedDefn, leftVar);
 								addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
-								return leftTranslatedDefn;
+								if (rest != null) {
+									List<GraphPatternElement> ret = new ArrayList<GraphPatternElement>();
+									ret.add((GraphPatternElement) rest);
+									ret.add((TripleElement) leftTranslatedDefn);
+									return ret;
+								}
+								else {
+									return leftTranslatedDefn;
+								}
 							} else {
 								Node defn = nodeCheck(leftTranslatedDefn);
 								GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, defn);
@@ -5170,7 +5193,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
 								if (leftMultiVarIndex == variableNames.size() - 1) {
 									// all variables processed
-									return bi;
+									if (rest != null) {
+										List<GraphPatternElement> ret = new ArrayList<GraphPatternElement>();
+										ret.add((GraphPatternElement) rest);
+										ret.add(bi);
+										return ret;
+									}
+									else {
+										return bi;
+									}
 								}
 							}
 						}
@@ -5427,6 +5458,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected boolean replaceVariable(TripleElement triple, VariableNode var)
 			throws IOException, PrefixNotFoundException, InvalidNameException, InvalidTypeException,
 			TranslationException, ConfigurationException {
+		if (triple.getObject() == null) {
+			triple.setObject(var);
+			return true;
+		}
 		return false;
 	}
 
