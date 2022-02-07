@@ -155,4 +155,86 @@ rdf(v0, rulevars2:var3, v2) and is(v1,v2) and +(v1,v2,v3) then rdf(v0, rulevars2
 then rdf(v0,rulevars2:var1,rulevars2:Failed) and rdf(v0,rulevars2:var3,rulevars2:Failed)."))
 		]
 	}
+
+	@Test
+	def void testGH_874c() {
+		
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+		
+		createFile('UseArticles.sadl', '''
+		uri "http://sadl.org/propChains.sadl" alias propchains.
+		
+		 Part is a class
+		          described by partID with values of type string
+		          described by processing with values of type Process.
+		
+		 Process is a class
+		          described by temperature with values of type Temperature.
+		
+		 Temperature is a type of UnittedQuantity.
+		
+		 p1 is a Part
+		          partID "123"
+		          processing (a Process temperature (a Temperature ^value 100 unit "C")).
+		  
+		  
+		// what are the unit and value of the temperature of processing of (a Part partID "123")?
+		 Ask: select u,v  where u is unit of temperature of processing of (a Part with partID "123") 
+		 	and v is ^value of temperature of processing of the Part.
+		''').resource.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults()
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(issues.isEmpty)
+			for (cmd:cmds) {
+				println(cmd.toString)
+			}
+			assertTrue(cmds.size == 1)
+			assertTrue(processor.compareTranslations(cmds.get(0).toString, "select u v where and(rdf(v0, propchains:partID, \"123\"), and(rdf(v0, propchains:processing, v1), and(rdf(v1, propchains:temperature, v2), and(rdf(v2, sadlimplicitmodel:unit, u), rdf(v2, sadlimplicitmodel:value, v)))))"))
+		]
+	}
+	
+	@Test
+	def void testGH_874d() {
+		
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+		
+		createFile('UseArticles.sadl', '''
+		uri "http://sadl.org/chainqueries.sadl" alias chainqueries.
+		
+		 {C1, C2, C3, C4} are classes.
+		 partID describes C1 with values of type string.
+		 p1 describes C1 with values of type C2.
+		 p2 describes C2 with values of type C3.
+		 p3 describes C3 with values of type C4.
+		 temperature describes C4 with values of type Temperature.
+		 
+		 Temperature is a type of UnittedQuantity.
+		 	
+		 i1 is a C1
+		          partID "123"
+		          p1 (a C2 with p2 (a C3 with p3 (a C4 with temperature (a Temperature ^value 100 unit "C")))).
+		  
+		// what are the unit and value of the temperature of processing of (a Part partID "123")?
+		 Ask: select u,v  where u is unit of temperature of p3 of p2 of p1 of (a C1 with partID "123") 
+		 	and v is ^value of temperature of p3 of p2 of p1 of the C1.
+		''').resource.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults()
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(issues.isEmpty)
+			for (cmd:cmds) {
+				println(cmd.toString)
+			}
+			assertTrue(cmds.size == 1)
+			assertTrue(processor.compareTranslations(cmds.get(0).toString, "select u v where and(rdf(v0, chainqueries:partID, \"123\"), and(rdf(v0, chainqueries:p1, v1), and(rdf(v1, chainqueries:p2, v2), and(rdf(v2, chainqueries:p3, v3), and(rdf(v3, chainqueries:temperature, v4), and(rdf(v4, sadlimplicitmodel:unit, u), rdf(v4, sadlimplicitmodel:value, v)))))))"))
+		]
+	}
+	
 }

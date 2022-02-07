@@ -1906,6 +1906,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (retiredNode != null && retiredNode instanceof ProxyNode) {
 			retiredNode = ((ProxyNode)retiredNode).getReplacementNode();
 		}
+		else if (retiredNode instanceof VariableNode) {
+			// there's already a triple for te in those patterns processed
+			return retiredNode;
+		}
 		Node subj = te.getSubject();
 		if (subj instanceof ProxyNode) {
 			if (retiredNode != null) {
@@ -2202,6 +2206,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			var = findVariableInTripleForReuse(((Rule)getTarget()).getThens(), subject, predicate, object);
 			if (var != null) {
 				return var;
+			}
+		}
+		else if (getTarget() == null) {
+			Node candidate = findMatchingElementInRetiredProxyNodes(new TripleElement( subject, predicate, object));
+			if (candidate instanceof VariableNode) {
+				return (VariableNode)candidate;
 			}
 		}
 		return null;
@@ -3097,6 +3107,43 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		results[1] = Boolean.valueOf(foundFirst);
 		results[2] = Integer.valueOf(removalCnt);
 		return results;
+	}
+	
+	public List<?> removeDuplicates(List<?> jct) {
+		if (jct.size() == 1 && jct.get(0) instanceof Junction && 
+				((Junction)jct.get(0)).getJunctionType().equals(JunctionType.Conj)) {
+			try {
+				JunctionList lst = junctionToList((Junction)jct.get(0));
+				List<Integer> indexToRemove = new ArrayList<Integer>();
+				for (int i = 0; i < lst.size(); i++) {
+					Object el = lst.get(i);
+					for (int j = i + 1; j < lst.size(); j++) {
+						Object el2 = lst.get(j);
+						if (el.equals(el2)) {
+							if (!indexToRemove.contains(j)) {
+								indexToRemove.add(j);
+							}
+						}
+					}
+				}
+				if (indexToRemove.size() > 0) {
+					for (int i = indexToRemove.size() - 1; i >= 0; i--) {
+						lst.remove(indexToRemove.get(i).intValue());
+					}
+				}
+				return listToAnd(lst);
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidNameException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidTypeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return jct;
 	}
 
 	private List<GraphPatternElement> getAllGPEs(List<GraphPatternElement> list) throws TranslationException {

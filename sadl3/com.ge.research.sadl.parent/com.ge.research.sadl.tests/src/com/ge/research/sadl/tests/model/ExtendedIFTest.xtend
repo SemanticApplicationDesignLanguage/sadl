@@ -263,8 +263,8 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 	described by publicized with values of type boolean.
 			 	
 			 	past describes System with values of type UnittedQuantity.
-				past of System has exactly 1 value.
-				
+			 	past of System has exactly 1 value.
+			 									
 			 Result is a class, can only be one of {Passed, Failed}.
 			 
 			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
@@ -1450,4 +1450,83 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		]
 	}
 	
+	@Test
+	def void testGH_874() {
+		'''
+		uri "http://sadl.org/propChains.sadl" alias propchains.
+		
+		 Part is a class
+		          described by partID with values of type string
+		          described by processing with values of type Process.
+		
+		 Process is a class
+		          described by temperature with values of type Temperature.
+		
+		 Temperature is a type of UnittedQuantity.
+		
+		 p1 is a Part
+		          partID "123"
+		          processing (a Process temperature (a Temperature ^value 100 unit "C")).
+		  
+		  
+		 // what is the temperature of processing of p1?
+		 Ask: select x where x is the temperature of processing of p1.
+		
+		// what is the temperature of processing of (a Part partID "123")?
+		 Ask: select x where x is the temperature of processing of (a Part with partID "123").
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults()
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			var cnt = 0
+			for (cmd:cmds) {
+				println(cmd.toString)
+				if (cmd.toString.equals("select x where and(rdf(propchains:p1, propchains:processing, v0), rdf(v0, propchains:temperature, x))")) cnt++
+				if (cmd.toString.equals("select x where and(rdf(v0, propchains:partID, \"123\"), and(rdf(v0, propchains:processing, v1), rdf(v1, propchains:temperature, x)))")) cnt++
+			}
+			assertTrue(cnt == 2)
+		]
+	}
+
+	@Test
+	def void testGH_874b() {
+		'''
+		uri "http://sadl.org/propChains.sadl" alias propchains.
+		
+		 Part is a class
+		          described by partID with values of type string
+		          described by processing with values of type Process.
+		
+		 Process is a class
+		          described by temperature with values of type Temperature.
+		
+		 Temperature is a type of UnittedQuantity.
+		
+		 p1 is a Part
+		          partID "123"
+		          processing (a Process temperature (a Temperature ^value 100 unit "C")).
+		  
+		  
+		// what is the unit of a temperature of a processing of (a Part partID "123")?
+		 Ask: select x where x is the unit of a temperature of a processing of (a Part with partID "123").
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults()
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(issues.empty)
+			for (cmd:cmds) {
+				println(cmd.toString)
+			}
+			assertTrue(cmds.size == 1)
+			assertTrue(cmds.get(0).toString.equals("select x where and(rdf(v0, propchains:partID, \"123\"), and(rdf(v0, propchains:processing, v1), and(rdf(v1, propchains:temperature, v2), rdf(v2, sadlimplicitmodel:unit, x))))"))
+			
+		]
+	}
+
 }
