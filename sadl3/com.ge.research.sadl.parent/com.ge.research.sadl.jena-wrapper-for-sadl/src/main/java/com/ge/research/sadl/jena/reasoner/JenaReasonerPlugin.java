@@ -345,9 +345,9 @@ public class JenaReasonerPlugin extends Reasoner{
 		
 		try {
 //<<<<<<< HEAD
-			if (tbox != null && !configurationMgr.getSadlModelGetter(repoType).modelExists(tbox)) {
+//			if (tbox != null && !configurationMgr.getSadlModelGetter(repoType).modelExists(tbox)) {
 //=======
-//			if (tbox != null && !configurationMgr.getModelGetter().modelExists(getModelName(), tbox)) {
+			if (tbox != null && !configurationMgr.getSadlModelGetter(repoType).modelExists(getModelName())) {
 //>>>>>>> development
 				if (tbox.equals(getModelName())) {
 					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
@@ -384,9 +384,9 @@ public class JenaReasonerPlugin extends Reasoner{
 				throw new ConfigurationException("Format '" + format + "' is not supported by reasoner '" + getConfigurationCategory() + "'.");
 			}
 			if (format.equals(SadlPersistenceFormat.JENA_TDB_FORMAT)) {
-				schemaModel = configurationMgr.getSadlModelGetter(format).getOntModel(tbox);	
-				schemaModel.getDocumentManager().setProcessImports(true);
-				schemaModel.loadImports();
+				schemaModel = configurationMgr.getSadlModelGetter(format).getOntModel(getModelName());	
+//				schemaModel.getDocumentManager().setProcessImports(true);
+//				schemaModel.loadImports();
 			}
 			else {
 				if (tbox != null && tbox.endsWith(".TDB/")) {

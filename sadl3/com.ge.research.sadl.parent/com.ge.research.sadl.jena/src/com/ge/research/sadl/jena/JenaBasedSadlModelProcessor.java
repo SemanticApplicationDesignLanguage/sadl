@@ -774,9 +774,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private void generateOwlFile(IFileSystemAccess2 fsa, String modelFolder, String owlFN, Model model, String modelName, String modelAlias, String format) throws TranslationException, IOException {
 		if (isBinary(format)) {
 			// IFileSystemAccess2.generateFile doesn't appear to handle binary files.
-//			String fs = modelFolder + "/" + owlFN;
-//	         writeOwlModelWithRDFDataMgr(model, format, fs);
-			getConfigMgr().getSadlModelGetterPutter(format).saveModel(model, modelName, modelName, owlFN, format);
+			String ofn = modelFolder + "/" + owlFN;
+			getConfigMgr().getSadlModelGetterPutter(format).saveModel(model, modelName, modelName, ofn, format);
 		}
 		else {
 			Charset charset = Charset.forName("UTF-8");

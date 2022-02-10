@@ -1,5 +1,8 @@
 package com.ge.research.sadl.model.persistence;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.jena.riot.RDFFormat;
 
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -140,6 +143,16 @@ public class SadlPersistenceFormat {
 
 		}
 		throw new TranslationException("Invalid format: " + rdfFormat);
+	}
+	
+	/**
+	 * Method to return all of the possible OWL file extensions supported in approximate
+	 * order of likelihood
+	 * 
+	 * @return -- list of extensions
+	 */
+	public static List<String> getOwlFileExtensions() {
+		return Arrays.asList("owl", "nt", "ttl", "rj", "jsonld", "trig", "nq", "trix", "trdf");
 	}
 	
 	public static String getSadlPersistenceFormatFromFilename(String owlFilename) {
