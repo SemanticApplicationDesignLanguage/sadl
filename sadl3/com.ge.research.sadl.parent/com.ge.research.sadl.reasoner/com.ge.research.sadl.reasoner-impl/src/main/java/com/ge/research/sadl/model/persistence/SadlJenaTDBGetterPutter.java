@@ -17,6 +17,14 @@ import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
 import com.ge.research.sadl.reasoner.TranslationException;
 
+/**
+ * Strategy: all read calls to SadlJenaTDBGetter check and if needed open READ transaction. 
+ * Putter checks for transaction and if true ends, opens WRITE transaction, does save, ends, 
+ * reopens READ transaction.
+ * 
+ * @author Natural Semantics, LLC
+ *
+ */
 public class SadlJenaTDBGetterPutter extends SadlJenaTDBGetter implements ISadlModelGetterPutter {
 
 	public SadlJenaTDBGetterPutter(IConfigurationManager mgr, String fmt) throws IOException {

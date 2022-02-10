@@ -19,6 +19,15 @@ import org.apache.jena.vocabulary.OWL;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 
+/**
+/**
+ * Strategy: all read calls to SadlJenaTDBGetter check and if needed open READ transaction. 
+ * Putter checks for transaction and if true ends, opens WRITE transaction, does save, ends, 
+ * reopens READ transaction.
+ * 
+ * @author Natural Semantics, LLC
+ *
+ */
 public class SadlJenaTDBGetter extends SadlModelGetter {
 
 	protected String tdbFolder = null;
