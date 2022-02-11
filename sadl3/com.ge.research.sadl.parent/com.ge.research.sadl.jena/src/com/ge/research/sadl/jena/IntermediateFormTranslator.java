@@ -2632,17 +2632,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							throw new TranslationException("Unexpected real argument");
 						}
 					}
-					else {		// argNode is not null, but still make sure we don't have a remaining null object in a triple
+					else {		// argNode is not null, add to retiredProxyNodes and set the arg to the argNode
 						((ProxyNode)arg).setReplacementNode(SadlModelProcessor.nodeCheck(argNode));
 						if (realArg instanceof GraphPatternElement) {
-							if (realArg instanceof TripleElement && ((TripleElement)realArg).getObject() == null) {
-								VariableNode v = getVariableNode(((TripleElement)realArg).getSubject(), 
-										((TripleElement)realArg).getPredicate(), null, false);
-								if (v != null) {
-									((TripleElement) realArg).setObject(v);
-									argNode = v;
-								}
-							}
 							retiredProxyNodes.put((GraphPatternElement) realArg, (ProxyNode)arg);
 						}
 						else {
