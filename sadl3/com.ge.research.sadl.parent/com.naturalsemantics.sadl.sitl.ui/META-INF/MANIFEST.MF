@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Automatic-Module-Name: com.naturalsemantics.sadl.sitl.ui
 Bundle-ManifestVersion: 2
 Bundle-Name: com.naturalsemantics.sadl.sitl.ui
-Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Natural Semantics, LLC
+Bundle-Version: 3.5.0.qualifier
 Bundle-SymbolicName: com.naturalsemantics.sadl.sitl.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.naturalsemantics.sadl.sitl,
@@ -17,7 +17,9 @@ Require-Bundle: com.naturalsemantics.sadl.sitl,
  org.eclipse.compare,
  org.eclipse.xtext.builder,
  com.ge.research.sadl;bundle-version="3.5.0",
- com.ge.research.sadl.ui;bundle-version="3.5.0"
+ com.ge.research.sadl.ui;bundle-version="3.5.0",
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
+ org.eclipse.xtend.lib;bundle-version="2.14.0";resolution:=optional
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.naturalsemantics.sadl.sitl.ui.quickfix,

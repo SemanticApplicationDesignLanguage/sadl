@@ -35,9 +35,14 @@ SadlModelElement returns sadl::SadlModelElement :
 	super::SadlStatement EOS			|
 	super::ExternalEquationStatement EOS	|
 	super::EquationStatement EOS |
-	Transform
+	Transform EOS |
+	Validate EOS
 ;
 
 Transform: 
-	'Transform' expr=Expression
+	('Transform'|'transform') ':' expr=Expression
+;
+
+Validate:
+	('Validate'|'validate') ':' expr=Expression
 ;

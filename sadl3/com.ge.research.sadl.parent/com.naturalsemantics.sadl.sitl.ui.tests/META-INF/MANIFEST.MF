@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Automatic-Module-Name: com.naturalsemantics.sadl.sitl.ui.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: com.naturalsemantics.sadl.sitl.ui.tests
-Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Natural Semantics, LLC
+Bundle-Version: 3.5.0.qualifier
 Bundle-SymbolicName: com.naturalsemantics.sadl.sitl.ui.tests; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.naturalsemantics.sadl.sitl.ui,

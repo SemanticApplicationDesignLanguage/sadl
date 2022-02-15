@@ -41,12 +41,12 @@
     <module>com.ge.research.sadl.ui.tests</module>
     <module>com.ge.research.sadl.update</module>
     <module>com.ge.research.sadl.xtextgenerator</module>
-	<module>com.naturalsemantics.sadl.sitl</module>
-	<module>com.naturalsemantics.sadl.sitl.ide</module>
-	<module>com.naturalsemantics.sadl.sitl.ui</module>
-	<module>com.naturalsemantics.sadl.sitl.target</module>
-	<module>com.naturalsemantics.sadl.sitl.tests</module>
-	<module>com.naturalsemantics.sadl.sitl.ui.tests</module>
+    <module>com.naturalsemantics.sadl.sitl</module>
+    <module>com.naturalsemantics.sadl.sitl.ide</module>
+    <module>com.naturalsemantics.sadl.sitl.target</module>
+    <module>com.naturalsemantics.sadl.sitl.tests</module>
+    <module>com.naturalsemantics.sadl.sitl.ui</module>
+    <module>com.naturalsemantics.sadl.sitl.ui.tests</module>
   </modules>
 
   <!-- Set all properties in one place -->

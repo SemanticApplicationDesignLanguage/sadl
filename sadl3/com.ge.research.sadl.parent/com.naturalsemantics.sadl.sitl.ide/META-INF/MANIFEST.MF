@@ -2,8 +2,8 @@ Manifest-Version: 1.0
 Automatic-Module-Name: com.naturalsemantics.sadl.sitl.ide
 Bundle-ManifestVersion: 2
 Bundle-Name: com.naturalsemantics.sadl.sitl.ide
-Bundle-Vendor: My Company
-Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Natural Semantics, LLC
+Bundle-Version: 3.5.0.qualifier
 Bundle-SymbolicName: com.naturalsemantics.sadl.sitl.ide; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.naturalsemantics.sadl.sitl,
@@ -13,7 +13,8 @@ Require-Bundle: com.naturalsemantics.sadl.sitl,
  com.ge.research.sadl;bundle-version="3.5.0",
  com.ge.research.sadl.ui;bundle-version="3.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
-Export-Package: com.naturalsemantics.sadl.sitl.ide.contentassist.antlr,
+Export-Package: com.naturalsemantics.sadl.sitl.ide.editor, 
+ com.naturalsemantics.sadl.sitl.ide.contentassist.antlr,
  com.naturalsemantics.sadl.sitl.ide.contentassist.antlr.internal,
  com.naturalsemantics.sadl.sitl.ide.contentassist.antlr.lexer,
  com.naturalsemantics.sadl.sitl.ide.contentassist.antlr.lexer.jflex
