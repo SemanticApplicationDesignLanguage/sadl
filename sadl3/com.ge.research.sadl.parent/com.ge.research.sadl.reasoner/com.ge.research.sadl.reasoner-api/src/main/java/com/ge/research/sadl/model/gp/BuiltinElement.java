@@ -40,7 +40,8 @@ public class BuiltinElement extends GraphPatternElement {
 	private int expectedArgCount = 0;
 	private boolean createdFromInterval = false;
 	private NamedNode mImpliedPropertyNode = null;		// contains the implied property information of the named node
-
+	private Equation inModelReferencedEquation = null;	// the declared Equation or ExternalEquation this built-in references (if any)
+	
 	private List<Node> argumentTypes = null;
 	private List<Node> returnTypes = null;
 
@@ -585,5 +586,13 @@ public class BuiltinElement extends GraphPatternElement {
 	 */
 	public void setExpectedArgCount(int expectedArgCount) {
 		this.expectedArgCount = expectedArgCount;
+	}
+
+	public Equation getInModelReferencedEquation() {
+		return inModelReferencedEquation;
+	}
+
+	public void setInModelReferencedEquation(Equation inModelReferencedEquation) {
+		this.inModelReferencedEquation = inModelReferencedEquation;
 	}
 }

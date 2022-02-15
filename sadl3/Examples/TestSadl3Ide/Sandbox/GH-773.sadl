@@ -1,0 +1,9 @@
+ uri "http://sadl.org/GH-773.sadl" alias gh-773.
+ 
+ dependsOn describes ^Equation with values of type ^Equation.
+ 
+ External getFreeStream0(): "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.Solver.getFreeStream0".
+ getFreeStream0 has dependsOn getCp.
+ External getCp(double temp, int opt) returns double: "http://com.ge.research.sadl.darpa.aske.answer/TurboModified2_java#Turbo.getCp".
+// getFreeStream0 has dependsOn getCp.
+ 

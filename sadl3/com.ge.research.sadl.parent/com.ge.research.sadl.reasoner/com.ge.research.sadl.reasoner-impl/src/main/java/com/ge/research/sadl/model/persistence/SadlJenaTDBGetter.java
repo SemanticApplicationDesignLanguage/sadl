@@ -19,6 +19,15 @@ import org.apache.jena.vocabulary.OWL;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 
+/**
+/**
+ * Strategy: all read calls to SadlJenaTDBGetter check and if needed open READ transaction. 
+ * Putter checks for transaction and if true ends, opens WRITE transaction, does save, ends, 
+ * reopens READ transaction.
+ * 
+ * @author Natural Semantics, LLC
+ *
+ */
 public class SadlJenaTDBGetter extends SadlModelGetter {
 
 	protected String tdbFolder = null;
@@ -36,13 +45,18 @@ public class SadlJenaTDBGetter extends SadlModelGetter {
 	
 	@Override
 	public Model getModel(String uri) {
-//     	ds.begin(ReadWrite.READ);
-		if(ds.containsNamedModel(uri)) {
-			Model m = ds.getNamedModel(uri);
-//	     	ds.end();
-			return m;
-		}
-//     	ds.end();
+     	if (!ds.isInTransaction()) {
+     		ds.begin(ReadWrite.READ);
+     	}
+     	try {
+			if(ds.containsNamedModel(uri)) {
+				Model m = ds.getNamedModel(uri);
+				return m;
+			}
+     	}
+     	finally {
+//     		ds.end();
+     	}
 		return null;
 	}
 
@@ -53,35 +67,59 @@ public class SadlJenaTDBGetter extends SadlModelGetter {
 			return (OntModel)m;
 		}
 		else {
-//			ds.begin(ReadWrite.READ);
-			getConfigMgr().getOntModelSpec(null).setImportModelGetter(this);
-			OntModel om = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
-//			om.getDocumentManager().setProcessImports(true);
-//			om.loadImports();
-//			ds.end();
-			return om;
+	     	if (!ds.isInTransaction()) {
+	     		ds.begin(ReadWrite.READ);
+	     	}
+	     	try {
+	     		getConfigMgr().getOntModelSpec(null).setImportModelGetter(this);
+	     		OntModel om = ModelFactory.createOntologyModel(getConfigMgr().getOntModelSpec(null), m);
+				om.getDocumentManager().setProcessImports(true);
+				om.loadImports();
+				return om;
+	     	}
+	     	finally {
+//	     		ds.end();
+	     	}
 		}
-	
 	}
+	
 	@Override
-	public Model getModel(String URL, ModelReader loadIfAbsent) {
-		// TODO Auto-generated method stub
+	public Model getModel(String uri, ModelReader loadIfAbsent) {
+     	if (!ds.isInTransaction()) {
+     		ds.begin(ReadWrite.READ);
+     	}
+     	try {
+			if (ds.containsNamedModel(uri)) {
+				return ds.getNamedModel(uri);
+			}
+     	}
+     	finally {
+//    		ds.end();
+     	}
 		return null;
 	}
 	
 	@Override
 	public boolean modelExists(String uri) throws ConfigurationException, MalformedURLException {
-//     	ds.begin(ReadWrite.READ);
-		if (ds.containsNamedModel(uri)) {
-//			ds.end();
-			return true;
-		}
-//		ds.end();
+     	if (!ds.isInTransaction()) {
+     		ds.begin(ReadWrite.READ);
+     	}
+     	try {
+			if (ds.containsNamedModel(uri)) {
+				return true;
+			}
+     	}
+     	finally {
+//    		ds.end();
+     	}
 		return false;
 	}
 
 	@Override
 	public List<String> getAvailableModelNames() {
+     	if (!ds.isInTransaction()) {
+     		ds.begin(ReadWrite.READ);
+     	}
 		Iterator<String> existingNames = ds.listNames();
 		if (existingNames.hasNext()) {
 			List<String> names = new ArrayList<String>();

@@ -1,0 +1,12 @@
+ uri "http://sadl.org/GH828.sadl" alias gh828.
+ 
+ Person is a class.
+// gender of Person must be one of {Male, Female}. 
+// age of Person must be one of {"young", "old"}. 
+// age of Person must be one of {12, 18}. 
+ 
+// age describes Person with values of type string.
+// John is a Person with age "old".
+ age describes Person with values of type int.
+ John is a Person with age 23.
+  

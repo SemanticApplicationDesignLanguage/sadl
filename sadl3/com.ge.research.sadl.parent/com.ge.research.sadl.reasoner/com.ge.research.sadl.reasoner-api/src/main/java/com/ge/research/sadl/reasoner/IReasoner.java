@@ -33,8 +33,10 @@ import java.util.Map;
 import jakarta.activation.DataSource;
 
 import com.ge.research.sadl.model.Explanation;
+import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
+import com.ge.research.sadl.model.gp.Node;
 
 public interface IReasoner {
 	
@@ -353,6 +355,14 @@ public interface IReasoner {
 	 * @param patterns
 	 */
 	public List<Explanation> explain(List<GraphPatternElement> patterns);
+	
+	/**
+	 * Method to evaluate a SADL Equation or External equation, wrapped in a BuiltinElement that identifies the
+	 * equation's inputs.
+	 * @param bi
+	 * @return --a SADL Node, which could be a Literal, a NamedNode, or a ProxyNode to wrap a GraphPatternElement 
+	 */
+	public Node evaluateSadlEquation(BuiltinElement bi);
 	
 	/**
 	 * Write the inferred model (or deductions only) to the specified filename

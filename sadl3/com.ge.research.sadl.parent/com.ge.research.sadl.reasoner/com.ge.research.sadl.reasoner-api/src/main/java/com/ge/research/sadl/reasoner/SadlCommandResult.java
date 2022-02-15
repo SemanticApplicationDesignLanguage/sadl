@@ -52,7 +52,7 @@ public class SadlCommandResult {
 		}
 		else {
 			sb.append("\n  ");
-			sb.append(getResults().toString());
+			sb.append(getResults() != null ? getResults().toString() : "no results");
 		}
 		if (getErrors() != null) {
 			sb.append("\n  Errors:");

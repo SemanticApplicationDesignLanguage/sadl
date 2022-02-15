@@ -263,8 +263,8 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 	described by publicized with values of type boolean.
 			 	
 			 	past describes System with values of type UnittedQuantity.
-				past of System has exactly 1 value.
-				
+			 	past of System has exactly 1 value.
+			 									
 			 Result is a class, can only be one of {Passed, Failed}.
 			 
 			 UnittedConstant is a class described by constantValue with values of type UnittedQuantity.
@@ -1128,7 +1128,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			}
 			var idx = 0
 			for (t:forTest) {
-				processor.compareTranslations(results.get(idx++).toString, t.toString)
+				assertTrue(processor.compareTranslations(results.get(idx++).toString, t.toString))
 			}
 		]
 	}
@@ -1411,8 +1411,14 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 					println(issue.message)
 				}
 			}
- 			issues.assertHasIssues(1);
-			assertEquals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information", issues.head.message)
+ 			issues.assertHasIssues(7);
+ 			var param1issueFound = false;
+ 			for (issue : issues) {
+ 				if (issue.message.equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information")) {
+ 					param1issueFound = true;
+ 				}
+ 			}
+			assertTrue(param1issueFound) 
 			for (rule:rules) {
 				println(rule.toString)
 			}
@@ -1441,6 +1447,214 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			}
 			assertTrue(rules.size == 1)
 			assertEquals("Rule R1:  if +(1,2,v0) and +(3,4,v1) then print(\"Multiple built-in args: \",v0,v1).", rules.get(0).toString)
+		]
+	}
+	
+	@Test
+	def void testGH_874() {
+		'''
+		uri "http://sadl.org/propChains.sadl" alias propchains.
+		
+		 Part is a class
+		          described by partID with values of type string
+		          described by processing with values of type Process.
+		
+		 Process is a class
+		          described by temperature with values of type Temperature.
+		
+		 Temperature is a type of UnittedQuantity.
+		
+		 p1 is a Part
+		          partID "123"
+		          processing (a Process temperature (a Temperature ^value 100 unit "C")).
+		  
+		  
+		 // what is the temperature of processing of p1?
+		 Ask: select x where x is the temperature of processing of p1.
+		
+		// what is the temperature of processing of (a Part partID "123")?
+		 Ask: select x where x is the temperature of processing of (a Part with partID "123").
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults()
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			var cnt = 0
+			for (cmd:cmds) {
+				println(cmd.toString)
+				if (cmd.toString.equals("select x where and(rdf(propchains:p1, propchains:processing, v0), rdf(v0, propchains:temperature, x))")) cnt++
+				if (cmd.toString.equals("select x where and(rdf(v0, propchains:partID, \"123\"), and(rdf(v0, propchains:processing, v1), rdf(v1, propchains:temperature, x)))")) cnt++
+			}
+			assertTrue(cnt == 2)
+		]
+	}
+
+	@Test
+	def void testGH_874b() {
+		'''
+		uri "http://sadl.org/propChains.sadl" alias propchains.
+		
+		 Part is a class
+		          described by partID with values of type string
+		          described by processing with values of type Process.
+		
+		 Process is a class
+		          described by temperature with values of type Temperature.
+		
+		 Temperature is a type of UnittedQuantity.
+		
+		 p1 is a Part
+		          partID "123"
+		          processing (a Process temperature (a Temperature ^value 100 unit "C")).
+		  
+		  
+		// what is the unit of a temperature of a processing of (a Part partID "123")?
+		 Ask: select x where x is the unit of a temperature of a processing of (a Part with partID "123").
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults()
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(issues.empty)
+			for (cmd:cmds) {
+				println(cmd.toString)
+			}
+			assertTrue(cmds.size == 1)
+			assertTrue(cmds.get(0).toString.equals("select x where and(rdf(v0, propchains:partID, \"123\"), and(rdf(v0, propchains:processing, v1), and(rdf(v1, propchains:temperature, v2), rdf(v2, sadlimplicitmodel:unit, x))))"))
+			
+		]
+	}
+
+	@Test
+	def void testGH_882() {
+		val forTest = "Rule Test:  if rdf(inst, rdf:type, test:Class1) and rdf(inst, test:xyz, xyz1) and rdf(xyz1, rdf:type, abc) and rdf(abc, rdfs:subClassOf, test:XYZ) and rdf(abc, test:new1, v0) and rdf(abc, test:new1, z1) and rdf(z1, test:ccc1Val, someName1) and rdf(obj1, rdf:type, test:Object) and rdf(obj1, test:objProp, obj2) and rdf(obj2, rdf:type, test:Object2) and rdf(obj2, test:someProp3, inst) and rdf(obj2, someName1, v1) and rdf(v1, sadlimplicitmodel:value, z2) and rdf(xyz1, test:new3, v2) and >=(z2,v2) and rdf(obj3, rdf:type, test:Object2) and rdf(obj3, someName1, v3) and rdf(v3, sadlimplicitmodel:value, z3) and >=(z3,v2) then print(\"in Test *********************************************************************************************\")."
+
+		val rdfmodel ='''
+			uri "http://www.w3.org/2000/01/rdf-schema" alias rdfs.
+			
+			^type is a property.
+			
+			rdfs:domain is a property.
+			
+			rdfs:range is a property.
+			
+			rdfs:subClassOf is a property.
+			
+			rdfs:subPropertyOf is a property.
+			
+			rdfs:subTypeOf is a property.
+			
+			rdfs:onProperty is a property.
+			
+			rdfs:allValuesFrom is a property.
+			
+			rdfs:onClass is a property.		
+			'''.sadl
+		'''
+			uri "http://kdl.ge.com/Test.sadl" alias test.
+			
+			import "http://www.w3.org/2000/01/rdf-schema".
+			
+			Object is a class
+			
+			   described by objProp with values of type Object2.
+			Object2 is a class
+			
+			   described by someProp1 with values of type UnittedQuantity
+			
+			   described by someProp2 with values of type UnittedQuantity
+			
+			   described by someProp3 with values of type Class1.
+			Class1 is a class,
+			
+			   described by xyz with values of type XYZ.
+			CCC1 is a class,
+			
+			   described by ccc1Val  with values of type class.
+			XYZ is a class
+			
+			  described by new1 with a single value of type CCC1
+			
+			   described by new2 with a single value of type CCC1
+			
+			   described by new3 with a single value of type float.
+			ABC is a type of XYZ.
+			
+			new1 of ABC is (a CCC1 with ccc1Val someProp1).
+			
+			new2 of ABC is (a CCC1 with ccc1Val someProp2).
+			
+			Rule Test
+			
+			if inst is a Class1
+			
+			and xyz of inst is xyz1
+			
+			and xyz1 is a abc
+			
+			and abc rdfs:subClassOf XYZ
+			
+			and new1 of abc is a CCC1
+			
+			and new1 of abc is z1
+			
+			and z1 has ccc1Val someName1
+			
+			and obj1 is a Object
+			
+			and obj2 is objProp of obj1
+			
+			and obj2 is a Object2
+			
+			and inst is someProp3 of obj2
+			
+			and ^value of someName1 of obj2 is z2
+			
+			and z2 >= new3 of xyz1
+			
+			and obj3 is a Object2
+			
+			and ^value of someName1 of obj3 is z3
+			
+			and z3 >= new3 of xyz1
+			
+			then print("in Test *********************************************************************************************").
+			
+			mx is a Class1
+			
+			has xyz (a ABC with new3 0.0).
+			
+			p1 is a Object
+			
+			with objProp (a Object2
+			
+			                 with someProp3 mx
+			
+			                 with someProp1 (a UnittedQuantity with ^value 3.2 with unit "xxx1")
+			
+			                 with someProp2 (a UnittedQuantity with ^value 8.3 with unit "xxx2")
+			
+			                 ).
+			Ask: "select * where {?x ?y ?z} limit 2".
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(rules.size==1)
+			for (rule:rules) {
+				println(rule.toString)
+			}
+			assertTrue(processor.compareTranslations(rules.get(0).toString, forTest))
+//			var idx = 0
+//			for (t:forTest) {
+//				assertEquals(rules.get(idx++).toString, t.toString)
+//			}
 		]
 	}
 	
