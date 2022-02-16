@@ -2997,7 +2997,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			if (!returnOnError) {
-				Object qobj = processExpression(qexpr);
+				Object qobj = processAsk(qexpr);
 				if (qobj instanceof Query) {
 					query = (Query) qobj;
 				} else if (qobj == null) {
@@ -3030,6 +3030,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							if (annotations != null && annotations.size() > 0) {
 								addNamedStructureAnnotations(nqry, annotations);
 							}
+						}
+					}
+					if (query.getKeyword() == null) {
+						if (query.getVariables() == null) {
+							query.setKeyword("ask");
+						}
+						else {
+							query.setKeyword("select");
 						}
 					}
 					if (isGraph) {
@@ -3073,8 +3081,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					Node obj = ((TripleElement) e).getObject();
 					boolean implicitObject = false;
 					if (obj == null) {
-						obj = new VariableNode(getIfTranslator().getNewVar());	// not sure why this uses IFT to get new var name awc 2/5/22
-						setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
+						obj = new VariableNode(getNewVar(expr));
 						((TripleElement) e).setObject(obj);
 						implicitObject = true;
 					}
@@ -3191,17 +3198,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	public Query processExpression(SelectExpression expr)
+	public Object processExpression(SelectExpression expr)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		return processAsk(expr);
 	}
 
-	public Query processExpression(ConstructExpression expr)
+	public Object processExpression(ConstructExpression expr)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		return processAsk(expr);
 	}
 
-	public Query processExpression(AskExpression expr)
+	public Object processExpression(AskExpression expr)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		return processAsk(expr);
 	}
@@ -3280,7 +3287,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return query;
 	}
 
-	private Query processAsk(Expression expr) {
+	protected Object processAsk(EObject thenExpr) {
 		Object trgt = getTarget();
 		Query query = null;
 		if (trgt instanceof Query) {
@@ -3289,10 +3296,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		else if (trgt instanceof Test) {
 			query = new Query();
 			setTarget(query);
-			addInfo("Creating query as part of test", expr);
+			addInfo("Creating query as part of test", thenExpr);
 		}
 		else {
-			addError("Unhandled construct with target of type " + expr.getClass().getCanonicalName(), expr);
+			addError("Unhandled construct with target of type " + thenExpr.getClass().getCanonicalName(), thenExpr);
 		}
 		// if (parent != null) {
 		// getIfTranslator().setEncapsulatingTarget(parent);
@@ -3301,14 +3308,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// get variables and other information from the SelectExpression
 		EList<SadlResource> varList = null; // the specified list of variables to be returned
 		List<VariableNode> names = null; // the actual names generated from the varList
-		Expression whexpr = null;
-		if (expr instanceof SelectExpression) {
-			whexpr = ((SelectExpression) expr).getWhereExpression();
+		EObject whexpr = null;
+		Object qobj;
+		if (thenExpr instanceof SelectExpression) {
+			whexpr = ((SelectExpression) thenExpr).getWhereExpression();
 			query.setKeyword("select");
-			if (((SelectExpression) expr).isDistinct()) {
+			if (((SelectExpression) thenExpr).isDistinct()) {
 				query.setDistinct(true);
 			}
-			varList = ((SelectExpression) expr).getSelectFrom();
+			varList = ((SelectExpression) thenExpr).getSelectFrom();
 			if (varList != null) {
 				names = new ArrayList<VariableNode>();
 				for (int i = 0; i < varList.size(); i++) {
@@ -3356,15 +3364,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						// throw new InvalidNameException("'" + var.toString() + "' isn't a variable as
 						// expected in query select names.");
 						if (var != null) {
-							addError(SadlErrorMessages.QUERY_ISNT_VARIABLE.get(var.toString()), expr);
+							addError(SadlErrorMessages.QUERY_ISNT_VARIABLE.get(var.toString()), thenExpr);
 						}
 					} else {
 						names.add(((VariableNode) var));
 					}
 				}
 			}
-			if (((SelectExpression) expr).getOrderby() != null) {
-				EList<OrderElement> ol = ((SelectExpression) expr).getOrderList();
+			if (((SelectExpression) thenExpr).getOrderby() != null) {
+				EList<OrderElement> ol = ((SelectExpression) thenExpr).getOrderList();
 				List<OrderingPair> orderingPairs = new ArrayList<OrderingPair>();
 				for (int i = 0; i < ol.size(); i++) {
 					OrderElement oele = ol.get(i);
@@ -3374,32 +3382,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				query.setOrderBy(orderingPairs);
 			}
-		} else if (expr instanceof ConstructExpression) {
-			whexpr = ((ConstructExpression) expr).getWhereExpression();
+		} else if (thenExpr instanceof ConstructExpression) {
+			whexpr = ((ConstructExpression) thenExpr).getWhereExpression();
 			query.setKeyword("construct");
 			names = new ArrayList<VariableNode>();
 			try {
-				Object result = processExpression(((ConstructExpression) expr).getSubj());
+				Object result = processExpression(((ConstructExpression) thenExpr).getSubj());
 				if (result instanceof VariableNode) {
 					names.add(((VariableNode) result));
 				} else {
-					names.add(createVariable(result.toString(), expr));
+					names.add(createVariable(result.toString(), thenExpr));
 				}
-				result = processExpression(((ConstructExpression) expr).getPred());
+				result = processExpression(((ConstructExpression) thenExpr).getPred());
 				if (result instanceof VariableNode) {
 					names.add((VariableNode) result);
 				} else {
-					names.add(createVariable(result.toString(), expr));
+					names.add(createVariable(result.toString(), thenExpr));
 				}
-				result = processExpression(((ConstructExpression) expr).getObj());
+				result = processExpression(((ConstructExpression) thenExpr).getObj());
 				if (result instanceof VariableNode) {
 					names.add(((VariableNode) result));
 				} else {
-					names.add(createVariable(result.toString(), expr));
+					names.add(createVariable(result.toString(), thenExpr));
 				}
 				if (names.size() != 3) {
 					addWarning("A 'construct' statement should have 3 variables so as to be able to generate a graph.",
-							expr);
+							thenExpr);
 				}
 			} catch (InvalidNameException e) {
 				e.printStackTrace();
@@ -3414,10 +3422,29 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} catch (ConfigurationException e) {
 				e.printStackTrace();
 			}
-		} else if (expr instanceof AskExpression) {
-			whexpr = ((AskExpression) expr).getWhereExpression();
+		} else if (thenExpr instanceof AskExpression) {
+			whexpr = ((AskExpression) thenExpr).getWhereExpression();
 			query.setKeyword("ask");
+		} 				
+		else if (thenExpr instanceof StringLiteral || thenExpr instanceof SadlResource) {
+			try {
+				return processExpression(thenExpr);
+			} catch (InvalidNameException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvalidTypeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
+		else {
+			// this is just some expression...
+			whexpr = thenExpr;
+		}
+		
 
 		// Translate the query to the resulting intermediate form.
 		if (modelValidator != null) {
@@ -3460,8 +3487,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			addError(e1.getMessage(), whexpr);
 		}
 
+		boolean explicitNames = false;
 		if (names != null && names.size() > 0) {
 			query.setVariables(names); // this will replace implicitly added variables if there are explicit ones
+			explicitNames = true;
 		}
 
 		Object expandedPattern = null;
@@ -3470,13 +3499,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			expandedPattern = getIfTranslator().expandProxyNodes(pattern, false, true);
 			setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 		} catch (InvalidNameException e) {
-			addError(SadlErrorMessages.INVALID_NAME.get("query", pattern.toString()), expr);
+			addError(SadlErrorMessages.INVALID_NAME.get("query", pattern.toString()), thenExpr);
 			e.printStackTrace();
 		} catch (InvalidTypeException e) {
-			addError(SadlErrorMessages.INVALID_TYPE.get("query", pattern.toString()), expr);
+			addError(SadlErrorMessages.INVALID_TYPE.get("query", pattern.toString()), thenExpr);
 			e.printStackTrace();
 		} catch (TranslationException e) {
-			addError(SadlErrorMessages.TRANSLATION_ERROR.get("query", pattern.toString()), expr);
+			addError(SadlErrorMessages.TRANSLATION_ERROR.get("query", pattern.toString()), thenExpr);
 			e.printStackTrace();
 		}
 		if (expandedPattern != null && expandedPattern instanceof List<?> && ((List<?>) expandedPattern).size() > 0) {
@@ -3484,12 +3513,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 
 		if (pattern instanceof List<?>) {
-			if (query.getVariables() == null) {
+			if (query.getVariables() == null || !explicitNames) {
 				Set<VariableNode> nodes = getIfTranslator().getSelectVariables((List<GraphPatternElement>) pattern);
 				if (nodes != null && nodes.size() > 0) {
 					names = new ArrayList<VariableNode>(1);
 					for (VariableNode node : nodes) {
-						names.add(node);
+						if (!names.contains(node)) {
+							names.add(node);
+						}
 					}
 					query.setVariables(names);
 					if (query.getKeyword() == null) {
@@ -3530,8 +3561,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			q.setSparqlQueryString(qstr);
 		} else if (qobj instanceof NamedNode) {
 			if (isProperty(((NamedNode) qobj).getNodeType())) {
-				VariableNode sn = new VariableNode(getIfTranslator().getNewVar()); // not sure why this uses IFT to get new var name awc 2/5/22
-				setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
+				VariableNode sn = new VariableNode(getNewVar(context));
 				TripleElement tr = new TripleElement(sn, (Node) qobj, null);
 				q.addPattern(tr);
 				List<VariableNode> vars = q.getVariables();
@@ -8713,8 +8743,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			else if (((Object[])result)[0] instanceof GraphPatternElement &&
 					((Object[])result)[1] instanceof GraphPatternElement) {
 				List<GraphPatternElement> lst = new ArrayList<GraphPatternElement>();
-				lst.add((GraphPatternElement) ((Object[])result)[0]);
+				// is there any circumstance where we don't want to put "rest" before "result"?
 				lst.add((GraphPatternElement) ((Object[])result)[1]);
+				lst.add((GraphPatternElement) ((Object[])result)[0]);
 				return listToSingleJunction(lst);
 			}
 		}

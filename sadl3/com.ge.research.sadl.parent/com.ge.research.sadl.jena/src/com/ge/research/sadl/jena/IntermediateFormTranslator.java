@@ -694,6 +694,15 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 				}
 			}
+			else if (gpe instanceof Junction) {
+				try {
+					JunctionList jctlst = junctionToList((Junction) gpe);
+					return getUnboundVariables(jctlst);
+				} catch (TranslationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 
 		return vars; 
@@ -3138,7 +3147,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return jct;
 	}
 
-	private List<GraphPatternElement> getAllGPEs(List<GraphPatternElement> list) throws TranslationException {
+	public List<GraphPatternElement> getAllGPEs(List<GraphPatternElement> list) throws TranslationException {
 		List<GraphPatternElement> results = null;
 		for (int i = 0; list != null && i < list.size(); i++) {
 			GraphPatternElement gpe = list.get(i);

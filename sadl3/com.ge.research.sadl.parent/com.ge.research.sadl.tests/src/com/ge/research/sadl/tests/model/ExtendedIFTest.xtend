@@ -1530,6 +1530,88 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	}
 
 	@Test
+	def void testGH_874c() {
+		'''
+		uri "http://sadl.org/propChains.sadl" alias propchains.
+		
+		 Part is a class
+		          described by partID with values of type string
+		          described by processing with values of type Process.
+		
+		 Process is a class
+		          described by temperature with values of type Temperature.
+		
+		 Temperature is a type of UnittedQuantity.
+		
+		 p1 is a Part
+		          partID "123"
+		          processing (a Process temperature (a Temperature ^value 100 unit "C")).
+		  
+		  
+		// what is the unit of a temperature of a processing of (a Part partID "123")?
+		 Ask: the temperature of a processing of (a Part with partID "123").
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults()
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(issues.empty)
+			for (cmd:cmds) {
+				println(cmd.toString)
+			}
+			assertTrue(cmds.size == 1)
+			assertTrue(cmds.get(0).toString.equals("select v0 v1 v2 where and(rdf(v0, propchains:partID, \"123\"), and(rdf(v0, propchains:processing, v1), rdf(v1, propchains:temperature, v2)))"))
+			
+		]
+	}
+
+	@Test
+	def void testGH_874d() {
+		'''
+		uri "http://sadl.org/propChains.sadl" alias propchains.
+		
+		 Part is a class
+		          described by partID with values of type string
+		          described by processing with values of type Process.
+		
+		 Process is a class
+		          described by temperature with values of type Temperature.
+		
+		 Temperature is a type of UnittedQuantity.
+		
+		 p1 is a Part
+		          partID "123"
+		          processing (a Process temperature (a Temperature ^value 100 unit "C")).
+		  	  
+		 Ask: partID.
+		 
+		 Ask: processing.
+		 
+		 Ask: temperature of processing.
+		 
+		 Ask: unit of temperature of processing of a Part.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			val results = processor.getIntermediateFormResults()
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+			assertTrue(issues.empty)
+			for (cmd:cmds) {
+				println(cmd.toString)
+			}
+			assertTrue(cmds.size == 4)
+			assertTrue(cmds.get(0).toString.equals("select v0 v1 where rdf(v0, propchains:partID, v1)"))
+			assertTrue(cmds.get(1).toString.equals("select v0 v1 where rdf(v0, propchains:processing, v1)"))
+			assertTrue(cmds.get(2).toString.equals("select v0 v1 v2 where and(rdf(v0, propchains:processing, v1), rdf(v1, propchains:temperature, v2))"))
+			assertTrue(cmds.get(3).toString.equals("select v0 v1 v2 v3 where and(rdf(v0, propchains:processing, v1), and(rdf(v1, propchains:temperature, v2), rdf(v2, sadlimplicitmodel:unit, v3)))"))
+		]
+	}
+
+	@Test
 	def void testGH_882() {
 		val forTest = "Rule Test:  if rdf(inst, rdf:type, test:Class1) and rdf(inst, test:xyz, xyz1) and rdf(xyz1, rdf:type, abc) and rdf(abc, rdfs:subClassOf, test:XYZ) and rdf(abc, test:new1, v0) and rdf(abc, test:new1, z1) and rdf(z1, test:ccc1Val, someName1) and rdf(obj1, rdf:type, test:Object) and rdf(obj1, test:objProp, obj2) and rdf(obj2, rdf:type, test:Object2) and rdf(obj2, test:someProp3, inst) and rdf(obj2, someName1, v1) and rdf(v1, sadlimplicitmodel:value, z2) and rdf(xyz1, test:new3, v2) and >=(z2,v2) and rdf(obj3, rdf:type, test:Object2) and rdf(obj3, someName1, v3) and rdf(v3, sadlimplicitmodel:value, z3) and >=(z3,v2) then print(\"in Test *********************************************************************************************\")."
 
