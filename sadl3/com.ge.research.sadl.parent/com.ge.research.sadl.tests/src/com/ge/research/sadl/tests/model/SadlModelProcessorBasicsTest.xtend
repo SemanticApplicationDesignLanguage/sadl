@@ -1470,6 +1470,9 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  		 Ask: "select ?x ?y where {?x <weight> ?y}".
  		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
  			assertNotNull(issues)
+ 			for (issue : issues) {
+ 				println(issue.toString)
+ 			}
  			assertTrue(issues.size == 1)
  			val issue0 = issues.get(0).toString
  			assertTrue(issue0.startsWith("ERROR:weight is ambiguous; see 'http://sadl.org/model2.sadl#weight' and 'http://sadl.org/model1.sadl#weight'"))
