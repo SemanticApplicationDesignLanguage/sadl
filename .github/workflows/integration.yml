@@ -8,9 +8,9 @@ on:
     types: [opened, synchronize, reopened]
   workflow_dispatch:
 
-# Runs a build job as a CI check:
-# - Builds SADL source & runs unit tests
-# - Builds SADL-Eclipse Docker image
+# Runs integration workflow as a CI check:
+# - Builds SADL source and runs unit tests
+# - Builds SADL-Eclipse image
 
 jobs:
   integration:
@@ -38,7 +38,7 @@ jobs:
       with:
         run: mvn -B package -Dtycho.localArtifacts=ignore --file sadl3/com.ge.research.sadl.parent/pom.xml
 
-    - name: Build SADL-Eclipse Docker image
+    - name: Build SADL-Eclipse image
       uses: docker/build-push-action@v2.9.0
       with:
         context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product

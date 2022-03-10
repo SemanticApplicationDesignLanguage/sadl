@@ -9,10 +9,11 @@ on:
     tags-ignore: [ '*' ]
   workflow_dispatch:
 
-# Runs a build job and uploads SADL build artifacts:
-# - Builds SADL source & runs unit tests
-# - Uploads SADL build artifacts to workflow
-# - Builds SADL-Eclipse Docker image and pushes it
+# Runs main workflow and uploads build artifacts:
+# - Builds SADL source and runs unit tests
+# - Uploads SADL product/zip to main workflow assets
+# - Pushes SADL-Eclipse image to Docker Hub
+# - Updates sadl-develop update site
 
 jobs:
   main:
@@ -45,13 +46,13 @@ jobs:
         cd sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository/features
         echo "sadlversion=$(ls com.ge.research.sadl.feature_*.jar | sed 's/com.ge.research.sadl.feature_\(.*\).jar/\1/')" >> $GITHUB_ENV
 
-    - name: Upload SADL product zip files
+    - name: Upload SADL product
       uses: actions/upload-artifact@v3.0.0
       with:
         name: sadl-eclipse-${{ env.sadlversion }}
         path: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/target/products/*.zip
 
-    - name: Upload SADL update repository
+    - name: Upload SADL update site
       uses: actions/upload-artifact@v3.0.0
       with:
         name: com.ge.research.sadl.update-${{ env.sadlversion }}
@@ -63,7 +64,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build SADL-Eclipse Docker image and push it
+    - name: Build and push SADL-Eclipse image
       uses: docker/build-push-action@v2.9.0
       with:
         context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
@@ -78,3 +79,21 @@ jobs:
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
         repository: sadl/sadl-eclipse
         readme-filepath: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/README.md
+
+    - name: Check out sadl-update-sites
+      uses: actions/checkout@v3.0.0
+      with:
+        repository: SemanticApplicationDesignLanguage/sadl-update-sites
+        token: ${{ secrets.CI_PAT }}
+        path: sadl-update-sites
+
+    - name: Update sadl-develop in sadl-update-sites
+      run: |
+        cd sadl-update-sites
+        rm -rf sadl-develop
+        mv ../sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.update/target/repository sadl-develop
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .
+        git commit -m "Update sadl-develop in sadl-update-sites"
+        git push
