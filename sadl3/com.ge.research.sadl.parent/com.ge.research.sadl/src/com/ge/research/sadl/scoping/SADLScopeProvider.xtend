@@ -101,7 +101,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 	@Inject protected AmbiguousNameHelper ambiguousNameHelper;
 	@Inject protected GlobalScopeProviderFilterProvider globalScopeProviderFilterProvider;
 
-	@Inject OnChangeEvictingCache cache
+	@Inject protected OnChangeEvictingCache cache
 
 	val LocalScopeProvider localScope_01 = namedScopeProvider([resource, namespace, parentScope, importScope |
 		return internalGetLocalResourceScope(resource, namespace, parentScope, importScope, true) [

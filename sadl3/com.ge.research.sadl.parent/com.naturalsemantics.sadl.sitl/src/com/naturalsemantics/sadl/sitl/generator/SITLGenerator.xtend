@@ -7,6 +7,9 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
+import java.net.URI
+import com.ge.research.sadl.processing.OntModelProvider
+import com.naturalsemantics.sadl.sitl.processing.JenaBasedSitlModelProcessor
 
 /**
  * Generates code from your model files on save.
@@ -16,10 +19,9 @@ import org.eclipse.xtext.generator.IGeneratorContext
 class SITLGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-//		fsa.generateFile('greetings.txt', 'People to greet: ' + 
-//			resource.allContents
-//				.filter(Greeting)
-//				.map[name]
-//				.join(', '))
+		val lastSeg = resource.getURI().lastSegment();
+		val sitlfn = lastSeg.toString + ".tmpl"
+		val content = OntModelProvider.getPrivateKeyValuePair(resource, JenaBasedSitlModelProcessor.SITL_TMPL_SERIALIZATION);
+		fsa.generateFile(sitlfn, content.toString)
 	}
 }

@@ -21,12 +21,16 @@
  */
 package com.naturalsemantics.sadl.sitl.scoping;
 
-import com.ge.research.sadl.scoping.SADLScopeProvider;
+import com.ge.research.sadl.scoping.SADLScopeProvider
+import com.google.common.base.Predicate
+import com.google.inject.Provider
+import java.util.Map
+import java.util.Set
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.EReference
-import org.eclipse.xtext.EcoreUtil2
-import com.ge.research.sadl.sADL.ExpressionScope
-import com.ge.research.sadl.sADL.SadlModel
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.naming.QualifiedName
+import org.eclipse.xtext.resource.IEObjectDescription
+import org.eclipse.xtext.scoping.IScope
 
 /**
  * This class contains custom scoping description.
@@ -36,42 +40,34 @@ import com.ge.research.sadl.sADL.SadlModel
  */
 class SITLScopeProvider extends SADLScopeProvider {
 
-	override protected getSadlResourceScope(EObject obj, EReference reference) {
-		val parent = createResourceScope(obj.eResource, null, newHashSet);
-		val statement = EcoreUtil2.getContainerOfType(obj, ExpressionScope)
-		if (statement !== null) {
-			val model = EcoreUtil2.getContainerOfType(statement, SadlModel)
-			var newParent = parent
-//			for (context : model.elements.filter(RequirementContext)) {
-//				if (context !== statement) {
-//					newParent = getLocalVariableScope(#[context.expr], newParent)
-//				}
-//			}
-//			if (statement instanceof RequirementContext) {
-//				if (statement.expr !== null) {
-//					newParent = getLocalVariableScope(#[statement.expr], newParent)
-//				}
-//			}
-//			if (statement instanceof WherePart) {
-//				if (statement.where !== null) {
-//					newParent = getLocalVariableScope(#[statement.where], newParent)
-//				}
-//			}
-//			if (statement instanceof WithWhenPart) {
-//				if (statement.when !== null) {
-//					newParent = getLocalVariableScope(#[statement.when], newParent);
-//					if (obj.eContainer instanceof BinaryOperation) {
-//						val container = obj.eContainer as BinaryOperation;
-//						if ((container.op == 'is' || container.op == '=') && container.left == obj) {
-//							val importedNamespace = converter.toQualifiedName(statement.name.concreteName);
-//							newParent = newParent.doWrap(importedNamespace);
-//						}
-//					}
-//				}
-//			}
+	protected override IScope createResourceScope(Resource resource, String alias, Set<Resource> importedResources, Predicate<EObject> isIncluded) {
+		val provider = [
+			val shouldWrap = importedResources.empty
+			if (!importedResources.add(resource)) {
+				return IScope.NULLSCOPE
+			}
+			
+			var newParent = createImportScope(resource, importedResources)
+			if (shouldWrap) {
+				newParent = wrap(newParent)
+			}
+			val importScope = newParent;
+			val aliasToUse = alias ?: resource.getAlias
+			val namespace = if(aliasToUse !== null) QualifiedName.create(aliasToUse) else null
+						
+			// finally all the rest
+			newParent = internalGetLocalResourceScope(resource, namespace, newParent, importScope, isIncluded)
 			return newParent
-		}
-		return super.getSadlResourceScope(obj, reference)
+		] as Provider<IScope>;
+		val key = 'resource_scope' -> alias;
+		return cache.get(key, resource, provider);
 	}
 
+	protected override boolean canAddToScope(Map<QualifiedName, IEObjectDescription> scope, QualifiedName qn, EObject obj) {
+		if (!obj.eResource.URI.fileExtension.equals("sitl")) {
+			return super.canAddToScope(scope, qn, obj);
+		}
+		return !scope.containsKey(qn);
+	}
+	
 }

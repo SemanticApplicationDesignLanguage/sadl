@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
+	<extension-point id="sitl_model_processor" name="SITL Model Processor" schema="schema/sitl_model_processor.exsd"/>
 	<extension point="org.eclipse.emf.ecore.generated_package">
 		<package
 			uri = "http://www.naturalsemantics.com/sadl/sitl/SITL"
 			class = "com.naturalsemantics.sadl.sitl.sITL.SITLPackage"
 			genModel = "model/generated/SITL.genmodel" />
 	</extension>
+    <extension
+        point="com.naturalsemantics.sadl.sitl.sitl_model_processor">
+     <sitlProcessor
+           class="com.naturalsemantics.sadl.sitl.processing.JenaBasedSitlModelProcessor">
+     </sitlProcessor>
+    </extension>
 </plugin>

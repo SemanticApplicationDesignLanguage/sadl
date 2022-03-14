@@ -33,16 +33,38 @@ SitlModel returns sadl::SadlModel :
 @Override
 SadlModelElement returns sadl::SadlModelElement :
 	super::SadlStatement EOS			|
-	super::ExternalEquationStatement EOS	|
-	super::EquationStatement EOS |
+//	super::ExternalEquationStatement EOS	|
+//	super::EquationStatement EOS |
+	Incremental EOS |
+	Infer EOS |
+	Log EOS  |
+	StartGroup	|
+	EndGroup	|
 	Transform EOS |
 	Validate EOS
 ;
 
+Incremental:
+	incremental=('incremental' | 'Incremental')
+;
+
+Infer:
+	{Infer} ('Infer' | 'infer') ':' ('chunk' chunkSize = NUMBER ('parallel' threads=NUMBER)? )?	
+;
+
+Log:
+	('Log' | 'log') ':' fileName = STRING
+;
+
 Transform: 
-	('Transform'|'transform') ':' expr=Expression
+	('Transform'|'transform') ':' expr=Expression 
 ;
 
 Validate:
-	('Validate'|'validate') ':' expr=Expression
+	('Validate'|'validate') ':' expr=Expression (act1='skip' (act2='group')? | 'abort' | 'generate' (base=STRING))?
 ;
+
+StartGroup: startGroup = '{';
+
+EndGroup: endGroup = '}';
+

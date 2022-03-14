@@ -48,6 +48,7 @@ import com.ge.research.sadl.resource.SadlResourceDescriptionManager
 import org.eclipse.xtext.linking.impl.ImportedNamesAdapter
 import com.ge.research.sadl.scoping.SilencedImportedNamesAdapter
 import com.ge.research.sadl.processing.IModelProcessor.ProcessorContextPreferenceValuesProvider
+import com.naturalsemantics.sadl.sitl.processing.SitlModelProcessorProvider
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -87,8 +88,7 @@ class SITLRuntimeModule extends AbstractSITLRuntimeModule {
 	}
 	
 	def Class<? extends IModelProcessorProvider> bindIModelProcessorProvider() {	// similar
-		return SadlModelProcessorProvider
-//		return JenaBasedDialogModelProcessor
+		return SitlModelProcessorProvider
 	}
 	
 // this is what's in SADL and SRL	

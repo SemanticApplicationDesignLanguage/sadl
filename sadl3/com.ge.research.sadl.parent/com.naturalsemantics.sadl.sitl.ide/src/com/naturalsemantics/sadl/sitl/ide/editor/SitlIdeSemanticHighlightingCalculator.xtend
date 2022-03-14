@@ -1,12 +1,12 @@
 package com.naturalsemantics.sadl.sitl.ide.editor
 
-import com.ge.research.sadl.external.ExternalResourceAdapter
 import com.ge.research.sadl.ide.editor.coloring.SadlIdeSemanticHighlightingCalculator
 import com.ge.research.sadl.model.CircularDefinitionException
 import com.ge.research.sadl.model.DeclarationExtensions
 import com.ge.research.sadl.sADL.Name
 import com.ge.research.sadl.sADL.QueryStatement
 import com.ge.research.sadl.sADL.SADLPackage
+import com.ge.research.sadl.sADL.SadlInstance
 import com.ge.research.sadl.sADL.SadlIsInverseOf
 import com.ge.research.sadl.sADL.SadlModel
 import com.ge.research.sadl.sADL.SadlPropertyCondition
@@ -15,10 +15,8 @@ import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SadlSimpleTypeReference
 import com.ge.research.sadl.utils.SadlASTUtils
 import com.google.common.base.Preconditions
-import com.google.common.collect.ImmutableList
 import com.google.common.collect.ImmutableSet
 import com.google.inject.Inject
-import java.util.List
 import org.eclipse.xtext.ide.editor.syntaxcoloring.HighlightingStyles
 import org.eclipse.xtext.ide.editor.syntaxcoloring.IHighlightedPositionAcceptor
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
@@ -27,7 +25,6 @@ import org.eclipse.xtext.util.CancelIndicator
 
 import static com.ge.research.sadl.ide.editor.coloring.SadlIdeHighlightingConfiguration.*
 import static org.eclipse.xtext.ide.editor.syntaxcoloring.HighlightingStyles.*
-import com.ge.research.sadl.sADL.SadlInstance
 
 class SitlIdeSemanticHighlightingCalculator extends SadlIdeSemanticHighlightingCalculator {
 
@@ -122,17 +119,12 @@ class SitlIdeSemanticHighlightingCalculator extends SadlIdeSemanticHighlightingC
 		}
 	}
 
-//	protected def void highlight(IHighlightedPositionAcceptor acceptor, EObject object, EStructuralFeature feature,
-//		String id) {
-//
-//		for (node : NodeModelUtils.findNodesForFeature(object, feature)) {
-//			acceptor.addPosition(node.offset, node.length, id)
-//		}
-//	}
-
 	def private String getHighlightingId(SadlResource rn) {
 		val sr = rn.tryGetSadlResourceFromScope
-		if (sr.eContainer instanceof SadlInstance && 
+		if (sr !== null && !sr.equals(rn)) {
+			return VARIABLE_REF_ID;
+		}
+		else if (sr.eContainer instanceof SadlInstance && 
 			(sr.eContainer as SadlInstance).nameOrRef !== null &&
 			(sr.eContainer as SadlInstance).nameOrRef.equals(rn)) {
 			return VARIABLE_DECL_ID
@@ -157,6 +149,17 @@ class SitlIdeSemanticHighlightingCalculator extends SadlIdeSemanticHighlightingC
 					return RDF_PROPERTY_ID
 				}
 				case INSTANCE: {
+					val rnuri = declarationExtensions.getConceptUri(rn)
+					val delimIdx = rnuri.indexOf("#")
+					val rnns = delimIdx > 0 ? rnuri.substring(0, delimIdx)
+					val contents = rn.eResource.contents
+					val firstEobj = contents.get(0)
+					if (firstEobj instanceof SadlModel) {
+						val thisUri = (firstEobj as SadlModel).baseUri
+						if (thisUri.equals(rnns)) {
+							return VARIABLE_REF_ID
+						}
+					}
 					return INSTANCE_ID
 				}
 				case STRUCTURE_NAME: {
@@ -183,43 +186,5 @@ class SitlIdeSemanticHighlightingCalculator extends SadlIdeSemanticHighlightingC
 			}
 		}
 	}
-
-	/**
-	 * Method to map the argument SADL resource to its declaration via the scope
-	 * provider. If we do not get the definition but use the SADL resource from the
-	 * AST as-is, we can get a false negative answer from the
-	 * {@link DeclarationExtensions#isExternal(SadlResource) isExternal} call and
-	 * cannot retrieve the correct {@link ExternalResourceAdapter#getType concept
-	 * type} for externals.
-	 */
-//	protected def SadlResource tryGetSadlResourceFromScope(SadlResource toMap) {
-//		if (toMap === null) {
-//			return null
-//		}
-//		val resource = toMap.eResource
-//		if (resource instanceof XtextResource) {
-//			val name = declarationExtensions.getConcreteName(toMap)
-//			if (name === null) {
-//				return toMap
-//			}
-//			val scopeProvider = resource.resourceServiceProvider.get(IScopeProvider)
-//			val scope = scopeProvider.getScope(toMap, SADL_RESOURCE__NAME)
-//			val description = scope.getSingleElement(QualifiedName.create(name))
-//			if (description === null) {
-//				return toMap
-//			}
-//			val mapped = description.EObjectOrProxy
-//			if (mapped instanceof SadlResource) {
-//				if (!mapped.eIsProxy) {
-//					return mapped
-//				}
-//			}
-//		}
-//		return toMap
-//	}
-
-//	private static def List<String> sadl(List<String> scopes) {
-//		return ImmutableList.builder.addAll(scopes).add('source.sadl').build
-//	}
 
 }

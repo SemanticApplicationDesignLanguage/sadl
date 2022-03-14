@@ -21,10 +21,23 @@
  */
 package com.naturalsemantics.sadl.sitl.ui.contentassist;
 
+import com.google.inject.Inject
+import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
+import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
+import com.ge.research.sadl.ui.contentassist.SADLUiToIdeContentProposalProvider
 
 /**
  * See https://www.eclipse.org/Xtext/documentation/310_eclipse_support.html#content-assist
  * on how to customize the content assistant.
  */
-public class SITLProposalProvider extends AbstractSITLProposalProvider {
+class SITLProposalProvider extends AbstractSITLProposalProvider {
+
+	@Inject
+	SADLUiToIdeContentProposalProvider delegate;
+
+	override createProposals(ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		delegate.createProposals(context, acceptor);
+	}
+
+	
 }
