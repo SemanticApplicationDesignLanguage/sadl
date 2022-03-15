@@ -1,10 +1,9 @@
-sadl
-====
+# Semantic Application Design Language
 
-[![Build Status](https://travis-ci.org/crapo/sadlos2.svg?branch=development)](https://travis-ci.org/crapo/sadlos2)
-[![Build status](https://ci.appveyor.com/api/projects/status/293aewek023j2hom/branch/development?svg=true)](https://ci.appveyor.com/project/crapo/sadlos2/branch/development)
+![SADL Main Workflow](https://github.com/SemanticApplicationDesignLanguage/sadl/actions/workflows/main.yml/badge.svg)
+![SADL Release Workflow](https://github.com/SemanticApplicationDesignLanguage/sadl/actions/workflows/release.yml/badge.svg)
 
-This repository contains the Semantic Application Design Language (SADL) Open Source code and issue tracking.
+This repository contains the SADL open source code and issue tracking.
 
 Please find installation instructions [here](http://semanticapplicationdesignlanguage.github.io/sadl/InstallSadlIde.html). 
 
