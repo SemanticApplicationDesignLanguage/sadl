@@ -42,6 +42,24 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>eu.somatik.serviceloader-maven-plugin</groupId>
+        <artifactId>serviceloader-maven-plugin</artifactId>
+        <version>1.1.0</version>
+        <configuration>
+          <services>
+            <param>com.ge.research.sadl.processing.IModelProcessor</param>
+            <!-- 						<param>com.ge.research.sadl.processing.ISadlImplicitModelFragmentProvider</param>	-->
+          </services>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -84,24 +102,6 @@
           </filesets>
         </configuration>
       </plugin>
-		<plugin>
-				<groupId>eu.somatik.serviceloader-maven-plugin</groupId>
-				<artifactId>serviceloader-maven-plugin</artifactId>
-				<version>1.1.0</version>
-				<configuration>
-					<services>
-						<param>com.ge.research.sadl.processing.IModelProcessor</param>
-<!-- 						<param>com.ge.research.sadl.processing.ISadlImplicitModelFragmentProvider</param>	-->
-					</services>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
