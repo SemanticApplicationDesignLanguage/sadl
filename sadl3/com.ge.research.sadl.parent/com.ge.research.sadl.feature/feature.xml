@@ -171,4 +171,25 @@ SADL also includes POJava and OpenCSV, licensed under Apache License V2.0.
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="com.naturalsemantics.sadl.sitl"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.naturalsemantics.sadl.sitl.ide"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.naturalsemantics.sadl.sitl.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
