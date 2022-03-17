@@ -26,10 +26,24 @@ import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.XtextRunner
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 class SadlLinkingTest extends AbstractLinkingTest {
+
+	@Ignore ("this test will pass if and when the test code is fixed to support escaped names")
+	@Test
+	def void testLinkingEscapedNames() {
+		'''
+			uri "http://sadl.org/escapednames.sadl" alias en.
+			
+			[^A] is a class.
+			[prop1] describes <^A> with values of type float.
+			
+			[MyA] is a <^A> with <prop1> 23 .
+		'''.assertLinking[sadl]
+	}
 
 	@Test
 	def void testLinkingQNames() {

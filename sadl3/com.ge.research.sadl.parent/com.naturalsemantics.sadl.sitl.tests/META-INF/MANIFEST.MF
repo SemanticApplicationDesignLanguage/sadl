@@ -13,6 +13,7 @@ Require-Bundle: com.naturalsemantics.sadl.sitl,
  org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
  org.junit;bundle-version="4.13.0",
  com.ge.research.sadl;bundle-version="3.5.0",
- com.ge.research.sadl.ui;bundle-version="3.5.0"
+ com.ge.research.sadl.ui;bundle-version="3.5.0",
+ com.ge.research.sadl.tests;bundle-version="3.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.naturalsemantics.sadl.sitl.tests;x-internal=true
