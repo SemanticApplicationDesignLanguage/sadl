@@ -2387,4 +2387,26 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			)
 		]
 	}
+
+	@Test
+	def void testGH_904c() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Part is a class described by processing with values of type Processing.
+			 Processing is a class described by temperature with values of type float,
+			 	described by volume with values of type float.
+			 	
+			 part1 is a Part. 	
+			 	
+			 Ask: the temperature and volume of the processing of part1.
+			 Ask: temperature of the processing of part1 and volume of the processing of part1.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			assertTrue(issues.empty)
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 2)
+			assertEquals(cmds.get(0).toString, cmds.get(1).toString
+			)
+		]
+	}
 }
