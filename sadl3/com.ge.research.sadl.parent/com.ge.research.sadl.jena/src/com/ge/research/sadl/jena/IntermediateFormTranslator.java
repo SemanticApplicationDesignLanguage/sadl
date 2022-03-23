@@ -3189,8 +3189,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		for( Node lProxy : lProxies ) {
 			if( lProxy instanceof ProxyNode ) {
 				lResult.add(((ProxyNode)lProxy).getProxyFor());
-			} else {
-				throw new TranslationException("junctionToGraphPatternList called on junction which includes a non-GraphPatternElement; this is not supported.");
+//			} else {
+//				throw new TranslationException("junctionToGraphPatternList called on junction which includes a non-GraphPatternElement; this is not supported.");
 			}
 		}
 		return lResult;

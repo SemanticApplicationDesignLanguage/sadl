@@ -2332,4 +2332,59 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		]
 	}
 	
+	@Test
+	def void testGH_904a() {
+		val sadlModel = '''
+			 uri "http://sadl.org/generalcase.sadl" alias generalcase.
+			 
+			 FinalClass is a class.
+			 pn describes FinalClass with values of type Rn.
+			 Rn is a class.
+			 pm describes Rn with values of type Rm.
+			 Rm is a class.
+			 
+			 pl describes Rm with values of type Rpl.
+			 Rpl is a class.
+			 p1 describes Rpl with values of type Rp1.
+			 Rp1 is a class.
+			 
+			 qk describes Rm with values of type Rqk.
+			 Rqk is a class.
+			 q1 describes Rqk with values of type Rq1.
+			 Rq1 is a class.
+			 
+			 FC1 is a FinalClass.
+			 
+			 Ask: p1 of pl and q1 of qk of pm of pn of FC1.
+			 Ask: p1 of pl of pm of pn of FC1 and q1 of qk of pm of pn of FC1.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			assertTrue(issues.empty)
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 2)
+			assertEquals(cmds.get(0).toString, cmds.get(1).toString
+			)
+		]
+	}
+	
+	@Test
+	def void testGH_904b() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Part is a class described by processing with values of type Processing.
+			 Processing is a class described by temperature with values of type float,
+			 	described by volume with values of type float.
+			 	
+			 part1 is a Part. 	
+			 	
+			 Ask: temperature and volume of the processing of part1.
+			 Ask: temperature of the processing of part1 and volume of the processing of part1.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			assertTrue(issues.empty)
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 2)
+			assertEquals(cmds.get(0).toString, cmds.get(1).toString
+			)
+		]
+	}
 }
