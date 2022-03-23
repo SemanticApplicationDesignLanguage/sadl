@@ -6439,14 +6439,24 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 */
 	private boolean leftSideIncompletePropertyChain(Expression expr) {
 		try {
-			if (expr instanceof Name && isProperty(getDeclarationExtensions().getOntConceptType((SadlResource) expr))) {
+			if (expr instanceof Declaration) {
+				SadlTypeReference decltype = ((Declaration)expr).getType();
+				if (decltype instanceof SadlSimpleTypeReference) {
+					SadlResource declSR = ((SadlSimpleTypeReference)decltype).getType().getName();
+					if (isProperty(getDeclarationExtensions().getOntConceptType(declSR))) {
+						return true;
+					}
+				}
+			}
+			else if (expr instanceof Name && isProperty(getDeclarationExtensions().getOntConceptType((SadlResource) expr))) {
 				return true;
 			}
 			else if (expr instanceof PropOfSubject) { // && ((PropOfSubject) lexpr).getRight() == null) {
 				while (((PropOfSubject)expr).getRight() instanceof PropOfSubject) {
 					expr = ((PropOfSubject)expr).getRight();
 				}
-				if (((PropOfSubject)expr).getRight() instanceof Name) {
+				if (((PropOfSubject)expr).getRight() instanceof Name || 
+						((PropOfSubject)expr).getRight() instanceof Declaration) {
 					return leftSideIncompletePropertyChain(((PropOfSubject)expr).getRight());
 				}
 				return leftSideIncompletePropertyChain(((PropOfSubject)expr).getLeft());
