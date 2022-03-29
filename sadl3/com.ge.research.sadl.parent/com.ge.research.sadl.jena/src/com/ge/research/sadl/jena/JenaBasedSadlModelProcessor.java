@@ -6344,7 +6344,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							if (pred2 instanceof NamedNode) {
 								Property prop2 = getTheJenaModel().getProperty(((NamedNode)pred2).getURI());
 								List<OntClass> domainMembers2 = getPropertyDomainClasses(prop2);
-								if (domainMembers2 != null && domainMembers2.contains(member)) {
+								if (domainsMatch(member, domainMembers2, (EObject)robjtriple.getContext())) {
 									if (lastNewLobjElement == null) {
 										leftEndTriple.setSubject(robjtriple.getSubject());
 									}
@@ -6396,6 +6396,22 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return lobj;
 	}
 	
+	private boolean domainsMatch(OntClass member, List<OntClass> domainMembers2, EObject context) {
+		for (OntClass member2 : domainMembers2) {
+			if (domainMembers2 != null && domainMembers2.contains(member)) {
+				return true;
+			}
+			try {
+				if (SadlUtils.classIsSubclassOf(member, member2, true, null)) {
+					return true;										
+				}
+			} catch (CircularDependencyException e) {
+				addError(e.getMessage(), context);
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Method to get a list of OntClass members of a property's domain.
 	 * @param p

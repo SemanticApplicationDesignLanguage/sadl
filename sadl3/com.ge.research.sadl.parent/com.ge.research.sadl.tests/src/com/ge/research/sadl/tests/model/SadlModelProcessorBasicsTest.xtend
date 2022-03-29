@@ -2409,4 +2409,31 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			)
 		]
 	}
+
+	@Test
+	def void testGH_904d() {
+		val sadlModel = '''
+			uri "http://sadl.org/test.sadl" alias test.
+			
+			Part is a class described by processing with values of type Process.
+			Process is a class
+			described by processNum with a single value of type string .
+			
+			SubProcess is a type of Process
+			described by temperature with values of type UnittedQuantity
+			described by volume with values of type UnittedQuantity
+			described by pressure with values of type UnittedQuantity .
+			
+			
+			Ask: temperature and processNum of the processing of part1.
+			Ask: temperature of the processing of part1 and processNum of the processing of part1.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			assertFalse(issues.empty)
+			assertTrue(issues.get(0).toString.startsWith("WARNING:temperature, an object property with domain  http://sadl.org/test.sadl#SubProcess, may, but is not guaranteed to (because it is broader), operate (chained property) with processing, an object property with range  http://sadl.org/test.sadl#Process."))
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 2)
+			assertEquals(cmds.get(0).toString, cmds.get(1).toString
+			)
+		]
+	}
 }
