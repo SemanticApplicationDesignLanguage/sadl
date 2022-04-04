@@ -5720,14 +5720,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (robj instanceof NamedNode) {
 				((NamedNode)robj).setContext(rexpr);
 			}
-			if (robj instanceof Object[] && ((Object[]) robj).length == 2) {
-				rest = ((Object[]) robj)[1];
-				robj = ((Object[]) robj)[0];
-			}
 			if (op != null && op.equals("and") && getTarget() instanceof Query) {
 				// check for special case where there is a conjunction of properties or property chains that is an abbreviated form
 				if (rexpr instanceof PropOfSubject && leftSideIncompletePropertyChain(lexpr)) {
-					lobj = deabbreviateLeftOfConjunction(lexpr, rexpr, lobj, robj);
+					if (robj instanceof Object[] && ((Object[]) robj).length == 2) {
+						rest = ((Object[]) robj)[1];
+						robj = ((Object[]) robj)[0];
+					}
+					lobj = deabbreviateLeftOfConjunction(lexpr, rexpr, lobj, robj, rest);
 				}
 			}
 		} else {
@@ -6260,7 +6260,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			jct.setLhs(nodeCheck(postProcessTranslationResult(lobj)));
-			jct.setRhs(nodeCheck(robj instanceof NamedNode && rest != null ? rest : robj));
+//			if (rest != null) {
+//				Object[] newRobj = new Object[2];
+//				newRobj[0] = robj;
+//				newRobj[1] = rest;
+//				robj = newRobj;
+//			}
+//			jct.setRhs(nodeCheck(robj instanceof NamedNode && rest != null ? rest : robj));
+			jct.setRhs(nodeCheck(postProcessTranslationResult(robj)));
 			
 			return jct;
 		} else {
@@ -6295,9 +6302,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * drawing from the right side.
 	 * @param lobj
 	 * @param robj
+	 * @param rest 
 	 * @return
 	 */
-	private Object deabbreviateLeftOfConjunction(Expression lexpr, Expression rexpr, Object lobj, Object robj) {
+	private Object deabbreviateLeftOfConjunction(Expression lexpr, Expression rexpr, Object lobj, Object robj, Object rest) {
 		// find matching domain to expand abbreviated form
 		// find the end of the left chain
 		try {
@@ -6393,6 +6401,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
+		if (rest != null) {
+			// rest needs to be applied to both lobj and robj
+			Object[] larr = new Object[2];
+			larr[0] = lobj;
+			larr[1] = rest;
+			return larr;
+		}
 		return lobj;
 	}
 	
@@ -6474,6 +6489,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (((PropOfSubject)expr).getRight() instanceof Name || 
 						((PropOfSubject)expr).getRight() instanceof Declaration) {
 					return leftSideIncompletePropertyChain(((PropOfSubject)expr).getRight());
+				}
+				else if (((PropOfSubject)expr).getRight() instanceof SubjHasProp) {
+					return false;
 				}
 				return leftSideIncompletePropertyChain(((PropOfSubject)expr).getLeft());
 			}

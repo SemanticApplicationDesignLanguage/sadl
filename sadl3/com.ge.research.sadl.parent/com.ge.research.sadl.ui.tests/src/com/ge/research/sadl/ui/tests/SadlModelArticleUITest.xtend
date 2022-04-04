@@ -580,4 +580,256 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
  			}
  		]
 	}
+	
+	@Test
+	def void test904a_witharticles_01() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			 uri "http://sadl.org/generalcase.sadl" alias generalcase.
+			 
+			 FinalClass is a class.
+			 pn describes FinalClass with values of type Rn.
+			 Rn is a class.
+			 pm describes Rn with values of type Rm.
+			 Rm is a class.
+			 
+			 pl describes Rm with values of type Rpl.
+			 Rpl is a class.
+			 p1 describes Rpl with values of type Rp1.
+			 Rp1 is a class.
+			 
+			 qk describes Rm with values of type Rqk.
+			 Rqk is a class.
+			 q1 describes Rqk with values of type Rq1.
+			 Rq1 is a class.
+			 
+			 FC1 is a FinalClass.
+			 
+			 Ask: p1 of pl and q1 of qk of pm of pn of FC1.
+			 Ask: p1 of pl of pm of pn of FC1 and q1 of qk of pm of pn of FC1.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			issues.map[message].forEach[println(it)];
+			assertEquals(0, issues.size)
+			for (cmd : commands) {
+				println(cmd.toString)
+			}
+			assertEquals(2, commands.size)
+			assertEquals(commands.get(0).toString, commands.get(1).toString)
+			assertEquals(commands.get(0).toString, "select v0 v1 v2 v3 v4 v5 where and(rdf(generalcase:FC1, generalcase:pn, v0), and(rdf(v0, generalcase:pm, v1), and(rdf(v1, generalcase:pl, v2), and(rdf(v2, generalcase:p1, v3), and(rdf(v1, generalcase:qk, v4), rdf(v4, generalcase:q1, v5))))))")
+		]
+
+	}
+
+	@Test
+	def void test904b_witharticles_01() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Part is a class described by processing with values of type Processing.
+			 Processing is a class described by temperature with values of type float,
+			 	described by volume with values of type float.
+			 	
+			 part1 is a Part. 	
+			 	
+			 Ask: temperature and volume of the processing of part1.
+			 Ask: temperature of the processing of part1 and volume of the processing of part1.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			issues.map[message].forEach[println(it)];
+			assertEquals(0, issues.size)
+			for (cmd : commands) {
+				println(cmd.toString)
+			}
+			assertEquals(2, commands.size)
+			assertEquals(commands.get(0).toString, commands.get(1).toString)
+			assertEquals(commands.get(0).toString, "select v0 v1 v2 where and(rdf(test:part1, test:processing, v0), and(rdf(v0, test:temperature, v1), rdf(v0, test:volume, v2)))")
+		]
+
+	}
+
+	@Test
+	def void test904d_witharticles_01() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			uri "http://sadl.org/test.sadl" alias test.
+			
+			Part is a class described by processing with values of type Process.
+			Process is a class
+			described by processNum with a single value of type string .
+			
+			SubProcess is a type of Process
+			described by temperature with values of type UnittedQuantity
+			described by volume with values of type UnittedQuantity
+			described by pressure with values of type UnittedQuantity .
+			
+			part1 is a Part. 	
+			
+			Ask: temperature and processNum of the processing of part1.
+			Ask: temperature of the processing of part1 and processNum of the processing of part1.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			issues.map[message].forEach[println(it)];
+			for (cmd : commands) {
+				println(cmd.toString)
+			}
+			assertEquals(2, commands.size)
+			assertEquals(commands.get(0).toString, commands.get(1).toString)
+			assertEquals(commands.get(0).toString, "select v0 v1 v2 where and(rdf(test:part1, test:processing, v0), and(rdf(v0, test:temperature, v1), rdf(v0, test:processNum, v2)))")
+		]
+
+	}
+
+	@Test
+	def void test904e_witharticles_01() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			uri "http://sadl.org/test.sadl" alias test.
+			
+			Part is a class described by processing with values of type Process,
+				described by partID with values of type string.
+			Process is a class
+			described by processNum with a single value of type string .
+			
+			SubProcess is a type of Process
+			described by temperature with values of type UnittedQuantity
+			described by volume with values of type UnittedQuantity
+			described by pressure with values of type UnittedQuantity .
+			
+			part1 is a Part with partID "123". 	
+			
+			Ask: temperature of the processing of (a Part with partID "123").
+			Ask: temperature and processNum of the processing of (a Part with partID "123").
+			Ask: temperature of the processing of (a Part with partID "123") and processNum of the processing of the Part.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			issues.map[message].forEach[println(it)];
+			for (cmd : commands) {
+				println(cmd.toString)
+			}
+			assertEquals(3, commands.size)
+			assertEquals(commands.get(0).toString, "select v0 v1 v2 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), rdf(v1, test:temperature, v2)))")
+			assertEquals(commands.get(1).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3))))")
+			assertEquals(commands.get(2).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3))))")
+		]
+
+	}
+
+	@Test
+	def void test904e_witharticles_02() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			uri "http://sadl.org/test.sadl" alias test.
+			
+			Part is a class described by processing with values of type Process,
+				described by partID with values of type string.
+			Process is a class
+			described by processNum with a single value of type string .
+			
+			SubProcess is a type of Process
+			described by temperature with values of type UnittedQuantity
+			described by volume with values of type UnittedQuantity
+			described by pressure with values of type UnittedQuantity .
+			
+			part1 is a Part with partID "123". 	
+			
+			Ask: temperature of the processing of (a Part with partID "123") and processNum of the processing of (a Part with partID "123").
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			issues.map[message].forEach[println(it)];
+			for (cmd : commands) {
+				println(cmd.toString)
+			}
+			assertEquals(2, issues.size)
+			assertEquals("There is already an implicit variable with ordinality 1. Please use 'a second' to create another implicit variable or 'the first' to refer to the existing implicit variable.", issues.get(1).message)
+			assertEquals(1, commands.size)
+			assertEquals(commands.get(0).toString, "select v0 v2 v3 v4 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), rdf(v2, test:processNum, v4))))")
+		]
+
+	}
+
+	@Test
+	def void test904e_withoutarticles_01() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.FALSE.toString));
+
+		createFile('UseArticles.sadl', '''
+			uri "http://sadl.org/test.sadl" alias test.
+			
+			Part is a class described by processing with values of type Process,
+				described by partID with values of type string.
+			Process is a class
+			described by processNum with a single value of type string .
+			
+			SubProcess is a type of Process
+			described by temperature with values of type UnittedQuantity
+			described by volume with values of type UnittedQuantity
+			described by pressure with values of type UnittedQuantity .
+			
+			part1 is a Part with partID "123". 	
+			
+			Ask: temperature of the processing of (a Part with partID "123").
+			Ask: temperature and processNum of the processing of (a Part with partID "123").
+			Ask: temperature of the processing of (a Part with partID "123") and processNum of the processing of (a Part with partID "123").
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			issues.map[message].forEach[println(it)];
+			for (cmd : commands) {
+				println(cmd.toString)
+			}
+			assertEquals(3, commands.size)
+			assertEquals(commands.get(0).toString, "select v0 v1 v2 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), rdf(v1, test:temperature, v2)))")
+			assertEquals(commands.get(1).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3))))")
+			assertEquals(commands.get(2).toString, "select v0 v2 v3 v1 v4 v5 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), and(rdf(v1, test:partID, \"123\"), and(rdf(v1, test:processing, v4), rdf(v4, test:processNum, v5))))))")
+		]
+
+	}
+
+	@Test
+	def void test904e_withoutarticles_02() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.FALSE.toString));
+
+		createFile('UseArticles.sadl', '''
+			uri "http://sadl.org/test.sadl" alias test.
+			
+			Part is a class described by processing with values of type Process,
+				described by partID with values of type string.
+			Process is a class
+			described by processNum with a single value of type string .
+			
+			SubProcess is a type of Process
+			described by temperature with values of type UnittedQuantity
+			described by volume with values of type UnittedQuantity
+			described by pressure with values of type UnittedQuantity .
+			
+			part1 is a Part with partID "123". 	
+			
+			Ask: temperature of the processing of (a Part with partID "123") and processNum of the processing of the Part.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			issues.map[message].forEach[println(it)];
+			for (cmd : commands) {
+				println(cmd.toString)
+			}
+			assertTrue(issues.size == 2)
+			assertEquals("The use of articles is not enabled in preferences but the content is only valid when enabled.", issues.get(1).message)
+			assertEquals(1, commands.size)
+			assertEquals(commands.get(0).toString, "select v0 v2 v3 v1 v4 v5 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), and(rdf(v1, test:processing, v4), rdf(v4, test:processNum, v5)))))"
+			)
+		]
+
+	}
+
 }
