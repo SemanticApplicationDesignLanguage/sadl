@@ -57,7 +57,7 @@
     <version.mwe2>2.12.1</version.mwe2>
     <version.sadl>${project.version}</version.sadl>
     <version.slf4j>1.7.36</version.slf4j>
-    <version.surefire>3.0.0-M5</version.surefire>
+    <version.surefire>3.0.0-M6</version.surefire>
     <version.tycho>2.7.0</version.tycho>
     <version.xtext>2.25.0</version.xtext>
     <version.xtext-antlr>2.1.1</version.xtext-antlr>
