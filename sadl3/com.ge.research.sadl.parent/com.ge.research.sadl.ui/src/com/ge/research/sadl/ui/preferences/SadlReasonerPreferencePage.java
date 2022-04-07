@@ -637,7 +637,7 @@ public class SadlReasonerPreferencePage extends PreferencePage implements IWorkb
 		}
 		
 		// double check to make sure the page is valid, jena reasoner and translator should be selected	
-		if(checkedReasoner.getClass().getSimpleName().equals(mDefaultReasonerSimpleName) &&
+		if(checkedReasoner != null && checkedReasoner.getClass().getSimpleName().equals(mDefaultReasonerSimpleName) &&
 				checkedTranslator.getClass().getSimpleName().equals(mDefaultTranslatorSimpleName)) {
 			setValid(true);
 		} else {
