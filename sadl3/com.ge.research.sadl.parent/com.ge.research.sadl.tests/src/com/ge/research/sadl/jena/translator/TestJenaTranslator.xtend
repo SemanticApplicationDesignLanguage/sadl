@@ -26,6 +26,7 @@ public class TestJenaTranslator extends AbstractSADLModelProcessorTest {
 		val cm = new ConfigurationManager
 		val tr = cm.translator
 		print(tr)
+		assertNotNull(tr)
 	}
 		
 	@Test
@@ -480,4 +481,6 @@ then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulev
  		]
 		
 	}
+	
+	
 }

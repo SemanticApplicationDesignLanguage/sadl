@@ -4633,7 +4633,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		try {
 			List<ModelError> errlist = getConfigMgr().getTranslator().validateRule(rule);
-			if (errlist != null) {
+			if (errlist != null && errlist.size() > 0) {
 				modelErrorsToOutput(getCurrentResource(), errlist, true);
 			}
 		} catch (ConfigurationException e) {
@@ -9218,6 +9218,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					shpTriples.add(tr);
 					subjectFound = true;
 				} else if (subjObj != null) {
+					if (subjObj instanceof TripleElement) {
+						((TripleElement)subjObj).setEmbedded(true);
+					}
 					tr.setSubject(nodeCheck(subjObj));
 					shpTriples.add(tr);
 					subjectFound = true;
