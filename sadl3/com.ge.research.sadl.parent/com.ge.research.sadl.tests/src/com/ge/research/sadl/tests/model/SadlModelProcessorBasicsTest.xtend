@@ -2510,4 +2510,78 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		]
 	}
 	
+	@Test
+	def void testImpliedPropertyInRule() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type float,
+			 	described by width with values of type float.
+			 	
+			 Rule R1: if x is a Rectangle then area of x is height of x * width of x.
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			for (issue : issues) {
+				println(issue.message.toString)
+			}
+ 			for (rule : rules) {
+ 				println(rule.toString)
+ 			}
+ 		]
+	}
+	
+	@Test
+	def void testImpliedPropertyInRule_02() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type float,
+			 	described by width with values of type float.
+			 	
+			 BigRectangle is a type of Rectangle.
+			 	
+			 Rule R2: if x is a Rectangle and area of x > 20 "sq ft" then x is a BigRectangle.
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			for (issue : issues) {
+				println(issue.message.toString)
+			}
+ 			for (rule : rules) {
+ 				println(rule.toString)
+ 			}
+ 		]
+	}
+	
+	@Test
+	def void testGH_440a() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ImpliedPropertyInTest.sadl" alias ImpliedPropertyInTest.
+			 
+			 Person is a class 
+			 	described by child with values of type Person,
+			 	described by age with values of type decimal,
+			 	described by weight with values of type decimal.
+			 Person has impliedProperty age //, has impliedProperty weight
+			 .
+			 
+			 Sue is a Person with age 23, with weight 125.
+			 
+			 Test: Sue is 23 .
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			for (issue : issues) {
+				println(issue.message.toString)
+			}
+			assertEquals(issues.size, 1)
+			assertTrue(issues.get(0).message.toString.startsWith("Implied property 'age' used (left side of 'is') to pass type check"))
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 1)
+			for (cmd : cmds) {
+				println(cmd.toString)
+			}
+			assertEquals(cmds.get(0).toString, "rdf(ImpliedPropertyInTest:Sue, age, v0) is 23")
+		]
+	}
+	
 }

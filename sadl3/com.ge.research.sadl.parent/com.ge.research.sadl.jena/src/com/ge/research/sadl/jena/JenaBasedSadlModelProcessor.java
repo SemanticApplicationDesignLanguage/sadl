@@ -5865,7 +5865,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							e.printStackTrace();
 						}
 					}
-					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
+					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel, false);
 				}
 				else {
 					addError("Something is going wrong with translation, please report", rexpr);
@@ -5881,7 +5881,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (isDefiningDeclaration) {
 						trel.setObject(((VariableNode)robj).getType());
 					}
-					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
+					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel, false);
 				}
 				else if (!(robj instanceof VariableNode)) {
 					if (lobj instanceof Node && robj instanceof Node) {
@@ -5896,7 +5896,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								e.printStackTrace();
 							}
 						}
-						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel, false);
 					} else {
 						// throw new TranslationException("Unhandled binary operation condition: left
 						// and right are not both nodes.");
@@ -6002,7 +6002,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					} else if (isComparisonViaBuiltin(robj, lobj)) {
 						BuiltinElement be = (BuiltinElement) ((TripleElement) robj).getNext();
 						be.addMissingArgument((Node) lobj);
-						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern);
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern, false);
 					} else if (pattern instanceof TripleElement) {
 						TripleElement lastPattern = (TripleElement) pattern;
 						// this while may need additional conditions to narrow application to nested
@@ -6048,7 +6048,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					doVariableSubstitution(((TripleElement) pattern),
 							(VariableNode) ((TripleElement) pattern).getSubject(), (VariableNode) assignedNode);
 				}
-				return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern);
+				return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern, false);
 			}
 			BuiltinElement bin = null;
 			boolean binOnRight = false;
@@ -6061,7 +6061,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					//Pull up the not to the outside operator with the "is" operator nested     			
 					Node right_arg = right.getArguments().get(0);
 					GraphPatternElement bi = createBinaryBuiltin(op, lobj, right_arg); 
-					Object biWithImpliedProperties = applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi);
+					Object biWithImpliedProperties = applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi, false);
 					Object ubi = createUnaryBuiltin(container, "not", biWithImpliedProperties);
 					return combineRest(ubi, rest);
 				}
@@ -6091,7 +6091,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							bin.addArgument(assignedNode);
 						}
 					}
-					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, retObj);
+					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, retObj, false);
 				} else if (assignedNode instanceof Node && isComparisonBuiltin(bin.getFuncName())) {
 					// this is a comparison with an extra "is"
 					if (bin.getArguments().size() == 1) {
@@ -6100,7 +6100,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						} else {
 							bin.addArgument(assignedNode);
 						}
-						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, bin);
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, bin, false);
 					}
 				}
 			}
@@ -6118,7 +6118,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						return left;
 					}
 					else {
-						applyImpliedAndExpandedProperties(container, lexpr, rexpr, left);
+						applyImpliedAndExpandedProperties(container, lexpr, rexpr, left, false);
 						GraphPatternElement bi = createBinaryBuiltin(op, left, arg); 
 						if (bi == null && getTarget() instanceof Test) {
 							Test tst = (Test) getTarget();
@@ -6152,7 +6152,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					gpe = gpe.getNext();
 				}
-				return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern);
+				return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern, false);
 			}
 		}
 		// if we get to here we want to actually create a BuiltinElement for the
@@ -6165,7 +6165,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				&& robj instanceof com.ge.research.sadl.model.gp.Literal
 				&& !variableIsBound((Rule) getTarget(), null, (VariableNode) lobj)) {
 			return applyImpliedAndExpandedProperties(container, lexpr, rexpr,
-					createBinaryBuiltin("assign", robj, lobj));
+					createBinaryBuiltin("assign", robj, lobj), false);
 		}
 
 		if (op.equals("and") || op.equals("or")) {
@@ -6293,7 +6293,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (isNegated) {
 				bi = (GraphPatternElement) createUnaryBuiltin(container, "not", bi);
 			}
-			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi), rest);
+			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi, false), rest);
 		}
 	}
 
@@ -6610,9 +6610,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * @param lobj
 	 * @param robj
 	 * @param maybeGpe
+	 * @param recursiveCall 
 	 * @return Object
 	 */
-	private Object applyImpliedAndExpandedProperties(EObject binobj, EObject lobj, EObject robj, Object maybeGpe) {
+	private Object applyImpliedAndExpandedProperties(EObject binobj, EObject lobj, EObject robj, Object maybeGpe, boolean recursiveCall) {
 		try {
 			Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
 			List<EObject> toBeRemoved = null;
@@ -6642,8 +6643,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									//left is the first argument of a BuiltinElement
 									List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
 									if(args.get(0) instanceof NamedNode ) {
-			        					addLocalizedTypeToNode(((NamedNode) args.get(0)), lPropTci);
-										((NamedNode) args.get(0)).setImpliedPropertyNode(impliedPropertyNode);
+										NamedNode arg1 = (NamedNode) args.get(0);
+										Node arg2 = args.get(1);
+										if (!recursiveCall && ((BuiltinElement)maybeGpe).getFuncType().equals(BuiltinType.Equal) && arg1 instanceof NamedNode) {
+											TripleElement newTr = new TripleElement(arg1, impliedPropertyNode, arg2);
+											maybeGpe = newTr;
+										}
+			        					addLocalizedTypeToNode(arg1, lPropTci);
+										arg1.setImpliedPropertyNode(impliedPropertyNode);
 
 									}else if (args.get(0) instanceof ProxyNode && args.get(1) instanceof ProxyNode) {
 										GraphPatternElement lGPE = ((ProxyNode)args.get(0)).getProxyFor();
@@ -6713,7 +6720,32 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// TODO must add implied properties to rules, tests, etc.
 				} 
 				else if (maybeGpe == null && getTarget() != null) {
-					addError("implied properties not yet implemented for " + getTarget().getClass().getSimpleName(), binobj);
+					if (getTarget() instanceof Test) {
+						// the two sides of the test are treated as if they were two sides of an "is" BuiltinElement
+						BuiltinElement bi = new BuiltinElement();
+						bi.setFuncName("is");
+						Object lhsArg = ((Test)getTarget()).getLhs();
+						Object rhsArg = ((Test)getTarget()).getRhs();
+						try {
+							bi.addArgument(lhsArg instanceof Node ? (Node)lhsArg : new ProxyNode((GraphPatternElement) lhsArg));
+							bi.addArgument(rhsArg instanceof Node ? (Node)rhsArg : new ProxyNode((GraphPatternElement) rhsArg));
+							Object result = applyImpliedAndExpandedProperties(binobj, lobj, robj, bi, true);
+							if (result instanceof BuiltinElement) {
+								((Test)getTarget()).setLhs(((BuiltinElement)bi).getArguments().get(0));
+								((Test)getTarget()).setRhs(((BuiltinElement)bi).getArguments().get(1));
+								return null;
+							}
+							else {
+								throw new TranslationException("Unexpected error applying implied properties to target Test");
+							}
+						} catch (InvalidTypeException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					else {
+						addError("implied properties not yet implemented for " + getTarget().getClass().getSimpleName(), binobj);
+					}
 				}
 				else {
 					throw new TranslationException("Unexpected type to which to apply implied and expanded properties");

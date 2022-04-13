@@ -4536,7 +4536,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (var != null && var.getType() != null) {
 			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(var.getType().toFullyQualifiedString(), NodeType.VariableNode));
 			ConceptName et = getModelProcessor().namedNodeToConceptName(tctype);
-			TypeCheckInfo tci = new TypeCheckInfo(et, var.getType(), this, reference);
+			List<ConceptName> ip = getImpliedProperties(getTheJenaModel().getResource(tctype.getURI()));
+			TypeCheckInfo tci = new TypeCheckInfo(et, var.getType(), this, ip, reference);
 			return tci;
 		}
 		if (getVariableSeekingType() != null && getVariableSeekingType().equals(conceptNm)) {
@@ -6327,16 +6328,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return binaryOpLeftImpliedProperties;
 	}
 
-	protected void setBinaryOpLeftImpliedProperties(List<ConceptName> binaryLeftTypeCheckInfo) {
-		this.binaryOpLeftImpliedProperties = binaryLeftTypeCheckInfo;
+	protected void setBinaryOpLeftImpliedProperties(List<ConceptName> binaryLeftImpliedProperties) {
+		this.binaryOpLeftImpliedProperties = binaryLeftImpliedProperties;
 	}
 
 	public List<ConceptName> getBinaryOpRightImpliedProperties() {
 		return binaryOpRightImpliedProperties;
 	}
 
-	protected void setBinaryOpRightImpliedProperties(List<ConceptName> binaryRightTypeCheckInfo) {
-		this.binaryOpRightImpliedProperties = binaryRightTypeCheckInfo;
+	protected void setBinaryOpRightImpliedProperties(List<ConceptName> binaryRightImpliedProperties) {
+		this.binaryOpRightImpliedProperties = binaryRightImpliedProperties;
 	}
 
 	/**
