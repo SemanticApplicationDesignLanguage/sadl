@@ -23,6 +23,8 @@ import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.processing.SadlConstants;
+
 /**
  * This class provides useful utilities for building Jena builtin functions.
  * @author 200005201
@@ -488,5 +490,114 @@ public class GeUtils {
 		return nodes;
 	}
 
+	/**
+	 * Method to determine if a Node is an instance of the SadlImplicitModel UnittedQuantity class.
+	 * @param node
+	 * @param context
+	 * @return
+	 */
+	public static boolean isUnittedQuantity(Node node, RuleContext context) {
+		Node UQCls =  NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		ClosableIterator<Triple> citr = context.find(node, RDF.type.asNode(), UQCls);
+		if (citr.hasNext()) {
+			citr.close();
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Method to determine if any of the elements of a list of Nodes is an instance of the SadlImplicitModel's
+	 * UnittedQuantity class.
+	 * @param nodes
+	 * @param context
+	 * @return
+	 */
+	public static boolean listContainsUnittedQuantity(List<Node> nodes, RuleContext context) {
+		if (nodes != null) {
+			for (Node node : nodes) {
+				if (isUnittedQuantity(node, context)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Method to obtain the value of a Node which is an instance of the SadlImplicitModel's
+	 * UnittedQuantity class
+	 * @param node
+	 * @param context
+	 * @return
+	 */
+	public static Node getUnittedQuantityValue(Node node, RuleContext context) {
+		Node valuePred =  NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
+		ClosableIterator<Triple> citr = context.find(node, valuePred, null);
+		if (citr.hasNext()) {
+			Node val = citr.next().getObject();
+			citr.close();
+			return val;
+		}
+		return null;
+	}
+	
+	/**
+	 * Method to get a list of Nodes which are the values of a list of instances of the SadlImplicitModel's
+	 * UnittedQuantity class
+	 * @param bi
+	 * @param nodes
+	 * @param context
+	 * @return
+	 */
+	public static List<Node> getUnittedQuantityValues(Builtin bi, List<Node> nodes, RuleContext context) {
+		List<Node> values = new ArrayList<Node>();
+		for (Node node : nodes) {
+			Node value = getUnittedQuantityValue(node, context);
+			if (value == null) {
+				throw new BuiltinException(bi, context, "Encountered a non-UnittedQuantity or invalid UnittedQuantity while processing UnittedQuantities");
+			}
+			values.add(value);
+		}
+		return values;
+	}
+
+	/**
+	 * Method to obtain the unit of a Node which is an instance of the SadlImplicitModel's
+	 * UnittedQuantity class
+	 * @param node
+	 * @param context
+	 * @return
+	 */
+	public static Node getUnittedQuantityUnit(Node node, RuleContext context) {
+		Node unitPred =  NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
+		ClosableIterator<Triple> citr = context.find(node, unitPred, null);
+		if (citr.hasNext()) {
+			Node unit =  citr.next().getObject();
+			citr.close();
+			return unit;
+		}
+		return null;
+	}
+
+	/**
+	 * Method to get a list of Nodes which are the units of a list of instances of the SadlImplicitModel's
+	 * UnittedQuantity class
+	 * @param bi
+	 * @param nodes
+	 * @param context
+	 * @return
+	 */
+	public static List<Node> getUnittedQuantityUnits(Builtin bi, List<Node> nodes, RuleContext context) {
+		List<Node> units = new ArrayList<Node>();
+		for (Node node : nodes) {
+			Node unit = getUnittedQuantityUnit(node, context);
+			if (unit == null) {
+				throw new BuiltinException(bi, context, "Encountered a non-UnittedQuantity or invalid UnittedQuantity while processing UnittedQuantities");
+			}
+			units.add(unit);
+		}
+		return units;
+	}
 
 }

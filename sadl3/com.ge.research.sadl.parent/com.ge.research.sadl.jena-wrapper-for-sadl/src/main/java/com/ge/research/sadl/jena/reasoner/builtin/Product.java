@@ -20,8 +20,13 @@ package com.ge.research.sadl.jena.reasoner.builtin;
 
 import org.apache.jena.reasoner.rulesys.*;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.XSD;
 
+import com.ge.research.sadl.processing.SadlConstants;
+
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.jena.graph.*;
 
@@ -52,95 +57,197 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
         checkArgs(length, context);
         BindingEnvironment env = context.getEnv();
+        /*
+         * There are three cases to consider:
+         * 1. The arguments (except the last) represent a graph pattern and the nodes that match that graph
+         *    pattern is a list of items to be multipled together. The product is assigned to the last argument,
+         *    which must be a variable.
+         * 2. There are three arguments, the first two of which are to be multipled together and assigned
+         *    to the third, which must be a variable
+         * 3. The first argument is a list of items to be multipled together, the product of which is to
+         *    be assigned to the second argument, which must be a variable.
+         *    
+         * In any of these three cases, the elements of the list may be instances of the SadlImplicitModel's
+         * UnittedQuantity, in which case the result is an instance of a UnittedQuantity whose value is the
+         * product of the values of the multiplicands and the unit is the product of the units.
+         * 
+         */
     	if (GeUtils.isGraphPatternInput(this, args, length, context)) {
         	Node[] nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
         	Number nProd = Long.valueOf(1);
-        	nProd = multiplyList(nProd, Arrays.asList(nodes), context);
         	Node prod = null;
-        	if (nProd instanceof Float || nProd instanceof Double) {
-        		prod = Util.makeDoubleNode(nProd.doubleValue());
+        	List<Node> nodeLst = Arrays.asList(nodes);
+        	if (GeUtils.listContainsUnittedQuantity(nodeLst, context)) {
+        		prod = createUnittedQuantityProduct(context, nProd, nodeLst);
         	}
         	else {
-        		prod = Util.makeLongNode(nProd.longValue());
+	        	nProd = multiplyList(nProd, nodeLst, context);
+	        	if (nProd instanceof Float || nProd instanceof Double) {
+	        		prod = Util.makeDoubleNode(nProd.doubleValue());
+	        	}
+	        	else if (nProd instanceof Integer) {
+	        		prod = Util.makeIntNode(nProd.intValue());
+	        	}
+	        	else {
+	        		prod = Util.makeLongNode(nProd.longValue());
+	        	}
         	}
 //        	System.out.println("builtin product assigning value: " + sum);
         	return env.bind(args[length - 1], prod);
         }
         else if (length == 3) {
-    		// this is just the normal case implemented by HP Labs (standard Jena)
-    		if (getArg(0, args, context).isURI()) {
-    			throw new BuiltinException(this, context, "First argument to product is a URI: " + getArg(0, args, context).getURI());
-    		}
-    		if (getArg(1, args, context).isURI()) {
-    			throw new BuiltinException(this, context, "Second argument to product is a URI: " + getArg(1, args, context).getURI());
-    		}
-     		return super.bodyCall(args, length, context);
+        	if (GeUtils.isUnittedQuantity(getArg(0, args, context), context) ||
+        		GeUtils.isUnittedQuantity(getArg(1, args, context), context)) {
+        		Number nProd = Long.valueOf(1);
+        		List<Node> nodeLst = new ArrayList<Node>();
+        		nodeLst.add(getArg(0, args, context));
+        		nodeLst.add(getArg(1, args, context));
+        		Node prod = createUnittedQuantityProduct(context, nProd, nodeLst);
+               	return env.bind(args[length - 1], prod);
+        	}
+        	else {
+	    		// this is just the normal case implemented by HP Labs (standard Jena)
+	    		if (getArg(0, args, context).isURI()) {
+	    			throw new BuiltinException(this, context, "First argument to product is a URI: " + getArg(0, args, context).getURI());
+	    		}
+	    		if (getArg(1, args, context).isURI()) {
+	    			throw new BuiltinException(this, context, "Second argument to product is a URI: " + getArg(1, args, context).getURI());
+	    		}
+	     		return super.bodyCall(args, length, context);
+        	}
     	}
-        Node n1 = getArg(0, args, context);
-        Node n2 = getArg(1, args, context);
-        if (n1.isVariable()) {
+    	
+    	// Not a graph pattern and not 3 arguments, a multiplicand, a multiplier, and a variable, so 
+    	// this case must be either a list (length = 2) or more than 3 args.
+        Node prod = getArg(0, args, context);
+        if (prod.isVariable()) {
         	return false;
         }
         
-        if (n1.isLiteral() && n2.isLiteral()) {
-            Object v1 = n1.getLiteralValue();
-            Object v2 = n2.getLiteralValue();
-            Node prod = null;
-            if (v1 instanceof Number && v2 instanceof Number) {
-                Number nv1 = (Number)v1;
-                Number nv2 = (Number)v2;
-                if (v1 instanceof Float || v1 instanceof Double 
-                ||  v2 instanceof Float || v2 instanceof Double) {
-                    prod = Util.makeDoubleNode(nv1.doubleValue() * nv2.doubleValue());
-                } else {
-                    prod = Util.makeLongNode(nv1.longValue() * nv2.longValue());
-                }
-                return env.bind(args[2], prod);
-            }
-        }
-        else {
-//        	System.out.println("builtin product called with first arg list: " + Utils.listToString(Util.convertList(n1, context)));
+        if (length == 2) {
+        	// this may be a list of multiplicands
             if (!args[length - 1].isVariable()) {
             	return false;
             }
-            if (n1 == null || n1.equals(RDF.Nodes.nil)) {
+            if (prod == null || prod.equals(RDF.Nodes.nil)) {
                 return false;
             } else {
             	Number nProd = Long.valueOf(1);
-            	nProd = multiplyList(nProd, n1, context);
-            	Node prod = null;
-            	if (nProd instanceof Float || nProd instanceof Double) {
-            		prod = Util.makeDoubleNode(nProd.doubleValue());
+            	java.util.List<Node> nodeLst = Util.convertList(prod, context);
+            	if (GeUtils.listContainsUnittedQuantity(nodeLst, context)) {
+            		prod = createUnittedQuantityProduct(context, nProd, nodeLst);
             	}
             	else {
-            		prod = Util.makeLongNode(nProd.longValue());
+	            	nProd = multiplyList(nProd, nodeLst, context);
+	            	if (nProd instanceof Float || nProd instanceof Double) {
+	            		prod = Util.makeDoubleNode(nProd.doubleValue());
+	            	}
+	            	else if (nProd instanceof Integer) {
+	            		prod = Util.makeIntNode(nProd.intValue());
+	            	}
+	            	else {
+	            		prod = Util.makeLongNode(nProd.longValue());
+	            	}
             	}
 //            	System.out.println("builtin product assigning value: " + sum);
             	return env.bind(args[length - 1], prod);
             }
         }
-        // Doesn't (yet) handle partially bound cases
-        return false;
+        else {
+        	// so this must be the one remaining case--more than three arguments, more than two multipliers
+        	List<Node> nodeLst = Arrays.asList(args);
+        	if (GeUtils.listContainsUnittedQuantity(nodeLst, context)) {
+            	Number nProd = Long.valueOf(1);
+            	List<Node> multiplierNodeLst = new ArrayList<Node>(nodeLst.size() - 1);
+            	for (int i = 0; i < (nodeLst.size() - 1); i++) {
+            		multiplierNodeLst.add(nodeLst.get(i));
+            	}
+        		prod = createUnittedQuantityProduct(context, nProd, multiplierNodeLst);
+        	}
+        	else {
+	        	if (!prod.isLiteral()) {
+	                throw new BuiltinException(this, context, "builtin " + getName() + " has a multiplier (" + prod + ") which is not a Literal");
+	        	}
+	            Object prodObj = prod.getLiteralValue();
+	            if (!(prodObj instanceof Number)) {
+	                throw new BuiltinException(this, context, "builtin " + getName() + " has a multiplier (" + prodObj + ") which is not a number");
+	            }
+	            Number nProd = Long.valueOf(1);
+	        	java.util.List<Node> lst = new ArrayList<Node>();
+	        	for (int i = 0; i < (length - 1); i++) {
+	        		lst.add(getArg(i, args, context));
+	        	}
+	        	nProd = multiplyList(nProd, lst, context);
+	           	if (nProd instanceof Float || nProd instanceof Double) {
+	        		prod = Util.makeDoubleNode(nProd.doubleValue());
+	        	}
+	        	else if (nProd instanceof Integer) {
+	        		prod = Util.makeIntNode(nProd.intValue());
+	        	}
+	        	else {
+	        		prod = Util.makeLongNode(nProd.longValue());
+	        	}
+        	}
+//        	System.out.println("builtin product assigning value: " + sum);
+        	return env.bind(args[length - 1], prod);
+        }
     }
-    
-    private Number multiplyList(Number prod, Node lst, RuleContext context) {
-    	java.util.List<Node> l = Util.convertList(lst, context);
-        return multiplyList(prod, l, context);
-    }
+
+	private Node createUnittedQuantityProduct(RuleContext context, Number nProd, List<Node> nodeLst) {
+		List<Node> values = GeUtils.getUnittedQuantityValues(this, nodeLst, context);
+		nProd = multiplyList(nProd, values, context);
+		Node valNode;
+		if (nProd instanceof Float || nProd instanceof Double) {
+			valNode = Util.makeDoubleNode(nProd.doubleValue());
+		}
+		else if (nProd instanceof Integer) {
+			valNode = Util.makeIntNode(nProd.intValue());
+		}
+		else {
+			valNode = Util.makeLongNode(nProd.longValue());
+		}
+		Node uQinst = Utils.createInstanceOfClass(context, SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		Node valPred = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
+		Utils.addValue(context, uQinst, valPred, valNode);
+		List<Node>units = GeUtils.getUnittedQuantityUnits(this, nodeLst, context);
+		StringBuilder sb = new StringBuilder();
+		for (Node unit : units) {
+			if (sb.length() > 0) {
+				sb.append("*");
+			}
+			sb.append(unit.getLiteralValue().toString());
+		}
+		Node unitNode = NodeFactory.createLiteral(sb.toString());
+		Node unitPred = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
+		Utils.addValue(context, uQinst, unitPred, unitNode);
+		return uQinst;
+	}
     
     private Number multiplyList(Number prod, java.util.List<Node> l, RuleContext context) {
     	for (int i = 0; l != null && i < l.size(); i++) {
     		Node elt = (Node) l.get(i);
             if (elt != null && elt.isLiteral()) {
             	Object v1 = elt.getLiteralValue();
-            	if (v1 instanceof Number) {
-            		if (v1 instanceof Float) {
+             	if (v1 instanceof Number) {
+                   	String ldturi = elt.getLiteralDatatypeURI();
+            		if (v1 instanceof Float || ldturi.equals(XSD.xfloat.getURI())) {
 //            			System.out.println("multiplying " + v1 + " by prod (" + prod.floatValue() + ")");
             			prod = (Float)v1 * prod.floatValue();
             		}
-            		else if (v1 instanceof Double) {
+            		else if (v1 instanceof Double || ldturi.equals(XSD.xdouble.getURI())) {
 //            			System.out.println("multiplying " + v1 + " by prod (" + prod.doubleValue() + ")");
             			prod = (Double)v1 * prod.doubleValue();
+            		}
+            		else if (v1 instanceof Integer || ldturi.equals(XSD.xint)) {
+            			prod = ((Number)v1).intValue() * prod.doubleValue();
+            		}
+            		else if (ldturi.equals(XSD.decimal.getURI())) {
+            			if (elt.getLiteralLexicalForm().indexOf(".") >= 0) {
+            				prod = ((Number) v1).doubleValue() * prod.doubleValue();
+            			}
+            			else {
+            				prod = ((Number)v1).longValue() * prod.doubleValue();
+            			}
             		}
             		else {
 //            			System.out.println("multiplying " + v1 + " by prod (" + prod.longValue() + ")");

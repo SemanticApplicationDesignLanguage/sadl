@@ -3330,6 +3330,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					TypeCheckInfo tci = null;
 					try {
 						tci = getModelValidator().getType(varList.get(i));
+						if (tci != null && tci.getImplicitProperties() != null) {
+							if (var instanceof VariableNode) {
+								if (tci.getImplicitProperties().size() == 1) {
+									ConceptName ipn = tci.getImplicitProperties().get(0);
+									((VariableNode)var).setImpliedPropertyNode(conceptNameToNamedNode(ipn));
+								}
+								else {
+									addWarning("Multiple implied properties on variable not supported", varList.get(i));
+								}
+							}
+						}
 					} catch (DontTypeCheckException e1) {
 						// OK to not type check
 					} catch (CircularDefinitionException e1) {
@@ -12305,6 +12316,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					while (ipvs.hasNext()) {
 						RDFNode ipv = ipvs.next();
 						if (ipv.canAs(OntProperty.class)) {
+							if (value.equals(ipv)) {
+								// they are the same implied property (maybe repeated in models)
+								continue;
+							}
 							ExtendedIterator<? extends OntResource> ipvitr = ipv.as(OntProperty.class).listRange();
 							while (ipvitr.hasNext()) {
 								OntResource ipvr = ipvitr.next();
@@ -15286,7 +15301,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							while (sitr.hasNext()) {
 								RDFNode obj = sitr.nextStatement().getObject();
 								if (obj.isURIResource()) {
-									ConceptName cn = new ConceptName(obj.asResource().getURI());
+									ConceptName cn = (new SadlUtils()).getConceptByUri(getTheJenaModel(), obj.asResource().getURI());
 									if (!retlst.contains(cn)) {
 										retlst.add(cn);
 									}
@@ -16566,4 +16581,5 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		cachedJenaResource.put(key, jenaResource);
 	}
+	
 }

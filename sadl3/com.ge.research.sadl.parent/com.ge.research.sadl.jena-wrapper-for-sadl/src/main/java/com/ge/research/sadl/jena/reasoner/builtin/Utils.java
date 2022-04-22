@@ -281,6 +281,19 @@ public class Utils {
 		Utils.deleteReplaceCreateValue(context, newInst, RDF.Nodes.type, theClass);
 		return newInst;
 	}
+	
+	/**
+	 * Call this method to create a new blank node instance of an existing class within the context
+	 * @param context -- the RuleContext from the calling built-in
+	 * @param existingClass -- the URI of the existing class
+	 * @return -- a new blank node which is an instance of the existing class
+	 */
+	public static synchronized Node createInstanceOfClass(RuleContext context, String existingClass) {
+		Node newInst = NodeFactory.createBlankNode();
+		Node_URI theClass = (Node_URI) NodeFactory.createURI(existingClass);
+		Utils.addValue(context, newInst, RDF.Nodes.type, theClass);
+		return newInst;
+	}
 
 	/**
 	 * Call this method to add a triple to the context when the URI is known for subject, property, and object value.

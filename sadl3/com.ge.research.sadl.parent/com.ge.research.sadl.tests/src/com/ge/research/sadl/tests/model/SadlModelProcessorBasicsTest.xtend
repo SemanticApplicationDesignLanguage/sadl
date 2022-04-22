@@ -2528,6 +2528,12 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  			for (rule : rules) {
  				println(rule.toString)
  			}
+ 			assertTrue(issues.size == 1)
+ 			assertTrue(issues.get(0).toString.contains("UnittedQuantity, cannot be compared (is) with xsd:float"))
+ 			assertTrue(rules.size == 1)
+ 			assertEquals("Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2).", 
+ 				rules.get(0).toString
+ 			)
  		]
 	}
 	
@@ -2541,9 +2547,56 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			 Rectangle is a class described  by height with values of type float,
 			 	described by width with values of type float.
 			 	
+			 Rule R1: if x is a Rectangle then area of x is (height of x * width of x) "sq ft".
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			for (issue : issues) {
+				println(issue.message.toString)
+			}
+ 			for (rule : rules) {
+ 				println(rule.toString)
+ 			}
+ 			assertTrue(issues.size == 0)
+ 			assertTrue(rules.size == 1)
+ 			assertEquals("Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) and unittedQuantity(v2,\"sq ft\",v3) then rdf(x, impliedpropertiesinrule:area, v3).", 
+ 				rules.get(0).toString
+ 			)
+ 		]
+	}
+	
+	@Test
+	def void testImpliedPropertyInRule_03() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type float,
+			 	described by width with values of type float.
+			 	
 			 BigRectangle is a type of Rectangle.
 			 	
 			 Rule R2: if x is a Rectangle and area of x > 20 "sq ft" then x is a BigRectangle.
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			for (issue : issues) {
+				println(issue.message.toString)
+			}
+ 			for (rule : rules) {
+ 				println(rule.toString)
+ 			}
+ 		]
+	}
+	
+	@Test
+	def void testImpliedPropertyInRule_04() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type UnittedQuantity,
+			 	described by width with values of type UnittedQuantity.
+			 	
+			 Rule R1: if x is a Rectangle then area of x is height of x * width of x.
  		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
 			for (issue : issues) {
 				println(issue.message.toString)
