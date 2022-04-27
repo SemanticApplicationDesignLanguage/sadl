@@ -31,6 +31,8 @@ import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.getContainerOfType
 import com.ge.research.sadl.sADL.Declaration
+import com.ge.research.sadl.model.OntConceptType
+import com.ge.research.sadl.sADL.RuleStatement
 
 /**
  * Static utility class for SADL AST elements.
@@ -98,7 +100,7 @@ class SadlASTUtils {
 		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
 			val container = eContainer as SubjHasProp;
 			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null &&
-				!container.inQueryStatement && !container.inEquationStatement;
+				!container.inQueryStatement && !container.inEquationStatement && !container.inRuleStatement;
 		}
 		return false;
 	}
@@ -110,6 +112,10 @@ class SadlASTUtils {
 	
 	private static def isInEquationStatement(EObject it) {
 		return getContainerOfType(EquationStatement) !== null;
+	}
+	
+	private static def isInRuleStatement(EObject it) {
+		return getContainerOfType(RuleStatement) !== null;
 	}
 
 	/**

@@ -88,6 +88,67 @@ class ImpliedExtendedPropertiesTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
+	def void testImpliedPropertyInRule_01() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule2.sadl" alias impliedpropertiesinrule2.
+			  
+			 Person is a class 
+			 	described by child with values of type Person,
+			 	described by age with values of type decimal,
+			 	described by weight with values of type decimal.
+			 Person has impliedProperty age //, has impliedProperty weight
+			 .
+			 
+			 Adult is a type of Person.
+			 
+			 Sue is a Person with age 23, with weight 125.
+			 
+			 Parent is a type of (child has at least 1 value). 
+			 Parent is the same as (child has at least 1 value).  
+			 
+			 Rule R1: if x is a Person and x > 18 then x is an Adult.
+			 
+			 Test: Sue is an Adult .			 
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			{ assertNotNull(jenaModel)
+
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule R1:  if rdf(x, rdf:type, ipt:Person) and rdf(x, ipt:child, y) then rdf(x, ipt:age, 23.0)."))
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
 	def void testImpliedPropertyInTest_02() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
