@@ -5720,9 +5720,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (robj instanceof NamedNode) {
 				((NamedNode)robj).setContext(rexpr);
 			}
-			if (robj instanceof Object[] && ((Object[]) robj).length == 2) {
-				rest = ((Object[]) robj)[1];
-				robj = ((Object[]) robj)[0];
+			if (op != null && op.equals("and") && getTarget() instanceof Query) {
+				// check for special case where there is a conjunction of properties or property chains that is an abbreviated form
+				if (rexpr instanceof PropOfSubject && leftSideIncompletePropertyChain(lexpr)) {
+					if (robj instanceof Object[] && ((Object[]) robj).length == 2) {
+						rest = ((Object[]) robj)[1];
+						robj = ((Object[]) robj)[0];
+					}
+					lobj = deabbreviateLeftOfConjunction(lexpr, rexpr, lobj, robj, rest);
+				}
 			}
 		} else {
 			addError("Right side of '" + op + "' is null", rexpr); // TODO Add new error
@@ -6254,7 +6260,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 			jct.setLhs(nodeCheck(postProcessTranslationResult(lobj)));
-			jct.setRhs(nodeCheck(robj instanceof NamedNode && rest != null ? rest : robj));
+//			if (rest != null) {
+//				Object[] newRobj = new Object[2];
+//				newRobj[0] = robj;
+//				newRobj[1] = rest;
+//				robj = newRobj;
+//			}
+//			jct.setRhs(nodeCheck(robj instanceof NamedNode && rest != null ? rest : robj));
+			jct.setRhs(nodeCheck(postProcessTranslationResult(robj)));
 			
 			return jct;
 		} else {
@@ -6282,6 +6295,211 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi), rest);
 		}
+	}
+
+	/**
+	 * Method to add missing (abbreviated) content to the left side of a conjunction, 
+	 * drawing from the right side.
+	 * @param lobj
+	 * @param robj
+	 * @param rest 
+	 * @return
+	 */
+	private Object deabbreviateLeftOfConjunction(Expression lexpr, Expression rexpr, Object lobj, Object robj, Object rest) {
+		// find matching domain to expand abbreviated form
+		// find the end of the left chain
+		try {
+			if (lobj instanceof NamedNode && isProperty((NamedNode)lobj)) {
+				lobj = new TripleElement(null, (Node) lobj, null);
+			}
+		} catch (TranslationException e1) {
+			addError(e1.getMessage(), lexpr);
+		}
+		if (!(lobj instanceof TripleElement)) {
+			addError("Left of conjunctions not a triple as expected", lexpr);
+			return lobj;
+		}
+		if (!(robj instanceof TripleElement)) {
+			addError("Right of conjunctions not a triple as expected", rexpr);
+			return lobj;
+		}
+		TripleElement leftEndTriple = (lobj instanceof TripleElement) ? (TripleElement)lobj : null;
+		while (leftEndTriple.getSubject() != null) {
+			if (leftEndTriple.getSubject() instanceof ProxyNode) {
+				GraphPatternElement gpe = ((ProxyNode)leftEndTriple.getSubject()).getProxyFor();
+				if (gpe instanceof TripleElement) {
+					leftEndTriple = (TripleElement) gpe;
+				}
+				else {
+					// this shouldn't happen
+					addError("Left of conjunctions contains unexpected non-triple", rexpr);
+				}
+			}
+		}
+		if (leftEndTriple != null) {
+			Node pred1 = leftEndTriple.getPredicate();
+			if (pred1 instanceof NamedNode) {
+				Property prop1 = getTheJenaModel().getProperty(((NamedNode)pred1).getURI());
+				List<OntClass> domainMembers = getPropertyDomainClasses(prop1);
+				if (domainMembers !=  null) {
+					boolean done = false;
+					TripleElement robjtriple = (TripleElement)robj;
+					TripleElement newLobjAccumulatorElement = null;
+					TripleElement lastNewLobjElement =  null;
+					for (OntClass member : domainMembers) {
+						while (robjtriple != null) {
+							Node pred2 = robjtriple.getPredicate();
+							if (pred2 instanceof NamedNode) {
+								Property prop2 = getTheJenaModel().getProperty(((NamedNode)pred2).getURI());
+								List<OntClass> domainMembers2 = getPropertyDomainClasses(prop2);
+								if (domainsMatch(member, domainMembers2, (EObject)robjtriple.getContext())) {
+									if (lastNewLobjElement == null) {
+										leftEndTriple.setSubject(robjtriple.getSubject());
+									}
+									else {
+										leftEndTriple.setSubject(lastNewLobjElement.getSubject());
+									}
+									done = true;
+									break;
+								}
+								else {
+									if (robjtriple.getSubject() instanceof ProxyNode) {
+										Object gpe = ((ProxyNode) robjtriple.getSubject()).getProxyFor();
+										if (gpe instanceof TripleElement) {
+											robjtriple = (TripleElement) gpe;
+											if (newLobjAccumulatorElement == null) {
+												newLobjAccumulatorElement = new TripleElement(robjtriple.getSubject(), robjtriple.getPredicate(), robjtriple.getObject());
+												lastNewLobjElement = newLobjAccumulatorElement;
+											}
+											else {
+												TripleElement newTriple = new TripleElement(robjtriple.getSubject(), robjtriple.getPredicate(), robjtriple.getObject());
+												try {
+													lastNewLobjElement.setObject(new ProxyNode(newTriple));
+													lastNewLobjElement = newTriple;
+												} catch (InvalidTypeException e) {
+													addError(e.getMessage(), (EObject) robjtriple.getContext());
+													return lobj;
+												}
+											}
+										}
+										else {
+											addError("Unexpected non-triple", (EObject)robjtriple.getContext());
+											return lobj;
+										}
+									}
+									else {
+										addError("Unexpected non-proxy", (EObject)robjtriple.getContext());
+										return lobj;
+									}
+								}
+							}
+						}
+						if (done) {
+							break;
+						}
+					}
+				}
+			}
+		}
+		if (rest != null) {
+			// rest needs to be applied to both lobj and robj
+			Object[] larr = new Object[2];
+			larr[0] = lobj;
+			larr[1] = rest;
+			return larr;
+		}
+		return lobj;
+	}
+	
+	private boolean domainsMatch(OntClass member, List<OntClass> domainMembers2, EObject context) {
+		for (OntClass member2 : domainMembers2) {
+			if (domainMembers2 != null && domainMembers2.contains(member)) {
+				return true;
+			}
+			try {
+				if (SadlUtils.classIsSubclassOf(member, member2, true, null)) {
+					return true;										
+				}
+			} catch (CircularDependencyException e) {
+				addError(e.getMessage(), context);
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Method to get a list of OntClass members of a property's domain.
+	 * @param p
+	 * @return
+	 */
+	private List<OntClass> getPropertyDomainClasses(Property p) {
+		List<OntClass> domainMembers = null;
+		StmtIterator sitr = getTheJenaModel().listStatements(p, RDFS.domain, (RDFNode)null);
+		while (sitr.hasNext()) {
+			RDFNode obj = sitr.nextStatement().getObject();
+			if (obj.isResource()) {
+				org.apache.jena.rdf.model.Resource rsrc = obj.asResource();
+				if (rsrc.canAs(OntClass.class)) {
+					OntClass cls = rsrc.as(OntClass.class);
+					if (domainMembers == null) {
+						domainMembers = new ArrayList<OntClass>();
+					}
+					if (cls.isUnionClass()) {
+						RDFList members = cls.asUnionClass().getOperands();
+						List<RDFNode> javaList = members.asJavaList();
+						for (RDFNode member : javaList) {
+							if (member.isResource() && member.asResource().canAs(OntClass.class)) {
+								domainMembers.add(member.asResource().as(OntClass.class));
+							}
+						}
+					}
+					else {
+						domainMembers.add(cls);
+					}
+				}
+			}
+		}
+		return domainMembers;
+	}
+
+	/**
+	 * Method to analyze an Expression in a query and determine if it is an incomplete property
+	 * chain, that is a property chain that ends with a property rather than a class or instance.
+	 * @param expr
+	 * @return
+	 */
+	private boolean leftSideIncompletePropertyChain(Expression expr) {
+		try {
+			if (expr instanceof Declaration) {
+				SadlTypeReference decltype = ((Declaration)expr).getType();
+				if (decltype instanceof SadlSimpleTypeReference) {
+					SadlResource declSR = ((SadlSimpleTypeReference)decltype).getType().getName();
+					if (isProperty(getDeclarationExtensions().getOntConceptType(declSR))) {
+						return true;
+					}
+				}
+			}
+			else if (expr instanceof Name && isProperty(getDeclarationExtensions().getOntConceptType((SadlResource) expr))) {
+				return true;
+			}
+			else if (expr instanceof PropOfSubject) { // && ((PropOfSubject) lexpr).getRight() == null) {
+				while (((PropOfSubject)expr).getRight() instanceof PropOfSubject) {
+					expr = ((PropOfSubject)expr).getRight();
+				}
+				if (((PropOfSubject)expr).getRight() instanceof Name || 
+						((PropOfSubject)expr).getRight() instanceof Declaration) {
+					return leftSideIncompletePropertyChain(((PropOfSubject)expr).getRight());
+				}
+				else if (((PropOfSubject)expr).getRight() instanceof SubjHasProp) {
+					return false;
+				}
+				return leftSideIncompletePropertyChain(((PropOfSubject)expr).getLeft());
+			}
+		} catch (CircularDefinitionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	/**
