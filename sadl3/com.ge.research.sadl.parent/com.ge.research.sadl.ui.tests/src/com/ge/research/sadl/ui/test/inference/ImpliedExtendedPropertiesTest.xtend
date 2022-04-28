@@ -28,6 +28,7 @@ import org.junit.Test
 
 import static com.ge.research.sadl.ui.tests.GeneratedOutputFormat.*
 import com.ge.research.sadl.reasoner.ResultSet
+import org.junit.Ignore
 
 /**
  * Test that demonstrate how to make assertions on the generated translator outputs, plus runs the inferencer too.
@@ -92,7 +93,7 @@ class ImpliedExtendedPropertiesTest extends AbstractSadlPlatformTest {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
-			 uri "http://sadl.org/ImpliedPropertiesInRule2.sadl" alias impliedpropertiesinrule2.
+			 uri "http://sadl.org/ImpliedPropertiesInRule2.sadl" alias ipt.
 			  
 			 Person is a class 
 			 	described by child with values of type Person,
@@ -127,7 +128,7 @@ class ImpliedExtendedPropertiesTest extends AbstractSadlPlatformTest {
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
-					"Rule R1:  if rdf(x, rdf:type, ipt:Person) and rdf(x, ipt:child, y) then rdf(x, ipt:age, 23.0)."))
+					"Rule R1:  if rdf(x, rdf:type, ipt:Person) and rdf(x, ipt:age, v0) and >(v0,18) then rdf(x, rdf:type, ipt:Adult)."))
 			}
 		]
 
@@ -143,6 +144,11 @@ class ImpliedExtendedPropertiesTest extends AbstractSadlPlatformTest {
 				assertTrue(scr instanceof SadlCommandResult)
 				val tr = (scr as SadlCommandResult).results
 				assertTrue(tr instanceof TestResult)
+				if ((tr as TestResult).passed) 
+					println("    passed\n")
+				else {
+					println("    failed\n")
+				}
 				assertTrue((tr as TestResult).passed)
 			}
 		];

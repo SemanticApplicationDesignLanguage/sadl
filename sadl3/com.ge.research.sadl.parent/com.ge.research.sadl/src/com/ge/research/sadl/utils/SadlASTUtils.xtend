@@ -33,6 +33,8 @@ import static extension org.eclipse.xtext.EcoreUtil2.getContainerOfType
 import com.ge.research.sadl.sADL.Declaration
 import com.ge.research.sadl.model.OntConceptType
 import com.ge.research.sadl.sADL.RuleStatement
+import com.ge.research.sadl.sADL.PropOfSubject
+import org.eclipse.xtext.scoping.IScope
 
 /**
  * Static utility class for SADL AST elements.
@@ -98,25 +100,59 @@ class SadlASTUtils {
 	 */
 	static def boolean isUnit(EObject it) {
 		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
+//			val iTlName = declarationExtensions.getConcreteName(it as SadlResource)
 			val container = eContainer as SubjHasProp;
+			val leftSR = container.left instanceof SadlResource
+			val propSR = container.prop instanceof SadlResource
+			if (propSR) {
+//				val propLName = declarationExtensions.getConcreteName(container.prop as SadlResource)
+				val inPofS = container.eContainer instanceof PropOfSubject
+				if (inPofS) {
+					val contIsRightOfPofS = (container.eContainer as PropOfSubject).right.equals(container)
+					if (contIsRightOfPofS) {
+						var retval = (it as SadlResource).equals(container.prop as SadlResource);
+						return retval
+					}			
+				}
+			}
 			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null &&
-				!container.inQueryStatement && !container.inEquationStatement && !container.inRuleStatement;
+				!leftSR
+//				 &&
+//				!container.inQueryStatement && !container.inEquationStatement && !container.inRuleStatement;
 		}
 		return false;
 	}
 
-	// TOOD this logic should be much smarter.
-	private static def isInQueryStatement(EObject it) {
-		return getContainerOfType(QueryStatement) !== null;
+	/**
+	 * {@code true} if the argument is a SADL resource which represents a non-quoted unit in a unit expression like construct.
+	 * Otherwise, {@code false}.
+	 */
+	static def boolean isUnit(EObject it, IScope scope) {
+		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
+//			val iTlName = declarationExtensions.getConcreteName(it as SadlResource)
+			val container = eContainer as SubjHasProp;
+			if (container.right === null) {
+				if (container.prop.equals(it) && scope.getSingleElement(it) != null) {
+					return false  // this is already defined as a concept, can't be a UNIT
+				}
+				return isUnit(it)
+			}
+		}
+		return false;
 	}
-	
-	private static def isInEquationStatement(EObject it) {
-		return getContainerOfType(EquationStatement) !== null;
-	}
-	
-	private static def isInRuleStatement(EObject it) {
-		return getContainerOfType(RuleStatement) !== null;
-	}
+
+//	// TOOD this logic should be much smarter.
+//	private static def isInQueryStatement(EObject it) {
+//		return getContainerOfType(QueryStatement) !== null;
+//	}
+//	
+//	private static def isInEquationStatement(EObject it) {
+//		return getContainerOfType(EquationStatement) !== null;
+//	}
+//	
+//	private static def isInRuleStatement(EObject it) {
+//		return getContainerOfType(RuleStatement) !== null;
+//	}
 
 	/**
 	 * Helper for getting the declaration extension in code that does not use Guice.

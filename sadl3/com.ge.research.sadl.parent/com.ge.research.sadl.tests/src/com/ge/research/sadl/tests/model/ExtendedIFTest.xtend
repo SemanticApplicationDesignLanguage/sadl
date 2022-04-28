@@ -240,6 +240,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
 // 			jenaModel.write(System.out)
+			for (issue:issues) {
+				println(issue.toString)
+			}
  			issues.assertHasIssues(2);
  			for (issue:issues) {
  				if (issue.severity.equals(Severity.ERROR)) {
@@ -385,10 +388,10 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
  			assertNotNull(jenaModel)
 // 			jenaModel.write(System.out)
+			for (issue:issues) {
+				println(issue.message)
+			}
  			issues.assertHasNoIssues;
-//			for (issue:issues) {
-//				println(issue.message)
-//			}
   			assertTrue(rules.size == 12)
 			for (rule:rules) {
 				println("\"" + rule.toString + "\",")

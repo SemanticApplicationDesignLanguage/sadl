@@ -8456,7 +8456,33 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		else if (getTarget() != null && getTarget() instanceof Rule && 
 				((Rule)getTarget()).getVariable(getModelNamespace() + lName) != null) {
-			return ((Rule)getTarget()).getVariable(getModelNamespace() + lName);
+			VariableNode var = ((Rule)getTarget()).getVariable(getModelNamespace() + lName);
+			Property ip = OntModelProvider.getImpliedProperty(getCurrentResource(), aExpr);
+			if (ip != null) {
+				NamedNode propnn = new NamedNode(ip.getURI());
+				NodeType ptype;
+				if (ip instanceof DatatypeProperty) {
+					ptype = NodeType.DataTypeProperty;
+				}
+				else if (ip instanceof ObjectProperty) {
+					ptype = NodeType.ObjectProperty;
+				}
+				else if (ip instanceof AnnotationProperty) {
+					ptype = NodeType.AnnotationProperty;
+				}
+				else {
+					ptype = NodeType.PropertyNode;
+				}
+				propnn.setNodeType(ptype);
+				propnn = validateNamedNode(propnn);
+				TripleElement tr = new TripleElement(var, propnn, null);
+				// remove so it isn't applied again
+				getModelValidator().removeImpliedPropertyUsed(aExpr);
+				return tr;
+			}
+			else {
+				return var;
+			}
 		}			// make sure the right side is defined for binary operation
 		else if (lQName.equals(aExpr) && aExpr.eContainer() instanceof BinaryOperation
 				&& ((BinaryOperation) aExpr.eContainer()).getRight() != null
@@ -9309,7 +9335,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				else if (subj.eContainer() instanceof SubjHasProp && 
 						subj.eContainer().eContainer() instanceof BinaryOperation) {
-					addError("Triple pattern as part of binary operation is incomplete", subj.eContainer());
+//					if (getTarget() == null) {
+//						addError("Triple pattern as part of binary operation is incomplete", subj.eContainer());
+//					}
 					return shpTriples;
 				}
 				else {

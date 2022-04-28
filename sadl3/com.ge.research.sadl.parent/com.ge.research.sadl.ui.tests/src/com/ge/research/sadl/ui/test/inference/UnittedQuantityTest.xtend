@@ -346,7 +346,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 			 Rule AdultRule: if p is a Person and p has age >= 18 years then p is an Adult.
 			 Rule AdultRule2: if p is a Person and p has age uq and unit of uq is "years" and ^value of uq >= 18 then p is an Adult.
 			 Expr: age >= 18 years.
-«««			 Expr: p has age >= 18 years.
+			 Expr: p has age >= 18 years.
 			 Test: Jane is an Adult.
  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
