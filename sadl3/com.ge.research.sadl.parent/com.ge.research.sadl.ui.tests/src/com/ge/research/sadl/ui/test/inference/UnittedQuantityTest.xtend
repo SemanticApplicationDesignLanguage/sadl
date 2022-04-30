@@ -447,4 +447,181 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
+	@Test
+	def void testUnittedQuantityInQuery_01() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by age with values of type UnittedQuantity.
+			 
+			 Adult is a type of Person.
+			  
+			 Jane is a Person with age 23 years.
+			 
+
+			 Ask: "select ?p where {?p <test:age> ?v0 . ?v0 <sadlimplicitmodel:unit> \"years\" . ?v0 <sadlimplicitmodel:value> ?v1 . FILTER(?v1 > 18)}".
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.class.canonicalName)
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"p\"
+\"http://sadl.org/test.sadl#Jane\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+	@Test
+	def void testUnittedQuantityInQuery_02() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by age with values of type UnittedQuantity.
+			 
+			 Adult is a type of Person.
+			  
+			 Jane is a Person with age 23 "years".
+			 
+			 Ask: select p where p has age > 18 years.
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+//				assertTrue(tr instanceof TestResult)
+//				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
+	def void testUnittedQuantityInQuery_03() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by age with values of type UnittedQuantity.
+			 
+			 Adult is a type of Person.
+			  
+			 Jane is a Person with age 23 years.
+			 
+			 Ask: select p where p has age > 18 years.
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+//				assertTrue(tr instanceof TestResult)
+//				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
 }

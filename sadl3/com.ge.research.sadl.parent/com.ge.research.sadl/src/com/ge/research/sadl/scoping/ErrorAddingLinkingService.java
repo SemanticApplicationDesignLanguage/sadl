@@ -48,10 +48,11 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 		final String crossRefString = getCrossRefNodeAsString(node);
 		if (crossRefString != null && !crossRefString.equals("")) {
 			logger.debug("before getLinkedObjects: node: '" + crossRefString + "'");
-			final IScope scope = getScope(context, ref);
-			if (SadlASTUtils.isUnit(context, scope)) {
+			if (SadlASTUtils.isUnit(context, ref, getScopeProvider())) {
 				return Collections.emptyList();
 			}
+			final IScope scope = getScope(context, ref);
+			IScope scope2 = getScope(context, ref);
 			QualifiedName qualifiedLinkName =  qualifiedNameConverter.toQualifiedName(crossRefString);
 			IEObjectDescription eObjectDescription = scope.getSingleElement(qualifiedLinkName);
 			logger.debug("after getLinkedObjects: node: '" + crossRefString + "' result: " + eObjectDescription);
