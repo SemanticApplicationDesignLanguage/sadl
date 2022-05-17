@@ -43,6 +43,7 @@ import org.eclipse.xtext.scoping.IScopeProvider
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.impl.MapBasedScope
+import com.ge.research.sadl.sADL.TestStatement
 
 /**
  * Static utility class for SADL AST elements.
@@ -238,6 +239,7 @@ class SadlASTUtils {
 		if (isInQueryStatement) { return true }
 		if (isInEquationStatement) { return true }
 		if (isInExpressionStatement) { return true }
+		if (isInTestStatement) { return true }
 		return false
 	}
 	
@@ -255,6 +257,10 @@ class SadlASTUtils {
 
 	private static def isInExpressionStatement(EObject it) {
 		return getContainerOfType(ExpressionStatement) !== null;
+	}
+	
+	private static def isInTestStatement(EObject it) {
+		return getContainerOfType(TestStatement) !== null;
 	}
 
 	/**

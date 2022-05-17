@@ -73,4 +73,17 @@ class SadlCustomPreferencesTest extends AbstractLinkingTest {
 			'''Expected «expected» as the 'IGNORE_UNITTEDQUANTITIES' value. Was: «actual».''', expected, actual);
 	}
 
+	@Test
+	def void check_Expand_UnittedQuantitites_Overridden() {
+		val resource = '''
+			uri "http://sadl.org/Foo.sadl".
+		'''.sadl;
+		val preferenceValues = preferenceValuesProvider.getPreferenceValues(resource);
+
+		val expected = Boolean.TRUE.toString;
+		val actual = preferenceValues.getPreference(IGNORE_UNITTEDQUANTITIES)
+
+		assertEquals(
+			'''Expected «expected» as the 'EXPAND_UNITTEDQUANTITIES' value. Was: «actual».''', expected, actual);		
+	}
 }

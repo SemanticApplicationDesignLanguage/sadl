@@ -88,8 +88,9 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				if (tr != null) {
 					println(tr.toString)
 				}
-//				assertTrue(tr instanceof TestResult)
-//				assertTrue((tr as TestResult).passed)
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"s\",\"ar\"
+\"http://sadl.org/ImpliedPropertiesInRule.sadl#MyRect\",8.8 \"ft*ft\"", (tr as ResultSet).toString.trim)
 			}
 		];
 	}
@@ -147,8 +148,9 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				if (tr != null) {
 					println(tr.toString)
 				}
-//				assertTrue(tr instanceof TestResult)
-//				assertTrue((tr as TestResult).passed)
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"c\",\"v\"
+\"http://sadl.org/UnittedQuantityInRule2.sadl#MyRP\",9.680000000000001 \"ft*ft*ft\"", (tr as ResultSet).toString.trim)
 			}
 		];
 	}
@@ -206,8 +208,9 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				if (tr != null) {
 					println(tr.toString)
 				}
-//				assertTrue(tr instanceof TestResult)
-//				assertTrue((tr as TestResult).passed)
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"c\",\"v\"
+\"http://sadl.org/UnittedQuantityInRule3.sadl#MyRP\",9.680000000000001 \"ft*ft*ft\"", (tr as ResultSet).toString.trim)
 			}
 		];
 	}
@@ -264,8 +267,9 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				if (tr != null) {
 					println(tr.toString)
 				}
-//				assertTrue(tr instanceof TestResult)
-//				assertTrue((tr as TestResult).passed)
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"c\",\"v\"
+\"http://sadl.org/UnittedQuantityInRule4.sadl#MyRP\",9.680000000000001 \"ft*ft*ft\"", (tr as ResultSet).toString.trim)
 			}
 		];
 	}
@@ -275,7 +279,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
-			 uri "http://sadl.org/UnittedQuantityInRule45.sadl" alias unittedquantityinrule5.
+			 uri "http://sadl.org/UnittedQuantityInRule5.sadl" alias unittedquantityinrule5.
 			 
 			 Container is a class described by volume with values of type UnittedQuantity.
 			 
@@ -323,8 +327,9 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				if (tr != null) {
 					println(tr.toString)
 				}
-//				assertTrue(tr instanceof TestResult)
-//				assertTrue((tr as TestResult).passed)
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"c\",\"v\"
+\"http://sadl.org/UnittedQuantityInRule5.sadl#MyRP\",9.680000000000001 \"ft*ft*ft\"", (tr as ResultSet).toString.trim)
 			}
 		];
 	}
@@ -343,7 +348,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 			  
 			 Jane is a Person with age 23 years.
 			 
-			 Rule AdultRule: if p is a Person and p has age >= 18 years then p is an Adult.
+«««			 Rule AdultRule: if p is a Person and p has age >= 18 years then p is an Adult.
 			 Rule AdultRule2: if p is a Person and p has age uq and unit of uq is "years" and ^value of uq >= 18 then p is an Adult.
 			 Expr: age >= 18 years.
 			 Expr: p has age >= 18 years.
@@ -382,16 +387,14 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				if (tr != null) {
 					println(tr.toString)
 				}
-//				assertTrue(tr instanceof TestResult)
-//				assertTrue((tr as TestResult).passed)
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
 			}
 		];
 	}
 		
 	@Test
 	def void testUnittedQuantityInRule_07() {
-		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
-		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString))
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
 			 uri "http://sadl.org/test.sadl" alias test.
@@ -404,7 +407,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 			 Jane is a Person with age 23 years.
 			 
 			 Rule AdultRule: if p is a Person and p has age >= 18 years then p is an Adult.
-			 Rule AdultRule2: if p is a Person and p has age uq and unit of uq is "years" and ^value of uq >= 18 years then p is an Adult.
+«««			 Rule AdultRule2: if p is a Person and p has age uq and unit of uq is "years" and ^value of uq >= 18 years then p is an Adult.
 			 Expr: age >= 18 years.
 			 Test: Jane is an Adult.
  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
@@ -441,8 +444,67 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				if (tr != null) {
 					println(tr.toString)
 				}
-//				assertTrue(tr instanceof TestResult)
-//				assertTrue((tr as TestResult).passed)
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
+	def void testUnittedQuantityInRule_08() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString))
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 External unittedQuantity(decimal val, string unit) returns UnittedQuantity : "http://sadl.org#unittedQuantity".
+			 Person is a class described by age with values of type UnittedQuantity.
+			 
+			 Adult is a type of Person.
+			  
+			 Jane is a Person with age 23 years.
+			 
+			 Rule AdultRule: if p is a Person and p has age >= 18 years then p is an Adult.
+«««			 Rule AdultRule2: if p is a Person and p has age uq and unit of uq is "years" and ^value of uq >= 18 years then p is an Adult.
+			 Expr: age >= 18 years.
+			 Test: Jane is an Adult.
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
 			}
 		];
 	}
@@ -520,6 +582,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 			 Ask: select p where p has age > 18 years.
  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
+//			jenaModel.write(System.out)
 			if (issues !== null) {
 				for (issue : issues) {
 					System.out.println(issue.message)
@@ -556,10 +619,12 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				}
 				val tr = (scr as SadlCommandResult).results
 				if (tr != null) {
+					println(tr.class.canonicalName)
 					println(tr.toString)
 				}
-//				assertTrue(tr instanceof TestResult)
-//				assertTrue((tr as TestResult).passed)
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"p\"
+\"http://sadl.org/test.sadl#Jane\"", (tr as ResultSet).toString.trim)
 			}
 		];
 	}
@@ -580,6 +645,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 			 Ask: select p where p has age > 18 years.
  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
+//			jenaModel.write(System.out)
 			if (issues !== null) {
 				for (issue : issues) {
 					System.out.println(issue.message)
@@ -616,10 +682,317 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				}
 				val tr = (scr as SadlCommandResult).results
 				if (tr != null) {
+					println(tr.class.canonicalName)
 					println(tr.toString)
 				}
-//				assertTrue(tr instanceof TestResult)
-//				assertTrue((tr as TestResult).passed)
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"p\"
+\"http://sadl.org/test.sadl#Jane\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+	@Test
+	def void testUnittedQuantityInQuery_04() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by age with values of type UnittedQuantity.
+			 
+			 Adult is a type of Person.
+			  
+			 Jane is a Person with age 23 years.
+			 
+			 Ask: select p where 18 years < p has age.
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+//			jenaModel.write(System.out)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.class.canonicalName)
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"p\"
+\"http://sadl.org/test.sadl#Jane\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+	@Test
+	def void testUnittedQuantityInTest_01() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString))
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 External unittedQuantity(decimal val, string unit) returns UnittedQuantity : "http://sadl.org#unittedQuantity".
+			 Person is a class described by age with values of type UnittedQuantity.
+			 
+			 Adult is a type of Person.
+			  
+			 Jane is a Person with age 23 years.
+			 
+			 Test: age of Jane > 18 years.
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
+	def void testUnittedQuantityInTest_02() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 External unittedQuantity(decimal val, string unit) returns UnittedQuantity : "http://sadl.org#unittedQuantity".
+			 Person is a class described by age with values of type UnittedQuantity.
+			 
+			 Adult is a type of Person.
+			  
+			 Jane is a Person with age 23 years.
+			 
+			 Test: age of Jane > 18 years.
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
+	def void testUnittedQuantityInTest_03() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 External unittedQuantity(decimal val, string unit) returns UnittedQuantity : "http://sadl.org#unittedQuantity".
+			 Person is a class described by age with values of type UnittedQuantity.
+			 
+			 Adult is a type of Person.
+			  
+			 Jane is a Person with age 23 years.
+			 
+			 Test: ^value of age of Jane > 18.
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
+	def void testUnittedQuantityInTest_04() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 External unittedQuantity(decimal val, string unit) returns UnittedQuantity : "http://sadl.org#unittedQuantity".
+			 Person is a class described by age with values of type UnittedQuantity.
+			 
+			 Adult is a type of Person.
+			  
+			 Jane is a Person with age 23 years.
+			 George is a Person with age 18 years.
+			 
+			 Test: age of Jane > age of George.
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
 			}
 		];
 	}

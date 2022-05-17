@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.formatting2.ISubFormatter;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
@@ -49,6 +50,7 @@ import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.Junction.JunctionType;
+import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.JunctionList;
 import com.ge.research.sadl.model.gp.JunctionNode;
 import com.ge.research.sadl.model.gp.Literal;
@@ -716,6 +718,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	public void postProcessTest(Test test, TestStatement object) {
 		try {
 			Object lhs = test.getLhs();
+			if (lhs instanceof ProxyNode) {
+				lhs = ((ProxyNode)lhs).getProxyFor();
+			}
 			if (lhs instanceof List<?> && ((List<?>)lhs).size() > 0) {
 				if (((List<?>)lhs).get(0) instanceof GraphPatternElement) {
 					flattenLinkedList((List<GraphPatternElement>)lhs);
@@ -771,13 +776,25 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					test.setCompName(((BuiltinElement)lhs).getFuncName());
 				}
 			}
-			if (test.getRhs() instanceof ProxyNode) {
-				test.setRhs(((ProxyNode)test.getRhs()).getProxyFor());
-			}
 			Object rhs = test.getRhs();
+			if (rhs instanceof ProxyNode) {
+				rhs = ((ProxyNode)rhs).getProxyFor();
+			}
 			if (rhs instanceof List<?> && ((List<?>)rhs).size() > 0) {
 				if (((List<?>)rhs).get(0) instanceof GraphPatternElement) {
 					flattenLinkedList((List<GraphPatternElement>)rhs);
+				}
+				if (rhs instanceof List<?>) {
+					if (((List<?>)rhs).size() == 1) {
+						rhs = ((List<?>)rhs).get(0);
+						test.setRhs(rhs);
+					}
+					else if (((List<?>)rhs).size() == 2 && ((List<?>)rhs).get(1) instanceof BuiltinElement &&
+							((BuiltinElement)((List<?>)rhs).get(1)).isCreatedFromInterval()) {
+						test.setRhs(((List<?>)rhs).get(0));
+						test.setCompName(((BuiltinElement)((List<?>)rhs).get(1)).getFuncType());
+						test.setRhs(((BuiltinElement)((List<?>)rhs).get(1)).getArguments().get(1));
+					}
 				}
 			}
 			else if (rhs instanceof GraphPatternElement && ((GraphPatternElement)rhs).getNext() != null) {
@@ -786,7 +803,18 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					BuiltinElement be = (BuiltinElement) ((GraphPatternElement)rhs).getNext();
 					if (isComparisonBuiltin(be.getFuncName())) {
 						((GraphPatternElement)rhs).setNext(null);
-						test.setLhs(be.getArguments().get(1));
+						if (be.getArguments().size() > 1) {
+							if (be.getArguments().get(1) instanceof VariableNode) {
+								test.setLhs(be.getArguments().get(0));
+							}
+							else {
+								
+							}
+						}
+						else {
+							addError(new IFTranslationError("A BuiltinElement in a Test is a comparison (" + be.getFuncName() + ") but has less than two arguments (" + be.toString() + ")"));
+						}
+//						test.setLhs(be.getArguments().get(1));
 						test.setCompName(be.getFuncName());
 						done = true;
 					}
@@ -798,15 +826,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 	
-			if (test.getLhs() instanceof ProxyNode) {
-				test.setLhs(((ProxyNode)test.getLhs()).getProxyFor());
-			}
 			if (test.getCompType() != null && test.getCompType().equals(ComparisonType.Eq) 
-					&& test.getLhs() != null && test.getRhs() != null 
-					&& test.getLhs() instanceof NamedNode && test.getRhs() instanceof List<?>) {
+					&& lhs != null && rhs != null 
+					&& lhs instanceof NamedNode && rhs instanceof List<?>) {
 				if (test.getRhsVariables() != null && test.getRhsVariables().size() == 1) {
 					String rhsvar = test.getRhsVariables().get(0).getName();
-					List<?> rhslist = (List<?>) test.getRhs();
+					List<?> rhslist = (List<?>) rhs;
 					boolean allPass = true;
 					for (int i = 0; i < rhslist.size(); i++) {
 						Object anrhs = rhslist.get(i);
@@ -825,9 +850,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					if (allPass) {
 						for (int i = 0; i < rhslist.size(); i++) {
 							TripleElement triple = (TripleElement) rhslist.get(i);
-							triple.setSubject((Node) test.getLhs());
+							triple.setSubject((Node) lhs);
 						}
-						test.setLhs(test.getRhs());
+						test.setLhs(rhs);
 						test.setRhs(null);
 						test.setRhsVariables(null);
 						test.setCompName((String)null);
@@ -837,11 +862,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			
 			// this is a validity checking section
 			TripleElement singleTriple = null;
-			if (test.getLhs() instanceof TripleElement && test.getRhs() == null && ((TripleElement)test.getLhs()).getNext() == null) {
-				singleTriple = (TripleElement) test.getLhs();
+			if (lhs instanceof TripleElement && rhs == null) {
+				singleTriple = (TripleElement) lhs;
 			}
-			else if (test.getRhs() instanceof TripleElement && test.getLhs() == null && ((TripleElement)test.getRhs()).getNext() == null) {
-				singleTriple = (TripleElement) test.getRhs();
+			else if (rhs instanceof TripleElement && lhs == null) {
+				singleTriple = (TripleElement) rhs;
 			}
 			if (singleTriple != null) {
 				// a single triple test should not have any variables in it
@@ -859,9 +884,122 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 				}
 			}
+			if (!getModelProcessor().isIgnoreUnittedQuantities() && isExpandableComparisonOperator(test.getCompType())) {
+				BuiltinElement be = new BuiltinElement();
+				setBuiltinElementNameAndType(test.getCompType(), be);
+				List<GraphPatternElement> patterns = new ArrayList<GraphPatternElement>();
+				VariableNode lhsVar = null;
+				if (lhs instanceof GraphPatternElement) {
+					if (lhs instanceof TripleElement && ((TripleElement)lhs).getObject() instanceof VariableNode) {
+						patterns.add((GraphPatternElement) lhs);
+						lhsVar = (VariableNode) ((TripleElement)lhs).getObject();
+					}
+					else if (lhs instanceof Junction) {
+						JunctionList lhslst = junctionToList((Junction)lhs);
+						for (GraphPatternElement gpe : lhslst) {
+							patterns.add(gpe);
+							if (gpe instanceof TripleElement && ((TripleElement)gpe).getObject() instanceof VariableNode) {
+								lhsVar = (VariableNode) ((TripleElement)gpe).getObject();
+							}
+						}
+					}
+				}
+				else if (lhs instanceof List<?>) {
+					for (GraphPatternElement gpe : (List<GraphPatternElement>)lhs) {
+						patterns.add(gpe);
+						if (gpe instanceof TripleElement && ((TripleElement)gpe).getObject() instanceof VariableNode) {
+							lhsVar = (VariableNode) ((TripleElement)gpe).getObject();
+						}
+					}
+				}
+				VariableNode rhsVar = null;
+				if (rhs instanceof GraphPatternElement) {
+					if (rhs instanceof TripleElement && ((TripleElement)rhs).getObject() instanceof VariableNode) {
+						patterns.add((GraphPatternElement) rhs);
+						rhsVar = (VariableNode) ((TripleElement)rhs).getObject();
+					}
+					else if (rhs instanceof Junction) {
+						JunctionList lhslst = junctionToList((Junction)rhs);
+						for (GraphPatternElement gpe : lhslst) {
+							patterns.add(gpe);
+							if (gpe instanceof TripleElement && ((TripleElement)gpe).getObject() instanceof VariableNode) {
+								lhsVar = (VariableNode) ((TripleElement)gpe).getObject();
+							}
+						}
+					}
+				}
+				else if (rhs instanceof List<?>) {
+					for (GraphPatternElement gpe : (List<GraphPatternElement>)rhs) {
+						patterns.add(gpe);
+						if (gpe instanceof TripleElement && ((TripleElement)gpe).getObject() instanceof VariableNode) {
+							lhsVar = (VariableNode) ((TripleElement)gpe).getObject();
+						}
+					}
+				}
+				if (lhsVar == null && rhsVar == null) {
+					throw new TranslationException("Unable to find a VariableNode in test");
+				}
+				if (lhsVar != null) {
+					be.addArgument(lhsVar);
+				}
+				else {
+					be.addArgument(SadlModelProcessor.nodeCheck(lhs));
+				}
+				if (rhsVar != null) {
+					be.addArgument(rhsVar);
+				}
+				else {
+					be.addArgument(SadlModelProcessor.nodeCheck(rhs));
+				}
+				patterns.add(be);
+				patterns = expandUnittedQuantities(patterns, be, false);
+				patterns.remove(be);
+				test.setLhs(patterns);
+				List<VariableNode> lhsVars = new ArrayList<VariableNode>();
+				if (be.getArguments().get(0) instanceof VariableNode) {
+					lhsVars.add((VariableNode) be.getArguments().get(0));	
+					test.setLhsVariables(lhsVars);
+				}
+				List<VariableNode> rhsVars = new ArrayList<VariableNode>();
+				if (be.getArguments().get(1) instanceof VariableNode) {
+					rhsVars.add((VariableNode)be.getArguments().get(1));
+				}
+				test.setRhsVariables(rhsVars);
+				test.setRhs(be.getArguments().get(1));
+			}
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			addError(new IFTranslationError(e.getMessage() ));
+		}
+	}
+
+	private void setBuiltinElementNameAndType(ComparisonType compType, BuiltinElement be) throws TranslationException {
+		if (compType.equals(ComparisonType.Eq)) {
+			be.setFuncName("==");
+//			return BuiltinType.Equal;
+		}
+		else if (compType.equals(ComparisonType.GT)) {
+			be.setFuncName(">");
+//			return BuiltinType.GT;
+		}
+		else if (compType.equals(ComparisonType.GTE)) {
+			be.setFuncName(">=");
+//			return BuiltinType.GTE;
+		}
+		else if (compType.equals(ComparisonType.LT)) {
+			be.setFuncName("<");
+//			return BuiltinType.LT;
+		}
+		else if (compType.equals(ComparisonType.LTE)) {
+			be.setFuncName("<=");
+//			return BuiltinType.LTE;
+		}
+		else if (compType.equals(ComparisonType.Neq)) {
+			be.setFuncName("!=");
+//			return BuiltinType.NotEqual;
+		}
+		else {
+			throw new TranslationException("Invalid ComparisonType: " + compType.toString());
 		}
 	}
 
@@ -907,6 +1045,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 
 	public Rule postProcessRule(Rule rule, EObject object) throws TranslationException {
 		clearCruleVariableTypedOutput();
+		vNum = getModelProcessor().getVariableNumber();
 		try {
 			// do this first so that the arguments don't change before these are applied
 			addImpliedAndExpandedProperties(rule);
@@ -1753,6 +1892,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			patterns = decorateCRuleVariables((List<GraphPatternElement>) patterns, isRuleThen);
 			if (!(getTarget() instanceof Test) && patterns.size() > 1) {
 				patterns = listToAnd(patterns);
+			}
+			if (patterns instanceof List<?>) {
+				if (((List<?>)patterns).size() == 1) {
+					return ((List<?>)patterns).get(0);
+				}
+				else {
+					return listToAnd(patterns);
+				}
 			}
 		}
 		return patterns;
@@ -2669,7 +2816,164 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			patterns.add(be);
 		}
 		patterns = moveTriplesOutOfBuiltin(patterns, be, isRuleThen);
+		if (!getModelProcessor().isIgnoreUnittedQuantities() && isExpandableComparisonOperator(be)) {
+			patterns = expandUnittedQuantities(patterns, be, isRuleThen);
+		}
 		return returnNode;
+	}
+
+	private boolean isExpandableComparisonOperator(BuiltinElement be) {
+		BuiltinType bit = be.getFuncType();
+		if (bit.equals(BuiltinType.GT) ||
+				bit.equals(BuiltinType.GTE) ||
+				bit.equals(BuiltinType.LT) ||
+				bit.equals(BuiltinType.LTE) ||
+				bit.equals(BuiltinType.Equal) ||
+				bit.equals(BuiltinType.NotEqual)) {
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean isExpandableComparisonOperator(ComparisonType ct) {
+		if (ct != null && (ct.equals(ComparisonType.Eq) ||
+				ct.equals(ComparisonType.Eq) ||
+				ct.equals(ComparisonType.GT) ||
+				ct.equals(ComparisonType.GTE) ||
+				ct.equals(ComparisonType.LT) ||
+				ct.equals(ComparisonType.LTE) ||
+				ct.equals(ComparisonType.Neq))) {
+			return true;
+		}
+		return false;
+	}
+
+	private List<GraphPatternElement> expandUnittedQuantities(List<GraphPatternElement> patterns, BuiltinElement be,
+			boolean isRuleThen) throws TranslationException {
+		int beIdx = patterns != null ? patterns.indexOf(be) : -1;
+		if (beIdx >= 0) {
+			List<GraphPatternElement> newTriples = unittedQuantityExpansion(be);
+			if (newTriples != null) {
+				for (GraphPatternElement tr : newTriples) {
+					patterns.add(beIdx++, tr);
+				} 
+			}
+		}
+		return patterns;
+	}
+
+	/**
+	 * Method to expand a binary operation on UnittedQuantity arguments. The TripleElement instances needed to expand 
+	 * the UnittedQuantity instances or variables to patterns referencing the UnittedQuantity unit and value property
+	 * values are identifed and returned. The new arguments for the value objects to be passed to the binary operator
+	 * are put into the BuiltinElement's args list.
+	 * @param gpe
+	 * @return
+	 * @throws TranslationException
+	 */
+	private List<GraphPatternElement> unittedQuantityExpansion(BuiltinElement gpe) throws TranslationException {
+		List<Node> args = gpe.getArguments();
+		if (args.size() == 2) {
+			Object[] returnVals = new Object[2];								// the overall return container
+			List<GraphPatternElement> addlGpes = new ArrayList<GraphPatternElement>();	// the added TripleElement container
+
+			NamedNode valuePredNode = UtilsForJena.validateNamedNode(getModelProcessor().getConfigMgr(), getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI));
+			valuePredNode.setNodeType(NodeType.DataTypeProperty);
+			NamedNode unitPredNode = UtilsForJena.validateNamedNode(getModelProcessor().getConfigMgr(), getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI));
+			unitPredNode.setNodeType(NodeType.DataTypeProperty);
+			
+			Node newLhs = null;
+			Node newRhs = null;
+			String lhsUnits = null;
+			VariableNode lhsUnitVar = null;
+			String rhsUnits = null;
+			VariableNode rhsUnitVar = null;
+			if (args.get(0) instanceof Literal && ((Literal)args.get(0)).getUnits() != null) {
+				// LHS is a UnittedQuantity
+				newLhs = new Literal(((Literal)args.get(0)).getValue(), null, ((Literal)args.get(0)).getLiteralType());
+				lhsUnits = ((Literal)args.get(0)).getUnits();
+			}
+			if (args.get(1) instanceof Literal && ((Literal)args.get(1)).getUnits() != null) {
+				// RHS is a UnittedQuantity
+				newRhs = new Literal(((Literal)args.get(1)).getValue(), null, ((Literal)args.get(1)).getLiteralType());
+				rhsUnits = ((Literal)args.get(1)).getUnits();
+			}
+			if (isUnittedQuantityVariable(args.get(0))) {
+				// LHS is a variable of type UnittedQuantity
+				newLhs = new VariableNode(getNewVar());
+				TripleElement addedTriple1 = new TripleElement(args.get(0), valuePredNode, newLhs);
+				addlGpes.add(addedTriple1);
+				if (rhsUnits != null) {
+					TripleElement addedTriple2 = new TripleElement(args.get(0), unitPredNode, new Literal(rhsUnits, null, LiteralType.StringLiteral));
+					addlGpes.add(addedTriple2);
+				}
+				else {
+					rhsUnitVar = new VariableNode(getNewVar());
+					TripleElement addedTriple2 = new TripleElement(args.get(0), unitPredNode, rhsUnitVar);
+					addlGpes.add(addedTriple2);
+				}
+				args.set(0, newLhs);
+			}
+			if (isUnittedQuantityVariable(args.get(1))) {
+				// RHS is a variable of type UnittedQuantity
+				newRhs = new VariableNode(getNewVar());
+				TripleElement addedTriple1 = new TripleElement(args.get(1), valuePredNode, newRhs);
+				addlGpes.add(addedTriple1);
+				if (lhsUnits != null) {
+					TripleElement addedTriple2 = new TripleElement(args.get(1), unitPredNode, new Literal(lhsUnits, null, LiteralType.StringLiteral));
+					addlGpes.add(addedTriple2);
+				}
+				else {
+					if (rhsUnitVar != null) {
+						lhsUnitVar = rhsUnitVar;
+					}
+					else {
+						lhsUnitVar = new VariableNode(getNewVar());
+					}
+					TripleElement addedTriple2 = new TripleElement(args.get(1), unitPredNode, lhsUnitVar);
+					addlGpes.add(addedTriple2);
+				}
+				args.set(1, newRhs);
+			}
+			if (lhsUnits == null || rhsUnits == null) {
+				// we need to add an additional BuiltinElement to compute the unit of the answer (math operation) 
+				// or validate that they are the same unit at runtime (comparison)
+			}
+			if (newLhs != null) {
+				gpe.getArguments().set(0,  newLhs);
+			}
+			if (newRhs != null) {
+				gpe.getArguments().set(1,  newRhs);
+			}
+			if (addlGpes.size() == 0) {
+				return null;
+			}
+			else {
+				return addlGpes;
+			}
+		}
+		else {
+			throw new TranslationException("getUnittedQuantityExtensions called for not-binary built-in");
+		}
+	}
+
+	/**
+	 * Method to determine if a VariableNode is a subclass of UnittedQuantity
+	 * @param node
+	 * @return
+	 */
+	private boolean isUnittedQuantityVariable(Node node) {
+		if (node instanceof VariableNode && ((VariableNode)node).getType() instanceof NamedNode) {
+			NamedNode varType = (NamedNode) ((VariableNode)node).getType();
+			OntClass varTypeCls = getTheJenaModel().getOntClass(varType.getURI());
+			if (varTypeCls != null) {
+				OntClass uQCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+				if (uQCls != null && (varTypeCls.equals(uQCls) || varTypeCls.hasSuperClass(uQCls, false))) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private boolean objectShouldBeUnittedQuantity(TripleElement tr) {

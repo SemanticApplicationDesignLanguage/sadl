@@ -354,6 +354,9 @@ public class SADLCli implements IApplication {
                         } else if (sadlLabel.equals("IgnoreUnittedQuantitiesDuringTranslation")) {
                             sadlPreferences.put(
                                     SadlPreferences.IGNORE_UNITTEDQUANTITIES.getId(), sadlValue);
+                        } else if (sadlLabel.equals("ExpandUnittedQuantitiesDuringTranslation")) {
+                        	sadlPreferences.put(
+                        			SadlPreferences.EXPAND_UNITTEDQUANTITIES.getId(), sadlValue);	
                         } else if (sadlLabel.equals(
                                 "TranslateMultipleClassDomainOrRangeAsUnionClass")) {
                             sadlPreferences.put(

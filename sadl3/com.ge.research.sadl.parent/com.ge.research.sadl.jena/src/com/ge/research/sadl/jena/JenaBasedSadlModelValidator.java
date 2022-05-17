@@ -2285,7 +2285,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return matchTci;
 			}
 			getModelProcessor().addTypeCheckingError("Unable to get sublist type", expression);
-			return getType(expression);
+//			return getType(expression);	// How could this not be an infinite recursion??? awc 5/6/22
+			throw new InvalidNameException("Error getting type of '" + constant + "'");
 		}
 		else if (constant.equals("a type")) {
 			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(RDFS.subClassOf.getURI(), NodeType.ClassNode));

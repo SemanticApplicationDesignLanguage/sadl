@@ -545,14 +545,31 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				}
 			}
 		} else {
+			List<VariableNode> allVars = new ArrayList<VariableNode>();
+			if (((Test)cmd).getLhsVariables() != null) {
+				allVars.addAll(((Test)cmd).getLhsVariables());
+			}
+			if (((Test)cmd).getRhsVariables() != null) {
+				allVars.addAll(((Test)cmd).getRhsVariables());
+			}
 			Object lhobj = convertToComparableObject(
 					getModelFolderPath(), getInitializedReasoner(),
 					((Test) cmd).getLhs(),
-					((Test) cmd).getLhsVariables());
+					allVars);
 			Object rhobj = convertToComparableObject(
 					getModelFolderPath(), getInitializedReasoner(),
 					((Test) cmd).getRhs(),
-					((Test) cmd).getRhsVariables());
+					allVars);
+			if (lhobj instanceof ResultSet) {
+				if (((Test)cmd).getRhsVariables() != null) {
+					// get rhs value from ResultSet
+					rhobj = getValuesFromResultSet((ResultSet)lhobj, ((Test)cmd).getRhsVariables());
+				}
+				if (((Test)cmd).getLhsVariables() != null) {
+					// get lhs value from ResultSet
+					lhobj = getValuesFromResultSet((ResultSet)lhobj, ((Test)cmd).getLhsVariables());
+				}
+			}
 			ComparisonType type = ((Test) cmd).getCompType();
 			if (type != null
 					&& (type.equals(ComparisonType.IsNot) || type
@@ -701,6 +718,39 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		result.setResults(testResult);
 		result.setErrors(getInitializedReasoner().getErrors());
 		return result;
+	}
+
+	/**
+	 * Method to get the value(s) of a named variable from a ResultSet
+	 * @param rs
+	 * @param variables
+	 * @return
+	 */
+	private Object getValuesFromResultSet(ResultSet rs, List<VariableNode> variables) {
+		if (rs.getRowCount() < 1) {
+			return null;
+		}
+		List<Integer> cols = new ArrayList<Integer>();
+		for (VariableNode vn : variables) {
+			int col = rs.getColumnPosition(vn.getName());
+			if (col >= 0) {
+				cols.add(col);
+			}
+		}
+		if (cols.size() > 0) {
+			if (rs.getRowCount() == 1) {
+				if (cols.size() == 1) {
+					return rs.getResultAt(0, cols.get(0));
+				}
+				for (int col : cols) {	// multiple values in row
+					Object val = rs.getResultAt(0, col);
+				}
+			}
+			else {
+				// multiple rows
+			}
+		}
+		return null;
 	}
 
 	private TestResult testTriple(IReasoner reasoner, TripleElement triple)
@@ -1005,6 +1055,14 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			}
 			obj = newQuery;
 		} 
+		else if (obj instanceof List<?>) {
+			Query newQuery = new Query();
+			newQuery.setPatterns((List<GraphPatternElement>)obj);
+			if (testVars != null) {
+				newQuery.setVariables(testVars);
+			}
+			obj = newQuery;
+		}
 		else if (obj instanceof Junction) {
 			if (((Junction)obj).getJunctionType().equals(JunctionType.Conj)) {
 				JunctionList jlst = IntermediateFormTranslator.junctionToList((Junction) obj);
@@ -1018,6 +1076,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 //				}
 				Query newQuery = new Query();
 				newQuery.setPatterns(jlst);
+				if (testVars != null) {
+					newQuery.setVariables(testVars);
+				}
 				obj = newQuery;
 //				if (lhs instanceof GraphPatternElement && rhs instanceof GraphPatternElement) {
 //					newQuery.addPattern((GraphPatternElement) lhs);

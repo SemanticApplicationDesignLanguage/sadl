@@ -1007,6 +1007,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	//------------PEFERENCES ---------------
 	private boolean ignoreUnittedQuantities;
 
+	private boolean expandUnittedQuantities;
+
 	private boolean useArticlesInValidation;
 	
 	private boolean expandMissingPatternsInValidation;
@@ -2815,6 +2817,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					addError(SadlErrorMessages.PHRASE_NOT_KNOWN.toString(), object);
 					addError("Phrase 'not known' is not a valid graph pattern; did you mean 'is not known'?", object);
 				}
+			}
+		}
+		else if (gpe instanceof Junction) {
+			try {
+				JunctionList plst = IntermediateFormTranslator.junctionToList((Junction)gpe);
+				for (GraphPatternElement el : plst) {
+					numErrors += validateGraphPatternElement(object, el);
+				}
+			} catch (TranslationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		if (gpe.getNext() != null) {
@@ -6304,6 +6317,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (isNegated) {
 				bi = (GraphPatternElement) createUnaryBuiltin(container, "not", bi);
 			}
+			bi.setContext(container);
 			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi, false), rest);
 		}
 	}
@@ -7884,10 +7898,26 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			BuiltinElement builtin = new BuiltinElement();
 			builtin.setFuncName(transformOpName(name));
 			if (lobj != null) {
-				builtin.addArgument(nodeCheck(lobj));
+				if (lobj instanceof Object[] && ((Object[])lobj).length == 2 && 
+						((Object[])lobj)[0] instanceof VariableNode && 
+						((Object[])lobj)[1] instanceof GraphPatternElement) {
+					builtin.addArgument(nodeCheck(((Object[])lobj)[1]));
+					
+				}
+				else {
+					builtin.addArgument(nodeCheck(lobj));
+				}
 			}
 			if (robj != null) {
-				builtin.addArgument(nodeCheck(robj));
+				if (robj instanceof Object[] && ((Object[])robj).length == 2 && 
+						((Object[])robj)[0] instanceof VariableNode && 
+						((Object[])robj)[1] instanceof GraphPatternElement) {
+					builtin.addArgument(nodeCheck(((Object[])robj)[1]));
+					
+				}
+				else {
+					builtin.addArgument(nodeCheck(robj));
+				}
 			}
 			return builtin;
 		}
@@ -12410,6 +12440,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		// TODO this may need to check for property restrictions on a subclass of
 		// UnittedQuantity
+		if ((unit !=  null && unit.startsWith("\"") && unit.endsWith("\"")) ||
+				(unit !=  null && unit.startsWith("'") && unit.endsWith("'"))) {
+			unit = unit.substring(1, unit.length() - 1);
+		}
 		unittedVal.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI),
 				getTheJenaModel().createTypedLiteral(literalNumber, XSD.decimal.getURI()));
 		unittedVal.addProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI),
@@ -16446,6 +16480,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			setIgnoreUnittedQuantities(Boolean.parseBoolean(ignoreUnits));
 			modelProcessorPreferenceMap.put(SadlPreferences.IGNORE_UNITTEDQUANTITIES.getId(), ignoreUnits);
 	
+			String expandUnittedQuantities = preferenceValues.getPreference(SadlPreferences.EXPAND_UNITTEDQUANTITIES);
+			if (expandUnittedQuantities == null) {
+				expandUnittedQuantities = "true";
+			}
+			setExpandUnittedQuantities(Boolean.parseBoolean(expandUnittedQuantities));
+			modelProcessorPreferenceMap.put(SadlPreferences.EXPAND_UNITTEDQUANTITIES.getId(), expandUnittedQuantities);
+			
 			setUseArticlesInValidation(false);
 			String useArticles = preferenceValues.getPreference(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION);
 			if (useArticles == null) {
@@ -16485,6 +16526,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			modelProcessorPreferenceMap.put(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), enableMetricsCollectionStr);
 		}
 		return modelProcessorPreferenceMap;
+	}
+
+	protected void setExpandUnittedQuantities(boolean expandUnittedQuantities) {
+		this.expandUnittedQuantities = expandUnittedQuantities;
+		
 	}
 
 	protected boolean isIgnoreUnittedQuantities() {
