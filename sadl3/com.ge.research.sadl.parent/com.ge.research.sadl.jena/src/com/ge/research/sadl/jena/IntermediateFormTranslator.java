@@ -1097,6 +1097,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 					rule.setIfs((List<GraphPatternElement>) results);
 				}
+				else if (results instanceof GraphPatternElement) {
+					rule.getIfs().clear();
+					rule.getIfs().add((GraphPatternElement) results);
+				}
 			} catch (InvalidNameException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -1128,6 +1132,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						}
 					}
 					rule.setThens((List<GraphPatternElement>) results);
+				}
+				else if (results instanceof GraphPatternElement) {
+					rule.getThens().clear();
+					rule.getThens().add((GraphPatternElement) results);
 				}
 			} catch (InvalidNameException e) {
 				// TODO Auto-generated catch block

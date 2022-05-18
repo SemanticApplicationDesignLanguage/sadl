@@ -3559,6 +3559,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			pattern = getIfTranslator().removeDuplicates((List<?>) pattern);
 			query.setPatterns((List<GraphPatternElement>) pattern);
+		} else if (pattern instanceof GraphPatternElement) {
+			query.addPattern((GraphPatternElement)pattern);
 		} else if (pattern instanceof Literal) {
 			// this must be a SPARQL query
 			query.setSparqlQueryString(((Literal) pattern).getValue().toString());

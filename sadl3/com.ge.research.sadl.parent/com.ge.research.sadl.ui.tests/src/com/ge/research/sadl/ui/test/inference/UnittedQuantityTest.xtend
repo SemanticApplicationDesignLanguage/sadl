@@ -66,6 +66,11 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 					System.out.println(rule.toString)
 				}
 			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
 		]
 
 		var List<ConfigurationItem> configItems = newArrayList
