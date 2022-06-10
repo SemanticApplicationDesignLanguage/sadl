@@ -26,6 +26,7 @@ public class SadlConstants {
 	public static final String SADL_IMPLICIT_MODEL_PREFIX = "sadlimplicitmodel";
 	public static final String SADL_IMPLICIT_MODEL_EVENT_URI = SADL_IMPLICIT_MODEL_URI + "#Event";
 	public static final String SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI = SADL_IMPLICIT_MODEL_URI + "#UnittedQuantity";
+	public static final String SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME = "unittedQuantity";
 	public static final String SADL_IMPLICIT_MODEL_UNIT_URI = SADL_IMPLICIT_MODEL_URI + "#unit";
 	public static final String SADL_IMPLICIT_MODEL_VALUE_URI = SADL_IMPLICIT_MODEL_URI + "#value";
 	public static final String SADL_IMPLICIT_MODEL_IMPLIED_PROPERTY_URI = SADL_IMPLICIT_MODEL_URI + "#impliedProperty";

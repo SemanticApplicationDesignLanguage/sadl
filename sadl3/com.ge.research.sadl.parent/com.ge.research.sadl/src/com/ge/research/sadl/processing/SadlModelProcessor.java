@@ -396,6 +396,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		}
 		else if (gpe instanceof Junction) {
 			Object lhsobj = ((Junction)gpe).getLhs();
+			if (lhsobj instanceof ProxyNode) {
+				lhsobj = ((ProxyNode)lhsobj).getProxyFor();
+			}
 			if (lhsobj instanceof GraphPatternElement && variableIsBound((GraphPatternElement)lhsobj, v)) {
 				return true;
 			}
@@ -403,6 +406,9 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 				return true;
 			}
 			Object rhsobj = ((Junction)gpe).getRhs();
+			if (rhsobj instanceof ProxyNode) {
+				rhsobj = ((ProxyNode)rhsobj).getProxyFor();
+			}
 			if (rhsobj instanceof GraphPatternElement && variableIsBound((GraphPatternElement)rhsobj, v)) {
 				return true;
 			}

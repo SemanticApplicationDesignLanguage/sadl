@@ -32,6 +32,7 @@ import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
@@ -111,6 +112,9 @@ public class JenaTranslatorPlugin implements ITranslator {
     private Map<String, String> prefixes = new HashMap<String, String>();
 	
 	protected boolean saveRuleFileAfterModelSave = true; 	// unless set to false because an explicit list of rules are
+															// provided, we need to look for rule files in
+															// imported models and if there are any create a rule file
+															// for this model so that the imported rule files will be loaded
 
 	private Rule ruleInTranslation = null;
 	private Query queryInTranslation = null;
@@ -120,9 +124,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 	private String modelName;
 
 	protected List<ModelError> errors = null;
-														// provided, we need to look for rule files in
-														// imported models and if there are any create a rule file
-														// for this model so that the imported rule files will be loaded
+
+	private List<TripleElement> additionalWhereTriples = null;
 	
 	/**
 	 * The null argument constructor
@@ -399,7 +402,18 @@ public class JenaTranslatorPlugin implements ITranslator {
 						addError(me);
 					}
 					else {
-						sb.append(graphPatternElementToJenaRuleString(elements.get(idx), rulePart));
+						String elementStr = graphPatternElementToJenaRuleString(elements.get(idx), rulePart);
+						if (getAdditionalWhereTriples() != null) {
+							for (TripleElement tr : getAdditionalWhereTriples()) {
+								if (sb.length() > 0) {
+									sb.append(",");
+									sb.append(graphPatternElementToJenaRuleString(tr, RulePart.PREMISE));
+								}
+							}
+							clearAdditionalWhereTriples();
+							sb.append(",");
+						}
+						sb.append(elementStr);
 					}
 				}
 				idx++;
@@ -710,6 +724,16 @@ public class JenaTranslatorPlugin implements ITranslator {
 			// the filter string will be added in the method
 			graphPatternElementToJenaQueryString(gpe, sbfilter, TranslationTarget.QUERY_FILTER, RulePart.NOT_A_RULE);
 		}
+		if (getAdditionalWhereTriples() != null) {
+			for (TripleElement tr : getAdditionalWhereTriples()) {
+				if (sbmain.length() > 0) {
+					sbmain.append(" . ");
+					sbmain.append(graphPatternElementToJenaQueryString(tr, sbfilter, TranslationTarget.QUERY_TRIPLE, RulePart.NOT_A_RULE));
+				}
+				tripleCtr++;
+			}
+			clearAdditionalWhereTriples();
+		}
 		return tripleCtr;
 	}
 	
@@ -833,6 +857,88 @@ public class JenaTranslatorPlugin implements ITranslator {
 			throw new TranslationException("Unhandled filter type: " + gpe.getFuncName());
 		}
 	}
+
+	/**
+	 * Method to provide information necessary to expand a binary operation on UnittedQuantity arguments. 
+	 * The TripleElement instances needed to expand the UnittedQuantity instances or variables to unit and value
+	 * are identifed and returned as are the new arguments for the value objects to be passed to the binary operator.
+	 * @param gpe
+	 * @param args
+	 * @return
+	 * @throws TranslationException
+	 */
+	private Object[] getUnittedQuantityExpansions(BuiltinElement gpe, List<Node> args) throws TranslationException {
+		if (args.size() == 2) {
+			if (args.get(0) instanceof Literal && ((Literal)args.get(0)).getUnits() != null) {
+				TripleElement[] addlTriples = new TripleElement[2];
+				Node rhs = args.get(1);
+				Node newRhs = new VariableNode(getNewVariableForRule());
+				NamedNode valuePredNode = UtilsForJena.validateNamedNode(configurationMgr, getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI));
+				valuePredNode.setNodeType(NodeType.DataTypeProperty);
+				TripleElement addedTriple1 = new TripleElement(rhs, valuePredNode, newRhs);
+				addlTriples[1] = addedTriple1;
+				NamedNode unitPredNode = UtilsForJena.validateNamedNode(configurationMgr, getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI));
+				unitPredNode.setNodeType(NodeType.DataTypeProperty);
+				TripleElement addedTriple2 = new TripleElement(rhs, unitPredNode, new Literal(((Literal)args.get(0)).getUnits(), null, LiteralType.StringLiteral));
+				addlTriples[0] = addedTriple2;
+				gpe.getArguments().set(1, newRhs);
+				Literal newVal = new Literal(((Literal)args.get(0)).getValue(), null, ((Literal)args.get(0)).getLiteralType());
+				Node[] newBiNodes = new Node[2];
+				newBiNodes[1] = newRhs;
+				newBiNodes[0] = newVal;
+				Object[] returnVals = new Object[2];
+				returnVals[0] = newBiNodes;
+				returnVals[1] = addlTriples;
+				return returnVals;
+			}
+			else if (args.get(1) instanceof Literal && ((Literal)args.get(1)).getUnits() != null) {
+				TripleElement[] addlTriples = new TripleElement[2];
+				Node lhs = args.get(0);
+				Node newLhs = new VariableNode(getNewVariableForRule());
+				NamedNode valuePredNode = UtilsForJena.validateNamedNode(configurationMgr, getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI));
+				valuePredNode.setNodeType(NodeType.DataTypeProperty);
+				TripleElement addedTriple1 = new TripleElement(lhs, valuePredNode, newLhs);
+				addlTriples[0] = addedTriple1;
+				NamedNode unitPredNode = UtilsForJena.validateNamedNode(configurationMgr, getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI));
+				unitPredNode.setNodeType(NodeType.DataTypeProperty);
+				TripleElement addedTriple2 = new TripleElement(lhs, unitPredNode, new Literal(((Literal)args.get(1)).getUnits(), null, LiteralType.StringLiteral));
+				addlTriples[1] = addedTriple2;
+				gpe.getArguments().set(0, newLhs);
+				Literal newVal = new Literal(((Literal)args.get(1)).getValue(), null, ((Literal)args.get(1)).getLiteralType());
+				Node[] newBiNodes = new Node[2];
+				newBiNodes[0] = newLhs;
+				newBiNodes[1] = newVal;
+				Object[] returnVals = new Object[2];
+				returnVals[0] = newBiNodes;
+				returnVals[1] = addlTriples;
+				return returnVals;
+			}
+			else {
+				throw new TranslationException("getUnittedQuantityExtensions called but no UnittedQuantity argument found");
+			}
+		}
+		else {
+			throw new TranslationException("getUnittedQuantityExtensions called for not-binary built-in");
+		}
+	}
+
+	private void addAdditionalWhereTriple(TripleElement tr) {
+		if (additionalWhereTriples  == null) {
+			additionalWhereTriples = new ArrayList<TripleElement>();
+		}
+		additionalWhereTriples.add(tr);
+	}
+	
+	private List<TripleElement> getAdditionalWhereTriples() {
+		return additionalWhereTriples == null ? null : additionalWhereTriples.size() > 0 ? additionalWhereTriples : null;
+	}
+	
+	private void clearAdditionalWhereTriples() {
+		if (additionalWhereTriples != null) {
+			additionalWhereTriples.clear();
+		}
+	}
+
 
 	protected boolean translateAndSaveRules(OntModel model, List<Rule> ruleList, String modelName, String filename) throws TranslationException, IOException {
 		if (ruleList == null || ruleList.size() < 1) {

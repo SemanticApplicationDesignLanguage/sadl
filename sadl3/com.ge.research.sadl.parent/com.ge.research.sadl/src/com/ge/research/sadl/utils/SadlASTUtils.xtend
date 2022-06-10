@@ -18,19 +18,28 @@
 package com.ge.research.sadl.utils
 
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.processing.SadlModelProcessor
+import com.ge.research.sadl.sADL.BinaryOperation
+import com.ge.research.sadl.sADL.Declaration
 import com.ge.research.sadl.sADL.EquationStatement
+import com.ge.research.sadl.sADL.ExpressionStatement
 import com.ge.research.sadl.sADL.NumberLiteral
 import com.ge.research.sadl.sADL.QueryStatement
+import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SubjHasProp
+import com.ge.research.sadl.sADL.TestStatement
 import com.ge.research.sadl.sADL.UnitExpression
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.resource.XtextResource
+import org.eclipse.xtext.scoping.IScope
+import org.eclipse.xtext.scoping.IScopeProvider
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.getContainerOfType
-import com.ge.research.sadl.sADL.Declaration
 
 /**
  * Static utility class for SADL AST elements.
@@ -89,27 +98,142 @@ class SadlASTUtils {
 		}
 		return null;
 	}
+	
+	/**
+	 * This is called when not doing scoping and calls the main method with null for EReference and IScopeProvider
+	 */
+	static def boolean isUnit(EObject it) {
+		return isUnit(it, null, null);
+	}
 
 	/**
 	 * {@code true} if the argument is a SADL resource which represents a non-quoted unit in a unit expression like construct.
 	 * Otherwise, {@code false}.
 	 */
-	static def boolean isUnit(EObject it) {
+	static def boolean isUnit(EObject it, EReference ref, IScopeProvider scopeProvider) {
 		if (it instanceof SadlResource && eContainer instanceof SubjHasProp) {
-			val container = eContainer as SubjHasProp;
-			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null &&
-				!container.inQueryStatement && !container.inEquationStatement;
+			val iTlName = declarationExtensions.getConcreteName(it as SadlResource)
+			if (!isInExpressionGrammar) return false	// the SubjHasProp unit statement only exists in the expression grammar			
+			val container = eContainer as SubjHasProp
+			if (isInEquationStatement && container.left instanceof Declaration) {
+				// in equation bodies there can be constructs of the form "a Someclass sc"
+				return false
+			}
+//			val propLName = container.prop instanceof SadlResource ? declarationExtensions.getConcreteName(container.prop as SadlResource) : null
+			if (eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null) {
+				if (it.equals(container.prop)) {
+					if (scopeProvider !== null) {
+						val IScope scope = scopeProvider.getScope(it, ref)
+						if (scope !== null) {
+							val elements = scope.allElements
+							var boolean firstEncounterMatch = false
+							for (element : elements) {
+								val qn = (element as IEObjectDescription).qualifiedName
+								var String qnln
+								var int segCnt
+								if (qn.segmentCount == 1) {
+									if (qn.firstSegment.indexOf(':') > 0 ) {
+										qnln = qn.firstSegment.substring(qn.firstSegment.indexOf(':') + 1)
+										segCnt = 2
+									}
+									else {
+										qnln = qn.firstSegment
+										segCnt = 1
+									}
+								}
+								else {
+									qnln = qn.getSegment(qn.segmentCount - 1)
+									segCnt = 2
+								}
+									
+								if (qnln.equals(iTlName)) {
+									if (!firstEncounterMatch && segCnt == 1) {
+										// this is the first encounter has no prefix
+										firstEncounterMatch = true
+									}
+									else if (firstEncounterMatch) {	
+										if (segCnt > 1) {
+											// segment count of > 1 means that it is defined outside of this statement
+											return false
+										}
+										else {
+											return true
+										}
+									}
+								}
+							}
+							return true
+						}
+						return false	// this shouldn't happen....
+					}
+					else {
+						val SadlResource decl = declarationExtensions.getDeclaration(it as SadlResource)
+						if (decl.equals(it)) {
+							return true
+						}
+					}
+					return false;
+				}
+				var result = true
+				return result
+			}
+
+//			val leftSR = container.left instanceof SadlResource
+//			val propSR = container.prop instanceof SadlResource
+//			if (propSR) {
+//				val propLName = declarationExtensions.getConcreteName(container.prop as SadlResource)
+//				val inPofS = container.eContainer instanceof PropOfSubject
+//				if (inPofS) {
+//					val contIsRightOfPofS = (container.eContainer as PropOfSubject).right.equals(container)
+//					if (contIsRightOfPofS) {
+//						var retval = (it as SadlResource).equals(container.prop as SadlResource);
+//						return retval
+//					}			
+//				}
+//			}
+//			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null &&
+//				!leftSR
+////				 &&
+////				!container.inQueryStatement && !container.inEquationStatement && !container.inRuleStatement;
 		}
-		return false;
+		
+		
+		return false
+	}
+
+	static def boolean isComparisonOperation(BinaryOperation operation) {
+		return SadlModelProcessor.isComparisonBuiltin(operation.op)
 	}
 
 	// TOOD this logic should be much smarter.
+	
+	private static def isInExpressionGrammar(EObject it) {
+		if (isInRuleStatement) { return true }
+		if (isInQueryStatement) { return true }
+		if (isInEquationStatement) { return true }
+		if (isInExpressionStatement) { return true }
+		if (isInTestStatement) { return true }
+		return false
+	}
+	
 	private static def isInQueryStatement(EObject it) {
 		return getContainerOfType(QueryStatement) !== null;
 	}
 	
 	private static def isInEquationStatement(EObject it) {
 		return getContainerOfType(EquationStatement) !== null;
+	}
+	
+	private static def isInRuleStatement(EObject it) {
+		return getContainerOfType(RuleStatement) !== null;
+	}
+
+	private static def isInExpressionStatement(EObject it) {
+		return getContainerOfType(ExpressionStatement) !== null;
+	}
+	
+	private static def isInTestStatement(EObject it) {
+		return getContainerOfType(TestStatement) !== null;
 	}
 
 	/**

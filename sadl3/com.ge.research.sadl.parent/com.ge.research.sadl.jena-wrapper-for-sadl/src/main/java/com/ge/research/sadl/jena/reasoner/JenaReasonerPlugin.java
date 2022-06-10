@@ -1432,6 +1432,10 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (!results.hasNext()) {
 			return null;
 		}
+		Resource uqcls = infModel.getResource(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		Property valprop = infModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
+		Property unitprop = infModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
+
 		ArrayList<ArrayList<Object>> o = new ArrayList<ArrayList<Object>>();
 		List<String> queryVars = results.getResultVars();
 		String[] columnName = new String[queryVars.size()];
@@ -1454,11 +1458,36 @@ public class JenaReasonerPlugin extends Reasoner{
 					}
 				}
 				else if (n != null && n.isResource()) {
-					if (!((Resource)n).isAnon()){
-						temp.add(((Resource)n).getURI());
+					StmtIterator sitr = infModel.listStatements(n.asResource(), RDF.type, uqcls);
+					if (sitr.hasNext()) {
+						StringBuilder sb = new StringBuilder();
+						boolean useParens = false;
+						if (n.isURIResource()) {
+							sb.append(n.asResource().getLocalName());
+							sb.append(" (");
+							useParens = true;
+						}
+						StmtIterator vitr = infModel.listStatements(n.asResource(), valprop, (RDFNode)null);
+						if (vitr.hasNext()) {
+							sb.append(vitr.nextStatement().getObject().asLiteral().getLexicalForm());
+							sb.append(" ");
+						}
+						StmtIterator uitr = infModel.listStatements(n.asResource(), unitprop, (RDFNode)null);
+						if (uitr.hasNext()) {
+							sb.append(uitr.nextStatement().getObject().asLiteral().getLexicalForm());
+						}
+						if (useParens) {
+							sb.append(")");
+						}
+						temp.add(sb.toString());
 					}
 					else {
-						temp.add(n.toString() + "(blank node)");
+						if (!((Resource)n).isAnon()){
+							temp.add(((Resource)n).getURI());
+						}
+						else {
+							temp.add(n.toString() + "(blank node)");
+						}
 					}
 				}
 				else {

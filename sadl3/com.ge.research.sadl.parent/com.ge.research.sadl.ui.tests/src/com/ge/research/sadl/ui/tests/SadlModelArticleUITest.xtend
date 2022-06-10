@@ -21,6 +21,7 @@ import com.ge.research.sadl.preferences.SadlPreferences
 import org.eclipse.xtext.preferences.PreferenceKey
 import org.junit.Ignore
 import org.junit.Test
+import org.eclipse.xtext.diagnostics.Severity
 
 class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
@@ -514,6 +515,53 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 	}
 
 	@Test
+	def void testCRule_05() {
+		val grd = newArrayList(
+"Rule R1:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:teaches, v1) and !=(v0,v1) then rdf(v0, rulevars:knows, v1).",
+"Rule R2:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:teaches, v1) and !=(v0,v1) then rdf(v0, rulevars:acquaintance, v1).",
+"Rule R3:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).",
+"Rule R3b:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).")
+		
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+		
+		createFile('UseArticles.sadl', '''
+			    uri "http://sadl.org/SimplePathFindingCase.sadl" alias spfc.
+			    
+			    UnittedQuantity has impliedProperty ^value.
+			    
+			    Shape is a class described by area with values of type UnittedQuantity.
+			    
+			    Circle is a type of Shape described by radius with values of type UnittedQuantity.
+			    
+			    Rule AreaOfCircle2: then the area is PI* the radius^2.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
+			if (rules !== null) {
+	 			for (rule:rules) {
+	 				println("\"" + rule.toString + "\",")
+	 			}
+				for ( rule : rules) {
+					val rc = processor.ifTranslator.cook(rule);
+					println(rc.toString);
+				}
+			}
+			assertEquals(0, issues.filter[severity === Severity.ERROR].size)
+			assertEquals(0, issues.filter[severity === Severity.WARNING].size)
+			assertEquals(3, issues.filter[severity === Severity.INFO].size)
+//			assertTrue(rules.size == 4)
+// 			var grdidx = 0
+// 			for (rule:rules) {
+// 				assertTrue(processor.compareTranslations(rule.toString(), grd.get(grdidx++)))
+// 			}
+		]
+	}
+
+	@Test
 	def void testVariables_01() {
 		val grd = newArrayList(
 "Rule R1:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:teaches, y) then rdf(x, ht:acquaintance, y).",
@@ -830,6 +878,73 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			)
 		]
 
+	}
+
+	@Test
+	def void testCRuleEmbeddedSubject() {
+		val grd = newArrayList(
+"Rule NorthernerAtHeart:  if rdf(v0, rdf:type, gm:Birth) and rdf(v0, gm:location, v1) and rdf(v1, gm:latitude, v2) and rdf(gm:Philadelphia, gm:latitude, v3) and >(v2,v3) and rdf(v0, gm:child, v4) then rdf(v4, gm:likes, \"cold weather in the winter\").")
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			uri "http://com.ge.research.sadlGeorgeAndMartha" alias gm.
+			
+			Person is a type of PhysicalObject, described by spouse with  a single value of type Person,
+				described by friend with values of type Person,
+				described by age with a single value of type decimal,
+				described by likes with values of type string
+				described by weight with values of type DATA
+				.
+				
+			Birth is a class described by child with values of type Person,
+				described by mother with a single value of type Person,
+				described by location with a single value of type Location,
+				described by ^when with a single value of type dateTime,
+				described by weight. // with a single value of type float.
+				
+			Location is a class, described by latitude with a single value of type double,
+				described by longitude with a single value of type double,
+				described by gm:description with values of type string.
+				
+			Philadelphia is a Location with latitude 39.9522.
+				
+			// this rule will have multiple errors if use articles in translation is not checked	
+			Rule NorthernerAtHeart 
+				if     the latitude of the location of a Birth > latitude of Philadelphia  	  
+				then (a child of the Birth) likes "cold weather in the winter".
+						
+			 DATA is a class, 
+			 	described by gm:^value with a single value of type decimal,
+			 	described by gm:validity with a single value of type boolean,
+			 	described by gm:unit with a single value of type string.
+			 DATA has impliedProperty gm:^value.
+			 DATA has impliedProperty gm:unit.
+			 DATA has impliedProperty gm:validity.
+			 	
+			 PhysicalObject is a class
+			// 	described by weight with values of type DATA
+			.
+
+			''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
+			if (rules !== null) {
+	 			for (rule:rules) {
+	 				println("\"" + rule.toString + "\",")
+	 			}
+			}
+			issues.assertHasNoIssues;
+			assertEquals(1, rules.size);
+ 			var grdidx = 0
+ 			for (rule:rules) {
+ 				assertTrue(processor.compareTranslations(rule.toString(), grd.get(grdidx++)))
+ 			}
+ 		]
 	}
 
 }

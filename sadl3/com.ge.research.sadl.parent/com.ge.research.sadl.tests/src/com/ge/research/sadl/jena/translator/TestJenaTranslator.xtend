@@ -26,6 +26,7 @@ public class TestJenaTranslator extends AbstractSADLModelProcessorTest {
 		val cm = new ConfigurationManager
 		val tr = cm.translator
 		print(tr)
+		assertNotNull(tr)
 	}
 		
 	@Test

@@ -479,9 +479,15 @@ public class ResultSet {
 	private Object quoteAsNeeded(Object val) {
 		if (val instanceof String) {
 			StringBuilder sb = new StringBuilder();
-			sb.append("\"");
-			sb.append(((String)val).replaceAll("\"", "\"\""));
-			sb.append("\"");
+			String uqVal = checkForValueAndUnit((String) val);
+			if (uqVal !=null) {
+				sb.append(uqVal);
+			}
+			else {
+				sb.append("\"");
+				sb.append(((String)val).replaceAll("\"", "\"\""));
+				sb.append("\"");
+			}
 			return sb.toString();
 		}
 		else if (val != null &&  containsWhitespaceOrQuote(val.toString())) {
@@ -496,6 +502,28 @@ public class ResultSet {
 		}
 	}
 	
+	private String checkForValueAndUnit(String val) {
+		// does it start with a valid number followed by a string? If so display as UnittedQuantity
+		int spidx = val.indexOf(" ");
+		if (spidx > 0 && spidx < val.length() - 1) {
+			String possibleNumber = val.substring(0, spidx);
+			try {
+				Double dbl = Double.parseDouble(possibleNumber);
+				StringBuilder sb = new StringBuilder(possibleNumber);
+				String rest = val.substring(spidx + 1);
+				sb.append(" \"");
+				sb.append(rest.toString().replaceAll("\"", "\"\""));
+				sb.append("\"");
+				return sb.toString();
+			}
+			catch (Exception e) {
+				return null;
+			}
+			
+		}
+		return null;
+	}
+
 	/**
 	 * Method to determine if a string contains whitespace of double quotes
 	 * @param str

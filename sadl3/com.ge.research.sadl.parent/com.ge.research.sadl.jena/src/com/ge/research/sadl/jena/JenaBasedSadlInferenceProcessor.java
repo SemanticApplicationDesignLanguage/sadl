@@ -501,6 +501,54 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				}
 				if (triple != null) {
 					testResult = testTriple(getInitializedReasoner(), triple);
+				} else if (((Test)cmd).getSharedPatterns() != null) {
+					List<VariableNode> lhv = ((Test)cmd).getLhsVariables();
+					List<VariableNode> rhv = ((Test)cmd).getRhsVariables();
+					List<VariableNode> allVars = null;
+					if (lhv != null) {
+						allVars = lhv;
+						if (rhv != null) {
+							allVars.addAll(rhv);
+						}
+					}
+					else if (rhv != null) {
+						allVars = rhv;
+					}
+				
+					Object obj = convertToComparableObject(
+							getModelFolderPath(), getInitializedReasoner(),
+							((Test)cmd).getSharedPatterns(), allVars);
+					if (obj instanceof ResultSet
+							&& ((ResultSet) obj)
+									.getColumnCount() > 0) {
+						ResultSet rs = (ResultSet)obj;
+						int rows = rs.getRowCount();
+						if (rows == 1) {
+							Object lval = null;
+							Object rval = null;
+							if (lhv != null) {
+								lval = rs.getResultAt(0, 0);
+								if (rhv != null) {
+									rval = rs.getResultAt(0, 1);
+								}
+							}
+							else if (rhv != null) {
+								rval = rs.getResultAt(0, 0);
+							}
+							if (lval == null) {
+								lval = ((Test)cmd).getLhs();
+							}
+							if (rval == null) {
+								rval = ((Test)cmd).getRhs();
+							}
+							testResult = doTestComparison(lval, rval, cmd.getCompType());
+						}
+						else {
+							for (int i = 0; i < rows; i++) {
+							}	
+						}
+					}
+					
 				} else if (lhs instanceof List<?>
 						&& ((List<?>) lhs).size() == 2) {
 					testResult = testFilteredQuery(getInitializedReasoner(),

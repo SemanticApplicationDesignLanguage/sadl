@@ -332,8 +332,7 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
   rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, -3.141592653589793)
 ",
 "SADL Command Result:
-  rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, null) != 3.141592653589793
-",
+  [v0]: not 3.141592653589793  where Conj(rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, v0))",
 "SADL Command Result:
   rdf(UsingNumericConstants:MyFoo3, UsingNumericConstants:fprop, known)
 ",
