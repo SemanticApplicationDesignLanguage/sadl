@@ -335,8 +335,8 @@ class TestStatementTest extends AbstractSadlPlatformTest {
 					println(cmd.toString)
 				}
 			}
-			val errors = issues.filter[severity === Severity.ERROR]
-			assertTrue(errors.size == 1)
+			val warnings = issues.filter[severity === Severity.WARNING]
+			assertTrue(warnings.size == 1)
 		]
 	}		
 		
@@ -725,4 +725,77 @@ class TestStatementTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
+	@Test		
+	def void testExpandedProperties_01() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test1.sadl" alias test1.
+			 
+			 Build is a class described by height with values of type float, described by weight with values of type float.
+			 Build has expandedProperty height, has expandedProperty weight.
+			 
+			 Person is a class described by build with values of type Build.
+			 
+			 Joe is a Person with build (a Build with height 6.0, with weight 165.0).
+			 George is a Person with build (a Build with height 6.0, with weight 165.0).
+			 
+			 Expr: build of Joe = build of George.
+			 
+			 Rule R1: if x is a Person and y is a Person and x != y and build of x = build of y then print(x, " has the same build as ", y).
+			 
+			 Test: build of Joe = build of George.
+			 
+			 Ask: select p1, p2 where build of p1 = build of p2.
+			 
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			var cntr = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				if (cntr++ == 0) {
+					assertTrue(tr instanceof TestResult)
+					assertTrue((tr as TestResult).passed)
+				}
+				else {
+					assertTrue(tr instanceof ResultSet)
+				}
+			}
+		];
+	}
 }

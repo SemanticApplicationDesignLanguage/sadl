@@ -57,6 +57,7 @@ import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.ProxyNode;
+import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.Test;
@@ -154,10 +155,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private Map<Resource, List<TripleElement>> missingTriplesByResource;
 	private List<NamedNode> namedNodesToCleanOfMissingPatternsWhenCooked = null;
 	private Map<String, Boolean> addMissingTriplePatternsReturnValueByReqName;
-    private Object encapsulatingTarget = null;	// when a query is in a test
     private GraphPatternElement firstOfPhrase = null;
     
-    private List<ConceptName> namedNodes = null;
     private boolean collectNamedNodes = false;
     private List<String> userDefinedVariables = new ArrayList<String>();
     private OntModel theJenaModel = null;
@@ -224,7 +223,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			errors.clear();
 		}
 		setTarget(null);
-		encapsulatingTarget = null;
 		setFirstOfPhrase(null);
 	}
 	
@@ -801,6 +799,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					test.setRhs(flattenLinkedList(newRhs));
 				}
 			}
+			
+			if (lhs != null && lhs instanceof GraphPatternElement) {
+				
+			}
 	
 			if (test.getCompType() != null && test.getCompType().equals(ComparisonType.Eq) 
 					&& test.getLhs() != null && test.getRhs() != null 
@@ -1210,16 +1212,13 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	private Rule addImpliedAndExpandedProperties(Rule rule) throws InvalidNameException, InvalidTypeException, TranslationException {
-		boolean clearPreviouslyRetired = true;	// must clear on first call
 		List<GraphPatternElement> gvns = rule.getGivens();
 		if (gvns != null) {
 			addImpliedAndExpandedProperties(gvns);
-			clearPreviouslyRetired = false;
 		}
 		List<GraphPatternElement> ifs = rule.getIfs();
 		if (ifs != null) {
 			addImpliedAndExpandedProperties(ifs);
-			clearPreviouslyRetired = false;
 		}
 		List<GraphPatternElement> thens = rule.getThens();
 		if (thens != null) {
@@ -1227,13 +1226,49 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		return rule;
 	}
-
-	protected void addImpliedAndExpandedProperties(List<GraphPatternElement> fgpes) throws InvalidNameException, InvalidTypeException, TranslationException {
-//		List<GraphPatternElement> fgpes = flattenLinkedList(gpes);
+	
+//	public Test postProcessTest(Test test, EObject context) {
+//		
+//		return test;
+//	}
+//	
+//	private Test addImpliedAndExpandedProperties(Test test) {
+//		
+//		return test;
+//	}
+	
+//	public Query postProcessQuery(Query query, EObject context) {
+//		
+//		return query;
+//	}
+//	
+//	private Query addImpliedAndExpandedProperties(Query query) {
+//		
+//		return query;
+//	}
+	
+	@SuppressWarnings("unchecked")
+	public Object postProcessExpressionStatement(Object exprStmt, EObject context) throws TranslationException, InvalidNameException, InvalidTypeException {
+		if (exprStmt instanceof GraphPatternElement) {
+			return addImpliedAndExpandedProperties((GraphPatternElement)exprStmt);
+		}
+		else if (exprStmt instanceof List<?>) {
+			return addImpliedAndExpandedProperties((List<GraphPatternElement>)exprStmt);
+		}
+		else if (exprStmt instanceof Query) {
+			List<GraphPatternElement> patterns = addImpliedAndExpandedProperties(((Query)exprStmt).getPatterns());
+			((Query)exprStmt).setPatterns(patterns);
+			return exprStmt;
+		}
+		throw new TranslationException("Unexpected input into postProcessExpressionStatement: " + exprStmt.getClass().getCanonicalName());
+	}
+	
+	protected List<GraphPatternElement> addImpliedAndExpandedProperties(List<GraphPatternElement> fgpes) throws InvalidNameException, InvalidTypeException, TranslationException {
 		for (int i = 0; i < fgpes.size(); i++) {
 			GraphPatternElement gpeback = addImpliedAndExpandedProperties(fgpes.get(i));
 			fgpes.set(i, gpeback);
 		}
+		return fgpes;
 	}
 
 	protected GraphPatternElement addImpliedAndExpandedProperties(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -1299,74 +1334,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 		}
 		return gpe;
-	}
-
-	//Need to update for implied properties being moved off graph pattern elements?
-	private void applyLeftImpliedProperty(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
-		NamedNode lip = null; //gpe.getLeftImpliedPropertyUsed();
-		if (gpe instanceof BuiltinElement) {
-			if (((BuiltinElement)gpe).getArguments() == null || ((BuiltinElement)gpe).getArguments().size() != 2) {
-				throw new TranslationException("Implied properties can't be applied to a BuiltinElement with other than 2 arguments");
-			}
-			Node arg0 = ((BuiltinElement)gpe).getArguments().get(0);
-			if (arg0 instanceof NamedNode && getModelProcessor().isProperty(((NamedNode)arg0))) {
-				TripleElement newTriple = singlePropertyToTriple((NamedNode)arg0);
-				arg0 = SadlModelProcessor.nodeCheck(newTriple);
-			}
-			TripleElement newTriple = new TripleElement(arg0, lip, null);
-			arg0 = SadlModelProcessor.nodeCheck(newTriple);
-			((BuiltinElement)gpe).getArguments().set(0, arg0);	
-			for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
-				Node agi = ((BuiltinElement)gpe).getArguments().get(i);
-				if (agi instanceof ProxyNode && ((ProxyNode)agi).getProxyFor() instanceof BuiltinElement) {
-					addImpliedAndExpandedProperties((BuiltinElement)((ProxyNode)agi).getProxyFor());
-				}
-			}
-			//((BuiltinElement)gpe).setLeftImpliedPropertyUsed(null);
-		}
-		else if (gpe instanceof TripleElement) {
-			TripleElement newTriple = new TripleElement(((TripleElement)gpe).getSubject(), ((TripleElement)gpe).getPredicate(), null);
-			((TripleElement)gpe).setSubject(SadlModelProcessor.nodeCheck(newTriple));
-			((TripleElement)gpe).setPredicate(lip);
-			//gpe.setRightImpliedPropertyUsed(null);
-		}
-		else {
-			throw new TranslationException("Unexpected GraphPatternElement (" + gpe.getClass().getCanonicalName() + ") encountered applying implied property");
-		}
-	}
-
-	//Need to update for implied properties being moved off graph pattern elements?
-	private void applyRightImpliedProperty(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
-		NamedNode rip = null; //gpe.getRightImpliedPropertyUsed();
-		if (gpe instanceof BuiltinElement) {
-			if (((BuiltinElement)gpe).getArguments() == null || ((BuiltinElement)gpe).getArguments().size() != 2) {
-				throw new TranslationException("Implied properties can't be applied to a BuiltinElement with other than 2 arguments");
-			}
-			Node arg1 = ((BuiltinElement)gpe).getArguments().get(1);
-			if (arg1 instanceof NamedNode && getModelProcessor().isProperty(((NamedNode)arg1))) {
-				TripleElement newTriple = singlePropertyToTriple((NamedNode)arg1);
-				arg1 = SadlModelProcessor.nodeCheck(newTriple);
-			}
-			TripleElement newTriple = new TripleElement(arg1, rip, null);
-			arg1 = SadlModelProcessor.nodeCheck(newTriple);
-			((BuiltinElement)gpe).getArguments().set(1, arg1);			
-			for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
-				Node agi = ((BuiltinElement)gpe).getArguments().get(i);
-				if (agi instanceof ProxyNode && ((ProxyNode)agi).getProxyFor() instanceof BuiltinElement) {
-					addImpliedAndExpandedProperties((BuiltinElement)((ProxyNode)agi).getProxyFor());
-				}
-			}
-			//gpe.setRightImpliedPropertyUsed(null);
-		}
-		else if (gpe instanceof TripleElement) {
-			Node objNode = ((TripleElement)gpe).getObject();
-			TripleElement newTriple = new TripleElement(objNode, rip, null);
-			((TripleElement)gpe).setObject(SadlModelProcessor.nodeCheck(newTriple));
-			//gpe.setRightImpliedPropertyUsed(null);
-		}
-		else {
-			throw new TranslationException("Unexpected GraphPatternElement (" + gpe.getClass().getCanonicalName() + ") encountered applying implied property");
-		}
 	}
 
 	private GraphPatternElement applyExpandedProperties(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -1462,39 +1429,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		VariableNode nvar = null; //new VariableNode(getNewVar());
 		TripleElement newTriple = new TripleElement(nvar, prop, null);
 		return newTriple;
-	}
-
-	private List<NamedNode> getNamedNodeList(List<NamedNode> found, GraphPatternElement gpe) {
-		if (gpe instanceof TripleElement) {
-			found = addNamedNode(found, ((TripleElement)gpe).getSubject());
-			found = addNamedNode(found, ((TripleElement)gpe).getObject());
-		}
-		else if (gpe instanceof BuiltinElement) {
-			if (((BuiltinElement)gpe).getArguments() != null) {
-				for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
-					found = addNamedNode(found, ((BuiltinElement)gpe).getArguments().get(i));
-				}
-			}
-		}
-		else if (gpe instanceof Junction) {
-			Object lhs = ((Junction)gpe).getLhs();
-			if (lhs instanceof Node) {
-				found = addNamedNode(found, (Node) lhs);
-			}
-			Object rhs = ((Junction)gpe).getRhs();
-			if (rhs instanceof Node) {
-				found = addNamedNode(found, (Node) rhs);
-			}
-		}
-		return found;
-	}
-
-	private List<NamedNode> addNamedNode(List<NamedNode> found, Node node) {
-		if (node instanceof NamedNode && !(node instanceof VariableNode)) {
-			if (found == null) found = new ArrayList<NamedNode>();
-			found.add((NamedNode)node);
-		}
-		return found;
 	}
 
 	private List<GraphPatternElement> decorateCRuleVariables(List<GraphPatternElement> gpes, boolean isRuleThen) {
@@ -1643,8 +1577,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private List<GraphPatternElement> flattenRuleJunction(Junction jct) throws TranslationException {
 		List<GraphPatternElement>results = new ArrayList<GraphPatternElement>();
 		if (!jct.getJunctionType().equals(JunctionType.Conj)) {
-//			addError(new IFTranslationError("Disjunction not supported in rules at this time"));
-			// this is up to the target translator to decide, not the Intermediate Form Translator
+			// Whether this is supported is up to the target translator to decide, not the Intermediate Form Translator
 			results.add(jct);
 			return results;
 		}
@@ -1709,16 +1642,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			rule.getIfs().add(tgpe);			
 		}
 		else {
-//			if (tgpe instanceof TripleElement) {
-//				if (((TripleElement)tgpe).getPredicate() instanceof RDFTypeNode && 
-//					((TripleElement)tgpe).getSubject() instanceof VariableNode) {
-//					if (isCruleVariableInTypeOutput((VariableNode) ((TripleElement)tgpe).getSubject())) {
-//						results.remove(tgpe);
-//						rule.getIfs().add(0, tgpe);
-//					}
-//				}
-//			}
-//			else 
 			if (tgpe instanceof Junction) {
 				int idx = results.indexOf(tgpe);
 				GraphPatternElement newtgpe = moveEmbeddedFromJunction(rule, (Junction)tgpe);
@@ -1924,7 +1847,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 				else {
 					((Junction)pattern).setLhs(SadlModelProcessor.nodeCheck(listToAnd(lhsPatterns).get(0)));
-	//				throw new TranslationException("LHS of a Junction should be a single GraphPatternElement: " + jctPatterns.toString());
 				}
 			}
 			
@@ -1946,7 +1868,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 				else {
 					((Junction)pattern).setRhs(SadlModelProcessor.nodeCheck(listToAnd(rhsPatterns).get(0)));
-	//				throw new TranslationException("RHS of a Junction should be a single GraphPatternElement: " + jctPatterns.toString());
 				}
 			}
 			patterns = existingPatterns;
@@ -2045,8 +1966,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					rememberedPatterns = patterns;
 					patterns = new ArrayList<GraphPatternElement>();
 				}
-///* works for test_08: */				Object objNode = expandProxyNodes(patterns, realObj, isRuleThen, UnNestingType.ReturnSubjectMoveAfter);
-///* works for test_19: */				Object objNode = expandProxyNodes(patterns, realObj, isRuleThen, UnNestingType.ReturnObjectMoveBefore); // UnNestingType.ReturnSubjectMoveAfter);
 				Object objNode;
 				if (realObj instanceof TripleElement && te.getSourceType() != null && te.getSourceType().equals(TripleSourceType.VariableDefinition)) {
 					unt = UnNestingType.ReturnObjectMoveAfter;
@@ -2215,7 +2134,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	protected VariableNode getVariableNode(Node subject, Node predicate, Node object, boolean varIsSubject) {
 		VariableNode var = findVariableInTargetForReuse(subject, predicate, object);
 		if (var != null) {
-//			return new VariableNode(var.getName());
 			return var;
 		}
 		if (predicate != null) {
@@ -2274,7 +2192,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 	
 	protected VariableNode findVariableInTargetForReuse(Node subject, Node predicate, Node object) {
-		// Note: when we find a match we still create a new VariableNode with the same name in order to have the right reference counts for the new VariableNode
 		if (getTarget() instanceof Rule) {
 			VariableNode var = findVariableInTripleForReuse(((Rule)getTarget()).getGivens(), subject, predicate, object);
 			if (var != null) {
@@ -2406,10 +2323,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	
 	protected String getNewVar() {
 		String proposedName = "v" + vNum;
-		while (userDefinedVariables.contains(proposedName)
-//				||
-//				!modelManager.getConceptType(proposedName).equals(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL)
-		) {
+		while (userDefinedVariables.contains(proposedName)) {
 			vNum++;
 			proposedName = "v" + vNum;
 		}
@@ -2734,7 +2648,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				patterns.add(be);
 			}
 			else {
-//				patterns.add(patterns.size() - 1, be);
 				patterns.add(be);
 			}
 			returnNode = be.getArguments() != null ? be.getArguments().get(0) : null;	// this can occur during editing
@@ -2763,19 +2676,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return false;
 	}
 	
-	private boolean isExpandableComparisonOperator(ComparisonType ct) {
-		if (ct != null && (ct.equals(ComparisonType.Eq) ||
-				ct.equals(ComparisonType.Eq) ||
-				ct.equals(ComparisonType.GT) ||
-				ct.equals(ComparisonType.GTE) ||
-				ct.equals(ComparisonType.LT) ||
-				ct.equals(ComparisonType.LTE) ||
-				ct.equals(ComparisonType.Neq))) {
-			return true;
-		}
-		return false;
-	}
-
 	/**
 	 * Method to expand a binary operation on UnittedQuantity arguments. The TripleElement instances needed to expand 
 	 * the UnittedQuantity instances or variables to patterns referencing the UnittedQuantity unit and value property
@@ -2846,9 +2746,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 									((Literal)arg).setUnits(null);
 								}
 								else if (arg instanceof NamedNode) {
-//									VariableNode newArg = new VariableNode(getNewVar());
-//									TripleElement addedTriple2 = new TripleElement(arg, valuePredNode, newArg);
-//									newTriples.add(addedTriple1);
 									args.set(args.indexOf(arg), replacementArg);
 								}
 							}
@@ -2884,7 +2781,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						else if (uqArgs.get(2).equals(rhsArg)) {
 							newRhsArg = uqArgs.get(0);
 							rhsUnits = SadlUtils.stripQuotes(uqArgs.get(1).toString());
-//							rhsArgValueTriple = patterns.indexOf(gpe) + tripleAddedCntr + 1;	
 						}
 						toBeRemoved.add(gpe);
 					}
@@ -3104,101 +3000,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	/**
-	 * Method to expand a binary operation on UnittedQuantity arguments. The TripleElement instances needed to expand 
-	 * the UnittedQuantity instances or variables to patterns referencing the UnittedQuantity unit and value property
-	 * values are identifed and returned. The new arguments for the value objects to be passed to the binary operator
-	 * are put into the BuiltinElement's args list.
-	 * @param gpe
-	 * @return
-	 * @throws TranslationException
-	 */
-	private List<GraphPatternElement> unittedQuantityExpansion(BuiltinElement gpe) throws TranslationException {
-		List<Node> args = gpe.getArguments();
-		if (args.size() == 2) {
-			Object[] returnVals = new Object[2];								// the overall return container
-			List<GraphPatternElement> addlGpes = new ArrayList<GraphPatternElement>();	// the added TripleElement container
-
-			NamedNode valuePredNode = UtilsForJena.validateNamedNode(getModelProcessor().getConfigMgr(), getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI));
-			valuePredNode.setNodeType(NodeType.DataTypeProperty);
-			NamedNode unitPredNode = UtilsForJena.validateNamedNode(getModelProcessor().getConfigMgr(), getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI));
-			unitPredNode.setNodeType(NodeType.DataTypeProperty);
-			
-			Node newLhs = null;
-			Node newRhs = null;
-			String lhsUnits = null;
-			VariableNode lhsUnitVar = null;
-			String rhsUnits = null;
-			VariableNode rhsUnitVar = null;
-			if (args.get(0) instanceof Literal && ((Literal)args.get(0)).getUnits() != null) {
-				// LHS is a UnittedQuantity
-				newLhs = new Literal(((Literal)args.get(0)).getValue(), null, ((Literal)args.get(0)).getLiteralType());
-				lhsUnits = ((Literal)args.get(0)).getUnits();
-			}
-			if (args.get(1) instanceof Literal && ((Literal)args.get(1)).getUnits() != null) {
-				// RHS is a UnittedQuantity
-				newRhs = new Literal(((Literal)args.get(1)).getValue(), null, ((Literal)args.get(1)).getLiteralType());
-				rhsUnits = ((Literal)args.get(1)).getUnits();
-			}
-			if (isUnittedQuantityVariable(args.get(0))) {
-				// LHS is a variable of type UnittedQuantity
-				newLhs = new VariableNode(getNewVar());
-				TripleElement addedTriple1 = new TripleElement(args.get(0), valuePredNode, newLhs);
-				addlGpes.add(addedTriple1);
-				if (rhsUnits != null) {
-					TripleElement addedTriple2 = new TripleElement(args.get(0), unitPredNode, new Literal(rhsUnits, null, LiteralType.StringLiteral));
-					addlGpes.add(addedTriple2);
-				}
-				else {
-					rhsUnitVar = new VariableNode(getNewVar());
-					TripleElement addedTriple2 = new TripleElement(args.get(0), unitPredNode, rhsUnitVar);
-					addlGpes.add(addedTriple2);
-				}
-				args.set(0, newLhs);
-			}
-			if (isUnittedQuantityVariable(args.get(1))) {
-				// RHS is a variable of type UnittedQuantity
-				newRhs = new VariableNode(getNewVar());
-				TripleElement addedTriple1 = new TripleElement(args.get(1), valuePredNode, newRhs);
-				addlGpes.add(addedTriple1);
-				if (lhsUnits != null) {
-					TripleElement addedTriple2 = new TripleElement(args.get(1), unitPredNode, new Literal(lhsUnits, null, LiteralType.StringLiteral));
-					addlGpes.add(addedTriple2);
-				}
-				else {
-					if (rhsUnitVar != null) {
-						lhsUnitVar = rhsUnitVar;
-					}
-					else {
-						lhsUnitVar = new VariableNode(getNewVar());
-					}
-					TripleElement addedTriple2 = new TripleElement(args.get(1), unitPredNode, lhsUnitVar);
-					addlGpes.add(addedTriple2);
-				}
-				args.set(1, newRhs);
-			}
-			if (lhsUnits == null || rhsUnits == null) {
-				// we need to add an additional BuiltinElement to compute the unit of the answer (math operation) 
-				// or validate that they are the same unit at runtime (comparison)
-			}
-			if (newLhs != null) {
-				gpe.getArguments().set(0,  newLhs);
-			}
-			if (newRhs != null) {
-				gpe.getArguments().set(1,  newRhs);
-			}
-			if (addlGpes.size() == 0) {
-				return null;
-			}
-			else {
-				return addlGpes;
-			}
-		}
-		else {
-			throw new TranslationException("getUnittedQuantityExtensions called for not-binary built-in");
-		}
-	}
-
-	/**
 	 * Method to determine if a Node is a UnittedQuantity
 	 * @param arg
 	 * @return
@@ -3392,73 +3193,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return false;
 	}
 
-	//Removed implied properties from graph pattern element
-	/*private Object applyExpandedAndImpliedProperties(List<GraphPatternElement> patterns, BuiltinElement be,
-			Object realArgForThen, List<GraphPatternElement> moveToIfts, Object finalIfsVar)
-			throws TranslationException, InvalidNameException, InvalidTypeException {
-		if (be.getExpandedPropertiesToBeUsed() != null) {
-			// create a new VariableNode of the same type as finalIfsVar
-			VariableNode thereExistsVar = getVariableNode(be);
-			thereExistsVar.setType(((VariableNode)finalIfsVar).getType());
-			((TripleElement)realArgForThen).setObject(thereExistsVar);
-			BuiltinElement thereExistsBe = new BuiltinElement();
-			thereExistsBe.setFuncName(JenaBasedSadlModelProcessor.THERE_EXISTS);
-			thereExistsBe.addArgument(thereExistsVar);
-			patterns.add(patterns.size() - 1, thereExistsBe);
-			for (NamedNode ep: be.getExpandedPropertiesToBeUsed()) {
-				VariableNode newVar = null;
-				boolean createTriple = false;
-				if (finalIfsVar instanceof Node) {
-					newVar = findVariableInTargetForReuse((Node)finalIfsVar, ep, null);	
-					if (newVar == null) {
-						createTriple = true;
-						newVar = getVariableNode(be);
-					}
-				}
-				TripleElement epTriple = new TripleElement(SadlModelProcessor.nodeCheck(thereExistsVar), ep, newVar);
-				patterns.add(epTriple);
-				if (createTriple) {
-					TripleElement epTriple2 = new TripleElement(SadlModelProcessor.nodeCheck(finalIfsVar), ep, newVar);
-					moveToIfts.add(epTriple2);
-				}
-			}
-		}
-		else if (be.getLeftImpliedPropertyUsed() != null) {
-			VariableNode newVar = null;
-			boolean createTriple = false;
-			if (finalIfsVar instanceof Node) {
-				newVar = findVariableInTargetForReuse((Node) finalIfsVar, be.getLeftImpliedPropertyUsed(), null);
-				if (newVar == null) {
-					createTriple = true;
-					newVar = getVariableNode((Node) finalIfsVar, be.getLeftImpliedPropertyUsed(), null, false);
-				}
-			}
-			if (createTriple) {
-				TripleElement epTriple = new TripleElement(SadlModelProcessor.nodeCheck(finalIfsVar), SadlModelProcessor.nodeCheck(be.getLeftImpliedPropertyUsed()), newVar);
-				patterns.add(epTriple);
-			}
-			return newVar;
-		}
-		else if (be.getRightImpliedPropertyUsed() != null) {
-			VariableNode newVar = null;
-			boolean createTriple = false;
-			if (finalIfsVar instanceof Node) {
-				newVar = findVariableInTargetForReuse((Node)finalIfsVar, be.getRightImpliedPropertyUsed(), null);
-				if (newVar == null) {
-					createTriple = true;
-					newVar =getVariableNode((Node) finalIfsVar, be.getRightImpliedPropertyUsed(), null, false);
-				}
-			}
-			if (createTriple) {
-				TripleElement epTriple = new TripleElement(SadlModelProcessor.nodeCheck(finalIfsVar), SadlModelProcessor.nodeCheck(be.getRightImpliedPropertyUsed()), newVar);
-				moveToIfts.add(epTriple);
-			}
-			return newVar;
-		}
-		return null;
-	}
-	*/
-	
 	private void removeArgsFromPatterns(List<GraphPatternElement> patterns, BuiltinElement be) {
 		if (patterns != null && patterns.size() > 0) {
 			List<Node> args = be.getArguments();
@@ -3755,8 +3489,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		for( Node lProxy : lProxies ) {
 			if( lProxy instanceof ProxyNode ) {
 				lResult.add(((ProxyNode)lProxy).getProxyFor());
-//			} else {
-//				throw new TranslationException("junctionToGraphPatternList called on junction which includes a non-GraphPatternElement; this is not supported.");
 			}
 		}
 		return lResult;
@@ -3868,40 +3600,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	/**
-	 * This method returns true only if all variables in the element are bound in other rule elements
-	 * 
-	 * @param rule
-	 * @param gpe
-	 * @return
-	 */
-	private boolean allElementVariablesBound(Rule rule,
-			GraphPatternElement gpe) {
-		if (gpe instanceof TripleElement) {
-			Node subject = ((TripleElement)gpe).getSubject();
-			if ((subject instanceof VariableNode || subject instanceof NamedNode)
-					&& !variableIsBound(rule, gpe, subject)) {
-				return false;
-			}
-			Node object = ((TripleElement)gpe).getObject();
-			if ((object instanceof VariableNode || object instanceof NamedNode) 
-					&& !variableIsBound(rule, gpe, object)) {
-				return false;
-			}
-		}
-		else if (gpe instanceof BuiltinElement) {
-			List<Node> args = ((BuiltinElement)gpe).getArguments();
-			for (int i = 0; args != null && i < args.size(); i++) {
-				Node arg = args.get(i);
-				if ((arg instanceof VariableNode || arg instanceof NamedNode) 
-					&& !variableIsBound(rule, gpe, arg)) {
-						return false;
-					}
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * This method returns true if the argument node is bound in some other element of the rule
 	 * 
 	 * @param rule
@@ -3979,7 +3677,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		else if (gpe instanceof BuiltinElement) {
 			List<Node> args = ((BuiltinElement)gpe).getArguments();
 			// TODO built-ins can actually have more than the last argument as output, but we can only tell this
-			//	if we have special knowledge of the builtin. Current SADL grammar doesn't allow this to occur.
+			//	if we have special knowledge of the builtin.
 			if (args != null && args.get(args.size() - 1) != null && args.get(args.size() - 1).equals(v)) {
 				return true;
 			}
@@ -4003,67 +3701,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return false;
 	}
 
-	private boolean doVariableSubstitution(List<GraphPatternElement> gpes,
-			VariableNode v1, VariableNode v2) {
-		boolean retval = false;
-		for (int i = 0; gpes != null && i < gpes.size(); i++) {
-			GraphPatternElement gpe = gpes.get(i);
-			if (gpe instanceof TripleElement) {
-				if (((TripleElement)gpe).getSubject().equals(v1)) {
-					((TripleElement)gpe).setSubject(v2);
-					retval = true;
-				}
-				else if (((TripleElement)gpe).getObject().equals(v1)) {
-					((TripleElement)gpe).setObject(v2);
-					retval = true;
-				}
-			}
-			else if (gpe instanceof BuiltinElement) {
-				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				for (int j = 0; j < args.size(); j++) {
-					if (args.get(j).equals(v1)) {
-						args.set(j, v2);
-						retval = true;
-					}
-				}
-			}
-			else if (gpe instanceof Junction) {
-				logger.error("Not yet handled");
-			}
-		}
-		return retval;
-	}
-
-	private boolean doVariableSubstitution(GraphPatternElement gpe, VariableNode v1, VariableNode v2) {
-		boolean retval = false;
-		do {
-			if (gpe instanceof TripleElement) {
-				if (((TripleElement)gpe).getSubject().equals(v1)) {
-					((TripleElement)gpe).setSubject(v2);
-					retval = true;
-				}
-				else if (((TripleElement)gpe).getObject().equals(v1)) {
-					((TripleElement)gpe).setObject(v2);
-					retval = true;
-				}
-			}
-			else if (gpe instanceof BuiltinElement) {
-				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				for (int j = 0; j < args.size(); j++) {
-					if (args.get(j).equals(v1)) {
-						args.set(j, v2);
-						retval = true;
-					}
-				}
-			}
-			else if (gpe instanceof Junction) {
-				logger.error("Not yet handled");
-			}
-			gpe = gpe.getNext();
-		} while (gpe != null);
-		return retval;
-	}
-
 	private void setFirstOfPhrase(GraphPatternElement firstOfPhrase) {
 		this.firstOfPhrase = firstOfPhrase;
 	}
@@ -4077,7 +3714,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 */
 	@Override
 	public void setEncapsulatingTarget(Object _encapsulatingTarget) {
-		encapsulatingTarget = _encapsulatingTarget;
 	}
 
 	public boolean isCollectNamedNodes() {
@@ -4086,23 +3722,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 
 	public void setCollectNamedNodes(boolean collectNamedNodes) {
 		this.collectNamedNodes = collectNamedNodes;
-	}
-
-	/**
-	 * This method can be called only once for a given set of translations; calling it clears the list of ConceptNames
-	 * @return
-	 */
-	public List<ConceptName> getNamedNodes() {
-		if (namedNodes != null) {
-			List<ConceptName> x = new ArrayList<ConceptName>(namedNodes);
-			namedNodes.clear();
-			return x;
-		}
-		return null;
-	}
-
-	private void setNamedNodes(List<ConceptName> namedNodes) {
-		this.namedNodes = namedNodes;
 	}
 
 	private boolean isCruleVariableInTypeOutput(VariableNode cruleVariable) {
@@ -4692,19 +4311,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				if (subclassV != null) {
 					return subclassV;
 				}
-//				for (VariableNode v : variables) {
-//					OntClass cls = getTheJenaModel().getOntClass(classUri);
-//					if (cls != null && v.getType() != null) {
-//						ExtendedIterator<OntClass> scitr = cls.listSubClasses();
-//						while (scitr.hasNext()) {
-//							OntClass sc = scitr.next();
-//							if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
-//								scitr.close();
-//								return v;
-//							}
-//						}
-//					}
-//				}
 			}
 		}
 		return null;
@@ -5054,39 +4660,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @throws TranslationException
 	 */
 	private void applyMissingPatternsToAllOccurrencesOfNamedNode(Rule rule) throws TranslationException {
-//		if (!rule.getContext().isMissingPatternsAddedToVariables() && rule.getContext().getCtxElements() != null) {
-//			applyMissingPatternsToGraphPatternElements(rule.getContext().getCtxElements());
-//			Map<String, RequirementVariable> ctxVarMap = rule.getContext().getVariables();
-//			if (ctxVarMap != null) {
-//				Iterator<String> varitr = ctxVarMap.keySet().iterator();
-//				while (varitr.hasNext()) {
-//					RequirementVariable var = ctxVarMap.get(varitr.next());
-//					if (var.getDefinitions() != null) {
-//						List<Node> defns = var.getDefinitions();
-//						for (Node defn : defns) {
-//							if (defn instanceof ProxyNode && ((ProxyNode)defn).getProxyFor() instanceof GraphPatternElement) {
-//								applyMissingPatternsToGraphPatternElement((GraphPatternElement) ((ProxyNode)defn).getProxyFor());
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//		if (rule.getVariables() != null) {
-//			Map<String, RequirementVariable> varMap = rule.getVariables();
-//			Iterator<String> varitr = varMap.keySet().iterator();
-//			while (varitr.hasNext()) {
-//				RequirementVariable var = varMap.get(varitr.next());
-//				if (var.getDefinitions() != null) {
-//					List<Node> defns = var.getDefinitions();
-//					for (Node defn : defns) {
-//						if (defn instanceof ProxyNode && ((ProxyNode)defn).getProxyFor() instanceof GraphPatternElement) {
-//							applyMissingPatternsToGraphPatternElement((GraphPatternElement) ((ProxyNode)defn).getProxyFor());
-//						}
-//					}
-//				}
-//			}
-//		}
 		applyMissingPatternsToGraphPatternElements(rule.getGivens());
 		applyMissingPatternsToGraphPatternElements(rule.getIfs());
 		applyMissingPatternsToGraphPatternElements(rule.getThens());
