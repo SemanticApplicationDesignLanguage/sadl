@@ -1260,7 +1260,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			((Query)exprStmt).setPatterns(patterns);
 			return exprStmt;
 		}
-		throw new TranslationException("Unexpected input into postProcessExpressionStatement: " + exprStmt.getClass().getCanonicalName());
+//		throw new TranslationException("Unexpected input into postProcessExpressionStatement: " + exprStmt.getClass().getCanonicalName());
+		return exprStmt;
 	}
 	
 	protected List<GraphPatternElement> addImpliedAndExpandedProperties(List<GraphPatternElement> fgpes) throws InvalidNameException, InvalidTypeException, TranslationException {

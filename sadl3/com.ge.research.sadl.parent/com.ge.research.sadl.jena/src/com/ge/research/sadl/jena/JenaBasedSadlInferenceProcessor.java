@@ -565,7 +565,12 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 					if (lhobj instanceof ResultSet
 							&& ((ResultSet) lhobj)
 									.getColumnCount() > 0) {
-						testResult = new TestResult(true);
+						if (isNegatedTriple(lhs)) {
+							testResult = new TestResult(false);
+						}
+						else {
+							testResult = new TestResult(true);
+						}
 					}
 				} else if (lhs instanceof Junction && rhs == null) {
 					Object lhobj = convertToComparableObject(
@@ -749,6 +754,15 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		result.setResults(testResult);
 		result.setErrors(getInitializedReasoner().getErrors());
 		return result;
+	}
+
+	private boolean isNegatedTriple(Object lhs) {
+		if (lhs instanceof List<?> && ((List<?>)lhs).size() == 1 && 
+				((List<?>)lhs).get(0) instanceof TripleElement &&
+				((TripleElement)((List<?>)lhs).get(0)).getModifierType().equals(TripleModifierType.Not)) {
+			return true;
+		}
+		return false;
 	}
 
 	private TestResult testTriple(IReasoner reasoner, TripleElement triple)
@@ -1164,7 +1178,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 									.createTypedLiteral(
 											((com.ge.research.sadl.model.gp.Literal) objval)
 													.getValue()).toString();
-						} else if (objval != null) {
+						} else if (objval != null && objval instanceof NamedNode) {
 							strObjVal = ((NamedNode) objval)
 									.toFullyQualifiedString();
 						}

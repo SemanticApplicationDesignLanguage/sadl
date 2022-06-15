@@ -2257,7 +2257,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * @return
 	 * @throws JenaProcessorException
 	 */
-	public Test[] processStatement(TestStatement element) throws JenaProcessorException {		Test[] generatedTests = null;
+	public Test[] processStatement(TestStatement element) throws JenaProcessorException {
+		Test[] generatedTests = null;
 		Test sadlTest = null;
 		boolean done = false;
 		Object testtrans = null;
@@ -2333,9 +2334,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							if (theGpe instanceof Junction) {
 								JunctionList flattened = getIfTranslator().junctionToList(((Junction)((List<?>)expanded).get(0)));
 								GraphPatternElement last = flattened.get(flattened.size() - 1);
-								if (last instanceof BuiltinElement
-//										&& IntermediateFormTranslator.isComparisonBuiltin(((BuiltinElement)last).getFuncName())
-										) {
+								if (last instanceof BuiltinElement) {
 									List<Node> args = ((BuiltinElement)last).getArguments();
 									if (((BuiltinElement)last).getFuncType().equals(BuiltinType.Not) 
 											&& args.get(0) instanceof ProxyNode) {
@@ -2381,26 +2380,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								}
 							}
 							else if (theGpe instanceof TripleElement) {
-								if (((TripleElement) testtrans).getModifierType() != null
-										&& !((TripleElement) testtrans).getModifierType().equals(TripleModifierType.None)) {
+								if (((TripleElement) theGpe).getModifierType() != null
+										&& !((TripleElement) theGpe).getModifierType().equals(TripleModifierType.None)) {
 									// Filtered query with modification
-									TripleModifierType ttype = ((TripleElement) testtrans).getModifierType();
-									getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
-									Object trans = getIfTranslator().expandProxyNodes(testtrans, false, true);
-									setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
-									if ((trans != null && trans instanceof List<?> && ((List<?>) trans).size() > 0)) {
-										if (ttype.equals(TripleModifierType.Not)) {
-											if (changeFilterDirection(trans)) {
-												((TripleElement) testtrans).setType(TripleModifierType.None);
-											}
+									TripleModifierType ttype = ((TripleElement) theGpe).getModifierType();
+									if (ttype.equals(TripleModifierType.Not)) {
+										if (changeFilterDirection(theGpe)) {
+											((TripleElement) theGpe).setType(TripleModifierType.None);
 										}
-										test.setLhs(trans);
-									} else {
-										if (ttype.equals(TripleModifierType.Not)) {
-											changeFilterDirection(testtrans);
-										}
-										test.setLhs(testtrans);
 									}
+									test.setLhs(theGpe);
 								}
 								else {
 									test.setLhs(theGpe);
@@ -2440,9 +2429,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									}
 								}
 							}
+							else {
+								addError("Unsupported type of GraphPatternElement in Test statement: " + theGpe.getClass().getCanonicalName(), element);
+							}
+						}
+						else {
+							addError("Unexpected result of Test statement processing; the list has " + ((List<?>)expanded).size() + " elements", element);
 						}
 					}
-					
+					else {
+						addError("Unexpected result of Test statement processing: " + expanded.getClass().getCanonicalName(), element);
+					}
 				}
 
 				if (!done) {
@@ -2498,7 +2495,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 			for (int i = 0; generatedTests != null && i < generatedTests.length; i++) {
 				sadlTest = generatedTests[i];
-//				applyImpliedProperties(sadlTest, tests.get(0));
 				// ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
 				// if (node != null) {
 				// test.setLineNo(node.getStartLine());
@@ -2859,15 +2855,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		if (unboundVars.size() > 0) {
-			StringBuilder sb = new StringBuilder("Unbound variables found in Test: ");
-			for (int i = 0; i < unboundVars.size(); i++) {
-				if (i > 0) {
-					sb.append(", ");
-				}
-				sb.append(unboundVars.get(i).getName());
-				numErrors++;
+			if (test.getLhsVariables() != null) {
+				unboundVars.removeAll(test.getLhsVariables());
 			}
-			addWarning(sb.toString(), object);	// for now this is a warning in case it has faulty detection. When robust can become error. awc 6/14/22
+			if (test.getRhsVariables() != null) {
+				unboundVars.removeAll(test.getRhsVariables());
+			}
+			if (unboundVars.size() > 0) {
+				StringBuilder sb = new StringBuilder("Unbound variables found in Test: ");
+				for (int i = 0; i < unboundVars.size(); i++) {
+					if (i > 0) {
+						sb.append(", ");
+					}
+					sb.append(unboundVars.get(i).getName());
+					numErrors++;
+				}
+				addWarning(sb.toString(), object);	// for now this is a warning in case it has faulty detection. When robust can become error. awc 6/14/22
+			}
 		}
 		return numErrors;
 	}
