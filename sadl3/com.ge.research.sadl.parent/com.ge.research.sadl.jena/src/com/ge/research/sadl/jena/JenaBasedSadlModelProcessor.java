@@ -2258,6 +2258,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * @throws JenaProcessorException
 	 */
 	public Test[] processStatement(TestStatement element) throws JenaProcessorException {
+		clearCruleVariables();
 		Test[] generatedTests = null;
 		Test sadlTest = null;
 		boolean done = false;
@@ -6384,6 +6385,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else if (op.equals("is unique in")) {
 				reverseArgs = true;
 				op = "unique";
+			}
+			else if (op.equals("is same as") | op.equals("is the same as")) {
+				op = "sameAs";
+			}
+			else if (op.equals("is different from")) {
+				op = "differentFrom";
 			}
 			GraphPatternElement bi;
 			if (reverseArgs) {
