@@ -1903,6 +1903,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		else if (retiredNode instanceof VariableNode) {
 			// there's already a triple for te in those patterns processed
+			// however, check to see if there's an embedded TripleElement to be expanded
+			if (te.getObject() instanceof ProxyNode && 
+					((ProxyNode)te.getObject()).getProxyFor() instanceof TripleElement &&
+					((TripleElement)((ProxyNode)te.getObject()).getProxyFor()).getSubject() == null) {
+				TripleElement nestedTriple = (TripleElement)((ProxyNode)te.getObject()).getProxyFor();
+				nestedTriple.setSubject(retiredNode);
+				patterns.add(nestedTriple);
+			}
 			return retiredNode;
 		}
 		Node subj = te.getSubject();
@@ -2361,14 +2369,21 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						GraphPatternElement gpe = itr.next();
 						if (gpe instanceof TripleElement && !(((TripleElement)gpe).getPredicate() instanceof RDFTypeNode)) {
 							if ((te.getSubject() == null || te.getSubject().equals(((TripleElement)gpe).getSubject()))
-									&& (te.getPredicate() == null || te.getPredicate().equals(((TripleElement)gpe).getPredicate()))
-									&& (te.getObject() == null || te.getObject().equals(((TripleElement)gpe).getObject()))) {
-								if (te.getObject() == null && te.getSubject() == null) {
-									// this is too broad for some cases
-									continue;
+									&& (te.getPredicate() == null || te.getPredicate().equals(((TripleElement)gpe).getPredicate()))) {
+								// first condition
+								if ((te.getObject() == null || te.getObject().equals(((TripleElement)gpe).getObject())) ||
+										// second condition
+										(((TripleElement)gpe).getObject() instanceof VariableNode) &&
+										te.getObject() instanceof ProxyNode && 
+										((ProxyNode)te.getObject()).getProxyFor() instanceof TripleElement &&
+										((TripleElement)((ProxyNode)te.getObject()).getProxyFor()).getSubject() == null) {
+									if (te.getObject() == null && te.getSubject() == null) {
+										// this is too broad for some cases
+										continue;
+									}
+									ProxyNode pn = retiredProxyNodes.get(gpe);
+									return pn.getReplacementNode();
 								}
-								ProxyNode pn = retiredProxyNodes.get(gpe);
-								return pn.getReplacementNode();
 							}
 						}
 					}

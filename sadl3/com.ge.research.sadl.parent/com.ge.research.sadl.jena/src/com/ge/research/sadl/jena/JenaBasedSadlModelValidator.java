@@ -2193,7 +2193,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	}
 
 	private boolean isUnittedQuantity(TypeCheckInfo tci) {
-		if (tci != null) {
+		if (tci != null && tci.getImplicitProperties() == null) {
 			Node tctn = tci.getTypeCheckType();
 			if (tctn instanceof NamedNode && ((NamedNode)tctn).toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 				return true;

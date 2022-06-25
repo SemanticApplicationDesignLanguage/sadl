@@ -154,6 +154,7 @@ class ImpliedExtendedPropertiesTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
+	@Test
 	def void testImpliedPropertyInRule_02() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
@@ -221,6 +222,63 @@ class ImpliedExtendedPropertiesTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
+	def void testImpliedPropertyInRule_03() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+				 uri "http://sadl.org/test1.sadl" alias test1.
+				 
+				 Person is a class described by age with values of type UnittedQuantity.
+				 Adult is a type of Person.
+				 
+				 verified describes UnittedQuantity with values of type boolean.
+				 
+				 UnittedQuantity has impliedProperty verified.
+				 
+				 Rule R1: if p is a Person and age of p >= 18 yrs and age of p is true then p is an Adult.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			{ assertNotNull(jenaModel)
+
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(rules.size == 1)
+//			assertTrue(
+//				processor.compareTranslations(rules.get(0).toString(),
+//					"Rule R1:  if rdf(x, rdf:type, ipt:Person) and rdf(x, ipt:age, v0) and >(v0,18) then rdf(x, rdf:type, ipt:Adult)."))
+			}
+		]
+
+//		var List<ConfigurationItem> configItems = newArrayList
+//		val String[] catHier = newArrayOfSize(1)
+//		catHier.set(0, "Jena")
+//		val ci = new ConfigurationItem(catHier)
+//		ci.addNameValuePair("pModelSpec", "OWL_MEM")
+//		configItems.add(ci)
+//		assertInferencer(sfname, null, configItems) [
+//			for (scr : it) {
+//				println(scr.toString)
+//				assertTrue(scr instanceof SadlCommandResult)
+//				val tr = (scr as SadlCommandResult).results
+//				assertTrue(tr instanceof TestResult)
+//				if ((tr as TestResult).passed) 
+//					println("    passed\n")
+//				else {
+//					println("    failed\n")
+//				}
+//				assertTrue((tr as TestResult).passed)
+//			}
+//		];
+	}
+
+	@Test
 	def void testImpliedPropertyInTest_02() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
@@ -281,6 +339,196 @@ class ImpliedExtendedPropertiesTest extends AbstractSadlPlatformTest {
 		
 		
 	@Test
+	def void testExpandedPropertyInRule_01() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+				uri "http://sadl.org/test3.sadl" alias test3.
+				 
+				ConnectorType is a class described by numberOfProngs with values of type int, 
+					described by maxCurrent with values of type float, 
+					described by referenceVoltable with values of type float.
+				ConnectorType has expandedProperty numberOfProngs.
+				
+				TypeB1 is a ConnectorType, has numberOfProngs 3.
+				TypeB2 is a ConnectorType, has numberOfProngs 3.
+					
+				Connector is a class described by connectorType with values of type ConnectorType.
+				
+				{Socket, Plug} are types of Connector.
+				
+				Rule R1: if p is a Plug and s is a Socket and connectorType of p = connectorType of s then print(p, " is compatible with ", s).
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			{ assertNotNull(jenaModel)
+
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule R1:  if rdf(p, rdf:type, test3:Plug) and rdf(s, rdf:type, test3:Socket) and rdf(p, test3:connectorType, v0) and rdf(v0, test3:numberOfProngs, v1) and rdf(s, test3:connectorType, v2) and rdf(v2, test3:numberOfProngs, v3) and is(v1,v3) then print(p,\" is compatible with \",s)."))
+			}
+		]
+	}
+		
+	@Test
+	def void testImpliedPropertyWithUQInRule_04() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+				 uri "http://sadl.org/test2.sadl" alias test2.
+				 
+				 Person is a class described by age with values of type UnittedQuantity.
+				 Adult is a type of Person.
+				 
+				 Status is a class, can only be one of {Verified, Unverified}.
+				 status describes UnittedQuantity with values of type Status.
+				 
+				 UnittedQuantity has impliedProperty status.
+				 
+				 Rule R1: if p is a Person and age of p >= 18 yrs and age of p is Verified then p is an Adult.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			{ assertNotNull(jenaModel)
+
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule R1:  if rdf(p, rdf:type, test2:Person) and rdf(p, test2:age, v0) and rdf(v0, sadlimplicitmodel:value, v1) and rdf(v0, sadlimplicitmodel:unit, \"yrs\") and >=(v1,18) and rdf(v0, test2:status, test2:Verified) then rdf(p, rdf:type, test2:Adult)."))
+			}
+		]
+	}
+		
+	@Test
+	def void testImpliedPropertyWithUQInRule_05() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+				 uri "http://sadl.org/test2.sadl" alias test2.
+				 
+				 Person is a class described by age with values of type UnittedQuantity.
+				 Adult is a type of Person.
+				 
+				 Status is a class, can only be one of {Verified, Unverified}.
+				 status describes UnittedQuantity with values of type Status.
+				 
+				 UnittedQuantity has impliedProperty status.
+				 
+				 Rule R1: if p is a Person and age of p >= 18 yrs and age of p is Verified then p is an Adult.
+				 
+				 Joan is a Person with age (a UnittedQuantity with ^value 20, with unit "yrs", with status Verified).
+				 
+				 Test: Joan is an Adult.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			{ assertNotNull(jenaModel)
+
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule R1:  if rdf(p, rdf:type, test2:Person) and rdf(p, test2:age, v0) and rdf(v0, sadlimplicitmodel:value, v1) and rdf(v0, sadlimplicitmodel:unit, \"yrs\") and >=(v1,18) and rdf(v0, test2:status, test2:Verified) then rdf(p, rdf:type, test2:Adult)."))
+			}
+		]
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
+	def void testImpliedPropertyWithUQInRule_06() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+				 uri "http://sadl.org/test2.sadl" alias test2.
+				 
+				 Person is a class described by age with values of type UnittedQuantity.
+				 Adult is a type of Person.
+				 
+				 Status is a class, can only be one of {Verified, Unverified}.
+				 status describes UnittedQuantity with values of type Status.
+				 
+				 UnittedQuantity has impliedProperty status.
+				 
+				 Rule R1: if p is a Person and age of p >= 18 yrs and age of p is Verified then p is an Adult.
+				 
+				 Joan is a Person with age (a UnittedQuantity with ^value 20, with unit "yrs", with status Verified).
+				 
+				 Test: Joan is an Adult.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			{ assertNotNull(jenaModel)
+
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule R1:  if rdf(p, rdf:type, test2:Person) and rdf(p, test2:age, v0) and rdf(v0, sadlimplicitmodel:value, v1) and rdf(v0, sadlimplicitmodel:unit, \"yrs\") and >=(v1,18) and rdf(v0, test2:status, test2:Verified) then rdf(p, rdf:type, test2:Adult)."))
+			}
+		]
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
 	def void testExpandedPropertyInTest_01() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
@@ -353,7 +601,7 @@ class ImpliedExtendedPropertiesTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testExpandedPropertyInTest_02() {
+	def void testExpandedPropertyInQuery_01() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''

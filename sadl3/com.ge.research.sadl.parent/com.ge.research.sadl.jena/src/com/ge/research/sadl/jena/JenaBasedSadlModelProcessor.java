@@ -8079,6 +8079,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					return typenode;
 				}
 
+				try {
+					if (isFormOfSomethingIsaClass(expr, (NamedNode)typenode)) {
+						// this is of the form "something is a class" where so return the class (typenode)
+						//	where the something must be an instance or an explicit variable
+						return typenode;
+					}
+				} catch (CircularDefinitionException e) {
+					e.printStackTrace();
+				}
+
 				// create a CRule variable
 				String nvar = getNewVar(expr);
 				VariableNode var = addCruleVariable((NamedNode) typenode, ordNum, nvar, expr, getHostEObject());
@@ -8090,13 +8100,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					processListDeclaration(expr, (NamedNode)typenode);
 				}
 				try {
-					if (expr.eContainer() instanceof BinaryOperation &&
-							((BinaryOperation)expr.eContainer()).getOp().equals("is") &&
-							(((NamedNode)typenode).getNodeType().equals(NodeType.ClassNode) ||
-									((NamedNode)typenode).getNodeType().equals(NodeType.ClassListNode)) &&
-							((BinaryOperation)expr.eContainer()).getLeft() instanceof Name &&
-							(getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.INSTANCE) ||
-							getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.VARIABLE))) {
+					if (isFormOfSomethingIsaClass(expr, (NamedNode)typenode)) {
 						// this is of the form "something is a class" where so return the class (typenode)
 						//	where the something must be an instance or an explicit variable
 						return typenode;
@@ -8174,6 +8178,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} 
 		}
 		return typenode;
+	}
+
+	private boolean isFormOfSomethingIsaClass(Declaration expr, NamedNode typenode) throws CircularDefinitionException {
+		if (expr.eContainer() instanceof BinaryOperation &&
+				((BinaryOperation)expr.eContainer()).getOp().equals("is") &&
+				(typenode.getNodeType().equals(NodeType.ClassNode) ||
+						typenode.getNodeType().equals(NodeType.ClassListNode)) &&
+				((BinaryOperation)expr.eContainer()).getLeft() instanceof Name &&
+				(getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.INSTANCE) ||
+				getDeclarationExtensions().getOntConceptType(((Name)((BinaryOperation)expr.eContainer()).getLeft())).equals(OntConceptType.VARIABLE))) {
+			return true;
+		}
+		return false;
 	}
 
 	private boolean isClassificationDeclaration(Declaration expr) {

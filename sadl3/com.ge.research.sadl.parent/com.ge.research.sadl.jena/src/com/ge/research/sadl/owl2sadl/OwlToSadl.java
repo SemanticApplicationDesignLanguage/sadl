@@ -642,6 +642,7 @@ public class OwlToSadl {
 				"from",
 				"gDay",
 				"has",
+				"different",
 				"described",
 				"--",
 				"always",
@@ -709,7 +710,7 @@ public class OwlToSadl {
 				"Deductions",
 				"time",
 				"gYearMonth");
-	}
+		}
 	
 	/**
 	 * Save the SADL model to the specified file
