@@ -13,16 +13,15 @@
         name="UnittedQuantities">Introduction</a></h2>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
         style="font-family: &quot;Times New Roman&quot;, serif;">Quantitative
-        measurement is an important concept in many modeling problems. A
-        quantitative measure has a numerical <em>value</em> and usually has a <em>unit</em>
-        associated with it, which gives meaning to the number by relating the
-        quantitative value to some standard amount, e.g., <em>16 feet</em>. In
-        many cases, giving only a number is either completely ambiguous or
-        requires that an assumption be made about the unit of measure.
-        Furthermore, derived values often have units associated with them as
-        well. Whether a direct measurement or a derivation therefrom, a value
-        along with its associated unit is what we will refer to as a <em>unitted
-          quantity</em>.<br>
+        data, either measured or computed, is an important concept in many
+        modeling problems. A quantitative data item has a numerical <em>value</em>
+        and usually has a <em>unit</em> associated with it, which gives meaning
+        to the number by relating the quantitative value to some standard
+        amount, e.g., <em>16 feet</em>. In many cases, giving only a number is
+        either completely ambiguous or requires that an assumption be made about
+        the unit of measure. Whether a direct measurement or a computional
+        result, a value along with its associated unit is what we will refer to
+        as a <em>unitted quantity</em>.<br>
       </span></p>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
         style="font-family: &quot;Times New Roman&quot;, serif;">To illustrate,
@@ -94,7 +93,7 @@
         style="font-family: &quot;Times New Roman&quot;, serif;">An observer
         with experience would be able to guess, at least in the context of
         English units, that George's age is 23 years&nbsp; and his weight is 165
-        lbs and that Jim's age is 2 days or 2 months, but not 2 years, and his
+        lbs and that Jim's age is 2 days or 2 months, but not 2 years, since his
         weight is 9.5 lbs. However, for quantitative modeling we would often
         like to avoid the ambiguity by making the units explicit.<br>
       </span></p>
@@ -202,11 +201,11 @@
         style="font-size: 10pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">.</span></p>
     <p> <span style="font-family: &quot;Times New Roman&quot;, serif;">Domain
         models can sub-class UnittedQuantity to create more specific classes of
-        quantitative measures and derivations. This allows modelers to create
-        more complex models of UnittedQuantities, see <a href="http://www.qudt.org/">QUDT</a>
-        as an example. If transitive closure is enabled by the reasoner,
-        instances of all sub-classes of UnittedQuantity should behave in the
-        expected way as they will also be instances of UnittedQuantity.<br>
+        quantitative data. This allows modelers to create more complex models of
+        UnittedQuantities, see <a href="http://www.qudt.org/">QUDT</a> as an
+        example. If transitive closure is enabled by the reasoner, instances of
+        all sub-classes of UnittedQuantity should behave in the expected way as
+        they will also be instances of UnittedQuantity.<br>
       </span></p>
     <p><span style="font-family: &quot;Times New Roman&quot;, serif;">The
         translation of the instance statements above from SADL to OWL is made as
@@ -313,9 +312,9 @@
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><span
         style="font-family: &quot;Times New Roman&quot;, serif;">When a property
         such as <em>age</em> or <em>weight</em> in the examples above is
-        defined and given a range, the range in the OWL model should be
-        consistent with the planned usage. For example, consider this definition
-        of <em>Person</em>.<br>
+        defined and given a range, the range in the SADL model, and therefore in
+        the OWL model, should be consistent with the planned usage. For example,
+        consider this definition of <em>Person</em>.<br>
       </span></p>
     <p style="line-height: 100%; margin-bottom: 0in" align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
       <font color="#000000"> </font><font style="font-size: 9pt" size="2"><font
@@ -366,7 +365,7 @@
       addition, subtraction, multiplication, division, and exponentiation, and
       in comparison operations such as less than, greater than, etc. </p>
     <p> <span style="font-family: &quot;Times New Roman&quot;, serif;">Using a
-        rule to illustrate, and building on the examples above and with <em>UnittedQuantity</em>
+        rule to illustrate, and building on the example above that has <em>UnittedQuantity</em>
         specified as the range of <em>age</em>, consider the following rule.</span></p>
     <p><font color="#800080"><font face="Monospace"><font style="font-size: 10pt"
             size="2">&nbsp;&nbsp;&nbsp; Rule</font></font></font><font color="#000000"><font
@@ -496,11 +495,10 @@
         color="#000000"><font face="Monospace"><font style="font-size: 10pt" size="2">.</font></font></font></p>
     <p style="line-height: 100%; margin-bottom: 0in">In this rule the variable <em>uq</em>
       is of type <em>UnittedQuantity</em>, obtained from the range of <em>age</em>.
-      The <em>unit</em>&nbsp; is <em>years</em> condition ensures that values
-      of <em>age</em> that are in other units of time do not inappropriately
-      fire the rule. The <em>value</em> property is extracted from the
-      UnittedQuantity bound to <em>uq</em> so that it can be used in the
-      numerical comparison. </p>
+      The <em>unit is years</em> condition ensures that values of <em>age</em>
+      that are in other units of time do not inappropriately fire the rule. The
+      <em>value</em> property is extracted from the UnittedQuantity bound to <em>uq</em>
+      so that it can be used in the numerical comparison. </p>
     <p style="line-height: 100%; margin-bottom: 0in"><span style="font-family: &quot;Times New Roman&quot;, serif;">Note
         that for expressions in rules and queries, a limitation of the SADL
         grammar is that the unit designation given immediately following the
