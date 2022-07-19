@@ -28,7 +28,7 @@ public class TestTranslator {
 	}
 
 	@Test
-	public void testTranslateRule() throws TranslationException {
+	public void testTranslateRule_01() throws TranslationException {
 		ITranslator trans = new SWIPrologTranslatorPlugin();
 		OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 		String altUrl = kbroot + "/Shapes/OwlModels/Shapes.owl";
@@ -39,6 +39,19 @@ public class TestTranslator {
 		String stat = trans.translateRule(om, "http://sadl.org/Shapes.owl", rule);
 	}
 
+	
+	@Test
+	public void testTranslateRule_02() throws TranslationException {
+		ITranslator trans = new SWIPrologTranslatorPlugin();
+		OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+		String altUrl = kbroot + "/Likes/OwlModels/test.owl";
+		String format = "RDF/XML";
+		om.read(altUrl, format);
+		Rule rule = new Rule("TestRule");
+		
+		String stat = trans.translateRule(om, "http://sadl.org/test.sadl", rule);
+	}
+	
 	@Ignore
 	@Test
 	public void testTranslateQuery() {

@@ -1,0 +1,22 @@
+ uri "http://sadl.org/test.sadl" alias test.
+ 
+ Person is a class described by likes with values of type Food.
+ Food is a class.
+ {indian, mild, chinese, italian} are types of Food.
+ 
+ Sam is a Person.
+ {dahl,  curry, tandoori, kurma} are instances of indian.
+ {chop_suey, chow_mein, sweet_and_sour} are instances of chinese.
+ {pizza, spagetti} are instances of italian.
+ 
+ {dahl, tandoori, kurma} are instances of mild.
+ 
+ chips is a Food.
+ 
+ Rule R1: if x is a mild and x is a indian then Sam likes x.
+ Rule R2: if x is a chinese then Sam likes x.
+ Rule R3: if x is an italian then Sam likes x.
+ Rule R4: if x is chips then Sam likes x.
+ 
+ Ask: select x where x is an indian and x is a mild.
+ Ask: select x where Sam likes x.

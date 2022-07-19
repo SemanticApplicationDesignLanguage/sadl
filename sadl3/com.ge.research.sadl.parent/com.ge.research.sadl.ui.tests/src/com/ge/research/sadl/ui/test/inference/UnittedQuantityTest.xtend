@@ -102,6 +102,70 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
+	def void testUnittedQuantityInRule_01b() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type UnittedQuantity,
+			 	described by width with values of type UnittedQuantity.
+			 	
+			 MyRect is a Rectangle with width 4.0 ft, with height 2.2 ft.
+			 	
+			 Rule R1: if x is a Rectangle then area of x is height of x * width of x.
+			 
+			 Ask: select s, ar where s is a Rectangle and s has area ar.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"s\",\"ar\"
+\"http://sadl.org/ImpliedPropertiesInRule.sadl#MyRect\",8.8 \"ft*ft\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+	@Test
 	def void testUnittedQuantityInRule_02() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
@@ -1006,4 +1070,59 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
+	@Test
+	def void testExpandUnittedQuantityPreference_01() {
+
+//		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.TRUE.toString));
+//	this should be the default
+
+		createFile('MissingInfo.sadl', '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias uqir.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type UnittedQuantity,
+			 	described by width with values of type UnittedQuantity.
+			 				 	
+			 Rule R1: if x is a Rectangle then area of x is height of x * width of x.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			issues.map[message].forEach[println(it)];
+			for (rule : rules) {
+				println(rule.toString)
+			}
+			assertEquals(0, issues.size)
+			assertEquals("Rule R1:  if rdf(x, rdf:type, uqir:Rectangle) and rdf(x, uqir:height, v0) and rdf(v0, sadlimplicitmodel:value, v2) and rdf(v0, sadlimplicitmodel:unit, v4) and rdf(x, uqir:width, v1) and rdf(v1, sadlimplicitmodel:value, v3) and rdf(v1, sadlimplicitmodel:unit, v4) and *(v0,v1,v5) then rdf(x, uqir:area, v5).", 
+				rules.get(0).toString
+			)
+		]
+
+	}
+	@Test
+	def void testExpandUnittedQuantityPreference_02() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString));
+
+		createFile('MissingInfo.sadl', '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias uqir.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type UnittedQuantity,
+			 	described by width with values of type UnittedQuantity.
+			 				 	
+			 Rule R1: if x is a Rectangle then area of x is height of x * width of x.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			issues.map[message].forEach[println(it)];
+			for (rule : rules) {
+				println(rule.toString)
+			}
+			assertEquals(0, issues.size)
+			assertEquals("Rule R1:  if rdf(x, rdf:type, uqir:Rectangle) and rdf(x, uqir:height, v0) and rdf(x, uqir:width, v1) and *(v0,v1,v2) then rdf(x, uqir:area, v2).", 
+				rules.get(0).toString
+			)
+		]
+
+	}
 }

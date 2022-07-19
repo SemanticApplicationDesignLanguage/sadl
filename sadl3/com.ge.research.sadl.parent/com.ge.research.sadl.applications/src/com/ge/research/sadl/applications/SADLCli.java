@@ -344,6 +344,9 @@ public class SADLCli implements IApplication {
                             sadlPreferences.put(
                                     SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS.getId(),
                                     sadlValue);
+                        } else if (sadlLabel.equals("ExpandUnittedQuantityInTranslation")) {
+                        	sadlPreferences.put(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.getId(),
+                        			sadlValue);
                         } else if (sadlLabel.equals("TypeCheckingWarningOnly")) {
                             sadlPreferences.put(
                                     SadlPreferences.TYPE_CHECKING_WARNING_ONLY.getId(), sadlValue);

@@ -2673,7 +2673,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			patterns.add(be);
 		}
 		patterns = moveTriplesOutOfBuiltin(patterns, be, isRuleThen);
-		if (!getModelProcessor().isIgnoreUnittedQuantities() && isExpandableComparisonOperator(be)) {
+		if (!getModelProcessor().isIgnoreUnittedQuantities() && 
+				(isExpandableComparisonOperator(be) || 
+						getModelProcessor().isExpandUnittedQuantityInTranslation())) {
 			patterns = expandUnittedQuantities(patterns, be, isRuleThen);
 		}
 		return returnNode;

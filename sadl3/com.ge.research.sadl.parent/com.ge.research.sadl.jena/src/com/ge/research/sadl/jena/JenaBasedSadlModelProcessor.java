@@ -530,6 +530,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return expandMissingPatternsInValidation;
 	}
 
+	public void setExpandUnittedQuantityInTranslation(boolean expandUnittedQuantityInTranslation) {
+		this.expandUnittedQuantityInTranslation = expandUnittedQuantityInTranslation;
+	}
+	
+	public boolean isExpandUnittedQuantityInTranslation() {
+		return expandUnittedQuantityInTranslation;
+	}
+	
 	public void setTypeUnsupportedDownstream(boolean useTypeUnsupportedDownstreamWarnings) {
 		this.typeUnsupportedDownstreamWarnings = useTypeUnsupportedDownstreamWarnings;
 	}
@@ -1003,11 +1011,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	//------------PEFERENCES ---------------
 	private boolean ignoreUnittedQuantities;
 
-	private boolean expandUnittedQuantities;
-
 	private boolean useArticlesInValidation;
 	
 	private boolean expandMissingPatternsInValidation;
+	
+	private boolean expandUnittedQuantityInTranslation = true;
 
 	private boolean domainAndRangeAsUnionClasses = true;
 
@@ -16611,6 +16619,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			setExpandMissingPatternsInValidation(Boolean.parseBoolean(expandMissingPatterns));
 			modelProcessorPreferenceMap.put(SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS.getId(), expandMissingPatterns);
 			
+			String expandUnittedQuantityInTranslation = preferenceValues.getPreference(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION);
+			if (expandUnittedQuantityInTranslation == null) {
+				expandUnittedQuantityInTranslation = "true";
+			}
+			setExpandUnittedQuantityInTranslation(Boolean.parseBoolean(expandUnittedQuantityInTranslation));
+			modelProcessorPreferenceMap.put(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.getId(), expandUnittedQuantityInTranslation);
+			
 			String domainAndRangeAsUnionClassesStr = preferenceValues
 					.getPreference(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES);
 			if (domainAndRangeAsUnionClassesStr == null) {
@@ -16635,11 +16650,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			modelProcessorPreferenceMap.put(SadlPreferences.ENABLE_METRICS_COLLECTION.getId(), enableMetricsCollectionStr);
 		}
 		return modelProcessorPreferenceMap;
-	}
-
-	protected void setExpandUnittedQuantities(boolean expandUnittedQuantities) {
-		this.expandUnittedQuantities = expandUnittedQuantities;
-		
 	}
 
 	protected boolean isIgnoreUnittedQuantities() {

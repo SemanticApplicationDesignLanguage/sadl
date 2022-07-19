@@ -24,6 +24,7 @@ import static com.ge.research.sadl.preferences.SadlPreferences.CREATE_DOMAIN_AND
 import static com.ge.research.sadl.preferences.SadlPreferences.DEEP_VALIDATION_OFF;
 import static com.ge.research.sadl.preferences.SadlPreferences.ENABLE_METRICS_COLLECTION;
 import static com.ge.research.sadl.preferences.SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS;
+import static com.ge.research.sadl.preferences.SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION;
 import static com.ge.research.sadl.preferences.SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD;
 import static com.ge.research.sadl.preferences.SadlPreferences.GRAPH_IMPLICIT_ELEMENTS;
 import static com.ge.research.sadl.preferences.SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES;
@@ -225,6 +226,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		addField(new BooleanFieldEditorExt(P_USE_ARTICLES_IN_VALIDATION.getId(), "Use indefinite and definite articles in validation and translation", translationSettings));
 		addField(new BooleanFieldEditorExt(FIND_AND_EXPAND_MISSING_PATTERNS.getId(), "Find and expand missing patterns in translation", translationSettings));
 		addField(new BooleanFieldEditorExt(IGNORE_UNITTEDQUANTITIES.getId(), "Ignore Unitted Quantities (treat as numeric only) during translation", translationSettings));
+		addField(new BooleanFieldEditorExt(EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.getId(), "Expand Unitted Quantities in translation", translationSettings));
 		addField(new BooleanFieldEditorExt(CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(), "Translate multiple-class domain or range as union class (owl:unionOf)", translationSettings));
 
 		// Type Checking Settings

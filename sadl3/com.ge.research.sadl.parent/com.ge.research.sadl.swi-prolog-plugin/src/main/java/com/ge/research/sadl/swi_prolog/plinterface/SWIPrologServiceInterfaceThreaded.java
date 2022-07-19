@@ -12,7 +12,7 @@ public class SWIPrologServiceInterfaceThreaded implements ISWIPrologServiceInter
 	private String rules = "";
 	private int usageCounter = 0;
 	private long sleepTime = 1L;
-	private long timeoutTime = 500L;
+	private long timeoutTime = 5000L;
 	
 	public SWIPrologServiceInterfaceThreaded(){
 		rules = "";
