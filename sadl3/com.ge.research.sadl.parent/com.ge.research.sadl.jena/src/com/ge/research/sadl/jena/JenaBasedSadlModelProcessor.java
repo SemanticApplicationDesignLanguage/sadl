@@ -4588,6 +4588,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			Object result = postProcessTranslationResult(processExpression(expr));
 			if (result instanceof GraphPatternElement) {
 				rule.addIf((GraphPatternElement) result);
+			} else if (result instanceof VariableNode) {
+				// don't do anything with this now, but use it in post-processing
 			} else {
 				addError(SadlErrorMessages.IS_NOT_A.get("If Expression (" + result + ")", "GraphPatternElement"), expr);
 			}
@@ -5044,6 +5046,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					if (varkey != null) {
 						setVariableInDefinition(varkey, null);
+					}
+					else if ((leftVariableDefn instanceof SadlResource) &&
+							getDeclarationExtensions().getOntConceptType((SadlResource) leftVariableDefn).equals(OntConceptType.INSTANCE) &&
+							leftTranslatedDefn instanceof Node) {
+						// the definition is an instance
+						leftVar.addDefinition((Node) leftTranslatedDefn);
+						// we don't want to create anything here, just return this variable
+						return leftVar;
 					}
 					if (leftTranslatedDefn instanceof Object[] && ((Object[]) leftTranslatedDefn).length == 2) {
 						rest = ((Object[]) leftTranslatedDefn)[1];
