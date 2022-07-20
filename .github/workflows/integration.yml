@@ -39,7 +39,7 @@ jobs:
         run: mvn -B package -Dtycho.localArtifacts=ignore --file sadl3/com.ge.research.sadl.parent/pom.xml
 
     - name: Build SADL-Eclipse image
-      uses: docker/build-push-action@v3.0.0
+      uses: docker/build-push-action@v3.1.0
       with:
         context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
         file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
