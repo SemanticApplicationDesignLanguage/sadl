@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target includeMode="feature" name="com.ge.research.sadl.target" sequenceNumber="69">
+<target name="com.ge.research.sadl.target" sequenceNumber="69">
     <locations>
         <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="false" type="InstallableUnit">
             <unit id="org.eclipse.draw2d.feature.group" version="0.0.0"/>
