@@ -926,7 +926,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			String command = "swipl -f " +  runServiceFile; 
 			Runtime.getRuntime().exec(command); //for *NIX
 		} else {
-			throw new IOException("Unknown OS " + getOSIdent() + ", can't kill prolog service");
+			throw new IOException("Unknown OS " + getOSIdent() + ", can't start prolog service");
 		}
 	}
 

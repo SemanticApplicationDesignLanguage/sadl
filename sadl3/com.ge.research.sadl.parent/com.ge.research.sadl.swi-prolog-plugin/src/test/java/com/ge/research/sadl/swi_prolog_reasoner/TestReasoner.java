@@ -1,20 +1,19 @@
 package com.ge.research.sadl.swi_prolog_reasoner;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -24,6 +23,7 @@ import com.ge.research.sadl.reasoner.QueryParseException;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
 import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
+import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin;
 
 public class TestReasoner {
@@ -52,6 +52,9 @@ public class TestReasoner {
 //	@Ignore
 	@Test
 	public void testInitializeReasoner() throws ReasonerNotFoundException, ConfigurationException, TripleNotFoundException {
+		if (!canRunSwiProlog()) {
+			return;
+		}
 		String kbIdentifier = kbroot + "/Shapes/OwlModels";
 		IConfigurationManager cm = new ConfigurationManager(kbIdentifier, null);
 		String prologReasonerClassName = "com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin";
@@ -69,6 +72,9 @@ public class TestReasoner {
 
 	@Test
 	public void testShapes01() throws ConfigurationException, ReasonerNotFoundException, IOException, TripleNotFoundException {
+		if (!canRunSwiProlog()) {
+			return;
+		}
 		String kbIdentifier = kbroot + "/Shapes/OwlModels";
 		IConfigurationManager cm = new ConfigurationManager(kbIdentifier, null);
 		String prologReasonerClassName = "com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin";
@@ -87,6 +93,9 @@ public class TestReasoner {
 
 	@Test
 	public void testGetPredicates() throws ConfigurationException, ReasonerNotFoundException, IOException, TripleNotFoundException, QueryParseException, QueryCancelledException {
+		if (!canRunSwiProlog()) {
+			return;
+		}
 		String kbIdentifier = kbroot + "/Shapes/OwlModels";
 		IConfigurationManager cm = new ConfigurationManager(kbIdentifier, null);
 		String prologReasonerClassName = "com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin";
@@ -163,4 +172,38 @@ public class TestReasoner {
 //			}
 //		}
 	}	
+
+
+	@Test
+	public void testCanExecuteSwiProlog() {
+		if (SadlUtils.isWindows()) {
+			boolean ce = SadlUtils.canExecute("swipl-win");
+			System.out.println("OS: Windows, SWI-Prolog installed: " + ce);
+		}
+		else if (SadlUtils.isMac()) {
+			boolean ce = SadlUtils.canExecute("swipl");
+			System.out.println("OS: Mac, SWI-Prolog installed: " + ce);
+		}
+		else if (SadlUtils.isUnix()) {
+			boolean ce = SadlUtils.canExecute("swipl");
+			System.out.println("OS: unix, SWI-Prolog installed: " + ce);
+		}
+	}
+		
+	private boolean canRunSwiProlog() {
+		boolean ce = false;
+		if (SadlUtils.isWindows()) {
+			ce = SadlUtils.canExecute("swipl-win");
+			System.out.println("OS: Windows, SWI-Prolog installed: " + ce);
+		}
+		else if (SadlUtils.isMac()) {
+			ce = SadlUtils.canExecute("swipl");
+			System.out.println("OS: Mac, SWI-Prolog installed: " + ce);
+		}
+		else if (SadlUtils.isUnix()) {
+			ce = SadlUtils.canExecute("swipl");
+			System.out.println("OS: unix, SWI-Prolog installed: " + ce);
+		}
+		return ce;
+	}
 }
