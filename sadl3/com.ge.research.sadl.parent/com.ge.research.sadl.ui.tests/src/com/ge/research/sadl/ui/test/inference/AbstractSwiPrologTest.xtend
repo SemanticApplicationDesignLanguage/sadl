@@ -11,6 +11,7 @@ import java.util.stream.Stream
 import static java.nio.file.Files.isExecutable;
 import java.nio.file.Files
 import com.ge.research.sadl.reasoner.utils.SadlUtils
+import com.ge.research.sadl.jena.UtilsForJena
 
 abstract class AbstractSwiPrologTest extends AbstractSadlPlatformTest {
 
@@ -59,5 +60,12 @@ static val CONFIG = '''
 		return ce;
 	}
 	
-	
+	def String getPrologFileContent(String pfn) {
+		val projectPath = Paths.get(project.locationURI);
+		val modelFolderPath = projectPath.resolve(UtilsForJena.OWL_MODELS_FOLDER_NAME);
+		val su = new SadlUtils
+		val fn = su.fileUrlToFileName(modelFolderPath.toFile.absolutePath) + "/" + pfn
+		val content = su.fileToString(new File(fn))
+		return content
+	}
 }
