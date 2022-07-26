@@ -18,7 +18,8 @@ Require-Bundle: com.ge.research.sadl.ui,
  com.ge.research.jena,
  com.ge.research.sadl.tests,
  org.eclipse.ui.ide,
- org.eclipse.xtext.ui.testing
+ org.eclipse.xtext.ui.testing,
+ com.ge.research.sadl.swi-prolog-plugin;bundle-version="3.5.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.ui.tests;x-internal=true,
  com.ge.research.sadl.ui.tests.contentassist
