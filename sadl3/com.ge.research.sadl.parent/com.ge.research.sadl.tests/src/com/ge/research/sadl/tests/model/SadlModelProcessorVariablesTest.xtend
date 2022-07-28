@@ -44,7 +44,7 @@ class SadlModelProcessorVariablesTest extends AbstractSADLModelProcessorTest {
 	@Inject Provider<JenaBasedSadlModelProcessor> processorProvider
 	@Inject IPreferenceValuesProvider preferenceProvider
 	
-	@Ignore
+//	@Ignore
 	@Test
 	def void testVariables_01() {
 		val sadlModel = '''
@@ -95,6 +95,51 @@ class SadlModelProcessorVariablesTest extends AbstractSADLModelProcessorTest {
  			assertTrue(processorProvider.get.compareTranslations(rules.get(1).toString(),"Rule R2:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:teaches, y) then rdf(x, ht:knows, y)."))
    			assertTrue(processorProvider.get.compareTranslations(rules.get(2).toString(),"Rule R5:  if rdf(x, ht:knows, y) then rdf(y, ht:knows, x)."))
  			assertTrue(processorProvider.get.compareTranslations(rules.get(3).toString(),"Rule R6:  if rdf(x, rdf:type, ht:Person) and rdf(x, ht:knows, y) then rdf(y, ht:knows, x)."))
+  		]
+	}
+	
+	@Test // "GH-951"
+	def void testVariables_02() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by likes with values of type Food.
+			 Food is a class.
+			 {indian, mild, chinese, italian} are types of Food.
+			 
+			 Sam is a Person.
+			 {dahl,  curry, tandoori, kurma} are instances of indian.
+			 {chop_suey, chow_mein, sweet_and_sour} are instances of chinese.
+			 {pizza, spagetti} are instances of italian.
+			 
+			 {dahl, tandoori, kurma} are instances of mild.
+			 
+			 chips is a Food.
+			 
+			 Rule R1: if x is a mild and x is a indian then Sam likes x.
+			 Rule R2: if x is a chinese then Sam likes x.
+			 Rule R3: if x is an italian then Sam likes x.
+			 Rule R4: if x is chips then Sam likes x.
+			 
+			 Ask: select x where x is an indian and x is a mild.
+			 Ask: select x where Sam likes x.
+ 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues |
+ 			assertNotNull(jenaModel)
+ 			jenaModel.write(System.out, "RDF/XML-ABBREV")
+ 			if (issues.size > 0) {
+ 				for (issue:issues) {
+ 					print(issue.toString)
+ 				}
+ 			}
+ 			assertTrue(issues.size == 0)
+ 			assertTrue(rules.size == 4)
+ 			for(rule:rules) {
+ 				println(rule.toString)
+ 			}
+ 			assertTrue(processorProvider.get.compareTranslations(rules.get(0).toString(),"Rule R1:  if rdf(x, rdf:type, test:mild) and rdf(x, rdf:type, test:indian) then rdf(test:Sam, test:likes, x)."))
+ 			assertTrue(processorProvider.get.compareTranslations(rules.get(1).toString(),"Rule R2:  if rdf(x, rdf:type, test:chinese) then rdf(test:Sam, test:likes, x)."))
+   			assertTrue(processorProvider.get.compareTranslations(rules.get(2).toString(),"Rule R3:  if rdf(x, rdf:type, test:italian) then rdf(test:Sam, test:likes, x)."))
+ 			assertTrue(processorProvider.get.compareTranslations(rules.get(3).toString(),"Rule R4:  then rdf(test:Sam, test:likes, test:chips)."))
   		]
 	}
 	

@@ -14,7 +14,15 @@
 
   <build>
     <plugins>
-      <!-- Fix https://issues.apache.org/jira/browse/MINSTALL-151 -->
+      <!-- Skip deploy, https://issues.apache.org/jira/browse/MINSTALL-151 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+      <!-- Skip install, https://issues.apache.org/jira/browse/MINSTALL-151 -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-install-plugin</artifactId>
@@ -22,10 +30,23 @@
           <skip>true</skip>
         </configuration>
       </plugin>
-      <!-- Do build product and its zip archive -->
+      <!-- Build products and their zip archives -->
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-p2-director-plugin</artifactId>
+        <configuration>
+          <profile>sadl.product</profile>
+          <formats>
+            <linux>zip</linux>
+            <macosx>tar.gz</macosx>
+          </formats>
+          <products>
+            <product>
+              <id>sadl.product</id>
+              <rootFolder>sadl.product</rootFolder>
+            </product>
+          </products>
+        </configuration>
         <executions>
           <execution>
             <id>default-materialize-products</id>
@@ -41,12 +62,13 @@
           </execution>
         </executions>
       </plugin>
-      <!-- Don't build repository and its zip archive -->
+      <!-- Don't build repository zip archive -->
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-p2-repository-plugin</artifactId>
         <configuration>
           <createArtifactRepository>false</createArtifactRepository>
+          <includeAllDependencies>true</includeAllDependencies>
           <skipArchive>true</skipArchive>
         </configuration>
       </plugin>

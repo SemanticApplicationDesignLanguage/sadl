@@ -54,6 +54,18 @@ public enum GeneratedOutputFormat implements GeneratedOutputLocationProvider {
 			return OWLDIR + "/" + extractFileName(inputFilePath) + ".rules";
 		}
 
+	},
+
+	/**
+	 * The prolog rules output.
+	 */
+	PL {
+
+		@Override
+		public String get(String inputFilePath) {
+			return OWLDIR + "/" + extractFileName(inputFilePath) + ".pl";
+		}
+
 	};
 
 	protected String extractFileName(String inputFilePath) {

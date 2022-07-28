@@ -21,12 +21,17 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static java.nio.file.StandardOpenOption.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import jakarta.activation.DataSource;
 
@@ -1553,4 +1558,85 @@ public class SadlUtils {
 	    String s = String.format("%."+numSigFig+"G", BigDecimal.valueOf(val));
 	    return s;
 	}
+
+	/**
+	 * Method to determine if an executable file is on the path, that is can be found and executed.
+	 * @param exeFileName
+	 * @return
+	 */
+	public static boolean canExecute( final String exeFileName ) {
+		final String[] paths = System.getenv( "PATH" ).split( Pattern.quote( File.pathSeparator ) );
+		return Stream.of( paths ).map( Paths::get ).anyMatch(
+				path -> {
+					final Path p = path.resolve( exeFileName );
+					boolean found = false;
+
+					String[] EXTENSIONS;
+					if (isWindows()) {
+						EXTENSIONS = new String[] {"exe", "bat"};
+					}
+					else if (isMac()) {
+						EXTENSIONS = new String[] {""};
+					}
+					else if (isUnix()) {
+						EXTENSIONS = new String[] {""};
+					}
+					else {
+						String os = System.getProperty("os.name").toLowerCase();
+						System.err.println("Unsupported Operating System: " + os);
+						return false;
+					}
+					for( final String extension : EXTENSIONS ) {
+						String pathStr = p.toString() + extension;
+						Path ptt = Paths.get(pathStr);
+						if( java.nio.file.Files.isExecutable( ptt ) ) {
+							found = true;
+							break;
+						}
+					}
+
+					return found;
+				}
+				);
+	}
+
+	/**
+	 * Method to find the name of the operating system
+	 * @return
+	 */
+	public static String getOSIdent() {
+		return System.getProperty("os.name").toLowerCase();
+		
+	}
+	
+	/**
+	 * Method to determine if the OS is Windows
+	 * @return
+	 */
+	public static boolean isWindows() {
+
+		return (getOSIdent().indexOf("win") >= 0);
+
+	}
+
+	/**
+	 * Method to determine if the OS is Mac
+	 * @return
+	 */
+	public static boolean isMac() {
+
+		return (getOSIdent().indexOf("mac") >= 0);
+
+	}
+
+	/**
+	 * Method to determine if the OS is some flavor of Unix
+	 * @return
+	 */
+	public static boolean isUnix() {
+
+		return (getOSIdent().indexOf("nix") >= 0 || getOSIdent().indexOf("nux") >= 0 || getOSIdent().indexOf("aix") > 0 );
+		
+	}
+
 }
