@@ -24,6 +24,7 @@ import org.apache.jena.vocabulary.XSD;
 
 import com.ge.research.sadl.processing.SadlConstants;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -112,6 +113,20 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
 	    		}
 	    		if (getArg(1, args, context).isURI()) {
 	    			throw new BuiltinException(this, context, "Second argument to product is a URI: " + getArg(1, args, context).getURI());
+	    		}
+	    		for (int i = 0; i < args.length - 1; i++) {
+	    	        Node n = getArg(i, args, context);
+	    	        if (n.isLiteral()) {
+	    	        	Object v = n.getLiteralValue();
+	    	        	if (v instanceof Number) {
+	    	        		if (v instanceof BigDecimal) {
+	    	        			if (((BigDecimal)v).scale() > 0) {
+	    	        				Double d = ((BigDecimal)v).doubleValue();
+	    	        				args[i] = Util.makeDoubleNode(d);
+	    	        			}
+	    	        		}
+	    	        	}
+	    	        }
 	    		}
 	     		return super.bodyCall(args, length, context);
         	}

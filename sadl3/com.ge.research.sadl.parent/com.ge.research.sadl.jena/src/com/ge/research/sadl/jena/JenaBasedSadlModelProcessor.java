@@ -2843,6 +2843,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// the gpes must either have a comparison builtin that can return true or false 
 		// or a set of triples that are completely bound.
 		List<VariableNode> unboundVars = new ArrayList<VariableNode>();
+		List<VariableNode> boundVars = new ArrayList<VariableNode>();
 		for (int i = gpes.size() - 1; i >= 0; i--) {
 			GraphPatternElement gpe = gpes.get(i);
 			if (gpe instanceof BuiltinElement && IntermediateFormTranslator.isComparisonBuiltin(((BuiltinElement)gpe).getFuncName())) {
@@ -2850,15 +2851,21 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			else if (gpe instanceof TripleElement) {
 				if (((TripleElement)gpe).getSubject() instanceof VariableNode) {
-					unboundVars.add((VariableNode) ((TripleElement)gpe).getSubject());
+					VariableNode vn = (VariableNode) ((TripleElement)gpe).getSubject();
+					if (!boundVars.contains(vn) && !unboundVars.contains(vn)) {
+						unboundVars.add(vn);
+					}
 				}
 				else if (((TripleElement)gpe).getObject() instanceof VariableNode) {
 					VariableNode vn = (VariableNode) ((TripleElement)gpe).getObject();
 					if (unboundVars.contains(vn)) {
 						unboundVars.remove(vn);
+						boundVars.add(vn);
 					}
 					else {
-						unboundVars.add(vn);
+						if (!boundVars.contains(vn) && !unboundVars.contains(vn)) {
+							unboundVars.add(vn);
+						}
 					}
 				}
 			}
@@ -11193,7 +11200,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if (rng.asResource().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 							org.apache.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
 							if (isIgnoreUnittedQuantities()) {
-								Literal lval = sadlExplicitValueToLiteral((SadlNumberLiteral) value, effectiveRng);
+								Literal lval = sadlExplicitValueToLiteral((SadlNumberLiteral) value, effectiveRng, false);
 								if (lval != null) {
 									return lval;
 								}
@@ -11214,7 +11221,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							}
 						}
 						try {
-							Literal litval = sadlExplicitValueToLiteral(value, (org.apache.jena.rdf.model.Resource) rng);
+							Literal litval = sadlExplicitValueToLiteral(value, (org.apache.jena.rdf.model.Resource) rng, false);
 							rngitr.close();
 							return litval;
 						}
@@ -11224,10 +11231,10 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				}
 				addWarning("Can't find range of property to create typed Literal", value);
-				return sadlExplicitValueToLiteral(value, null);
+				return sadlExplicitValueToLiteral(value, null, false);
 			}
 			else {
-				Literal litval = sadlExplicitValueToLiteral(value, prop);
+				Literal litval = sadlExplicitValueToLiteral(value, prop, false);
 				return litval;
 			}
 		}
@@ -12118,7 +12125,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else {
 			Literal lval;
 			try {
-				lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, type);
+				lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, type, false);
 				getTheJenaModel().add(lastInst, getTheJenaModel().getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI),
 						lval);
 			} catch (JenaProcessorException e) {
@@ -12196,7 +12203,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								EObject pval = propinititr.next().getValue();
 								if (pval instanceof SadlNumberLiteral) {
 									org.apache.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
-									Literal lval = sadlExplicitValueToLiteral((SadlNumberLiteral) pval, effectiveRng);
+									Literal lval = sadlExplicitValueToLiteral((SadlNumberLiteral) pval, effectiveRng, false);
 									if (lval != null) {
 										addInstancePropertyValue(inst, oprop, lval, subjCtx, val);
 									}
@@ -12266,26 +12273,43 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //					addListValues(inst, cls, (SadlValueList) val);  // This was replaced by the code above because the
 																	// list is the value of a triple, not elements of the subject (inst)
 				} else if (val instanceof SadlExplicitValue) {
+					boolean negated = false;
+					if (val instanceof SadlUnaryExpression && 
+							((SadlUnaryExpression)val).getOperator().equals("-")) {
+						val = ((SadlUnaryExpression)val).getValue();
+//						if (val instanceof SadlNumberLiteral) {
+//							BigDecimal minusOne = new BigDecimal(-1);
+////							((SadlNumberLiteral)val).setLiteralNumber(((SadlNumberLiteral)val).getLiteralNumber().multiply(minusOne));
+//						}
+						negated = true;
+					}
 					OntResource rng = oprop.getRange();
 					if (val instanceof SadlNumberLiteral && ((SadlNumberLiteral) val).getUnit() != null) {
+						BigDecimal snlVal = ((SadlNumberLiteral) val).getLiteralNumber();
 						if (!isIgnoreUnittedQuantities()) {
 							String unit = ((SadlNumberLiteral) val).getUnit();
 							if (rng != null) {
 								if (rng.canAs(OntClass.class)
 										&& checkForSubclassing(rng.as(OntClass.class), getTheJenaModel().getOntClass(
 												SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI), val)) {
-									addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng,
-											((SadlNumberLiteral) val).getLiteralNumber(), unit);
+									if (negated) {
+										BigDecimal minusOne = new BigDecimal(-1);
+										snlVal = snlVal.multiply(minusOne);
+										addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng, snlVal, unit);
+									}
+									else {
+										addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng, snlVal, unit);
+									}
 								} else {
 									addError(SadlErrorMessages.UNITTED_QUANTITY_ERROR.toString(), val);
 								}
 							} else {
 								addUnittedQuantityAsInstancePropertyValue(inst, oprop, rng,
-										((SadlNumberLiteral) val).getLiteralNumber(), unit);
+										snlVal, unit);
 							}
 						} else {
 							org.apache.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
-							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, effectiveRng);
+							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, effectiveRng, negated);
 							if (lval != null) {
 								addInstancePropertyValue(inst, oprop, lval, subjCtx, val);
 							}
@@ -12293,7 +12317,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					} else {
 						if (rng == null) {
 							// this isn't really an ObjectProperty--should probably be an rdf:Property
-							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, null);
+							Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, null, negated);
 							addInstancePropertyValue(inst, oprop, lval, subjCtx, val);
 						} else {
 							addError("A SadlExplicitValue is given to an ObjectProperty", val);
@@ -12380,7 +12404,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						e.printStackTrace();
 					}
 				} else if (val instanceof SadlExplicitValue) {
-					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, oprop.getRange());
+					Literal lval = sadlExplicitValueToLiteral((SadlExplicitValue) val, oprop.getRange(), false);
 					if (inst != null && lval != null) {
 						try {
 							lval.getValue();
@@ -12427,7 +12451,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				} else if (val instanceof SadlInstance) {
 					rsrcval = processSadlInstance((SadlInstance) val);
 				} else if (val instanceof SadlExplicitValue) {
-					rsrcval = sadlExplicitValueToLiteral((SadlExplicitValue) val, null);
+					rsrcval = sadlExplicitValueToLiteral((SadlExplicitValue) val, null, false);
 				} else {
 					throw new JenaProcessorException(SadlErrorMessages.UNHANDLED.get(val.getClass().getCanonicalName(),
 							"unable to handle annotation value"));
@@ -12446,7 +12470,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} else if (val instanceof SadlInstance) {
 				rsrcval = processSadlInstance((SadlInstance) val);
 			} else if (val instanceof SadlExplicitValue) {
-				rsrcval = sadlExplicitValueToLiteral((SadlExplicitValue) val, null);
+				rsrcval = sadlExplicitValueToLiteral((SadlExplicitValue) val, null, false);
 			} else {
 				throw new JenaProcessorException(
 						"unable to handle rdf property value of type '" + val.getClass().getCanonicalName() + "')");
@@ -14151,9 +14175,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 				} else {
 					if (prop.canAs(OntProperty.class)) {
-						val = sadlExplicitValueToLiteral(value, prop.as(OntProperty.class).getRange());
+						val = sadlExplicitValueToLiteral(value, prop.as(OntProperty.class).getRange(), false);
 					} else {
-						val = sadlExplicitValueToLiteral(value, null);
+						val = sadlExplicitValueToLiteral(value, null, false);
 					}
 				}
 			} else if (restObj instanceof SadlNestedInstance) {
@@ -14342,10 +14366,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return true;
 	}
 
-	protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value, org.apache.jena.rdf.model.Resource rng)
+	protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value, org.apache.jena.rdf.model.Resource rng, boolean isNegated)
 			throws JenaProcessorException {
 		try {
-			boolean isNegated = false;
 			if (value instanceof SadlUnaryExpression) {
 				String op = ((SadlUnaryExpression) value).getOperator();
 				if (op.equals("-")) {
@@ -15933,7 +15956,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							org.apache.jena.ontology.OntResource range = annProp.canAs(OntProperty.class)
 									? annProp.as(OntProperty.class).getRange()
 									: null;
-							org.apache.jena.rdf.model.Literal annLiteral = sadlExplicitValueToLiteral(annvalue, range);
+							org.apache.jena.rdf.model.Literal annLiteral = sadlExplicitValueToLiteral(annvalue, range, false);
 							getTheJenaModel().add(namedStructure, annProp, annLiteral);
 							if (cntr > 0)
 								sb.append(", ");

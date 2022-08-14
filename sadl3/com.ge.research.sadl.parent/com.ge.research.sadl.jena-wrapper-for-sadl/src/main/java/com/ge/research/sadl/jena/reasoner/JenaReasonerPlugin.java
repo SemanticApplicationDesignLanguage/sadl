@@ -49,6 +49,7 @@ import java.util.Set;
 
 import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.datatypes.xsd.XSDDuration;
 import org.apache.jena.graph.Graph;
@@ -1460,26 +1461,49 @@ public class JenaReasonerPlugin extends Reasoner{
 				else if (n != null && n.isResource()) {
 					StmtIterator sitr = infModel.listStatements(n.asResource(), RDF.type, uqcls);
 					if (sitr.hasNext()) {
-						StringBuilder sb = new StringBuilder();
-						boolean useParens = false;
-						if (n.isURIResource()) {
-							sb.append(n.asResource().getLocalName());
-							sb.append(" (");
-							useParens = true;
-						}
+						// This is an instance of UnittedQuantity--create a SADL Literal
+						
 						StmtIterator vitr = infModel.listStatements(n.asResource(), valprop, (RDFNode)null);
+						Object val = null;
+						RDFDatatype valDt = null;
+						String units = null;
 						if (vitr.hasNext()) {
-							sb.append(vitr.nextStatement().getObject().asLiteral().getLexicalForm());
-							sb.append(" ");
+							Literal obj = vitr.nextStatement().getObject().asLiteral();
+							val = obj.getValue();
+							valDt = obj.getDatatype();
 						}
 						StmtIterator uitr = infModel.listStatements(n.asResource(), unitprop, (RDFNode)null);
 						if (uitr.hasNext()) {
-							sb.append(uitr.nextStatement().getObject().asLiteral().getLexicalForm());
+							units = uitr.nextStatement().getObject().asLiteral().getLexicalForm();
 						}
-						if (useParens) {
-							sb.append(")");
+						LiteralType littype = null;
+						com.ge.research.sadl.model.gp.Literal litval = new com.ge.research.sadl.model.gp.Literal(val, units, littype);
+						if (!(((Resource)n).isAnon()) ) {
+							litval.setUri(((Resource)n).getURI());
 						}
-						temp.add(sb.toString());
+						temp.add(litval);
+						
+						//OLD
+//						StringBuilder sb = new StringBuilder();
+//						boolean useParens = false;
+//						if (n.isURIResource()) {
+//							sb.append(n.asResource().getLocalName());
+//							sb.append(" (");
+//							useParens = true;
+//						}
+//						StmtIterator vitr = infModel.listStatements(n.asResource(), valprop, (RDFNode)null);
+//						if (vitr.hasNext()) {
+//							sb.append(vitr.nextStatement().getObject().asLiteral().getLexicalForm());
+//							sb.append(" ");
+//						}
+//						StmtIterator uitr = infModel.listStatements(n.asResource(), unitprop, (RDFNode)null);
+//						if (uitr.hasNext()) {
+//							sb.append(uitr.nextStatement().getObject().asLiteral().getLexicalForm());
+//						}
+//						if (useParens) {
+//							sb.append(")");
+//						}
+//						temp.add(sb.toString());
 					}
 					else {
 						if (!((Resource)n).isAnon()){
@@ -1572,7 +1596,13 @@ public class JenaReasonerPlugin extends Reasoner{
 			Statement s = stI.next();
 			result.add(new ArrayList<Object>());
 			if (sub == null) {
-				result.get(i).add(s.getSubject().getURI());
+				Resource subrsrc = s.getSubject();
+				if (isUnittedQuantity(subrsrc)) {
+					result.get(i).add(unittedQuantityToLiteral(subrsrc));
+				}
+				else {
+					result.get(i).add(s.getSubject().getURI());
+				}
 			}
 			if (pred == null) {
 				result.get(i).add(s.getPredicate().getURI());
@@ -1587,6 +1617,9 @@ public class JenaReasonerPlugin extends Reasoner{
 						System.err.println("Error (" + t.getMessage() + ") converting literal value to result set");
 						result.get(i).add(((Literal)objval).getLexicalForm());
 					}
+				}
+				else if (objval.isResource() && isUnittedQuantity((Resource)objval)) {
+					result.get(i).add(unittedQuantityToLiteral((Resource)objval));
 				}
 				else if (objval != null && objval.isResource() && !((Resource)objval).isAnon()){
 					result.get(i).add(((Resource)objval).getURI());
@@ -1622,6 +1655,46 @@ public class JenaReasonerPlugin extends Reasoner{
 		return rs;
 	}
 	
+	/**
+	 * Method to convert a Jena Model UnittedQuantity to a SADL Literal with units
+	 * @param n
+	 * @return
+	 */
+	private Object unittedQuantityToLiteral(Resource n) {
+		Property valprop = infModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
+		Property unitprop = infModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
+		StmtIterator vitr = infModel.listStatements(n.asResource(), valprop, (RDFNode)null);
+		if (vitr.hasNext()) {
+			Object val = vitr.next().getObject().asLiteral().getValue();
+			if (val instanceof XSDDateTime) {
+				val = ((XSDDateTime)val).asCalendar().getTime();
+			} 
+			else if (val instanceof XSDDuration) {
+				val = ((XSDDuration)val).toString();
+			}
+			StmtIterator uitr = infModel.listStatements(n.asResource(), unitprop, (RDFNode)null);
+			if (uitr.hasNext()) {
+				com.ge.research.sadl.model.gp.Literal uq = new com.ge.research.sadl.model.gp.Literal(val, uitr.next().getObject().toString(), (LiteralType)null);
+				return uq;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Method to determine if a node in the graph is a UnittedQuantity
+	 * @param n
+	 * @return
+	 */
+	private boolean isUnittedQuantity(Resource n) {
+		Resource uqcls = infModel.getResource(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		StmtIterator sitr = infModel.listStatements(n, RDF.type, uqcls);
+		if (sitr.hasNext()) {
+			sitr.close();
+			return true;
+		}
+		return false;
+	}
 
 	public List<Explanation> explain(String rulename) {
 		startTrace();

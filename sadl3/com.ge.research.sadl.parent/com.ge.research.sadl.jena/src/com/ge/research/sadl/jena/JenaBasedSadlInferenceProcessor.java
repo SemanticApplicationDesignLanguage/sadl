@@ -504,17 +504,14 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 				} else if (((Test)cmd).getSharedPatterns() != null) {
 					List<VariableNode> lhv = ((Test)cmd).getLhsVariables();
 					List<VariableNode> rhv = ((Test)cmd).getRhsVariables();
-					List<VariableNode> allVars = null;
+					List<VariableNode> allVars = new ArrayList<VariableNode>();
 					if (lhv != null) {
-						allVars = lhv;
-						if (rhv != null) {
-							allVars.addAll(rhv);
-						}
+						allVars.addAll(lhv);
 					}
-					else if (rhv != null) {
-						allVars = rhv;
+					if (rhv != null) {
+						allVars.addAll(rhv);
 					}
-				
+					
 					Object obj = convertToComparableObject(
 							getModelFolderPath(), getInitializedReasoner(),
 							((Test)cmd).getSharedPatterns(), allVars);
@@ -1264,6 +1261,22 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			ComparisonType type) {
 		Object lhval = toComparableObject(lhobj);
 		Object rhval = toComparableObject(rhobj);
+		if (isUnittedQuantity(lhval) && isUnittedQuantity(rhval)) {
+			String lhunits = getUnittedQuantityUnits(lhval);
+			String rhunits = getUnittedQuantityUnits(rhval);
+			Object lhUQval = getUnittedQuantityValue(lhval);
+			Object rhUQval = getUnittedQuantityValue(rhval);
+			if (ResultSet.valuesMatch(lhunits, rhunits)) {
+				return doTestComparison(lhUQval, rhUQval, type);
+			}
+			else {
+				TestResult result = new TestResult(false);
+				result.setMsg("Units of left-hand side (" + lhunits + 
+						") and right-hand side (" + rhunits + ") do not match");
+				result.setType(type);
+				return result;
+			}
+		}
 		if (lhval != null && rhval != null) {
 			if (ResultSet.valuesMatch(lhval, rhval)) {
 				if (type.equals(ComparisonType.Eq)
@@ -1323,6 +1336,32 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return createTestFailed(lhobj, lhval, rhobj, rhval, type);
 	}
 
+	private Object getUnittedQuantityValue(Object val) {
+		if (val instanceof Literal) {
+			return ((Literal)val).getValue();
+		}
+		return null;
+	}
+
+	private String getUnittedQuantityUnits(Object val) {
+		if (val instanceof Literal) {
+			return ((Literal)val).getUnits();
+		}
+		return null;
+	}
+
+	/**
+	 * Method to determine if a test comparison value is a UnittedQuantity
+	 * @param lhval
+	 * @return
+	 */
+	private boolean isUnittedQuantity(Object val) {
+		if (val instanceof Literal && ((Literal)val).getUnits() != null) {
+			return true;
+		}
+		return false;
+	}
+
 	private TestResult createTestFailed(Object lhobj, Object lhval,
 			Object rhobj, Object rhval, ComparisonType type) {
 		TestResult result = new TestResult(false);
@@ -1380,6 +1419,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 
 	private Object toComparableObject(Object obj) {
 		if (obj instanceof com.ge.research.sadl.model.gp.Literal) {
+			if (((com.ge.research.sadl.model.gp.Literal)obj).getUnits() != null) {
+				return obj;
+			}
 			return ((com.ge.research.sadl.model.gp.Literal) obj).getValue();
 		} else if (obj instanceof ResultSet) {
 			ResultSet rs = (ResultSet) obj;
