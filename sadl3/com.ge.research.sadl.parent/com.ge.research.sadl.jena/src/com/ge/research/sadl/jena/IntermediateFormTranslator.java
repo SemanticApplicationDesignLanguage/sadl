@@ -694,6 +694,15 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 				}
 			}
+			else if (gpe instanceof Junction) {
+				try {
+					JunctionList jctlst = junctionToList((Junction) gpe);
+					return getUnboundVariables(jctlst);
+				} catch (TranslationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 
 		return vars; 
@@ -898,6 +907,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 
 	public Rule postProcessRule(Rule rule, EObject object) throws TranslationException {
 		clearCruleVariableTypedOutput();
+		variableIsInstanceReplacement(rule);
 		try {
 			// do this first so that the arguments don't change before these are applied
 			addImpliedAndExpandedProperties(rule);
@@ -1006,6 +1016,67 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return rule;
 	}
 	
+	private void variableIsInstanceReplacement(Rule rule) {
+		 List<VariableNode> vars = rule.getRuleVariables();
+		 if (vars != null) {
+			 for (VariableNode var : vars) {
+				 if (var.getDefinitions() != null) {
+					 for (Node vardef : var.getDefinitions()) {
+						 if (vardef instanceof NamedNode &&
+								 ((NamedNode)vardef).getNodeType().equals(NodeType.InstanceNode)) {
+							 // replace all instances of this VariableNode with its definition NamedNode
+							 replaceVariableNodeWithInstanceNamedNode(var, vardef, rule.getGivens());
+							 replaceVariableNodeWithInstanceNamedNode(var, vardef, rule.getIfs());
+							 replaceVariableNodeWithInstanceNamedNode(var, vardef, rule.getThens());
+						 }
+					 }
+				 }
+			 }
+		 }
+		
+	}
+
+	private void replaceVariableNodeWithInstanceNamedNode(VariableNode var, Node vardef, List<GraphPatternElement> gpes) {
+		if (gpes != null) {
+			for (GraphPatternElement gpe : gpes) {
+				replaceVariableNodeWithInstanceNamedNode(var, vardef, gpe);
+			}
+		}
+		
+	}
+
+	private void replaceVariableNodeWithInstanceNamedNode(VariableNode var, Node vardef, GraphPatternElement gpe) {
+		if (gpe instanceof TripleElement) {
+			if (((TripleElement)gpe).getSubject().equals(var)) {
+				((TripleElement)gpe).setSubject(vardef);
+			}
+			if (((TripleElement)gpe).getPredicate().equals(var)) {
+				((TripleElement)gpe).setPredicate(vardef);
+			}
+			if (((TripleElement)gpe).getObject().equals(var)) {
+				((TripleElement)gpe).setObject(vardef);
+			}
+		}
+		else if (gpe instanceof BuiltinElement) {
+			List<Node> args = ((BuiltinElement)gpe).getArguments();
+			for (int idx = 0; idx < args.size(); idx++) {
+				if (args.get(idx).equals(var)) {
+					args.set(idx, vardef);
+				}
+			}
+		}
+		else if (gpe instanceof Junction) {
+			Object lhs = ((Junction)gpe).getLhs();
+			Object rhs = ((Junction)gpe).getRhs();
+			if (lhs instanceof ProxyNode) {
+				replaceVariableNodeWithInstanceNamedNode(var, vardef, ((ProxyNode)((Junction)gpe).getLhs()).getProxyFor());
+			}
+			if (rhs instanceof ProxyNode) {
+				replaceVariableNodeWithInstanceNamedNode(var, vardef, ((ProxyNode)((Junction)gpe).getRhs()).getProxyFor());
+			}
+		}
+	}
+
 	private void addMissingCommonVariables(Rule rule) throws TranslationException {
 		// Find triples with null subjects
 		List<TripleElement> nullSubjects = null;
@@ -3138,7 +3209,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return jct;
 	}
 
-	private List<GraphPatternElement> getAllGPEs(List<GraphPatternElement> list) throws TranslationException {
+	public List<GraphPatternElement> getAllGPEs(List<GraphPatternElement> list) throws TranslationException {
 		List<GraphPatternElement> results = null;
 		for (int i = 0; list != null && i < list.size(); i++) {
 			GraphPatternElement gpe = list.get(i);
@@ -3180,8 +3251,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		for( Node lProxy : lProxies ) {
 			if( lProxy instanceof ProxyNode ) {
 				lResult.add(((ProxyNode)lProxy).getProxyFor());
-			} else {
-				throw new TranslationException("junctionToGraphPatternList called on junction which includes a non-GraphPatternElement; this is not supported.");
+//			} else {
+//				throw new TranslationException("junctionToGraphPatternList called on junction which includes a non-GraphPatternElement; this is not supported.");
 			}
 		}
 		return lResult;

@@ -45,6 +45,7 @@
 
   <!-- Set all properties in one place -->
   <properties>
+    <!-- Settings of Maven plugins -->
     <maven.compiler.release>8</maven.compiler.release>
     <maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
     <maven.compiler.showWarnings>true</maven.compiler.showWarnings>
@@ -52,13 +53,14 @@
     <maven.compiler.target>8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <version.jena>4.4.0</version.jena>
-    <version.log4j>2.17.1</version.log4j>
+    <!-- Versions of multiple dependencies using the same versions -->
+    <version.jena>4.5.0</version.jena>
+    <version.log4j>2.18.0</version.log4j>
     <version.mwe2>2.12.1</version.mwe2>
     <version.sadl>${project.version}</version.sadl>
     <version.slf4j>1.7.36</version.slf4j>
-    <version.surefire>3.0.0-M5</version.surefire>
-    <version.tycho>2.6.0</version.tycho>
+    <version.surefire>3.0.0-M7</version.surefire>
+    <version.tycho>2.7.4</version.tycho>
     <version.xtext>2.25.0</version.xtext>
     <version.xtext-antlr>2.1.1</version.xtext-antlr>
   </properties>
@@ -188,7 +190,7 @@
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.22.0</version>
+        <version>3.23.1</version>
       </dependency>
       <dependency>
         <groupId>org.codehaus.woodstox</groupId>
@@ -208,7 +210,7 @@
       <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
-        <version>1.14.3</version>
+        <version>1.15.2</version>
       </dependency>
       <dependency>
         <groupId>org.pojava</groupId>
@@ -235,7 +237,7 @@
         <plugin>
           <groupId>com.github.ekryd.sortpom</groupId>
           <artifactId>sortpom-maven-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>3.2.0</version>
           <configuration>
             <createBackupFile>false</createBackupFile>
             <indentSchemaLocation>true</indentSchemaLocation>
@@ -272,12 +274,12 @@
         <plugin>
           <groupId>org.apache.felix</groupId>
           <artifactId>maven-bundle-plugin</artifactId>
-          <version>5.1.4</version>
+          <version>5.1.8</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
-          <version>3.1.0</version>
+          <version>3.2.0</version>
           <!-- Clean extra files created by build -->
           <configuration>
             <filesets>
@@ -305,7 +307,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.10.0</version>
+          <version>3.10.1</version>
           <configuration>
             <compilerArgs>
               <arg>-Xlint:all</arg>
@@ -315,17 +317,17 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>3.3.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>3.0.0-M2</version>
+          <version>3.0.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.1.0</version>
           <configuration>
             <rules>
               <requireMavenVersion>
@@ -356,7 +358,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>3.0.0-M1</version>
+          <version>3.0.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -366,7 +368,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.3.2</version>
+          <version>3.4.1</version>
           <configuration>
             <author>false</author>
             <docencoding>UTF-8</docencoding>
@@ -385,25 +387,17 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>3.3.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.10.0</version>
+          <version>3.12.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
           <version>3.2.1</version>
-          <executions>
-            <execution>
-              <id>default-jar-no-fork</id>
-              <goals>
-                <goal>jar-no-fork</goal>
-              </goals>
-            </execution>
-          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -423,7 +417,7 @@
           <?m2e ignore?>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>exec-maven-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.1.0</version>
           <dependencies>
             <dependency>
               <groupId>com.ge.research.sadl</groupId>
@@ -465,7 +459,32 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>versions-maven-plugin</artifactId>
-          <version>2.9.0</version>
+          <version>2.11.0</version>
+        </plugin>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+          <groupId>org.eclipse.m2e</groupId>
+          <artifactId>lifecycle-mapping</artifactId>
+          <version>1.0.0</version>
+          <configuration>
+            <lifecycleMappingMetadata>
+              <pluginExecutions>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-compiler-plugin</artifactId>
+                    <versionRange>[2.7.0,)</versionRange>
+                    <goals>
+                      <goal>validate-classpath</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
+                  </action>
+                </pluginExecution>
+              </pluginExecutions>
+            </lifecycleMappingMetadata>
+          </configuration>
         </plugin>
         <plugin>
           <?m2e ignore?>

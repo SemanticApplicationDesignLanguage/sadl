@@ -1470,6 +1470,9 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  		 Ask: "select ?x ?y where {?x <weight> ?y}".
  		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
  			assertNotNull(issues)
+ 			for (issue : issues) {
+ 				println(issue.toString)
+ 			}
  			assertTrue(issues.size == 1)
  			val issue0 = issues.get(0).toString
  			assertTrue(issue0.startsWith("ERROR:weight is ambiguous; see 'http://sadl.org/model2.sadl#weight' and 'http://sadl.org/model1.sadl#weight'"))
@@ -2326,6 +2329,184 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 				assertTrue(issue.severity.equals(Severity.WARNING))
 				assertTrue(issue.message.contains("Can't find range of property to create typed Literal"))
 			}
+		]
+	}
+	
+	@Test
+	def void testGH_904a() {
+		val sadlModel = '''
+			 uri "http://sadl.org/generalcase.sadl" alias generalcase.
+			 
+			 FinalClass is a class.
+			 pn describes FinalClass with values of type Rn.
+			 Rn is a class.
+			 pm describes Rn with values of type Rm.
+			 Rm is a class.
+			 
+			 pl describes Rm with values of type Rpl.
+			 Rpl is a class.
+			 p1 describes Rpl with values of type Rp1.
+			 Rp1 is a class.
+			 
+			 qk describes Rm with values of type Rqk.
+			 Rqk is a class.
+			 q1 describes Rqk with values of type Rq1.
+			 Rq1 is a class.
+			 
+			 FC1 is a FinalClass.
+			 
+			 Ask: p1 of pl and q1 of qk of pm of pn of FC1.
+			 Ask: p1 of pl of pm of pn of FC1 and q1 of qk of pm of pn of FC1.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			assertTrue(issues.empty)
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 2)
+			for (cmd : cmds) {
+				println(cmd.toString)
+			}
+			assertEquals(cmds.get(0).toString, cmds.get(1).toString)
+		]
+	}
+	
+	@Test
+	def void testGH_904b() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Part is a class described by processing with values of type Processing.
+			 Processing is a class described by temperature with values of type float,
+			 	described by volume with values of type float.
+			 	
+			 part1 is a Part. 	
+			 	
+			 Ask: temperature and volume of the processing of part1.
+			 Ask: temperature of the processing of part1 and volume of the processing of part1.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			assertTrue(issues.empty)
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 2)
+			for (cmd : cmds) {
+				println(cmd.toString)
+			}
+			assertEquals(cmds.get(0).toString, cmds.get(1).toString)
+		]
+	}
+
+	@Test
+	def void testGH_904c() {
+		val sadlModel = '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Part is a class described by processing with values of type Processing.
+			 Processing is a class described by temperature with values of type float,
+			 	described by volume with values of type float.
+			 	
+			 part1 is a Part. 	
+			 	
+			 Ask: the temperature and volume of the processing of part1.
+			 Ask: temperature of the processing of part1 and volume of the processing of part1.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			assertTrue(issues.empty)
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 2)
+			for (cmd : cmds) {
+				println(cmd.toString)
+			}
+			assertEquals(cmds.get(0).toString, cmds.get(1).toString)
+		]
+	}
+
+	@Test
+	def void testGH_904d() {
+		val sadlModel = '''
+			uri "http://sadl.org/test.sadl" alias test.
+			
+			Part is a class described by processing with values of type Process.
+			Process is a class
+			described by processNum with a single value of type string .
+			
+			SubProcess is a type of Process
+			described by temperature with values of type UnittedQuantity
+			described by volume with values of type UnittedQuantity
+			described by pressure with values of type UnittedQuantity .
+			
+			part1 is a Part. 	
+			
+			Ask: temperature and processNum of the processing of part1.
+			Ask: temperature of the processing of part1 and processNum of the processing of part1.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			assertFalse(issues.empty)
+			assertTrue(issues.get(0).toString.startsWith("WARNING:temperature, an object property with domain  http://sadl.org/test.sadl#SubProcess, may, but is not guaranteed to (because it is broader), operate (chained property) with processing, an object property with range  http://sadl.org/test.sadl#Process."))
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 2)
+			for (cmd : cmds) {
+				println(cmd.toString)
+			}
+			assertEquals(cmds.get(0).toString, cmds.get(1).toString)
+		]
+	}
+	
+	@Test
+	def void testGH_904e() {
+		val sadlModel = '''
+			uri "http://sadl.org/test.sadl" alias test.
+			
+			Part is a class described by processing with values of type Process,
+				described by partID with values of type string.
+			Process is a class
+			described by processNum with a single value of type string .
+			
+			SubProcess is a type of Process
+			described by temperature with values of type UnittedQuantity
+			described by volume with values of type UnittedQuantity
+			described by pressure with values of type UnittedQuantity .
+			
+			part1 is a Part with partID "123". 	
+			
+			Ask: temperature of the processing of (a Part with partID "123").
+			Ask: temperature and processNum of the processing of (a Part with partID "123").
+			Ask: temperature of the processing of (a Part with partID "123") and processNum of the processing of (a Part with partID "123").
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			assertFalse(issues.empty)
+			assertTrue(issues.get(0).toString.startsWith("WARNING:temperature, an object property with domain  http://sadl.org/test.sadl#SubProcess, may, but is not guaranteed to (because it is broader), operate (chained property) with processing, an object property with range  http://sadl.org/test.sadl#Process."))
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 3)
+			for (cmd : cmds) {
+				println(cmd.toString)
+			}
+			assertEquals(cmds.get(1).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3))))")
+			assertEquals(cmds.get(2).toString, "select v0 v2 v3 v1 v4 v5 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), and(rdf(v1, test:partID, \"123\"), and(rdf(v1, test:processing, v4), rdf(v4, test:processNum, v5))))))")
+		]
+	}
+	
+	@Test
+	def void testGH_904f() {
+		val sadlModel = '''
+			uri "http://sadl.org/test.sadl" alias test.
+			
+			Part is a class described by processing with values of type Process,
+				described by partID with values of type string.
+			Process is a class
+			described by processNum with a single value of type string .
+			
+			SubProcess is a type of Process
+			described by temperature with values of type UnittedQuantity
+			described by volume with values of type UnittedQuantity
+			described by pressure with values of type UnittedQuantity .
+						
+			Ask: temperature of the processing of (a Part).
+			Ask: temperature and processNum of the processing of (a Part).
+			Ask: temperature of the processing of (a Part) and processNum of the processing of (the Part).
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			assertFalse(issues.empty)
+			assertTrue(issues.get(0).toString.startsWith("WARNING:temperature, an object property with domain  http://sadl.org/test.sadl#SubProcess, may, but is not guaranteed to (because it is broader), operate (chained property) with processing, an object property with range  http://sadl.org/test.sadl#Process."))
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 3)
+			for (cmd : cmds) {
+				println(cmd.toString)
+			}
+			assertEquals(cmds.get(1).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3)))")
+			assertEquals(cmds.get(2).toString, "select v0 v2 v3 v1 v4 v5 where and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), and(rdf(v1, test:processing, v4), rdf(v4, test:processNum, v5))))")
 		]
 	}
 	
