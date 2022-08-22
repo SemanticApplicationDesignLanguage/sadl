@@ -58,7 +58,7 @@
     <version.log4j>2.18.0</version.log4j>
     <version.mwe2>2.12.1</version.mwe2>
     <version.sadl>${project.version}</version.sadl>
-    <version.slf4j>1.7.36</version.slf4j>
+    <version.slf4j>2.0.0</version.slf4j>
     <version.surefire>3.0.0-M7</version.surefire>
     <version.tycho>2.7.4</version.tycho>
     <version.xtext>2.25.0</version.xtext>
