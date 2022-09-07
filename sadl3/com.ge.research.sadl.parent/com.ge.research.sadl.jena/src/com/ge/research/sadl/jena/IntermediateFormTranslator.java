@@ -183,7 +183,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	//      triple will be moved *after* the container and replaced in the container by the 
 	//      *subject* of the triple
 
-	public enum BuiltinUnittedQuantityStatus {SameUnitsRequired, DifferentUnitsOrLeftOnly, LeftUnitsOnly, UnitsNotSupported, StatusUnknown}
+	public enum BuiltinUnittedQuantityStatus {SameUnitsRequired, DifferentUnitsAllowedOrLeftOnly, LeftUnitsOnly, UnitsNotSupported, StatusUnknown}
 	// This enum identifies the categories of BuiltinElements WRT UnittedQuantity arguments.
 
 	class BuiltinElementAndUnits {
@@ -1119,6 +1119,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			while (keyItr.hasNext()) {
 				BuiltinElementAndUnits beau = keyItr.next();
 				BuiltinElement be = beau.getBuiltinElement();
+				if (be.getArguments().size() < 3) {
+					continue;
+				}
 				Node thirdArg = be.getArguments().get(2);
 				Node[] unitVars = beau.getArgUnits();
 				for (GraphPatternElement gpe : rule.getThens()) {
@@ -2279,7 +2282,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			
 		}
 		VariableNode var = new VariableNode(getNewVar());
-		if (bltin.getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME)) {
+		if (bltin.getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME) ||
+				builtinElementWithUnittedQuantityArgReturnsUnittedQuantity(bltin)) {
 			NamedNode uqType = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode);
 			var.setType(modelProcessor.validateNode(uqType));
 
@@ -2863,9 +2867,15 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private List<GraphPatternElement> expandUnittedQuantities(List<GraphPatternElement> patterns, BuiltinElement be,
 			boolean isRuleThen) throws TranslationException {
 		if (be.getArguments() == null || be.getArguments().size() != 2) {
+			// all BuiltinElements of interest are binary at this point (before any 3rd output arg for a math operation is added later)
+			return patterns;
+		}
+		if (be.getArguments().get(0) instanceof Literal && be.getArguments().get(1) instanceof Literal) {
+			// if both args are Literals we don't want to do anything. If the units aren't the same that will be detected later (?? verify with test case ??).
 			return patterns;
 		}
 		BuiltinUnittedQuantityStatus bestatus = getBuiltinElementUQStatus(be);
+		boolean isComparison = isComparisonOperation(be);
 		int beIdx = patterns != null ? patterns.indexOf(be) : -1;
 		if (beIdx >= 0) {
 			// the BuiltinElement be should be in the patterns list--otherwise it is an unexpected error
@@ -2897,7 +2907,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				if (gpe instanceof TripleElement) {
 					Node currentTripleObject = ((TripleElement)gpe).getObject();
 //					if (lhsUQ) {
-						if (currentTripleObject.equals(lhsArg)) {
+						if (currentTripleObject.equals(lhsArg) && !valueTripleAdded(patterns, lhsArg)) {
 							// the lhsArg is obtained from a triple so need to expand to get value and unit
 							newLhsArg = new VariableNode(getNewVar());
 							TripleElement addedTriple1 = new TripleElement(lhsArg, valuePredNode, newLhsArg);
@@ -2973,24 +2983,38 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							toBeRemoved.add(gpe);
 						}
 						else if (isCommonMathOperation((BuiltinElement)gpe)) {
-							// If the output of the math operation is a variable used in the comparison
+							// If the output of the math operation is a variable used in the
 							//	BuiltinElement be, then the unit of the math operation output must also
 							//	be the unit of the other comparison operation argument.
 							String unit = getUnitFromMathOperation((BuiltinElement)gpe);
 							if (unit != null) {
 								List<Node> args = ((BuiltinElement)gpe).getArguments();
-								for (int i = 0; i < args.size() - 1; i++) {
+								for (int i = 0; i <= args.size() - 1; i++) {
 									Node arg = args.get(i);
 									if (arg instanceof Literal && ((Literal)arg).getUnits() != null) {
 										((Literal)arg).setUnits(null);
 									}
 									else if (arg instanceof NamedNode) {
-										VariableNode newArg = new VariableNode(getNewVar());
-										TripleElement addedTriple1 = new TripleElement(arg, valuePredNode, newArg);
-										addNewTriple(newTriples, gpe, addedTriple1);
-										args.set(args.indexOf(arg), newArg);
-										TripleElement addedTriple2 = new TripleElement(arg, unitPredNode, new Literal(unit, null, LiteralType.StringLiteral));
-										addNewTriple(newTriples, addedTriple1, addedTriple2);
+										if (arg instanceof VariableNode && bestatus.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)) {
+//											TripleElement addedTriple2 = new TripleElement(arg, unitPredNode, new Literal(unit, null, LiteralType.StringLiteral));
+//											if (!patterns.contains(addedTriple2)) {
+//												addNewTriple(newTriples, gpe, addedTriple2);
+//											}
+											if (i == 0) {
+												rhsUnits = unit;
+											}
+											else {
+												lhsUnits = unit;
+											}
+										}
+										else {
+											VariableNode newArg = new VariableNode(getNewVar());
+											TripleElement addedTriple1 = new TripleElement(arg, valuePredNode, newArg);
+											addNewTriple(newTriples, gpe, addedTriple1);
+											args.set(args.indexOf(arg), newArg);
+											TripleElement addedTriple2 = new TripleElement(arg, unitPredNode, new Literal(unit, null, LiteralType.StringLiteral));
+											addNewTriple(newTriples, addedTriple1, addedTriple2);
+										}
 									}
 								}
 								if (args.size() > 2 && args.get(2).equals(lhsArg)) {
@@ -3001,7 +3025,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 								}
 							}
 						}
-						if (gpe.equals(be)) {
+						if (gpe.equals(be) && isComparisonOperation(be)) {
 							if (newLhsArg != null) {
 								be.getArguments().set(0, newLhsArg);
 							}
@@ -3047,7 +3071,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						rhsUnitVar = lhsUnitVar;
 					}
 				}
-				else if (bestatus.equals(BuiltinUnittedQuantityStatus.DifferentUnitsOrLeftOnly)){
+				else if (bestatus.equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)){
 					if (lhsUnitVar == null) {
 						lhsUnitVar = new VariableNode(getNewVar());
 					}
@@ -3110,6 +3134,25 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return patterns;
 	}
 
+	/**
+	 * Method to determine if the argument Node is already the subject of a TripleElement in patterns with "value" as the predicate
+	 * @param patterns
+	 * @param arg
+	 * @return
+	 */
+	private boolean valueTripleAdded(List<GraphPatternElement> patterns, Node arg) {
+		Iterator<GraphPatternElement> gpeItr = patterns.iterator();
+		while (gpeItr.hasNext()) {
+			GraphPatternElement gpe = gpeItr.next();
+			if (gpe instanceof TripleElement && ((TripleElement)gpe).getSubject().equals(arg)) {
+				if (((TripleElement)gpe).getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private void addModifiedBuiltinElementAndUnits(BuiltinElement be, Node lhsUnitVar, Node rhsUnitVar) {
 		if (modifiedBuiltinElementsAndUnits == null) {
 			modifiedBuiltinElementsAndUnits = new ArrayList<BuiltinElementAndUnits>();
@@ -3141,7 +3184,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			return BuiltinUnittedQuantityStatus.SameUnitsRequired;
 		}
 		else if (funcType.equals(BuiltinType.Multiply) || funcType.equals(BuiltinType.Divide)) {
-			return BuiltinUnittedQuantityStatus.DifferentUnitsOrLeftOnly;
+			return BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly;
 		}
 		else if (funcType.equals(BuiltinType.Power)) {
 			return BuiltinUnittedQuantityStatus.LeftUnitsOnly;
@@ -3152,6 +3195,43 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		else {
 			return BuiltinUnittedQuantityStatus.StatusUnknown;
 		}
+	}
+	
+	/**
+	 * Method to determine if the returned value of a BuiltinElement with
+	 * UnittedQuantityArgs should return a UnittedQuantity
+	 * @param be -- the BuiltinElement
+	 * @return -- true or false
+	 */
+	private boolean builtinElementWithUnittedQuantityArgReturnsUnittedQuantity(BuiltinElement be) {
+		if (be.getArguments() != null && be.getArguments().size() == 2) {
+			boolean arg0IsUQ = isUnittedQuantity(be.getArguments().get(0));
+			boolean arg1IsUQ = isUnittedQuantity(be.getArguments().get(1));
+			BuiltinType funcType = be.getFuncType();
+			String funcName = be.getFuncName();
+			if (funcType.equals(BuiltinType.Plus) || funcType.equals(BuiltinType.Minus)) {
+				if (arg0IsUQ || arg1IsUQ) {
+					return true;
+				}
+			}
+			else if (isComparisonBuiltin(funcName)) {
+				return false;
+			}
+			else if (funcType.equals(BuiltinType.Multiply) || funcType.equals(BuiltinType.Divide)) {
+				if (arg0IsUQ || arg1IsUQ) {
+					return true;
+				}
+			}
+			else if (funcType.equals(BuiltinType.Power)) {
+				if (arg0IsUQ) {
+					return true;
+				}
+			}
+			else if (funcType.equals(BuiltinType.Modulus)) {
+				return false;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -3310,6 +3390,15 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 */
 	private boolean isCommonMathOperation(BuiltinElement be) {
 		return getModelProcessor().isNumericOperator(be.getFuncName());
+	}
+
+	/**
+	 * Method to determine if BuiltinElement is a comparison operation
+	 * @param be
+	 * @return
+	 */
+	private boolean isComparisonOperation(BuiltinElement be) {
+		return getModelProcessor().isComparisonOperator(be.getFuncName());
 	}
 
 	/**
