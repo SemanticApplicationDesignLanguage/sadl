@@ -207,6 +207,44 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private List<BuiltinElementAndUnits> modifiedBuiltinElementsAndUnits;
 	
 	/**
+	 * Class to contain a new TripleElement and the GraphPatternElement after which it should
+	 * eventually appear.
+	 */
+	class NewTripleAndPredecessor {
+		private TripleElement newTriple;
+		private GraphPatternElement predecessor;
+		
+		public NewTripleAndPredecessor(TripleElement tr, GraphPatternElement pr) {
+			setNewTriple(tr);
+			setPredecessor(pr);
+		}
+
+		TripleElement getNewTriple() {
+			return newTriple;
+		}
+
+		void setNewTriple(TripleElement newTriple) {
+			this.newTriple = newTriple;
+		}
+
+		GraphPatternElement getPredecessor() {
+			return predecessor;
+		}
+
+		void setPredecessor(GraphPatternElement predecessor) {
+			this.predecessor = predecessor;
+		}
+		
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			sb.append(getNewTriple().toDescriptiveString());
+			sb.append(" after ");
+			sb.append(getPredecessor().toDescriptiveString());
+			return sb.toString();
+		}
+	}
+	
+	/**
      * The constructor takes a ModelManager argument
      * @param ontModel 
      * @param modmgr
@@ -2875,7 +2913,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			return patterns;
 		}
 		BuiltinUnittedQuantityStatus bestatus = getBuiltinElementUQStatus(be);
-		boolean isComparison = isComparisonOperation(be);
 		int beIdx = patterns != null ? patterns.indexOf(be) : -1;
 		if (beIdx >= 0) {
 			// the BuiltinElement be should be in the patterns list--otherwise it is an unexpected error
@@ -2901,131 +2938,130 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			TripleElement rhsArgValueTriple = null;
 			String lhsUnits = null;
 			String rhsUnits = null;
-			Map <GraphPatternElement, GraphPatternElement> newTriples = new HashMap<GraphPatternElement, GraphPatternElement>();
-			List<GraphPatternElement> toBeRemoved = new ArrayList<GraphPatternElement>();
+			
+			List<NewTripleAndPredecessor> newTriples = 		// This is a List of NewTripleAndPredecessors containing the new TripleElement
+					new ArrayList<NewTripleAndPredecessor>();	// and the GraphPatternElement it should follow in the completed patterns
+			
+			List<GraphPatternElement> unittedQuantityBuiltinsToBeRemoved = new ArrayList<GraphPatternElement>();
 			for (GraphPatternElement gpe : patterns) {
 				if (gpe instanceof TripleElement) {
 					Node currentTripleObject = ((TripleElement)gpe).getObject();
-//					if (lhsUQ) {
-						if (currentTripleObject.equals(lhsArg) && !valueTripleAdded(patterns, lhsArg)) {
-							// the lhsArg is obtained from a triple so need to expand to get value and unit
+					if (currentTripleObject != null && currentTripleObject.equals(lhsArg)) {
+						// the lhsArg is obtained from a triple so need to expand to get value and unit
+						TripleElement lhsValueTriple = findValueTripleAlreadyAdded(patterns, lhsArg);
+						if (lhsValueTriple == null) {
 							newLhsArg = new VariableNode(getNewVar());
 							TripleElement addedTriple1 = new TripleElement(lhsArg, valuePredNode, newLhsArg);
 							lhsArgValueTriple = addedTriple1;
 							addNewTriple(newTriples, gpe, addedTriple1);
+							// create incomplete triple for unit constraint
+							TripleElement addedTriple2 = new TripleElement(lhsArg, unitPredNode, null);
+							addNewTriple(newTriples, addedTriple1, addedTriple2);
 						}
-						else if (currentTripleObject.equals(rhsArg)) {
-							// the rhsArg is obtained from a triple so need to expand to get value and unit
+						else {
+							newLhsArg = lhsValueTriple.getObject();
+						}
+					}
+					else if (currentTripleObject != null && currentTripleObject.equals(rhsArg)) {
+						// the rhsArg is obtained from a triple so need to expand to get value and unit
+						TripleElement rhsValueTriple = findValueTripleAlreadyAdded(patterns, rhsArg);
+						if (rhsValueTriple == null) {
 							newRhsArg = new VariableNode(getNewVar());
 							TripleElement addedTriple1 = new TripleElement(rhsArg, valuePredNode, newRhsArg);
 							rhsArgValueTriple = addedTriple1;
 							addNewTriple(newTriples, gpe, addedTriple1);
-						} else if (isUnittedQuantity(currentTripleObject) && 
-								!patternsExpandCurrentObject(patterns, currentTripleObject, valuePredNode, unitPredNode)) {					
-							GraphPatternElement referencingGpe = getReferencingGpe(patterns, patterns.indexOf(gpe), currentTripleObject);
-							VariableNode replacementArg = new VariableNode(getNewVar());
-							TripleElement addedTriple1 = new TripleElement(currentTripleObject, valuePredNode, replacementArg);
-							addNewTriple(newTriples,gpe, addedTriple1);
-							// If the output of the math operation is a variable used in the comparison
-							//	BuiltinElement be, then the unit of the math operation output must also
-							//	be the unit of the other comparison operation argument.
-							if (referencingGpe instanceof BuiltinElement && isCommonMathOperation((BuiltinElement)referencingGpe)) {
-								String unit = getUnitFromMathOperation((BuiltinElement)referencingGpe);
-								List<Node> args = ((BuiltinElement)referencingGpe).getArguments();
-								for (int i = 0; i < args.size() - 1; i++) {
-									Node arg = args.get(i);
-									if (arg instanceof Literal && ((Literal)arg).getUnits() != null) {
-										((Literal)arg).setUnits(null);
-									}
-									else if (arg instanceof NamedNode) {
-										args.set(args.indexOf(arg), replacementArg);
-									}
-								}
-								if (unit != null) {
-									TripleElement addedTriple2 = new TripleElement(currentTripleObject, unitPredNode, new Literal(unit, null, LiteralType.StringLiteral));
-									addNewTriple(newTriples, addedTriple1, addedTriple2);
-									if (args.size() > 2 && args.get(2).equals(lhsArg)) {
-										lhsUnits = unit;
-									}
-									else if (args.size() > 2 && args.get(2).equals(rhsArg)) {
-										rhsUnits = unit;
-									}
-								}
-							}
+							// create incomplete triple for unit constraint
+							TripleElement addedTriple2 = new TripleElement(rhsArg, unitPredNode, null);
+							addNewTriple(newTriples, addedTriple1, addedTriple2);
+						}
+						else {
+							newRhsArg = rhsValueTriple.getObject();
+						}
+					} else if (currentTripleObject != null && isUnittedQuantity(currentTripleObject) && 
+							!patternsExpandCurrentObject(patterns, currentTripleObject, valuePredNode, unitPredNode)) {	
+						// This gpe is a TripleElement whose object is a UnittedQuantity which has not yet been expanded in the patterns
+						GraphPatternElement referencingGpe = getReferencingGpe(patterns, patterns.indexOf(gpe), currentTripleObject);
+						VariableNode replacementArg = new VariableNode(getNewVar());
+						TripleElement addedTriple1 = new TripleElement(currentTripleObject, valuePredNode, replacementArg);
+						addNewTriple(newTriples,gpe, addedTriple1);
+						// create incomplete triple for unit constraint
+						TripleElement addedTriple2 = new TripleElement(currentTripleObject, unitPredNode, null);
+						addNewTriple(newTriples, addedTriple1, addedTriple2);						
+						if (referencingGpe != null) {
 							replaceReferencingGpeArg(referencingGpe, currentTripleObject, replacementArg);
 						}
-						else if (isUnittedQuantity(((TripleElement)gpe).getSubject()) && 
-								!patternsExpandCurrentObject(patterns, ((TripleElement)gpe).getSubject(), valuePredNode, unitPredNode)) {
-							Node currentTripleSubject = ((TripleElement)gpe).getSubject();
-							GraphPatternElement referencingGpe = getReferencingGpe(patterns, patterns.indexOf(gpe), currentTripleSubject);
-							VariableNode replacementArg = new VariableNode(getNewVar());
-							TripleElement addedTriple1 = new TripleElement(currentTripleSubject, valuePredNode, replacementArg);
-							addNewTriple(newTriples, gpe, addedTriple1);
+					}
+					else if (isUnittedQuantity(((TripleElement)gpe).getSubject()) && 
+							!patternsExpandCurrentObject(patterns, ((TripleElement)gpe).getSubject(), valuePredNode, unitPredNode)) {
+						// This gpe is a TripleElement whose subject is a UnittedQuantity which has not been expanded in the patterns 
+						Node currentTripleSubject = ((TripleElement)gpe).getSubject();
+						GraphPatternElement referencingGpe = getReferencingGpe(patterns, patterns.indexOf(gpe), currentTripleSubject);
+						VariableNode replacementArg = new VariableNode(getNewVar());
+						TripleElement addedTriple1 = new TripleElement(currentTripleSubject, valuePredNode, replacementArg);
+						addNewTriple(newTriples, gpe, addedTriple1);
+						// create incomplete triple for unit constraint
+						TripleElement addedTriple2 = new TripleElement(currentTripleSubject, unitPredNode, null);
+						addNewTriple(newTriples, addedTriple1, addedTriple2);
+						if (referencingGpe != null) {
 							replaceReferencingGpeArg(referencingGpe, currentTripleSubject, replacementArg);
 						}
-//					}
-//					else if (rhsUQ) {
-//						
-//					}
+					}
 				}
 				else if (gpe instanceof BuiltinElement) {
-//					if (lhsUQ) {
-						if (((BuiltinElement)gpe).getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME)) {
-							List<Node> uqArgs = ((BuiltinElement)gpe).getArguments();
-							if (uqArgs.size() > 2 && uqArgs.get(2).equals(lhsArg)) {
-								newLhsArg = uqArgs.get(0);
-								lhsUnits = SadlUtils.stripQuotes(uqArgs.get(1).toString());
-							}
-							else if (uqArgs.size() > 2 && uqArgs.get(2).equals(rhsArg)) {
-								newRhsArg = uqArgs.get(0);
-								rhsUnits = SadlUtils.stripQuotes(uqArgs.get(1).toString());
-							}
-							toBeRemoved.add(gpe);
+					if (((BuiltinElement)gpe).getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME)) {
+						List<Node> uqArgs = ((BuiltinElement)gpe).getArguments();
+						if (uqArgs.size() > 2 && uqArgs.get(2).equals(lhsArg)) {
+							newLhsArg = uqArgs.get(0);
+							lhsUnits = SadlUtils.stripQuotes(uqArgs.get(1).toString());
 						}
-						else if (isCommonMathOperation((BuiltinElement)gpe)) {
-							// If the output of the math operation is a variable used in the
-							//	BuiltinElement be, then the unit of the math operation output must also
-							//	be the unit of the other comparison operation argument.
-							String unit = getUnitFromMathOperation((BuiltinElement)gpe);
-							if (unit != null) {
-								List<Node> args = ((BuiltinElement)gpe).getArguments();
-								for (int i = 0; i <= args.size() - 1; i++) {
-									Node arg = args.get(i);
-									if (arg instanceof Literal && ((Literal)arg).getUnits() != null) {
-										((Literal)arg).setUnits(null);
-									}
-									else if (arg instanceof NamedNode) {
-										if (arg instanceof VariableNode && bestatus.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)) {
-//											TripleElement addedTriple2 = new TripleElement(arg, unitPredNode, new Literal(unit, null, LiteralType.StringLiteral));
-//											if (!patterns.contains(addedTriple2)) {
-//												addNewTriple(newTriples, gpe, addedTriple2);
-//											}
-											if (i == 0) {
-												rhsUnits = unit;
-											}
-											else {
-												lhsUnits = unit;
-											}
+						else if (uqArgs.size() > 2 && uqArgs.get(2).equals(rhsArg)) {
+							newRhsArg = uqArgs.get(0);
+							rhsUnits = SadlUtils.stripQuotes(uqArgs.get(1).toString());
+						}
+						unittedQuantityBuiltinsToBeRemoved.add(gpe);
+					}
+					else if (isCommonMathOperation((BuiltinElement)gpe)) {
+						// If the output of a math operation is a variable used in the
+						//	BuiltinElement be, then the unit of the math operation output must also
+						//	be the unit of the other comparison operation argument.
+						String unit = getUnitFromMathOperation(patterns, (BuiltinElement)gpe);
+						if (unit != null) {
+							List<Node> args = ((BuiltinElement)gpe).getArguments();
+							for (int i = 0; i <= args.size() - 1; i++) {
+								Node arg = args.get(i);
+								if (arg instanceof Literal && ((Literal)arg).getUnits() != null) {
+									((Literal)arg).setUnits(null);
+								}
+								else if (arg instanceof NamedNode) {
+									if (arg instanceof VariableNode && bestatus.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)) {
+										setMissingUnits(newTriples, arg, new Literal(unit, null, LiteralType.StringLiteral));
+										if (i == 0) {
+											lhsUnits = unit;
 										}
-										else {
-											VariableNode newArg = new VariableNode(getNewVar());
-											TripleElement addedTriple1 = new TripleElement(arg, valuePredNode, newArg);
-											addNewTriple(newTriples, gpe, addedTriple1);
-											args.set(args.indexOf(arg), newArg);
-											TripleElement addedTriple2 = new TripleElement(arg, unitPredNode, new Literal(unit, null, LiteralType.StringLiteral));
-											addNewTriple(newTriples, addedTriple1, addedTriple2);
+										else if (i == 1) {
+											rhsUnits = unit;
 										}
 									}
-								}
-								if (args.size() > 2 && args.get(2).equals(lhsArg)) {
-									lhsUnits = unit;
-								}
-								else if (args.size() > 2 && args.get(2).equals(rhsArg)) {
-									rhsUnits = unit;
+									else {
+										VariableNode newArg = new VariableNode(getNewVar());
+										TripleElement addedTriple1 = new TripleElement(arg, valuePredNode, newArg);
+										addNewTriple(newTriples, gpe, addedTriple1);
+										args.set(args.indexOf(arg), newArg);
+										TripleElement addedTriple2 = new TripleElement(arg, unitPredNode, new Literal(unit, null, LiteralType.StringLiteral));
+										addNewTriple(newTriples, addedTriple1, addedTriple2);
+									}
 								}
 							}
+							if (args.size() > 2 && args.get(2).equals(lhsArg)) {
+								lhsUnits = unit;
+							}
+							else if (args.size() > 2 && args.get(2).equals(rhsArg)) {
+								rhsUnits = unit;
+							}
 						}
-						if (gpe.equals(be) && isComparisonOperation(be)) {
+					}
+					if (gpe.equals(be)) {
+						if (isComparisonOperation(be) || isCommonMathOperation(be)) {
 							if (newLhsArg != null) {
 								be.getArguments().set(0, newLhsArg);
 							}
@@ -3041,91 +3077,67 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 								((Literal)rhsArg).setUnits(null);
 							}
 						}
-//					}
-//					else if (rhsUQ) {
-//						
-//					}
+					}
 				}
 			}
 			if (lhsUnits != null) {
-				TripleElement addedTriple2 = new TripleElement(rhsArg, unitPredNode, new Literal(lhsUnits, null, LiteralType.StringLiteral));
-				addNewTriple(newTriples, rhsArgValueTriple, addedTriple2);
+				Literal lhsUnuitLiteral = new Literal(lhsUnits, null, LiteralType.StringLiteral);
+				updateUnitTripleObject(patterns, newTriples, lhsArg, lhsUnuitLiteral);
+				if (bestatus.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired) && rhsArg instanceof VariableNode) {
+					updateUnitTripleObject(patterns, newTriples, rhsArg, lhsUnuitLiteral);
+				}
 			}
 			if (rhsUnits != null) {
-				TripleElement addedTriple2 = new TripleElement(lhsArg, unitPredNode, new Literal(rhsUnits, null, LiteralType.StringLiteral));
-				addNewTriple(newTriples, lhsArgValueTriple, addedTriple2);
+				Literal rhsUnuitLiteral = new Literal(rhsUnits, null, LiteralType.StringLiteral);
+				updateUnitTripleObject(patterns, newTriples, rhsArg, new Literal(rhsUnits, null, LiteralType.StringLiteral));
+				if (bestatus.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired) && lhsArg instanceof VariableNode) {
+					updateUnitTripleObject(patterns, newTriples, lhsArg, rhsUnuitLiteral);
+				}
 			}
 			if (lhsUnits == null && rhsUnits == null) {
-				Node lhsUnitVar = getUnitVarFromPrevious(patterns, lhsArg, unitPredNode);
-				Node rhsUnitVar = getUnitVarFromPrevious(patterns, rhsArg, unitPredNode);
+				Node lhsUnitVar = getUnitFromPrevious(patterns, lhsArg, valuePredNode, unitPredNode);
+				Node rhsUnitVar = getUnitFromPrevious(patterns, rhsArg, valuePredNode, unitPredNode);
 				if (bestatus.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)) {
-					// we don't know what the units are, but they need to be the same
-					if (lhsUnitVar == null) {
-						lhsUnitVar = rhsUnitVar;
+					if (lhsUnitVar == null && rhsUnitVar == null) {
+						// we don't know what the units are, but they need to be the same
+						VariableNode unitVar = new VariableNode(getNewVar());
+						updateUnitTripleObject(patterns, newTriples, lhsArg, unitVar);
+						updateUnitTripleObject(patterns, newTriples, rhsArg, unitVar);
 					}
-					else if (rhsUnitVar == null) {
-						rhsUnitVar = lhsUnitVar;
+					else if (lhsUnitVar != null) {
+						updateUnitTripleObject(patterns, newTriples, rhsArg, lhsUnitVar);
 					}
-					if (lhsUnitVar == null) {
-						lhsUnitVar = new VariableNode(getNewVar());
-						rhsUnitVar = lhsUnitVar;
+					else if (rhsUnitVar != null) {
+						updateUnitTripleObject(patterns, newTriples, lhsArg, rhsUnitVar);
 					}
 				}
 				else if (bestatus.equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)){
+					// this must be a math operation
 					if (lhsUnitVar == null) {
 						lhsUnitVar = new VariableNode(getNewVar());
 					}
 					if (rhsUQ && rhsUnitVar == null) {
 						rhsUnitVar = new VariableNode(getNewVar());
 					}
+					// cache modified be with units of lhs, rhs
+					updateUnitTripleObject(patterns, newTriples, lhsArg, lhsUnitVar);
+					updateUnitTripleObject(patterns, newTriples, rhsArg, rhsUnitVar);
+					addModifiedBuiltinElementAndUnits(be, lhsUnitVar, rhsUnitVar);
 				}
-				TripleElement addedTriple2 = new TripleElement(lhsArg, unitPredNode, lhsUnitVar);
-				addNewTriple(newTriples, lhsArgValueTriple, addedTriple2);
-				if (rhsUQ) {
-					TripleElement addedTriple3 = new TripleElement(rhsArg, unitPredNode, rhsUnitVar);
-					addNewTriple(newTriples, rhsArgValueTriple, addedTriple3);
-				}
-				// cache modified be with units of lhs, rhs
-				addModifiedBuiltinElementAndUnits(be, lhsUnitVar, rhsUnitVar);
 			}
-			for (GraphPatternElement gpe : toBeRemoved) {
+			for (GraphPatternElement gpe : unittedQuantityBuiltinsToBeRemoved) {
+				if (gpe instanceof BuiltinElement) {
+					fillMissingUnitsInNewTriplesFromUnittedQuantityBuiltins(be, bestatus, newTriples, (BuiltinElement)gpe);
+				}
 				patterns.remove(gpe);
 			}
 
 			if (newTriples != null && newTriples.size() > 0) {
-				Iterator<GraphPatternElement> keyItr = newTriples.keySet().iterator();
+				Iterator<NewTripleAndPredecessor> keyItr = newTriples.iterator();
 				while (keyItr.hasNext()) {
-					GraphPatternElement newTriple = keyItr.next();
-					if (!patterns.contains(newTriple)) {
-						GraphPatternElement predecessor = newTriples.get(newTriple);
-						if (predecessor != null) {
-							int predecessorIdx = patterns.indexOf(predecessor);
-							if (predecessorIdx < 0) {
-								// predecessor apparently hasn't been added yet--find it and add it	
-								GraphPatternElement predecessorSuccessor = newTriples.get(predecessor);
-								int predecessorSuccessorIdx = patterns.indexOf(predecessorSuccessor);
-								beIdx = patterns.indexOf(be);	// latest position
-								if (predecessorSuccessorIdx > beIdx) {
-									patterns.add(beIdx, predecessor);
-								}
-								else {
-									patterns.add(predecessorSuccessorIdx + 1, predecessor);
-								}	
-								predecessorIdx = patterns.indexOf(predecessor);
-							}
-							beIdx = patterns.indexOf(be);	// latest position
-							if (predecessorIdx > beIdx) {
-								patterns.add(beIdx, newTriple);
-							}
-							else {
-								patterns.add(predecessorIdx + 1, newTriple);
-							}
-						}
-						else {
-							System.out.println("What to do here?");
-						}
-					}
-				} 
+					NewTripleAndPredecessor npt = keyItr.next();
+					boolean success = addNewTripleToPatterns(npt, newTriples, patterns, be);
+				}
 			}
 		}
 		else {
@@ -3135,35 +3147,193 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	/**
-	 * Method to determine if the argument Node is already the subject of a TripleElement in patterns with "value" as the predicate
-	 * @param patterns
-	 * @param arg
+	 * Method to use a unittedQuantity BuiltinElement to fill in missing units in new triples
+	 * @param be
+	 * @param bestatus 
+	 * @param newTriples
+	 * @param uqBe
+	 * @throws TranslationException
+	 */
+	private void fillMissingUnitsInNewTriplesFromUnittedQuantityBuiltins(BuiltinElement be, BuiltinUnittedQuantityStatus bestatus, List<NewTripleAndPredecessor> newTriples, BuiltinElement uqBe) throws TranslationException {
+		List<Node> args = uqBe.getArguments();
+		if (args == null || args.size() < 2) {
+			throw new TranslationException("Unexpected unittedQuantity built-in without expected arguments");
+		}
+		Node arg1 = args.get(0);
+		Node arg2 = args.get(1);
+		setMissingUnits(newTriples, arg1, arg2);
+		if (bestatus.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)) {
+			for (Node arg : be.getArguments()) {
+				setMissingUnits(newTriples, arg, arg2);
+			}
+		}
+	}
+
+	/**
+	 * Method to fill in missing units
+	 * @param newTriples
+	 * @param subj
+	 * @param unit
+	 */
+	private void setMissingUnits(List<NewTripleAndPredecessor> newTriples, Node subj, Node unit) {
+		if (newTriples !=  null) {
+			Node valueSubject = null;
+			for (NewTripleAndPredecessor ntp : newTriples) {
+				TripleElement nt = ntp.getNewTriple();
+				if (nt.getSubject().equals(subj) && 
+						nt.getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI)) {
+					if (nt.getObject() == null) {
+						nt.setObject(unit);
+					}
+					else if (!nt.getObject().equals(unit)){
+						System.err.println("Encountered conflicting units: " + nt.toDescriptiveString());
+					}
+				}
+				else if (nt.getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI) &&
+						nt.getObject().equals(subj)) {
+					valueSubject = nt.getSubject();
+				}
+				else if (nt.getSubject().equals(valueSubject) && 
+						nt.getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI)) {
+					if (nt.getObject() == null) {
+						nt.setObject(unit);
+					}
+					else if (!nt.getObject().equals(unit)){
+						System.err.println("Encountered conflicting units: " + nt.toDescriptiveString());
+					}
+				}
+			}
+		}
+		
+	}
+
+	/**
+	 * Method to add a new triple, encapsulated in a NewTripleAndPredecessor instance, to patterns. If the 
+	 * predecessor isn't in patterns then it should be in the newTriples list so recurse
+	 * @param npt -- the NewTripleAndPredecessor instance to be processed
+	 * @param newTriples -- the list of NewTripleAndPredecessor instances being processed
+	 * @param patterns -- the list of GraphPatternElements to which we are adding a new triple
+	 * @param be -- the BuiltinElement for which we are expanding UnittedQuantities
+	 * @return -- true if successful else false
+	 * @throws TranslationException
+	 */
+	private boolean addNewTripleToPatterns(NewTripleAndPredecessor npt, List<NewTripleAndPredecessor> newTriples,
+			List<GraphPatternElement> patterns, BuiltinElement be) throws TranslationException {
+		TripleElement newTriple = npt.getNewTriple();
+		GraphPatternElement predecessor = npt.getPredecessor();
+		if (!patterns.contains(predecessor)) {
+			// the predecessor isn't yet in patterns; try to find it in newTriples
+			NewTripleAndPredecessor predecessorsPredecessor = findPredecessorNTP(newTriples, predecessor);
+			if (predecessorsPredecessor != null) {
+				boolean status = addNewTripleToPatterns(predecessorsPredecessor, newTriples, patterns, be);
+				// now the predecessor should be in patterns
+				if (!patterns.contains(predecessor)) {
+					throw new TranslationException("Unable to find or add predecessor '" + predecessor.toDescriptiveString() + "' to patterns");
+				}
+			}
+		}
+		// patterns contains predecessor
+		int predecessorIdx = patterns.indexOf(predecessor);
+		int beIdx = patterns.indexOf(be);	// latest position
+		if (predecessorIdx > beIdx) {
+			patterns.add(beIdx, newTriple);
+		}
+		else {
+			patterns.add(predecessorIdx + 1, newTriple);
+		}	
+		return true;
+	}
+
+	/**
+	 * Method to find the predecessor for a new TripleElement
+	 * @param newTriples -- the List of new triples and predecessors
+	 * @param newTriple
 	 * @return
 	 */
-	private boolean valueTripleAdded(List<GraphPatternElement> patterns, Node arg) {
-		Iterator<GraphPatternElement> gpeItr = patterns.iterator();
-		while (gpeItr.hasNext()) {
-			GraphPatternElement gpe = gpeItr.next();
-			if (gpe instanceof TripleElement && ((TripleElement)gpe).getSubject().equals(arg)) {
-				if (((TripleElement)gpe).getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI)) {
-					return true;
-				}
+	private NewTripleAndPredecessor findPredecessorNTP(List<NewTripleAndPredecessor> newTriples,
+			GraphPatternElement newTriple) {
+		for (NewTripleAndPredecessor ntp : newTriples) {
+			TripleElement tr = ntp.getNewTriple();
+			if (newTriple instanceof TripleElement &&
+				((TripleElement)tr).getSubject().equals(((TripleElement)newTriple).getSubject()) &&
+				((TripleElement)tr).getPredicate().equals(((TripleElement)newTriple).getPredicate()) &&
+				(((TripleElement)tr).getObject() == null || ((TripleElement)tr).getObject().equals(((TripleElement)newTriple).getObject()))) {
+				return ntp;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Method to find and update a unit triple for a given subject with the given unit Node
+	 * @param patterns 
+	 * @param newTriples
+	 * @param subj
+	 * @param unitNode
+	 * @return
+	 */
+	private boolean updateUnitTripleObject(List<GraphPatternElement> patterns, List<NewTripleAndPredecessor> newTriples, Node subj,
+			Node unitNode) {
+		Iterator<NewTripleAndPredecessor> itr = newTriples.iterator();
+		while (itr.hasNext()) {
+			NewTripleAndPredecessor ntp = itr.next();
+			TripleElement tr = ntp.getNewTriple();
+			if (tr.getSubject().equals(subj) && 
+					tr.getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI)) {
+				tr.setObject(unitNode);
+				return true;
+			}
+		}
+		for (GraphPatternElement gpe : patterns) {
+			if (gpe instanceof TripleElement && 
+					((TripleElement)gpe).getSubject().equals(subj) && 
+					((TripleElement)gpe).getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI)) {
+				((TripleElement)gpe).setObject(unitNode);
+				return true;
 			}
 		}
 		return false;
 	}
 
-	private void addModifiedBuiltinElementAndUnits(BuiltinElement be, Node lhsUnitVar, Node rhsUnitVar) {
+	/**
+	 * Method to determine if the argument Node is already the subject of a TripleElement in patterns with "value" as the predicate
+	 * @param patterns
+	 * @param arg
+	 * @return -- the TripleElement found, if any
+	 */
+	private TripleElement findValueTripleAlreadyAdded(List<GraphPatternElement> patterns, Node arg) {
+		Iterator<GraphPatternElement> gpeItr = patterns.iterator();
+		while (gpeItr.hasNext()) {
+			GraphPatternElement gpe = gpeItr.next();
+			if (gpe instanceof TripleElement && ((TripleElement)gpe).getSubject().equals(arg)) {
+				if (((TripleElement)gpe).getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI)) {
+					return (TripleElement)gpe;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Method to add a BuiltinElement with the LHS unit Node and RHS unit Node for latter retrieval
+	 * @param be -- the BuiltinElement to remember
+	 * @param lhsUnitNode -- its LHS unit Node
+	 * @param rhsUnitNode -- its RHS unit Node
+	 */
+	private void addModifiedBuiltinElementAndUnits(BuiltinElement be, Node lhsUnitNode, Node rhsUnitNode) {
 		if (modifiedBuiltinElementsAndUnits == null) {
 			modifiedBuiltinElementsAndUnits = new ArrayList<BuiltinElementAndUnits>();
 		}
 		Node[] units = new Node[2];
-		units[0] = lhsUnitVar;
-		units[1] = rhsUnitVar;
+		units[0] = lhsUnitNode;
+		units[1] = rhsUnitNode;
 		BuiltinElementAndUnits mbeau = new BuiltinElementAndUnits(be, units);
 		modifiedBuiltinElementsAndUnits.add(mbeau);
 	}
 	
+	/** Method to retrieve the remembered list of BuiltinElements and unit Nodes
+	 * @return
+	 */
 	private List<BuiltinElementAndUnits> getModifiedBuiltinElementsAndUnits() {
 		return modifiedBuiltinElementsAndUnits;
 	}
@@ -3237,40 +3407,69 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	/**
 	 * Method to find the unit of a variable from the patterns GraphPatternElement List.
 	 * @param patterns
-	 * @param rhsArg
+	 * @param target
 	 * @param unitPredNode
 	 * @return
 	 */
-	private Node getUnitVarFromPrevious(List<GraphPatternElement> patterns, Node rhsArg,
-			NamedNode unitPredNode) {
+	private Node getUnitFromPrevious(List<GraphPatternElement> patterns, Node target,
+			NamedNode valuePredNode, NamedNode unitPredNode) {
 		for (GraphPatternElement gpe : patterns) {
 			if (gpe instanceof TripleElement) {
-				if (((TripleElement)gpe).getSubject() != null && ((TripleElement)gpe).getSubject().equals(rhsArg) &&
+				if (((TripleElement)gpe).getSubject() != null && ((TripleElement)gpe).getSubject().equals(target) &&
 						((TripleElement)gpe).getPredicate().equals(unitPredNode)) {
-					return ((TripleElement)gpe).getObject();
+					Node unit = ((TripleElement)gpe).getObject();
+					if (unit != null) {
+						return unit;
+					}
 				}
+			}
+		}
+		List<Node> thingsWithSameUnits = new ArrayList<Node>();
+		for (GraphPatternElement gpe : patterns) {
+			if (gpe instanceof BuiltinElement && 
+					getBuiltinElementUQStatus((BuiltinElement) gpe).equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)){
+				List<Node> args = ((BuiltinElement)gpe).getArguments();
+				if (args.contains(target)) {
+					for (Node arg : args) {
+						if (!arg.equals(target)) {
+							thingsWithSameUnits.add(arg);
+						}
+					}
+				}
+			}
+			else if (gpe instanceof TripleElement) {
+				if (((TripleElement)gpe).getObject() != null && ((TripleElement)gpe).getObject().equals(target)
+						&& ((TripleElement)gpe).getPredicate().equals(valuePredNode)) {
+					thingsWithSameUnits.add(((TripleElement)gpe).getSubject());
+				}
+			}
+		}
+		for (Node su : thingsWithSameUnits) {
+			Node indirect = getUnitFromPrevious(patterns, su, valuePredNode, unitPredNode);
+			if (indirect != null) {
+				return indirect;
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * Method to determine if the patterns List contains already contains an expansion of the currentTripleObject UnittedQuantity
+	 * Method to determine if the patterns List already contains an expansion of the given UnittedQuantity node
 	 * @param patterns
-	 * @param currentTripleObject
+	 * @param node
 	 * @param valuePredNode
 	 * @param unitPredNode
 	 * @return
 	 */
-	private boolean patternsExpandCurrentObject(List<GraphPatternElement> patterns, Node currentTripleObject, NamedNode valuePredNode, NamedNode unitPredNode) {
+	private boolean patternsExpandCurrentObject(List<GraphPatternElement> patterns, Node node, NamedNode valuePredNode, NamedNode unitPredNode) {
 		boolean valueTripleFound = false;
 		boolean unitTripleFound = false;
 		for (GraphPatternElement gpe : patterns) {
 			if (gpe instanceof TripleElement) {
-				if (((TripleElement)gpe).getPredicate().equals(valuePredNode)) {
+				if (((TripleElement)gpe).getPredicate().equals(valuePredNode) && ((TripleElement)gpe).getSubject().equals(node)) {
 					valueTripleFound = true;
 				}
-				else if (((TripleElement)gpe).getPredicate().equals(unitPredNode)) {
+				else if (((TripleElement)gpe).getPredicate().equals(unitPredNode) && ((TripleElement)gpe).getSubject().equals(node)) {
 					unitTripleFound = true;
 				}
 				if (valueTripleFound && unitTripleFound) {
@@ -3287,8 +3486,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @param predecessorGpe
 	 * @param addedTriple1
 	 */
-	private void addNewTriple(Map<GraphPatternElement, GraphPatternElement> newTriples, GraphPatternElement predecessorGpe, TripleElement tripleToAdd) {
-		newTriples.put(tripleToAdd, predecessorGpe);
+	private void addNewTriple(List<NewTripleAndPredecessor> newTriples, GraphPatternElement predecessorGpe, TripleElement tripleToAdd) {
+		newTriples.add(new NewTripleAndPredecessor(tripleToAdd, predecessorGpe));
 	}
 
 	/**
@@ -3302,7 +3501,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		for (int i = startingAtIndex + 1; i < patterns.size(); i++) {
 			GraphPatternElement gpe = patterns.get(i);
 			if (gpe instanceof TripleElement) {
-				if (((TripleElement)gpe).getObject().equals(node)) {
+				if (((TripleElement)gpe).getObject() != null &&
+						((TripleElement)gpe).getObject().equals(node)) {
 					return gpe;
 				}
 				else if (((TripleElement)gpe).getSubject().equals(node)) {
@@ -3350,10 +3550,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 
 	/**
 	 * Method to compute unit of result of common math operation for Literal arguments
+	 * @param patterns 
 	 * @param be
 	 * @return
 	 */
-	private String getUnitFromMathOperation(BuiltinElement be) {
+	private String getUnitFromMathOperation(List<GraphPatternElement> patterns, BuiltinElement be) {
 		String fn = be.getFuncName();
 		String arg1Unit = null;
 		String arg2Unit = null;
@@ -3364,6 +3565,23 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (be.getArguments().get(1) instanceof Literal &&
 				((Literal)be.getArguments().get(1)).getUnits() != null) {
 			arg2Unit = ((Literal)be.getArguments().get(1)).getUnits();
+		}
+		if (arg1Unit == null && arg2Unit == null) {
+			for (GraphPatternElement gpe : patterns) {
+				if (gpe instanceof TripleElement && 
+						((TripleElement)gpe).getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI)) {
+					if (((TripleElement)gpe).getSubject().equals(be.getArguments().get(0))) {
+						if (((TripleElement)gpe).getObject() instanceof Literal) {
+							arg1Unit = ((Literal)((TripleElement)gpe).getObject()).getValue().toString();
+						}
+					}
+					if (((TripleElement)gpe).getSubject().equals(be.getArguments().get(1))) {
+						if (((TripleElement)gpe).getObject() instanceof Literal) {
+							arg2Unit = ((Literal)((TripleElement)gpe).getObject()).getValue().toString();
+						}
+					}
+				}
+			}
 		}
 		if (fn.equals("+") || fn.equals("-") ) {
 			if (arg1Unit != null) {
