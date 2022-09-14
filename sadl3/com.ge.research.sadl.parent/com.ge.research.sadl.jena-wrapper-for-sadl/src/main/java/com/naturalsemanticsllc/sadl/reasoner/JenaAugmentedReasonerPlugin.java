@@ -43,12 +43,7 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.InfModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-//<<<<<<< HEAD
-//import org.apache.jena.rdf.model.ModelGetter;
 import org.apache.jena.rdf.model.RDFWriterI;
-//=======
-//import org.apache.jena.rdf.model.RDFWriter;
-//>>>>>>> GH-808
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.reasoner.Derivation;
 import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;

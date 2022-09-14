@@ -41,7 +41,6 @@ import java.util.Map.Entry;
 import java.util.ServiceLoader;
 import java.util.StringTokenizer;
 
-import org.apache.jena.ext.xerces.util.XMLChar;
 import org.apache.jena.ontology.OntDocumentManager;
 import org.apache.jena.ontology.OntDocumentManager.ReadFailureHandler;
 import org.apache.jena.ontology.OntModel;
@@ -61,6 +60,7 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.util.FileUtils;
+import org.apache.jena.util.XMLChar;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
