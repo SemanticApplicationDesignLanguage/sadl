@@ -3305,7 +3305,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		Iterator<GraphPatternElement> gpeItr = patterns.iterator();
 		while (gpeItr.hasNext()) {
 			GraphPatternElement gpe = gpeItr.next();
-			if (gpe instanceof TripleElement && ((TripleElement)gpe).getSubject().equals(arg)) {
+			if (gpe instanceof TripleElement && 
+					((TripleElement)gpe).getSubject() != null &&
+					((TripleElement)gpe).getSubject().equals(arg)) {
 				if (((TripleElement)gpe).getPredicate().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI)) {
 					return (TripleElement)gpe;
 				}
@@ -3413,6 +3415,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 */
 	private Node getUnitFromPrevious(List<GraphPatternElement> patterns, Node target,
 			NamedNode valuePredNode, NamedNode unitPredNode) {
+		if (target instanceof Literal) {
+			return null;
+		}
 		for (GraphPatternElement gpe : patterns) {
 			if (gpe instanceof TripleElement) {
 				if (((TripleElement)gpe).getSubject() != null && ((TripleElement)gpe).getSubject().equals(target) &&
