@@ -55,7 +55,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Versions of multiple dependencies using the same versions -->
     <version.jena>4.6.1</version.jena>
-    <version.log4j>2.18.0</version.log4j>
+    <version.log4j>2.19.0</version.log4j>
     <version.mwe2>2.12.1</version.mwe2>
     <version.sadl>${project.version}</version.sadl>
     <version.slf4j>2.0.1</version.slf4j>
