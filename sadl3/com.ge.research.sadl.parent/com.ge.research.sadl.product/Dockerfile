@@ -4,9 +4,9 @@
 
 ARG BUILDKIT_INLINE_CACHE=1
 
-# Base our image on Ubuntu 20.04 with latest Temurin JDK 11 build
+# Base our image on Ubuntu 22.04 with latest Temurin JDK 17 build
 
-FROM eclipse-temurin:11.0.13_8-jdk-focal
+FROM eclipse-temurin:17.0.4.1_1-jdk
 
 # Install packages needed to run SADL
 
@@ -19,7 +19,7 @@ RUN apt-get update -qq \
 
 # Copy SADL into our image
 
-COPY --chown=sadl:sadl target/products/sadl.product/linux/gtk/x86_64/ /app/
+COPY --chown=sadl:sadl target/products/sadl.product/linux/gtk/x86_64/sadl.product/ /app/
 
 # Run SADL as the sadl user, not as root
 
