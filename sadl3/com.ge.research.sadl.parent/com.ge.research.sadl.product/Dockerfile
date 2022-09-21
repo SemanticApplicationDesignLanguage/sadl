@@ -6,7 +6,7 @@ ARG BUILDKIT_INLINE_CACHE=1
 
 # Base our image on Ubuntu 22.04 with latest Temurin JDK 17 build
 
-FROM eclipse-temurin:17.0.4.1_1-jdk
+FROM eclipse-temurin:17.0.4_8-jdk
 
 # Install packages needed to run SADL
 
