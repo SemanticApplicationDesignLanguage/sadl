@@ -6,7 +6,7 @@ ARG BUILDKIT_INLINE_CACHE=1
 
 # Base our image on Ubuntu 20.04 with latest Temurin JDK 11 build
 
-FROM eclipse-temurin:11.0.13_8-jdk-focal
+FROM eclipse-temurin:17.0.4_8-jdk-focal
 
 # Install packages needed to run SADL
 
