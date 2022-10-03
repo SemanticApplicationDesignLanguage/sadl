@@ -55,10 +55,10 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Versions of multiple dependencies using the same versions -->
     <version.jena>4.6.1</version.jena>
-    <version.log4j>2.18.0</version.log4j>
+    <version.log4j>2.19.0</version.log4j>
     <version.mwe2>2.12.1</version.mwe2>
     <version.sadl>${project.version}</version.sadl>
-    <version.slf4j>2.0.0</version.slf4j>
+    <version.slf4j>2.0.2</version.slf4j>
     <version.surefire>3.0.0-M7</version.surefire>
     <version.tycho>2.7.5</version.tycho>
     <version.xtext>2.25.0</version.xtext>
@@ -363,7 +363,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.2.2</version>
+          <version>3.3.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

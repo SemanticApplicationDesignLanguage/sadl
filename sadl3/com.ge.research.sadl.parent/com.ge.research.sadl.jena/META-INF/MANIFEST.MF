@@ -50,7 +50,8 @@ Require-Bundle: com.ge.research.jena,
  org.eclipse.emf.ecore,
  org.eclipse.equinox.common,
  org.eclipse.xtext,
- org.eclipse.xtext.builder
+ org.eclipse.xtext.builder,
+ org.slf4j.api
 Import-Package: jakarta.activation
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Automatic-Module-Name: com.ge.research.sadl.jena

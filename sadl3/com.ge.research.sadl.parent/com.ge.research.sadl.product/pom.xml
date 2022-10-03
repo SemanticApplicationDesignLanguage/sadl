@@ -38,7 +38,7 @@
           <profile>sadl.product</profile>
           <formats>
             <linux>zip</linux>
-            <macosx>tar.gz</macosx>
+            <macosx>zip</macosx>
           </formats>
           <products>
             <product>
