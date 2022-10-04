@@ -140,6 +140,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	public static final String RANGE = "range";
 	public static final String SELF = "self";
 	private static final String EXPLICIT_VALUE = "explicit value";
+	private static final String UNITTED_QUANTITY = "unitted quantity";
 	public static final String RESTRICTED_TO = "restriction to";
 	private static final String INSTANCE_OF_CLASS = "instance of class";
 	public static final String INSTANCE_OF_LIST = "instance of typed list of type";
@@ -825,7 +826,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			
 			TypeCheckInfo rightTypeCheckInfo = null;
 			try {
-				rightTypeCheckInfo = getType(rightExpression);
+				if (SadlASTUtils.isUnitExpression(rightExpression)) {
+					// make the type that of the predicate
+					rightTypeCheckInfo = new TypeCheckInfo(new ConceptName(((NamedNode)leftTypeCheckInfo.getTypeCheckType()).getURI(), 
+							getModelProcessor().nodeTypeToConceptType(((NamedNode)leftTypeCheckInfo.getTypeCheckType()).getNodeType())));
+					rightTypeCheckInfo.setTypeCheckType(leftTypeCheckInfo.getTypeCheckType());
+					rightTypeCheckInfo.setTypeToExprRelationship(UNITTED_QUANTITY);
+				}
+				else {
+					rightTypeCheckInfo = getType(rightExpression);
+				}
 				if (getModelProcessor().isConjunction(op) || getModelProcessor().isDisjunction(op)) {
 					// this can be treated as a boolean only (maybe even larger criteria?)
 					if(rightTypeCheckInfo != null && rightTypeCheckInfo.getImplicitProperties() != null) {
@@ -2196,6 +2206,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (tci != null && tci.getImplicitProperties() == null) {
 			Node tctn = tci.getTypeCheckType();
 			if (tctn instanceof NamedNode && ((NamedNode)tctn).toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+				return true;
+			}
+			else if (tci.getTypeToExprRelationship() != null && tci.getTypeToExprRelationship().equals(UNITTED_QUANTITY)) {
 				return true;
 			}
 		}
@@ -6389,11 +6402,21 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return true;	// this is OK
 		}
 		TypeCheckInfo valType;
-		if (predType.getTypeCheckType() instanceof NamedNode &&
-				(((NamedNode)predType.getTypeCheckType()).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI) ||
+		if (predType.getTypeCheckType() instanceof NamedNode) {
+			if ((((NamedNode)predType.getTypeCheckType()).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI) ||
 						((NamedNode)predType.getTypeCheckType()).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI))) {
-			valType = new TypeCheckInfo(new ConceptName(((NamedNode)predType.getTypeCheckType()).getURI()));
-			valType.setTypeCheckType(predType.getTypeCheckType());
+				valType = new TypeCheckInfo(new ConceptName(((NamedNode)predType.getTypeCheckType()).getURI()));
+				valType.setTypeCheckType(predType.getTypeCheckType());
+			}
+			else if (val instanceof SadlNumberLiteral && ((SadlNumberLiteral)val).getUnit() != null) {
+				// make the type that of the predicate
+				valType = new TypeCheckInfo(new ConceptName(((NamedNode)predType.getTypeCheckType()).getURI(),
+						getModelProcessor().nodeTypeToConceptType(((NamedNode)predType.getTypeCheckType()).getNodeType())));
+				valType.setTypeCheckType(predType.getTypeCheckType());
+			}
+			else {
+				valType = getType(val);
+			}
 		}
 		else {
 			valType = getType(val);
