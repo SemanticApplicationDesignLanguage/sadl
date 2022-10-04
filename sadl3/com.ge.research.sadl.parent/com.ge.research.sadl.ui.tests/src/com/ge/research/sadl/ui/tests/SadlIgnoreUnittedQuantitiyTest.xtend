@@ -134,5 +134,70 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 				"Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2).")
 		]
 	}
+	
+	@Test
+	def void testIgnoreUnitsInSadl5() {
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString));
+
+		createFile('OntologyWithUnittedQuantity.sadl', '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by age with values of type int.
+			 
+			 George is a Person with age 25 years. 
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (!issues.empty) {
+				for (issue : issues) {
+					println(issue.toString)
+				}
+			}
+			assertTrue(issues.empty)
+		]
+	}
+
+	@Test
+	def void testIgnoreUnitsInSadl6() {
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString));
+
+		createFile('OntologyWithUnittedQuantity.sadl', '''
+				 uri "http://sadl.org/test2.sadl" alias test2.
+				 
+				 Person is a class described by age with values of type UnittedQuantity.
+				 
+				 George is a Person with age 25 years.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (!issues.empty) {
+				for (issue : issues) {
+					println(issue.toString)
+				}
+			}
+			assertTrue(issues.empty)
+		]
+	}
+
+	@Test
+	def void testIgnoreUnitsInSadl7() {
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString));
+
+		createFile('OntologyWithUnittedQuantity.sadl', '''
+			 uri "http://sadl.org/test3.sadl" alias test3.
+			 
+			 TimeSpan is a type of UnittedQuantity.
+			 
+			 Person is a class described by age with values of type TimeSpan.  
+			 
+			 George is a Person with age 25 years.
+ 		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (!issues.empty) {
+				for (issue : issues) {
+					println(issue.toString)
+				}
+			}
+			assertTrue(issues.empty)
+		]
+	}
 
 }

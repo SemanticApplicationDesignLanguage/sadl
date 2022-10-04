@@ -6413,6 +6413,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				valType.setTypeCheckType(predType.getTypeCheckType());
 			}
 			else if (val instanceof SadlNumberLiteral && ((SadlNumberLiteral)val).getUnit() != null && 
+					!getModelProcessor().isIgnoreUnittedQuantities() &&
 					declarationExtensions.getOntConceptType(pred).equals(OntConceptType.CLASS_PROPERTY)) {
 				// make the type that of the predicate if
 				//	1. there are units on the number and

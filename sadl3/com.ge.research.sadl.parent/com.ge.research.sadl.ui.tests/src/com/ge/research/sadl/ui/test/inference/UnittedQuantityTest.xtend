@@ -1188,6 +1188,81 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
+	def void testUnittedQuantityInTest_05() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/TestUQSubclass.sadl" alias testuqsubclass.
+			 
+			 Person is a class described by weight with values of type Weight,
+			 	described by age with values of type TimeSpan.
+			 
+			 Weight is a type of UnittedQuantity.
+			 TimeSpan is a type of UnittedQuantity.
+			 
+			 Adult is a type of Person.
+			 
+			 Rule AdultRule: if p is a Person and p has age >= 18 years then p is an Adult. 
+			 
+			 George is a Person with age 23 years, with weight 165 lbs.
+			 
+			 Jim is a Person with age 2 days, with weight 9.5 lbs.
+			 
+			 George is a Person with age (a TimeSpan with ^value 23, with unit "years"), 
+			 	with weight (a Weight with ^value 165, with unit "lbs").
+			 	
+			 Jim is a Person with age (a TimeSpan with ^value 2, with unit "days"), 
+			 	with weight (a Weight with ^value 9.5, with unit "lbs").
+			 
+			 Test: George is an Adult.
+ 	    ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
 	def void testExpandUnittedQuantityPreference_01() {
 
 //		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.TRUE.toString));
