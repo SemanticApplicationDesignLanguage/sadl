@@ -11304,14 +11304,20 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// value and make the property an owl:DatatypeProperty
 		// TODO this should probably work for any declared subclass of UnittedQuantity
 		// and associated value restriction?
-		if (isIgnoreUnittedQuantities() && rngResource != null && rngResource.isURIResource()
-				&& rngResource.canAs(OntClass.class)
-				&& rngResource.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
-			org.apache.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
-			rngNode = effectiveRng;
-			rngResource = null;
-			getTheJenaModel().remove(prop, RDF.type, OWL.ObjectProperty);
-			getTheJenaModel().add(prop, RDF.type, OWL.DatatypeProperty);
+		try {
+			if (isIgnoreUnittedQuantities() && rngResource != null && rngResource.isURIResource()
+					&& rngResource.canAs(OntClass.class)
+					&& (rngResource.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)
+						|| (classIsSubclassOfCached(rngResource.as(OntClass.class), getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI), true, null))	)
+					) {
+				org.apache.jena.rdf.model.Resource effectiveRng = getUnittedQuantityValueRange();
+				rngNode = effectiveRng;
+				rngResource = null;
+				getTheJenaModel().remove(prop, RDF.type, OWL.ObjectProperty);
+				getTheJenaModel().add(prop, RDF.type, OWL.DatatypeProperty);
+			}
+		} catch (CircularDependencyException e) {
+			addError("Unexpected error checking for subclass of UnittedQuantity--is it missing from the SadlImplicitModel?", context);
 		}
 
 		RDFNode propOwlType = null;

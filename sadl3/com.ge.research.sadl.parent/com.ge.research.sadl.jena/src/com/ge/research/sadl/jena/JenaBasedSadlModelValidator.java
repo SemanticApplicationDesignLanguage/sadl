@@ -2060,6 +2060,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		else {
 			TypeCheckInfo tci = new TypeCheckInfo(uqcn, tctype, this, expression);
+			if (expression instanceof SadlNumberLiteral) {
+				String val = ((SadlNumberLiteral)expression).getLiteralNumber().toString();
+				tci.setAdditionalInformation(val + " " + unit + ", ");
+			}
 			tci.setTypeToExprRelationship(unit);
 			return tci;
 		}
@@ -6408,8 +6412,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				valType = new TypeCheckInfo(new ConceptName(((NamedNode)predType.getTypeCheckType()).getURI()));
 				valType.setTypeCheckType(predType.getTypeCheckType());
 			}
-			else if (val instanceof SadlNumberLiteral && ((SadlNumberLiteral)val).getUnit() != null) {
-				// make the type that of the predicate
+			else if (val instanceof SadlNumberLiteral && ((SadlNumberLiteral)val).getUnit() != null && 
+					declarationExtensions.getOntConceptType(pred).equals(OntConceptType.CLASS_PROPERTY)) {
+				// make the type that of the predicate if
+				//	1. there are units on the number and
+				//	2. the predicate is an ObjectProperty (expects a UnittedQuantity value)
 				valType = new TypeCheckInfo(new ConceptName(((NamedNode)predType.getTypeCheckType()).getURI(),
 						getModelProcessor().nodeTypeToConceptType(((NamedNode)predType.getTypeCheckType()).getNodeType())));
 				valType.setTypeCheckType(predType.getTypeCheckType());
