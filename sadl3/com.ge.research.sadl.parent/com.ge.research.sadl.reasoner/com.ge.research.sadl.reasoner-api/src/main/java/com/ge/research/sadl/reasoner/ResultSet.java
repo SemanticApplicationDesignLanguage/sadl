@@ -511,9 +511,16 @@ public class ResultSet {
 				Double dbl = Double.parseDouble(possibleNumber);
 				StringBuilder sb = new StringBuilder(possibleNumber);
 				String rest = val.substring(spidx + 1);
-				sb.append(" \"");
-				sb.append(rest.toString().replaceAll("\"", "\"\""));
-				sb.append("\"");
+				boolean isQuoted = isDoubleQuoted(rest, "\\");
+				if (!isQuoted) {
+					sb.append(" \"");
+					sb.append(rest.toString().replaceAll("\"", "\"\""));
+					sb.append("\"");
+				}
+				else {
+					sb.append(" ");
+					sb.append(rest);
+				}
 				return sb.toString();
 			}
 			catch (Exception e) {
@@ -524,6 +531,22 @@ public class ResultSet {
 		return null;
 	}
 
+	/**
+	 * Method to determine if a string, which may be padded with white space, is double quoted but
+	 * checks to make sure an ending quote isn't escaped.
+	 * @param s
+	 * @return
+	 */
+	public static boolean isDoubleQuoted(String s, String delim) {
+		String sp = s.trim();
+		
+		if (sp.startsWith("\"") && sp.endsWith("\"") && 
+				(!sp.endsWith(delim + "\"") || sp.endsWith(delim + delim + "\""))) {
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Method to determine if a string contains whitespace of double quotes
 	 * @param str

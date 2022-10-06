@@ -831,7 +831,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					rightTypeCheckInfo = new TypeCheckInfo(new ConceptName(((NamedNode)leftTypeCheckInfo.getTypeCheckType()).getURI(), 
 							getModelProcessor().nodeTypeToConceptType(((NamedNode)leftTypeCheckInfo.getTypeCheckType()).getNodeType())));
 					rightTypeCheckInfo.setTypeCheckType(leftTypeCheckInfo.getTypeCheckType());
-					rightTypeCheckInfo.setTypeToExprRelationship(UNITTED_QUANTITY);
+					if (!getModelProcessor().isIgnoreUnittedQuantities()) {
+						rightTypeCheckInfo.setTypeToExprRelationship(UNITTED_QUANTITY);
+					}
+					else {
+						rightTypeCheckInfo.setTypeToExprRelationship(EXPLICIT_VALUE);
+					}
 				}
 				else {
 					rightTypeCheckInfo = getType(rightExpression);

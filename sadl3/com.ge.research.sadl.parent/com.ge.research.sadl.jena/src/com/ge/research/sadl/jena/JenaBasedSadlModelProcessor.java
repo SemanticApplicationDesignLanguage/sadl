@@ -2336,6 +2336,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					
 					getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
 					testtrans = getIfTranslator().postProcessExpressionStatement(testtrans, element);
+					if (testtrans instanceof Junction) {
+						testtrans = getIfTranslator().junctionToList((Junction)testtrans);
+					}
 					Object expanded = getIfTranslator().expandProxyNodes(testtrans, false, true);
 					if (expanded instanceof List<?>) {
 						if (((List<?>)expanded).size() == 1) {
@@ -9292,7 +9295,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		com.ge.research.sadl.model.gp.Literal unitLiteral = new com.ge.research.sadl.model.gp.Literal();
 		unitLiteral.setValue(unit);
-		if (!(valarg instanceof Node || valarg instanceof GraphPatternElement)) {
+		if (valarg instanceof NamedNode) {
+			// this is the kind of error that happens with invalid syntax that makes a construct that appears like a unitted quantity
+//			addError("Invalid syntax", expr);	// this will get reported elsewhere as a warning
+			return valarg;
+		}
+		else if (!(valarg instanceof Node || valarg instanceof GraphPatternElement)) {
 			// this is the kind of error that happens with invalid syntax that makes a construct that appears like a unitted quantity
 			addError("Invalid syntax", expr);
 			return valarg;

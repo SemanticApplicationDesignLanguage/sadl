@@ -1263,6 +1263,183 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
+	def void testUnittedQuantityInTest_06() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test3.sadl" alias test3.
+			 
+			 Person is a class described by age with values of type int, described by weight with values of type float.
+			 
+			 George is a Person with weight 156.9.
+			 
+			 Test: weight of George > 150 lbs.
+ 	    ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
+	def void testUnittedQuantityInTest_07() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test3.sadl" alias test3.
+			 
+			 Person is a class described by age with values of type UnittedQuantity, described by weight with values of type UnittedQuantity.
+
+			 George is a Person with weight 156.9 lbs.
+			 
+			 Test: weight of George > 150 lbs.
+ 	    ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
+	def void testUnittedQuantityInTest_08() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/test3.sadl" alias test3.
+			 
+			 Person is a class described by age with values of type UnittedQuantity, described by weight with values of type UnittedQuantity.
+
+			 George is a Person with weight 156.9 lbs.
+			 
+			 Test: George has weight w and w > 150 lbs.
+ 	    ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+		
+	@Test
 	def void testExpandUnittedQuantityPreference_01() {
 
 //		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.TRUE.toString));
