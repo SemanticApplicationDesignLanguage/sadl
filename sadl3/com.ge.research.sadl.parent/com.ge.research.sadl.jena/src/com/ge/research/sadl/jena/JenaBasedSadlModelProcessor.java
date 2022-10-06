@@ -14779,7 +14779,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		this.cancelIndicator = cancelIndicator;
 	}
 
-	protected String getModelName() {
+	public String getModelName() {
 		return modelName;
 	}
 
@@ -15273,7 +15273,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return modelFolderPathname == null && isSyntheticUri(resource);
 	}
 
-	protected IConfigurationManagerForIDE getConfigMgr() {
+	public IConfigurationManagerForIDE getConfigMgr() {
 		return configMgr;
 	}
 

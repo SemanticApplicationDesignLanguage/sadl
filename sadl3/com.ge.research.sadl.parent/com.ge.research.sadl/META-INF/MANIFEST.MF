@@ -45,7 +45,8 @@ Export-Package: com.ge.research.sadl,
  com.ge.research.sadl.scoping,
  com.ge.research.sadl.services,
  com.ge.research.sadl.utils,
- com.ge.research.sadl.validation
+ com.ge.research.sadl.validation,
+ com.naturalsemantics.sadl.processing
 Import-Package: jakarta.activation,
  org.apache.log4j
 Automatic-Module-Name: com.ge.research.sadl
