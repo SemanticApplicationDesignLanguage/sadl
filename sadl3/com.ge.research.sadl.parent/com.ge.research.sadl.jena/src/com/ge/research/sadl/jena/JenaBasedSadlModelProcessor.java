@@ -16821,5 +16821,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		cachedJenaResource.put(key, jenaResource);
 	}
+
+	@Override
+	public boolean isUnittedQuantity(String uri) {
+		OntClass cls = getTheJenaModel().getOntClass(uri);
+		if (cls != null) {
+			OntClass uQCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+			if (uQCls != null && (cls.equals(uQCls) || cls.hasSuperClass(uQCls, false))) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 }

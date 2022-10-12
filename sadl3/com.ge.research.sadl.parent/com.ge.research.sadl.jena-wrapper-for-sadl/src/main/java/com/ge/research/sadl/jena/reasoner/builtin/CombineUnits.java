@@ -18,6 +18,8 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.impl.LiteralLabelFactory;
@@ -60,34 +62,25 @@ public class CombineUnits extends CancellableBuiltin {
          *  4) the Node_RuleVariable used to return the combined units
          */
         
-		StringBuilder sb = new StringBuilder();
         Node n1 = getArg(0, args, context);
         Node n2 = getArg(1, args, context);
         Node n3 = getArg(2, args, context);
-        if (n2.isLiteral()) {
-           Object v = n2.getLiteralValue();
-           sb.append(v.toString());
+        if (!n2.isLiteral()) {
+ 			throw new BuiltinException(this, context, "Expected 2nd argument of combineUnits to be a literal but was: " + n2.toString());
         }
-        else {
-			throw new BuiltinException(this, context, "Expected 2nd argument of combineUnits to be a leteral but was: " + n2.toString());
+        if (!n1.isLiteral()) {
+			throw new BuiltinException(this, context, "Expected 1st argument of combineUnits to be a literal but was: " + n1.toString());
         }
-        if (n1.isLiteral()) {
-           Object v = n1.getLiteralValue();
-           sb.append(v.toString());
+        if (!n3.isLiteral()) {
+			throw new BuiltinException(this, context, "Expected 3rd argument of combineUnits to be a literal but was: " + n3.toString());
         }
-        else {
-			throw new BuiltinException(this, context, "Expected 1st argument of combineUnits to be a leteral but was: " + n1.toString());
-        }
-        if (n3.isLiteral()) {
-           Object v = n3.getLiteralValue();
-           sb.append(v.toString());
-        }
-        else {
-			throw new BuiltinException(this, context, "Expected 3rd argument of combineUnits to be a leteral but was: " + n3.toString());
-        }
-	
-//        System.out.println("builtin product assigning value: " + sum);
-		Node combinedUnits = NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral( sb.toString() ));
+        String units;
+		try {
+			units = Utils.combineUnits(n1, n2, n3);
+		} catch (Exception e) {
+			throw new BuiltinException(this, context, "Failed to combine units (" + n1.toString() + ", " + n2.toString() + ", " + n3.toString() + "): " + e.getMessage());
+		} 
+		Node combinedUnits = NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral( units ));
        	return env.bind(args[length - 1], combinedUnits);
         
     }

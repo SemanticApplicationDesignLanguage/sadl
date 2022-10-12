@@ -107,7 +107,8 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
                	return env.bind(args[length - 1], prod);
         	}
         	else {
-	    		// this is just the normal case implemented by HP Labs (standard Jena)
+	    		// this is just the normal case implemented by HP Labs (standard Jena) (except Jena doesn't handle
+        		//	BigDecimal so we convert BigDecimal to Double before making the call)
 	    		if (getArg(0, args, context).isURI()) {
 	    			throw new BuiltinException(this, context, "First argument to product is a URI: " + getArg(0, args, context).getURI());
 	    		}
@@ -154,7 +155,7 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
             	}
             	else {
 	            	nProd = multiplyList(nProd, nodeLst, context);
-	            	if (nProd instanceof Float || nProd instanceof Double) {
+	            	if (nProd instanceof Float || nProd instanceof Double || nProd instanceof BigDecimal) {
 	            		prod = Util.makeDoubleNode(nProd.doubleValue());
 	            	}
 	            	else if (nProd instanceof Integer) {
@@ -193,7 +194,7 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
 	        		lst.add(getArg(i, args, context));
 	        	}
 	        	nProd = multiplyList(nProd, lst, context);
-	           	if (nProd instanceof Float || nProd instanceof Double) {
+	           	if (nProd instanceof Float || nProd instanceof Double || nProd instanceof BigDecimal) {
 	        		prod = Util.makeDoubleNode(nProd.doubleValue());
 	        	}
 	        	else if (nProd instanceof Integer) {

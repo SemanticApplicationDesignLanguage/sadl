@@ -252,6 +252,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		//General Settings
 		store.setDefault(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(), true);
 		store.setDefault(SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED.getId(), true);
+		store.setDefault(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.getId(), false);
 		store.setDefault(SadlPreferences.GRAPH_RENDERER_CLASS.getId(), SadlPreferences.GRAPH_RENDERER_CLASS.getDefaultValue());
 //		store.setDefault(RAEConstants.ANALYSIS_TIMEOUT,"600");
 //		store.setDefault(RAEConstants.RUN_PARTIAL_ANALYSIS,false);

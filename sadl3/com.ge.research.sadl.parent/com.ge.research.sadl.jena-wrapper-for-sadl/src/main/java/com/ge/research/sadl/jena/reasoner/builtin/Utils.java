@@ -19,6 +19,8 @@
 package com.ge.research.sadl.jena.reasoner.builtin;
 
 import java.io.InvalidObjectException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -513,4 +515,19 @@ public class Utils {
     public static synchronized Node makeXSDDateTimeNode(XSDDateTime value) {
     	return NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(value));
     }
+
+	public static String combineUnits(Node n1, Node n2, Node n3) throws ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		String className = System.getProperty("ISadlUnittedQuantityHandle.combineUnits");
+		Class<?> c = Class.forName(className);
+		Class<?> partypes[] = new Class[3];
+		partypes[0] = Node.class;
+		partypes[1] = Node.class;
+		partypes[2] = Node.class;
+		Method meth = c.getMethod("combineUnits", partypes);
+		Object arglist[] = new Object[3];
+		arglist[0] = n1;
+		arglist[1] = n2;
+		arglist[2] = n3;
+		return meth.invoke(null, arglist).toString();
+	}
 }

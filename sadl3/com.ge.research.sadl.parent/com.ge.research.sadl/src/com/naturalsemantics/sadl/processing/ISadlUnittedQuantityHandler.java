@@ -19,6 +19,8 @@ package com.naturalsemantics.sadl.processing;
 
 import java.util.List;
 
+import org.apache.jena.graph.Node;
+
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Rule;
@@ -26,6 +28,12 @@ import com.ge.research.sadl.reasoner.TranslationException;
 
 public interface ISadlUnittedQuantityHandler {
 
+	/*
+	 * Methods used in translation of statements containing references to UnittedQuantity when 
+	 * the SADL preference "Expand Unitted Quantities in translation" is checked.
+	 *  
+	 */
+	
 	/**
 	 * Method to add any combineUnits and there exists constructs to the rule at the end of rule processing.
 	 * @param rule
@@ -49,5 +57,11 @@ public interface ISadlUnittedQuantityHandler {
 	 * Method to reset the instance of ISadlUnittedQuantityHandler for a new rule, query, or test.
 	 */
 	abstract void reset();
-
+	
+	/*
+	 * Methods used in inference (called by Jena built-in functions) when
+	 * the SADL preference "Expand Unitted Quantities in translation" is not checked
+	 * are invoked by Java reflection so the methods are in the specific implementation classes.
+	 */
+	
 }

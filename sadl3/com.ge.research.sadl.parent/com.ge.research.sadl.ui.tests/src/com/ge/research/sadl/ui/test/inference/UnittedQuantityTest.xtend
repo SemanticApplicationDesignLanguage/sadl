@@ -681,6 +681,66 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
+	def void testUnittedQuantityInRule_09() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/testUQTimesNumber.sadl" alias testuqtimesnumber.
+			 
+			 Shape is a class described by perimeter with values of type UnittedQuantity.
+			 
+			 Rectangle is a type of Shape described by height with values of type UnittedQuantity, described by width with values of type UnittedQuantity.
+			 
+			 Rule PerimeterOfRect: if x is a Rectangle then perimeter of x is (height of x + width of x) * 2. 
+			 
+			 MyRect is a Rectangle with height 2.5 ft, with width 10.0 ft.
+			 
+			 Ask: select x, y where x has perimeter y.
+  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"x\",\"y\"
+\"http://sadl.org/testUQTimesNumber.sadl#MyRect\",25.0", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+	@Test
 	def void testUnittedQuantityInQuery_01() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'

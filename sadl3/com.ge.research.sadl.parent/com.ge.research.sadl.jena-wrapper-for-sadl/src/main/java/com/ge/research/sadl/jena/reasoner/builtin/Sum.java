@@ -21,6 +21,7 @@ package com.ge.research.sadl.jena.reasoner.builtin;
 import org.apache.jena.reasoner.rulesys.*;
 import org.apache.jena.vocabulary.RDF;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 
 import org.apache.jena.graph.*;
@@ -67,12 +68,27 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum {
         	return env.bind(args[length - 1], sum);
         }
         else if (length == 3) {
-    		// this is just the normal case implemented by HP Labs (standard Jena)
+    		// this is just the normal case implemented by HP Labs (standard Jena) (except Jena doesn't handle
+    		//	BigDecimal so we convert BigDecimal to Double before making the call)
     		if (getArg(0, args, context).isURI()) {
     			throw new BuiltinException(this, context, "First argument to sum is a URI: " + getArg(0, args, context).getURI());
     		}
     		if (getArg(1, args, context).isURI()) {
     			throw new BuiltinException(this, context, "Second argument to sum is a URI: " + getArg(1, args, context).getURI());
+    		}
+    		for (int i = 0; i < args.length - 1; i++) {
+    	        Node n = getArg(i, args, context);
+    	        if (n.isLiteral()) {
+    	        	Object v = n.getLiteralValue();
+    	        	if (v instanceof Number) {
+    	        		if (v instanceof BigDecimal) {
+    	        			if (((BigDecimal)v).scale() > 0) {
+    	        				Double d = ((BigDecimal)v).doubleValue();
+    	        				args[i] = Util.makeDoubleNode(d);
+    	        			}
+    	        		}
+    	        	}
+    	        }
     		}
     		return super.bodyCall(args, length, context);
     	}
@@ -89,8 +105,8 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum {
             if (v1 instanceof Number && v2 instanceof Number) {
                 Number nv1 = (Number)v1;
                 Number nv2 = (Number)v2;
-                if (v1 instanceof Float || v1 instanceof Double 
-                ||  v2 instanceof Float || v2 instanceof Double) {
+                if (v1 instanceof Float || v1 instanceof Double || v1 instanceof BigDecimal
+                ||  v2 instanceof Float || v2 instanceof Double || v2 instanceof BigDecimal) {
                     sum = Util.makeDoubleNode(nv1.doubleValue() + nv2.doubleValue());
                 } else {
                     sum = Util.makeLongNode(nv1.longValue() + nv2.longValue());

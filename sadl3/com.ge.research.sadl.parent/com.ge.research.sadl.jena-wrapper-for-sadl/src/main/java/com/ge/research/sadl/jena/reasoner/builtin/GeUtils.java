@@ -492,6 +492,8 @@ public class GeUtils {
 
 	/**
 	 * Method to determine if a Node is an instance of the SadlImplicitModel UnittedQuantity class.
+	 * Since this is during inference, we can assume that transient closure over class hierarchies
+	 * has made every instance of a subclass of UnittedQuantity also an instance of UnittedQuantity.
 	 * @param node
 	 * @param context
 	 * @return

@@ -1956,14 +1956,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (getModelProcessor().isVariableInDeclarationInRuleOrQuery(expression.getRight())) {
 			return null;
 		}
-
-		TypeCheckInfo binopreturn = combineBinaryOperationTypesWithComparison(operations, expression, expression.getLeft(), expression.getRight(), 
-				leftTypeCheckInfo, rightTypeCheckInfo, ImplicitPropertySide.NONE);
-		if (getModelProcessor().isNumericOperator(expression.getOp())) {
-			TypeCheckInfo uqTci = getTypeCompatibleWithOperationOnUnittedQuantities(((BinaryOperation)expression).getOp(), leftTypeCheckInfo, rightTypeCheckInfo);
-			if (uqTci != null) {
-				return uqTci;
+		TypeCheckInfo binopreturn = null;
+		if (!getModelProcessor().isIgnoreUnittedQuantities()) {
+			binopreturn = combineBinaryOperationTypesForBinaryOperation(operations, expression, expression.getLeft(), expression.getRight(), 
+					leftTypeCheckInfo, rightTypeCheckInfo, ImplicitPropertySide.NONE);
+			if (binopreturn != null) {
+				return binopreturn;
 			}
+		}
+		if (getModelProcessor().isNumericOperator(expression.getOp())) {
+//			TypeCheckInfo uqTci = getTypeCompatibleWithOperationOnUnittedQuantities(((BinaryOperation)expression).getOp(), leftTypeCheckInfo, rightTypeCheckInfo);
+//			if (uqTci != null) {
+//				return uqTci;
+//			}
 			if (leftTypeCheckInfo != null && !isNumeric(leftTypeCheckInfo) && !isNumericWithImpliedProperty(leftTypeCheckInfo, ((BinaryOperation)expression).getLeft())) {
 				getModelProcessor().addTypeCheckingError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getLeft());
 			}
@@ -1972,21 +1977,21 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 			
 			NamedNode tctype = null;
-			if(binopreturn != null) {
-				tctype = (NamedNode) binopreturn.getTypeCheckType();
-			}else {
+//			if(binopreturn != null) {
+//				tctype = (NamedNode) binopreturn.getTypeCheckType();
+//			}else {
 				tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
-			}
+//			}
 			ConceptName lConceptName = getModelProcessor().namedNodeToConceptName(tctype);
 			lConceptName.setType(ConceptType.RDFDATATYPE);
 			return new TypeCheckInfo(lConceptName, tctype, this, expression);
 		}
-		if (binopreturn != null) {
-			return binopreturn;
-		}
-		else {
+//		if (binopreturn != null) {
+//			return binopreturn;
+//		}
+//		else {
 			return createBooleanTypeCheckInfo(expression);
-		}
+//		}
 	}
 
 	private TypeCheckInfo createBooleanTypeCheckInfo(EObject expression) throws TranslationException, InvalidNameException, InvalidTypeException {
@@ -1995,40 +2000,40 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(booleanLiteralConceptName, tctype, this, expression);
 	}
 
-	private TypeCheckInfo getTypeCompatibleWithOperationOnUnittedQuantities(String op, TypeCheckInfo leftTypeCheckInfo,
-			TypeCheckInfo rightTypeCheckInfo) {
-		if (!modelProcessor.isNumericOperator(op)) {
-			return null;
-		}
-		if (leftTypeCheckInfo == null || rightTypeCheckInfo == null) {
-			return null;
-		}
-		if (!leftTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) ||
-				!rightTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
-			return null;
-		}
-		if (op.equals("+") || op.equals("-")) {
-			if (leftTypeCheckInfo.getTypeToExprRelationship() != null && rightTypeCheckInfo.getTypeToExprRelationship() != null &&
-					leftTypeCheckInfo.getTypeToExprRelationship().equals(rightTypeCheckInfo.getTypeToExprRelationship())) {
-				return leftTypeCheckInfo;
-			}
-			if (leftTypeCheckInfo.getTypeToExprRelationship().equals(RANGE) && !rightTypeCheckInfo.getTypeToExprRelationship().equals(RANGE)) {
-				// could issue warning that units may not match
-				return leftTypeCheckInfo;
-			}
-			if (!leftTypeCheckInfo.getTypeToExprRelationship().equals(RANGE) && rightTypeCheckInfo.getTypeToExprRelationship().equals(RANGE)) {
-				// could issue warning that units may not match
-				return rightTypeCheckInfo;
-			}
-		}
-		if (op.equals("/") || op.equals("*") || op.equals("^")) {
-			if (leftTypeCheckInfo.getTypeToExprRelationship() != null && rightTypeCheckInfo.getTypeToExprRelationship() != null) {
-				leftTypeCheckInfo.setTypeToExprRelationship(leftTypeCheckInfo.getTypeToExprRelationship() + op + rightTypeCheckInfo.getTypeToExprRelationship());
-				return leftTypeCheckInfo;
-			}
-		}
-		return null;
-	}
+//	private TypeCheckInfo getTypeCompatibleWithOperationOnUnittedQuantities(String op, TypeCheckInfo leftTypeCheckInfo,
+//			TypeCheckInfo rightTypeCheckInfo) {
+//		if (!modelProcessor.isNumericOperator(op)) {
+//			return null;
+//		}
+//		if (leftTypeCheckInfo == null || rightTypeCheckInfo == null) {
+//			return null;
+//		}
+//		if (!leftTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) ||
+//				!rightTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+//			return null;
+//		}
+//		if (op.equals("+") || op.equals("-")) {
+//			if (leftTypeCheckInfo.getTypeToExprRelationship() != null && rightTypeCheckInfo.getTypeToExprRelationship() != null &&
+//					leftTypeCheckInfo.getTypeToExprRelationship().equals(rightTypeCheckInfo.getTypeToExprRelationship())) {
+//				return leftTypeCheckInfo;
+//			}
+//			if (leftTypeCheckInfo.getTypeToExprRelationship().equals(RANGE) && !rightTypeCheckInfo.getTypeToExprRelationship().equals(RANGE)) {
+//				// could issue warning that units may not match
+//				return leftTypeCheckInfo;
+//			}
+//			if (!leftTypeCheckInfo.getTypeToExprRelationship().equals(RANGE) && rightTypeCheckInfo.getTypeToExprRelationship().equals(RANGE)) {
+//				// could issue warning that units may not match
+//				return rightTypeCheckInfo;
+//			}
+//		}
+//		if (op.equals("/") || op.equals("*") || op.equals("^")) {
+//			if (leftTypeCheckInfo.getTypeToExprRelationship() != null && rightTypeCheckInfo.getTypeToExprRelationship() != null) {
+//				leftTypeCheckInfo.setTypeToExprRelationship(leftTypeCheckInfo.getTypeToExprRelationship() + op + rightTypeCheckInfo.getTypeToExprRelationship());
+//				return leftTypeCheckInfo;
+//			}
+//		}
+//		return null;
+//	}
 
 	private Declaration getEmbeddedDeclaration(EObject expr) {
 		if (expr instanceof SubjHasProp) {
@@ -2211,11 +2216,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	private boolean isUnittedQuantity(TypeCheckInfo tci) {
+	/**
+	 * Method to determine if the type of a TypeCheckInfo is UnittedQuantity or a subclass.
+	 * @param tci
+	 * @return
+	 * @throws InvalidTypeException
+	 */
+	private boolean isUnittedQuantity(TypeCheckInfo tci) throws InvalidTypeException {
 		if (tci != null && tci.getImplicitProperties() == null) {
 			Node tctn = tci.getTypeCheckType();
-			if (tctn instanceof NamedNode && ((NamedNode)tctn).toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
-				return true;
+			if (tctn instanceof NamedNode) {
+				return getModelProcessor().isUnittedQuantity(((NamedNode)tctn).getURI());
 			}
 			else if (tci.getTypeToExprRelationship() != null && tci.getTypeToExprRelationship().equals(UNITTED_QUANTITY)) {
 				return true;
@@ -4780,12 +4791,61 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return null;
 	}
 
-	private TypeCheckInfo combineBinaryOperationTypesWithComparison(List<String> operations, EObject binExpr, EObject leftExpression, EObject rightExpression,
+	private TypeCheckInfo combineBinaryOperationTypesForBinaryOperation(List<String> operations, EObject binExpr, EObject leftExpression, EObject rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, ImplicitPropertySide side) throws InvalidNameException, DontTypeCheckException, InvalidTypeException, TranslationException {
+		if (!getModelProcessor().isIgnoreUnittedQuantities() && 
+				(isUnittedQuantity(leftTypeCheckInfo) || isUnittedQuantity(rightTypeCheckInfo))) {
+			// check UnittedQuantity compatibility and operation return TypeCheckInfo
+			TypeCheckInfo uqTypeCheckInfo = getTypeOfBinaryOperationWithUnittedQuantityInputs(operations, leftTypeCheckInfo, rightTypeCheckInfo, binExpr);
+			if (uqTypeCheckInfo != null) {
+				return uqTypeCheckInfo;
+			}
+		}
 		if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo, side)){
 			return null;
 		}
 		return combineBinaryOperationTypes(operations, binExpr, leftTypeCheckInfo, rightTypeCheckInfo);
+	}
+
+	/**
+	 * Method to determine the return type, if possible, of a binary operation with at least one UnittedQuantity input.
+	 * @param operations
+	 * @param leftTypeCheckInfo
+	 * @param rightTypeCheckInfo
+	 * @param binExpr
+	 * @return
+	 * @throws InvalidTypeException
+	 */
+	private TypeCheckInfo getTypeOfBinaryOperationWithUnittedQuantityInputs(List<String> operations,
+			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, EObject binExpr) throws InvalidTypeException {
+		if (!getModelProcessor().isNumericOperator(operations)) {
+			return null;
+		}
+		Node leftConcept = leftTypeCheckInfo.getTypeCheckType();
+		Node rightConcept  = rightTypeCheckInfo.getTypeCheckType();
+		if (operations.contains("*") || operations.contains("/")) {
+			if (isUnittedQuantity(leftTypeCheckInfo) && getModelProcessor().isNumericType(rightConcept.getURI())) {
+				return leftTypeCheckInfo;
+			}
+			else if (isUnittedQuantity(rightTypeCheckInfo) && getModelProcessor().isNumericType(leftConcept.getURI())) {
+				return rightTypeCheckInfo;
+			}
+			else if (isUnittedQuantity(leftTypeCheckInfo) && isUnittedQuantity(rightTypeCheckInfo)) {
+				// this will be a UnittedQuantity type but the exact type will be determined during expression evaluation
+				TypeCheckInfo prodType = new TypeCheckInfo(new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI,ConceptType.ONTCLASS));
+				prodType.setTypeCheckType(new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode));
+				return prodType;
+			}
+		}
+		else if (operations.contains("+") || operations.contains("-")) {
+			if (isUnittedQuantity(leftTypeCheckInfo) && isUnittedQuantity(rightTypeCheckInfo)) {
+				return leftTypeCheckInfo;
+			}
+		}
+		else {
+			throw new InvalidTypeException("This type (" + operations.toString() + ") not yet implemented");
+		}
+		return null;
 	}
 
 	private TypeCheckInfo combineBinaryOperationTypes(List<String> operations, EObject binExpr,
@@ -4915,6 +4975,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if(!isNumericOperator) {
 				isNumericOperator = getModelProcessor().isNumericComparisonOperator(operations);
 			}
+			else if (!getModelProcessor().isIgnoreUnittedQuantities() && 
+					(isUnittedQuantity(leftTypeCheckInfo) || isUnittedQuantity(rightTypeCheckInfo))) {
+				// check UnittedQuantity compatibility and operation return TypeCheckInfo
+				TypeCheckInfo uqTypeCheckInfo = getTypeOfBinaryOperationWithUnittedQuantityInputs(operations, leftTypeCheckInfo, rightTypeCheckInfo, leftExpression.eContainer());
+				if (uqTypeCheckInfo != null) {
+					return true;
+				}
+			}
+
 			// negated expressions have the type of the expression negated
 			if (leftExpression instanceof UnaryExpression && ((UnaryExpression)leftExpression).getOp().equals("not")) {
 				leftExpression = ((UnaryExpression)leftExpression).getExpr();

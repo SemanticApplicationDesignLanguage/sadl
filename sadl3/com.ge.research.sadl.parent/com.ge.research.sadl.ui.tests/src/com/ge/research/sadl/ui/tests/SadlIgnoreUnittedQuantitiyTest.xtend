@@ -103,8 +103,8 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 			for (rule : rules) {
 				println(rule.toString)
 			}
-			processor.compareTranslations(rules.get(0).toString, 
-				"Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2).")
+			assertTrue(processor.compareTranslations(rules.get(0).toString, 
+				"Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2)."))
 		]
 	}
 
@@ -112,6 +112,7 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 	def void testIgnoreUnitsInSadl4() {
 
 		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString))
 
 		createFile('OntologyWithUnittedQuantity.sadl', '''
 			uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
@@ -126,12 +127,15 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 			Ask: select s, ar where s is a Rectangle and s has area ar.
 		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
 			assertNotNull(jenaModel)
+			for (issue : issues) {
+				println(issue.toString)
+			}
 			assertTrue(issues.empty)
 			for (rule : rules) {
 				println(rule.toString)
 			}
-			processor.compareTranslations(rules.get(0).toString, 
-				"Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2).")
+			assertTrue(processor.compareTranslations(rules.get(0).toString, 
+				"Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2)."))
 		]
 	}
 	

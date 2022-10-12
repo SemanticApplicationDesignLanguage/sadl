@@ -25,8 +25,8 @@ import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
 
 import com.ge.research.sadl.jena.IntermediateFormTranslator;
-import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.jena.IntermediateFormTranslator.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -882,6 +882,25 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 		else {
 			return BuiltinUnittedQuantityStatus.StatusUnknown;
 		}
+	}
+
+	/**
+	 * Method to compute the units of the output of a binary operation that generates units, e.g., multiply and divide.
+	 * @param operator
+	 * @param arg1
+	 * @param arg2
+	 * @return
+	 */
+	public static String combineUnits(org.apache.jena.graph.Node operator, org.apache.jena.graph.Node arg1,
+			org.apache.jena.graph.Node arg2) {
+		StringBuilder sb = new StringBuilder();
+		Object v2 = arg1.getLiteralValue();
+		sb.append(v2.toString());
+		Object v1 = operator.getLiteralValue();
+		sb.append(v1.toString());
+		Object v3 = arg2.getLiteralValue();
+		sb.append(v3.toString());
+		return sb.toString();
 	}
 	
 }
