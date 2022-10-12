@@ -17,6 +17,7 @@ Export-Package: com.ge.research.sadl.jena;
    com.ge.research.sadl.sADL,
    org.eclipse.emf.common.util,
    com.ge.research.sadl.importer,
+   org.apache.jena.datatypes.xsd,
    org.eclipse.xtext.diagnostics,
    org.eclipse.xtext.generator,
    org.eclipse.emf.ecore.resource,
@@ -38,10 +39,8 @@ Export-Package: com.ge.research.sadl.jena;
    org.slf4j,
    org.apache.jena.rdf.model,
    com.ge.research.sadl.jena",
- com.ge.research.sadl.owl2sadl;
-  uses:="org.apache.jena.ontology,
-   com.ge.research.sadl.reasoner,
-   org.apache.jena.rdf.model"
+ com.ge.research.sadl.owl2sadl;uses:="org.apache.jena.ontology,com.ge.research.sadl.reasoner,org.apache.jena.rdf.model",
+ com.naturalsemantics.sadl.jena
 Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
  com.ge.research.sadl.errorgenerator,
