@@ -246,6 +246,71 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
+	@Test
+	def void testUnittedQuantityInRule_01d() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+				 uri "http://sadl.org/NamedUQinQuery.sadl" alias nameduqinquery.
+				 
+				 Shape is a class described by area with values of type UnittedQuantity.
+				 
+				 Rectangle is a type of Shape described by height with values of type UnittedQuantity, described by width with values of type UnittedQuantity.
+				 
+				 Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x.
+				 
+				 StandardFootballField is a Rectangle with height (a UnittedQuantity StandardLength with ^value 120, with unit "yds"), with width 53.33 yds.
+				 
+				 Ask: select x, h, w, ar where x is a Rectangle and x has height h and x has width w and x has area ar.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs != null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr != null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				(tr as ResultSet).setShowNamespaces(false)
+				assertEquals("\"x\",\"h\",\"w\",\"ar\"
+\"StandardFootballField\",StandardLength (120 \"yds\"),53.33 \"yds\",6399.599999999999 \"yds*yds\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+
 	@Ignore
 	@Test
 	def void testUnittedQuantityInRule_02() {

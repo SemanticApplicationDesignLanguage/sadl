@@ -524,6 +524,16 @@ public class ResultSet {
 				return sb.toString();
 			}
 			catch (Exception e) {
+				// if there's a name, the space might not be the right one but
+				// it will be followed by a "(" and the rest will end with a ")"
+				String rest = val.substring(spidx + 1).trim();
+				if (rest.startsWith("(") && rest.endsWith(")")) {
+					rest = rest.substring(1, rest.length() - 1);
+					String tryagain = checkForValueAndUnit(rest);
+					if (tryagain != null) {
+						return possibleNumber + " (" + tryagain + ")";
+					}
+				}
 				return null;
 			}
 			
