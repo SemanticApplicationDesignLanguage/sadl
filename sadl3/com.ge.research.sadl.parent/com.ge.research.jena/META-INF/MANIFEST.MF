@@ -180,6 +180,7 @@ Bundle-ClassPath: lib/collection.jar,
  lib/opencsv.jar,
  lib/reasoner-api.jar,
  lib/reasoner-impl.jar,
+ lib/slf4j-api.jar,
  lib/stax-api.jar,
  lib/wstx-asl.jar
 Automatic-Module-Name: com.ge.research.jena
