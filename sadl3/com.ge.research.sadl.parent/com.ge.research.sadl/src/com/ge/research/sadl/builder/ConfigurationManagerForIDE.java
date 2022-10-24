@@ -61,7 +61,6 @@ import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider;
-import org.eclipse.xtext.util.StringInputStream;
 
 import com.ge.research.sadl.external.XMLHelper;
 import com.ge.research.sadl.model.ConceptName;
@@ -81,6 +80,7 @@ import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.naturalsemantics.sadl.processing.ISadlUnittedQuantityHandler;
 
 /**
  * this class extension supports configuration tasks unique to the IDE (development environment)
@@ -706,7 +706,11 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	protected static ServiceLoader<IReasoner> getReasonersFromServiceLoader(Class<IReasoner> cls) {
 		return ServiceLoader.load(cls);
 	}
-
+	
+	protected static ServiceLoader<ISadlUnittedQuantityHandler> getUnittedQuantityHandlersFromService(Class<ISadlUnittedQuantityHandler> cls) {
+		return ServiceLoader.load(cls);
+	}
+	
 	/**
 	 * Method to get a list of all the available reasoners using a {@link ServiceLoader}
 	 * @return A list of all available reasoners
@@ -755,6 +759,31 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			System.err.println("Error getting available translators: " + t.getMessage());
 		}
 		return translators;
+	}
+
+	/**
+	 * Method to get a list of all the available implementations of ISadlUnittedQuantityHandler using a {@link ServiceLoader}
+	 * @return A list of all available UnittedQuantity handlers
+	 */
+	public static List<ISadlUnittedQuantityHandler> getAvailableUnittedQuantityHandlers() {
+		List<ISadlUnittedQuantityHandler> uqHanders = new ArrayList<ISadlUnittedQuantityHandler>();
+		try {
+			ServiceLoader<ISadlUnittedQuantityHandler> serviceLoader = getUnittedQuantityHandlersFromService(ISadlUnittedQuantityHandler.class);
+			if( serviceLoader != null ){
+				for( Iterator<ISadlUnittedQuantityHandler> itr = serviceLoader.iterator(); itr.hasNext() ; ){
+					try {
+						uqHanders.add(itr.next());
+					}
+					catch (Throwable t) {
+						System.err.println("Error getting available UnittedQuantity handlers: " + t.getMessage());
+					}
+				}
+			}
+		}
+		catch (Throwable t) {
+			System.err.println("Error getting available UnittedQuantity handlers: " + t.getMessage());
+		}
+		return uqHanders;
 	}
 
 	/**

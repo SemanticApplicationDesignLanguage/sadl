@@ -25,6 +25,7 @@ import static com.ge.research.sadl.preferences.SadlPreferences.DEEP_VALIDATION_O
 import static com.ge.research.sadl.preferences.SadlPreferences.ENABLE_METRICS_COLLECTION;
 import static com.ge.research.sadl.preferences.SadlPreferences.FIND_AND_EXPAND_MISSING_PATTERNS;
 import static com.ge.research.sadl.preferences.SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION;
+import static com.ge.research.sadl.preferences.SadlPreferences.SADL_UNITTEDQUANTITY_HANDLER;
 import static com.ge.research.sadl.preferences.SadlPreferences.GENERATE_METRICS_REPORT_ON_CLEAN_BUILD;
 import static com.ge.research.sadl.preferences.SadlPreferences.GRAPH_IMPLICIT_ELEMENTS;
 import static com.ge.research.sadl.preferences.SadlPreferences.GRAPH_IMPLICIT_ELEMENT_INSTANCES;
@@ -56,15 +57,22 @@ import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK;
 import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK_ENDPOINT;
 import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK_STORE_TYPE;
 
-
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.eclipse.core.internal.resources.Project;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
+import org.eclipse.jface.preference.IPreferencePageContainer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -72,20 +80,31 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.dialogs.PropertyDialog;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
+import com.ge.research.sadl.builder.ConfigurationManagerForIdeFactory;
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.BooleanFieldEditorExt;
 import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.FieldEditorExt;
 import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.FileFieldEditorExt;
 import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.RadioGroupFieldEditorExt;
+import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.ComboFieldEditorExt;
 import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.StringFieldEditorExt;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.naturalsemantics.sadl.processing.ISadlUnittedQuantityHandler;
 
 @SuppressWarnings("restriction")
 public class SadlRootPreferencePage extends LanguageRootPreferencePage {
@@ -227,6 +246,26 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		addField(new BooleanFieldEditorExt(FIND_AND_EXPAND_MISSING_PATTERNS.getId(), "Find and expand missing patterns in translation", translationSettings));
 		addField(new BooleanFieldEditorExt(IGNORE_UNITTEDQUANTITIES.getId(), "Ignore Unitted Quantities (treat as numeric only) during translation", translationSettings));
 		addField(new BooleanFieldEditorExt(EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.getId(), "Expand Unitted Quantities in translation", translationSettings));
+		
+		List<String> classes = new ArrayList<String>();
+		List<String> clsNames = new ArrayList<String>();
+		List<ISadlUnittedQuantityHandler> ics = ConfigurationManagerForIDE.getAvailableUnittedQuantityHandlers();
+		if (ics != null) {
+			for (ISadlUnittedQuantityHandler cls : ics) {
+				classes.add(cls.getClass().getCanonicalName());
+				clsNames.add(cls.getClass().getSimpleName());
+			}
+		}
+		else {
+			classes.add("com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena");
+			clsNames.add("SadlSimpleUnittedQuantityHanderForJena");
+		}
+		String[][] options = new String[classes.size()] [2];
+		for (int i = 0; i < classes.size(); i++) {
+			options[i][0] = clsNames.get(i);
+			options[i][1] = classes.get(i);
+		}
+		addField(new ComboFieldEditorExt(SADL_UNITTEDQUANTITY_HANDLER.getId(), "UnittedQuantity Hander", options, translationSettings));
 		addField(new BooleanFieldEditorExt(CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(), "Translate multiple-class domain or range as union class (owl:unionOf)", translationSettings));
 
 		// Type Checking Settings

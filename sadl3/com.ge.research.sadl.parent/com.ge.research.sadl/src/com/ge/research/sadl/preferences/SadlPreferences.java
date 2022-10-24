@@ -61,6 +61,7 @@ public class SadlPreferences {
 	public static final PreferenceKey P_USE_ARTICLES_IN_VALIDATION= new PreferenceKey("use_articles_in_validation", String.valueOf(false));
 	public static final PreferenceKey FIND_AND_EXPAND_MISSING_PATTERNS= new PreferenceKey("find_and_expand_missing_patterns", String.valueOf(false));
 	public static final PreferenceKey EXPAND_UNITTEDQUANTITY_IN_TRANSLATION = new PreferenceKey("expandUnittedQuantityInTranslation", String.valueOf(true));
+	public static final PreferenceKey SADL_UNITTEDQUANTITY_HANDLER = new PreferenceKey("sadlUnittedQuantityHandler", "com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena");
 	public static final PreferenceKey TYPE_CHECKING_WARNING_ONLY = new PreferenceKey("typeCheckingWarningOnly", String.valueOf(false));
 	public static final PreferenceKey TYPE_CHECKING_RANGE_REQUIRED = new PreferenceKey("typeCheckingRangeRequired", String.valueOf(true));
 	public static final PreferenceKey IGNORE_UNITTEDQUANTITIES = new PreferenceKey("ignoreUnittedQuantities", String.valueOf(false));
@@ -107,6 +108,7 @@ public class SadlPreferences {
 			P_USE_ARTICLES_IN_VALIDATION,
 			FIND_AND_EXPAND_MISSING_PATTERNS,
 			EXPAND_UNITTEDQUANTITY_IN_TRANSLATION,
+			SADL_UNITTEDQUANTITY_HANDLER,
 //			DISABLE_TYPE_CHECKING,
 			TYPE_CHECKING_WARNING_ONLY,
 			TYPE_CHECKING_RANGE_REQUIRED,

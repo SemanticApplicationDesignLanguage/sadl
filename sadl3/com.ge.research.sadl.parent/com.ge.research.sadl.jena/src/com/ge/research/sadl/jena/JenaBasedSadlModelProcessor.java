@@ -130,7 +130,6 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.preferences.IPreferenceValues;
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
 import org.eclipse.xtext.resource.XtextResource;
-import org.eclipse.xtext.resource.XtextSyntaxDiagnostic;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
 import org.eclipse.xtext.service.OperationCanceledError;
@@ -194,6 +193,7 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.processing.IFTranslationError;
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.processing.OntModelProvider;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -303,7 +303,6 @@ import com.ge.research.sadl.utils.SadlASTUtils;
 import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Iterables;
 
 public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements IJenaBasedModelProcessor {
 	public static final String THERE_EXISTS = "thereExists";
@@ -415,6 +414,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private Map<String, List<ConceptName>> impliedPropoertiesCache = new HashMap<>();
 	private Map<String, Boolean> classIsSubclassOfCache = new HashMap<>();
+
+	private String sadlUnittedQuantityHandler;
 
 	/**
 	 * Method to determine if subcls is a subclass of cls
@@ -532,6 +533,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	public void setExpandUnittedQuantityInTranslation(boolean expandUnittedQuantityInTranslation) {
 		this.expandUnittedQuantityInTranslation = expandUnittedQuantityInTranslation;
+	}
+	
+	public void setSadlUnittedQuantityHandler(String hdlr) {
+		this.sadlUnittedQuantityHandler = hdlr;
+	}
+	
+	public String getSadlUnittedQuantityHandler() {
+		return this.sadlUnittedQuantityHandler;
 	}
 	
 	public boolean isExpandUnittedQuantityInTranslation() {
@@ -2302,7 +2311,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				 *           and the value(s) returned are compared per the comparison operator.
 				 */
 				
-				if (expr instanceof BinaryOperation && IntermediateFormTranslator.isComparisonBuiltin(((BinaryOperation)expr).getOp()) &&
+				if (expr instanceof BinaryOperation && getIfTranslator().isComparisonBuiltin(((BinaryOperation)expr).getOp()) &&
 						(((BinaryOperation)expr).getLeft() instanceof SelectExpression ||
 								((BinaryOperation)expr).getRight() instanceof SelectExpression)) {
 					String op = ((BinaryOperation)expr).getOp();
@@ -2804,7 +2813,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private int validateTest(EObject object, Test test) {
 		int numErrors = 0;
-		if (test.getCompName() != null && !IntermediateFormTranslator.isComparisonBuiltin(test.getCompName())) {
+		if (test.getCompName() != null && !getIfTranslator().isComparisonBuiltin(test.getCompName())) {
 			addError("Invalid test operation; " + test.getCompName() + " is not an operation returning true or false.", object);
 			numErrors++;
 		}
@@ -2849,7 +2858,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		List<VariableNode> boundVars = new ArrayList<VariableNode>();
 		for (int i = gpes.size() - 1; i >= 0; i--) {
 			GraphPatternElement gpe = gpes.get(i);
-			if (gpe instanceof BuiltinElement && IntermediateFormTranslator.isComparisonBuiltin(((BuiltinElement)gpe).getFuncName())) {
+			if (gpe instanceof BuiltinElement && getIfTranslator().isComparisonBuiltin(((BuiltinElement)gpe).getFuncName())) {
 				return numErrors;
 			}
 			else if (gpe instanceof TripleElement) {
@@ -16672,6 +16681,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			setExpandUnittedQuantityInTranslation(Boolean.parseBoolean(expandUnittedQuantityInTranslation));
 			modelProcessorPreferenceMap.put(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.getId(), expandUnittedQuantityInTranslation);
+			
+			String sadlUnittedQuantityHandler = preferenceValues.getPreference(SadlPreferences.SADL_UNITTEDQUANTITY_HANDLER);
+			if (sadlUnittedQuantityHandler == null) {
+				sadlUnittedQuantityHandler = "com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena";
+			}
+			setSadlUnittedQuantityHandler(sadlUnittedQuantityHandler);
+			modelProcessorPreferenceMap.put(SadlPreferences.SADL_UNITTEDQUANTITY_HANDLER.getId(), sadlUnittedQuantityHandler);
 			
 			String domainAndRangeAsUnionClassesStr = preferenceValues
 					.getPreference(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES);

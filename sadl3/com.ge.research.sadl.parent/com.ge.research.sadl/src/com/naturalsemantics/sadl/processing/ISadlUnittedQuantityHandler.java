@@ -19,15 +19,16 @@ package com.naturalsemantics.sadl.processing;
 
 import java.util.List;
 
-import org.apache.jena.graph.Node;
-
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 public interface ISadlUnittedQuantityHandler {
-
+	
+	abstract void setIntermediateFormTranslator(I_IntermediateFormTranslator ift);
+	
 	/*
 	 * Methods used in translation of statements containing references to UnittedQuantity when 
 	 * the SADL preference "Expand Unitted Quantities in translation" is checked.
@@ -38,8 +39,9 @@ public interface ISadlUnittedQuantityHandler {
 	 * Method to add any combineUnits and there exists constructs to the rule at the end of rule processing.
 	 * @param rule
 	 * @return
+	 * @throws TranslationException 
 	 */
-	abstract Rule checkRuleForNewUnittedQuantityCreation(Rule rule);
+	abstract Rule checkRuleForNewUnittedQuantityCreation(Rule rule) throws TranslationException;
 	
 	/**
 	 * Method to expand a binary operation on UnittedQuantity arguments. The TripleElement instances needed to expand 

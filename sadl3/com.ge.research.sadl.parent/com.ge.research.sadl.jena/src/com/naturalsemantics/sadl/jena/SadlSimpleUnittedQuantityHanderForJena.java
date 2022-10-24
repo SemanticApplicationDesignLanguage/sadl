@@ -21,11 +21,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
 
 import com.ge.research.sadl.jena.IntermediateFormTranslator;
-import com.ge.research.sadl.jena.IntermediateFormTranslator.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
@@ -38,6 +38,8 @@ import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
+import com.ge.research.sadl.processing.I_IntermediateFormTranslator.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
@@ -45,7 +47,7 @@ import com.naturalsemantics.sadl.processing.ISadlUnittedQuantityHandler;
 
 public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuantityHandler {
 	
-	private IntermediateFormTranslator ifTranslator;
+	private I_IntermediateFormTranslator ifTranslator;
 	
 	class BuiltinElementAndUnits {
 		BuiltinElement builtin;
@@ -66,6 +68,10 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 	}
 	
 	private List<BuiltinElementAndUnits> modifiedBuiltinElementsAndUnits;
+	
+	public SadlSimpleUnittedQuantityHanderForJena() {
+		
+	}
 
 	/**
 	 * Class to contain a new TripleElement and the GraphPatternElement after which it should
@@ -109,7 +115,7 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 		setIfTranslator(ift);
 	}
 
-	private IntermediateFormTranslator getIfTranslator() {
+	private I_IntermediateFormTranslator getIfTranslator() {
 		return ifTranslator;
 	}
 
@@ -118,7 +124,7 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 	}
 	
 	@Override
-	public Rule checkRuleForNewUnittedQuantityCreation(Rule rule) {
+	public Rule checkRuleForNewUnittedQuantityCreation(Rule rule) throws TranslationException {
 		// Using the modifiedBuiltinElementsAndUnits, add any combineUnits and there exists constructs to the rule
 		List<BuiltinElementAndUnits> modifiedBEs = getModifiedBuiltinElementsAndUnits();
 		if (modifiedBEs != null && modifiedBEs.size() > 0) {
@@ -152,7 +158,11 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 						BuiltinElement thereExistsBE = new BuiltinElement();
 						thereExistsBE.setFuncName("thereExists");
 						Node pred = ((TripleElement)gpe).getPredicate();
-						OntProperty prop = getIfTranslator().getTheJenaModel().getOntProperty(pred.getURI());
+						Object theModel = getIfTranslator().getTheModel();
+						if (!(theModel instanceof OntModel)) {
+							throw new TranslationException("The model was not a Jena OntModel as expected.");
+						}
+						OntProperty prop = ((OntModel)theModel).getOntProperty(pred.getURI());
 						NamedNode uQClass = null;
 						if (prop != null) {
 							OntResource rng = prop.getRange();
@@ -220,8 +230,6 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 			}
 			Node newLhsArg = null;
 			Node newRhsArg = null;
-			TripleElement lhsArgValueTriple = null;
-			TripleElement rhsArgValueTriple = null;
 			String lhsUnits = null;
 			String rhsUnits = null;
 			
@@ -244,7 +252,6 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 						if (lhsValueTriple == null) {
 							newLhsArg = new VariableNode(getIfTranslator().getNewVar());
 							TripleElement addedTriple1 = new TripleElement(lhsArg, valuePredNode, newLhsArg);
-							lhsArgValueTriple = addedTriple1;
 							addNewTriple(newTriples, gpe, addedTriple1);
 							// create incomplete triple for unit constraint
 							TripleElement addedTriple2 = new TripleElement(lhsArg, unitPredNode, null);
@@ -260,7 +267,6 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 						if (rhsValueTriple == null) {
 							newRhsArg = new VariableNode(getIfTranslator().getNewVar());
 							TripleElement addedTriple1 = new TripleElement(rhsArg, valuePredNode, newRhsArg);
-							rhsArgValueTriple = addedTriple1;
 							addNewTriple(newTriples, gpe, addedTriple1);
 							// create incomplete triple for unit constraint
 							TripleElement addedTriple2 = new TripleElement(rhsArg, unitPredNode, null);
@@ -901,6 +907,11 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 		Object v3 = arg2.getLiteralValue();
 		sb.append(v3.toString());
 		return sb.toString();
+	}
+
+	@Override
+	public void setIntermediateFormTranslator(I_IntermediateFormTranslator ift) {
+		ifTranslator = ift;
 	}
 	
 }

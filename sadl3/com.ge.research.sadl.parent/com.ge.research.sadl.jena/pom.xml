@@ -31,6 +31,7 @@
             <param>com.ge.research.sadl.processing.IModelProcessor</param>
             <param>com.ge.research.sadl.processing.ISadlImportProcessor</param>
             <param>com.ge.research.sadl.processing.ISadlInferenceProcessor</param>
+            <param>com.naturalsemantics.sadl.processing.ISadlUnittedQuantityHandler</param>
           </services>
         </configuration>
       </plugin>

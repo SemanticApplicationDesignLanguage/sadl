@@ -55,6 +55,7 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -821,6 +822,32 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		}
 		return null;
 	}
+
+	/**
+	 * Method to get a configuration manager
+	 * @return
+	 */
+	abstract public IConfigurationManager getConfigMgr() ;
+
+	/**
+	 * Method to get the model name
+	 * @return
+	 */
+	public abstract String getModelName();
+
+	/**
+	 * Method to determine if a built-in function is a comparison operator
+	 * @param funcName
+	 * @return
+	 */
+	public abstract boolean isComparisonOperator(String funcName);
+
+	/**
+	 * Method to determine if a built-in function is a numeric operator
+	 * @param funcName
+	 * @return
+	 */
+	public abstract boolean isNumericOperator(String funcName);
 
 
 }

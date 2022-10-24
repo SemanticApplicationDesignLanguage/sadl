@@ -1,16 +1,20 @@
-package com.ge.research.sadl.jena;
+package com.ge.research.sadl.processing;
 
 import java.util.List;
 
+import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.NamedNode;
-import com.ge.research.sadl.processing.SadlModelProcessor;
+import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 public interface I_IntermediateFormTranslator {
+
+	public enum BuiltinUnittedQuantityStatus {SameUnitsRequired, DifferentUnitsAllowedOrLeftOnly, LeftUnitsOnly, UnitsNotSupported, StatusUnknown}
+	// This enum identifies the categories of BuiltinElements WRT UnittedQuantity arguments.
 
 	/**
 	 * Method to set the target of this translation, which can be a Test, a Query, or a Rule instance
@@ -115,4 +119,37 @@ public interface I_IntermediateFormTranslator {
 	 * @return
 	 */
 	boolean graphPatternElementMustBeInConclusions(GraphPatternElement gpe);
+
+	/**
+	 * Method to get a name for a new VariableNode
+	 * @return
+	 */
+	abstract String getNewVar();
+
+	/**
+	 * Method to get the BuiltinUnittedQuantityStatus of a BuiltinElement
+	 * @param be
+	 * @return
+	 */
+	abstract BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be);
+
+	/**
+	 * Method to determine if a Node is a UnittedQuantity
+	 * @param lhsArg
+	 * @return
+	 */
+	abstract boolean isUnittedQuantity(Node lhsArg);
+
+	/**
+	 * Method to determine if a built-in function is a comparison function
+	 * @param funcName
+	 * @return
+	 */
+	abstract boolean isComparisonBuiltin(String funcName);
+
+	/**
+	 * Method to get the OWL model generated from the SADL model
+	 * @return
+	 */
+	abstract Object getTheModel();
 }
