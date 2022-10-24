@@ -55,10 +55,11 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Versions of multiple dependencies using the same versions -->
     <version.jena>4.6.1</version.jena>
-    <version.log4j>2.18.0</version.log4j>
+    <version.log4j>2.19.0</version.log4j>
     <version.mwe2>2.12.1</version.mwe2>
     <version.sadl>${project.version}</version.sadl>
-    <version.slf4j>2.0.0</version.slf4j>
+    <!-- Can't use slf4j-api 2 yet, must match Eclipse and log4j-slf4j-impl -->
+    <version.slf4j>1.7.36</version.slf4j>
     <version.surefire>3.0.0-M7</version.surefire>
     <version.tycho>2.7.5</version.tycho>
     <version.xtext>2.25.0</version.xtext>
@@ -363,7 +364,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>3.2.2</version>
+          <version>3.3.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -459,7 +460,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>versions-maven-plugin</artifactId>
-          <version>2.12.0</version>
+          <version>2.13.0</version>
         </plugin>
         <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
         <plugin>

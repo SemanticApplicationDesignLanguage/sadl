@@ -37,6 +37,8 @@
             <unit id="org.objectweb.asm" version="0.0.0"/>
             <unit id="org.objectweb.asm.tree" version="0.0.0"/>
             <unit id="org.opentest4j" version="0.0.0"/>
+            <unit id="org.slf4j.api" version="0.0.0" />
+            <unit id="org.slf4j.binding.simple" version="0.0.0" />
             <repository location="https://download.eclipse.org/tools/orbit/downloads/2020-12"/>
         </location>
     </locations>

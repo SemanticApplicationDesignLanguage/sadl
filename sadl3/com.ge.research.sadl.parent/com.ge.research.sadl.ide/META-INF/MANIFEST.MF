@@ -16,7 +16,8 @@ Require-Bundle: com.ge.research.jena,
  org.eclipse.lsp4j.generator,
  org.eclipse.lsp4j.jsonrpc,
  org.eclipse.xtext.ide,
- org.eclipse.xtext.xbase.ide
+ org.eclipse.xtext.xbase.ide,
+ org.slf4j.api
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.ide,
  com.ge.research.sadl.ide.contentassist.antlr,

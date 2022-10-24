@@ -6,6 +6,7 @@ Bundle-Version: 3.5.0.qualifier
 Bundle-Vendor: GE Research
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Eclipse-RegisterBuddy: com.ge.research.sadl
+Require-Bundle: org.slf4j.api
 Export-Package: au.com.bytecode.opencsv,
  com.ctc.wstx.api,
  com.ctc.wstx.cfg,
@@ -140,8 +141,7 @@ Export-Package: au.com.bytecode.opencsv,
  org.apache.jena.util,
  org.apache.jena.util.iterator,
  org.apache.jena.vocabulary,
- org.pojava.datetime,
- org.slf4j
+ org.pojava.datetime
 Bundle-ClassPath: lib/collection.jar,
  lib/commons-cli.jar,
  lib/commons-codec.jar,
@@ -181,7 +181,6 @@ Bundle-ClassPath: lib/collection.jar,
  lib/opencsv.jar,
  lib/reasoner-api.jar,
  lib/reasoner-impl.jar,
- lib/slf4j-api.jar,
  lib/stax-api.jar,
  lib/wstx-asl.jar
 Automatic-Module-Name: com.ge.research.jena
