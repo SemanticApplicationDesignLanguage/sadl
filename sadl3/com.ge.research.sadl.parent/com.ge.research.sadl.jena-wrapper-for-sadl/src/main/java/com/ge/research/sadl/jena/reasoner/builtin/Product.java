@@ -23,6 +23,8 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.XSD;
 
 import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.jena.graph.*;
+import org.apache.jena.graph.impl.LiteralLabelFactory;
 
 /**
 
@@ -61,11 +64,11 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
         /*
          * There are three cases to consider:
          * 1. The arguments (except the last) represent a graph pattern and the nodes that match that graph
-         *    pattern is a list of items to be multipled together. The product is assigned to the last argument,
+         *    pattern is a list of items to be multiplied together. The product is assigned to the last argument,
          *    which must be a variable.
-         * 2. There are three arguments, the first two of which are to be multipled together and assigned
+         * 2. There are three arguments, the first two of which are to be multiplied together and assigned
          *    to the third, which must be a variable
-         * 3. The first argument is a list of items to be multipled together, the product of which is to
+         * 3. The first argument is a list of items to be multiplied together, the product of which is to
          *    be assigned to the second argument, which must be a variable.
          *    
          * In any of these three cases, the elements of the list may be instances of the SadlImplicitModel's
@@ -210,7 +213,14 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
     }
 
 	private Node createUnittedQuantityProduct(RuleContext context, Number nProd, List<Node> nodeLst) {
-		List<Node> values = GeUtils.getUnittedQuantityValues(this, nodeLst, context);
+		String opStr = "*";
+		Node operator = NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(opStr));
+    	try {
+			Utils.validateUnittedQuantityArgs(context, BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly, nodeLst);
+		} catch (UnittedQuantityHandlerException e) {
+			throw new BuiltinException(this, context, e.getMessage());
+		}
+		List<Node> values = GeUtils.getUnittedQuantityValues(this, nodeLst, BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly, context);
 		nProd = multiplyList(nProd, values, context);
 		Node valNode;
 		if (nProd instanceof Float || nProd instanceof Double) {
@@ -225,17 +235,22 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product {
 		Node uQinst = Utils.createInstanceOfClass(context, SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
 		Node valPred = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
 		Utils.addValue(context, uQinst, valPred, valNode);
-		List<Node>units = GeUtils.getUnittedQuantityUnits(this, nodeLst, context);
-		StringBuilder sb = new StringBuilder();
+		List<Node>units = GeUtils.getUnittedQuantityUnits(this, nodeLst, BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly, context);
+		Node lastUnit = null;
 		for (Node unit : units) {
-			if (sb.length() > 0) {
-				sb.append("*");
+			if (lastUnit != null) {
+				try {
+					lastUnit = NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(Utils.combineUnits(context, operator, lastUnit, unit)));
+				} catch (UnittedQuantityHandlerException e) {
+					throw new BuiltinException(this, context, e.getMessage());
+				}
 			}
-			sb.append(unit.getLiteralValue().toString());
+			else {
+				lastUnit = unit;
+			}
 		}
-		Node unitNode = NodeFactory.createLiteral(sb.toString());
 		Node unitPred = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
-		Utils.addValue(context, uQinst, unitPred, unitNode);
+		Utils.addValue(context, uQinst, unitPred, lastUnit);
 		return uQinst;
 	}
     

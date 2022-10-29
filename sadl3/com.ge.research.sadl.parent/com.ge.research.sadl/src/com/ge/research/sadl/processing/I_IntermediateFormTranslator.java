@@ -7,14 +7,12 @@ import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 public interface I_IntermediateFormTranslator {
-
-	public enum BuiltinUnittedQuantityStatus {SameUnitsRequired, DifferentUnitsAllowedOrLeftOnly, LeftUnitsOnly, UnitsNotSupported, StatusUnknown}
-	// This enum identifies the categories of BuiltinElements WRT UnittedQuantity arguments.
 
 	/**
 	 * Method to set the target of this translation, which can be a Test, a Query, or a Rule instance

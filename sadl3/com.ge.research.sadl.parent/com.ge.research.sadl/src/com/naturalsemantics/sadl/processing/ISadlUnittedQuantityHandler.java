@@ -66,4 +66,10 @@ public interface ISadlUnittedQuantityHandler {
 	 * are invoked by Java reflection so the methods are in the specific implementation classes.
 	 */
 	
+	/**
+	 * Method to get the name of the implementation of IUnittedQuantityInferenceHelper Interface class
+	 * to be used during inference to handle UnittedQuantity arguments to built-in functions.
+	 * @return
+	 */
+	abstract String getUnittedQuantityInferenceHelperClassname();
 }

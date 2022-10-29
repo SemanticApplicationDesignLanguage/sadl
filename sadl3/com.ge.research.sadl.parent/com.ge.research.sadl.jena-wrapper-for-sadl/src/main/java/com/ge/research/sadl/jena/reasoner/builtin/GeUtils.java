@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 
 /**
  * This class provides useful utilities for building Jena builtin functions.
@@ -570,14 +571,22 @@ public class GeUtils {
 	 * @param context
 	 * @return
 	 */
-	public static List<Node> getUnittedQuantityValues(Builtin bi, List<Node> nodes, RuleContext context) {
+	public static List<Node> getUnittedQuantityValues(Builtin bi, List<Node> nodes, BuiltinUnittedQuantityStatus builtinUqStatus, RuleContext context) {
 		List<Node> values = new ArrayList<Node>();
+		boolean firstNode = true;
 		for (Node node : nodes) {
 			Node value = getUnittedQuantityValue(node, context);
-			if (value == null) {
-				throw new BuiltinException(bi, context, "Encountered a non-UnittedQuantity or invalid UnittedQuantity while processing UnittedQuantities");
+			if (!firstNode && value == null) {
+				if (builtinUqStatus.equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly) || 
+						builtinUqStatus.equals(BuiltinUnittedQuantityStatus.LeftUnitsOnly)) {
+					value = node;
+				}
+				else {
+					throw new BuiltinException(bi, context, "Encountered a non-UnittedQuantity or invalid UnittedQuantity while processing UnittedQuantities");
+				}
 			}
 			values.add(value);
+			firstNode = false;
 		}
 		return values;
 	}
@@ -589,7 +598,7 @@ public class GeUtils {
 	 * @param context
 	 * @return
 	 */
-	public static Node getUnittedQuantityUnit(Node node, RuleContext context) {
+	public static Node getUnittedQuantityUnit(Node node,  RuleContext context) {
 		Node unitPred =  NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
 		ClosableIterator<Triple> citr = context.find(node, unitPred, null);
 		if (citr.hasNext()) {
@@ -608,14 +617,19 @@ public class GeUtils {
 	 * @param context
 	 * @return
 	 */
-	public static List<Node> getUnittedQuantityUnits(Builtin bi, List<Node> nodes, RuleContext context) {
+	public static List<Node> getUnittedQuantityUnits(Builtin bi, List<Node> nodes,  BuiltinUnittedQuantityStatus builtinUqStatus, RuleContext context) {
 		List<Node> units = new ArrayList<Node>();
+		boolean firstNode = true;
 		for (Node node : nodes) {
 			Node unit = getUnittedQuantityUnit(node, context);
-			if (unit == null) {
-				throw new BuiltinException(bi, context, "Encountered a non-UnittedQuantity or invalid UnittedQuantity while processing UnittedQuantities");
+			if (!firstNode && unit == null) {
+				if (!builtinUqStatus.equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly) && 
+						!builtinUqStatus.equals(BuiltinUnittedQuantityStatus.LeftUnitsOnly)) {
+					throw new BuiltinException(bi, context, "Encountered a non-UnittedQuantity or invalid UnittedQuantity while processing UnittedQuantities");
+				}
 			}
 			units.add(unit);
+			firstNode = false;
 		}
 		return units;
 	}

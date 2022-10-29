@@ -52,6 +52,8 @@ public interface IConfigurationManager {
 	// Note: there is an implicit heirarchy in the configuration file:
 	//	Builtins is a subcategory of the ReasonerCategory
 	//	?? what else??
+	public static final String UnittedQuantityInferenceHelper = "UnittedQuantityInferenceHelper";
+	public static final String UQHelperClass = "UqHelperClass";
 	
 	// Other configuration constants
 	public static final String DateFormat = "DateFormat";

@@ -19,6 +19,7 @@
 package com.ge.research.sadl.jena.reasoner.builtin;
 
 import java.io.InvalidObjectException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -27,6 +28,10 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.graph.Node;
@@ -516,18 +521,45 @@ public class Utils {
     	return NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(value));
     }
 
-	public static String combineUnits(Node n1, Node n2, Node n3) throws ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		String className = System.getProperty("ISadlUnittedQuantityHandle.combineUnits");
-		Class<?> c = Class.forName(className);
-		Class<?> partypes[] = new Class[3];
-		partypes[0] = Node.class;
-		partypes[1] = Node.class;
-		partypes[2] = Node.class;
-		Method meth = c.getMethod("combineUnits", partypes);
-		Object arglist[] = new Object[3];
-		arglist[0] = n1;
-		arglist[1] = n2;
-		arglist[2] = n3;
-		return meth.invoke(null, arglist).toString();
+	public static String combineUnits(RuleContext context, Node n1, Node n2, Node n3) throws UnittedQuantityHandlerException {
+		String className = IUnittedQuantityInferenceHelper.getUnittedQuantityInferenceHelperClassname(context.getGraph().getReasoner());
+		try {
+			Class<?> c = Class.forName(className);
+			Constructor<?> cons = c.getConstructor();
+			Object inst = cons.newInstance();
+			if (inst instanceof IUnittedQuantityInferenceHelper) {
+				Object result = ((IUnittedQuantityInferenceHelper)inst).combineUnits(context, n1, n2, n3);
+				return result.toString();
+			}
+			else {
+				throw new UnittedQuantityHandlerException("Failed to instantiate IUnittedQuantityInferenceHandler class '" + className + "'");
+			}
+		} catch (Exception e) {
+			throw new UnittedQuantityHandlerException("Unable to invoke IUnittedQuantityInferenceHandler method 'combineUnits'", e);
+		} 
+	}
+
+	public static boolean validateUnittedQuantityArgs(RuleContext context, BuiltinUnittedQuantityStatus operatorType, List<Node> nodeLst) throws UnittedQuantityHandlerException {
+		String className = IUnittedQuantityInferenceHelper.getUnittedQuantityInferenceHelperClassname(context.getGraph().getReasoner());
+		try {
+			Class<?> c = Class.forName(className);
+			Constructor<?> cons = c.getConstructor();
+			Object inst = cons.newInstance();
+			if (inst instanceof IUnittedQuantityInferenceHelper) {
+				Node lastArg = null;
+				for (Node arg : nodeLst) {
+					if (lastArg != null) {
+						boolean result = ((IUnittedQuantityInferenceHelper)inst).validateOperation(context, operatorType, lastArg, arg);
+					}
+					lastArg = arg;
+				}
+				return true;
+			}
+			else {
+				throw new UnittedQuantityHandlerException("Failed to instantiate IUnittedQuantityInferenceHandler class '" + className + "'");
+			}
+		} catch (Exception e) {
+			throw new UnittedQuantityHandlerException("Unable to invoke IUnittedQuantityInferenceHandler method 'validateUnittedQuantityArgs'", e);
+		} 
 	}
 }

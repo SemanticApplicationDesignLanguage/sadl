@@ -18,8 +18,6 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.impl.LiteralLabelFactory;
@@ -76,7 +74,7 @@ public class CombineUnits extends CancellableBuiltin {
         }
         String units;
 		try {
-			units = Utils.combineUnits(n1, n2, n3);
+			units = Utils.combineUnits(context, n1, n2, n3);
 		} catch (Exception e) {
 			throw new BuiltinException(this, context, "Failed to combine units (" + n1.toString() + ", " + n2.toString() + ", " + n3.toString() + "): " + e.getMessage());
 		} 

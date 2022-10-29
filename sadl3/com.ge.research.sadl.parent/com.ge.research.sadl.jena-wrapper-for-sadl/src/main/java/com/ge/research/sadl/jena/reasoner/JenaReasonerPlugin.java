@@ -149,6 +149,7 @@ import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper;
 import com.ge.research.sadl.reasoner.InferenceCanceledException;
 import com.ge.research.sadl.reasoner.InvalidDerivationException;
 import com.ge.research.sadl.reasoner.InvalidNameException;
@@ -495,6 +496,15 @@ public class JenaReasonerPlugin extends Reasoner{
 			String msg = "Invalid timeout value '" + strTimeOut + "'";
 			logger.error(msg); addError(new ModelError(msg, ErrorType.ERROR));
 
+		}
+		// set UnittedQuantity inference helper
+		String[] uqih = {IConfigurationManager.UnittedQuantityInferenceHelper};
+		List<ConfigurationItem> config = configurationMgr.getConfiguration(uqih, false);
+		if (config != null && config.size() > 0) {
+			List<Object> helpers  = config.get(0).getAllValuesOfName(IConfigurationManager.UQHelperClass);
+			if (helpers != null && helpers.size() >= 1) {
+				IUnittedQuantityInferenceHelper.addUnittedQuantityInferenceHelperClassname(reasoner, helpers.get(0).toString());
+			}
 		}
 		return reasoner;
 	}

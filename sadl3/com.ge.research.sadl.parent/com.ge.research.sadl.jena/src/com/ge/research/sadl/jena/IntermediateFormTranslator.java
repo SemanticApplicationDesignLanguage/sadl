@@ -83,6 +83,12 @@ import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.ConfigurationItem;
+import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
+import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
@@ -2416,8 +2422,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				(isExpandableComparisonOperator(be) || 
 						getModelProcessor().isExpandUnittedQuantityInTranslation())) {
 			patterns = getUnittedQuantityHander().expandUnittedQuantities(patterns, be, isRuleThen);
-			String uqh = getModelProcessor().getSadlUnittedQuantityHandler();
-			System.setProperty("ISadlUnittedQuantityHandle.combineUnits", uqh);
 		}
 		return returnNode;
 	}
@@ -4803,6 +4807,18 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 
 	private void setUnittedQuantityHander(ISadlUnittedQuantityHandler uqHander) {
 		this.unittedQuantityHandler = uqHander;
+		
+		try {
+			String[] uqih = {IConfigurationManager.UnittedQuantityInferenceHelper};
+			ConfigurationItem ci =  new ConfigurationItem(uqih);
+			NameValuePair nvp = ci.new NameValuePair(IConfigurationManager.UQHelperClass, uqHander.getUnittedQuantityInferenceHelperClassname());
+			ci.addNameValuePair(nvp);
+			((IConfigurationManagerForEditing) getModelProcessor().getConfigMgr()).addConfiguration(ci);
+//			((IConfigurationManagerForEditing) getModelProcessor().getConfigMgr()).saveConfiguration();
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }	

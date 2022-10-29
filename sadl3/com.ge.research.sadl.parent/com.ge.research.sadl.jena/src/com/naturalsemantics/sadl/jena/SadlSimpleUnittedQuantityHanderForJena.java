@@ -39,7 +39,7 @@ import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
-import com.ge.research.sadl.processing.I_IntermediateFormTranslator.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
@@ -912,6 +912,11 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 	@Override
 	public void setIntermediateFormTranslator(I_IntermediateFormTranslator ift) {
 		ifTranslator = ift;
+	}
+
+	@Override
+	public String getUnittedQuantityInferenceHelperClassname() {
+		return "com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper";
 	}
 	
 }
