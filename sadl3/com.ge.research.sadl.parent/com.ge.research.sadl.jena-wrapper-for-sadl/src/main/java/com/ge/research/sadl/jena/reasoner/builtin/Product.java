@@ -25,7 +25,6 @@ import org.apache.jena.vocabulary.XSD;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
-import com.naturalsemantics.sadl.jena.reasoner.builtin.IUnittedQuantityEnabledBuiltin;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,7 +37,7 @@ import org.apache.jena.graph.impl.LiteralLabelFactory;
 /**
 
  */
-public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product implements IUnittedQuantityEnabledBuiltin {
+public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product implements ITypedBaseBuiltin {
 
 	private int argLength = 0;
 
@@ -300,6 +299,16 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
 	@Override
 	public BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
 		return BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly;
+	}
+
+	@Override
+	public String getFunctionSignatureString() {
+		return "product(decimal, ...)decimal";
+	}
+
+	@Override
+	public boolean canProcessListArgument() {
+		return true;
 	}
     
 }

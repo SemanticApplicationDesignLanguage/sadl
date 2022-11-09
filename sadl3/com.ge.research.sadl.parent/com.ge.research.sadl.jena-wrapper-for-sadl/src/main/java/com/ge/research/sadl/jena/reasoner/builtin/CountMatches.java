@@ -31,6 +31,8 @@ import org.apache.jena.reasoner.rulesys.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+
 public class CountMatches extends TypedBaseBuiltin {
     protected static final Logger logger = LoggerFactory.getLogger(CountMatches.class);
 	

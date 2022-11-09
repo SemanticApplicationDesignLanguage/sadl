@@ -26,6 +26,8 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.RDF;
 
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+
 public class Max extends TypedBaseBuiltin {
 	
 	private int argLength = 0;
@@ -185,5 +187,15 @@ public class Max extends TypedBaseBuiltin {
     	}
         return max;
     }
+
+	@Override
+	public BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+		return BuiltinUnittedQuantityStatus.SameUnitsRequired;
+	}
+
+	@Override
+	public boolean canProcessListArgument() {
+		return true;
+	}
 
 }

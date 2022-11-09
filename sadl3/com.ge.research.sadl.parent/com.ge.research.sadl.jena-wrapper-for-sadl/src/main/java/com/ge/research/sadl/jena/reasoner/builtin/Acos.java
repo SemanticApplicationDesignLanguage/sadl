@@ -23,6 +23,8 @@ import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+
 public class Acos extends TypedBaseBuiltin {
 
     /**
@@ -72,5 +74,4 @@ public class Acos extends TypedBaseBuiltin {
 	public String getFunctionSignatureString() {
 		return "acos(decimal)decimal";
 	}
-
 }

@@ -35,12 +35,11 @@ import org.apache.jena.vocabulary.XSD;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
-import com.naturalsemantics.sadl.jena.reasoner.builtin.IUnittedQuantityEnabledBuiltin;
 
 /**
 
  */
-public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implements IUnittedQuantityEnabledBuiltin {
+public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implements ITypedBaseBuiltin {
 
 	private int argLength = 0;
 
@@ -321,5 +320,15 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
 	@Override
 	public BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
 		return BuiltinUnittedQuantityStatus.SameUnitsRequired;
+	}
+
+	@Override
+	public String getFunctionSignatureString() {
+		return "sum(decimal, ...)decimal";
+	}
+
+	@Override
+	public boolean canProcessListArgument() {
+		return true;
 	}
 }

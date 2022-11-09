@@ -25,6 +25,8 @@ import org.apache.jena.reasoner.rulesys.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+
 public class Abs extends TypedBaseBuiltin {
 	private static final Logger logger = LoggerFactory.getLogger(Abs.class);
 
@@ -87,5 +89,4 @@ public class Abs extends TypedBaseBuiltin {
 	public String getFunctionSignatureString() {
 		return "abs(decimal)decimal";
 	}
-
 }

@@ -45,6 +45,7 @@ import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.jena.reasoner.builtin.ITypedBaseBuiltin;
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
@@ -90,7 +91,6 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.naturalsemantics.sadl.jena.reasoner.builtin.IUnittedQuantityEnabledBuiltin;
 
 public class JenaTranslatorPlugin implements ITranslator {
     private static final String THERE_EXISTS = "thereExists";
@@ -2504,7 +2504,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 				String className = null;
 				className = be.getFuncUri();
 				try {
-					IUnittedQuantityEnabledBuiltin inst = ((ConfigurationManager)configurationMgr).getClassInstance(className, IUnittedQuantityEnabledBuiltin.class);
+					ITypedBaseBuiltin inst = ((ConfigurationManager)configurationMgr).getClassInstance(className, ITypedBaseBuiltin.class);
 					be.setUnittedQuantityStatus(inst.getBuiltinUnittedQuantityStatus());
 				}
 				catch (ClassCastException e) {
