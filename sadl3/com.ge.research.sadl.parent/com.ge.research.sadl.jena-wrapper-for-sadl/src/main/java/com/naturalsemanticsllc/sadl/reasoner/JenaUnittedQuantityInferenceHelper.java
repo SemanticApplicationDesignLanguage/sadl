@@ -14,7 +14,8 @@
  * and licensed under the Eclipse Public License - v 1.0
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
- ***********************************************************************/package com.naturalsemanticsllc.sadl.reasoner;
+ ***********************************************************************/
+package com.naturalsemanticsllc.sadl.reasoner;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.reasoner.rulesys.RuleContext;

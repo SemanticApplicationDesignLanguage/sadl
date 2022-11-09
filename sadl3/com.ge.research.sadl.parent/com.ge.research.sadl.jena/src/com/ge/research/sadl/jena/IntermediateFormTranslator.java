@@ -88,7 +88,6 @@ import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing;
-import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
@@ -2439,28 +2438,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return false;
 	}
 	
-	public BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be) {
-		BuiltinType funcType = be.getFuncType();
-		String funcName = be.getFuncName();
-		if (funcType.equals(BuiltinType.Plus) || funcType.equals(BuiltinType.Minus)) {
-			return BuiltinUnittedQuantityStatus.SameUnitsRequired;
-		}
-		else if (isComparisonBuiltin(funcName)) {
-			return BuiltinUnittedQuantityStatus.SameUnitsRequired;
-		}
-		else if (funcType.equals(BuiltinType.Multiply) || funcType.equals(BuiltinType.Divide)) {
-			return BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly;
-		}
-		else if (funcType.equals(BuiltinType.Power)) {
-			return BuiltinUnittedQuantityStatus.LeftUnitsOnly;
-		}
-		else if (funcType.equals(BuiltinType.Modulus)) {
-			return BuiltinUnittedQuantityStatus.UnitsNotSupported;
-		}
-		else {
-			return BuiltinUnittedQuantityStatus.StatusUnknown;
-		}
-	}
 	
 	/**
 	 * Method to determine if the returned value of a BuiltinElement with

@@ -37,6 +37,7 @@ import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 
 public interface ITranslator {
 	
@@ -304,7 +305,7 @@ public interface ITranslator {
 	}
 
 	/**
-	 * Method to get the particular reasoner's name for a BuiltinElement
+	 * Method to get the particular reasoner's name for a BuiltinElement.
 	 * @param bin -- the BuiltinElement in question
 	 * @return -- the name of the BuiltinElement as it should appear in this translator
 	 * @throws TranslationException
@@ -312,9 +313,25 @@ public interface ITranslator {
 	public String builtinTypeToString(BuiltinElement bin) throws TranslationException;
 	
 	/**
+	 * Method to set the function name in the input BuiltinElement using the BuiltinType
+	 * and return the new name
+	 * @param bin
+	 * @return
+	 * @throws TranslationException
+	 */
+	public String setBuiltinElementNameByBuiltinType(BuiltinElement bin) throws TranslationException;
+	
+	/**
 	 * Return the full package and name of the class implementing the named builtin
 	 * @param builtinName -- name of builtin for which class name is desired
 	 * @return class name
 	 */
 	public String getBuiltinClassName(String builtinName);
+	
+	/**
+	 * Method to determine if a BuiltinElement can handle UnittedQuantity arguments
+	 * @param be
+	 * @return
+	 */
+	public BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be);
 }

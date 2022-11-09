@@ -20,8 +20,6 @@ package com.ge.research.sadl.reasoner;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
-
 /**
  * This class provides the interface for implementation classes that handle UnittedQuantity function arguments and 
  * return values during inference. It also provides a map of helper class names keyed by reasoner instance.
@@ -33,7 +31,7 @@ public interface IUnittedQuantityInferenceHelper {
 	// Map of helpers by reasoner
 	static Map<Object, String> uqhelperMap = new HashMap<Object, String>();
 	
-	public enum BuiltinUnittedQuantityStatus {SingleArgument, SameUnitsRequired, DifferentUnitsAllowedOrLeftOnly, LeftUnitsOnly, UnitsNotSupported, StatusUnknown}
+	public enum BuiltinUnittedQuantityStatus {SingleArgument, SameUnitsRequired, DifferentUnitsAllowedOrLeftOnly, LeftUnitsOnly, UnitsNotSupported}
 	// This enum identifies the categories of BuiltinElements WRT UnittedQuantity arguments.
 
 

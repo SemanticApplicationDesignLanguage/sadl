@@ -309,7 +309,10 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		'''.sadl.enableAmbiguousNameDetection;
 
 		val issues_1 = validate(model_1);
-		assertEquals(Iterables.toString(issues_1), 4, issues_1.size);
+		for (issue : issues_1) {
+			println(issue.toString)
+		}
+		assertEquals(Iterables.toString(issues_1), 5, issues_1.size);
 	}
 	
 	@Test

@@ -47,10 +47,11 @@ public class BuiltinInfo {
 	}
 	
 	public String getUri() {
-		String uri = getClassName().substring(0, getClassName().lastIndexOf('.'));
-		uri += "#";
-		uri += getName();
-		return uri;
+//		String uri = getClassName().substring(0, getClassName().lastIndexOf('.'));
+//		uri += "#";
+//		uri += getName();
+//		return uri;
+		return getClassName();
 	}
 	
 	private void setReasonerFamily(String reasonerFamily) {
@@ -91,5 +92,21 @@ public class BuiltinInfo {
 
 	public void setSignature(String signature) {
 		this.signature = signature;
+	}
+
+	public String toString() {
+		String name = getName();
+		String sign = getSignature();
+		StringBuilder sb = new StringBuilder();
+		if (sign != null && !sign.startsWith(name)) {
+			sb.append(name);
+		}
+		sb.append(sign);
+		if (getClassName() != null) {
+			sb.append("(");
+			sb.append(getClassName());
+			sb.append(")");
+		}
+		return sb.toString();
 	}
 }

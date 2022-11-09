@@ -17,14 +17,24 @@
  ***********************************************************************/
 package com.naturalsemantics.sadl.jena;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.reasoner.rulesys.Builtin;
+import org.apache.jena.reasoner.rulesys.BuiltinRegistry;
+import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 
+import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.jena.IntermediateFormTranslator;
 import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.model.gp.BuiltinElement;
@@ -39,8 +49,14 @@ import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
-import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.reasoner.ConfigurationException;
+import com.ge.research.sadl.reasoner.IReasoner;
+import com.ge.research.sadl.reasoner.ITranslator;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.reasoner.QueryCancelledException;
+import com.ge.research.sadl.reasoner.QueryParseException;
+import com.ge.research.sadl.reasoner.ResultSet;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.naturalsemantics.sadl.processing.ISadlUnittedQuantityHandler;
@@ -200,6 +216,18 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 	@Override
 	public List<GraphPatternElement> expandUnittedQuantities(List<GraphPatternElement> patterns, BuiltinElement be,
 			boolean isRuleThen) throws TranslationException {
+		if (be.getArguments() == null) {
+			return patterns;
+		}
+		List<Node> beargs = be.getArguments();
+		Node lhsArg = beargs.size() > 0 ? beargs.get(0) : null;
+		boolean lhsUQ = lhsArg != null ? getIfTranslator().isUnittedQuantity(lhsArg) : false;
+		Node rhsArg = beargs.size() > 1 ? beargs.get(1) : null;
+		boolean rhsUQ = rhsArg != null ? getIfTranslator().isUnittedQuantity(rhsArg) : false;
+		if (!lhsUQ && !rhsUQ) {
+			return patterns;
+		}
+
 		if (be.getArguments() == null || be.getArguments().size() != 2) {
 			// all BuiltinElements of interest are binary at this point (before any 3rd output arg for a math operation is added later)
 			return patterns;
@@ -208,7 +236,12 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 			// if both args are Literals we don't want to do anything. If the units aren't the same that will be detected later (?? verify with test case ??).
 			return patterns;
 		}
-		BuiltinUnittedQuantityStatus bestatus = getIfTranslator().getBuiltinElementUQStatus(be);
+		BuiltinUnittedQuantityStatus bestatus = getBuiltinUnittedQuantityStatusForExpansion(be);
+		if (bestatus == null) {
+			// try to get it from the built-in itself
+			bestatus = getBuiltinElementUQStatus(be);
+		}
+		be.setUnittedQuantityStatus(bestatus);
 		int beIdx = patterns != null ? patterns.indexOf(be) : -1;
 		if (beIdx >= 0) {
 			// the BuiltinElement be should be in the patterns list--otherwise it is an unexpected error
@@ -221,13 +254,6 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 			NamedNode unitPredNode = UtilsForJena.validateNamedNode(getIfTranslator().getModelProcessor().getConfigMgr(), getIfTranslator().getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI));
 			unitPredNode.setNodeType(NodeType.DataTypeProperty);
 
-			Node lhsArg = be.getArguments().get(0);
-			Node rhsArg = be.getArguments().get(1);
-			boolean lhsUQ = getIfTranslator().isUnittedQuantity(lhsArg);
-			boolean rhsUQ = getIfTranslator().isUnittedQuantity(rhsArg);
-			if (!lhsUQ && !rhsUQ) {
-				return patterns;
-			}
 			Node newLhsArg = null;
 			Node newRhsArg = null;
 			String lhsUnits = null;
@@ -821,9 +847,10 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 	 * @param target
 	 * @param unitPredNode
 	 * @return
+	 * @throws TranslationException 
 	 */
 	private Node getUnitFromPrevious(List<GraphPatternElement> patterns, Node target,
-			NamedNode valuePredNode, NamedNode unitPredNode) {
+			NamedNode valuePredNode, NamedNode unitPredNode) throws TranslationException {
 		if (target instanceof Literal) {
 			return null;
 		}
@@ -867,27 +894,40 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 		return null;
 	}
 
-	BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be) {
-		BuiltinType funcType = be.getFuncType();
-		String funcName = be.getFuncName();
-		if (funcType.equals(BuiltinType.Plus) || funcType.equals(BuiltinType.Minus)) {
-			return BuiltinUnittedQuantityStatus.SameUnitsRequired;
+	BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be) throws TranslationException {
+		if (be.getUnittedQuantityStatus() != null) {
+			return be.getUnittedQuantityStatus();
 		}
-		else if (getIfTranslator().isComparisonBuiltin(funcName)) {
-			return BuiltinUnittedQuantityStatus.SameUnitsRequired;
+		try {
+			ITranslator trans = getIfTranslator().getModelProcessor().getConfigMgr().getTranslator();
+			String biUri = SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#" + trans.builtinTypeToString(be);
+			if (getIfTranslator() instanceof IntermediateFormTranslator) {
+				OntModel m = ((IntermediateFormTranslator)getIfTranslator()).getTheModel();
+				Individual subject = m.getIndividual(biUri);
+				if (subject != null) {
+					StmtIterator sitr = m.listStatements(subject, m.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNALURL_PROPERTY_URI), (RDFNode)null);
+					if (sitr.hasNext()) {
+						String euri = sitr.nextStatement().getObject().toString();
+						be.setFuncUri(euri);
+						return trans.getBuiltinElementUQStatus(be);
+					}
+				}
+				else {
+					throw new TranslationException("Built-in '" + biUri + "' not found in semantic model.");
+				}
+			}
+			return trans.getBuiltinElementUQStatus(be);
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		else if (funcType.equals(BuiltinType.Multiply) || funcType.equals(BuiltinType.Divide)) {
-			return BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly;
-		}
-		else if (funcType.equals(BuiltinType.Power)) {
-			return BuiltinUnittedQuantityStatus.LeftUnitsOnly;
-		}
-		else if (funcType.equals(BuiltinType.Modulus)) {
-			return BuiltinUnittedQuantityStatus.UnitsNotSupported;
-		}
-		else {
-			return BuiltinUnittedQuantityStatus.StatusUnknown;
-		}
+		return BuiltinUnittedQuantityStatus.UnitsNotSupported;
 	}
 
 	/**

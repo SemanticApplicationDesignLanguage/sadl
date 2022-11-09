@@ -22,10 +22,39 @@ import java.util.List;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.TranslationException;
 
 public interface ISadlUnittedQuantityHandler {
+	/**
+	 * Method to determine the built-in UnittedQuantity status for common functions for use in expansion when
+	 * the built-in itself doesn't have this information.
+	 * @param be
+	 * @return
+	 */
+	default BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatusForExpansion(BuiltinElement be) {
+		BuiltinType bit = be.getFuncType();
+		if (bit.equals(BuiltinType.GT) ||
+				bit.equals(BuiltinType.GTE) ||
+				bit.equals(BuiltinType.LT) ||
+				bit.equals(BuiltinType.LTE) ||
+				bit.equals(BuiltinType.Equal) ||
+				bit.equals(BuiltinType.NotEqual) ||
+				bit.equals(BuiltinType.Plus) ||
+				bit.equals(BuiltinType.Minus)) {
+			return BuiltinUnittedQuantityStatus.SameUnitsRequired;
+		}
+		else if (bit.equals(BuiltinType.Multiply) ||
+				bit.equals(BuiltinType.Divide)) {
+			return BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly;
+		}
+		else if (bit.equals(BuiltinType.Power)) {
+			return BuiltinUnittedQuantityStatus.SingleArgument;
+		}
+		return null;
+	}
 	
 	abstract void setIntermediateFormTranslator(I_IntermediateFormTranslator ift);
 	

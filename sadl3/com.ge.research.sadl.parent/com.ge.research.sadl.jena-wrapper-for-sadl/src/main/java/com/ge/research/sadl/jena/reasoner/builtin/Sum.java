@@ -35,11 +35,12 @@ import org.apache.jena.vocabulary.XSD;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
+import com.naturalsemantics.sadl.jena.reasoner.builtin.IUnittedQuantityEnabledBuiltin;
 
 /**
 
  */
-public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum {
+public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implements IUnittedQuantityEnabledBuiltin {
 
 	private int argLength = 0;
 
@@ -98,7 +99,7 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum {
 	        		sum = Util.makeLongNode(nSum.longValue());
 	        	}
         	}
-//        	System.out.println("builtin product assigning value: " + sum);
+//        	System.out.println("builtin sum assigning value: " + sum);
         	return env.bind(args[length - 1], sum);
         }
         else if (length == 3) {
@@ -172,7 +173,7 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum {
 	            		n1 = Util.makeLongNode(nSum.longValue());
 	            	}
             	}
-//            	System.out.println("builtin product assigning value: " + sum);
+//            	System.out.println("builtin sum assigning value: " + sum);
             	return env.bind(args[length - 1], n1);
         	}
         }
@@ -316,4 +317,9 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum {
     	}
         return sum;
     }
+
+	@Override
+	public BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+		return BuiltinUnittedQuantityStatus.SameUnitsRequired;
+	}
 }

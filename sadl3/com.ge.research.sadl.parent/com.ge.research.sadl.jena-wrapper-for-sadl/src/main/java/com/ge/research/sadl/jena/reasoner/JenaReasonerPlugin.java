@@ -33,8 +33,6 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -126,7 +124,6 @@ import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin.TranslationTarg
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.gp.BuiltinElement;
-import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
@@ -165,10 +162,7 @@ import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
-import com.ge.research.sadl.sADL.Constant;
 import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquationUtils;
-
-import jakarta.activation.DataSource;
 
 import jakarta.activation.DataSource;
 
@@ -3250,12 +3244,13 @@ public class JenaReasonerPlugin extends Reasoner{
 		List<BuiltinInfo> implbltins = new ArrayList<BuiltinInfo>();
 		String pkg = "org.apache.jena.reasoner.rulesys.builtins";
 		String[] impbuiltinnames = {
-		"AddOne", "Bound", "CountLiteralValues", "IsBNode", "IsDType",
-		"IsLiteral", "ListContains", "ListEntry", "ListEqual", 
-//		"ListLength", this one removed so that the custom builtin by same name will not be confounded awc 4/9/2021
-		"ListMapAsObject", "ListMapAsSubject", "ListNotContains", "ListNotEqual", 
-		"NotBNode", "NotDType", "NotLiteral", "Now", "Regex", "StrConcat", "Table", 
+		"AddOne", "Bound", "CountLiteralValues", "Difference", "Equal", "GE", "GreaterThan", 
+		"IsBNode", "IsDType", "IsLiteral", "LE", "LessThan", "ListContains", "ListEntry", "ListEqual", 
+		"ListLength", "ListMapAsObject", "ListMapAsSubject", "ListNotContains", "ListNotEqual", 
+		"Max", "Min", "NotBNode", "NotDType", "NotEqual", "NotLiteral", "NoValue", "Now", "Print",
+		"Regex", "Product", "Quotient", "Regex", "StrConcat", "Sum", "Table", 
 		"TableAll", "Unbound", "UriConcat"};
+		List<FunctionSignature> signatures = getImplicitBuiltinSignatures();
 		for (int i = 0; i < impbuiltinnames.length; i++) {
 			String fqn = pkg + "." + impbuiltinnames[i];
 			try {
@@ -3264,6 +3259,16 @@ public class JenaReasonerPlugin extends Reasoner{
 				Object javaInstance = c.newInstance();
 				if (javaInstance instanceof Builtin) {
 					BuiltinInfo bi = new BuiltinInfo(((Builtin)javaInstance).getName(), fqn, getReasonerFamily(), ((Builtin)javaInstance).getArgLength());
+					for (FunctionSignature sig : signatures) {
+						if (sig.getName().equals(bi.getName())) {
+							bi.setSignature(sig.toString());
+							break;
+						}
+					}
+					if (bi.getSignature() == null) {
+						String untypedFctSignature = bi.getName() + "(...)--";
+						bi.setSignature(untypedFctSignature);
+					}
 					implbltins.add(bi);
 				}
 			} catch (ClassNotFoundException e) {

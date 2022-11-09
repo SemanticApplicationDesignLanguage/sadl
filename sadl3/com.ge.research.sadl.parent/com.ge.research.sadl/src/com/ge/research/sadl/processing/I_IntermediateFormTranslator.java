@@ -2,12 +2,10 @@ package com.ge.research.sadl.processing;
 
 import java.util.List;
 
-import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.Node;
-import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -123,13 +121,6 @@ public interface I_IntermediateFormTranslator {
 	 * @return
 	 */
 	abstract String getNewVar();
-
-	/**
-	 * Method to get the BuiltinUnittedQuantityStatus of a BuiltinElement
-	 * @param be
-	 * @return
-	 */
-	abstract BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be);
 
 	/**
 	 * Method to determine if a Node is a UnittedQuantity

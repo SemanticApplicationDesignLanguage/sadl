@@ -3400,6 +3400,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					}
 					else if (param.getUnknown() != null || param.getEllipsis() != null) {  //&& !isEllipsis(param)) {			
 						getModelProcessor().addWarning(SadlErrorMessages.TYPE_CHECK_BUILTIN_EXCEPTION.get("parameter " + (i + 1)), arg);
+					expressionsTypeCheckCache.put(expression, null);
 					}
 					else {
 						// don't try to typecheck if it's an untyped ellipsis

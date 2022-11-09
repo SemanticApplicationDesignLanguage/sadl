@@ -87,13 +87,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
@@ -152,13 +152,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
@@ -223,13 +223,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				if (idx == 0) {
@@ -247,7 +247,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_01d() {
+	def void testUnittedQuantityInRule_product_grammar_3inputs() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -294,13 +294,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
@@ -313,7 +313,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 
 	@Ignore
 	@Test
-	def void testUnittedQuantityInRule_02() {
+	def void testUnittedQuantityInRule_product_grammar() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -358,13 +358,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
@@ -375,7 +375,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 
 	@Test
-	def void testUnittedQuantityInRule_03() {
+	def void testUnittedQuantityInRule_product_graph_pattern () {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -418,13 +418,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
@@ -435,7 +435,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_03b() {
+	def void testUnittedQuantityInRule_sum_graph_pattern () {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -478,13 +478,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
@@ -495,7 +495,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_03c() {
+	def void testUnittedQuantityInRule_sum_of_list() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -538,13 +538,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
@@ -559,7 +559,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	 * UnittedQuantity arguments.
 	 */
 	@Test
-	def void testUnittedQuantityInRule_04() {
+	def void testUnittedQuantityInRule_product_of_list() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -603,13 +603,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
@@ -623,7 +623,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	 * This test uses explicit 
 	 */
 	@Test
-	def void testUnittedQuantityInRule_05() {
+	def void testUnittedQuantityInRule_product_3_inputs() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -668,13 +668,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
@@ -685,7 +685,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_06() {
+	def void testUnittedQuantityInRule_ge_simple() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -730,13 +730,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -746,7 +746,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_07() {
+	def void testUnittedQuantityInRule_ge_uq_literal() {
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
 			 uri "http://sadl.org/test.sadl" alias test.
@@ -789,13 +789,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -805,7 +805,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_08() {
+	def void testUnittedQuantityInRule_ge_ignoreuq() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString))
 		val sfname = 'JavaExternal.sadl'
@@ -850,13 +850,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -866,7 +866,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_09() {
+	def void testUnittedQuantityInRule_product_uq_and_notuq() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
 		val sfname = 'JavaExternal.sadl'
@@ -909,13 +909,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
@@ -927,7 +927,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		
 		
 	@Test
-	def void testUnittedQuantityInRule_09b() {
+	def void testUnittedQuantityInRule_product_uq_and_notuq_notexpanded() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
 		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString));
@@ -971,18 +971,140 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
 				assertEquals("\"x\",\"y\"
 \"http://sadl.org/testUQTimesNumber.sadl#MyRect\",25.0 \"ft\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+
+	@Ignore
+	@Test
+	def void testUnittedQuantityInRule_min_uq_expanded() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/GE2.sadl" alias ge2.
+			 
+			 Rectangle is a class described by height with values of type UnittedQuantity, 
+			 	described by width with values of type UnittedQuantity,
+			 	described by minDimension with values of type UnittedQuantity.
+			 
+			 Rule minDim: if x is a Rectangle then minDimension of x is min(height of x, width of x).
+			 
+			 TestRect is a Rectangle with height 5 inch, with width 4 inch.
+			 
+			 Test: minDimension of TestRect is 4 inch.
+  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+			}
+		];
+	}
+
+	@Ignore
+	@Test
+	def void testUnittedQuantityInRule_min_uq_not_expanded() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/GE2.sadl" alias ge2.
+			 
+			 Rectangle is a class described by height with values of type UnittedQuantity, 
+			 	described by width with values of type UnittedQuantity,
+			 	described by minDimension with values of type UnittedQuantity.
+			 
+			 Rule minDim: if x is a Rectangle then minDimension of x is min(height of x, width of x).
+			 
+			 TestRect is a Rectangle with height 5 inch, with width 4 inch.
+			 
+			 Test: minDimension of TestRect is 4 inch.
+  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
 			}
 		];
 	}
@@ -1029,13 +1151,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.class.canonicalName)
 					println(tr.toString)
 				}
@@ -1095,13 +1217,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.class.canonicalName)
 					println(tr.toString)
 				}
@@ -1160,13 +1282,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.class.canonicalName)
 					println(tr.toString)
 				}
@@ -1225,13 +1347,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.class.canonicalName)
 					println(tr.toString)
 				}
@@ -1290,13 +1412,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -1352,13 +1474,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -1415,13 +1537,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -1479,13 +1601,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -1554,13 +1676,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -1613,13 +1735,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -1672,13 +1794,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -1731,13 +1853,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -1851,13 +1973,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -1920,13 +2042,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -1989,13 +2111,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)
@@ -2066,13 +2188,13 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(scr.toString)
 				assertTrue(scr instanceof SadlCommandResult)
 				val errs = (scr as SadlCommandResult).errors
-				if (errs != null) {
+				if (errs !== null) {
 					for (err : errs) {
 						println(err.toString)
 					}
 				}
 				val tr = (scr as SadlCommandResult).results
-				if (tr != null) {
+				if (tr !== null) {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof TestResult)

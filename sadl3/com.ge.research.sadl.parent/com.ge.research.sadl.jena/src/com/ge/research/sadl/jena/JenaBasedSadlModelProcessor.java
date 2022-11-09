@@ -208,6 +208,7 @@ import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.IConfigurationManagerForEditing.Scope;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
+//import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
@@ -1887,30 +1888,30 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// test case: get SadlImplicitModel OWL model from the OntModelProvider
 			URI simTestUri = URI.createURI(IReasoner.SADL_BUILTIN_FUNCTIONS_SYNTHETIC_URI);
 			try {
-				sadlBuiltinFunctionModel = OntModelProvider
-						.find(resource.getResourceSet().getResource(simTestUri, true));
+				setSadlBuiltinFunctionModel(OntModelProvider
+						.find(resource.getResourceSet().getResource(simTestUri, true)));
 			} catch (Exception e) {
 				// this happens if the test case doesn't cause the implicit model to be
 				// loaded--here now for backward compatibility but test cases should be fixed?
-				sadlBuiltinFunctionModel = null;
+				setSadlBuiltinFunctionModel(null);
 			}
 		} else {
 			java.nio.file.Path implfn = checkImplicitBuiltinFunctionModelExistence(resource, context);
 			if (implfn != null) {
-				if (sadlBuiltinFunctionModel == null) {
+				if (getSadlBuiltinFunctionModel() == null) {
 					final URI uri = getUri(resource, implfn);
 					Resource imrsrc = resource.getResourceSet().getResource(uri, true);
 					if (imrsrc instanceof XtextResource) {
-						sadlBuiltinFunctionModel = OntModelProvider.find((XtextResource) imrsrc);
+						setSadlBuiltinFunctionModel(OntModelProvider.find((XtextResource) imrsrc));
 					} else if (imrsrc instanceof ExternalEmfResource) {
-						sadlBuiltinFunctionModel = ((ExternalEmfResource) imrsrc).getOntModel();
+						setSadlBuiltinFunctionModel(((ExternalEmfResource) imrsrc).getOntModel());
 					}
-					if (sadlBuiltinFunctionModel == null) {
+					if (getSadlBuiltinFunctionModel() == null) {
 						if (imrsrc instanceof XtextResource) {
 							((XtextResource) imrsrc).getResourceServiceProvider().getResourceValidator()
 									.validate(imrsrc, CheckMode.FAST_ONLY, cancelIndicator);
-							sadlBuiltinFunctionModel = OntModelProvider.find(imrsrc);
-							OntModelProvider.attach(imrsrc, sadlBuiltinFunctionModel,
+							setSadlBuiltinFunctionModel(OntModelProvider.find(imrsrc));
+							OntModelProvider.attach(imrsrc, getSadlBuiltinFunctionModel(),
 									IReasoner.SADL_BUILTIN_FUNCTIONS_URI,
 									IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS);
 						} else {
@@ -1920,9 +1921,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 			}
 		}
-		if (sadlBuiltinFunctionModel != null) {
+		if (getSadlBuiltinFunctionModel() != null) {
 			addImportToJenaModel(getModelName(), IReasoner.SADL_BUILTIN_FUNCTIONS_URI,
-					IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS, sadlBuiltinFunctionModel);
+					IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS, getSadlBuiltinFunctionModel());
 		}
 	}
 
@@ -4275,7 +4276,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Individual fpInst = getTheJenaModel().createIndividual(functionPatternClass);			// create new FunctionPattern 
 		String bieqUri;
 		try {
-			bieqUri = IReasoner.SADL_BUILTIN_FUNCTIONS_URI + "#" + getConfigMgr().getTranslator().builtinTypeToString(fp);
+			bieqUri = IReasoner.SADL_BUILTIN_FUNCTIONS_URI + "#" + getConfigMgr().getTranslator().setBuiltinElementNameByBuiltinType(fp);
 			Individual bieq = getTheJenaModel().getIndividual(bieqUri);			// get the referenced equation
 			if (bieq == null) {
 				// this might be an implicit builtin
@@ -16849,5 +16850,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		return false;
 	}
-	
+
+	OntModel getSadlBuiltinFunctionModel() {
+		return sadlBuiltinFunctionModel;
+	}
+
+	void setSadlBuiltinFunctionModel(OntModel sadlBuiltinFunctionModel) {
+		this.sadlBuiltinFunctionModel = sadlBuiltinFunctionModel;
+	}
+		
 }

@@ -25,6 +25,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+
 /**
  * Class to represent any function in the Intermediate Form
  * @author 200005201
@@ -44,6 +46,10 @@ public class BuiltinElement extends GraphPatternElement {
 	
 	private List<Node> argumentTypes = null;
 	private List<Node> returnTypes = null;
+	
+	// If the built-in implementation of this BuiltinElement can handle UnittedQuantity inputs, this tells how they should be 
+	// processed. Note that this should be set by information that is retrieved from the built-in implementation.
+	private BuiltinUnittedQuantityStatus  unittedQuantityStatus = null;  
 
 	
 	public static enum BuiltinType {
@@ -594,5 +600,13 @@ public class BuiltinElement extends GraphPatternElement {
 
 	public void setInModelReferencedEquation(Equation inModelReferencedEquation) {
 		this.inModelReferencedEquation = inModelReferencedEquation;
+	}
+
+	public BuiltinUnittedQuantityStatus getUnittedQuantityStatus() {
+		return unittedQuantityStatus;
+	}
+
+	public void setUnittedQuantityStatus(BuiltinUnittedQuantityStatus unittedQuantityStatus) {
+		this.unittedQuantityStatus = unittedQuantityStatus;
 	}
 }

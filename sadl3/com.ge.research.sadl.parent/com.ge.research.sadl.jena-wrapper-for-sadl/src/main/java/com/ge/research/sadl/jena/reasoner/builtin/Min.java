@@ -26,7 +26,10 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.RDF;
 
-public class Min extends TypedBaseBuiltin {
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.naturalsemantics.sadl.jena.reasoner.builtin.IUnittedQuantityEnabledBuiltin;
+
+public class Min extends TypedBaseBuiltin implements IUnittedQuantityEnabledBuiltin {
 	
 	private int argLength = 0;
 
@@ -186,5 +189,10 @@ public class Min extends TypedBaseBuiltin {
     	}
         return min;
     }
+
+	@Override
+	public BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+		return BuiltinUnittedQuantityStatus.SameUnitsRequired;
+	}
 
 }

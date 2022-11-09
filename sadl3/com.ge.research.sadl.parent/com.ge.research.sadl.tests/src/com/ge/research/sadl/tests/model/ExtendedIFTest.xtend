@@ -1466,9 +1466,6 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	
 	@Test
 	def void testRuleFlexibleArgumentNumber() {
-		val forTest = newArrayList(
-"[and(rdf(v0, SubjHasProp:prop1, v1)), and(rdf(v1, SubjHasProp:prop2, v2)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:InstOfClass4)), and(rdf(v2, SubjHasProp:prop3, SubjHasProp:AnotherInstOfClass4)), and(rdf(v1, SubjHasProp:prop2, SubjHasProp:InstOfClass3)), (rdf(v1, SubjHasProp:prop2, SubjHasProp:AnotherInstOfClass3)))))))))))]"
-		)
 		'''
 			    uri "http://sadl.org/StrConcatTest.sadl" alias sct.
 			    
@@ -1482,7 +1479,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 					println(issue.message)
 				}
 			}
- 			issues.assertHasIssues(7);
+ 			issues.assertHasIssues(2);	// one for each function, strConcat and print.
  			var param1issueFound = false;
  			for (issue : issues) {
  				if (issue.message.equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information")) {

@@ -49,6 +49,7 @@ import com.ge.research.sadl.reasoner.FunctionNotSupportedException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ITranslator;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.ReasonerNotFoundException;
@@ -1908,6 +1909,18 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 
 	@Override
 	public String getBuiltinClassName(String builtinName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String setBuiltinElementNameByBuiltinType(BuiltinElement bin) throws TranslationException {
 		// TODO Auto-generated method stub
 		return null;
 	}
