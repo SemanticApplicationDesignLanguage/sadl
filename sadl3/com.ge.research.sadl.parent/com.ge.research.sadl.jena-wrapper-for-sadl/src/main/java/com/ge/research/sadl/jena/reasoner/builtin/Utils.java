@@ -539,27 +539,4 @@ public class Utils {
 		} 
 	}
 
-	public static boolean validateUnittedQuantityArgs(RuleContext context, BuiltinUnittedQuantityStatus operatorType, List<Node> nodeLst) throws UnittedQuantityHandlerException {
-		String className = IUnittedQuantityInferenceHelper.getUnittedQuantityInferenceHelperClassname(context.getGraph().getReasoner());
-		try {
-			Class<?> c = Class.forName(className);
-			Constructor<?> cons = c.getConstructor();
-			Object inst = cons.newInstance();
-			if (inst instanceof IUnittedQuantityInferenceHelper) {
-				Node lastArg = null;
-				for (Node arg : nodeLst) {
-					if (lastArg != null) {
-						boolean result = ((IUnittedQuantityInferenceHelper)inst).validateOperation(context, operatorType, lastArg, arg);
-					}
-					lastArg = arg;
-				}
-				return true;
-			}
-			else {
-				throw new UnittedQuantityHandlerException("Failed to instantiate IUnittedQuantityInferenceHandler class '" + className + "'");
-			}
-		} catch (Exception e) {
-			throw new UnittedQuantityHandlerException("Unable to invoke IUnittedQuantityInferenceHandler method 'validateUnittedQuantityArgs'", e);
-		} 
-	}
 }

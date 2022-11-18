@@ -36,6 +36,7 @@ public class BuiltinElement extends GraphPatternElement {
     private static final Logger logger = LoggerFactory.getLogger(BuiltinElement.class);
 	private String funcName = null;
 	private String funcUri = null;	// URI of function if given
+	private String externalUri = null;  // Identity of the implementation as known externally
 	private String funcPrefix = null;  // QName prefix if given
 	private BuiltinType funcType = null;	// the BuiltinType of this BuiltinElement
 	private List<Node> arguments = null;
@@ -608,5 +609,13 @@ public class BuiltinElement extends GraphPatternElement {
 
 	public void setUnittedQuantityStatus(BuiltinUnittedQuantityStatus unittedQuantityStatus) {
 		this.unittedQuantityStatus = unittedQuantityStatus;
+	}
+
+	public String getExternalUri() {
+		return externalUri;
+	}
+
+	public void setExternalUri(String externalUri) {
+		this.externalUri = externalUri;
 	}
 }

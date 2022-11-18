@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.impl.LiteralLabelFactory;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.RuleContext;
@@ -34,6 +35,8 @@ import org.apache.jena.vocabulary.XSD;
 
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.UnittedQuantity;
+import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 /**
@@ -63,6 +66,7 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
         checkArgs(length, context);
         BindingEnvironment env = context.getEnv();
+        JenaUnittedQuantityInferenceHelper juqih = new JenaUnittedQuantityInferenceHelper();
         /*
          * There are three cases to consider:
          * 1. The arguments (except the last) represent a graph pattern and the nodes that match that graph
@@ -83,59 +87,67 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
            	Number nSum = Long.valueOf(0);
         	Node sum = null;
         	List<Node> nodeLst = Arrays.asList(nodes);
-        	if (GeUtils.listContainsUnittedQuantity(nodeLst, context)) {
-        		sum = createUnittedQuantitySum(context, nSum, nodeLst);
-        	}
-        	else {
-             	nSum = addList(nSum, Arrays.asList(nodes), context);
-		       	if (nSum instanceof Float || nSum instanceof Double) {
-	        		sum = Util.makeDoubleNode(nSum.doubleValue());
-	        	}
-		       	else if (nSum instanceof Integer) {
-		       		sum = Util.makeIntNode(nSum.intValue());
-		       	}
-	        	else {
-	        		sum = Util.makeLongNode(nSum.longValue());
-	        	}
-        	}
+        	try {
+				if (juqih.listContainsUnittedQuantity(nodeLst, context)) {
+					sum = createUnittedQuantitySum(context, nSum, nodeLst, juqih);
+				}
+				else {
+				 	nSum = addList(nSum, Arrays.asList(nodes), context);
+				   	if (nSum instanceof Float || nSum instanceof Double) {
+						sum = Util.makeDoubleNode(nSum.doubleValue());
+					}
+				   	else if (nSum instanceof Integer) {
+				   		sum = Util.makeIntNode(nSum.intValue());
+				   	}
+					else {
+						sum = Util.makeLongNode(nSum.longValue());
+					}
+				}
+			} catch (UnittedQuantityHandlerException e) {
+				throw new BuiltinException(this, context, e.getMessage());
+			}
 //        	System.out.println("builtin sum assigning value: " + sum);
         	return env.bind(args[length - 1], sum);
         }
         else if (length == 3) {
-        	if (GeUtils.isUnittedQuantity(getArg(0, args, context), context) ||
-            		GeUtils.isUnittedQuantity(getArg(1, args, context), context)) {
-            		Number nSum = Long.valueOf(0);
-            		List<Node> nodeLst = new ArrayList<Node>();
-            		nodeLst.add(getArg(0, args, context));
-            		nodeLst.add(getArg(1, args, context));
-            		Node sum = createUnittedQuantitySum(context, nSum, nodeLst);
-                   	return env.bind(args[length - 1], sum);
-            }
-            else {
-	    		// this is just the normal case implemented by HP Labs (standard Jena) (except Jena doesn't handle
-	    		//	BigDecimal so we convert BigDecimal to Double before making the call)
-	    		if (getArg(0, args, context).isURI()) {
-	    			throw new BuiltinException(this, context, "First argument to sum is a URI: " + getArg(0, args, context).getURI());
-	    		}
-	    		if (getArg(1, args, context).isURI()) {
-	    			throw new BuiltinException(this, context, "Second argument to sum is a URI: " + getArg(1, args, context).getURI());
-	    		}
-	    		for (int i = 0; i < args.length - 1; i++) {
-	    	        Node n = getArg(i, args, context);
-	    	        if (n.isLiteral()) {
-	    	        	Object v = n.getLiteralValue();
-	    	        	if (v instanceof Number) {
-	    	        		if (v instanceof BigDecimal) {
-	    	        			if (((BigDecimal)v).scale() > 0) {
-	    	        				Double d = ((BigDecimal)v).doubleValue();
-	    	        				args[i] = Util.makeDoubleNode(d);
-	    	        			}
-	    	        		}
-	    	        	}
-	    	        }
-	    		}
-	    		return super.bodyCall(args, length, context);
-            }
+        	try {
+				if (juqih.isUnittedQuantity(getArg(0, args, context), context) ||
+						juqih.isUnittedQuantity(getArg(1, args, context), context)) {
+						Number nSum = Long.valueOf(0);
+						List<Node> nodeLst = new ArrayList<Node>();
+						nodeLst.add(getArg(0, args, context));
+						nodeLst.add(getArg(1, args, context));
+						Node sum = createUnittedQuantitySum(context, nSum, nodeLst, juqih);
+				       	return env.bind(args[length - 1], sum);
+				}
+				else {
+					// this is just the normal case implemented by HP Labs (standard Jena) (except Jena doesn't handle
+					//	BigDecimal so we convert BigDecimal to Double before making the call)
+					if (getArg(0, args, context).isURI()) {
+						throw new BuiltinException(this, context, "First argument to sum is a URI: " + getArg(0, args, context).getURI());
+					}
+					if (getArg(1, args, context).isURI()) {
+						throw new BuiltinException(this, context, "Second argument to sum is a URI: " + getArg(1, args, context).getURI());
+					}
+					for (int i = 0; i < args.length - 1; i++) {
+				        Node n = getArg(i, args, context);
+				        if (n.isLiteral()) {
+				        	Object v = n.getLiteralValue();
+				        	if (v instanceof Number) {
+				        		if (v instanceof BigDecimal) {
+				        			if (((BigDecimal)v).scale() > 0) {
+				        				Double d = ((BigDecimal)v).doubleValue();
+				        				args[i] = Util.makeDoubleNode(d);
+				        			}
+				        		}
+				        	}
+				        }
+					}
+					return super.bodyCall(args, length, context);
+				}
+			} catch (UnittedQuantityHandlerException e) {
+				throw new BuiltinException(this, context, e.getMessage());
+			}
     	}
         
     	// Not a graph pattern and not 3 arguments, a multiplicand, a multiplier, and a variable, so 
@@ -157,21 +169,25 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
         	else {
         		Number nSum = Long.valueOf(0);
             	java.util.List<Node> nodeLst = Util.convertList(n1, context);
-            	if (GeUtils.listContainsUnittedQuantity(nodeLst, context)) {
-            		n1 = createUnittedQuantitySum(context, nSum, nodeLst);
-            	}
-            	else {
-            		nSum = sumList(nSum, nodeLst, context);
-	            	if (nSum instanceof Float || nSum instanceof Double || nSum instanceof BigDecimal) {
-	            		n1 = Util.makeDoubleNode(nSum.doubleValue());
-	            	}
-	            	else if (nSum instanceof Integer) {
-	            		n1 = Util.makeIntNode(nSum.intValue());
-	            	}
-	            	else {
-	            		n1 = Util.makeLongNode(nSum.longValue());
-	            	}
-            	}
+            	try {
+					if (juqih.listContainsUnittedQuantity(nodeLst, context)) {
+						n1 = createUnittedQuantitySum(context, nSum, nodeLst, juqih);
+					}
+					else {
+						nSum = sumList(nSum, nodeLst, context);
+						if (nSum instanceof Float || nSum instanceof Double || nSum instanceof BigDecimal) {
+							n1 = Util.makeDoubleNode(nSum.doubleValue());
+						}
+						else if (nSum instanceof Integer) {
+							n1 = Util.makeIntNode(nSum.intValue());
+						}
+						else {
+							n1 = Util.makeLongNode(nSum.longValue());
+						}
+					}
+				} catch (UnittedQuantityHandlerException e) {
+					throw new BuiltinException(this, context, e.getMessage());
+				}
 //            	System.out.println("builtin sum assigning value: " + sum);
             	return env.bind(args[length - 1], n1);
         	}
@@ -179,50 +195,70 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
         else {
         	// so this must be the one remaining case--more than three arguments, more than two addends
         	List<Node> nodeLst = Arrays.asList(args);
-        	if (GeUtils.listContainsUnittedQuantity(nodeLst, context)) {
-            	Number nSum = Long.valueOf(0);
-            	List<Node> sumNodeLst = new ArrayList<Node>(nodeLst.size() - 1);
-            	for (int i = 0; i < (nodeLst.size() - 1); i++) {
-            		sumNodeLst.add(nodeLst.get(i));
-            	}
-        		n1 = createUnittedQuantitySum(context, nSum, sumNodeLst);
-        	}
-        	else {
-	        	if (!n1.isLiteral()) {
-	                throw new BuiltinException(this, context, "builtin " + getName() + " has an addend (" + n1 + ") which is not a Literal");
-	        	}
-	            Object sumObj = n1.getLiteralValue();
-	            if (!(sumObj instanceof Number)) {
-	                throw new BuiltinException(this, context, "builtin " + getName() + " has an addend (" + sumObj + ") which is not a number");
-	            }
-	            Number nSum = Long.valueOf(0);
-	        	java.util.List<Node> lst = new ArrayList<Node>();
-	        	for (int i = 0; i < (length - 1); i++) {
-	        		lst.add(getArg(i, args, context));
-	        	}
-	        	nSum = sumList(nSum, lst, context);
-	           	if (nSum instanceof Float || nSum instanceof Double || nSum instanceof BigDecimal) {
-	        		n1 = Util.makeDoubleNode(nSum.doubleValue());
-	        	}
-	        	else if (nSum instanceof Integer) {
-	        		n1 = Util.makeIntNode(nSum.intValue());
-	        	}
-	        	else {
-	        		n1 = Util.makeLongNode(nSum.longValue());
-	        	}
-        	}
+        	try {
+				if (juqih.listContainsUnittedQuantity(nodeLst, context)) {
+					Number nSum = Long.valueOf(0);
+					List<Node> sumNodeLst = new ArrayList<Node>(nodeLst.size() - 1);
+					for (int i = 0; i < (nodeLst.size() - 1); i++) {
+						sumNodeLst.add(nodeLst.get(i));
+					}
+					n1 = createUnittedQuantitySum(context, nSum, sumNodeLst, juqih);
+					
+				}
+				else {
+					if (!n1.isLiteral()) {
+				        throw new BuiltinException(this, context, "builtin " + getName() + " has an addend (" + n1 + ") which is not a Literal");
+					}
+				    Object sumObj = n1.getLiteralValue();
+				    if (!(sumObj instanceof Number)) {
+				        throw new BuiltinException(this, context, "builtin " + getName() + " has an addend (" + sumObj + ") which is not a number");
+				    }
+				    Number nSum = Long.valueOf(0);
+					java.util.List<Node> lst = new ArrayList<Node>();
+					for (int i = 0; i < (length - 1); i++) {
+						lst.add(getArg(i, args, context));
+					}
+					nSum = sumList(nSum, lst, context);
+				   	if (nSum instanceof Float || nSum instanceof Double || nSum instanceof BigDecimal) {
+						n1 = Util.makeDoubleNode(nSum.doubleValue());
+					}
+					else if (nSum instanceof Integer) {
+						n1 = Util.makeIntNode(nSum.intValue());
+					}
+					else {
+						n1 = Util.makeLongNode(nSum.longValue());
+					}
+				}
+			} catch (UnittedQuantityHandlerException e) {
+				throw new BuiltinException(this, context, e.getMessage());
+			}
 //        	System.out.println("builtin sum assigning value: " + sum);
         	return env.bind(args[length - 1], n1);
         }
     }
     
-    private Node createUnittedQuantitySum(RuleContext context, Number nSum, List<Node> nodeLst) {
+    private Node createUnittedQuantitySum(RuleContext context, Number nSum, List<Node> nodeLst, JenaUnittedQuantityInferenceHelper juqih) {
+		String opStr = "+*";
+		Node operator = NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(opStr));
     	try {
-			Utils.validateUnittedQuantityArgs(context, BuiltinUnittedQuantityStatus.SameUnitsRequired, nodeLst);
+    		juqih.validateUnittedQuantityArgs(context, BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly, nodeLst);
 		} catch (UnittedQuantityHandlerException e) {
 			throw new BuiltinException(this, context, e.getMessage());
 		}
-		List<Node> values = GeUtils.getUnittedQuantityValues(this, nodeLst, BuiltinUnittedQuantityStatus.SameUnitsRequired, context);
+    	List<UnittedQuantity> uqs;
+		try {
+			uqs = juqih.getUnittedQuantityArgumentList(this, nodeLst, getBuiltinUnittedQuantityStatus(), context);
+		} catch (UnittedQuantityHandlerException e) {
+			throw new BuiltinException(this, context, e.getMessage());
+		}
+		List<Node> values = new ArrayList<Node>();
+		Node units = null; 
+		for (UnittedQuantity uq : uqs) {
+			values.add(uq.getValue());
+			if (units == null) {
+				units = uq.getUnit();
+			}
+		}
 		nSum = sumList(nSum, values, context);
 		Node valNode;
 		if (nSum instanceof Float || nSum instanceof Double) {
@@ -234,12 +270,7 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
 		else {
 			valNode = Util.makeLongNode(nSum.longValue());
 		}
-		Node uQinst = Utils.createInstanceOfClass(context, SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
-		Node valPred = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
-		Utils.addValue(context, uQinst, valPred, valNode);
-		List<Node>units = GeUtils.getUnittedQuantityUnits(this, nodeLst, BuiltinUnittedQuantityStatus.SameUnitsRequired, context);
-		Node unitPred = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
-		Utils.addValue(context, uQinst, unitPred, units.get(0));
+		Node uQinst = juqih.createUnittedQuantity(context, valNode, units);
 		return uQinst;
 	}
 

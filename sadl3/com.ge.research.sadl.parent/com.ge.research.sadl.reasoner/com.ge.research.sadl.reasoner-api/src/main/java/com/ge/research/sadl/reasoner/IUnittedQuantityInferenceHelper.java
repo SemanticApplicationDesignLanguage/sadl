@@ -18,7 +18,10 @@
 package com.ge.research.sadl.reasoner;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.jena.graph.Node;
 
 /**
  * This class provides the interface for implementation classes that handle UnittedQuantity function arguments and 
@@ -31,9 +34,38 @@ public interface IUnittedQuantityInferenceHelper {
 	// Map of helpers by reasoner
 	static Map<Object, String> uqhelperMap = new HashMap<Object, String>();
 	
-	public enum BuiltinUnittedQuantityStatus {SingleArgument, SameUnitsRequired, DifferentUnitsAllowedOrLeftOnly, LeftUnitsOnly, UnitsNotSupported}
 	// This enum identifies the categories of BuiltinElements WRT UnittedQuantity arguments.
+	public enum BuiltinUnittedQuantityStatus {SingleArgument, SameUnitsRequired, DifferentUnitsAllowedOrLeftOnly, LeftUnitsOnly, UnitsNotSupported}
 
+	/**
+	 * This class encapsulated the value and the unit of a UnittedQuantity
+	 */
+	class UnittedQuantity {
+		private Node value;
+		private Node unit;
+		
+		public UnittedQuantity(Node value, Node unit) {
+			setValue(value);
+			setUnit(unit);
+		}
+		
+		public Node getUnit() {
+			return unit;
+		}
+		
+		public void setUnit(Node unit) {
+			this.unit = unit;
+		}
+		
+		public Node getValue() {
+			return value;
+		}
+		
+		public void setValue(Node value) {
+			this.value = value;
+		}
+	}
+	
 
 	
 	/**
@@ -100,4 +132,42 @@ public interface IUnittedQuantityInferenceHelper {
 	 */
 	abstract Object[] performUnitConversions(Object operator, Number arg1Value, Object arg1Units, Number arg2Value, 
 			Object arg2Units) throws UnittedQuantityHandlerException;
+	
+	/**
+	 * Method to get a list of Nodes which are the units of a list of instances of the SadlImplicitModel's
+	 * UnittedQuantity class
+	 * @param bi
+	 * @param nodes
+	 * @param context
+	 * @return
+	 */
+	abstract List<UnittedQuantity> getUnittedQuantityArgumentList(Object bi, List<Node> nodes,  BuiltinUnittedQuantityStatus builtinUqStatus, Object context) throws UnittedQuantityHandlerException;
+	
+	/**
+	 * Method to determine if any of the elements of a list of Nodes is an instance of the SadlImplicitModel's
+	 * UnittedQuantity class.
+	 * @param nodes
+	 * @param context
+	 * @return
+	 */
+	abstract boolean listContainsUnittedQuantity(List<Node> nodes, Object context)  throws UnittedQuantityHandlerException;
+	
+	/**
+	 * Method to determine if a Node is an instance of the SadlImplicitModel UnittedQuantity class.
+	 * Since this is during inference, we can assume that transient closure over class hierarchies
+	 * has made every instance of a subclass of UnittedQuantity also an instance of UnittedQuantity.
+	 * @param node
+	 * @param context
+	 * @return
+	 */
+	abstract boolean isUnittedQuantity(Node node, Object context) throws UnittedQuantityHandlerException;
+
+	/**
+	 * Method to create a new instance of UnittedQuantity with the given value and units
+	 * @param context
+	 * @param value
+	 * @param unit
+	 * @return
+	 */
+	abstract Node createUnittedQuantity(Object context, Node value, Node unit)  throws UnittedQuantityHandlerException;
 }

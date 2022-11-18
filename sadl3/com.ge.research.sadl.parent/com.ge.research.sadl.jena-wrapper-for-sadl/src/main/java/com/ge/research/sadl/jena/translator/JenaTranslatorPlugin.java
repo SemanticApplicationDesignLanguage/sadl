@@ -1441,8 +1441,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 			// if not see if it is one already registered
 			Builtin bltin = BuiltinRegistry.theRegistry.getImplementation(builtinName);
 			if (bltin == null) {
-				logger.error("Something went wrong finding/loading Builtin '" + builtinName + "'");
-				addError("Unable to resolve built-in '" + builtinName + "' in rule '" + getRuleInTranslation().getRuleName() + "'");
+//				logger.error("Something went wrong finding/loading Builtin '" + builtinName + "'");
+//				addError("Unable to resolve built-in '" + builtinName + "' in rule '" + getRuleInTranslation().getRuleName() + "'");
 			}
 		}
 		return builtinName;
@@ -2500,9 +2500,9 @@ public class JenaTranslatorPlugin implements ITranslator {
 			return be.getUnittedQuantityStatus();
 		}
 		try {
-			if (be.getFuncUri() != null) {
+			if (be.getExternalUri() != null) {
 				String className = null;
-				className = be.getFuncUri();
+				className = be.getExternalUri();
 				try {
 					ITypedBaseBuiltin inst = ((ConfigurationManager)configurationMgr).getClassInstance(className, ITypedBaseBuiltin.class);
 					be.setUnittedQuantityStatus(inst.getBuiltinUnittedQuantityStatus());

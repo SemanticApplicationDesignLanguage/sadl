@@ -849,5 +849,10 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	 */
 	public abstract boolean isNumericOperator(String funcName);
 
-
+	/**
+	 * Method to identify any other expandable operation
+	 * @param funcName
+	 * @return
+	 */
+	public abstract boolean isOtherExpandableOperator(String funcName);
 }

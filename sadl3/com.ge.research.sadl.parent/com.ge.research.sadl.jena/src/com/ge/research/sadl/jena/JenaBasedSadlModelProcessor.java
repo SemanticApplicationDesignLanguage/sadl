@@ -144,7 +144,6 @@ import com.ge.research.sadl.builder.IConfigurationManagerForIDE;
 import com.ge.research.sadl.errorgenerator.generator.SadlErrorMessages;
 import com.ge.research.sadl.external.ExternalEmfResource;
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.ImplicitPropertySide;
-import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.TypeCheckInfo;
 import com.ge.research.sadl.model.CircularDefinitionException;
 import com.ge.research.sadl.model.ConceptIdentifier;
 import com.ge.research.sadl.model.ConceptName;
@@ -332,7 +331,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private List<String> numericComparisonOperators = Arrays.asList(">=", ">", "<=", "<");
 	private List<String> equalityInequalityComparisonOperators = Arrays.asList("==", "!=", "is", "=");
 	private List<String> mAssignmentOperators = Arrays.asList("is","=");
-	private List<String> canBeNumericOperators = Arrays.asList(">=", ">", "<=", "<", "==", "!=", "is", "=");
+	private List<String> canBeNumericOperators = Arrays.asList(">=", ">", "<=", "<", "==", "!=", "is", "=", "argument");
 
 	public enum OPERATORS_RETURNING_BOOLEAN {
 		contains, unique, is, gt, ge, lt, le, and, or, not, was, hasBeen
@@ -15830,6 +15829,13 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		return false;
 	}
+	
+	public boolean isOtherExpandableOperator(String op) {
+		if (op.equals("min")) {
+			return true;
+		}
+		return false;
+	}
 
 	public boolean canBeNumericOperator(List<String> operations) {
 		Iterator<String> itr = operations.iterator();
@@ -16858,5 +16864,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	void setSadlBuiltinFunctionModel(OntModel sadlBuiltinFunctionModel) {
 		this.sadlBuiltinFunctionModel = sadlBuiltinFunctionModel;
 	}
+
 		
 }

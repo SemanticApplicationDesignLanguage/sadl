@@ -33,8 +33,9 @@ public interface ISadlUnittedQuantityHandler {
 	 * the built-in itself doesn't have this information.
 	 * @param be
 	 * @return
+	 * @throws TranslationException 
 	 */
-	default BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatusForExpansion(BuiltinElement be) {
+	default BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatusForExpansion(BuiltinElement be) throws TranslationException {
 		BuiltinType bit = be.getFuncType();
 		if (bit.equals(BuiltinType.GT) ||
 				bit.equals(BuiltinType.GTE) ||
@@ -53,10 +54,28 @@ public interface ISadlUnittedQuantityHandler {
 		else if (bit.equals(BuiltinType.Power)) {
 			return BuiltinUnittedQuantityStatus.SingleArgument;
 		}
-		return null;
+		return getBuiltinUnittedQuantityStatus(be);
 	}
 	
 	abstract void setIntermediateFormTranslator(I_IntermediateFormTranslator ift);
+	
+	/**
+	 * Method to use the specific handler to get the BuiltinUnittedQuantityStatus
+	 * 
+	 * @param be
+	 * @return
+	 */
+	abstract BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus(BuiltinElement be) throws TranslationException;
+	
+	/**
+	 * Method to compute the return type of a built-in based on the built-in type and the types
+	 * of the arguments.
+	 * @param be
+	 * @param argTcis
+	 * @return
+	 * @throws TranslationException 
+	 */
+	abstract Object computeBuiltinReturnType(BuiltinElement be, List<Object>argTcis) throws TranslationException;
 	
 	/*
 	 * Methods used in translation of statements containing references to UnittedQuantity when 

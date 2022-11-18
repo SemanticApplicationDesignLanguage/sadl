@@ -49,7 +49,6 @@ import org.eclipse.xtext.resource.XtextResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.TypeCheckInfo;
 import com.ge.research.sadl.jena.missingpatterns.DirectedPath;
 import com.ge.research.sadl.jena.missingpatterns.MultiplePathsFoundException;
 import com.ge.research.sadl.jena.missingpatterns.PathFinder;
@@ -4755,7 +4754,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return null;
 	}
 
-	private ISadlUnittedQuantityHandler getUnittedQuantityHander() throws TranslationException {
+	public ISadlUnittedQuantityHandler getUnittedQuantityHander() throws TranslationException {
 		if (unittedQuantityHandler == null) {
 			String uqhdlrname = getModelProcessor().getSadlUnittedQuantityHandler();
 			if (uqhdlrname != null) {

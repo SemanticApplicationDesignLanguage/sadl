@@ -24,7 +24,9 @@ import org.apache.jena.vocabulary.XSD;
 
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.UnittedQuantity;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
+import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -61,6 +63,8 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
     public boolean bodyCall(Node[] args, int length, RuleContext context) {
         checkArgs(length, context);
         BindingEnvironment env = context.getEnv();
+        
+        JenaUnittedQuantityInferenceHelper juqih = new JenaUnittedQuantityInferenceHelper();
         /*
          * There are three cases to consider:
          * 1. The arguments (except the last) represent a graph pattern and the nodes that match that graph
@@ -81,59 +85,67 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
         	Number nProd = Long.valueOf(1);
         	Node prod = null;
         	List<Node> nodeLst = Arrays.asList(nodes);
-        	if (GeUtils.listContainsUnittedQuantity(nodeLst, context)) {
-        		prod = createUnittedQuantityProduct(context, nProd, nodeLst);
-        	}
-        	else {
-	        	nProd = multiplyList(nProd, nodeLst, context);
-	        	if (nProd instanceof Float || nProd instanceof Double) {
-	        		prod = Util.makeDoubleNode(nProd.doubleValue());
-	        	}
-	        	else if (nProd instanceof Integer) {
-	        		prod = Util.makeIntNode(nProd.intValue());
-	        	}
-	        	else {
-	        		prod = Util.makeLongNode(nProd.longValue());
-	        	}
-        	}
+        	try {
+				if (juqih.listContainsUnittedQuantity(nodeLst, context)) {
+					prod = createUnittedQuantityProduct(context, nProd, nodeLst, juqih);
+				}
+				else {
+					nProd = multiplyList(nProd, nodeLst, context);
+					if (nProd instanceof Float || nProd instanceof Double) {
+						prod = Util.makeDoubleNode(nProd.doubleValue());
+					}
+					else if (nProd instanceof Integer) {
+						prod = Util.makeIntNode(nProd.intValue());
+					}
+					else {
+						prod = Util.makeLongNode(nProd.longValue());
+					}
+				}
+			} catch (UnittedQuantityHandlerException e) {
+				throw new BuiltinException(this, context, e.getMessage());
+			}
 //        	System.out.println("builtin product assigning value: " + sum);
         	return env.bind(args[length - 1], prod);
         }
         else if (length == 3) {
-        	if (GeUtils.isUnittedQuantity(getArg(0, args, context), context) ||
-        		GeUtils.isUnittedQuantity(getArg(1, args, context), context)) {
-        		Number nProd = Long.valueOf(1);
-        		List<Node> nodeLst = new ArrayList<Node>();
-        		nodeLst.add(getArg(0, args, context));
-        		nodeLst.add(getArg(1, args, context));
-        		Node prod = createUnittedQuantityProduct(context, nProd, nodeLst);
-               	return env.bind(args[length - 1], prod);
-        	}
-        	else {
-	    		// this is just the normal case implemented by HP Labs (standard Jena) (except Jena doesn't handle
-        		//	BigDecimal so we convert BigDecimal to Double before making the call)
-	    		if (getArg(0, args, context).isURI()) {
-	    			throw new BuiltinException(this, context, "First argument to product is a URI: " + getArg(0, args, context).getURI());
-	    		}
-	    		if (getArg(1, args, context).isURI()) {
-	    			throw new BuiltinException(this, context, "Second argument to product is a URI: " + getArg(1, args, context).getURI());
-	    		}
-	    		for (int i = 0; i < args.length - 1; i++) {
-	    	        Node n = getArg(i, args, context);
-	    	        if (n.isLiteral()) {
-	    	        	Object v = n.getLiteralValue();
-	    	        	if (v instanceof Number) {
-	    	        		if (v instanceof BigDecimal) {
-	    	        			if (((BigDecimal)v).scale() > 0) {
-	    	        				Double d = ((BigDecimal)v).doubleValue();
-	    	        				args[i] = Util.makeDoubleNode(d);
-	    	        			}
-	    	        		}
-	    	        	}
-	    	        }
-	    		}
-	     		return super.bodyCall(args, length, context);
-        	}
+        	try {
+				if (juqih.isUnittedQuantity(getArg(0, args, context), context) ||
+						juqih.isUnittedQuantity(getArg(1, args, context), context)) {
+					Number nProd = Long.valueOf(1);
+					List<Node> nodeLst = new ArrayList<Node>();
+					nodeLst.add(getArg(0, args, context));
+					nodeLst.add(getArg(1, args, context));
+					Node prod = createUnittedQuantityProduct(context, nProd, nodeLst, juqih);
+				   	return env.bind(args[length - 1], prod);
+				}
+				else {
+					// this is just the normal case implemented by HP Labs (standard Jena) (except Jena doesn't handle
+					//	BigDecimal so we convert BigDecimal to Double before making the call)
+					if (getArg(0, args, context).isURI()) {
+						throw new BuiltinException(this, context, "First argument to product is a URI: " + getArg(0, args, context).getURI());
+					}
+					if (getArg(1, args, context).isURI()) {
+						throw new BuiltinException(this, context, "Second argument to product is a URI: " + getArg(1, args, context).getURI());
+					}
+					for (int i = 0; i < args.length - 1; i++) {
+				        Node n = getArg(i, args, context);
+				        if (n.isLiteral()) {
+				        	Object v = n.getLiteralValue();
+				        	if (v instanceof Number) {
+				        		if (v instanceof BigDecimal) {
+				        			if (((BigDecimal)v).scale() > 0) {
+				        				Double d = ((BigDecimal)v).doubleValue();
+				        				args[i] = Util.makeDoubleNode(d);
+				        			}
+				        		}
+				        	}
+				        }
+					}
+					return super.bodyCall(args, length, context);
+				}
+			} catch (UnittedQuantityHandlerException e) {
+				throw new BuiltinException(this, context, e.getMessage());
+			}
     	}
     	
     	// Not a graph pattern and not 3 arguments, a multiplicand, a multiplier, and a variable, so 
@@ -153,21 +165,25 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
             } else {
             	Number nProd = Long.valueOf(1);
             	java.util.List<Node> nodeLst = Util.convertList(prod, context);
-            	if (GeUtils.listContainsUnittedQuantity(nodeLst, context)) {
-            		prod = createUnittedQuantityProduct(context, nProd, nodeLst);
-            	}
-            	else {
-	            	nProd = multiplyList(nProd, nodeLst, context);
-	            	if (nProd instanceof Float || nProd instanceof Double || nProd instanceof BigDecimal) {
-	            		prod = Util.makeDoubleNode(nProd.doubleValue());
-	            	}
-	            	else if (nProd instanceof Integer) {
-	            		prod = Util.makeIntNode(nProd.intValue());
-	            	}
-	            	else {
-	            		prod = Util.makeLongNode(nProd.longValue());
-	            	}
-            	}
+            	try {
+					if (juqih.listContainsUnittedQuantity(nodeLst, context)) {
+						prod = createUnittedQuantityProduct(context, nProd, nodeLst, juqih);
+					}
+					else {
+						nProd = multiplyList(nProd, nodeLst, context);
+						if (nProd instanceof Float || nProd instanceof Double || nProd instanceof BigDecimal) {
+							prod = Util.makeDoubleNode(nProd.doubleValue());
+						}
+						else if (nProd instanceof Integer) {
+							prod = Util.makeIntNode(nProd.intValue());
+						}
+						else {
+							prod = Util.makeLongNode(nProd.longValue());
+						}
+					}
+				} catch (UnittedQuantityHandlerException e) {
+					throw new BuiltinException(this, context, e.getMessage());
+				}
 //            	System.out.println("builtin product assigning value: " + sum);
             	return env.bind(args[length - 1], prod);
             }
@@ -175,52 +191,67 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
         else {
         	// so this must be the one remaining case--more than three arguments, more than two multipliers
         	List<Node> nodeLst = Arrays.asList(args);
-        	if (GeUtils.listContainsUnittedQuantity(nodeLst, context)) {
-            	Number nProd = Long.valueOf(1);
-            	List<Node> multiplierNodeLst = new ArrayList<Node>(nodeLst.size() - 1);
-            	for (int i = 0; i < (nodeLst.size() - 1); i++) {
-            		multiplierNodeLst.add(nodeLst.get(i));
-            	}
-        		prod = createUnittedQuantityProduct(context, nProd, multiplierNodeLst);
-        	}
-        	else {
-	        	if (!prod.isLiteral()) {
-	                throw new BuiltinException(this, context, "builtin " + getName() + " has a multiplier (" + prod + ") which is not a Literal");
-	        	}
-	            Object prodObj = prod.getLiteralValue();
-	            if (!(prodObj instanceof Number)) {
-	                throw new BuiltinException(this, context, "builtin " + getName() + " has a multiplier (" + prodObj + ") which is not a number");
-	            }
-	            Number nProd = Long.valueOf(1);
-	        	java.util.List<Node> lst = new ArrayList<Node>();
-	        	for (int i = 0; i < (length - 1); i++) {
-	        		lst.add(getArg(i, args, context));
-	        	}
-	        	nProd = multiplyList(nProd, lst, context);
-	           	if (nProd instanceof Float || nProd instanceof Double || nProd instanceof BigDecimal) {
-	        		prod = Util.makeDoubleNode(nProd.doubleValue());
-	        	}
-	        	else if (nProd instanceof Integer) {
-	        		prod = Util.makeIntNode(nProd.intValue());
-	        	}
-	        	else {
-	        		prod = Util.makeLongNode(nProd.longValue());
-	        	}
-        	}
+        	try {
+				if (juqih.listContainsUnittedQuantity(nodeLst, context)) {
+					Number nProd = Long.valueOf(1);
+					List<Node> multiplierNodeLst = new ArrayList<Node>(nodeLst.size() - 1);
+					for (int i = 0; i < (nodeLst.size() - 1); i++) {
+						multiplierNodeLst.add(nodeLst.get(i));
+					}
+					prod = createUnittedQuantityProduct(context, nProd, multiplierNodeLst, juqih);
+				}
+				else {
+					if (!prod.isLiteral()) {
+				        throw new BuiltinException(this, context, "builtin " + getName() + " has a multiplier (" + prod + ") which is not a Literal");
+					}
+				    Object prodObj = prod.getLiteralValue();
+				    if (!(prodObj instanceof Number)) {
+				        throw new BuiltinException(this, context, "builtin " + getName() + " has a multiplier (" + prodObj + ") which is not a number");
+				    }
+				    Number nProd = Long.valueOf(1);
+					java.util.List<Node> lst = new ArrayList<Node>();
+					for (int i = 0; i < (length - 1); i++) {
+						lst.add(getArg(i, args, context));
+					}
+					nProd = multiplyList(nProd, lst, context);
+				   	if (nProd instanceof Float || nProd instanceof Double || nProd instanceof BigDecimal) {
+						prod = Util.makeDoubleNode(nProd.doubleValue());
+					}
+					else if (nProd instanceof Integer) {
+						prod = Util.makeIntNode(nProd.intValue());
+					}
+					else {
+						prod = Util.makeLongNode(nProd.longValue());
+					}
+				}
+			} catch (UnittedQuantityHandlerException e) {
+				throw new BuiltinException(this, context, e.getMessage());
+			}
 //        	System.out.println("builtin product assigning value: " + sum);
         	return env.bind(args[length - 1], prod);
         }
     }
 
-	private Node createUnittedQuantityProduct(RuleContext context, Number nProd, List<Node> nodeLst) {
+	private Node createUnittedQuantityProduct(RuleContext context, Number nProd, List<Node> nodeLst, JenaUnittedQuantityInferenceHelper juqih) {
 		String opStr = "*";
 		Node operator = NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(opStr));
-    	try {
-			Utils.validateUnittedQuantityArgs(context, BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly, nodeLst);
+    	List<UnittedQuantity> uqs;
+		try {
+			uqs = juqih.getUnittedQuantityArgumentList(this, nodeLst, getBuiltinUnittedQuantityStatus(), context);
 		} catch (UnittedQuantityHandlerException e) {
 			throw new BuiltinException(this, context, e.getMessage());
 		}
-		List<Node> values = GeUtils.getUnittedQuantityValues(this, nodeLst, BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly, context);
+		List<Node> values = new ArrayList<Node>();
+		List<Node> units = new ArrayList<Node>(); 
+		for (UnittedQuantity uq : uqs) {
+			values.add(uq.getValue());
+			units.add(uq.getUnit());
+		}
+    	try {
+    		juqih.validateUnittedQuantityArgs(context, BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly, units);
+		} catch (UnittedQuantityHandlerException e) {
+			throw new BuiltinException(this, context, e.getMessage());
+		}
 		nProd = multiplyList(nProd, values, context);
 		Node valNode;
 		if (nProd instanceof Float || nProd instanceof Double) {
@@ -232,10 +263,6 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
 		else {
 			valNode = Util.makeLongNode(nProd.longValue());
 		}
-		Node uQinst = Utils.createInstanceOfClass(context, SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
-		Node valPred = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
-		Utils.addValue(context, uQinst, valPred, valNode);
-		List<Node>units = GeUtils.getUnittedQuantityUnits(this, nodeLst, BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly, context);
 		Node lastUnit = null;
 		for (Node unit : units) {
 			if (lastUnit != null) {
@@ -249,8 +276,7 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
 				lastUnit = unit;
 			}
 		}
-		Node unitPred = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
-		Utils.addValue(context, uQinst, unitPred, lastUnit);
+		Node uQinst = juqih.createUnittedQuantity(context, valNode, lastUnit);
 		return uQinst;
 	}
     

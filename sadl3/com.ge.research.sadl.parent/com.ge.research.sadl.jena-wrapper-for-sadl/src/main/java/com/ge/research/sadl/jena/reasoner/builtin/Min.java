@@ -18,15 +18,22 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.graph.Node;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
+import org.apache.jena.reasoner.rulesys.Node_RuleVariable;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.RDF;
 
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.UnittedQuantity;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
+import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 
 public class Min extends TypedBaseBuiltin {
 	
@@ -72,6 +79,10 @@ public class Min extends TypedBaseBuiltin {
         Node min = null;
         boolean allLongs = true;
         Node[] nodes = null;
+        boolean hasUnittedQuantityArgument = false;
+        JenaUnittedQuantityInferenceHelper juqih = new JenaUnittedQuantityInferenceHelper();
+        Node unit0 = null;
+
         if (GeUtils.isGraphPatternInput(this, args, length, context)) {
         	nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
         }
@@ -79,6 +90,13 @@ public class Min extends TypedBaseBuiltin {
         	nodes = new Node[length];
         	for (int i = 0; i < length; i++) {
         		nodes[i] = getArg(i, args, context);
+        		try {
+					if (!hasUnittedQuantityArgument && juqih.isUnittedQuantity(nodes[i], context)) {
+						hasUnittedQuantityArgument = true;
+					}
+				} catch (UnittedQuantityHandlerException e) {
+					throw new BuiltinException(this, context, e.getMessage());
+				}
         	}
         }
         else {
@@ -89,10 +107,39 @@ public class Min extends TypedBaseBuiltin {
             	minVal = minOfList(n1, context);
              }
         }
+        if (hasUnittedQuantityArgument) {
+        	List<Node> nodeLst = new ArrayList<Node>();
+        	for (Node n : nodes) {
+        		if (!(n instanceof Node_RuleVariable)) {
+        			nodeLst.add(n);
+        		}
+        	}
+        	List<UnittedQuantity> uqlist = null;
+			try {
+				uqlist = juqih.getUnittedQuantityArgumentList(this, nodeLst, getBuiltinUnittedQuantityStatus(), context);
+			} catch (UnittedQuantityHandlerException e) {
+				throw new BuiltinException(this, context, e.getMessage());
+			}
+        	if (uqlist !=  null && uqlist.size() >= 1) {
+        		unit0 = uqlist.get(0).getUnit();
+        		Node[] values = new Node[nodes.length];
+        		values[0] = uqlist.get(0).getValue();
+        		for (int i = 1; i < uqlist.size(); i++) {
+        			Node unit = uqlist.get(i).getUnit();
+        			try {
+						juqih.validateOperation(context, getBuiltinUnittedQuantityStatus(), unit0, unit);
+					} catch (UnittedQuantityHandlerException e) {
+						throw new BuiltinException(this, context, e.getMessage());
+					}
+        			values[i] = uqlist.get(i).getValue();
+        		}
+        		nodes = values;
+        	}
+        }
         if (nodes != null) {
 	        for (int i = 0; i < nodes.length; i++) {
 	        	Node n1 = nodes[i]; //getArg(i, args, context);
-	        	if (n1.isLiteral()) {
+	        	if (n1 != null && n1.isLiteral()) {
 	        		Object v1 = n1.getLiteralValue();
 	        		if (v1 instanceof Number) {
 	        			Number nv1 = (Number)v1;
@@ -153,6 +200,9 @@ public class Min extends TypedBaseBuiltin {
     	}
     	else {
     		min = Util.makeLongNode(((Number) minVal).longValue());
+    	}
+    	if (hasUnittedQuantityArgument) {
+    		min = juqih.createUnittedQuantity(context, min, unit0);
     	}
         return env.bind(args[length - 1], min);
     }

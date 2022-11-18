@@ -20,16 +20,13 @@ package com.ge.research.sadl.ui.test.inference
 import com.ge.research.sadl.model.gp.TestResult
 import com.ge.research.sadl.preferences.SadlPreferences
 import com.ge.research.sadl.reasoner.ConfigurationItem
+import com.ge.research.sadl.reasoner.ResultSet
 import com.ge.research.sadl.reasoner.SadlCommandResult
 import com.ge.research.sadl.ui.tests.AbstractSadlPlatformTest
 import java.util.List
+import org.eclipse.xtext.diagnostics.Severity
 import org.eclipse.xtext.preferences.PreferenceKey
 import org.junit.Test
-
-import static com.ge.research.sadl.ui.tests.GeneratedOutputFormat.*
-import com.ge.research.sadl.reasoner.ResultSet
-import org.eclipse.xtext.diagnostics.Severity
-import org.junit.Ignore
 
 /**
  * Test that demonstrate how to make assertions on the generated translator outputs, plus runs the inferencer too.
@@ -311,7 +308,6 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 
-	@Ignore
 	@Test
 	def void testUnittedQuantityInRule_product_grammar() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
@@ -987,7 +983,6 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 
-	@Ignore
 	@Test
 	def void testUnittedQuantityInRule_min_uq_expanded() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
@@ -1048,7 +1043,6 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 
-	@Ignore
 	@Test
 	def void testUnittedQuantityInRule_min_uq_not_expanded() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
@@ -1364,7 +1358,6 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
-//	@Ignore		
 	@Test
 	def void testUnittedQuantityInTest_01() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
@@ -1427,7 +1420,6 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
-//	@Ignore	
 	@Test
 	def void testUnittedQuantityInTest_02() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
@@ -1489,7 +1481,6 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
-//	@Ignore	
 	@Test
 	def void testUnittedQuantityInTest_03() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
@@ -1552,7 +1543,6 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
-//	@Ignore	
 	@Test
 	def void testUnittedQuantityInTest_04() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
@@ -1896,6 +1886,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		]
 
 	}
+	
 	@Test
 	def void testExpandUnittedQuantityPreference_02() {
 
