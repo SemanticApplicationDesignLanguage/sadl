@@ -48,7 +48,7 @@ jobs:
         mv *.zip com.ge.research.sadl.update-${{ github.event.release.tag_name }}.zip
 
     - name: Upload SADL product and update site
-      uses: softprops/action-gh-release@v0.1.14
+      uses: softprops/action-gh-release@v0.1.15
       with:
         files: |
           sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/target/products/*.zip
