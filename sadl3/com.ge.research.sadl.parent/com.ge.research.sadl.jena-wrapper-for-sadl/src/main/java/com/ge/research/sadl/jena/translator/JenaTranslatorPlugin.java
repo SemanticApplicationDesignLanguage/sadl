@@ -502,12 +502,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 				return SpecialBuiltin.ISKNOWN;
 			}
 		}
-//		else if (elements.get(index) instanceof BuiltinElement && ((BuiltinElement)elements.get(index)).getFuncName().equals(THERE_EXISTS)) {
-//			return SpecialBuiltin.THEREEXISTS;
-//		}
 		else if (elements.get(index) instanceof BuiltinElement &&
 				((BuiltinElement)elements.get(index)).getInModelReferencedEquation() != null) {
-			return SpecialBuiltin.CONTAINS_SADL_EQUATION;
+			// don't wrap if from SadlBuiltinFunctionsModel
+			if (!(((BuiltinElement)elements.get(index)).getFuncUri().startsWith(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#"))) {
+				return SpecialBuiltin.CONTAINS_SADL_EQUATION;
+			}
 		}
 		return null;
 	}

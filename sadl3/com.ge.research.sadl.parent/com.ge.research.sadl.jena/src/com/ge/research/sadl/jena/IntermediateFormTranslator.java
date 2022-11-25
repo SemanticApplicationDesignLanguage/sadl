@@ -2178,13 +2178,13 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			Object finalIfsVar = expandProxyNodes(moveToIfts, realArgForIfs, false, UnNestingType.ReturnObjectMoveBefore);
 			if (finalIfsVar == null && realArgForIfs instanceof BuiltinElement) {
 				Node newNode = getVariableNode((BuiltinElement)realArgForIfs);
+				setNewReturnVariableType(newNode, (BuiltinElement)realArgForIfs);
 				((BuiltinElement)realArgForIfs).addArgument(newNode);
 				finalIfsVar = newNode;
 				((ProxyNode)arg1PN).setReplacementNode(SadlModelProcessor.nodeCheck(finalIfsVar));
 				retiredProxyNodes.put((GraphPatternElement) realArgForIfs, arg1PN);
 			}
 			if (realArgForThen instanceof TripleElement && ((TripleElement)realArgForThen).getObject() == null) {
-				Object finalThensVar = expandProxyNodes(patterns, realArgForThen, isRuleThen, UnNestingType.ReturnObjectMoveBefore);
 				((TripleElement)realArgForThen).setObject(SadlModelProcessor.nodeCheck(finalIfsVar));
 				if (!patterns.contains((TripleElement)realArgForThen)) {
 					patterns.add((TripleElement)realArgForThen);
@@ -2352,6 +2352,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							else if (((BuiltinElement)realArg).getArguments() != null &&
 									getModelProcessor().isBuiltinMissingArgument(((BuiltinElement)realArg).getFuncName(), ((BuiltinElement)realArg).getArguments().size())){
 								Node newNode = getVariableNode((BuiltinElement)realArg);
+								setNewReturnVariableType(newNode, (BuiltinElement)realArg);
 								((BuiltinElement)realArg).addArgument(newNode);
 								argNode = newNode;
 								((ProxyNode)arg).setReplacementNode(SadlModelProcessor.nodeCheck(argNode));
@@ -2361,6 +2362,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							else if (((BuiltinElement)realArg).getArguments() == null &&
 									getModelProcessor().isBuiltinMissingArgument(((BuiltinElement)realArg).getFuncName(), 0)) {
 								Node newNode = getVariableNode((BuiltinElement)realArg);
+								setNewReturnVariableType(newNode, (BuiltinElement)realArg);
 								((BuiltinElement)realArg).addArgument(newNode);
 								argNode = newNode;
 								((ProxyNode)arg).setReplacementNode(SadlModelProcessor.nodeCheck(argNode));
@@ -2422,6 +2424,47 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			patterns = getUnittedQuantityHander().expandUnittedQuantities(patterns, be, isRuleThen);
 		}
 		return returnNode;
+	}
+
+	/**
+	 * Method to set the type of a BuiltinElement return variable type
+	 * @param varNode
+	 * @param be
+	 * @throws TranslationException
+	 */
+	private void setNewReturnVariableType(Node varNode, BuiltinElement be) throws TranslationException {
+		if (be.getReturnTypes() != null) {
+			List<Node> retTypes = be.getReturnTypes();
+			((VariableNode)varNode).setType(retTypes.get(retTypes.size() - 1));
+			return;
+		}
+		if (be.getContext() != null && be.getContext() instanceof EObject) {
+			Object beTci;
+			try {
+				beTci = getModelProcessor().getModelValidator().getType((EObject)be.getContext());
+			} catch (TranslationException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new TranslationException(e.getMessage(), e);
+			}
+			if (beTci instanceof TypeCheckInfo) {
+				if (getModelProcessor().isNumericOperator(be.getFuncName())) {
+					List<Node> args = be.getArguments();
+					boolean uqFound = false;
+					for (Node arg : args) {
+						if (isUnittedQuantity(arg)) {
+							uqFound = true;
+						}
+					}
+					if (uqFound) {
+						Node beRetType = ((TypeCheckInfo)beTci).getTypeCheckType();
+						if (beRetType != null) {
+							((VariableNode)varNode).setType(beRetType);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private boolean isExpandableComparisonOperator(BuiltinElement be) {

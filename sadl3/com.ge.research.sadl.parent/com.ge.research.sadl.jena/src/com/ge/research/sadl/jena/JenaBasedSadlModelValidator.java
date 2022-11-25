@@ -163,7 +163,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected DeclarationExtensions declarationExtensions = null;
 	private EObject defaultContext;
 	
-	protected Map<EObject, TypeCheckInfo> expressionsTypeCheckCache = new HashMap<EObject,TypeCheckInfo>();
 	private Map<EObject, Property> impliedPropertiesUsed = null;
 	private Map<EObject, List<String>> applicableExpandedProperties = null;
 	
@@ -172,9 +171,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	private List<ConceptName> binaryOpLeftImpliedProperties;
 	private List<ConceptName> binaryOpRightImpliedProperties;
 	protected Object lastSuperCallExpression = null;
+	
+	// Cache results of validation to avoid repeated calculation
 	private Map<EObject,Boolean> mEObjectsValidated = null; 
-	private String variableSeekingType = null;
+	protected Map<EObject, TypeCheckInfo> expressionsTypeCheckCache = new HashMap<EObject,TypeCheckInfo>();
 	private Map<URI, TypeCheckInfo> typeCache = new HashMap<>();
+	
+	private String variableSeekingType = null;
 
    	public enum ExplicitValueType {RESTRICTION, VALUE}
    	
@@ -251,9 +254,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				//	the leftExpression will be a Name and isFunction will be true
 				
 				// if op is "argument" then left is the argument, right is the param
-				// if the left is a name which is a not function and the containing type is Equation or ExternalEquation, 
+				// if the left is a name which is not a function and the containing type is Equation or ExternalEquation, 
 				//	then the return type is the type of the equation; other wise the type is returned by getType(leftExpression)
-				if (op.equals("argument") && leftExpression instanceof Name && 
+				if (op.equals(ISadlModelValidator.ARGUMENT) && leftExpression instanceof Name && 
 						((Name)leftExpression).getName().eContainer() instanceof ExternalEquationStatement &&
 						!((Name)leftExpression).isFunction()) {
 					NamedNode nn = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI);
@@ -262,7 +265,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							nn, this, leftExpression);
 					leftTypeCheckInfo = getFunctionType(declarationExtensions.getDeclaration((Name)leftExpression));
 				}
-				else if (op.equals("argument") && leftExpression instanceof Name && 
+				else if (op.equals(ISadlModelValidator.ARGUMENT) && leftExpression instanceof Name && 
 						((Name)leftExpression).getName().eContainer() instanceof EquationStatement &&
 						!((Name)leftExpression).isFunction()) {
 					NamedNode nn = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_EQUATION_CLASS_URI);
@@ -497,7 +500,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				checkForApplicableExpandedProperties(expression, leftTypeCheckInfo, rightTypeCheckInfo);
 			}
 			TypeCheckInfo binopTci = combineBinaryOperationTypes(operations, expression, leftTypeCheckInfo, rightTypeCheckInfo);
-			expressionsTypeCheckCache.put(expression, binopTci);
+			if (binopTci != null) {
+				cacheTypeCheckInfoByEObject(expression, binopTci);
+			}
 			return !errorsFound;
 		} catch (Throwable t) {
 			return handleValidationException(expression, t);
@@ -1061,7 +1066,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	public TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
 		boolean forceValidation = false;
 		if (expressionsTypeCheckCache != null && expressionsTypeCheckCache.containsKey(expression) && !forceValidation) {
-			return expressionsTypeCheckCache.get(expression);
+			return getCachedTypeCheckInfoByEObject(expression);
 		}
 		TypeCheckInfo returnedTci = null;
 		
@@ -1273,7 +1278,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			throw new TranslationException("Unhandled expression type: " + expression.getClass().getCanonicalName());
 		}
 		if (returnedTci != null) {
-			expressionsTypeCheckCache.put(expression, returnedTci);
+			cacheTypeCheckInfoByEObject(expression, returnedTci);
 		}
 		return returnedTci;
 	}
@@ -2915,7 +2920,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		TypeCheckInfo uqReturnType = getNonExpandedUnittedQuantityFunctionReturnTci(expression, args);
 		if (uqReturnType != null) {
-			expressionsTypeCheckCache.put(expression, uqReturnType);
+			cacheTypeCheckInfoByEObject(expression, uqReturnType);
 			return uqReturnType;
 		}
 		// if check forced or this is a built-in with graph pattern arguments then don't check type except range of final property
@@ -2933,14 +2938,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				}
 				if (param != null) {
 					if (param.getUnknown() == null && (!isEllipsis(param) || param.getTypedEllipsis() != null)) {
-						validateBinaryOperationByParts(expression, arg, param.getType(), "argument", sb, false);
+						validateBinaryOperationByParts(expression, arg, param.getType(), ISadlModelValidator.ARGUMENT, sb, false);
 						if (sb.length() > 0) {
 							getModelProcessor().addTypeCheckingError(sb.toString(), expression);
 						}
 					}
 					else if (param.getUnknown() != null || param.getEllipsis() != null) {  //&& !isEllipsis(param)) {			
 						getModelProcessor().addWarning(SadlErrorMessages.TYPE_CHECK_BUILTIN_EXCEPTION.get("parameter " + (i + 1)), arg);
-					expressionsTypeCheckCache.put(expression, null);
+					cacheTypeCheckInfoByEObject(expression, null);
 					}
 					else {
 						// don't try to typecheck if it's an untyped ellipsis
@@ -3175,7 +3180,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				metricsProcessor.addMarker(null, MetricsProcessor.ERROR_MARKER_URI, MetricsProcessor.UNDEFINED_FUNCTION_URI);
 			}
 		}
-//		throw new DontTypeCheckException();	// we've added an error message (presumably) so why throw exception?
 	}
 	
 	protected TypeCheckInfo getType(SadlResource sr) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
@@ -4391,6 +4395,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			// check UnittedQuantity compatibility and operation return TypeCheckInfo
 			TypeCheckInfo uqTypeCheckInfo = getTypeOfBinaryOperationWithUnittedQuantityInputs(operations, leftTypeCheckInfo, rightTypeCheckInfo, binExpr);
 			if (uqTypeCheckInfo != null) {
+				cacheTypeCheckInfoByEObject(binExpr, uqTypeCheckInfo);
 				return uqTypeCheckInfo;
 			}
 		}
@@ -4398,6 +4403,46 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return null;
 		}
 		return combineBinaryOperationTypes(operations, binExpr, leftTypeCheckInfo, rightTypeCheckInfo);
+	}
+	
+	private boolean cacheTypeCheckInfoByEObject(EObject eobj, TypeCheckInfo tci) {
+		if (!expressionsTypeCheckCache.containsKey(eobj)) {
+			expressionsTypeCheckCache.put(eobj, tci);
+			return true;
+		}
+		return false;
+	}
+	
+	private TypeCheckInfo getCachedTypeCheckInfoByEObject(EObject eobj) {
+		return expressionsTypeCheckCache.get(eobj);
+	}
+
+	/**
+	 * Method to get the SADL unitted quantity handler
+	 * @return
+	 * @throws TranslationException
+	 * @throws InvalidTypeException
+	 */
+	private ISadlUnittedQuantityHandler getSadlUnittedQuantityHandler() throws TranslationException, InvalidTypeException {
+		ISadlUnittedQuantityHandler uqhdlr = getModelProcessor().getIfTranslator().getUnittedQuantityHander();
+		return uqhdlr;
+	}
+	
+	/**
+	 * Method to get the BuiltinUnittedQuantityStatus for a specified operation
+	 * @param op
+	 * @return
+	 * @throws TranslationException
+	 * @throws InvalidTypeException
+	 */
+	private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus(String op) throws TranslationException, InvalidTypeException {
+		ISadlUnittedQuantityHandler uqhdlr = getSadlUnittedQuantityHandler();
+		if (uqhdlr !=  null) {
+			BuiltinElement be = new BuiltinElement();
+			be.setFuncName(op);
+			return uqhdlr.getBuiltinUnittedQuantityStatus(be);
+		}
+		throw new TranslationException("SADL UnittedQuantity handler not found");
 	}
 
 	/**
@@ -4416,14 +4461,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return null;
 		}
 		String op = operations.get(0);
-		BuiltinElement be = new BuiltinElement();
-		be.setFuncName(op);
 		if (!SadlModelProcessor.isComparisonBuiltin(op)) {
-			ISadlUnittedQuantityHandler uqhdlr = getModelProcessor().getIfTranslator().getUnittedQuantityHander();
+			ISadlUnittedQuantityHandler uqhdlr = getSadlUnittedQuantityHandler();
 			// get the return type from the handler
 			List<Object> argTcis = new ArrayList<Object>();
 			argTcis.add(leftTypeCheckInfo);
 			argTcis.add(rightTypeCheckInfo);
+			BuiltinElement be = new BuiltinElement();
+			be.setFuncName(op);
 			Object fctTci = uqhdlr.computeBuiltinReturnType(be, argTcis);
 			if (fctTci instanceof TypeCheckInfo) {
 				return (TypeCheckInfo) fctTci;
@@ -4432,10 +4477,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		return null;
 	}
-
+	
 	private TypeCheckInfo combineBinaryOperationTypes(List<String> operations, EObject binExpr,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo)
 			throws InvalidTypeException, TranslationException, InvalidNameException {
+		if (getCachedTypeCheckInfoByEObject(binExpr) != null) {
+			return getCachedTypeCheckInfoByEObject(binExpr);
+		}
 		if (getModelProcessor().isBooleanComparison(operations)) {
 			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.xboolean.getURI(), NodeType.DataTypeProperty));
 			ConceptName booleanLiteralConceptName = getModelProcessor().namedNodeToConceptName(tctype);
@@ -4475,7 +4523,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				return new TypeCheckInfo(decimalLiteralConceptName, tctype, this, binExpr);
 			}
 		}
-		else{
+		else if (operations.contains(ISadlModelValidator.ARGUMENT)){
+			return null;
+		}
+		else {
+			// not sure when this would happen...
 			return leftTypeCheckInfo;
 		}
 	}
@@ -4656,7 +4708,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, ImplicitPropertySide side) throws InvalidNameException, InvalidTypeException, DontTypeCheckException, TranslationException {
 		if (leftTypeCheckInfo != null && leftTypeCheckInfo.getTypeCheckType() != null && rightTypeCheckInfo != null
 				&& rightTypeCheckInfo.getTypeCheckType() != null) {
-			if (operations.get(0).equals("argument") && leftTypeCheckInfo.getTypeToExprRelationship().equals(TypeCheckInfo.FUNCTION_RETURN) &&
+			if (operations.get(0).equals(ISadlModelValidator.ARGUMENT) && leftTypeCheckInfo.getTypeToExprRelationship().equals(TypeCheckInfo.FUNCTION_RETURN) &&
 					leftTypeCheckInfo.getExpressionType() instanceof ConceptName &&
 					((ConceptName)leftTypeCheckInfo.getExpressionType()).getUri().equals(rightTypeCheckInfo.getTypeCheckType().getURI())){
 				return true;
@@ -5209,6 +5261,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 																			  (!isNumeric(rightTypeCheckInfo) && !isNumericWithImpliedProperty(rightTypeCheckInfo,(Expression)rightExpression)))) {
 						if (!leftConceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) || 
 								!rightConceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+							if (leftConceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && 
+									(isNumeric(rightTypeCheckInfo) || isNumericWithImpliedProperty(rightTypeCheckInfo, (Expression)rightExpression))) {
+								// This could be a BuiltinUnittedQuantityStatus.
+								BuiltinUnittedQuantityStatus bqs = getBuiltinUnittedQuantityStatus(operations.get(0));
+								if (bqs.equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)) {
+									return true;
+								}
+							}
 							return false;
 						}
 					}

@@ -244,7 +244,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_product_grammar_3inputs() {
+	def void testUQInRule_product_grammar_2inputs() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -309,7 +309,73 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 
 	@Test
-	def void testUnittedQuantityInRule_product_grammar() {
+	def void testUQInRule_product_grammar_2inputsNoExpand() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+				 uri "http://sadl.org/NamedUQinQuery.sadl" alias nameduqinquery.
+				 
+				 Shape is a class described by area with values of type UnittedQuantity.
+				 
+				 Rectangle is a type of Shape described by height with values of type UnittedQuantity, described by width with values of type UnittedQuantity.
+				 
+				 Rule AreaOfRect: if x is a Rectangle then area of x is height of x * width of x.
+				 
+				 StandardFootballField is a Rectangle with height (a UnittedQuantity StandardLength with ^value 120, with unit "yds"), with width 53.33 yds.
+				 
+				 Ask: select x, h, w, ar where x is a Rectangle and x has height h and x has width w and x has area ar.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				(tr as ResultSet).setShowNamespaces(false)
+				assertEquals("\"x\",\"h\",\"w\",\"ar\"
+\"StandardFootballField\",StandardLength (120 \"yds\"),53.33 \"yds\",6399.599999999999 \"yds*yds\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+
+	@Test
+	def void testUQInRule_product_grammar3inputs() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -371,7 +437,70 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 
 	@Test
-	def void testUnittedQuantityInRule_product_graph_pattern () {
+	def void testUQInRule_product_grammar3inputsNoExpansion() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/UnittedQuantityInRule2.sadl" alias unittedquantityinrule2.
+			 
+			 Container is a class described by volume with values of type UnittedQuantity.
+			 
+			 RectangleParallelopided is a type of Container 
+			 	described  by height with values of type UnittedQuantity,
+			 	described by width with values of type UnittedQuantity,
+			 	described by depth with values of type UnittedQuantity.
+			 	
+			 MyRP is a RectangleParallelopided with width 4.0 ft, with height 2.2 ft, with depth 1.1 ft.
+			 	
+			 Rule RP1: if x is a RectangleParallelopided then volume of x is height of x * width of x * depth of x.
+			 
+			 Ask: select c, v where c is a RectangleParallelopided and c has volume v.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"c\",\"v\"
+\"http://sadl.org/UnittedQuantityInRule2.sadl#MyRP\",9.680000000000001 \"ft*ft*ft\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+
+	@Test
+	def void testUQInRule_product_graph_pattern_explicit_product () {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -430,132 +559,12 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
-	@Test
-	def void testUnittedQuantityInRule_sum_graph_pattern () {
-		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
-		val sfname = 'JavaExternal.sadl'
-		createFile(sfname, '''
-			 uri "http://sadl.org/UnittedQuantityInRule3.sadl" alias unittedquantityinrule3.
-			 
-			 Container is a class described by sumOfDimensions with values of type UnittedQuantity.
-			 
-			 RectangleParallelopided is a type of Container 
-			 	described  by dimension with values of type UnittedQuantity.
-			 dimension of RectangleParallelopided has exactly 3 values.
-			 	
-			 MyRP is a RectangleParallelopided with dimension 4.0 ft, with dimension 2.2 ft, with dimension 1.1 ft.
-			 	
-			 Rule RP1: if x is a RectangleParallelopided then sumOfDimensions of x is sum(x, dimension).
-			 
-			 Ask: select c, v where c is a RectangleParallelopided and c has sumOfDimensions v.
-			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
-			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					System.out.println(issue.message)
-				}
-			}
-			if (rules !== null) {
-				for (rule : rules) {
-					System.out.println(rule.toString)
-				}
-			}
-			assertTrue(issues.filter[severity === Severity.ERROR].size == 0)
-		]
-
-		var List<ConfigurationItem> configItems = newArrayList
-		val String[] catHier = newArrayOfSize(1)
-		catHier.set(0, "Jena")
-		val ci = new ConfigurationItem(catHier)
-		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
-		configItems.add(ci)
-		assertInferencer(sfname, null, configItems) [
-			for (scr : it) {
-				println(scr.toString)
-				assertTrue(scr instanceof SadlCommandResult)
-				val errs = (scr as SadlCommandResult).errors
-				if (errs !== null) {
-					for (err : errs) {
-						println(err.toString)
-					}
-				}
-				val tr = (scr as SadlCommandResult).results
-				if (tr !== null) {
-					println(tr.toString)
-				}
-				assertTrue(tr instanceof ResultSet)
-				assertEquals("\"c\",\"v\"
-\"http://sadl.org/UnittedQuantityInRule3.sadl#MyRP\",7.300000000000001 \"ft\"", (tr as ResultSet).toString.trim)
-			}
-		];
-	}
-		
-	@Test
-	def void testUnittedQuantityInRule_sum_of_list() {
-		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
-		val sfname = 'JavaExternal.sadl'
-		createFile(sfname, '''
-			 uri "http://sadl.org/UnittedQuantityInRule3.sadl" alias unittedquantityinrule3.
-			 
-			 Container is a class described by sumOfDimensions with values of type UnittedQuantity.
-			 
-			 RectangleParallelopided is a type of Container 
-			 	described  by dimension with values of type UnittedQuantity.
-			 dimension of RectangleParallelopided has exactly 3 values.
-			 	
-			 MyRP is a RectangleParallelopided with dimension 4.0 ft, with dimension 2.2 ft, with dimension 1.1 ft.
-			 	
-			 Rule RP1: if x is a RectangleParallelopided and dimlst = list(x, dimension) then sumOfDimensions of x is sum(dimlst).
-			 
-			 Ask: select c, v where c is a RectangleParallelopided and c has sumOfDimensions v.
-			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
-			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					System.out.println(issue.message)
-				}
-			}
-			if (rules !== null) {
-				for (rule : rules) {
-					System.out.println(rule.toString)
-				}
-			}
-			assertTrue(issues.filter[severity === Severity.ERROR].size == 0)
-		]
-
-		var List<ConfigurationItem> configItems = newArrayList
-		val String[] catHier = newArrayOfSize(1)
-		catHier.set(0, "Jena")
-		val ci = new ConfigurationItem(catHier)
-		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
-		configItems.add(ci)
-		assertInferencer(sfname, null, configItems) [
-			for (scr : it) {
-				println(scr.toString)
-				assertTrue(scr instanceof SadlCommandResult)
-				val errs = (scr as SadlCommandResult).errors
-				if (errs !== null) {
-					for (err : errs) {
-						println(err.toString)
-					}
-				}
-				val tr = (scr as SadlCommandResult).results
-				if (tr !== null) {
-					println(tr.toString)
-				}
-				assertTrue(tr instanceof ResultSet)
-				assertEquals("\"c\",\"v\"
-\"http://sadl.org/UnittedQuantityInRule3.sadl#MyRP\",7.300000000000001 \"ft\"", (tr as ResultSet).toString.trim)
-			}
-		];
-	}
-		
 	/*
 	 * This test uses a list of UnittedQuantities and so depends on the built-in product to handle processing of the 
 	 * UnittedQuantity arguments.
 	 */
 	@Test
-	def void testUnittedQuantityInRule_product_of_list() {
+	def void testUQInRule_product_of_list() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -615,29 +624,85 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
-	/*
-	 * This test uses explicit 
-	 */
 	@Test
-	def void testUnittedQuantityInRule_product_3_inputs() {
+	def void testUQInRule_product_graph_pattern () {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
-			 uri "http://sadl.org/UnittedQuantityInRule5.sadl" alias unittedquantityinrule5.
+			 uri "http://sadl.org/UnittedQuantityInRule3.sadl" alias unittedquantityinrule3.
 			 
-			 Container is a class described by volume with values of type UnittedQuantity.
+			 Container is a class described by sumOfDimensions with values of type UnittedQuantity,
+			 	described by volume with values of type UnittedQuantity.
 			 
 			 RectangleParallelopided is a type of Container 
-			 	described  by height with values of type UnittedQuantity,
-			 	described by width with values of type UnittedQuantity,
-			 	described by depth with values of type UnittedQuantity.
+			 	described  by dimension with values of type UnittedQuantity.
+			 dimension of RectangleParallelopided has exactly 3 values.
 			 	
-			 MyRP is a RectangleParallelopided with width 4.0 ft, with height 2.2 ft, with depth 1.1 ft.
+			 MyRP is a RectangleParallelopided with dimension 4.0 ft, with dimension 2.2 ft, with dimension 1.1 ft.
 			 	
-			 Rule RP1: if x is a RectangleParallelopided then volume of x is product(height of x, width of x, depth of x).
+			 Rule RP1: if x is a RectangleParallelopided then volume of x is product(x, dimension).
 			 
 			 Ask: select c, v where c is a RectangleParallelopided and c has volume v.
 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.filter[severity === Severity.ERROR].size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"c\",\"v\"
+\"http://sadl.org/UnittedQuantityInRule3.sadl#MyRP\",9.680000000000001 \"ft*ft*ft\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+	@Test
+	def void testUQInRule_product_uq_and_notuq() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/testUQTimesNumber.sadl" alias testuqtimesnumber.
+			 
+			 Shape is a class described by perimeter with values of type UnittedQuantity.
+			 
+			 Rectangle is a type of Shape described by height with values of type UnittedQuantity, described by width with values of type UnittedQuantity.
+			 
+			 Rule PerimeterOfRect: if x is a Rectangle then perimeter of x is (height of x + width of x) * 2. 
+			 
+			 MyRect is a Rectangle with height 2.5 ft, with width 10.0 ft.
+			 
+			 Ask: select x, y where x has perimeter y.
+  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
 			if (issues !== null) {
 				for (issue : issues) {
@@ -674,14 +739,197 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 					println(tr.toString)
 				}
 				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"x\",\"y\"
+\"http://sadl.org/testUQTimesNumber.sadl#MyRect\",25.0 \"ft\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+		
+	@Test
+	def void testUQInRule_product_uq_and_notuqNotExpand() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/testUQTimesNumber.sadl" alias testuqtimesnumber.
+			 
+			 Shape is a class described by perimeter with values of type UnittedQuantity.
+			 
+			 Rectangle is a type of Shape described by height with values of type UnittedQuantity, described by width with values of type UnittedQuantity.
+			 
+			 Rule PerimeterOfRect: if x is a Rectangle then perimeter of x is (height of x + width of x) * 2. 
+			 
+			 MyRect is a Rectangle with height 2.5 ft, with width 10.0 ft.
+			 
+			 Ask: select x, y where x has perimeter y.
+  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"x\",\"y\"
+\"http://sadl.org/testUQTimesNumber.sadl#MyRect\",25.0 \"ft\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+		
+	@Test
+	def void testUQInRule_sum_graph_pattern () {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/UnittedQuantityInRule3.sadl" alias unittedquantityinrule3.
+			 
+			 Container is a class described by sumOfDimensions with values of type UnittedQuantity.
+			 
+			 RectangleParallelopided is a type of Container 
+			 	described  by dimension with values of type UnittedQuantity.
+			 dimension of RectangleParallelopided has exactly 3 values.
+			 	
+			 MyRP is a RectangleParallelopided with dimension 4.0 ft, with dimension 2.2 ft, with dimension 1.1 ft.
+			 	
+			 Rule RP1: if x is a RectangleParallelopided then sumOfDimensions of x is sum(x, dimension).
+			 
+			 Ask: select c, v where c is a RectangleParallelopided and c has sumOfDimensions v.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.filter[severity === Severity.ERROR].size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
 				assertEquals("\"c\",\"v\"
-\"http://sadl.org/UnittedQuantityInRule5.sadl#MyRP\",9.680000000000001 \"ft*ft*ft\"", (tr as ResultSet).toString.trim)
+\"http://sadl.org/UnittedQuantityInRule3.sadl#MyRP\",7.300000000000001 \"ft\"", (tr as ResultSet).toString.trim)
 			}
 		];
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_ge_simple() {
+	def void testUQInRule_sum_of_list() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/UnittedQuantityInRule3.sadl" alias unittedquantityinrule3.
+			 
+			 Container is a class described by sumOfDimensions with values of type UnittedQuantity.
+			 
+			 RectangleParallelopided is a type of Container 
+			 	described  by dimension with values of type UnittedQuantity.
+			 dimension of RectangleParallelopided has exactly 3 values.
+			 	
+			 MyRP is a RectangleParallelopided with dimension 4.0 ft, with dimension 2.2 ft, with dimension 1.1 ft.
+			 	
+			 Rule RP1: if x is a RectangleParallelopided and dimlst = list(x, dimension) then sumOfDimensions of x is sum(dimlst).
+			 
+			 Ask: select c, v where c is a RectangleParallelopided and c has sumOfDimensions v.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.filter[severity === Severity.ERROR].size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"c\",\"v\"
+\"http://sadl.org/UnittedQuantityInRule3.sadl#MyRP\",7.300000000000001 \"ft\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+	@Test
+	def void testUQInRule_ge_simple() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
@@ -742,7 +990,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_ge_uq_literal() {
+	def void testUQInRule_ge_uq_literal() {
 		val sfname = 'JavaExternal.sadl'
 		createFile(sfname, '''
 			 uri "http://sadl.org/test.sadl" alias test.
@@ -801,7 +1049,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_ge_ignoreuq() {
+	def void testUQInRule_ge_ignoreuq() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString))
 		val sfname = 'JavaExternal.sadl'
@@ -862,68 +1110,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
-	def void testUnittedQuantityInRule_product_uq_and_notuq() {
-		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
-		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
-		val sfname = 'JavaExternal.sadl'
-		createFile(sfname, '''
-			 uri "http://sadl.org/testUQTimesNumber.sadl" alias testuqtimesnumber.
-			 
-			 Shape is a class described by perimeter with values of type UnittedQuantity.
-			 
-			 Rectangle is a type of Shape described by height with values of type UnittedQuantity, described by width with values of type UnittedQuantity.
-			 
-			 Rule PerimeterOfRect: if x is a Rectangle then perimeter of x is (height of x + width of x) * 2. 
-			 
-			 MyRect is a Rectangle with height 2.5 ft, with width 10.0 ft.
-			 
-			 Ask: select x, y where x has perimeter y.
-  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
-			assertNotNull(jenaModel)
-			if (issues !== null) {
-				for (issue : issues) {
-					System.out.println(issue.message)
-				}
-			}
-			if (rules !== null) {
-				for (rule : rules) {
-					System.out.println(rule.toString)
-				}
-			}
-			val errors = issues.filter[severity === Severity.ERROR]
-			assertTrue(errors.size == 0)
-		]
-
-		var List<ConfigurationItem> configItems = newArrayList
-		val String[] catHier = newArrayOfSize(1)
-		catHier.set(0, "Jena")
-		val ci = new ConfigurationItem(catHier)
-		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
-		configItems.add(ci)
-		assertInferencer(sfname, null, configItems) [
-			for (scr : it) {
-				println(scr.toString)
-				assertTrue(scr instanceof SadlCommandResult)
-				val errs = (scr as SadlCommandResult).errors
-				if (errs !== null) {
-					for (err : errs) {
-						println(err.toString)
-					}
-				}
-				val tr = (scr as SadlCommandResult).results
-				if (tr !== null) {
-					println(tr.toString)
-				}
-				assertTrue(tr instanceof ResultSet)
-				assertEquals("\"x\",\"y\"
-\"http://sadl.org/testUQTimesNumber.sadl#MyRect\",25.0", (tr as ResultSet).toString.trim)
-			}
-		];
-	}
-		
-		
-	@Test
-	def void testUnittedQuantityInRule_product_uq_and_notuq_notexpanded() {
+	def void testUQInRule_product_uq_and_notuq_notexpanded() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
 		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString));
@@ -984,7 +1171,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 
 	@Test
-	def void testUnittedQuantityInRule_min_uq_expanded() {
+	def void testUQInRule_min_uq_expanded() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
 		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.TRUE.toString));
@@ -1044,7 +1231,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 
 	@Test
-	def void testUnittedQuantityInRule_min_uq_not_expanded() {
+	def void testUQInRule_min_uq_not_expanded() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
 		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString));
@@ -1880,7 +2067,7 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 				println(rule.toString)
 			}
 			assertEquals(0, issues.size)
-			assertEquals("Rule R1:  if rdf(x, rdf:type, uqir:Rectangle) and rdf(x, uqir:height, v0) and rdf(v0, sadlimplicitmodel:value, v2) and rdf(v0, sadlimplicitmodel:unit, v4) and rdf(x, uqir:width, v1) and rdf(v1, sadlimplicitmodel:value, v3) and rdf(v1, sadlimplicitmodel:unit, v5) and *(v2,v3,v6) and combineUnits(\"*\",v4,v5,v8) then thereExists(UnittedQuantity,value,v6,unit,v8,Plus,x,uqir:area).", 
+			assertEquals("Rule R1:  if rdf(x, rdf:type, uqir:Rectangle) and rdf(x, uqir:height, v0) and rdf(v0, sadlimplicitmodel:value, v2) and rdf(v0, sadlimplicitmodel:unit, v4) and rdf(x, uqir:width, v1) and rdf(v1, sadlimplicitmodel:value, v3) and rdf(v1, sadlimplicitmodel:unit, v5) and *(v2,v3,v6) and combineUnits(\"*\",v4,v5,v7) then thereExists(UnittedQuantity,value,v6,unit,v7,Plus,x,uqir:area).", 
 				rules.get(0).toString
 			)
 		]

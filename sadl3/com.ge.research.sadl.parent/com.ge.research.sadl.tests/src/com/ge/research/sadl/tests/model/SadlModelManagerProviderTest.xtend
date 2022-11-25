@@ -1200,8 +1200,8 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			val eqs =processor.equations
 			assertEquals(1, eqs.size)
 			for(eq:eqs) {
+				println(eq.toString)
 				processor.compareTranslations("decimal PI_Controller(decimal K1,decimal K2,decimal Error): +(*(K1,Error),/(*(K2,^(Error,3)),abs(Error)))",eq.toString)
-//				println(eq.toString)
 			}
 		]
 	}

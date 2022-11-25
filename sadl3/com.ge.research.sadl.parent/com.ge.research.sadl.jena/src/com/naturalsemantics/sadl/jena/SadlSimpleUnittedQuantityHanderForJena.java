@@ -27,8 +27,12 @@ import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.XSD;
+import org.eclipse.emf.ecore.EObject;
 
 import com.ge.research.sadl.jena.IntermediateFormTranslator;
+import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
+import com.ge.research.sadl.jena.JenaBasedSadlModelValidator;
 import com.ge.research.sadl.jena.TypeCheckInfo;
 import com.ge.research.sadl.jena.UtilsForJena;
 import com.ge.research.sadl.model.ConceptName;
@@ -45,11 +49,13 @@ import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
 import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.sADL.BinaryOperation;
 import com.naturalsemantics.sadl.processing.ISadlUnittedQuantityHandler;
 
 public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuantityHandler {
@@ -168,6 +174,10 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 								}
 							}
 						}
+						if (returnedValueUnit == null) {
+							// unit isn't in the modifiedBEs
+							
+						}
 						if (returnedValueUnit != null) {
 							if (be.getUnittedQuantityStatus().equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)) {
 								if (unitVars.length == 2 && unitVars[0] != null && unitVars[1] != null) {
@@ -196,6 +206,9 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 								combineUnitsBe.addArgument(unitVars[1]);
 								combineUnitsBe.addArgument(returnedValueUnit);
 								rule.getIfs().add(combineUnitsBe);
+							}
+							else {
+								returnedValueUnit = unitVars[0];								
 							}
 						}
 						else {
@@ -301,9 +314,11 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 		boolean lhsUQ = lhsArg != null ? getIfTranslator().isUnittedQuantity(lhsArg) : false;
 		Node rhsArg = beargs.size() > 1 ? beargs.get(1) : null;
 		boolean rhsUQ = rhsArg != null ? getIfTranslator().isUnittedQuantity(rhsArg) : false;
-		if (!lhsUQ && !rhsUQ) {
-			return patterns;
-		}
+		boolean noUQArgs = false;
+		NamedNode valuePredNode = null;
+		NamedNode unitPredNode = null;
+		Node lhsUnitVar = null;
+		Node rhsUnitVar = null;
 
 		if (be.getArguments() == null || be.getArguments().size() != 2) {
 			// all BuiltinElements of interest are binary at this point (before any 3rd output arg for a math operation is added later)
@@ -313,6 +328,45 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 			// if both args are Literals we don't want to do anything. If the units aren't the same that will be detected later (?? verify with test case ??).
 			return patterns;
 		}
+
+		if (!lhsUQ && !rhsUQ) {
+			noUQArgs = true;
+			// check to see if this was originally a UQ-returning BuiltinElement
+			SadlModelProcessor processor = getIfTranslator().getModelProcessor();
+			if (processor instanceof JenaBasedSadlModelProcessor) {
+				try {
+					TypeCheckInfo beTci = ((JenaBasedSadlModelProcessor)processor).getModelValidator().getType((EObject) be.getContext());
+					if (beTci != null) {
+						Node beType = beTci.getTypeCheckType();
+						if (isUnittedQuantity(beType)) {
+							Node unitNode = null;
+							valuePredNode = UtilsForJena.validateNamedNode(getIfTranslator().getModelProcessor().getConfigMgr(), getIfTranslator().getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI));
+							valuePredNode.setNodeType(NodeType.DataTypeProperty);
+							unitPredNode = UtilsForJena.validateNamedNode(getIfTranslator().getModelProcessor().getConfigMgr(), getIfTranslator().getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI));
+							unitPredNode.setNodeType(NodeType.DataTypeProperty);
+							// need to find the unit associated with this built-in's return
+							lhsUnitVar = getUnitFromPrevious(patterns, lhsArg, valuePredNode, unitPredNode, true);
+							rhsUnitVar = getUnitFromPrevious(patterns, rhsArg, valuePredNode, unitPredNode, true);
+							if (lhsUnitVar == null && rhsUnitVar == null) {
+								return patterns;
+							}
+							else {
+								addModifiedBuiltinElementAndUnits(be, lhsUnitVar, rhsUnitVar);
+							}
+						}
+						return patterns;
+					}
+					else {
+						return patterns;
+					}
+				} catch (TranslationException e) {
+					throw e;
+				} catch (Exception e) {
+					throw new TranslationException(e.getMessage(), e);
+				}
+			}
+		}
+
 		BuiltinUnittedQuantityStatus bestatus = getBuiltinUnittedQuantityStatusForExpansion(be);
 		if (bestatus == null) {
 			// try to get it from the built-in itself
@@ -326,10 +380,14 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 			if (be.getArguments().size() != 2) {
 				throw new TranslationException("Unexpectd number of BuiltinElement arguments (" + be.getArguments().size() + ")");
 			}
-			NamedNode valuePredNode = UtilsForJena.validateNamedNode(getIfTranslator().getModelProcessor().getConfigMgr(), getIfTranslator().getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI));
-			valuePredNode.setNodeType(NodeType.DataTypeProperty);
-			NamedNode unitPredNode = UtilsForJena.validateNamedNode(getIfTranslator().getModelProcessor().getConfigMgr(), getIfTranslator().getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI));
-			unitPredNode.setNodeType(NodeType.DataTypeProperty);
+			if (valuePredNode == null) {
+				valuePredNode = UtilsForJena.validateNamedNode(getIfTranslator().getModelProcessor().getConfigMgr(), getIfTranslator().getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI));
+				valuePredNode.setNodeType(NodeType.DataTypeProperty);
+			}
+			if (unitPredNode == null) {
+				unitPredNode = UtilsForJena.validateNamedNode(getIfTranslator().getModelProcessor().getConfigMgr(), getIfTranslator().getModelProcessor().getModelName() + "#" , new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI));
+				unitPredNode.setNodeType(NodeType.DataTypeProperty);
+			}
 
 			Node newLhsArg = null;
 			Node newRhsArg = null;
@@ -340,142 +398,153 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 					new ArrayList<NewTripleAndPredecessor>();	// and the GraphPatternElement it should follow in the completed patterns
 			
 			List<GraphPatternElement> unittedQuantityBuiltinsToBeRemoved = new ArrayList<GraphPatternElement>();
-			for (GraphPatternElement gpe : patterns) {
-				if (gpe instanceof TripleElement) {
-					Node currentTripleObject = ((TripleElement)gpe).getObject();
-					if (currentTripleObject != null && currentTripleObject.equals(lhsArg) &&
-							currentTripleObject instanceof VariableNode && 	
-							// last 2 conditionals are to make sure that property is an ObjectProperty, 
-							//	cheaper than checking that type of variable is UnittedQuantity or subclass
-							((TripleElement)gpe).getPredicate() instanceof NamedNode &&
-							((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.ObjectProperty)) {
-//							((VariableNode)currentTripleObject).getType().getNamespace().equals(XSD.getURI())) {
-						// the lhsArg is obtained from a triple so need to expand to get value and unit
-						TripleElement lhsValueTriple = findValueTripleAlreadyAdded(patterns, lhsArg);
-						if (lhsValueTriple == null) {
-							newLhsArg = new VariableNode(getIfTranslator().getNewVar());
-							TripleElement addedTriple1 = new TripleElement(lhsArg, valuePredNode, newLhsArg);
+			if (!noUQArgs) {
+				for (GraphPatternElement gpe : patterns) {
+					if (gpe instanceof TripleElement) {
+						Node currentTripleObject = ((TripleElement)gpe).getObject();
+						if (currentTripleObject != null && currentTripleObject.equals(lhsArg) &&
+								currentTripleObject instanceof VariableNode && 	
+								// last 2 conditionals are to make sure that property is an ObjectProperty, 
+								//	cheaper than checking that type of variable is UnittedQuantity or subclass
+								((TripleElement)gpe).getPredicate() instanceof NamedNode &&
+								((NamedNode)((TripleElement)gpe).getPredicate()).getNodeType().equals(NodeType.ObjectProperty)) {
+	//							((VariableNode)currentTripleObject).getType().getNamespace().equals(XSD.getURI())) {
+							// the lhsArg is obtained from a triple so need to expand to get value and unit
+							TripleElement lhsValueTriple = findValueTripleAlreadyAdded(patterns, lhsArg);
+							if (lhsValueTriple == null) {
+								newLhsArg = new VariableNode(getIfTranslator().getNewVar());
+								((VariableNode)newLhsArg).setType(new NamedNode(XSD.decimal.getURI()));
+								TripleElement addedTriple1 = new TripleElement(lhsArg, valuePredNode, newLhsArg);
+								addNewTriple(newTriples, gpe, addedTriple1);
+								// create incomplete triple for unit constraint
+								TripleElement addedTriple2 = new TripleElement(lhsArg, unitPredNode, null);
+								addNewTriple(newTriples, addedTriple1, addedTriple2);
+							}
+							else {
+								newLhsArg = lhsValueTriple.getObject();
+							}
+						}
+						else if (currentTripleObject != null && currentTripleObject.equals(rhsArg)) {
+							// the rhsArg is obtained from a triple so need to expand to get value and unit
+							TripleElement rhsValueTriple = findValueTripleAlreadyAdded(patterns, rhsArg);
+							if (rhsValueTriple == null) {
+								newRhsArg = new VariableNode(getIfTranslator().getNewVar());
+								((VariableNode)newRhsArg).setType(new NamedNode(XSD.decimal.getURI()));
+								TripleElement addedTriple1 = new TripleElement(rhsArg, valuePredNode, newRhsArg);
+								addNewTriple(newTriples, gpe, addedTriple1);
+								// create incomplete triple for unit constraint
+								TripleElement addedTriple2 = new TripleElement(rhsArg, unitPredNode, null);
+								addNewTriple(newTriples, addedTriple1, addedTriple2);
+							}
+							else {
+								newRhsArg = rhsValueTriple.getObject();
+							}
+						} else if (currentTripleObject != null && getIfTranslator().isUnittedQuantity(currentTripleObject) && 
+								!patternsExpandCurrentObject(patterns, currentTripleObject, valuePredNode, unitPredNode)) {	
+							// This gpe is a TripleElement whose object is a UnittedQuantity which has not yet been expanded in the patterns
+							GraphPatternElement referencingGpe = getReferencingGpe(patterns, patterns.indexOf(gpe), currentTripleObject);
+							VariableNode replacementArg = new VariableNode(getIfTranslator().getNewVar());
+							TripleElement addedTriple1 = new TripleElement(currentTripleObject, valuePredNode, replacementArg);
+							addNewTriple(newTriples,gpe, addedTriple1);
+							// create incomplete triple for unit constraint
+							TripleElement addedTriple2 = new TripleElement(currentTripleObject, unitPredNode, null);
+							addNewTriple(newTriples, addedTriple1, addedTriple2);						
+							if (referencingGpe != null) {
+								replaceReferencingGpeArg(referencingGpe, currentTripleObject, replacementArg);
+							}
+						}
+						else if (getIfTranslator().isUnittedQuantity(((TripleElement)gpe).getSubject()) && 
+								!patternsExpandCurrentObject(patterns, ((TripleElement)gpe).getSubject(), valuePredNode, unitPredNode)) {
+							// This gpe is a TripleElement whose subject is a UnittedQuantity which has not been expanded in the patterns 
+							Node currentTripleSubject = ((TripleElement)gpe).getSubject();
+							GraphPatternElement referencingGpe = getReferencingGpe(patterns, patterns.indexOf(gpe), currentTripleSubject);
+							VariableNode replacementArg = new VariableNode(getIfTranslator().getNewVar());
+							TripleElement addedTriple1 = new TripleElement(currentTripleSubject, valuePredNode, replacementArg);
 							addNewTriple(newTriples, gpe, addedTriple1);
 							// create incomplete triple for unit constraint
-							TripleElement addedTriple2 = new TripleElement(lhsArg, unitPredNode, null);
+							TripleElement addedTriple2 = new TripleElement(currentTripleSubject, unitPredNode, null);
 							addNewTriple(newTriples, addedTriple1, addedTriple2);
-						}
-						else {
-							newLhsArg = lhsValueTriple.getObject();
-						}
-					}
-					else if (currentTripleObject != null && currentTripleObject.equals(rhsArg)) {
-						// the rhsArg is obtained from a triple so need to expand to get value and unit
-						TripleElement rhsValueTriple = findValueTripleAlreadyAdded(patterns, rhsArg);
-						if (rhsValueTriple == null) {
-							newRhsArg = new VariableNode(getIfTranslator().getNewVar());
-							TripleElement addedTriple1 = new TripleElement(rhsArg, valuePredNode, newRhsArg);
-							addNewTriple(newTriples, gpe, addedTriple1);
-							// create incomplete triple for unit constraint
-							TripleElement addedTriple2 = new TripleElement(rhsArg, unitPredNode, null);
-							addNewTriple(newTriples, addedTriple1, addedTriple2);
-						}
-						else {
-							newRhsArg = rhsValueTriple.getObject();
-						}
-					} else if (currentTripleObject != null && getIfTranslator().isUnittedQuantity(currentTripleObject) && 
-							!patternsExpandCurrentObject(patterns, currentTripleObject, valuePredNode, unitPredNode)) {	
-						// This gpe is a TripleElement whose object is a UnittedQuantity which has not yet been expanded in the patterns
-						GraphPatternElement referencingGpe = getReferencingGpe(patterns, patterns.indexOf(gpe), currentTripleObject);
-						VariableNode replacementArg = new VariableNode(getIfTranslator().getNewVar());
-						TripleElement addedTriple1 = new TripleElement(currentTripleObject, valuePredNode, replacementArg);
-						addNewTriple(newTriples,gpe, addedTriple1);
-						// create incomplete triple for unit constraint
-						TripleElement addedTriple2 = new TripleElement(currentTripleObject, unitPredNode, null);
-						addNewTriple(newTriples, addedTriple1, addedTriple2);						
-						if (referencingGpe != null) {
-							replaceReferencingGpeArg(referencingGpe, currentTripleObject, replacementArg);
+							if (referencingGpe != null) {
+								replaceReferencingGpeArg(referencingGpe, currentTripleSubject, replacementArg);
+							}
 						}
 					}
-					else if (getIfTranslator().isUnittedQuantity(((TripleElement)gpe).getSubject()) && 
-							!patternsExpandCurrentObject(patterns, ((TripleElement)gpe).getSubject(), valuePredNode, unitPredNode)) {
-						// This gpe is a TripleElement whose subject is a UnittedQuantity which has not been expanded in the patterns 
-						Node currentTripleSubject = ((TripleElement)gpe).getSubject();
-						GraphPatternElement referencingGpe = getReferencingGpe(patterns, patterns.indexOf(gpe), currentTripleSubject);
-						VariableNode replacementArg = new VariableNode(getIfTranslator().getNewVar());
-						TripleElement addedTriple1 = new TripleElement(currentTripleSubject, valuePredNode, replacementArg);
-						addNewTriple(newTriples, gpe, addedTriple1);
-						// create incomplete triple for unit constraint
-						TripleElement addedTriple2 = new TripleElement(currentTripleSubject, unitPredNode, null);
-						addNewTriple(newTriples, addedTriple1, addedTriple2);
-						if (referencingGpe != null) {
-							replaceReferencingGpeArg(referencingGpe, currentTripleSubject, replacementArg);
+					else if (gpe instanceof BuiltinElement) {
+						if (((BuiltinElement)gpe).getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME)) {
+							List<Node> uqArgs = ((BuiltinElement)gpe).getArguments();
+							if (uqArgs.size() > 2 && uqArgs.get(2).equals(lhsArg)) {
+								newLhsArg = uqArgs.get(0);
+								lhsUnits = SadlUtils.stripQuotes(uqArgs.get(1).toString());
+							}
+							else if (uqArgs.size() > 2 && uqArgs.get(2).equals(rhsArg)) {
+								newRhsArg = uqArgs.get(0);
+								rhsUnits = SadlUtils.stripQuotes(uqArgs.get(1).toString());
+							}
+							unittedQuantityBuiltinsToBeRemoved.add(gpe);
 						}
-					}
-				}
-				else if (gpe instanceof BuiltinElement) {
-					if (((BuiltinElement)gpe).getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME)) {
-						List<Node> uqArgs = ((BuiltinElement)gpe).getArguments();
-						if (uqArgs.size() > 2 && uqArgs.get(2).equals(lhsArg)) {
-							newLhsArg = uqArgs.get(0);
-							lhsUnits = SadlUtils.stripQuotes(uqArgs.get(1).toString());
-						}
-						else if (uqArgs.size() > 2 && uqArgs.get(2).equals(rhsArg)) {
-							newRhsArg = uqArgs.get(0);
-							rhsUnits = SadlUtils.stripQuotes(uqArgs.get(1).toString());
-						}
-						unittedQuantityBuiltinsToBeRemoved.add(gpe);
-					}
-					else if (isCommonMathOperation((BuiltinElement)gpe)) {
-						// If the output of a math operation is a variable used in the
-						//	BuiltinElement be, then the unit of the math operation output must also
-						//	be the unit of the other comparison operation argument.
-						String unit = getUnitFromMathOperation(patterns, (BuiltinElement)gpe);
-						if (unit != null) {
-							List<Node> args = ((BuiltinElement)gpe).getArguments();
-							for (int i = 0; i <= args.size() - 1; i++) {
-								Node arg = args.get(i);
-								if (arg instanceof Literal && ((Literal)arg).getUnits() != null) {
-									((Literal)arg).setUnits(null);
-								}
-								else if (arg instanceof NamedNode) {
-									if (arg instanceof VariableNode && bestatus.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)) {
-										setMissingUnits(newTriples, arg, new Literal(unit, null, LiteralType.StringLiteral));
-										if (i == 0) {
-											lhsUnits = unit;
+						else if (isCommonMathOperation((BuiltinElement)gpe)) {
+							// If the output of a math operation is a variable used in the
+							//	BuiltinElement be, then the unit of the math operation output must also
+							//	be the unit of the other comparison operation argument.
+							String unit = getUnitFromMathOperation(patterns, (BuiltinElement)gpe);
+							if (unit != null) {
+								List<Node> args = ((BuiltinElement)gpe).getArguments();
+								for (int i = 0; i <= args.size() - 1; i++) {
+									Node arg = args.get(i);
+									if (arg instanceof Literal && ((Literal)arg).getUnits() != null) {
+										((Literal)arg).setUnits(null);
+									}
+									else if (arg instanceof NamedNode) {
+										if (arg instanceof VariableNode && bestatus.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)) {
+											setMissingUnits(newTriples, arg, new Literal(unit, null, LiteralType.StringLiteral));
+											if (i == 0) {
+												lhsUnits = unit;
+											}
+											else if (i == 1) {
+												rhsUnits = unit;
+											}
 										}
-										else if (i == 1) {
-											rhsUnits = unit;
+										else {
+											VariableNode newArg = new VariableNode(getIfTranslator().getNewVar());
+											TripleElement addedTriple1 = new TripleElement(arg, valuePredNode, newArg);
+											addNewTriple(newTriples, gpe, addedTriple1);
+											args.set(args.indexOf(arg), newArg);
+											TripleElement addedTriple2 = new TripleElement(arg, unitPredNode, new Literal(unit, null, LiteralType.StringLiteral));
+											addNewTriple(newTriples, addedTriple1, addedTriple2);
 										}
 									}
-									else {
-										VariableNode newArg = new VariableNode(getIfTranslator().getNewVar());
-										TripleElement addedTriple1 = new TripleElement(arg, valuePredNode, newArg);
-										addNewTriple(newTriples, gpe, addedTriple1);
-										args.set(args.indexOf(arg), newArg);
-										TripleElement addedTriple2 = new TripleElement(arg, unitPredNode, new Literal(unit, null, LiteralType.StringLiteral));
-										addNewTriple(newTriples, addedTriple1, addedTriple2);
-									}
+								}
+								if (args.size() > 2 && args.get(2).equals(lhsArg)) {
+									lhsUnits = unit;
+								}
+								else if (args.size() > 2 && args.get(2).equals(rhsArg)) {
+									rhsUnits = unit;
 								}
 							}
-							if (args.size() > 2 && args.get(2).equals(lhsArg)) {
-								lhsUnits = unit;
-							}
-							else if (args.size() > 2 && args.get(2).equals(rhsArg)) {
-								rhsUnits = unit;
-							}
 						}
-					}
-					if (gpe.equals(be)) {
-						if (isComparisonOperation(be) || isCommonMathOperation(be) || isOtherExpandableOperation(be)) {
-							if (newLhsArg != null) {
-								be.getArguments().set(0, newLhsArg);
-							}
-							else if (lhsArg instanceof Literal && ((Literal)lhsArg).getUnits() != null) {
-								lhsUnits = ((Literal)lhsArg).getUnits();
-								((Literal)lhsArg).setUnits(null);
-							}
-							if (newRhsArg != null) {
-								be.getArguments().set(1,  newRhsArg);
-							}
-							else if (rhsArg instanceof Literal && ((Literal)rhsArg).getUnits() != null) {
-								rhsUnits = ((Literal)rhsArg).getUnits();
-								((Literal)rhsArg).setUnits(null);
+						if (gpe.equals(be)) {
+							if (isComparisonOperation(be) || isCommonMathOperation(be) || isOtherExpandableOperation(be)) {
+								if (newLhsArg != null) {
+									be.getArguments().set(0, newLhsArg);
+								}
+								else if (lhsArg instanceof Literal && ((Literal)lhsArg).getUnits() != null) {
+									lhsUnits = ((Literal)lhsArg).getUnits();
+									((Literal)lhsArg).setUnits(null);
+								}
+								if (newRhsArg != null) {
+									be.getArguments().set(1,  newRhsArg);
+								}
+								else if (rhsArg instanceof Literal && ((Literal)rhsArg).getUnits() != null) {
+									rhsUnits = ((Literal)rhsArg).getUnits();
+									((Literal)rhsArg).setUnits(null);
+								}
+								// add a return type to be used later in the expansion process.
+								List<Node> retTypes = be.getReturnTypes();
+								if (retTypes == null) {
+									retTypes = new ArrayList<Node>();
+								}
+								retTypes.add(new NamedNode(XSD.decimal.getURI()));
+								be.setReturnTypes(retTypes);
 							}
 						}
 					}
@@ -496,8 +565,12 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 				}
 			}
 			if (lhsUnits == null && rhsUnits == null) {
-				Node lhsUnitVar = getUnitFromPrevious(patterns, lhsArg, valuePredNode, unitPredNode);
-				Node rhsUnitVar = getUnitFromPrevious(patterns, rhsArg, valuePredNode, unitPredNode);
+				if (lhsUnitVar == null) {
+					lhsUnitVar = getUnitFromPrevious(patterns, lhsArg, valuePredNode, unitPredNode, true);
+				}
+				if (rhsUnitVar == null && !noUQArgs) {
+					rhsUnitVar = getUnitFromPrevious(patterns, rhsArg, valuePredNode, unitPredNode, true);
+				}
 				if (bestatus.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)) {
 					if (lhsUnitVar == null && rhsUnitVar == null) {
 						// we don't know what the units are, but they need to be the same
@@ -526,8 +599,14 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 						rhsUnitVar = new VariableNode(getIfTranslator().getNewVar());
 					}
 					// cache modified be with units of lhs, rhs
-					updateUnitTripleObject(patterns, newTriples, lhsArg, lhsUnitVar);
-					updateUnitTripleObject(patterns, newTriples, rhsArg, rhsUnitVar);
+					if (lhsUnitVar != null) {
+						if (!updateUnitTripleObject(patterns, newTriples, lhsArg, lhsUnitVar)) {
+							// there isn't any triple to update. We need to create 							
+						};
+					}
+					if (rhsUnitVar != null) {
+						updateUnitTripleObject(patterns, newTriples, rhsArg, rhsUnitVar);
+					}
 					addModifiedBuiltinElementAndUnits(be, lhsUnitVar, rhsUnitVar);
 				}
 			}
@@ -550,6 +629,10 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 			throw new TranslationException("Unexpected condition: BuiltinElement is not in the list of GraphPatternElements");
 		}
 		return patterns;
+	}
+
+	private boolean isUnittedQuantity(Node beType) {
+		return getIfTranslator().isUnittedQuantity(beType);
 	}
 
 	private boolean hasReturnedValue(BuiltinElement be) {
@@ -948,7 +1031,7 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 	 * @throws TranslationException 
 	 */
 	private Node getUnitFromPrevious(List<GraphPatternElement> patterns, Node target,
-			NamedNode valuePredNode, NamedNode unitPredNode) throws TranslationException {
+			NamedNode valuePredNode, NamedNode unitPredNode, boolean firstCall) throws TranslationException {
 		if (target instanceof Literal) {
 			return null;
 		}
@@ -965,13 +1048,28 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 		}
 		List<Node> thingsWithSameUnits = new ArrayList<Node>();
 		for (GraphPatternElement gpe : patterns) {
-			if (gpe instanceof BuiltinElement && 
-					getBuiltinUnittedQuantityStatus((BuiltinElement) gpe).equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)){
+			if (gpe instanceof BuiltinElement) {
 				List<Node> args = ((BuiltinElement)gpe).getArguments();
 				if (args.contains(target)) {
-					for (Node arg : args) {
-						if (!arg.equals(target)) {
-							thingsWithSameUnits.add(arg);
+					if (getBuiltinUnittedQuantityStatus((BuiltinElement) gpe).equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)){
+						for (Node arg : args) {
+							if (!arg.equals(target)) {
+								thingsWithSameUnits.add(arg);
+							}
+						}
+					}
+					else if (getBuiltinUnittedQuantityStatus((BuiltinElement) gpe).equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)){
+						boolean leftOnly = isLeftOnly((BuiltinElement)gpe);
+						if (leftOnly) {
+							if (firstCall) {
+								Node indirect = getUnitFromPrevious(patterns, args.get(0), valuePredNode, unitPredNode, false);
+								if (indirect != null) {
+									return indirect;
+								}
+							}
+						}
+						else {
+							return null;
 						}
 					}
 				}
@@ -984,12 +1082,34 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 			}
 		}
 		for (Node su : thingsWithSameUnits) {
-			Node indirect = getUnitFromPrevious(patterns, su, valuePredNode, unitPredNode);
+			Node indirect = getUnitFromPrevious(patterns, su, valuePredNode, unitPredNode, false);
 			if (indirect != null) {
 				return indirect;
 			}
 		}
 		return null;
+	}
+
+	private boolean isLeftOnly(BuiltinElement be) throws TranslationException {
+		Object ctx = be.getContext();
+		if (ctx instanceof BinaryOperation) {
+			SadlModelProcessor mp = getIfTranslator().getModelProcessor();
+			if (mp instanceof JenaBasedSadlModelProcessor) {
+				JenaBasedSadlModelValidator mv = ((JenaBasedSadlModelProcessor)mp).getModelValidator();
+				try {
+					TypeCheckInfo leftTci = mv.getType(((BinaryOperation)ctx).getLeft());
+					TypeCheckInfo rightTci = mv.getType(((BinaryOperation)ctx).getRight());
+					if (isUnittedQuantity(leftTci.getTypeCheckType()) && !isUnittedQuantity(rightTci.getTypeCheckType())) {
+						return true;
+					}
+				} catch (TranslationException e) {
+					throw e;
+				} catch (Exception e) {
+					throw new TranslationException(e.getMessage(), e);
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -1076,13 +1196,45 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 				}
 			}
 			else if (bes.equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)) {
-				TypeCheckInfo rettype = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
-				rettype.setTypeCheckType(new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode));
-				rettype.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
-				return rettype;
+				if (leftOnlyUQ(be, argTcis)) {
+					if (argTcis != null && argTcis.size() > 0 && argTcis.get(0) instanceof TypeCheckInfo) {
+						TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
+						fctTci.setTypeCheckType(((TypeCheckInfo)argTcis.get(0)).getTypeCheckType());
+						fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
+						return fctTci;
+					}
+				}
+				else {
+					TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
+					fctTci.setTypeCheckType(new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode));
+					fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
+					return fctTci;
+					}
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Method to determine if only the left-most (first) argument is a UnittedQuantity
+	 * @param be
+	 * @param argTcis
+	 * @return
+	 */
+	private boolean leftOnlyUQ(BuiltinElement be, List<Object> argTcis) {
+		boolean leftOnly = true;
+		for (int i = 0; i < argTcis.size(); i++) {
+			Object tci = argTcis.get(i);
+			if (tci instanceof TypeCheckInfo) {
+				if (((TypeCheckInfo)tci).getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+					if (i > 0) {
+						leftOnly = false;
+						break;
+					}
+				}
+			}
+		}
+		return leftOnly;
 	}
 
 }
