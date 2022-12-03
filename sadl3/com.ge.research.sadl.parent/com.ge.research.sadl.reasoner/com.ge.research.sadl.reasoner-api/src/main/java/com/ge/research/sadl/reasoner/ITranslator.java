@@ -35,6 +35,7 @@ import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.Literal;
+import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
@@ -334,4 +335,15 @@ public interface ITranslator {
 	 * @return
 	 */
 	public BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be);
+	
+	/**
+	 * Method to validate a the argument types of a built-in and return the return types.
+	 * @param model
+	 * @param argTypes
+	 * @return
+	 * @throws UnittedQuantityHandlerException
+	 * @throws ConfigurationException 
+	 * @throws TranslationException 
+	 */
+	public Node validateArgumentTypes(BuiltinElement be, OntModel model, List<Node> argTypes) throws TranslationException;
 }

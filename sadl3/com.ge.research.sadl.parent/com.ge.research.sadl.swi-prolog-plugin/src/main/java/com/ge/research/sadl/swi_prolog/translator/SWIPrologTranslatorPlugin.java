@@ -1925,4 +1925,10 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		return null;
 	}
 
+	@Override
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(BuiltinElement be, OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

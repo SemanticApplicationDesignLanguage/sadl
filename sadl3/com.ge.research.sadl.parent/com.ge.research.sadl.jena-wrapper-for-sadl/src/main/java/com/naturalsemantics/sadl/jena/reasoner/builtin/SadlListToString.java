@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
@@ -35,6 +36,7 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 /**
 	This class converts an RDF list to a string of the form "{element1, element2, ....}". 
@@ -175,5 +177,10 @@ public class SadlListToString extends TypedBaseBuiltin {
 	@Override
 	public String getFunctionSignatureString() {
 		return "sadlListToString(--)string";
+	}
+	@Override
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

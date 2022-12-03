@@ -20,12 +20,15 @@ package com.naturalsemantics.sadl.processing;
 import java.util.List;
 
 import com.ge.research.sadl.model.gp.BuiltinElement;
-import com.ge.research.sadl.model.gp.GraphPatternElement;
-import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
+import com.ge.research.sadl.model.gp.GraphPatternElement;
+import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
+import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 public interface ISadlUnittedQuantityHandler {
 	/**
@@ -54,7 +57,7 @@ public interface ISadlUnittedQuantityHandler {
 		else if (bit.equals(BuiltinType.Power)) {
 			return BuiltinUnittedQuantityStatus.SingleArgument;
 		}
-		return getBuiltinUnittedQuantityStatus(be);
+		return getBuiltinUnittedQuantityStatus(be, null);
 	}
 	
 	abstract void setIntermediateFormTranslator(I_IntermediateFormTranslator ift);
@@ -65,17 +68,22 @@ public interface ISadlUnittedQuantityHandler {
 	 * @param be
 	 * @return
 	 */
-	abstract BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus(BuiltinElement be) throws TranslationException;
+	abstract BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus(BuiltinElement be, List<Node> argTypes) throws TranslationException;
 	
 	/**
 	 * Method to compute the return type of a built-in based on the built-in type and the types
-	 * of the arguments.
-	 * @param be
-	 * @param argTcis
-	 * @return
+	 * of the arguments. If there is an error (incompatibility between the built-in and the argument
+	 * types) a TranslationException will be thrown. If an argument of type UnittedQuantity is encountered
+	 * but UnittedQuantity arguments are not supported, a UnittedQuantityNotSupportedException (subclass of
+	 * TranlationException) will be thrown. If UnittedQuantities are being expanded, the UnittedQuantityNotSupportedException
+	 * can be ignored by the caller.
+	 * 
+	 * @param be -- the BuiltinElement for the built-in, identifying the built-in implementation
+	 * @param argTcis -- URIs of argument types as Strings
+	 * @return -- URI of return type as String
 	 * @throws TranslationException 
 	 */
-	abstract Object computeBuiltinReturnType(BuiltinElement be, List<Object>argTcis) throws TranslationException;
+	abstract Node computeBuiltinReturnType(BuiltinElement be, List<Node>argTcis) throws TranslationException;
 	
 	/*
 	 * Methods used in translation of statements containing references to UnittedQuantity when 
@@ -103,6 +111,17 @@ public interface ISadlUnittedQuantityHandler {
 	abstract List<GraphPatternElement> expandUnittedQuantities(List<GraphPatternElement> patterns, BuiltinElement be,
 			boolean isRuleThen) throws TranslationException;
 	
+//	/**
+//	 * Method to validate a the argument types of a built-in and return the URIs of the return types.
+//	 * @param model
+//	 * @param argTypes
+//	 * @return
+//	 * @throws UnittedQuantityHandlerException
+//	 * @throws ConfigurationException 
+//	 * @throws TranslationException 
+//	 */
+//	abstract Object validateArgumentTypes(BuiltinElement be, Object model, java.util.List<String> argTypes) throws UnittedQuantityHandlerException, ConfigurationException, TranslationException;
+//	
 	/**
 	 * Method to reset the instance of ISadlUnittedQuantityHandler for a new rule, query, or test.
 	 */

@@ -18,8 +18,11 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
+import java.util.List;
+
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.graph.Node;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.RuleContext;
@@ -27,6 +30,7 @@ import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.RDF;
 
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 public class Max extends TypedBaseBuiltin {
 	
@@ -196,6 +200,12 @@ public class Max extends TypedBaseBuiltin {
 	@Override
 	public boolean canProcessListArgument() {
 		return true;
+	}
+
+	@Override
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

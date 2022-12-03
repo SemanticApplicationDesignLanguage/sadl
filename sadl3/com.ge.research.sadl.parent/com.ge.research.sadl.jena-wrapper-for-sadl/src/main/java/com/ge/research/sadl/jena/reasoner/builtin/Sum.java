@@ -25,19 +25,25 @@ import java.util.List;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.graph.impl.LiteralLabelFactory;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
+import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.UnittedQuantity;
+import com.ge.research.sadl.reasoner.TranslationException;
 import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
+import com.ge.research.sadl.reasoner.UnittedQuantityNotSupportedException;
 
 /**
 
@@ -361,5 +367,31 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
 	@Override
 	public boolean canProcessListArgument() {
 		return true;
+	}
+
+	@Override
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel context, List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
+		com.ge.research.sadl.model.gp.Node lastType = null;
+		boolean isList = false;
+		for (com.ge.research.sadl.model.gp.Node argType : argTypes) {
+			if (argType.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) || 
+					context.getGraph().contains(NodeFactory.createURI(argType.getURI()), RDFS.subClassOf.asNode(), NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI))) {
+				if (getBuiltinUnittedQuantityStatus().equals(BuiltinUnittedQuantityStatus.UnitsNotSupported)) {
+					throw new UnittedQuantityNotSupportedException(getClass().getCanonicalName() + " doesn't support UnittedQuantity arguments", XSD.decimal.getURI());
+				}
+					
+			}
+			if (lastType != null) {
+				if (!lastType.equals(argType)) {
+					throw new TranslationException("Arguments are not all of the same type.");
+				}
+			}
+			lastType = argType;
+		}
+		if (isList) {
+			// get type of list, should be number or UnittedQuantity, and return it
+			// TODO	    			
+		}
+		return lastType;
 	}
 }

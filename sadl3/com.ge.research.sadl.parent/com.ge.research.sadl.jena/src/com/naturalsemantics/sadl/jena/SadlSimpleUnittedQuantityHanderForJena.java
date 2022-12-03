@@ -54,6 +54,7 @@ import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ITranslator;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.naturalsemantics.sadl.processing.ISadlUnittedQuantityHandler;
@@ -370,7 +371,7 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 		BuiltinUnittedQuantityStatus bestatus = getBuiltinUnittedQuantityStatusForExpansion(be);
 		if (bestatus == null) {
 			// try to get it from the built-in itself
-			bestatus = getBuiltinUnittedQuantityStatus(be);
+			bestatus = getBuiltinUnittedQuantityStatus(be, null);
 		}
 		be.setUnittedQuantityStatus(bestatus);
 		int beIdx = patterns != null ? patterns.indexOf(be) : -1;
@@ -1051,14 +1052,14 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 			if (gpe instanceof BuiltinElement) {
 				List<Node> args = ((BuiltinElement)gpe).getArguments();
 				if (args.contains(target)) {
-					if (getBuiltinUnittedQuantityStatus((BuiltinElement) gpe).equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)){
+					if (getBuiltinUnittedQuantityStatus((BuiltinElement) gpe, null).equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)){
 						for (Node arg : args) {
 							if (!arg.equals(target)) {
 								thingsWithSameUnits.add(arg);
 							}
 						}
 					}
-					else if (getBuiltinUnittedQuantityStatus((BuiltinElement) gpe).equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)){
+					else if (getBuiltinUnittedQuantityStatus((BuiltinElement) gpe, null).equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)){
 						boolean leftOnly = isLeftOnly((BuiltinElement)gpe);
 						if (leftOnly) {
 							if (firstCall) {
@@ -1114,7 +1115,7 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 
 	@Override
 	public
-	BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus(BuiltinElement be) throws TranslationException {
+	BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus(BuiltinElement be, List<Node> argTypes) throws TranslationException {
 		if (be.getUnittedQuantityStatus() != null) {
 			return be.getUnittedQuantityStatus();
 		}
@@ -1181,38 +1182,62 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 	}
 
 	@Override
-	public Object computeBuiltinReturnType(BuiltinElement be, List<Object> argTcis) throws TranslationException {
-		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus(be));
-		BuiltinUnittedQuantityStatus bes = be.getUnittedQuantityStatus();
-		if (bes != null) {
-			if (bes.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired) || 
-					bes.equals(BuiltinUnittedQuantityStatus.LeftUnitsOnly) ||
-					bes.equals(BuiltinUnittedQuantityStatus.SingleArgument)) {
-				if (argTcis != null && argTcis.size() > 0 && argTcis.get(0) instanceof TypeCheckInfo) {
-					TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
-					fctTci.setTypeCheckType(((TypeCheckInfo)argTcis.get(0)).getTypeCheckType());
-					fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
-					return fctTci;
-				}
-			}
-			else if (bes.equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)) {
-				if (leftOnlyUQ(be, argTcis)) {
-					if (argTcis != null && argTcis.size() > 0 && argTcis.get(0) instanceof TypeCheckInfo) {
-						TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
-						fctTci.setTypeCheckType(((TypeCheckInfo)argTcis.get(0)).getTypeCheckType());
-						fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
-						return fctTci;
+	public Node computeBuiltinReturnType(BuiltinElement be, List<Node> argTypes) throws TranslationException {
+		Node retType;
+		try {
+			retType = (Node) validateArgumentTypes(be, getIfTranslator().getTheModel(), argTypes);
+		} catch (TranslationException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new TranslationException(e.getMessage(), e);
+		}
+//		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus(be, argTcis));
+//		BuiltinUnittedQuantityStatus bes = be.getUnittedQuantityStatus();
+//		if (bes != null) {
+//			if (bes.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired) || 
+//					bes.equals(BuiltinUnittedQuantityStatus.LeftUnitsOnly) ||
+//					bes.equals(BuiltinUnittedQuantityStatus.SingleArgument)) {
+//				if (argTcis != null && argTcis.size() > 0 && argTcis.get(0) instanceof TypeCheckInfo) {
+//					TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
+//					fctTci.setTypeCheckType(((TypeCheckInfo)argTcis.get(0)).getTypeCheckType());
+//					fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
+//					return fctTci;
+//				}
+//			}
+//			else if (bes.equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)) {
+//				if (leftOnlyUQ(be, argTcis)) {
+//					if (argTcis != null && argTcis.size() > 0 && argTcis.get(0) instanceof TypeCheckInfo) {
+//						TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
+//						fctTci.setTypeCheckType(((TypeCheckInfo)argTcis.get(0)).getTypeCheckType());
+//						fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
+//						return fctTci;
+//					}
+//				}
+//				else {
+//					TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
+//					fctTci.setTypeCheckType(new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode));
+//					fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
+//					return fctTci;
+//					}
+//			}
+//		}
+		return retType;
+	}
+
+	private List<String> getArgTypeUris(List<Object> argTcis) {
+		List<String> argTciTypes = null;
+		if (argTcis != null) {
+			argTciTypes = new ArrayList<String>();
+			for (Object tci : argTcis) {
+				if (tci instanceof TypeCheckInfo) {
+					Node argTypeNode = ((TypeCheckInfo)tci).getTypeCheckType();
+					if (argTypeNode instanceof NamedNode) {
+						argTciTypes.add(((NamedNode)argTypeNode).getURI());
 					}
 				}
-				else {
-					TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
-					fctTci.setTypeCheckType(new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode));
-					fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
-					return fctTci;
-					}
 			}
 		}
-		return null;
+		return argTciTypes;
 	}
 
 	/**
@@ -1235,6 +1260,39 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 			}
 		}
 		return leftOnly;
+	}
+
+//	@Override
+	private Node validateArgumentTypes(BuiltinElement be, Object model, List<Node> argTypes) throws UnittedQuantityHandlerException, ConfigurationException, TranslationException {
+		ITranslator trans = getIfTranslator().getModelProcessor().getConfigMgr().getTranslator();
+		if (getIfTranslator() instanceof IntermediateFormTranslator) {
+			model = ((IntermediateFormTranslator)getIfTranslator()).getTheModel();
+			if (be.getExternalUri() == null) {
+				if (be.getFuncUri() == null) {
+					String biUri = SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#" + trans.builtinTypeToString(be);
+					be.setFuncUri(biUri);
+				}
+				addExternalUri(be, (OntModel) model);
+			}
+			Node retType = trans.validateArgumentTypes(be, (OntModel)model, argTypes);
+			if (retType != null) {
+				return retType;
+			}
+		}
+		return null;
+	}
+
+	private void addExternalUri(BuiltinElement be, OntModel m) {
+		if (getIfTranslator() instanceof IntermediateFormTranslator) {
+			Individual subject = m.getIndividual(be.getFuncUri());
+			if (subject != null) {
+				StmtIterator sitr = m.listStatements(subject, m.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNALURL_PROPERTY_URI), (RDFNode)null);
+				if (sitr.hasNext()) {
+					String euri = sitr.nextStatement().getObject().toString();
+					be.setExternalUri(euri);
+				}
+			}
+		}
 	}
 
 }

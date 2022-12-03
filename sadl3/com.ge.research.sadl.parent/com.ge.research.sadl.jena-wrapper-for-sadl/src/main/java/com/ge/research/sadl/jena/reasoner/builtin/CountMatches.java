@@ -23,7 +23,10 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
+import java.util.List;
+
 import org.apache.jena.graph.Node;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.RuleContext;
@@ -32,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 public class CountMatches extends TypedBaseBuiltin {
     protected static final Logger logger = LoggerFactory.getLogger(CountMatches.class);
@@ -106,5 +110,11 @@ public class CountMatches extends TypedBaseBuiltin {
 	public String getFunctionSignatureString() {
     	return "countMatches(...)int";
     }
+
+	@Override
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

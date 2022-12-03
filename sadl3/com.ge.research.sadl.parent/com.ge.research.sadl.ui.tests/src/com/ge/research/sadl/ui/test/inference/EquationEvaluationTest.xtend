@@ -418,10 +418,10 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 					else if (issue.message.equals("Evaluates to: \"true\"")) {
 	 						evaluatesTrue++
 	 					}
-	 					else if (issue.message.equals("booleantypes:shouldBeFalse, a datatype property with range  xsd:boolean, cannot be compared (is) with sadlimplicitmodel:ExternalEquation returning xsd:string.")) {
+	 					else if (issue.message.equals("booleantypes:shouldBeFalse, a datatype property with range  xsd:boolean, cannot be compared (is) with function sadlimplicitmodel:ExternalEquation returning xsd:string.")) {
 	 						typeError1++
 	 					}
-	 					else if (issue.message.equals("booleantypes:shouldBeTrue, a datatype property with range  xsd:boolean, cannot be compared (is) with sadlimplicitmodel:ExternalEquation returning xsd:string.")) {
+	 					else if (issue.message.equals("booleantypes:shouldBeTrue, a datatype property with range  xsd:boolean, cannot be compared (is) with function sadlimplicitmodel:ExternalEquation returning xsd:string.")) {
 	 						typeError2++
 	 					}
 	 				}

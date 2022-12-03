@@ -38,6 +38,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.rulesys.Builtin;
 import org.apache.jena.reasoner.rulesys.BuiltinRegistry;
+import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -90,6 +91,7 @@ import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnit
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 
 public class JenaTranslatorPlugin implements ITranslator {
@@ -2531,5 +2533,106 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return BuiltinUnittedQuantityStatus.UnitsNotSupported;
 	}
 
+
+	@Override
+	public Node validateArgumentTypes(BuiltinElement be, OntModel model, List<Node> argTypes) throws TranslationException {
+		if (be.getExternalUri() != null) {
+			String className = null;
+			className = be.getExternalUri();
+			ITypedBaseBuiltin inst;
+			try {
+				inst = ((ConfigurationManager)configurationMgr).getClassInstance(className, ITypedBaseBuiltin.class);
+				return inst.validateArgumentTypes(model, argTypes);
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassCastException e) {
+				BaseBuiltin bbinst;
+				try {
+					bbinst  = ((ConfigurationManager)configurationMgr).getClassInstance(className, BaseBuiltin.class);
+					int numArgs = bbinst.getArgLength();
+					if (numArgs > 0) {
+						// This is a bit tricky. For a built-in that returns a value (other than boolean),
+						// the ArgTypes will not include the variable included in the be.expectedArgCount or
+						// the numArgs. but how to tell if the built-in will have an argument variable added?
+						if (numArgs == argTypes.size()) {
+							// looks good: get return type from OntModel
+							
+						}
+						else if (numArgs == 0) {
+							// number is flexible: get return type from OntModel
+							
+						}
+						else {
+//							throw new TranslationException("Expected " + numArgs + " arguments but appears that " + 
+//									argTypes.size() + " arguments are provided in the model");
+						}
+					}
+					else {
+						
+					}
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+//				} catch (TranslationException e1) {
+//					throw e1;
+				}
+				
+			} catch (ClassNotFoundException e) {
+				BaseBuiltin bbinst;
+				try {
+					bbinst  = ((ConfigurationManager)configurationMgr).getClassInstance(className, BaseBuiltin.class);
+					int numArgs = bbinst.getArgLength();
+					if (numArgs > 0) {
+						// This is a bit tricky. For a built-in that returns a value (other than boolean),
+						// the ArgTypes will not include the variable included in the be.expectedArgCount or
+						// the numArgs. but how to tell if the built-in will have an argument variable added?
+						if (numArgs == argTypes.size()) {
+							// looks good: get return type from OntModel
+							
+						}
+						else if (numArgs == 0) {
+							// number is flexible: get return type from OntModel
+							
+						}
+						else {
+//							throw new TranslationException("Expected " + numArgs + " arguments but appears that " + 
+//									argTypes.size() + " arguments are provided in the model");
+						}
+					}
+					else {
+						
+					}
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+//				} catch (TranslationException e1) {
+//					throw e1;
+				}
+
+			} catch (UnittedQuantityHandlerException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (TranslationException e) {
+				throw e;
+			}
+		}
+		return null;
+	}
 
 }

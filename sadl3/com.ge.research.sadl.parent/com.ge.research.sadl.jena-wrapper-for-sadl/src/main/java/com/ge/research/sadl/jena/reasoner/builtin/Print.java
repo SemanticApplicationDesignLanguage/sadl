@@ -17,10 +17,15 @@
  ***********************************************************************/
 package com.ge.research.sadl.jena.reasoner.builtin;
 
+import java.util.List;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Node_Literal;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.util.PrintUtil;
+
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 /**
  * Print its argument list as a side effect
@@ -91,5 +96,11 @@ public class Print extends TypedBaseBuiltin {
 	@Override
 	public String getFunctionSignatureString() {
 		return "print(...)--";
+	}
+
+	@Override
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

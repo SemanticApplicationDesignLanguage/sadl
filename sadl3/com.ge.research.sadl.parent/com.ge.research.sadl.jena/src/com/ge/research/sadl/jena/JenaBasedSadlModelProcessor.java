@@ -7732,6 +7732,37 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				argtypes = ((EquationStatement)contr).getParameter();
 				rtypes = ((EquationStatement)contr).getReturnType();
 			}
+			// do return types first to be able to determine if there will be an argument for a returned value
+			boolean returnsValue = false;
+			if (rtypes != null) {
+				List<Node> rTypeNodes = new ArrayList<Node>();
+				for (SadlReturnDeclaration srd : rtypes) {
+					if (srd.getUnknown() != null) {
+						ConstantNode typnode = new ConstantNode(SadlConstants.CONSTANT_NONE);
+						rTypeNodes.add(typnode);
+					}
+					else {
+						try {
+							SadlTypeReference typ = srd.getType();
+							EObject augtype = srd.getAugtype();
+							if (augtype != null) {
+								addError("unhandled return augmented data descriptor in processFunction", srd);
+							}
+							if (typ != null) {
+								NamedNode typnode = sadlTypeReferenceToNode(typ);
+								if (typnode != null) {
+									rTypeNodes.add(typnode);
+									returnsValue = true;
+								}
+							}
+						} catch (JenaProcessorException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				builtin.setReturnTypes(rTypeNodes);
+			}
+			
 			if (argtypes != null) {
 				List<Node> argTypeNodes = new ArrayList<Node>();
 				for (SadlParameterDeclaration spd : argtypes) {
@@ -7773,36 +7804,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if (argTypeNodes.size() == 1 && argTypeNodes.get(0).toString().equals("...")) {
 					builtin.setExpectedArgCount( -1);
 				}
+				else if (returnsValue) {
+					builtin.setExpectedArgCount(argTypeNodes.size() + 1);	// +1 for the variable that will be added for the returned value
+				}
 				else {
 					builtin.setExpectedArgCount(argTypeNodes.size());
 				}
-			}
-			if (rtypes != null) {
-				List<Node> rTypeNodes = new ArrayList<Node>();
-				for (SadlReturnDeclaration srd : rtypes) {
-					if (srd.getUnknown() != null) {
-						ConstantNode typnode = new ConstantNode(SadlConstants.CONSTANT_NONE);
-						rTypeNodes.add(typnode);
-					}
-					else {
-						try {
-							SadlTypeReference typ = srd.getType();
-							EObject augtype = srd.getAugtype();
-							if (augtype != null) {
-								addError("unhandled return augmented data descriptor in processFunction", srd);
-							}
-							if (typ != null) {
-								NamedNode typnode = sadlTypeReferenceToNode(typ);
-								if (typnode != null) {
-									rTypeNodes.add(typnode);
-								}
-							}
-						} catch (JenaProcessorException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-				builtin.setReturnTypes(rTypeNodes);
 			}
 		}
 		try {

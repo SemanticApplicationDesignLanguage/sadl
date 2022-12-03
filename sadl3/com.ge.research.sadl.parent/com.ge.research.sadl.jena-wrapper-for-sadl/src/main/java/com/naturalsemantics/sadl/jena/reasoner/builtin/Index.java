@@ -17,15 +17,19 @@
  ***********************************************************************/
 package com.naturalsemantics.sadl.jena.reasoner.builtin;
 
+import java.util.List;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 /**
  * This class implements a Jena Built-in function in the bodyCall method that takes a SADL typed 
@@ -124,6 +128,12 @@ public class Index extends TypedBaseBuiltin {
 	@Override
 	public String getFunctionSignatureString() {
 		return "index(--, --)int";
+	}
+
+	@Override
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

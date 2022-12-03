@@ -29,6 +29,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
@@ -40,6 +43,10 @@ import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Triple;
 //import org.apache.jena.graph.impl.LiteralLabel;
 import org.apache.jena.graph.impl.LiteralLabelFactory;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.reasoner.rulesys.Builtin;
+import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.FBRuleInfGraph;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
@@ -47,6 +54,7 @@ import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 
 /**
  * This class provides useful utilities for building Jena builtin functions.
@@ -522,21 +530,176 @@ public class Utils {
     }
 
 	public static String combineUnits(RuleContext context, Node n1, Node n2, Node n3) throws UnittedQuantityHandlerException {
+		IUnittedQuantityInferenceHelper inst = getUnittedQuantityInferenceHelper(context);
+		Object result = inst.combineUnits(context, n1, n2, n3);
+		return result.toString();
+	}
+	
+	/**
+	 * Method to get the UnittedQuantityInferenceHandler to be used.
+	 * @param bi
+	 * @param context
+	 * @return
+	 * @throws UnittedQuantityHandlerException 
+	 */
+	private static IUnittedQuantityInferenceHelper getUnittedQuantityInferenceHelper(RuleContext context) throws UnittedQuantityHandlerException {
 		String className = IUnittedQuantityInferenceHelper.getUnittedQuantityInferenceHelperClassname(context.getGraph().getReasoner());
+		Class<?> c;
 		try {
-			Class<?> c = Class.forName(className);
+			c = Class.forName(className);
 			Constructor<?> cons = c.getConstructor();
 			Object inst = cons.newInstance();
 			if (inst instanceof IUnittedQuantityInferenceHelper) {
-				Object result = ((IUnittedQuantityInferenceHelper)inst).combineUnits(context, n1, n2, n3);
-				return result.toString();
+				return (IUnittedQuantityInferenceHelper) inst;
+			}
+			else if (inst == null) {
+				throw new UnittedQuantityHandlerException("No instance of getUnittedQuantityInferenceHelper found in getUnittedQuantityInferenceHelper.");
 			}
 			else {
-				throw new UnittedQuantityHandlerException("Failed to instantiate IUnittedQuantityInferenceHandler class '" + className + "'");
+				throw new UnittedQuantityHandlerException("Unexpected instance of type " + inst.getClass().getCanonicalName() + " returned in getUnittedQuantityInferenceHelper.");
 			}
 		} catch (Exception e) {
-			throw new UnittedQuantityHandlerException("Unable to invoke IUnittedQuantityInferenceHandler method 'combineUnits'", e);
-		} 
+			throw new UnittedQuantityHandlerException(e.getMessage(), e);
+		}
 	}
 
+	/**
+	 * Method to validate arguments for built-ins like com.ge.research.sadl.jena.reasoner.builtin.Product that can accept
+	 *   1) any number of numeric inputs
+	 *   2) a List of numeric inputs
+	 *   3) a Graph Pattern that generates a List of numeric inputs
+	 * @param product 
+	 * @param model
+	 * @param argTypes
+	 * @return
+	 * @throws UnittedQuantityHandlerException 
+	 */
+	public com.ge.research.sadl.model.gp.Node validateBuiltinAcceptingVarNumListOrGraphPattern(OntModel context, List<com.ge.research.sadl.model.gp.Node> argTypes, boolean leftOnlyOK) throws UnittedQuantityHandlerException {
+		int numArgs = argTypes.size();
+		if (numArgs == 1) {
+			// must be a List
+			ClosableIterator<Triple> itr = context.getGraph().find(null, RDF.Nodes.type, NodeFactory.createURI(argTypes.get(0).getURI()));
+			if (itr.hasNext()) {
+				Node subj = itr.next().getSubject();
+				if (subj != null) {
+					boolean isList = context.getGraph().contains(subj, RDFS.subClassOf.asNode(), NodeFactory.createURI(SadlConstants.SADL_LIST_MODEL_LIST_URI));
+					if (!isList) {
+						itr.close();
+						throw new UnittedQuantityHandlerException("A single argument must be a List");
+					}
+					// get type of list, should be number or UnittedQuantity, and return it
+					// TODO	    			
+				}
+			}
+			itr.close();
+		}
+		else if (numArgs >= 2) {
+			int prodIdx = 1;	// 2nd argument
+			boolean graphPattern = false;
+			while (prodIdx < numArgs) {
+				String prodUri = argTypes.get(prodIdx).getURI();
+				Node n = NodeFactory.createURI(prodUri);
+				ClosableIterator<Triple> itr = context.getGraph().find(n, RDF.type.asNode(), null);
+				boolean isProp = false;
+				while (itr.hasNext()) {
+					Node on = itr.next().getObject();
+					if (!on.isURI()) {
+						isProp = false;
+					}
+					if (on.equals(OWL.ObjectProperty.asNode()) ||
+							on.equals(OWL.DatatypeProperty.asNode()) ||
+							on.equals(OWL.AnnotationProperty.asNode()) ||
+							on.equals(RDF.Property.asNode())) {
+						itr.close();
+						isProp = true;
+						break;
+					}
+				}
+				itr.close();
+				if (isProp) {
+					graphPattern = true;
+				}
+				else {
+					graphPattern = false;
+					break;
+				}
+				prodIdx = prodIdx + 3;
+			}
+			if (graphPattern) {
+				// if this is a graph pattern, the range of the final property should be numeric or a subclass of UnittedQuantity
+				String lastProdUri = argTypes.get(prodIdx - 3).getURI();
+				Node n = NodeFactory.createURI(lastProdUri);
+				ClosableIterator<Triple> itr = context.getGraph().find(n, RDFS.range.asNode(), null);
+				boolean isProp = false;
+				while (itr.hasNext()) {
+					Node rng = itr.next().getObject();
+					if (rng.isURI()) {
+						if (rng.getLiteralDatatypeURI() != null) {
+							// this is numeric?
+							String rngUri = rng.getLiteralDatatypeURI();
+							if (rngUri.equals(XSD.decimal) ||
+									rngUri.equals(XSD.xdouble) ||
+									rngUri.equals(XSD.xfloat) ||
+									rngUri.equals(XSD.xint) ||
+									rngUri.equals(XSD.xlong)) {
+								NamedNode retNN = new NamedNode(XSD.decimal.getURI());
+								retNN.setNodeType(NodeType.DataTypeNode);
+								return retNN;
+							}
+						}
+						else {
+							boolean isUQ = context.getGraph().contains(rng, RDFS.subClassOf.asNode(), NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI));
+							if (isUQ) {
+								NamedNode retNN =  new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+								retNN.setNodeType(NodeType.ClassNode);
+								return retNN;
+							}
+						}
+					}
+
+				}
+			}
+			
+			// not a graph pattern, so must be two or more operands.
+			boolean uqFound = false;
+			boolean returnTypeOfFirstArg = false;
+			for (int i = 0; i < argTypes.size(); i++) {
+				Resource argType = context.getResource(argTypes.get(i).getURI());
+				boolean isUQ = false;
+				if (argTypes.get(i).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+					isUQ = true;
+				}
+				else if (context.contains(argType, RDFS.subClassOf, context.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI))) {
+					isUQ = true;
+				}
+				if (isUQ) {
+					uqFound = true;
+				}
+				else {
+					if (uqFound) {
+						// this one isn't UQ but a previous one was
+						if (numArgs != 2 || !leftOnlyOK) {
+							throw new UnittedQuantityHandlerException("Arguments are an invalid mix of UnittedQuantity and non-UnittedQuantity");
+						}
+						returnTypeOfFirstArg = true;
+					}
+				}
+			}
+			if (uqFound) {
+				if (returnTypeOfFirstArg) {
+					return argTypes.get(0);
+				}
+				else {
+					NamedNode retNN =  new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+					retNN.setNodeType(NodeType.ClassNode);
+					return retNN;
+				}
+			}
+			NamedNode retNN = new NamedNode(XSD.decimal.getURI());
+			retNN.setNodeType(NodeType.DataTypeNode);
+			return retNN;
+		}
+		return null;
+
+	}
 }

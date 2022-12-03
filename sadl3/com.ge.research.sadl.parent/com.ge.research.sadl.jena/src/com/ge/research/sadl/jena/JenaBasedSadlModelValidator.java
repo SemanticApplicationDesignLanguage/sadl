@@ -94,6 +94,7 @@ import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnit
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.UnittedQuantityNotSupportedException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.sADL.AskExpression;
 import com.ge.research.sadl.sADL.BinaryOperation;
@@ -175,7 +176,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	// Cache results of validation to avoid repeated calculation
 	private Map<EObject,Boolean> mEObjectsValidated = null; 
 	protected Map<EObject, TypeCheckInfo> expressionsTypeCheckCache = new HashMap<EObject,TypeCheckInfo>();
-	private Map<URI, TypeCheckInfo> typeCache = new HashMap<>();
 	
 	private String variableSeekingType = null;
 
@@ -971,6 +971,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				else if (ct.equals(ConceptType.FUNCTION_DEFN)) {
 					if (typeCheckInfo.getTypeToExprRelationship() != null && 
 							typeCheckInfo.getTypeToExprRelationship().equals(TypeCheckInfo.FUNCTION_RETURN)) {
+						sb1.insert(0, "function ");
 						sb1.append(" returning ");
 						sb1.append(typeCheckInfo.getTypeCheckType().toString());
 					}
@@ -1065,7 +1066,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	public TypeCheckInfo getType(EObject expression) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
 		boolean forceValidation = false;
-		if (expressionsTypeCheckCache != null && expressionsTypeCheckCache.containsKey(expression) && !forceValidation) {
+		if (!forceValidation && getCachedTypeCheckInfoByEObject(expression) != null) {
 			return getCachedTypeCheckInfoByEObject(expression);
 		}
 		TypeCheckInfo returnedTci = null;
@@ -2891,6 +2892,11 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private TypeCheckInfo checkFunctionArguments(EList<SadlParameterDeclaration> params, EList<Expression> args, Name expression, boolean forceCheck)
 			throws InvalidTypeException, TranslationException, DontTypeCheckException {
+		if (isEObjectInError(expression)) {
+			return getCachedTypeCheckInfoByEObject(expression);
+		}
+		registerEObjectValidateCalled(expression);
+
 		boolean hasEllipsis = params.size() > 0 && 
 				(params.get(params.size() - 1).getTypedEllipsis() != null ||
 				params.get(params.size() - 1).getEllipsis() != null);
@@ -2944,8 +2950,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					else if (param.getUnknown() != null || param.getEllipsis() != null) {  //&& !isEllipsis(param)) {			
+						
 						getModelProcessor().addWarning(SadlErrorMessages.TYPE_CHECK_BUILTIN_EXCEPTION.get("parameter " + (i + 1)), arg);
-					cacheTypeCheckInfoByEObject(expression, null);
+						this.setEObjectInError(expression);
+						cacheTypeCheckInfoByEObject(expression, null);
 					}
 					else {
 						// don't try to typecheck if it's an untyped ellipsis
@@ -2965,9 +2973,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			if (!SadlModelProcessor.isComparisonBuiltin(biName)) {
 				ISadlUnittedQuantityHandler uqhdlr = getModelProcessor().getIfTranslator().getUnittedQuantityHander();
 				// get the return type from the handler
-				List<Object> argTcis = new ArrayList<Object>();
+				List<Node> argTcis = new ArrayList<Node>();
 				for (Expression arg : args) {
-					argTcis.add(getType(arg));
+					TypeCheckInfo argTci = getType(arg);
+					argTcis.add(argTci.getTypeCheckType());
 				}
 				Object fctTci = uqhdlr.computeBuiltinReturnType(be, argTcis);
 				if (fctTci instanceof TypeCheckInfo) {
@@ -3184,22 +3193,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	
 	protected TypeCheckInfo getType(SadlResource sr) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if (sr != null) {
-			URI uri = EcoreUtil.getURI(sr);
-			TypeCheckInfo type = typeCache.get(uri);
+			// Even though this is checked and cached at the getType(EObject) level, it is
+			//  done here because it can be called multiple times for a SadlResource before returning 
+			//  to higher level.
+			TypeCheckInfo type = getCachedTypeCheckInfoByEObject(sr);
 			if (type != null) {
 				return type;
 			}
 			type = getType(sr, sr);
-			typeCache.put(uri, type);
+			cacheTypeCheckInfoByEObject(sr, type);
 			return type;
 		}
 		return getType(sr, sr);
-	}
-	
-	public void clearTypeCache() {
-		if (typeCache != null) {
-			typeCache.clear();
-		}
 	}
 	
 	protected TypeCheckInfo getType(SadlResource sr, EObject reference) throws DontTypeCheckException, CircularDefinitionException, InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException{
@@ -4390,15 +4395,38 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 
 	private TypeCheckInfo combineBinaryOperationTypesForBinaryOperation(List<String> operations, EObject binExpr, EObject leftExpression, EObject rightExpression,
 			TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo, ImplicitPropertySide side) throws InvalidNameException, DontTypeCheckException, InvalidTypeException, TranslationException {
-		if (!getModelProcessor().isIgnoreUnittedQuantities() && 
-				(isUnittedQuantity(leftTypeCheckInfo) || isUnittedQuantity(rightTypeCheckInfo))) {
-			// check UnittedQuantity compatibility and operation return TypeCheckInfo
-			TypeCheckInfo uqTypeCheckInfo = getTypeOfBinaryOperationWithUnittedQuantityInputs(operations, leftTypeCheckInfo, rightTypeCheckInfo, binExpr);
-			if (uqTypeCheckInfo != null) {
-				cacheTypeCheckInfoByEObject(binExpr, uqTypeCheckInfo);
-				return uqTypeCheckInfo;
+		try {
+			TypeCheckInfo retTci = getTypeOfBinaryOperationWithUnittedQuantityInputs(operations, leftTypeCheckInfo, rightTypeCheckInfo, binExpr);
+			if (retTci != null) {
+				return retTci;
+			}
+		} catch (UnittedQuantityNotSupportedException e) {
+			if (getModelProcessor().isExpandUnittedQuantityInTranslation()) {
+				// not an error--return decimal for expansion 
+				String retUri = ((UnittedQuantityNotSupportedException)e).getExpandedUnittedQuantityReturnType();
+				BuiltinElement be = new BuiltinElement();
+				be.setFuncName(operations.get(0));
+				TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
+				NamedNode fctRetTypeNN = new NamedNode(retUri);
+				fctTci.setTypeCheckType(fctRetTypeNN);
+				fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
 			}
 		}
+		//		try {
+//			String retTypeUri = val
+//		}
+//		catch (UnittedQuantityNotSupportedException e) {
+//			
+//		}
+//		if (!getModelProcessor().isIgnoreUnittedQuantities() && 
+//				(isUnittedQuantity(leftTypeCheckInfo) || isUnittedQuantity(rightTypeCheckInfo))) {
+//			// check UnittedQuantity compatibility and operation return TypeCheckInfo
+//			TypeCheckInfo uqTypeCheckInfo = getTypeOfBinaryOperationWithUnittedQuantityInputs(operations, leftTypeCheckInfo, rightTypeCheckInfo, binExpr);
+//			if (uqTypeCheckInfo != null) {
+//				cacheTypeCheckInfoByEObject(binExpr, uqTypeCheckInfo);
+//				return uqTypeCheckInfo;
+//			}
+//		}
 		if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo, side)){
 			return null;
 		}
@@ -4431,16 +4459,17 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	/**
 	 * Method to get the BuiltinUnittedQuantityStatus for a specified operation
 	 * @param op
+	 * @param argTypes 
 	 * @return
 	 * @throws TranslationException
 	 * @throws InvalidTypeException
 	 */
-	private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus(String op) throws TranslationException, InvalidTypeException {
+	private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus(String op, List<Node> argTypes) throws TranslationException, InvalidTypeException {
 		ISadlUnittedQuantityHandler uqhdlr = getSadlUnittedQuantityHandler();
 		if (uqhdlr !=  null) {
 			BuiltinElement be = new BuiltinElement();
 			be.setFuncName(op);
-			return uqhdlr.getBuiltinUnittedQuantityStatus(be);
+			return uqhdlr.getBuiltinUnittedQuantityStatus(be, argTypes);
 		}
 		throw new TranslationException("SADL UnittedQuantity handler not found");
 	}
@@ -4464,14 +4493,15 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (!SadlModelProcessor.isComparisonBuiltin(op)) {
 			ISadlUnittedQuantityHandler uqhdlr = getSadlUnittedQuantityHandler();
 			// get the return type from the handler
-			List<Object> argTcis = new ArrayList<Object>();
-			argTcis.add(leftTypeCheckInfo);
-			argTcis.add(rightTypeCheckInfo);
 			BuiltinElement be = new BuiltinElement();
 			be.setFuncName(op);
-			Object fctTci = uqhdlr.computeBuiltinReturnType(be, argTcis);
-			if (fctTci instanceof TypeCheckInfo) {
-				return (TypeCheckInfo) fctTci;
+			Node fctRetTypeNN = uqhdlr.computeBuiltinReturnType(be, getArgTypeNodesForBinOp(leftTypeCheckInfo, rightTypeCheckInfo));
+			if (fctRetTypeNN != null && fctRetTypeNN instanceof NamedNode) {
+				TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.FUNCTION_DEFN));
+				getModelProcessor().validateNamedNode((NamedNode) fctRetTypeNN);
+				fctTci.setTypeCheckType(fctRetTypeNN);
+				fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
+				return  fctTci;
 			}
 		}
 		
@@ -5264,7 +5294,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 							if (leftConceptName.getUri().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) && 
 									(isNumeric(rightTypeCheckInfo) || isNumericWithImpliedProperty(rightTypeCheckInfo, (Expression)rightExpression))) {
 								// This could be a BuiltinUnittedQuantityStatus.
-								BuiltinUnittedQuantityStatus bqs = getBuiltinUnittedQuantityStatus(operations.get(0));
+								List<Node> argTypes = getArgTypeNodesForBinOp(leftTypeCheckInfo, rightTypeCheckInfo);
+								BuiltinUnittedQuantityStatus bqs = getBuiltinUnittedQuantityStatus(operations.get(0), argTypes);
 								if (bqs.equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)) {
 									return true;
 								}
@@ -5439,7 +5470,19 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return false;
 	}
 
-	
+	/**
+	 * Method to convert argument TypeCheckInfo contents into list of arg type Nodes
+	 * @param leftTypeCheckInfo
+	 * @param rightTypeCheckInfo
+	 * @return
+	 */
+	private List<Node> getArgTypeNodesForBinOp(TypeCheckInfo leftTypeCheckInfo, TypeCheckInfo rightTypeCheckInfo) {
+		List<Node> argTypes = new ArrayList<Node>();
+		argTypes.add(leftTypeCheckInfo != null ? leftTypeCheckInfo.getTypeCheckType() : null);
+		argTypes.add(rightTypeCheckInfo != null ? rightTypeCheckInfo.getTypeCheckType() : null);
+		return argTypes;
+	}
+
 	private boolean checkForListOverlap(Node aLeftTCT, Node aRightTCT) {
 		if(aLeftTCT instanceof NamedNode && aRightTCT instanceof NamedNode) {
 			NamedNode lNode = (NamedNode)aLeftTCT;

@@ -18,23 +18,27 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import org.apache.jena.reasoner.rulesys.*;
-import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.XSD;
-
-import com.ge.research.sadl.processing.SadlConstants;
-import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
-import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.UnittedQuantity;
-import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
-import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.jena.graph.*;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.impl.LiteralLabelFactory;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.reasoner.rulesys.BindingEnvironment;
+import org.apache.jena.reasoner.rulesys.BuiltinException;
+import org.apache.jena.reasoner.rulesys.RuleContext;
+import org.apache.jena.reasoner.rulesys.Util;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.XSD;
+
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.UnittedQuantity;
+import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
+import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 
 /**
 
@@ -336,5 +340,11 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
 	public boolean canProcessListArgument() {
 		return true;
 	}
-    
+
+	@Override
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model,
+			List<com.ge.research.sadl.model.gp.Node> argTypes)
+			throws UnittedQuantityHandlerException, TranslationException {
+		return (new Utils()).validateBuiltinAcceptingVarNumListOrGraphPattern(model, argTypes, true);
+	}
 }

@@ -2529,7 +2529,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  				println(rule.toString)
  			}
  			assertTrue(issues.size == 1)
- 			assertTrue(issues.get(0).toString.contains("area, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot be compared (is) with height, a datatype property with range  xsd:float."))
+ 			assertTrue(issues.get(0).toString.contains("area, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot be compared (is) with function product returning xsd:decimal."))
  			assertTrue(rules.size == 1)
  			assertEquals("Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2).", 
  				rules.get(0).toString
