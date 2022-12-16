@@ -1276,68 +1276,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 	@Override
 	public String setBuiltinElementNameByBuiltinType(BuiltinElement bin) throws TranslationException {
 		String builtinName = builtinTypeToString(bin);
-//		BuiltinType ftype = bin.getFuncType();
-//		if (ftype.equals(BuiltinType.Divide)) {
-//			bin.setFuncName("quotient");
-//		}
-//		else 
-//			if (ftype.equals(BuiltinType.Equal)) {
-//			bin.setFuncName("equal");
-//		}
-//		else if (ftype.equals(BuiltinType.GT)) {
-//			bin.setFuncName("greaterThan");
-//		}
-//		else if (ftype.equals(BuiltinType.GTE)) {
-//			bin.setFuncName("ge");
-//		}
-//		else if (ftype.equals(BuiltinType.LT)) {
-//			bin.setFuncName("lessThan");
-//		}
-//		else if (ftype.equals(BuiltinType.LTE)) {
-//			bin.setFuncName("le");
-//		}
-//		else if (ftype.equals(BuiltinType.Minus)) {
-//			bin.setFuncName("difference");
-//		}
-//		else if (ftype.equals(BuiltinType.Modulus)) {
-//			bin.setFuncName("mod");
-//		}
-//		else if (ftype.equals(BuiltinType.Multiply)) {
-//			bin.setFuncName("product");
-//		}
-//		else if (ftype.equals(BuiltinType.Negative)) {
-//			bin.setFuncName("negative");
-//		}
-//		else if (ftype.equals(BuiltinType.Not)) {
-//			bin.setFuncName("noValue");
-//		}
-//		else if (ftype.equals(BuiltinType.NotEqual)) {
-//			bin.setFuncName("notEqual");
-//		}
-//		else if (ftype.equals(BuiltinType.NotOnly)) {
-//			bin.setFuncName("notOnlyValue");
-//		}
-//		else if (ftype.equals(BuiltinType.Only)) {
-//			bin.setFuncName("noValuesOtherThan");
-//		}
-//		else if (ftype.equals(BuiltinType.Plus)) {
-//			bin.setFuncName("sum");
-//		}
-//		else if (ftype.equals(BuiltinType.Power)) {
-//			bin.setFuncName("pow");
-//		}
-//		else if (ftype.equals(BuiltinType.Assign)) {
-//			bin.setFuncName("assign");
-//		}
-//
-//		String builtinName = bin.getFuncName();
-//		if (builtinName.equals("length") && bin.getArguments() != null && bin.getArguments().size() == 2) {
-//			Node arg0 = bin.getArguments().get(0);
-//			if (arg0 instanceof NamedNode) {
-//				builtinName = "listLength";		
-//			}
-//		}
-		
+
 		bin.setFuncName(builtinName);
 		
 		// Note: the order here allows any built-in which overrides the ones in Jena to be picked up preferentially
