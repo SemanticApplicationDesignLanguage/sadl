@@ -27,10 +27,10 @@ jobs:
 
     steps:
     - name: Check out SADL source
-      uses: actions/checkout@v3.1.0
+      uses: actions/checkout@v3.2.0
 
     - name: Set up Java
-      uses: actions/setup-java@v3.6.0
+      uses: actions/setup-java@v3.9.0
       with:
         distribution: ${{ matrix.distribution }}
         java-version: ${{ matrix.java-version }}
@@ -73,7 +73,7 @@ jobs:
         tags: sadl/sadl-eclipse:dev
 
     - name: Update Docker Hub description
-      uses: peter-evans/dockerhub-description@v3.1.1
+      uses: peter-evans/dockerhub-description@v3.1.2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -81,7 +81,7 @@ jobs:
         readme-filepath: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/README.md
 
     - name: Check out sadl-update-sites
-      uses: actions/checkout@v3.1.0
+      uses: actions/checkout@v3.2.0
       with:
         repository: SemanticApplicationDesignLanguage/sadl-update-sites
         token: ${{ secrets.CI_PAT }}
