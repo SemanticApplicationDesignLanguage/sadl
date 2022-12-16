@@ -337,6 +337,14 @@ public interface ITranslator {
 	public BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be);
 	
 	/**
+	 * Method to get the default implementation of the ISadlUnittedQuantityHandler. This can be 
+	 * overridden via preferences.
+	 * @param be
+	 * @return
+	 */
+	public String getDefaultUnittedQuantityHandlerClassname();
+	
+	/**
 	 * Method to validate a the argument types of a built-in and return the return types.
 	 * @param model
 	 * @param argTypes

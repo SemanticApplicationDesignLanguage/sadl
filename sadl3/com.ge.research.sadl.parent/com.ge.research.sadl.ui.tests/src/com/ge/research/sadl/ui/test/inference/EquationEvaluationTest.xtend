@@ -418,10 +418,10 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 					else if (issue.message.equals("Evaluates to: \"true\"")) {
 	 						evaluatesTrue++
 	 					}
-	 					else if (issue.message.equals("booleantypes:shouldBeFalse, a datatype property with range  xsd:boolean, cannot be compared (is) with function sadlimplicitmodel:ExternalEquation returning xsd:string.")) {
+	 					else if (issue.message.equals("booleantypes:shouldBeFalse, a datatype property with range  xsd:boolean, cannot be compared (is) with function booleantypes:booleanToString returning xsd:string.")) {
 	 						typeError1++
 	 					}
-	 					else if (issue.message.equals("booleantypes:shouldBeTrue, a datatype property with range  xsd:boolean, cannot be compared (is) with function sadlimplicitmodel:ExternalEquation returning xsd:string.")) {
+	 					else if (issue.message.equals("booleantypes:shouldBeTrue, a datatype property with range  xsd:boolean, cannot be compared (is) with function booleantypes:booleanToString2 returning xsd:string.")) {
 	 						typeError2++
 	 					}
 	 				}
@@ -578,6 +578,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	
 	@Test
 	def void testSadlEquationInRule_09() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		createFile('StringFormat.sadl', '''
 			 uri "http://sadl.org/StringFormat.sadl" alias stringformat.
 			 

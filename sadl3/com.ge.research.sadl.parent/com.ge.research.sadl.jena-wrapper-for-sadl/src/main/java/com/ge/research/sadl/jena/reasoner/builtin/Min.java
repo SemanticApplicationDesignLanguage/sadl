@@ -19,6 +19,7 @@
 package com.ge.research.sadl.jena.reasoner.builtin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.jena.datatypes.xsd.XSDDateTime;
@@ -61,7 +62,7 @@ public class Min extends TypedBaseBuiltin {
 
 	@Override
 	public String getFunctionSignatureString() {
-		return "min(decimal,decimal,...)decimal";
+		return "min(decimal,decimal ...)decimal";
 	}
     /**
      * This method is invoked when the builtin is called in a rule body.
@@ -252,8 +253,33 @@ public class Min extends TypedBaseBuiltin {
 
 	@Override
 	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
-		// TODO Auto-generated method stub
-		return null;
+		com.ge.research.sadl.model.gp.Node lastArgType = null;
+		for (com.ge.research.sadl.model.gp.Node argType : argTypes) {
+			if (lastArgType == null) {
+				lastArgType = argType;
+			}
+			else {
+				if (argType.equals(lastArgType)) {
+					continue;
+				}
+				else {
+					int priority1 = numericTypePriority(lastArgType);
+					int priority2 = numericTypePriority(argType);
+					if (priority2 > priority1) {
+						lastArgType = argType;
+					}
+				}
+			}
+		}
+		return lastArgType;
 	}
 
+	private int numericTypePriority(com.ge.research.sadl.model.gp.Node type) {
+		List<String> prioritizedTypes = Arrays.asList("int", "long", "float", "double", "decimal");
+		String name = type.getName();
+		if (prioritizedTypes.contains(name)) {
+			return prioritizedTypes.indexOf(name);
+		}
+		return -1;
+	}
 }

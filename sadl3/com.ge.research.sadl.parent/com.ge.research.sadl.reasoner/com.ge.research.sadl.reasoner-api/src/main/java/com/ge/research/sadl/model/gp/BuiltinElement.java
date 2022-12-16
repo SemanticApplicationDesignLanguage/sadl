@@ -570,6 +570,18 @@ public class BuiltinElement extends GraphPatternElement {
 	public void setArgumentTypes(List<Node> argumentTypes) {
 		this.argumentTypes = argumentTypes;
 	}
+	
+	/**
+	 * Method to add an argument type Node
+	 * @param argumentType
+	 * @return
+	 */
+	public void addArgumentType(Node argumentType) {
+		if (this.argumentTypes == null) {
+			this.argumentTypes = new ArrayList<Node>();
+		}
+		this.argumentTypes.add(argumentType);
+	}
 
 	/**
 	 * Method to get the return types (if known)
@@ -585,6 +597,16 @@ public class BuiltinElement extends GraphPatternElement {
 	 */
 	public void setReturnTypes(List<Node> returnTypes) {
 		this.returnTypes = returnTypes;
+	}
+	
+	/**
+	 * Method to add a return type
+	 */
+	public void addReturnType(Node rt) {
+		if (returnTypes == null) {
+			returnTypes = new ArrayList<Node>();
+		}
+		returnTypes.add(rt);
 	}
 
 	/**

@@ -35,8 +35,6 @@ import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor;
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator;
 import com.ge.research.sadl.jena.TypeCheckInfo;
 import com.ge.research.sadl.jena.UtilsForJena;
-import com.ge.research.sadl.model.ConceptName;
-import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Literal;
@@ -1191,78 +1189,10 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 		} catch (Exception e) {
 			throw new TranslationException(e.getMessage(), e);
 		}
-//		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus(be, argTcis));
-//		BuiltinUnittedQuantityStatus bes = be.getUnittedQuantityStatus();
-//		if (bes != null) {
-//			if (bes.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired) || 
-//					bes.equals(BuiltinUnittedQuantityStatus.LeftUnitsOnly) ||
-//					bes.equals(BuiltinUnittedQuantityStatus.SingleArgument)) {
-//				if (argTcis != null && argTcis.size() > 0 && argTcis.get(0) instanceof TypeCheckInfo) {
-//					TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
-//					fctTci.setTypeCheckType(((TypeCheckInfo)argTcis.get(0)).getTypeCheckType());
-//					fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
-//					return fctTci;
-//				}
-//			}
-//			else if (bes.equals(BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly)) {
-//				if (leftOnlyUQ(be, argTcis)) {
-//					if (argTcis != null && argTcis.size() > 0 && argTcis.get(0) instanceof TypeCheckInfo) {
-//						TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
-//						fctTci.setTypeCheckType(((TypeCheckInfo)argTcis.get(0)).getTypeCheckType());
-//						fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
-//						return fctTci;
-//					}
-//				}
-//				else {
-//					TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL));
-//					fctTci.setTypeCheckType(new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode));
-//					fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
-//					return fctTci;
-//					}
-//			}
-//		}
 		return retType;
 	}
 
-	private List<String> getArgTypeUris(List<Object> argTcis) {
-		List<String> argTciTypes = null;
-		if (argTcis != null) {
-			argTciTypes = new ArrayList<String>();
-			for (Object tci : argTcis) {
-				if (tci instanceof TypeCheckInfo) {
-					Node argTypeNode = ((TypeCheckInfo)tci).getTypeCheckType();
-					if (argTypeNode instanceof NamedNode) {
-						argTciTypes.add(((NamedNode)argTypeNode).getURI());
-					}
-				}
-			}
-		}
-		return argTciTypes;
-	}
-
-	/**
-	 * Method to determine if only the left-most (first) argument is a UnittedQuantity
-	 * @param be
-	 * @param argTcis
-	 * @return
-	 */
-	private boolean leftOnlyUQ(BuiltinElement be, List<Object> argTcis) {
-		boolean leftOnly = true;
-		for (int i = 0; i < argTcis.size(); i++) {
-			Object tci = argTcis.get(i);
-			if (tci instanceof TypeCheckInfo) {
-				if (((TypeCheckInfo)tci).getTypeCheckType().getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
-					if (i > 0) {
-						leftOnly = false;
-						break;
-					}
-				}
-			}
-		}
-		return leftOnly;
-	}
-
-//	@Override
+	//	@Override
 	private Node validateArgumentTypes(BuiltinElement be, Object model, List<Node> argTypes) throws UnittedQuantityHandlerException, ConfigurationException, TranslationException {
 		ITranslator trans = getIfTranslator().getModelProcessor().getConfigMgr().getTranslator();
 		if (getIfTranslator() instanceof IntermediateFormTranslator) {
@@ -1272,7 +1202,12 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 					String biUri = SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#" + trans.builtinTypeToString(be);
 					be.setFuncUri(biUri);
 				}
-				addExternalUri(be, (OntModel) model);
+				try {
+					addExternalUri(be, (OntModel) model);
+				}
+				catch (UnittedQuantityHandlerException e) {
+					// is this a implied operator?
+				}
 			}
 			Node retType = trans.validateArgumentTypes(be, (OntModel)model, argTypes);
 			if (retType != null) {
@@ -1282,7 +1217,7 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 		return null;
 	}
 
-	private void addExternalUri(BuiltinElement be, OntModel m) {
+	private void addExternalUri(BuiltinElement be, OntModel m) throws UnittedQuantityHandlerException {
 		if (getIfTranslator() instanceof IntermediateFormTranslator) {
 			Individual subject = m.getIndividual(be.getFuncUri());
 			if (subject != null) {
@@ -1291,6 +1226,9 @@ public class SadlSimpleUnittedQuantityHanderForJena implements ISadlUnittedQuant
 					String euri = sitr.nextStatement().getObject().toString();
 					be.setExternalUri(euri);
 				}
+			}
+			else {
+				throw new UnittedQuantityHandlerException(be.getFuncUri() + " not found in model.");
 			}
 		}
 	}

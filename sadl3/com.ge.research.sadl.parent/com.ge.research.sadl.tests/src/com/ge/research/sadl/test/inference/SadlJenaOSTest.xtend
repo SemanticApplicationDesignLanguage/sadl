@@ -186,8 +186,8 @@ then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulev
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 1)
-			assertTrue(issues.get(0).message.equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information"))
+//			assertTrue(issues.size == 1)
+//			assertTrue(issues.get(0).message.equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information"))
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),

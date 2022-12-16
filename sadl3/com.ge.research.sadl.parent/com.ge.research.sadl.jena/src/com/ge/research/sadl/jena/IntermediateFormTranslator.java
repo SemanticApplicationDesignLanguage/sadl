@@ -2180,6 +2180,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				Node newNode = getVariableNode((BuiltinElement)realArgForIfs);
 				setNewReturnVariableType(newNode, (BuiltinElement)realArgForIfs);
 				((BuiltinElement)realArgForIfs).addArgument(newNode);
+				((BuiltinElement)realArgForIfs).addArgumentType(((VariableNode)newNode).getType());
 				finalIfsVar = newNode;
 				((ProxyNode)arg1PN).setReplacementNode(SadlModelProcessor.nodeCheck(finalIfsVar));
 				retiredProxyNodes.put((GraphPatternElement) realArgForIfs, arg1PN);

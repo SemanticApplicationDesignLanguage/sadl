@@ -55,7 +55,7 @@ External list(...) returns --:
 External asin(...) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin.Asin".
 
-External sum(...) returns --:
+External sum(decimal ... x1) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin.Sum".
 
 External greaterThan(...) returns --:
@@ -64,7 +64,7 @@ External greaterThan(...) returns --:
 External mod(...) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin.Mod".
 
-External min(decimal X, decimal X, ...) returns decimal:
+External min(decimal X1, decimal ... X2) returns decimal:
 "com.ge.research.sadl.jena.reasoner.builtin.Min".
 
 External floor(...) returns --:
@@ -79,7 +79,7 @@ External ceiling(...) returns --:
 External max(decimal X, decimal X, ...) returns decimal:
 "com.ge.research.sadl.jena.reasoner.builtin.Max".
 
-External print(...) returns --:
+External print(...):
 "com.ge.research.sadl.jena.reasoner.builtin.Print".
 
 External countMatches(...) returns int:

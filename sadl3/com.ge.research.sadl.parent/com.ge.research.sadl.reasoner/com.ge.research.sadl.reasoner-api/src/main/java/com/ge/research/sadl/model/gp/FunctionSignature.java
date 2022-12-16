@@ -33,6 +33,7 @@ public class FunctionSignature {
 				if (!this.getParameterTypes()[i].trim().equals("--")) {
 					if (!this.getParameterTypes()[i].trim().equals("...")) {
 						sb.append(" X");
+						sb.append(i+1);	// make variable name unique to built-in
 					}
 				}
 				if(i != this.getParameterTypes().length - 1){

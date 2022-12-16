@@ -73,6 +73,7 @@ import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.SadlUnionClass;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.ConstantNode;
+import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.Junction;
 //import com.ge.research.sadl.model.gp.JunctionNode;
 import com.ge.research.sadl.model.gp.NamedNode;
@@ -81,6 +82,9 @@ import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.TripleElement;
+import com.ge.research.sadl.model.gp.TypedEllipsisNode;
+import com.ge.research.sadl.model.gp.UnknownNode;
+import com.ge.research.sadl.model.gp.UntypedEllipsisNode;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.ISadlModelValidator;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -150,6 +154,7 @@ import com.ge.research.sadl.sADL.ValueTable;
 import com.ge.research.sadl.sADL.impl.ElementInListImpl;
 import com.ge.research.sadl.sADL.impl.ExternalEquationStatementImpl;
 import com.ge.research.sadl.sADL.impl.PropOfSubjectImpl;
+import com.ge.research.sadl.sADL.impl.SadlReturnDeclarationImpl;
 import com.ge.research.sadl.sADL.impl.TestStatementImpl;
 import com.ge.research.sadl.utils.SadlASTUtils;
 import com.naturalsemantics.sadl.processing.ISadlUnittedQuantityHandler;
@@ -1426,7 +1431,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode));
 			ConceptName uqcn = getModelProcessor().namedNodeToConceptName(tctype);
 			TypeCheckInfo tci = new TypeCheckInfo(uqcn, tctype, this, expression);
-			tci.setTypeToExprRelationship(SadlASTUtils.getUnitAsString(expression));
+			tci.setTypeToExprRelationship(TypeCheckInfo.EXPLICIT_VALUE);
 			return tci;
 		}
 		else if (expression.isComma() && expression.getRight() == null) {
@@ -1474,8 +1479,39 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException,
 			DontTypeCheckException, CircularDefinitionException, InvalidTypeException, PropertyWithoutRangeException {
 		List<String> operations = Arrays.asList(expression.getOp().split("\\s+"));
+
 		TypeCheckInfo leftTypeCheckInfo = unifyCompoundTypeCheckInfos(getType(expression.getLeft()));
 		TypeCheckInfo rightTypeCheckInfo = unifyCompoundTypeCheckInfos(getType(expression.getRight()));
+
+		
+		String op = operations.get(0);
+		if (!op.equals("is")) {
+			try {
+				ITranslator trans = getModelProcessor().getTranslator();
+				BuiltinElement be = new BuiltinElement();
+				be.setFuncName(op);
+				be.addArgumentType(leftTypeCheckInfo.getTypeCheckType());
+				be.addArgumentType(rightTypeCheckInfo.getTypeCheckType());
+				String translatorBuiltinName = trans.builtinTypeToString(be);
+				if (translatorBuiltinName != null) {
+					String biUri = SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#" + translatorBuiltinName;
+					Individual biInst = getTheJenaModel().getIndividual(biUri);
+					if (biInst != null) {
+						Equation eq = getModelProcessor().getEquationFromOwl(expression, translatorBuiltinName, biInst);
+						be.setInModelReferencedEquation(eq);
+						TypeCheckInfo binOpTci = checkFunctionArgumentsAndReturnReturnTypeCheckInfo(be, eq, expression);
+						if (binOpTci != null) {
+							return binOpTci;
+						}
+					}
+				}
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		
 		if (expression.getLeft() instanceof PropOfSubject && ((BinaryOperation)expression).getRight() instanceof Declaration) {
 			TypeCheckInfo subjtype = getType(((PropOfSubject)expression.getLeft()).getRight());
 			if (subjtype != null) {
@@ -1502,10 +1538,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		}
 		if (getModelProcessor().isNumericOperator(expression.getOp())) {
-//			TypeCheckInfo uqTci = getTypeCompatibleWithOperationOnUnittedQuantities(((BinaryOperation)expression).getOp(), leftTypeCheckInfo, rightTypeCheckInfo);
-//			if (uqTci != null) {
-//				return uqTci;
-//			}
 			if (leftTypeCheckInfo != null && !isNumeric(leftTypeCheckInfo) && !isNumericWithImpliedProperty(leftTypeCheckInfo, ((BinaryOperation)expression).getLeft())) {
 				getModelProcessor().addTypeCheckingError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getLeft());
 			}
@@ -1513,22 +1545,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				getModelProcessor().addTypeCheckingError("Numeric operator requires numeric arguments", ((BinaryOperation)expression).getRight());
 			}
 			
-			NamedNode tctype = null;
-//			if(binopreturn != null) {
-//				tctype = (NamedNode) binopreturn.getTypeCheckType();
-//			}else {
-				tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
-//			}
+			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
 			ConceptName lConceptName = getModelProcessor().namedNodeToConceptName(tctype);
 			lConceptName.setType(ConceptType.RDFDATATYPE);
 			return new TypeCheckInfo(lConceptName, tctype, this, expression);
 		}
-//		if (binopreturn != null) {
-//			return binopreturn;
-//		}
-//		else {
-			return createBooleanTypeCheckInfo(expression);
-//		}
+		return createBooleanTypeCheckInfo(expression);
 	}
 
 	private TypeCheckInfo createBooleanTypeCheckInfo(EObject expression) throws TranslationException, InvalidNameException, InvalidTypeException {
@@ -1536,41 +1558,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		ConceptName booleanLiteralConceptName = getModelProcessor().namedNodeToConceptName(tctype);
 		return new TypeCheckInfo(booleanLiteralConceptName, tctype, this, expression);
 	}
-
-//	private TypeCheckInfo getTypeCompatibleWithOperationOnUnittedQuantities(String op, TypeCheckInfo leftTypeCheckInfo,
-//			TypeCheckInfo rightTypeCheckInfo) {
-//		if (!modelProcessor.isNumericOperator(op)) {
-//			return null;
-//		}
-//		if (leftTypeCheckInfo == null || rightTypeCheckInfo == null) {
-//			return null;
-//		}
-//		if (!leftTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) ||
-//				!rightTypeCheckInfo.getTypeCheckType().toFullyQualifiedString().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
-//			return null;
-//		}
-//		if (op.equals("+") || op.equals("-")) {
-//			if (leftTypeCheckInfo.getTypeToExprRelationship() != null && rightTypeCheckInfo.getTypeToExprRelationship() != null &&
-//					leftTypeCheckInfo.getTypeToExprRelationship().equals(rightTypeCheckInfo.getTypeToExprRelationship())) {
-//				return leftTypeCheckInfo;
-//			}
-//			if (leftTypeCheckInfo.getTypeToExprRelationship().equals(RANGE) && !rightTypeCheckInfo.getTypeToExprRelationship().equals(RANGE)) {
-//				// could issue warning that units may not match
-//				return leftTypeCheckInfo;
-//			}
-//			if (!leftTypeCheckInfo.getTypeToExprRelationship().equals(RANGE) && rightTypeCheckInfo.getTypeToExprRelationship().equals(RANGE)) {
-//				// could issue warning that units may not match
-//				return rightTypeCheckInfo;
-//			}
-//		}
-//		if (op.equals("/") || op.equals("*") || op.equals("^")) {
-//			if (leftTypeCheckInfo.getTypeToExprRelationship() != null && rightTypeCheckInfo.getTypeToExprRelationship() != null) {
-//				leftTypeCheckInfo.setTypeToExprRelationship(leftTypeCheckInfo.getTypeToExprRelationship() + op + rightTypeCheckInfo.getTypeToExprRelationship());
-//				return leftTypeCheckInfo;
-//			}
-//		}
-//		return null;
-//	}
 
 	private Declaration getEmbeddedDeclaration(EObject expr) {
 		if (expr instanceof SubjHasProp) {
@@ -2314,7 +2301,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 					}
 					else {
-	//					cls = ((Name)subject).getName();
 						addEffectiveRangeUnit(className, predicateType);
 					}
 				}
@@ -2970,6 +2956,8 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			BuiltinElement be = new BuiltinElement();
 			String biName = getModelProcessor().getDeclarationExtensions().getConcreteName(expression.getName());
 			be.setFuncName(biName);
+			String funcUri = getModelProcessor().getDeclarationExtensions().getConceptUri(expression.getName());
+			be.setFuncUri(funcUri);
 			if (!SadlModelProcessor.isComparisonBuiltin(biName)) {
 				ISadlUnittedQuantityHandler uqhdlr = getModelProcessor().getIfTranslator().getUnittedQuantityHander();
 				// get the return type from the handler
@@ -2978,9 +2966,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					TypeCheckInfo argTci = getType(arg);
 					argTcis.add(argTci.getTypeCheckType());
 				}
-				Object fctTci = uqhdlr.computeBuiltinReturnType(be, argTcis);
-				if (fctTci instanceof TypeCheckInfo) {
-					return (TypeCheckInfo) fctTci;
+				Node fctTciType = uqhdlr.computeBuiltinReturnType(be, argTcis);
+				if (fctTciType != null) {
+					ConceptName determinant = new ConceptName(be.getFuncUri(), ConceptType.INDIVIDUAL);
+					TypeCheckInfo returnTci = new TypeCheckInfo(determinant);
+					returnTci.setTypeCheckType(fctTciType);
+					returnTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
+					return returnTci;
 				}
 			}
 		} catch (TranslationException e) {
@@ -3095,8 +3087,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			ExternalEquationStatement ees = (ExternalEquationStatement)fsr.eContainer();
 			if(ees != null && !ees.getReturnType().isEmpty()) {
 				TypeCheckInfo tci = getType(ees.getReturnType());
-				ConceptName etcn = new ConceptName(SadlConstants.SADL_IMPLICIT_MODEL_EXTERNAL_EQUATION_CLASS_URI);
-				if (etcn != null) {
+				String eename = getModelProcessor().getDeclarationExtensions().getConceptUri(fsr);
+				ConceptName etcn = new ConceptName(eename);
+				if (etcn != null && tci != null) {
 					etcn.setType(ConceptType.FUNCTION_DEFN);
 					tci.setExpressionType(etcn);
 				}
@@ -3131,17 +3124,20 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return tci;
 		}
 		else {
-			if (!returnType.isEmpty() && returnType.get(0).getUnknown() != null) {
-				return new TypeCheckInfo(null, new ConstantNode(SadlConstants.CONSTANT_NONE), this, returnType.get(0));
+			if (!returnType.isEmpty() && returnType.size() > 0) {
+				if (returnType.get(0).getNone() != null) {
+					return new TypeCheckInfo(null, new ConstantNode(SadlConstants.CONSTANT_NONE), this, returnType.get(0));
+				}
+				else if (returnType.get(0).getUnknown() != null) {
+					return new TypeCheckInfo(null, new UnknownNode(), this, returnType.get(0));
+				}
+				else if (!returnType.isEmpty()) {
+					return getType(returnType.get(0).getType());
+				}
 			}
-			else if (!returnType.isEmpty()) {
-				return getType(returnType.get(0).getType());
-			}
-			else {
-//                throw new DontTypeCheckException("External or Equation does not specify a return type.");
-				// equations can now not have return types awc 3/16/2020
-				return null;
-			}
+//          throw new DontTypeCheckException("External or Equation does not specify a return type.");
+			// equations can now not have return types awc 3/16/2020
+			return null;
 		}
 	}
 
@@ -4412,21 +4408,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				fctTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
 			}
 		}
-		//		try {
-//			String retTypeUri = val
-//		}
-//		catch (UnittedQuantityNotSupportedException e) {
-//			
-//		}
-//		if (!getModelProcessor().isIgnoreUnittedQuantities() && 
-//				(isUnittedQuantity(leftTypeCheckInfo) || isUnittedQuantity(rightTypeCheckInfo))) {
-//			// check UnittedQuantity compatibility and operation return TypeCheckInfo
-//			TypeCheckInfo uqTypeCheckInfo = getTypeOfBinaryOperationWithUnittedQuantityInputs(operations, leftTypeCheckInfo, rightTypeCheckInfo, binExpr);
-//			if (uqTypeCheckInfo != null) {
-//				cacheTypeCheckInfoByEObject(binExpr, uqTypeCheckInfo);
-//				return uqTypeCheckInfo;
-//			}
-//		}
 		if(!compareTypes(operations, leftExpression, rightExpression, leftTypeCheckInfo, rightTypeCheckInfo, side)){
 			return null;
 		}
@@ -5022,6 +5003,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return nonecn;
 
 		}
+		else if (tcttype instanceof UnknownNode) {
+			return new ConceptName(tcttype.getURI());
+		}
 		else {
 			throw new TranslationException("Unexpected type: " + tcttype.getURI());
 		}
@@ -5319,9 +5303,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						if (rightConceptName.getType() == null && leftConceptName.getType() == null) {
 							return true;
 						}
-//						else {
-//							return false;
-//						}
 					}
 					else if (leftConceptName.getType().equals(ConceptType.RDFDATATYPE) &&
 							  rightConceptName.getType().equals(ConceptType.RDFDATATYPE)) {
@@ -5377,17 +5358,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						}
 						
 						try {
-							/* this is what it was
-							OntClass subcls = getTheJenaModel().getOntClass(leftConceptName.getUri());
-							if (subcls == null) {
-								getModelProcessor().addTypeCheckingError("Concept '" + leftConceptName.getUri() + "' not found", leftExpression);
-							}
-							OntResource supercls = getTheJenaModel().getOntResource(rightConceptName.getUri());
-							if (supercls == null) {
-								getModelProcessor().addTypeCheckingError("Concept '" + rightConceptName.getUri() + "' not found", rightExpression);
-							}
-							*/
-							
 							OntResource supercls = getTheJenaModel().getOntResource(leftConceptName.getUri());
 							if (supercls == null) {
 								getModelProcessor().addTypeCheckingError("Concept '" + leftConceptName.getUri() + "' not found", leftExpression);
@@ -5407,9 +5377,6 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									}
 									return true;
 								}
-//								if (modelProcessor.classIsSubclassOfCached(supercls.as(OntClass.class), subcls, true, null)) {
-//									return true;
-//								}
 							}
 		// TODO handle equivalent classes.					
 		//					StmtIterator sitr = theJenaModel.listStatements(theJenaModel.getOntClass(rightConceptName.getUri()), OWL.equivalentClass, (RDFNode)null);
@@ -6473,5 +6440,203 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 	protected void setTheJenaModel(OntModel theJenaModel) {
 		this.theJenaModel = theJenaModel;
 	}
+	
+	protected TypeCheckInfo checkFunctionArgumentsAndReturnReturnTypeCheckInfo(BuiltinElement be, Equation eq, EObject context) throws InvalidTypeException {
+		TypeCheckInfo returnTci = null;
+		List<Node> args = be.getArguments();
+		List<Node> argTypes = be.getArgumentTypes();
+		int numArgs = args != null ? args.size() : argTypes != null ? argTypes.size() : 0;
+		
+		boolean hasUnittedQuantityInput = false;
+		if (numArgs > 0) {
+			if (args != null) {
+				for (Node arg : args) {
+					if (arg instanceof NamedNode) {
+						boolean isUQ = getModelProcessor().isUnittedQuantity(((NamedNode)arg).getURI());
+						if (isUQ) {
+							hasUnittedQuantityInput = true;
+							break;
+						}
+					}
+				}
+			}
+			else if (argTypes != null) {
+				for (Node argType : argTypes) {
+					if (argType instanceof NamedNode) {
+						boolean isUQType = getModelProcessor().isUnittedQuantity(((NamedNode)argType).getURI());
+						if (isUQType) {
+							hasUnittedQuantityInput = true;
+							break;
+						}
+					}
+				}
+			}
+		
+			if (eq != null) {
+				int minNumArgs = eq.getArgumentTypes().size();
+	//			String[] operations = new String[1];
+	//			operations[0] = ARGUMENT;
+				boolean argCheckPasses = true;
+				List<Node> eqArgTypes = eq.getArgumentTypes();
+				boolean unknownArgs = false;
+				int eqArgIdx = 0;
+				Node lastEqArgType = (eqArgTypes != null && eqArgTypes.size() > 0) ? eqArgTypes.get(0) : null;
+				if (lastEqArgType instanceof UnknownNode) {
+					getModelProcessor().addWarning("Argument type of '" + be.getFuncName() + "' is unknown, cannot do argument type checking.", context);
+				}
+				else {
+					for (Node eqArgType : eqArgTypes) {
+						if (argTypes.size() > eqArgIdx) {
+							Node argType = argTypes.get(eqArgIdx);
+							if (argType.equals(eqArgType)) {
+								continue;
+							}
+							else if (argumentTypeMatchesEquation(argType, eqArgType, hasUnittedQuantityInput)) {
+								continue;
+							}
+							argCheckPasses = false;
+						}
+						else if (lastEqArgType != null) {
+							if (lastEqArgType instanceof TypedEllipsisNode) {
+								if (argumentTypeMatchesEquation(lastEqArgType, eqArgType, hasUnittedQuantityInput)) {
+									continue;
+								}
+							}
+						}
+						else {
+							// we ran out of argTypes before reaching end of eqArgTypes; this shouldn't happen
+							// report error
+							System.out.println("Built-in usage has more arguments than function definition allows");
+						}
+						lastEqArgType = eqArgType;
+					}
+				}
+				
+			}
+		}
+		
+	
+		List<Node> retTypes = eq.getReturnTypes();
+		if (retTypes != null) {
+			if (retTypes.size() == 1) {
+				Node retType = retTypes.get(0);
+				if (retType instanceof UnknownNode) {
+					// get return TCI from instance of built-in validateArgumentTypes if possible
+					try {
+						ISadlUnittedQuantityHandler uqhdlr = getModelProcessor().getIfTranslator().getUnittedQuantityHander();
+						// get the return type from the handler
+						Node returnType = uqhdlr.computeBuiltinReturnType(be, argTypes);
+						if (returnType != null) {
+							ConceptName determinant = new ConceptName(eq.getUri(), ConceptType.FUNCTION_DEFN);
+							returnTci = new TypeCheckInfo(determinant);
+							returnTci.setTypeCheckType(returnType);
+							returnTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);							
+						}
+					} catch (InvalidTypeException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (TranslationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else {
+					ConceptName determinant = new ConceptName(eq.getUri(), ConceptType.INDIVIDUAL);
+					returnTci = new TypeCheckInfo(determinant);
+					returnTci.setTypeCheckType(retType);
+					returnTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
+				}
+			}
+			else {
+				for (Node retType : retTypes) {
+					// TODO
+				}
+			}
+		}
+		return returnTci;
+	}
+	
+	private boolean argumentTypeMatchesEquation(Node argType, Node eqArgType, boolean hasUnittedQuantityInput) {
+		if (eqArgType instanceof UntypedEllipsisNode) {
+			return true;
+		}
+		String effectiveArgTypeUri = argType.getURI();
+		if (hasUnittedQuantityInput) {
+			try {
+				if (getModelProcessor().isExpandUnittedQuantityInTranslation()) {
+					effectiveArgTypeUri = XSD.decimal.getURI();
+				}
+			} catch (InvalidTypeException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if (effectiveArgTypeUri.equals(eqArgType.getURI())) {
+			return true;
+		}
+		if (eqArgType.getURI().equals(XSD.decimal.getURI()) &&
+				(effectiveArgTypeUri.equals(XSD.xint.getURI()) ||
+				 effectiveArgTypeUri.equals(XSD.xlong.getURI()) ||
+				 effectiveArgTypeUri.equals(XSD.xfloat.getURI()) ||
+				 effectiveArgTypeUri.equals(XSD.xdouble.getURI()))) {
+			return true;
+		}
+		if (eqArgType.getURI().equals(XSD.xdouble.getURI()) &&
+				(effectiveArgTypeUri.equals(XSD.xint.getURI()) ||
+				 effectiveArgTypeUri.equals(XSD.xlong.getURI()) ||
+				 effectiveArgTypeUri.equals(XSD.xfloat.getURI()) ||
+				 effectiveArgTypeUri.equals(XSD.decimal.getURI()))) {
+			return true;
+		}
+		if (eqArgType.getURI().equals(XSD.xfloat.getURI()) &&
+				(effectiveArgTypeUri.equals(XSD.xint.getURI()) ||
+				 effectiveArgTypeUri.equals(XSD.xlong.getURI()) ||
+				 effectiveArgTypeUri.equals(XSD.xfloat.getURI()) ||
+				 effectiveArgTypeUri.equals(XSD.decimal.getURI()))) {
+			return true;
+		}
+		if (eqArgType.getURI().equals(XSD.xlong.getURI()) &&
+				effectiveArgTypeUri.equals(XSD.xint.getURI())) {
+			return true;
+		}
+		return false;
+	}
 
+	protected TypeCheckInfo checkFunctionArgumentsAndReturnReturnTypeCheckInfo(EObject builtinReference, String definingEquationUri, EObject context) throws InvalidTypeException {
+		// The parameters can be of four types
+		// 1. Unknown ("--")
+		// 2. Untyped ellipsis ("..."), meaning any number of arguments of any type
+		// 3. Typed ellipsis (e.g., "int ... x"), meaning any number of arguments of the specified type
+		// 4. Typed parameter, e.g., "int x"), defining a particular parameter of the name and type specified
+		//
+		// These can be combined
+		// return types are similar but do not have parameter names
+		
+		TypeCheckInfo returnTci = null;
+		Equation eq = null;
+		
+		if (definingEquationUri != null) {
+			Individual eqInst = getTheJenaModel().getIndividual(definingEquationUri);
+			if (eqInst != null) {
+				String eqName = eqInst.getLocalName();
+				eq = getModelProcessor().getEquationFromOwl(context, eqName, eqInst);
+				List<Node> retTypes = eq.getReturnTypes();
+				if (retTypes != null) {
+					if (retTypes.size() == 1) {
+						Node retType = retTypes.get(0);
+						ConceptName determinant = new ConceptName(definingEquationUri, ConceptType.INDIVIDUAL);
+						returnTci = new TypeCheckInfo(determinant);
+						returnTci.setTypeCheckType(retType);
+						returnTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);
+					}
+					else {
+						for (Node retType : retTypes) {
+							// TODO handle multiple return values
+						}
+					}
+				}
+			}
+		}
+		return returnTci;
+	}
 }

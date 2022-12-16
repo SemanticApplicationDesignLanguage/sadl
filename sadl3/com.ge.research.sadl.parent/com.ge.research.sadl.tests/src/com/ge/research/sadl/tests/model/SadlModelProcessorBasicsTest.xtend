@@ -2038,6 +2038,31 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  		val numiss2 = issues2.size
  	}
  	
+  	@Test
+ 	def void testGH_518b() {
+ 		val sadlModel1 = '''
+			 uri "http://sadl.org/JavaExternal.sadl" alias javaexternal.
+			 			 
+			 Expr: min(2,3).
+			 
+			 Rule testRule: then print(min(2,3)).
+ 		'''.sadl
+		val sadlModel2 = '''
+			 uri "http://sadl.org/JavaExternalImported.sadl" alias javaexternalimported.
+			 
+			 import "http://sadl.org/JavaExternal.sadl" .
+			 
+			 Expr: min(2,3).
+ 		'''.sadl
+ 		val issues1 = _validationTestHelper.validate(sadlModel1)
+		val issues2 = _validationTestHelper.validate(sadlModel2)
+// 		assertTrue(issues1.empty)
+// 		assertFalse(issues2.empty)
+// 		assertTrue(issues2.toString.contains("Declaration of concepts in another namespace not supported"))
+ 		val numiss1 = issues1.size
+ 		val numiss2 = issues2.size
+ 	}
+ 	
  	@Test
  	def void testUserDefined01() {
  		val sadlModel = '''
@@ -2529,7 +2554,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  				println(rule.toString)
  			}
  			assertTrue(issues.size == 1)
- 			assertTrue(issues.get(0).toString.contains("area, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot be compared (is) with function product returning xsd:decimal."))
+ 			assertTrue(issues.get(0).toString.contains("area, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot be compared (is) with function product returning decimal."))
  			assertTrue(rules.size == 1)
  			assertEquals("Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2).", 
  				rules.get(0).toString

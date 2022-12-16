@@ -4068,11 +4068,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (typeNode == null) {
 				addError("Argument has no type", context);
 			}
-			else if (typeNode instanceof UntypedEllipsisNode) {
+			else if (typeNode instanceof UntypedEllipsisNode || typeNode instanceof TypedEllipsisNode) {
 				Property varnumargs = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VARIABLE_NUM_ARGUMENTS_PROPERTY_URI);
 				ddInst.addProperty(varnumargs, getTheJenaModel().createTypedLiteral(true));
+				if (!(typeNode instanceof UntypedEllipsisNode)){
+					ddInst.addProperty(typeProp, typeNode.getURI());
+				}
 			}
-			else if (!(typeNode instanceof UnknownNode)){
+			else { //if (!(typeNode instanceof UnknownNode)){
 				ddInst.addProperty(typeProp, typeNode.getURI());
 			}
 			if (dd.getUnits() != null) {
@@ -4625,7 +4628,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				rtypes.add(rtnode);
 			}
 			else if (srd.getUnknown() != null) {
-				rtypes.add(new UnknownNode());
+				rtnode = new UnknownNode();
+				rtypes.add(rtnode);
 			}
 			else {
 				rtypes.add(null);
@@ -5240,6 +5244,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								leftVariableDefnTripleMissingSubject = checkForMissingSubjectVariableInTriple(leftVar, leftTranslatedDefn, leftVariableDefn);
 							}
 						}
+						else if (vtype instanceof UnknownNode) {
+							addWarning(leftVariableDefnTci.getExpressionType() + " has unknown return type, can't do type checking.", leftVariableDefn);
+						}
 						else if (vtype != null) {
 							throw new TranslationException("This shouldn't happen!");
 						}
@@ -5488,7 +5495,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 		Expression lexpr = expr.getLeft();
 		Expression rexpr = expr.getRight();
-
+		
 		Object result = processBinaryExpressionByParts(expr, op, lexpr, rexpr);
 		if(result instanceof TripleElement) {
 			checkForArticleForNameInTriple(lexpr, result, SIDE.LEFT);
@@ -7685,7 +7692,11 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// This method is only called when a function is referenced, not when an equation is declared.
 		
 		EList<Expression> arglist = expr.getArglist();
+		
 		Node fnnode = processExpression(expr.getName());
+
+//		TypeCheckInfo retTci = getModelValidator().checkFunctionArgumentsAndReturnReturnTypeCheckInfo(expr.getName(), fnnode.getURI(), expr);
+
 		BuiltinElement builtin = new BuiltinElement();
 		if (fnnode instanceof NamedNode) {
 			builtin.setFuncName(((NamedNode) fnnode).getName());
@@ -7697,132 +7708,33 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		} else {
 			builtin.setFuncName(fnnode.toString());
 		}
+		for (Expression arg : arglist) {
+			Object argNode = processExpression(arg);
+			if (argNode instanceof Node) {
+				builtin.addArgument((Node) argNode);
+			}
+			else {
+				if (argNode instanceof BuiltinElement) {
+					((BuiltinElement)argNode).setEmbedded(true);
+				}
+				builtin.addArgument(nodeCheck(argNode));
+			}
+			try {
+				TypeCheckInfo argTci = getModelValidator().getType(arg);
+				if (argTci != null) {
+					builtin.addArgumentType(argTci.getTypeCheckType());
+				}
+			} catch (Exception e) {
+				addError(e.getMessage(), expr);
+			}
+		}
 		Equation eq = getEquation(expr.getName());		// Retrieve the equation if it was declared in this or an imported model.
 		builtin.setInModelReferencedEquation(eq);
-		if (arglist != null && arglist.size() > 0) {
-			List<Object> args = new ArrayList<Object>();
-			for (int i = 0; i < arglist.size(); i++) {
-				args.add(processExpression(arglist.get(i)));
-			}
-			if (args != null) {
-				int i = 0;
-				for (Object arg : args) {
-					try {
-						builtin.addArgument(nodeCheck(arg));
-						if (arg instanceof GraphPatternElement) {
-							((GraphPatternElement) arg).setEmbedded(true);
-						}
-					}
-					catch (TranslationException e) {
-						addError("Invalid argument ", arglist.get(i));
-					}
-					i++;
-				}
-			}
+		
+		TypeCheckInfo retTci2 = getModelValidator().checkFunctionArgumentsAndReturnReturnTypeCheckInfo(builtin, eq, expr);
+		if (retTci2 != null && retTci2.getTypeCheckType() != null) {
+			builtin.addReturnType(retTci2.getTypeCheckType());
 		}
-		if (expr.getName() != null) {
-			EObject contr = expr.getName().eContainer();
-			EList<SadlParameterDeclaration> argtypes = null;
-			EList<SadlReturnDeclaration> rtypes = null;
-			if (contr instanceof ExternalEquationStatement) {
-				argtypes = ((ExternalEquationStatement)contr).getParameter();
-				rtypes = ((ExternalEquationStatement)contr).getReturnType();
-			}
-			else if (contr instanceof EquationStatement) {
-				argtypes = ((EquationStatement)contr).getParameter();
-				rtypes = ((EquationStatement)contr).getReturnType();
-			}
-			// do return types first to be able to determine if there will be an argument for a returned value
-			boolean returnsValue = false;
-			if (rtypes != null) {
-				List<Node> rTypeNodes = new ArrayList<Node>();
-				for (SadlReturnDeclaration srd : rtypes) {
-					if (srd.getUnknown() != null) {
-						ConstantNode typnode = new ConstantNode(SadlConstants.CONSTANT_NONE);
-						rTypeNodes.add(typnode);
-					}
-					else {
-						try {
-							SadlTypeReference typ = srd.getType();
-							EObject augtype = srd.getAugtype();
-							if (augtype != null) {
-								addError("unhandled return augmented data descriptor in processFunction", srd);
-							}
-							if (typ != null) {
-								NamedNode typnode = sadlTypeReferenceToNode(typ);
-								if (typnode != null) {
-									rTypeNodes.add(typnode);
-									returnsValue = true;
-								}
-							}
-						} catch (JenaProcessorException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-				builtin.setReturnTypes(rTypeNodes);
-			}
-			
-			if (argtypes != null) {
-				List<Node> argTypeNodes = new ArrayList<Node>();
-				for (SadlParameterDeclaration spd : argtypes) {
-					if (spd.getUnknown() != null) {
-						ConstantNode typnode = new ConstantNode(SadlConstants.CONSTANT_NONE);
-						argTypeNodes.add(typnode);
-					}
-					else if (spd.getEllipsis() != null) {
-						Node uten = new UntypedEllipsisNode();
-						argTypeNodes.add(uten);
-					}
-					else {
-						try {
-							SadlTypeReference typ = spd.getType();
-							EObject augtype = spd.getAugtype();
-							if (augtype != null) {
-								addError("unhandled parameter augmented data descriptor in processFunction", contr);
-							}
-							if (typ != null) {
-								NamedNode typnode = sadlTypeReferenceToNode(typ);
-								if (typnode != null) {
-									if (spd.getTypedEllipsis() != null) {
-										argTypeNodes.add(createTypedEllipsisNodeFromVariableNode(null, typnode));
-									}
-									else {
-										argTypeNodes.add(typnode);										
-									}
-								}	
-							}
-							else if (spd.getEllipsis()!= null) {
-								argTypeNodes.add(new UntypedEllipsisNode());
-							}
-						} catch (JenaProcessorException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-				builtin.setArgumentTypes(argTypeNodes);
-				if (argTypeNodes.size() == 1 && argTypeNodes.get(0).toString().equals("...")) {
-					builtin.setExpectedArgCount( -1);
-				}
-				else if (returnsValue) {
-					builtin.setExpectedArgCount(argTypeNodes.size() + 1);	// +1 for the variable that will be added for the returned value
-				}
-				else {
-					builtin.setExpectedArgCount(argTypeNodes.size());
-				}
-			}
-		}
-		try {
-			getModelValidator().getFunctionTypeCheckInfoAndCheckArguments(expr, expr.getName(), true); // this will do argment checks on function
-		} catch (InvalidNameException e) {
-			throw e;
-		} catch (InvalidTypeException e) {
-			throw e;
-		} catch (TranslationException e) {
-			throw e;
-		} catch (Exception e) {
-			throw new TranslationException(e.getMessage(), e);
-		}	
 		return builtin;
 	}
 
@@ -15402,18 +15314,40 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (argsNode != null && argsNode.isResource()) {
 			List<RDFNode> args = getMembersOfSadlList(getTheJenaModel(), argsNode.asResource());
 			org.apache.jena.rdf.model.Property dataType = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DATATYPE_PROPERTY_URI);				
+			org.apache.jena.rdf.model.Property varNumArgs = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VARIABLE_NUM_ARGUMENTS_PROPERTY_URI);
+			org.apache.jena.rdf.model.Property localDesc = getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_DESCRIPTOR_NAME_PROPERTY_URI);
 			for (RDFNode arg : args) {
 				if (arg instanceof org.apache.jena.rdf.model.Resource) {
 					Statement dtstmt = arg.asResource().getProperty(dataType);
 					if (dtstmt != null) {
 						RDFNode obj = dtstmt.getObject();
+						Statement localDescStmt = arg.asResource().getProperty(localDesc);
+						if (localDescStmt != null) {
+							arguments.add(new VariableNode(localDescStmt.getObject().toString()));
+						}
+						Statement varnumargStmt = arg.asResource().getProperty(varNumArgs);
+//						if (varnumargStmt == null) {
+//							StmtIterator pitr = arg.asResource().listProperties();
+//							while (pitr.hasNext()) {
+//								System.out.println(pitr.nextStatement().toString());
+//							}
+//						}
 						if (obj.isURIResource()) {
-							Node argument =  new NamedNode(dtstmt.getObject().asResource().getURI());
-							arguments.add(argument);
+							Node argumentType =  varnumargStmt == null ? new NamedNode(dtstmt.getObject().asResource().getURI()) : 
+								new TypedEllipsisNode(dtstmt.getObject().asResource().getURI());
+							argumentTypes.add(argumentType);
 						}
 						else if (obj.isLiteral()) {
-							Node argument = new com.ge.research.sadl.model.gp.Literal(obj.asLiteral().getValue(), null, null);
-							arguments.add(argument);
+//							Node argumentType = varnumargStmt == null ? new com.ge.research.sadl.model.gp.Literal(obj.asLiteral().getValue(), null, null) : new TypedEllipsisNode(obj.asLiteral().getValue().toString());
+							NamedNode nnn = new NamedNode(obj.asLiteral().getValue().toString());
+							try {
+								nnn.setNodeType(NodeType.DataTypeNode);
+								validateNode(nnn);
+								Node argumentType = varnumargStmt == null ? nnn : new TypedEllipsisNode(obj.asLiteral().getValue().toString());
+								argumentTypes.add(argumentType);
+							} catch (Exception e) {
+								addError(eq.getName() + " encountered unexpected error getting argument type:" + e.getMessage(), context);
+							}
 						}
 						else {
 							addError("Data type of Equation " + eq.getName() + " argument is a blank node, unexpected.", context);
@@ -15453,8 +15387,23 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							returnTypes.add(retNode);
 						}
 						else if (obj.isLiteral()) {
-							Node retNode = new com.ge.research.sadl.model.gp.Literal(obj.asLiteral().getValue(), null, null);
-							returnTypes.add(retNode);
+							UnknownNode ukn = new UnknownNode();
+							if (obj.asLiteral().getValue().toString().equals(ukn.getURI())) {
+								returnTypes.add(ukn);
+							}
+							else {
+	//							Node retNode = new com.ge.research.sadl.model.gp.Literal(obj.asLiteral().getValue(), null, null);
+								NamedNode nnn = new NamedNode(obj.asLiteral().getValue().toString());
+								try {
+									nnn.setNodeType(NodeType.DataTypeNode);
+									validateNode(nnn);
+									Statement varargsstmt = retType.asResource().getProperty(getTheJenaModel().getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VARIABLE_NUM_ARGUMENTS_PROPERTY_URI));
+									Node retNode = varargsstmt == null ? nnn : new TypedEllipsisNode(obj.asLiteral().getValue().toString());
+									returnTypes.add(retNode);
+								} catch (Exception e) {
+									addError(eq.getName() + " encountered unexpected error getting argument type:" + e.getMessage(), context);
+								}
+							}
 						}
 						else {
 							addError("Data type of Equation " + eq.getName() + " retuirn type is a blank node, unexpected.", context);
@@ -15475,8 +15424,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		else {
-			Node un = new UnknownNode();
-			returnTypes.add(un);
+			try {
+				Node nn = new ConstantNode(SadlConstants.CONSTANT_NONE);
+				returnTypes.add(nn);
+			} catch (InvalidNameException e) {
+				// this can't happen unless the argument is null, which it isn't
+			}
+//			Node un = new UnknownNode();
+//			returnTypes.add(un);
 		}
 		eq.setReturnTypes(returnTypes);
 		return eq;
@@ -16733,7 +16688,19 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			
 			String sadlUnittedQuantityHandler = preferenceValues.getPreference(SadlPreferences.SADL_UNITTEDQUANTITY_HANDLER);
 			if (sadlUnittedQuantityHandler == null) {
-				sadlUnittedQuantityHandler = "com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena";
+				try {
+					ITranslator trans = getConfigMgr().getTranslator();
+					if (trans != null) {
+						sadlUnittedQuantityHandler = trans.getDefaultUnittedQuantityHandlerClassname();
+					}
+				} catch (ConfigurationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if (sadlUnittedQuantityHandler == null) {
+					// apparently the translator didn't provide a default handler
+					sadlUnittedQuantityHandler = "com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena";
+				}
 			}
 			setSadlUnittedQuantityHandler(sadlUnittedQuantityHandler);
 			modelProcessorPreferenceMap.put(SadlPreferences.SADL_UNITTEDQUANTITY_HANDLER.getId(), sadlUnittedQuantityHandler);

@@ -312,7 +312,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		for (issue : issues_1) {
 			println(issue.toString)
 		}
-		assertEquals(Iterables.toString(issues_1), 5, issues_1.size);
+		assertEquals(Iterables.toString(issues_1), 1, issues_1.size);
 	}
 	
 	@Test
@@ -345,7 +345,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 //			"Type comparison not possible"
 //		]
 //		sadlModel.assertErrors(errors)
-		sadlModel.assertError("age, a datatype property with range  xsd:float, cannot be compared (is) with No type check info generated.")
+		sadlModel.assertError("age, a datatype property with range  xsd:float, cannot be compared (is) with function subtractDates returning --.")
 	}
 	
 	@Test
@@ -606,8 +606,6 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 1)	
-			issues.get(0).equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information")
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -635,8 +633,6 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 1)	
-			issues.get(0).equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information")
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -666,8 +662,6 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 1)	
-			issues.get(0).equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information")
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -677,23 +671,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 	
 	@Test
 	def void testListBuiltins_01() {
-		val issueList = newArrayList(
-			"Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 2, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 2, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 2, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 2, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 2, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 2, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information",
-			"Built-in function, parameter 2, was found, but the reasoner and translator pair does not provide further type-checking information"
-			
-		)
+		// Node: print doesn't actually return anything, so no type checking warning will be given
 		'''
 		  uri "http://sadl.org/UsingListExpression.sadl" alias UsingListExpression.
 		  
@@ -734,12 +712,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 14)
-			var idx = 0
-			for (iss : issues) {
-				assertEquals(issueList.get(idx), iss.message)
-				idx++
-			}
+			assertTrue(issues.size == 0)
 			assertTrue(rules.size == 7)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -865,7 +838,7 @@ Rule ListLength:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:Y
 		assertTrue(issues.empty)
 	}
 
-	@Ignore
+//	@Ignore
 	@Test
 	def void testAgeOfMarthaIsAnInt() {
 		val sadlModel = '''
@@ -880,7 +853,7 @@ Rule ListLength:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:Y
 		for (issue : issues) {
 			println(issue.toString)
 		}
-		
+		assertEquals(5, issues.size)
 	}
 	
 }

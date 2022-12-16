@@ -21,6 +21,7 @@ package com.ge.research.sadl.jena.translator;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,6 +94,8 @@ import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquation;
+import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquationUtils;
 
 public class JenaTranslatorPlugin implements ITranslator {
     private static final String THERE_EXISTS = "thereExists";
@@ -1272,85 +1275,71 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 	@Override
 	public String setBuiltinElementNameByBuiltinType(BuiltinElement bin) throws TranslationException {
-		BuiltinType ftype = bin.getFuncType();
-		if (ftype.equals(BuiltinType.Divide)) {
-//			return "quotient";
-			bin.setFuncName("quotient");
-		}
-		else 
-			if (ftype.equals(BuiltinType.Equal)) {
-//			return "equal";
-			bin.setFuncName("equal");
-		}
-		else if (ftype.equals(BuiltinType.GT)) {
-//			return "greaterThan";
-			bin.setFuncName("greaterThan");
-		}
-		else if (ftype.equals(BuiltinType.GTE)) {
-//			return "ge";
-			bin.setFuncName("ge");
-		}
-		else if (ftype.equals(BuiltinType.LT)) {
-//			return "lessThan";
-			bin.setFuncName("lessThan");
-		}
-		else if (ftype.equals(BuiltinType.LTE)) {
-//			return "le";
-			bin.setFuncName("le");
-		}
-		else if (ftype.equals(BuiltinType.Minus)) {
-//			return "difference";
-			bin.setFuncName("difference");
-		}
-		else if (ftype.equals(BuiltinType.Modulus)) {
-//			return "mod";
-			bin.setFuncName("mod");
-		}
-		else if (ftype.equals(BuiltinType.Multiply)) {
-//			return "product";
-			bin.setFuncName("product");
-		}
-		else if (ftype.equals(BuiltinType.Negative)) {
-//			return "negative";
-			bin.setFuncName("negative");
-		}
-		else if (ftype.equals(BuiltinType.Not)) {
-//			return "noValue";
-			bin.setFuncName("noValue");
-		}
-		else if (ftype.equals(BuiltinType.NotEqual)) {
-//			return "notEqual";
-			bin.setFuncName("notEqual");
-		}
-		else if (ftype.equals(BuiltinType.NotOnly)) {
-//			return "notOnlyValue";
-			bin.setFuncName("notOnlyValue");
-		}
-		else if (ftype.equals(BuiltinType.Only)) {
-//			return "noValuesOtherThan";
-			bin.setFuncName("noValuesOtherThan");
-		}
-		else if (ftype.equals(BuiltinType.Plus)) {
-//			return "sum";
-			bin.setFuncName("sum");
-		}
-		else if (ftype.equals(BuiltinType.Power)) {
-//			return "pow";			
-			bin.setFuncName("pow");
-		}
-		else if (ftype.equals(BuiltinType.Assign)) {
-//			return "assign";
-			bin.setFuncName("assign");
-		}
-
-		String builtinName = bin.getFuncName();
-		if (builtinName.equals("length") && bin.getArguments() != null && bin.getArguments().size() == 2) {
-			Node arg0 = bin.getArguments().get(0);
-			if (arg0 instanceof NamedNode) {
-				builtinName = "listLength";		
-			}
-		}
-
+		String builtinName = builtinTypeToString(bin);
+//		BuiltinType ftype = bin.getFuncType();
+//		if (ftype.equals(BuiltinType.Divide)) {
+//			bin.setFuncName("quotient");
+//		}
+//		else 
+//			if (ftype.equals(BuiltinType.Equal)) {
+//			bin.setFuncName("equal");
+//		}
+//		else if (ftype.equals(BuiltinType.GT)) {
+//			bin.setFuncName("greaterThan");
+//		}
+//		else if (ftype.equals(BuiltinType.GTE)) {
+//			bin.setFuncName("ge");
+//		}
+//		else if (ftype.equals(BuiltinType.LT)) {
+//			bin.setFuncName("lessThan");
+//		}
+//		else if (ftype.equals(BuiltinType.LTE)) {
+//			bin.setFuncName("le");
+//		}
+//		else if (ftype.equals(BuiltinType.Minus)) {
+//			bin.setFuncName("difference");
+//		}
+//		else if (ftype.equals(BuiltinType.Modulus)) {
+//			bin.setFuncName("mod");
+//		}
+//		else if (ftype.equals(BuiltinType.Multiply)) {
+//			bin.setFuncName("product");
+//		}
+//		else if (ftype.equals(BuiltinType.Negative)) {
+//			bin.setFuncName("negative");
+//		}
+//		else if (ftype.equals(BuiltinType.Not)) {
+//			bin.setFuncName("noValue");
+//		}
+//		else if (ftype.equals(BuiltinType.NotEqual)) {
+//			bin.setFuncName("notEqual");
+//		}
+//		else if (ftype.equals(BuiltinType.NotOnly)) {
+//			bin.setFuncName("notOnlyValue");
+//		}
+//		else if (ftype.equals(BuiltinType.Only)) {
+//			bin.setFuncName("noValuesOtherThan");
+//		}
+//		else if (ftype.equals(BuiltinType.Plus)) {
+//			bin.setFuncName("sum");
+//		}
+//		else if (ftype.equals(BuiltinType.Power)) {
+//			bin.setFuncName("pow");
+//		}
+//		else if (ftype.equals(BuiltinType.Assign)) {
+//			bin.setFuncName("assign");
+//		}
+//
+//		String builtinName = bin.getFuncName();
+//		if (builtinName.equals("length") && bin.getArguments() != null && bin.getArguments().size() == 2) {
+//			Node arg0 = bin.getArguments().get(0);
+//			if (arg0 instanceof NamedNode) {
+//				builtinName = "listLength";		
+//			}
+//		}
+		
+		bin.setFuncName(builtinName);
+		
 		// Note: the order here allows any built-in which overrides the ones in Jena to be picked up preferentially
 		//	see if it is known to the ConfigurationManager or if we can find it in the services registry
 		boolean status = findOrAddBuiltin(builtinName);
@@ -1436,17 +1425,17 @@ public class JenaTranslatorPlugin implements ITranslator {
 			}
 		}
 
-		// Note: the order here allows any built-in which overrides the ones in Jena to be picked up preferentially
-		//	see if it is known to the ConfigurationManager or if we can find it in the services registry
-		boolean status = findOrAddBuiltin(builtinName);
-		if (!status) {
-			// if not see if it is one already registered
-			Builtin bltin = BuiltinRegistry.theRegistry.getImplementation(builtinName);
-			if (bltin == null) {
-//				logger.error("Something went wrong finding/loading Builtin '" + builtinName + "'");
-//				addError("Unable to resolve built-in '" + builtinName + "' in rule '" + getRuleInTranslation().getRuleName() + "'");
-			}
-		}
+//		// Note: the order here allows any built-in which overrides the ones in Jena to be picked up preferentially
+//		//	see if it is known to the ConfigurationManager or if we can find it in the services registry
+//		boolean status = findOrAddBuiltin(builtinName);
+//		if (!status) {
+//			// if not see if it is one already registered
+//			Builtin bltin = BuiltinRegistry.theRegistry.getImplementation(builtinName);
+//			if (bltin == null) {
+////				logger.error("Something went wrong finding/loading Builtin '" + builtinName + "'");
+////				addError("Unable to resolve built-in '" + builtinName + "' in rule '" + getRuleInTranslation().getRuleName() + "'");
+//			}
+//		}
 		return builtinName;
 	}
 
@@ -2596,7 +2585,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 						// This is a bit tricky. For a built-in that returns a value (other than boolean),
 						// the ArgTypes will not include the variable included in the be.expectedArgCount or
 						// the numArgs. but how to tell if the built-in will have an argument variable added?
-						if (numArgs == argTypes.size()) {
+						if (argTypes != null && numArgs == argTypes.size()) {
 							// looks good: get return type from OntModel
 							
 						}
@@ -2619,20 +2608,67 @@ public class JenaTranslatorPlugin implements ITranslator {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				} catch (ClassNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-//				} catch (TranslationException e1) {
-//					throw e1;
+					// maybe this is a Java class wrapped in a SADL External equation
+					if (className !=  null) {
+						EvaluateSadlEquationUtils eseu = new EvaluateSadlEquationUtils();
+						int lastDot = className.lastIndexOf('.');
+						if (lastDot > 0) {
+							String classname = className.substring(0, lastDot);
+							String methname =  className.substring(lastDot + 1);
+							Class<?> clazz = eseu.getMatchingClassOfExternalUri(classname);
+							Object arg0AsInstanceOfClazz = null;
+							List<Method> matchingStaticMethods = eseu.getMatchingMethodsOfExternalUri(clazz, methname, true);
+							Method bestMatch = eseu.getBestMatch(be, matchingStaticMethods, false);
+							if (bestMatch != null) {
+								Class<?> retTypeCls = bestMatch.getReturnType();
+								String retTypeUri = javaTypeToXsdType(retTypeCls);
+								NamedNode retNN = new NamedNode(retTypeUri);
+								retNN.setNodeType(NodeType.DataTypeNode);
+								return retNN;
+							}
+						}
+					}
 				}
 
 			} catch (UnittedQuantityHandlerException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new TranslationException(e.getMessage(), e);
 			} catch (TranslationException e) {
 				throw e;
 			}
 		}
 		return null;
+	}
+
+
+	private String javaTypeToXsdType(Class<?> retTypeCls) throws TranslationException {
+		if (retTypeCls.equals(String.class)) {
+			return XSD.xstring.getURI();
+		}
+		else if (retTypeCls.equals(Integer.class)) {
+			return XSD.xint.getURI();
+		}
+		else if (retTypeCls.equals(Long.class)) {
+			return XSD.xlong.getURI();
+		}
+		else if (retTypeCls.equals(Float.class)) {
+			return XSD.xfloat.getURI();
+		}
+		else if (retTypeCls.equals(Double.class)) {
+			return XSD.xdouble.getURI();
+		}
+		else if (retTypeCls.equals(Number.class)) {
+			return XSD.decimal.getURI();
+		}
+		else if (retTypeCls.equals(Boolean.class)) {
+			return XSD.xboolean.getURI();
+		}
+		throw new TranslationException("Type " + retTypeCls.getCanonicalName() + " not handled");
+	}
+
+
+	@Override
+	public String getDefaultUnittedQuantityHandlerClassname() {
+		return "com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena";
 	}
 
 }

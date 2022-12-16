@@ -1379,7 +1379,6 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		else {
 			logger.warn("Something went wrong finding/loading Builtin '" + bin.getFuncName() + "' of type '" + ftype + "'");
 			addError(getModelName() + ": Found reference to unknown built-in '" + bin.getFuncName() + "' of type '" + ftype + "'", ErrorType.WARNING);
-//			throw new TranslationException("Unable to resolve built-in of type '" + ftype + "'");
 			return bin.getFuncName();
 		}
 
@@ -1921,13 +1920,20 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 
 	@Override
 	public String setBuiltinElementNameByBuiltinType(BuiltinElement bin) throws TranslationException {
-		// TODO Auto-generated method stub
-		return null;
+		String builtinName = builtinTypeToString(bin);
+		BuiltinType ftype = bin.getFuncType();
+		bin.setFuncName(builtinName);
+		return builtinName;
 	}
 
 	@Override
 	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(BuiltinElement be, OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) {
 		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDefaultUnittedQuantityHandlerClassname() {
 		return null;
 	}
 

@@ -566,7 +566,7 @@ public class EvaluateSadlEquationUtils {
 	 * @param methodOnClassOfFirstArgument -- true if the method should be invoked on the instance of the class identified by the first argument
 	 * @return -- the Java Method best matching the args (if any)
 	 */
-	private Method getBestMatch(BuiltinElement bi, List<Method> matchingMethods, boolean methodOnClassOfFirstArgument) {
+	public Method getBestMatch(BuiltinElement bi, List<Method> matchingMethods, boolean methodOnClassOfFirstArgument) {
 		if (matchingMethods != null) {
 			int effectiveNumArguments = bi.getArguments() != null ? 
 					methodOnClassOfFirstArgument ? bi.getArguments().size() - 1 : bi.getArguments().size() : 0;
@@ -584,6 +584,9 @@ public class EvaluateSadlEquationUtils {
 						continue;
 					}
 					boolean match = true;
+					if ((bi.getArguments() == null || bi.getArguments().size() == 0) && numParams > 0) {
+						continue;
+					}
 					for (int i = 0;  i < paramTypes.length; i++) {
 						Class<?> pt = paramTypes[i];
 						String ptstr = pt.getTypeName();
@@ -815,7 +818,7 @@ public class EvaluateSadlEquationUtils {
 	 * @param exturistr
 	 * @return
 	 */
-	private Class<?> getMatchingClassOfExternalUri(String classname) {
+	public Class<?> getMatchingClassOfExternalUri(String classname) {
 		Class<?> fctCls;
 		try {
 			fctCls = Class.forName(classname);
@@ -835,7 +838,7 @@ public class EvaluateSadlEquationUtils {
 	 * @param staticMethods -- true if this call should only return static methods; false if this call should only return instance methods
 	 * @return -- a list of Java Methods matching the conditions
 	 */
-	private List<Method> getMatchingMethodsOfExternalUri(Class<?> fctCls, String methname, boolean staticMethods) {
+	public List<Method> getMatchingMethodsOfExternalUri(Class<?> fctCls, String methname, boolean staticMethods) {
 		if (fctCls != null) {
 			List<Method> results = new ArrayList<Method>();
 			Method[] fctMethods = fctCls.getMethods();
