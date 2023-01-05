@@ -1385,6 +1385,62 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		return builtinName;
 	}
 	
+	@Override
+	public BuiltinType reasonerBuiltinNameToBuiltinType(String builtinName) {
+		BuiltinType ftype = null;
+		if (builtinName == null) return ftype;
+		
+		if (builtinName.equals("/")) {
+			ftype = BuiltinType.Divide;	
+		}
+		else if (builtinName.equals("==")) {
+			ftype = BuiltinType.Equal;
+		}
+		else if (builtinName.equals(">")) {
+			ftype = BuiltinType.GT;
+		}
+		else if (builtinName.equals(">=")) {
+			ftype = BuiltinType.GTE;
+		}
+		else if (builtinName.equals("<")) {
+			ftype = BuiltinType.LT;
+		}
+		else if (builtinName.equals("=<")) {
+			ftype = BuiltinType.LTE;
+		}
+		else if (builtinName.equals("-")) {
+			ftype = BuiltinType.Minus;
+		}
+		else if (builtinName.equals("mod")) {
+			ftype = BuiltinType.Modulus;
+		}
+		else if (builtinName.equals("*")) {
+			ftype = BuiltinType.Multiply;
+		}
+		else if (builtinName.equals("-")) {
+			ftype = BuiltinType.Negative;
+		}
+		else if (builtinName.equals("\\+")) {
+			ftype = BuiltinType.Not;
+		}
+		else if (builtinName.equals("\\==")) {
+			ftype = BuiltinType.NotEqual;
+		}
+		else if (builtinName.equals("notOnlyValue")) {
+			ftype = BuiltinType.NotOnly;
+		}
+		else if (builtinName.equals("+")) {
+			ftype = BuiltinType.Plus;
+		}
+		else if (builtinName.equals("**")) {
+			ftype = BuiltinType.Power;
+		}
+		else if (builtinName.equals("is")) {
+			ftype = BuiltinType.Assign;
+		}
+		return ftype;
+	}
+	
 	String validateBuiltin(BuiltinElement bin, List<Node> args) {
 		if (functionListArity1.contains(bin.getFuncName()) || functionListArity2.contains(bin.getFuncName())) {	
 			return null;
@@ -1908,12 +1964,6 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 
 	@Override
 	public String getBuiltinClassName(String builtinName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be) {
 		// TODO Auto-generated method stub
 		return null;
 	}

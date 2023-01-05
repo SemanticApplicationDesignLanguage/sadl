@@ -2125,7 +2125,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 										continue;
 									}
 									ProxyNode pn = retiredProxyNodes.get(gpe);
-									return pn.getReplacementNode();
+									if (pn != null) {
+										return pn.getReplacementNode();
+									}
 								}
 							}
 						}
@@ -2420,7 +2422,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		patterns = moveTriplesOutOfBuiltin(patterns, be, isRuleThen);
 		if (!getModelProcessor().isIgnoreUnittedQuantities() && 
-				(isExpandableComparisonOperator(be) || 
+				(getModelProcessor().isExpandableComparisonOperator(be.getFuncType()) || 
 						getModelProcessor().isExpandUnittedQuantityInTranslation())) {
 			patterns = getUnittedQuantityHander().expandUnittedQuantities(patterns, be, isRuleThen);
 		}
@@ -2468,20 +2470,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 	}
 
-	private boolean isExpandableComparisonOperator(BuiltinElement be) {
-		BuiltinType bit = be.getFuncType();
-		if (bit.equals(BuiltinType.GT) ||
-				bit.equals(BuiltinType.GTE) ||
-				bit.equals(BuiltinType.LT) ||
-				bit.equals(BuiltinType.LTE) ||
-				bit.equals(BuiltinType.Equal) ||
-				bit.equals(BuiltinType.NotEqual)) {
-			return true;
-		}
-		return false;
-	}
-	
-	
 	/**
 	 * Method to determine if the returned value of a BuiltinElement with
 	 * UnittedQuantityArgs should return a UnittedQuantity

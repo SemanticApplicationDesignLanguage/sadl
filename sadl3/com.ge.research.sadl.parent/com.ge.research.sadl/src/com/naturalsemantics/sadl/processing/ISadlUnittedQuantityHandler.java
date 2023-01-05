@@ -20,55 +20,19 @@ package com.naturalsemantics.sadl.processing;
 import java.util.List;
 
 import com.ge.research.sadl.model.gp.BuiltinElement;
-import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
 import com.ge.research.sadl.reasoner.ConfigurationException;
-import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 public interface ISadlUnittedQuantityHandler {
 	/**
-	 * Method to determine the built-in UnittedQuantity status for common functions for use in expansion when
-	 * the built-in itself doesn't have this information.
-	 * @param be
-	 * @return
-	 * @throws TranslationException 
+	 * Method to set the Intermediate Form translator
 	 */
-	default BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatusForExpansion(BuiltinElement be) throws TranslationException {
-		BuiltinType bit = be.getFuncType();
-		if (bit.equals(BuiltinType.GT) ||
-				bit.equals(BuiltinType.GTE) ||
-				bit.equals(BuiltinType.LT) ||
-				bit.equals(BuiltinType.LTE) ||
-				bit.equals(BuiltinType.Equal) ||
-				bit.equals(BuiltinType.NotEqual) ||
-				bit.equals(BuiltinType.Plus) ||
-				bit.equals(BuiltinType.Minus)) {
-			return BuiltinUnittedQuantityStatus.SameUnitsRequired;
-		}
-		else if (bit.equals(BuiltinType.Multiply) ||
-				bit.equals(BuiltinType.Divide)) {
-			return BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly;
-		}
-		else if (bit.equals(BuiltinType.Power)) {
-			return BuiltinUnittedQuantityStatus.SingleArgument;
-		}
-		return getBuiltinUnittedQuantityStatus(be, null);
-	}
-	
 	abstract void setIntermediateFormTranslator(I_IntermediateFormTranslator ift);
-	
-	/**
-	 * Method to use the specific handler to get the BuiltinUnittedQuantityStatus
-	 * 
-	 * @param be
-	 * @return
-	 */
-	abstract BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus(BuiltinElement be, List<Node> argTypes) throws TranslationException;
 	
 	/**
 	 * Method to compute the return type of a built-in based on the built-in type and the types
@@ -111,17 +75,17 @@ public interface ISadlUnittedQuantityHandler {
 	abstract List<GraphPatternElement> expandUnittedQuantities(List<GraphPatternElement> patterns, BuiltinElement be,
 			boolean isRuleThen) throws TranslationException;
 	
-//	/**
-//	 * Method to validate a the argument types of a built-in and return the URIs of the return types.
-//	 * @param model
-//	 * @param argTypes
-//	 * @return
-//	 * @throws UnittedQuantityHandlerException
-//	 * @throws ConfigurationException 
-//	 * @throws TranslationException 
-//	 */
-//	abstract Object validateArgumentTypes(BuiltinElement be, Object model, java.util.List<String> argTypes) throws UnittedQuantityHandlerException, ConfigurationException, TranslationException;
-//	
+	/**
+	 * Method to validate a the argument types of a built-in and return the URIs of the return types.
+	 * @param model
+	 * @param argTypes
+	 * @return
+	 * @throws UnittedQuantityHandlerException
+	 * @throws ConfigurationException 
+	 * @throws TranslationException 
+	 */
+	abstract Object validateArgumentTypes(BuiltinElement be, Object model, java.util.List<Node> argTypes) throws UnittedQuantityHandlerException, ConfigurationException, TranslationException;
+	
 	/**
 	 * Method to reset the instance of ISadlUnittedQuantityHandler for a new rule, query, or test.
 	 */
@@ -139,4 +103,5 @@ public interface ISadlUnittedQuantityHandler {
 	 * @return
 	 */
 	abstract String getUnittedQuantityInferenceHelperClassname();
+
 }

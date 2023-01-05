@@ -14,9 +14,10 @@
  * and licensed under the Eclipse Public License - v 1.0
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
  *
- ***********************************************************************/package com.ge.research.sadl.reasoner;
+ ***********************************************************************/
+package com.ge.research.sadl.reasoner;
 
-public class UnittedQuantityHandlerException extends Exception {
+public class UnittedQuantityHandlerException  extends TranslationException {
 
     // Needed to avoid a warning.
     private static final long serialVersionUID = 1L;

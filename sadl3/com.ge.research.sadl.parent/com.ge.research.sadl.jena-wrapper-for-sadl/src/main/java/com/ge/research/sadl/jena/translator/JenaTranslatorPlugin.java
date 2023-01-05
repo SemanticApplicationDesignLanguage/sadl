@@ -94,7 +94,6 @@ import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
-import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquation;
 import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquationUtils;
 
 public class JenaTranslatorPlugin implements ITranslator {
@@ -1378,6 +1377,65 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return builtinName;
 	}
 
+	@Override
+	public BuiltinType reasonerBuiltinNameToBuiltinType(String builtinName) {
+		BuiltinType ftype = null;
+		if (builtinName == null) return ftype;
+		
+		if (builtinName.equals("quotient")) {
+			ftype = BuiltinType.Divide;	
+		}
+		else if (builtinName.equals("equal")) {
+			ftype = BuiltinType.Equal;
+		}
+		else if (builtinName.equals("greaterThan")) {
+			ftype = BuiltinType.GT;
+		}
+		else if (builtinName.equals("ge")) {
+			ftype = BuiltinType.GTE;
+		}
+		else if (builtinName.equals("lessThan")) {
+			ftype = BuiltinType.LT;
+		}
+		else if (builtinName.equals("le")) {
+			ftype = BuiltinType.LTE;
+		}
+		else if (builtinName.equals("difference")) {
+			ftype = BuiltinType.Minus;
+		}
+		else if (builtinName.equals("mod")) {
+			ftype = BuiltinType.Modulus;
+		}
+		else if (builtinName.equals("product")) {
+			ftype = BuiltinType.Multiply;
+		}
+		else if (builtinName.equals("negative")) {
+			ftype = BuiltinType.Negative;
+		}
+		else if (builtinName.equals("noValue")) {
+			ftype = BuiltinType.Not;
+		}
+		else if (builtinName.equals("notEqual")) {
+			ftype = BuiltinType.NotEqual;
+		}
+		else if (builtinName.equals("notOnlyValue")) {
+			ftype = BuiltinType.NotOnly;
+		}
+		else if (builtinName.equals("noValuesOtherThan")) {
+			ftype = BuiltinType.Only;
+		}
+		else if (builtinName.equals("sum")) {
+			ftype = BuiltinType.Plus;
+		}
+		else if (builtinName.equals("pow")) {
+			ftype = BuiltinType.Power;
+		}
+		else if (builtinName.equals("assign")) {
+			ftype = BuiltinType.Assign;
+		}
+		return ftype;
+	}
+
 	/**
 	 * Method to determine if an RDFNode is a subclass of the SADL typed list
 	 * @param theJenaModel
@@ -2425,44 +2483,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 	
 	@Override
-	public BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be) {
-		if (be.getUnittedQuantityStatus() != null) {
-			return be.getUnittedQuantityStatus();
-		}
-		try {
-			if (be.getExternalUri() != null) {
-				String className = null;
-				className = be.getExternalUri();
-				try {
-					ITypedBaseBuiltin inst = ((ConfigurationManager)configurationMgr).getClassInstance(className, ITypedBaseBuiltin.class);
-					be.setUnittedQuantityStatus(inst.getBuiltinUnittedQuantityStatus());
-				}
-				catch (ClassCastException e) {
-					return BuiltinUnittedQuantityStatus.UnitsNotSupported;
-				}
-				return be.getUnittedQuantityStatus();
-			}
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return BuiltinUnittedQuantityStatus.UnitsNotSupported;
-	}
-
-
-	@Override
 	public Node validateArgumentTypes(BuiltinElement be, OntModel model, List<Node> argTypes) throws TranslationException {
 		if (be.getExternalUri() != null) {
 			String className = null;
@@ -2470,7 +2490,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 			ITypedBaseBuiltin inst;
 			try {
 				inst = ((ConfigurationManager)configurationMgr).getClassInstance(className, ITypedBaseBuiltin.class);
-				return inst.validateArgumentTypes(model, argTypes);
+				return inst.validateArgumentTypes(model, be, argTypes);
 			} catch (InstantiationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -2486,7 +2506,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 						// This is a bit tricky. For a built-in that returns a value (other than boolean),
 						// the ArgTypes will not include the variable included in the be.expectedArgCount or
 						// the numArgs. but how to tell if the built-in will have an argument variable added?
-						if (numArgs == argTypes.size()) {
+						if (argTypes != null && numArgs == argTypes.size()) {
 							// looks good: get return type from OntModel
 							
 						}
@@ -2499,7 +2519,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 //									argTypes.size() + " arguments are provided in the model");
 						}
 					}
-					else {
+					else if (numArgs == 0) {
+						// this can take a variable number of arguments
 						
 					}
 				} catch (InstantiationException e1) {
@@ -2560,6 +2581,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 							Method bestMatch = eseu.getBestMatch(be, matchingStaticMethods, false);
 							if (bestMatch != null) {
 								Class<?> retTypeCls = bestMatch.getReturnType();
+								String cname = retTypeCls.getCanonicalName();
 								String retTypeUri = javaTypeToXsdType(retTypeCls);
 								NamedNode retNN = new NamedNode(retTypeUri);
 								retNN.setNodeType(NodeType.DataTypeNode);
@@ -2568,9 +2590,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 						}
 					}
 				}
-
-			} catch (UnittedQuantityHandlerException e) {
-				throw new TranslationException(e.getMessage(), e);
 			} catch (TranslationException e) {
 				throw e;
 			}
@@ -2580,25 +2599,25 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 
 	private String javaTypeToXsdType(Class<?> retTypeCls) throws TranslationException {
-		if (retTypeCls.equals(String.class)) {
+		if (retTypeCls.equals(String.class) || retTypeCls.getCanonicalName().equals("string")) {
 			return XSD.xstring.getURI();
 		}
-		else if (retTypeCls.equals(Integer.class)) {
+		else if (retTypeCls.equals(Integer.class) || retTypeCls.getCanonicalName().equals("int")) {
 			return XSD.xint.getURI();
 		}
-		else if (retTypeCls.equals(Long.class)) {
+		else if (retTypeCls.equals(Long.class) || retTypeCls.getCanonicalName().equals("long")) {
 			return XSD.xlong.getURI();
 		}
-		else if (retTypeCls.equals(Float.class)) {
+		else if (retTypeCls.equals(Float.class) || retTypeCls.getCanonicalName().equals("float")) {
 			return XSD.xfloat.getURI();
 		}
-		else if (retTypeCls.equals(Double.class)) {
+		else if (retTypeCls.equals(Double.class) || retTypeCls.getCanonicalName().equals("double")) {
 			return XSD.xdouble.getURI();
 		}
-		else if (retTypeCls.equals(Number.class)) {
+		else if (retTypeCls.equals(Number.class) || retTypeCls.getCanonicalName().equals("decimal")) {
 			return XSD.decimal.getURI();
 		}
-		else if (retTypeCls.equals(Boolean.class)) {
+		else if (retTypeCls.equals(Boolean.class) || retTypeCls.getCanonicalName().equals("boolean")) {
 			return XSD.xboolean.getURI();
 		}
 		throw new TranslationException("Type " + retTypeCls.getCanonicalName() + " not handled");
@@ -2609,5 +2628,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 	public String getDefaultUnittedQuantityHandlerClassname() {
 		return "com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena";
 	}
+
 
 }

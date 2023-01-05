@@ -328,7 +328,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	private List<String> comparisonOperators = Arrays.asList(">=", ">", "<=", "<", "==", "!=", "is", "=", "not",
 			"unique", "in", "contains", "does", /* "not", */"contain");
 	private List<String> numericOperators = Arrays.asList("*", "+", "/", "-", "%", "^");
+	private List<BuiltinType> numericOperatorTypes = Arrays.asList(BuiltinType.Multiply, BuiltinType.Plus, BuiltinType.Divide, BuiltinType.Minus, BuiltinType.Modulus, BuiltinType.Power);
 	private List<String> numericComparisonOperators = Arrays.asList(">=", ">", "<=", "<");
+	private List<BuiltinType> numericComparisonOperatorTypes = Arrays.asList(BuiltinType.GTE, BuiltinType.GT, BuiltinType.LTE, BuiltinType.LT);
 	private List<String> equalityInequalityComparisonOperators = Arrays.asList("==", "!=", "is", "=");
 	private List<String> mAssignmentOperators = Arrays.asList("is","=");
 	private List<String> canBeNumericOperators = Arrays.asList(">=", ">", "<=", "<", "==", "!=", "is", "=", ISadlModelValidator.ARGUMENT);
@@ -352,7 +354,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	// They are stored by type as key to a list of names, the index in the list is
 	// its ordinal number
 	private Map<NamedNode, List<VariableNode>> cruleVariables = null;
-	private List<EObject> preprocessedEObjects = null;
+	private Map<EObject, GraphPatternElement> preprocessedGraphPatternElementsByEObject = null;
 
 	protected String modelName;
 	protected String modelAlias;
@@ -3667,7 +3669,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			e.printStackTrace();
 		} catch (TranslationException e) {
 			addError(SadlErrorMessages.TRANSLATION_ERROR.get("query", pattern.toString()), thenExpr);
-			e.printStackTrace();
 		}
 		if (expandedPattern != null && expandedPattern instanceof List<?> && ((List<?>) expandedPattern).size() > 0) {
 			pattern = expandedPattern;
@@ -5275,12 +5276,12 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								rightDefnType = (NamedNode) rightTranslatedDefn;
 								setVarType(rightVar, rightDefnType, (Boolean) null, rightVariableDefn);
 							}
-							return combineRest(createBinaryBuiltin(expr.getOp(), leftVar, rightVar), rest);
+							return combineRest(createBinaryBuiltin(expr.getOp(), leftVar, rightVar, expr), rest);
 						}
 						if((((NamedNode) leftTranslatedDefn).isList() && ((NamedNode) leftTranslatedDefn).getListLiterals() != null) ||
 								((NamedNode) leftTranslatedDefn).getNodeType().equals(NodeType.DataTypeProperty)) {
 							addVariableDefinition(leftVar, leftTranslatedDefn, leftDefnType, expr);
-							GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, leftTranslatedDefn);
+							GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, leftTranslatedDefn, expr);
 							((BuiltinElement)bi).setFuncName("assign");
 							return combineRest(bi, rest);
 						}
@@ -5377,7 +5378,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								}
 							} else {
 								Node defn = nodeCheck(leftTranslatedDefn);
-								GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, defn);
+								GraphPatternElement bi = createBinaryBuiltin(expr.getOp(), leftVar, defn, expr);
 								if (bi instanceof BuiltinElement && (defn instanceof com.ge.research.sadl.model.gp.Literal || defn instanceof ConstantNode || 
 										(defn instanceof NamedNode && ((NamedNode)defn).getNodeType().equals(NodeType.InstanceNode)))) {
 									((BuiltinElement)bi).setFuncName("assign");
@@ -5468,7 +5469,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					((TripleElement) lobj).setObject(rightVar);
 					return lobj;
 				} else {
-					return createBinaryBuiltin(expr.getOp(), rightVar, lobj);
+					return createBinaryBuiltin(expr.getOp(), rightVar, lobj, expr);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -6212,7 +6213,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				if(right.getFuncName() == "not") {
 					//Pull up the not to the outside operator with the "is" operator nested     			
 					Node right_arg = right.getArguments().get(0);
-					GraphPatternElement bi = createBinaryBuiltin(op, lobj, right_arg); 
+					GraphPatternElement bi = createBinaryBuiltin(op, lobj, right_arg, lexpr.eContainer()); 
 					Object biWithImpliedProperties = applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi, false);
 					Object ubi = createUnaryBuiltin(container, "not", biWithImpliedProperties);
 					return combineRest(ubi, rest);
@@ -6271,7 +6272,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					else {
 						applyImpliedAndExpandedProperties(container, lexpr, rexpr, left, false);
-						GraphPatternElement bi = createBinaryBuiltin(op, left, arg); 
+						GraphPatternElement bi = createBinaryBuiltin(op, left, arg, lexpr.eContainer()); 
 						if (bi == null && getTarget() instanceof Test) {
 							Test tst = (Test) getTarget();
 							tst.setCompName(BuiltinType.NotEqual);
@@ -6315,9 +6316,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		// type assign.
 		if (optype == BuiltinType.Equal && getTarget() instanceof Rule && lobj instanceof VariableNode
 				&& robj instanceof com.ge.research.sadl.model.gp.Literal
-				&& !variableIsBound((Rule) getTarget(), null, (VariableNode) lobj)) {
+				&& isDefiningDeclaration) {
 			return applyImpliedAndExpandedProperties(container, lexpr, rexpr,
-					createBinaryBuiltin("assign", robj, lobj), false);
+					createBinaryBuiltin("assign", robj, lobj, lexpr.eContainer()), false);
 		}
 
 		if (op.equals("and") || op.equals("or")) {
@@ -6437,9 +6438,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			GraphPatternElement bi;
 			if (reverseArgs) {
-				bi = createBinaryBuiltin(op, robj, postProcessTranslationResult(lobj));
+				bi = createBinaryBuiltin(op, robj, postProcessTranslationResult(lobj), lexpr.eContainer());
 			} else {
-				bi = createBinaryBuiltin(op, postProcessTranslationResult(lobj), robj);
+				bi = createBinaryBuiltin(op, postProcessTranslationResult(lobj), robj, lexpr.eContainer());
 			}
 			if (isNegated) {
 				bi = (GraphPatternElement) createUnaryBuiltin(container, "not", bi);
@@ -7184,7 +7185,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						else {
 							processExpression(container);
 						}
-						eobjectPreprocessed(container);
+						eobjectPreprocessed(container, tr);
 						pred = tr.getPredicate() != null ? getTheJenaModel().getOntProperty(tr.getPredicate().toFullyQualifiedString()) : null;
 					}
 					if (pred == null) {
@@ -7302,9 +7303,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							namedNodeToConceptName((NamedNode) predNode),
 							getTheJenaModel().getProperty(((NamedNode) predNode).toFullyQualifiedString()), predeo);
 					TypeCheckInfo otci = getModelValidator().getType(objeo);
-					List<String> operations = new ArrayList<String>(1);
-					operations.add("is");
-					if (getModelValidator().compareTypesUsingImpliedPropertiesRecursively(operations, predeo, objeo,
+					String operation = "is";
+					if (getModelValidator().compareTypesUsingImpliedPropertiesRecursively(operation, predeo, objeo,
 							ptci, otci, ImplicitPropertySide.LEFT)) {
 						return;
 					}
@@ -7358,9 +7358,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						if (otci == null) {
 							otci = getModelValidator().getType(objeo);
 						}
-						List<String> operations = new ArrayList<String>(1);
-						operations.add("is");
-						if (getModelValidator().compareTypesUsingImpliedPropertiesRecursively(operations, predeo, objeo,
+						String operation = "is";
+						if (getModelValidator().compareTypesUsingImpliedPropertiesRecursively(operation, predeo, objeo,
 								ptci, otci, ImplicitPropertySide.LEFT)) {
 							return;
 						}
@@ -7695,19 +7694,33 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		
 		Node fnnode = processExpression(expr.getName());
 
-//		TypeCheckInfo retTci = getModelValidator().checkFunctionArgumentsAndReturnReturnTypeCheckInfo(expr.getName(), fnnode.getURI(), expr);
-
-		BuiltinElement builtin = new BuiltinElement();
-		if (fnnode instanceof NamedNode) {
-			builtin.setFuncName(((NamedNode) fnnode).getName());
-			builtin.setFuncPrefix(((NamedNode)fnnode).getPrefix());
-			builtin.setFuncUri(((NamedNode)fnnode).toFullyQualifiedString());
-		} else if (fnnode == null) {
-			addError("Function not found", expr);
-			return null;
-		} else {
-			builtin.setFuncName(fnnode.toString());
+		GraphPatternElement cachedGPE = getPreprocessedGraphPatternElement(expr);
+		BuiltinElement builtin;
+		if (cachedGPE != null && cachedGPE instanceof BuiltinElement) {
+			builtin = (BuiltinElement) cachedGPE;
 		}
+		else {
+			builtin = new BuiltinElement();
+			if (fnnode instanceof NamedNode) {
+				builtin.setFuncName(((NamedNode) fnnode).getName());
+				builtin.setFuncPrefix(((NamedNode)fnnode).getPrefix());
+				builtin.setFuncUri(((NamedNode)fnnode).toFullyQualifiedString());
+				builtin.setContext(expr);
+			} else if (fnnode == null) {
+				addError("Function not found", expr);
+				return null;
+			} else {
+				builtin.setFuncName(fnnode.toString());
+			}
+		}
+		boolean addArgTypes = false;
+		if (builtin.getArgumentTypes() == null || builtin.getArgumentTypes().size() < arglist.size()) {	
+			if (builtin.getArgumentTypes() !=  null) {
+				builtin.getArgumentTypes().clear();
+			}
+			addArgTypes = true;
+		}
+		
 		for (Expression arg : arglist) {
 			Object argNode = processExpression(arg);
 			if (argNode instanceof Node) {
@@ -7719,14 +7732,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				builtin.addArgument(nodeCheck(argNode));
 			}
-			try {
-				TypeCheckInfo argTci = getModelValidator().getType(arg);
-				if (argTci != null) {
-					builtin.addArgumentType(argTci.getTypeCheckType());
+			if (addArgTypes) {	
+				try {
+					TypeCheckInfo argTci = getModelValidator().getType(arg);
+					if (argTci != null) {
+						builtin.addArgumentType(argTci.getTypeCheckType());
+					}
+				} catch (Exception e) {
+					addError(e.getMessage(), expr);
 				}
-			} catch (Exception e) {
-				addError(e.getMessage(), expr);
-			}
+			}	
 		}
 		Equation eq = getEquation(expr.getName());		// Retrieve the equation if it was declared in this or an imported model.
 		builtin.setInModelReferencedEquation(eq);
@@ -7872,7 +7887,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	/**
 	 * This method returns true if the argument node is bound in some other element
-	 * of the rule
+	 * of the rule. Note that this will only work when the rule's patterns have been 
+	 * added; it will not work during processing when they have not been added.
 	 * 
 	 * @param rule
 	 * @param gpe
@@ -7903,7 +7919,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	public GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj)
+	@Override
+	public GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj, EObject context)
 			throws InvalidNameException, InvalidTypeException, TranslationException {
 		if (name.equals(JunctionType.AND_ALPHA) || name.equals(JunctionType.AND_SYMBOL)
 				|| name.equals(JunctionType.OR_ALPHA) || name.equals(JunctionType.OR_SYMBOL)) {
@@ -7928,8 +7945,15 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 //				return null;
 //				}
 		} else {
-			BuiltinElement builtin = new BuiltinElement();
-			builtin.setFuncName(transformOpName(name));
+			GraphPatternElement cachedGPE = getPreprocessedGraphPatternElement(context);
+			BuiltinElement builtin;
+			if (cachedGPE != null && cachedGPE instanceof BuiltinElement) {
+				builtin = (BuiltinElement) cachedGPE;
+			}
+			else {
+				builtin = new BuiltinElement();
+				builtin.setFuncName(transformOpName(name));
+			}
 			if (lobj != null) {
 				if (lobj instanceof Object[] && ((Object[])lobj).length == 2 && 
 						((Object[])lobj)[0] instanceof VariableNode && 
@@ -8864,7 +8888,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				((BuiltinElement) bi).setFuncName(constantBuiltinName);
 				((BuiltinElement) bi).addArgument(nodeCheck(trSubj));
 			} else {
-				bi = createBinaryBuiltin(constantBuiltinName, nodeCheck(trSubj), trPred);
+				bi = createBinaryBuiltin(constantBuiltinName, nodeCheck(trSubj), trPred, predicate);
 			}
             
             // special processing for index/count on <> of <> in <> of <> 
@@ -8899,7 +8923,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
                             
                             // create and returned the correctly formed builtinElement
                             GraphPatternElement formedBi = createBinaryBuiltin(constantBuiltinName, nodeCheck(modifiedSubject), 
-                                    nodeCheck(modifiedPredicate));
+                                    nodeCheck(modifiedPredicate), predicate);
                             return combineRest(formedBi, rest);
                         }
                     }
@@ -9242,7 +9266,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			return valarg;
 		}
 		else {
-			return createBinaryBuiltin(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME, valarg, unitLiteral);
+			return createBinaryBuiltin(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME, valarg, unitLiteral, valexpr);
 		}
 	}
 
@@ -9751,7 +9775,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		com.ge.research.sadl.model.gp.Literal unitLiteral = new com.ge.research.sadl.model.gp.Literal();
 		unitLiteral.setValue(unit);
-		return createBinaryBuiltin(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME, valobj, unitLiteral);
+		return createBinaryBuiltin(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME, valobj, unitLiteral, expr);
 	}
 
 	private void processSadlSameAs(SadlSameAs element) throws JenaProcessorException {
@@ -13393,7 +13417,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						try {
 							List<OntResource> listResources = processSadlClassOrPropertyDeclaration(
 									(SadlClassOrPropertyDeclaration) declResource.eContainer());
-							eobjectPreprocessed(declResource.eContainer());
+							eobjectPreprocessed(declResource.eContainer(), null);
 							return listResources.get(0);
 						} catch (TranslationException e) {
 							e.printStackTrace();
@@ -14013,7 +14037,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					try {
 						if(!isEObjectPreprocessed((SadlClassOrPropertyDeclaration)sr.eContainer())) {
 							processSadlClassOrPropertyDeclaration((SadlClassOrPropertyDeclaration)sr.eContainer());
-							eobjectPreprocessed((SadlClassOrPropertyDeclaration)sr.eContainer());
+							eobjectPreprocessed((SadlClassOrPropertyDeclaration)sr.eContainer(), null);
 						}
 					} catch (TranslationException e) {
 						e.printStackTrace();
@@ -14080,7 +14104,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 										try {
 											processSadlClassOrPropertyDeclaration(
 													(SadlClassOrPropertyDeclaration) cont);
-											eobjectPreprocessed(cont);
+											eobjectPreprocessed(cont, null);
 										} catch (TranslationException e) {
 											e.printStackTrace();
 										}
@@ -14092,7 +14116,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 										try {
 											processSadlClassOrPropertyDeclaration(
 													(SadlClassOrPropertyDeclaration) cont);
-											eobjectPreprocessed(cont);
+											eobjectPreprocessed(cont, null);
 										} catch (TranslationException e) {
 											e.printStackTrace();
 										}
@@ -15751,6 +15775,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (numericComparisonOperators.contains(operation)) {
 			return true;
 		}
+		try {
+			ITranslator trans = getTranslator();
+			BuiltinType ftype = trans.reasonerBuiltinNameToBuiltinType(operation);
+			if (ftype != null && numericComparisonOperatorTypes.contains(ftype)) {
+				return true;
+			}
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return false;
 	}
 	
@@ -15777,13 +15811,25 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
-	public boolean isBooleanComparison(List<String> operations) {
-		if (comparisonOperators.containsAll(operations)) {
+	public boolean isBooleanComparison(String op) {
+		if (comparisonOperators.contains(op)) {
 			return true;
 		}
 		return false;
 	}
 
+	public boolean isExpandableComparisonOperator(BuiltinType bit) {
+		if (bit.equals(BuiltinType.GT) ||
+				bit.equals(BuiltinType.GTE) ||
+				bit.equals(BuiltinType.LT) ||
+				bit.equals(BuiltinType.LTE) ||
+				bit.equals(BuiltinType.Equal) ||
+				bit.equals(BuiltinType.NotEqual)) {
+			return true;
+		}
+		return false;
+	}
+	
 	public boolean canBeNumericOperator(String op) {
 		if (canBeNumericOperators.contains(op))
 			return true;
@@ -15793,6 +15839,16 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public boolean isNumericOperator(String op) {
 		if (numericOperators.contains(op))
 			return true;
+		try {
+			ITranslator trans = getTranslator();
+			BuiltinType ftype = trans.reasonerBuiltinNameToBuiltinType(op);
+			if (ftype != null && numericOperatorTypes.contains(ftype)) {
+				return true;
+			}
+		} catch (ConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return false;
 	}
 
@@ -15807,6 +15863,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	
 	public boolean isOtherExpandableOperator(String op) {
 		if (op.equals("min")) {
+			return true;
+		} 
+		else if (op.equals("abs")) {
 			return true;
 		}
 		return false;
@@ -16222,23 +16281,44 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	// protected Literal sadlExplicitValueToLiteral(SadlExplicitValue value,
 	// OntProperty prop) throws JenaProcessorException, TranslationException {
 	protected boolean isEObjectPreprocessed(EObject eobj) {
-		if (preprocessedEObjects != null && preprocessedEObjects.contains(eobj)) {
+		if (preprocessedGraphPatternElementsByEObject != null && preprocessedGraphPatternElementsByEObject.containsKey(eobj)) {
 			return true;
 		}
 		return false;
 	}
 
-	protected boolean eobjectPreprocessed(EObject eobj) {
-		if (preprocessedEObjects == null) {
-			preprocessedEObjects = new ArrayList<EObject>();
-			preprocessedEObjects.add(eobj);
+	/**
+	 * Method to cache a GraphPatternElement by EObject for reuse. Note that while the cached GPE
+	 * can't be replaced, it is possible to register the key with a null GPE and then fill in the GPE later.
+	 * @param eobj
+	 * @param gpe
+	 * @return
+	 */
+	protected boolean eobjectPreprocessed(EObject eobj, GraphPatternElement gpe) {
+		if (preprocessedGraphPatternElementsByEObject == null) {
+			preprocessedGraphPatternElementsByEObject = new HashMap<EObject, GraphPatternElement>();
+			preprocessedGraphPatternElementsByEObject.put(eobj, gpe);
 			return true;
 		}
-		if (preprocessedEObjects.contains(eobj)) {
+		if (preprocessedGraphPatternElementsByEObject.containsKey(eobj) &&
+				preprocessedGraphPatternElementsByEObject.get(eobj) != null) {
 			return false;
 		}
-		preprocessedEObjects.add(eobj);
+		preprocessedGraphPatternElementsByEObject.put(eobj, gpe);
 		return true;
+	}
+	
+	/**
+	 * Method to get a preprocessed GraphPatternElement rather than create a new one
+	 * @param eobj
+	 * @return
+	 */
+	protected GraphPatternElement getPreprocessedGraphPatternElement(EObject eobj) {
+		if (preprocessedGraphPatternElementsByEObject != null && 
+				preprocessedGraphPatternElementsByEObject.containsKey(eobj)) {
+			return preprocessedGraphPatternElementsByEObject.get(eobj);
+		}
+		return null;
 	}
 
 	protected void checkShallForControlledProperty(Expression expr) {

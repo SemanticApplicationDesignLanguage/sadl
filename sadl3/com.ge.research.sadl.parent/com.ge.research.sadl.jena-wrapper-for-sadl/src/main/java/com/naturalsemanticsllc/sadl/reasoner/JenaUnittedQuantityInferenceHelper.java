@@ -24,15 +24,19 @@ import java.util.List;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.reasoner.rulesys.Builtin;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.Node_RuleVariable;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 
 import com.ge.research.sadl.jena.reasoner.builtin.Product;
 import com.ge.research.sadl.jena.reasoner.builtin.Utils;
+import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
@@ -47,7 +51,7 @@ public class JenaUnittedQuantityInferenceHelper implements IUnittedQuantityInfer
 			throw new UnittedQuantityHandlerException("The operator is not a Node " + operator.getClass().getCanonicalName());
 		}
 		String opStr = ((Node)operator).getLiteralValue().toString();
-		if (opStr.equals("*") || opStr.equals("/")) {
+		if (opStr.equals("*") || opStr.equals("product")|| opStr.equals("/") || opStr.equals("quotient")) {
 			if (arg1Units == null && arg2Units != null) {
 				if (arg2Units instanceof Node) {
 					return ((Node) arg2Units).getLiteralValue();
@@ -57,6 +61,14 @@ public class JenaUnittedQuantityInferenceHelper implements IUnittedQuantityInfer
 				if (arg1Units instanceof Node) {
 					return ((Node)arg1Units).getLiteralValue();
 				}
+			}
+		}
+		else if (opStr.equals("+") || opStr.equals("sum")|| opStr.equals("-") || opStr.equals("difference")) {
+			if (arg1Units == null || arg2Units == null || !arg1Units.equals(arg2Units)) {
+				throw new UnittedQuantityHandlerException("Units are not all the same (" + arg1Units.toString() + " != " + arg2Units.toString() + ")" );
+			}
+			else {
+				return arg1Units;
 			}
 		}
 		if (!(arg1Units instanceof Node)) {
@@ -140,6 +152,33 @@ public class JenaUnittedQuantityInferenceHelper implements IUnittedQuantityInfer
 		if (citr.hasNext()) {
 			citr.close();
 			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Method to determine if a Node is an instance of the SadlImplicitModel UnittedQuantity class.
+	 * Since this is during inference, we can assume that transient closure over class hierarchies
+	 * has made every instance of a subclass of UnittedQuantity also an instance of UnittedQuantity.
+	 * @param node
+	 * @param context
+	 * @return
+	 */
+	public boolean isUnittedQuantity(com.ge.research.sadl.model.gp.Node node, OntModel model) {
+		if (!(node instanceof NamedNode)) {
+			return false;
+		}
+		OntClass nodeCls = model.getOntClass(node.getURI());
+		if (nodeCls != null) {
+			OntClass UQCls =  model.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+			if (UQCls != null) {
+				if (UQCls.equals(nodeCls)) {
+					return true;
+				}
+				if (model.contains(nodeCls, RDFS.subClassOf, UQCls)) {
+					return true;
+				}
+			}
 		}
 		return false;
 	}
@@ -247,7 +286,7 @@ public class JenaUnittedQuantityInferenceHelper implements IUnittedQuantityInfer
 	 * @param context
 	 * @return
 	 */
-	private static Node getUnittedQuantityValue(Node node, RuleContext context) {
+	public static Node getUnittedQuantityValue(Node node, RuleContext context) {
 		Node valuePred =  NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
 		ClosableIterator<Triple> citr = context.find(node, valuePred, null);
 		if (citr.hasNext()) {
@@ -286,14 +325,8 @@ public class JenaUnittedQuantityInferenceHelper implements IUnittedQuantityInfer
 //		return values;
 //	}
 
-	/**
-	 * Method to obtain the unit of a Node which is an instance of the SadlImplicitModel's
-	 * UnittedQuantity class
-	 * @param node
-	 * @param context
-	 * @return
-	 */
-	private Node getUnittedQuantityUnit(Node node,  RuleContext context) {
+	@Override
+	public Node getUnittedQuantityUnit(Node node,  RuleContext context) {
 		Node unitPred =  NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
 		ClosableIterator<Triple> citr = context.find(node, unitPred, null);
 		if (citr.hasNext()) {

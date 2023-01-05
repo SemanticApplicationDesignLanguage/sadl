@@ -51,6 +51,8 @@ public class BuiltinElement extends GraphPatternElement {
 	// If the built-in implementation of this BuiltinElement can handle UnittedQuantity inputs, this tells how they should be 
 	// processed. Note that this should be set by information that is retrieved from the built-in implementation.
 	private BuiltinUnittedQuantityStatus  unittedQuantityStatus = null;  
+	private boolean canProcessListArgument = false;
+	private boolean canProcessUnittedQuantity = false;
 
 	
 	public static enum BuiltinType {
@@ -639,5 +641,21 @@ public class BuiltinElement extends GraphPatternElement {
 
 	public void setExternalUri(String externalUri) {
 		this.externalUri = externalUri;
+	}
+
+	public boolean isCanProcessListArgument() {
+		return canProcessListArgument;
+	}
+
+	public void setCanProcessListArgument(boolean canProcessListArgument) {
+		this.canProcessListArgument = canProcessListArgument;
+	}
+
+	public boolean isCanProcessUnittedQuantity() {
+		return canProcessUnittedQuantity;
+	}
+
+	public void setCanProcessUnittedQuantity(boolean canProcessUnittedQuantity) {
+		this.canProcessUnittedQuantity = canProcessUnittedQuantity;
 	}
 }

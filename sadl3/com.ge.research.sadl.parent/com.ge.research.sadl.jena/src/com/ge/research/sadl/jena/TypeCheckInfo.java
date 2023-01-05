@@ -352,33 +352,84 @@ public class TypeCheckInfo {
 						return sb.toString();
 					}
 					else {
-						sb.append(typeCheckType != null ? typeCheckType.toString() : "unknown type");
-						sb.append(", ");
-						if (typeToExprRelationship != null) {
-							sb.append(typeToExprRelationship);
-							try {
-								if (expressionType instanceof ConceptName &&
-										getValidator().getModelProcessor().isProperty(expressionType)) {
-									sb.append(", range of property ");
+						try {
+							if (expressionType instanceof ConceptName && 
+									getValidator().getModelProcessor().isProperty((ConceptName)expressionType)) {
+								sb.append(typeCheckType != null ? typeCheckType.toString() : "unknown type");
+								sb.append(", ");
+								if (typeToExprRelationship != null) {
+									sb.append(typeToExprRelationship);
+									try {
+										if (expressionType instanceof ConceptName &&
+												getValidator().getModelProcessor().isProperty(expressionType)) {
+											sb.append(", range of property ");
+										}
+										else {
+											sb.append(" ");
+										}
+									} catch (TranslationException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									if (expressionType instanceof ConceptName) {
+										sb.append(((ConceptName)expressionType).getName());
+									}
+									else {
+										sb.append(expressionType.toString());
+									}
+									sb.append(")");
+									return sb.toString();
 								}
-								else {
-									sb.append(" ");
-								}
-							} catch (InvalidTypeException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (TranslationException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							if (expressionType instanceof ConceptName) {
-								sb.append(((ConceptName)expressionType).getName());
 							}
 							else {
-								sb.append(expressionType.toString());
+								if (expressionType != null) {
+									if (expressionType instanceof ConceptName) {
+										sb.append(((ConceptName)expressionType).getName());
+									}
+									else {
+										sb.append(expressionType.toString());
+									}
+									sb.append(", ");
+									}
+								if (typeToExprRelationship != null) {
+									sb.append(typeToExprRelationship);
+									sb.append(", ");
+									if (typeCheckType != null) {
+										if (typeCheckType instanceof ConstantNode && ((ConstantNode)typeCheckType).getName().contentEquals(SadlConstants.CONSTANT_NONE)) {
+											sb.append("\"--\" (don't check)");
+										}
+										else {
+											sb.append(typeCheckType.toString());
+										}
+									}
+									else {
+										sb.append("unknown type");
+									}
+									if (getExplicitValue() != null) {
+										if (getExplicitValueType().equals(ExplicitValueType.RESTRICTION)) {
+											sb.append(", restricted to explicit value '");
+										}
+										else {
+											sb.append(", is the explicit value '");
+										}
+										sb.append(getExplicitValue().toString());
+										sb.append("'");
+									}
+									sb.append(")");
+									if (getImplicitProperties() != null) {
+										if (getImplicitProperties().size() > 1)
+											sb.append(" (has implied properties ");
+										else 
+											sb.append(" (has implied property ");
+										sb.append(implicitPropertiesToString(getImplicitProperties()));
+										sb.append(")");
+									}
+									return sb.toString();
+								}
 							}
-							sb.append(")");
-							return sb.toString();
+						} catch (TranslationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
 					sb.delete(15, sb.length() - 1);

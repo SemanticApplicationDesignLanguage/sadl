@@ -32,6 +32,7 @@ import org.apache.jena.ontology.OntModel;
 
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.Literal;
@@ -314,6 +315,16 @@ public interface ITranslator {
 	public String builtinTypeToString(BuiltinElement bin) throws TranslationException;
 	
 	/**
+	 * Method to determine the BuiltinType, if there is one, for the reasoner-specific built-in
+	 * name. This is needed because the SADL model may use the reasoner-specific name but we want
+	 * to treat the expression the same as if the grammar operator had been used.
+	 * 
+	 * @param biName
+	 * @return
+	 */
+	public BuiltinType reasonerBuiltinNameToBuiltinType(String biName);
+	
+	/**
 	 * Method to set the function name in the input BuiltinElement using the BuiltinType
 	 * and return the new name
 	 * @param bin
@@ -328,13 +339,6 @@ public interface ITranslator {
 	 * @return class name
 	 */
 	public String getBuiltinClassName(String builtinName);
-	
-	/**
-	 * Method to determine if a BuiltinElement can handle UnittedQuantity arguments
-	 * @param be
-	 * @return
-	 */
-	public BuiltinUnittedQuantityStatus getBuiltinElementUQStatus(BuiltinElement be);
 	
 	/**
 	 * Method to get the default implementation of the ISadlUnittedQuantityHandler. This can be 

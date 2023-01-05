@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.reasoner.rulesys.RuleContext;
 
 /**
  * This class provides the interface for implementation classes that handle UnittedQuantity function arguments and 
@@ -143,6 +144,15 @@ public interface IUnittedQuantityInferenceHelper {
 	 */
 	abstract List<UnittedQuantity> getUnittedQuantityArgumentList(Object bi, List<Node> nodes,  BuiltinUnittedQuantityStatus builtinUqStatus, Object context) throws UnittedQuantityHandlerException;
 	
+	/**
+	 * Method to obtain the unit of a Node which is an instance of the SadlImplicitModel's
+	 * UnittedQuantity class
+	 * @param node
+	 * @param context
+	 * @return
+	 */
+	abstract Node getUnittedQuantityUnit(Node node,  RuleContext context);
+
 	/**
 	 * Method to determine if any of the elements of a list of Nodes is an instance of the SadlImplicitModel's
 	 * UnittedQuantity class.
