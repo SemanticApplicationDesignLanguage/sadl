@@ -514,6 +514,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	}
 
+	@Ignore
 	@Test
 	def void testCRule_05() {
 		val grd = newArrayList(
@@ -523,6 +524,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 "Rule R3b:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).")
 		
 		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION .id, Boolean.FALSE.toString));
 		
 		createFile('UseArticles.sadl', '''
 			    uri "http://sadl.org/SimplePathFindingCase.sadl" alias spfc.

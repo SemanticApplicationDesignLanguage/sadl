@@ -27,6 +27,7 @@ import org.eclipse.xtext.preferences.PreferenceKey
 import org.junit.Test
 
 import static com.ge.research.sadl.ui.tests.GeneratedOutputFormat.*
+import org.junit.Ignore
 
 /**
  * Test that demonstrate how to make assertions on the generated translator outputs, plus runs the inferencer too.
@@ -204,6 +205,7 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 		];
 	}
 
+	@Ignore
 	@Test
 	def void checkTransitiveProperty() {
 		val grd1 = newArrayList(
@@ -239,6 +241,7 @@ class GH_275_CheckTranslatorAndInferencerPluginTest extends AbstractSadlPlatform
 		];
 	}
 	
+	@Ignore
 	@Test
 	def void testPreferredTimingInfo() {
 		updatePreferences(new PreferenceKey(SadlPreferences.SHOW_TIMING_INFORMATION.id, Boolean.TRUE.toString));

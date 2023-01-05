@@ -1231,6 +1231,235 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 
 	@Test
+	def void testUnittedQuantityInRule_Drew1() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+				 uri "http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl" alias mileslighttravelsperunitoftime.
+				 
+				 Trip is a class, described by timeTraveled with values of type UnittedQuantity,
+				 	described by distanceTraveled with values of type UnittedQuantity,
+				 	described by speed with values of type UnittedQuantity.
+				 	
+				 Rule DistanceTraveled: if tr is a Trip and tr has speed s and tr has timeTraveled t then distanceTraveled of tr is s * t. 
+				 Trip1 is a Trip, with speed 299792458.0 "m/s", with timeTraveled 10000000000000.0 hrs.
+				 Trip2 is a Trip, with speed 2.997924580E8 "m/s", with timeTraveled 1.0E13 hrs.
+				 	
+				 Ask: select tr, dt where tr is a Trip and tr has distanceTraveled dt.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"tr\",\"dt\"
+\"http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl#Trip2\",2.99792458E21 \"m/s*hrs\"
+\"http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl#Trip1\",2.99792458E21 \"m/s*hrs\"
+", (tr as ResultSet).toString)
+			}
+		];
+	}
+
+	@Test
+	def void testUnittedQuantityInRule_Drew2() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+				 uri "http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl" alias mileslighttravelsperunitoftime.
+				 
+				 Trip is a class, described by timeTraveled with values of type UnittedQuantity,
+				 	described by distanceTraveled with values of type UnittedQuantity,
+				 	described by speed with values of type UnittedQuantity.
+				 	
+				 Rule DistanceTraveled3: 
+				 	if tr is a Trip and 
+				 	tr has speed s and 
+				 	s has ^value sv and
+				 	s has unit su and 
+				 	su is "miles per second" and
+				 	tr has timeTraveled t and
+				 	t has ^value tv and
+				 	t has unit tu and
+				 	tu is "hrs" and
+				 	dv = sv * tv * 60.0 * 60.0 and
+				 	du = combineUnits("*", su, "sec")
+				 	then thereExists(UnittedQuantity,^value, dv, unit, du, Plus, tr, distanceTraveled). 	
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+			assertEquals("Rule DistanceTraveled3:  if rdf(tr, rdf:type, mileslighttravelsperunitoftime:Trip) and rdf(tr, mileslighttravelsperunitoftime:speed, s) and rdf(s, sadlimplicitmodel:value, sv) and rdf(s, sadlimplicitmodel:unit, su) and is(su,\"miles per second\") and rdf(tr, mileslighttravelsperunitoftime:timeTraveled, t) and rdf(t, sadlimplicitmodel:value, tv) and rdf(t, sadlimplicitmodel:unit, tu) and is(tu,\"hrs\") and *(sv,tv,v0) and *(v0,60.0,v1) and *(v1,60.0,dv) and combineUnits(\"*\",su,\"sec\",du) then thereExists(sadlimplicitmodel:UnittedQuantity,sadlimplicitmodel:value,dv,sadlimplicitmodel:unit,du,sadlimplicitmodel:Plus,tr,mileslighttravelsperunitoftime:distanceTraveled).",
+				rules.get(0).toString())
+		]
+	}
+
+	@Test
+	def void testUnittedQuantityInRule_Drew3() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl" alias mileslighttravelsperunitoftime.
+			 
+			 Trip is a class, described by timeTraveled with values of type UnittedQuantity,
+			 	described by distanceTraveled with values of type UnittedQuantity,
+			 	described by speed with values of type UnittedQuantity.
+			 	
+			// Rule DistanceTraveled: if tr is a Trip and tr has speed s and tr has timeTraveled t then distanceTraveled of tr is s * t. 
+			// Rule DistanceTraveled2: if tr is a Trip and tr has speed s and tr has timeTraveled t then distanceTraveled of tr is product(s,t). 	
+			 Rule DistanceTraveled3: 
+			 	if tr is a Trip and 
+			 	tr has speed s and 
+			 	s has ^value sv and
+			 	s has unit su and 
+			 	su is "m/s" and
+			 	tr has timeTraveled t and
+			 	t has ^value tv and
+			 	t has unit tu and
+			 	tu is "hrs" and
+			 	dv = sv * tv * 60 * 60 and
+			 	du = combineUnits("*", su, "sec")
+			 	then thereExists(UnittedQuantity,^value, dv, unit, du, Plus, tr, distanceTraveled). 	
+			 	
+			 Trip1 is a Trip, with speed 299792458.0 "m/s", with timeTraveled 10000000000000.0 hrs.
+			 Trip2 is a Trip, with speed 2.997924580E8 "m/s", with timeTraveled 1.0E13 hrs.
+			 	
+			 Ask: select tr, dt where tr is a Trip and tr has distanceTraveled dt.
+  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"tr\",\"dt\"
+\"http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl#Trip2\",1.0792528488E25 \"m/s*sec\"
+\"http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl#Trip1\",1.0792528488E25 \"m/s*sec\"
+", (tr as ResultSet).toString)
+			}
+		];
+	}
+
+	@Test
+	def void testUQInRule_min_uq_expanded_erroneous() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/GE2.sadl" alias ge2.
+			 
+			 Rectangle is a class described by height with values of type UnittedQuantity, 
+			 	described by width with values of type UnittedQuantity,
+			 	described by minDimension with values of type UnittedQuantity.
+			 
+			 Rule minDim: if x is a Rectangle then minDimension of x is min(height of x, 23).
+			 
+			 TestRect is a Rectangle with height 5 inch, with width 4 inch.
+			 
+			 Test: minDimension of TestRect is 4 inch.
+  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+	
+	}
+
+	@Test
 	def void testUQInRule_min_uq_not_expanded() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
@@ -2381,4 +2610,124 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 	
+	@Test
+	def void testUQInRule_Abs() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/absUQ.sadl" alias absuq.
+			 
+			 NumberAndAbsValue is a class, described by number with values of type UnittedQuantity, described by absValue with values of type UnittedQuantity.
+			 
+			 Rule R1: if x is a NumberAndAbsValue then absValue of x is abs(number of x).
+			 
+			 TestNum is a NumberAndAbsValue with number -23.5 dollars.
+			 
+			 Ask: select x where y is a NumberAndAbsValue and y has absValue x.
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				} 
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+			assertTrue(rules.size == 1)
+			assertEquals("Rule R1:  if rdf(x, rdf:type, absuq:NumberAndAbsValue) and rdf(x, absuq:number, v0) and rdf(v0, sadlimplicitmodel:value, v1) and rdf(v0, sadlimplicitmodel:unit, v2) and abs(v1,v3) then thereExists(UnittedQuantity,value,v3,unit,v2,Plus,x,absuq:absValue).", rules.get(0).toString)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				var resultUQ = (tr as ResultSet).getResultAt(0,0)
+				assertEquals("23.5 \"dollars\"", resultUQ.toString)
+			}
+		];
+	}
+		
+	@Test
+	def void testUQInRule_AbsEmbedded() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/absUqEmbedded.sadl" alias absuqembedded.
+			 
+			 NumberAndAbsValue is a class, described by number1 with values of type UnittedQuantity, 
+			 	described by number2 with values of type UnittedQuantity,
+			 	described by absValue with values of type UnittedQuantity.
+			 
+			 Rule R1: if x is a NumberAndAbsValue then absValue of x is abs(number1 of x + number2 of x).
+			 
+			 TestNum is a NumberAndAbsValue with number1 -23.5 dollars, with number2 10 dollars.
+			 
+			 Ask: select x where y is a NumberAndAbsValue and y has absValue x.
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				} 
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+			assertTrue(rules.size == 1)
+			assertEquals("Rule R1:  if rdf(x, rdf:type, absuqembedded:NumberAndAbsValue) and rdf(x, absuqembedded:number1, v0) and rdf(v0, sadlimplicitmodel:value, v2) and rdf(v0, sadlimplicitmodel:unit, v4) and rdf(x, absuqembedded:number2, v1) and rdf(v1, sadlimplicitmodel:value, v3) and rdf(v1, sadlimplicitmodel:unit, v4) and +(v2,v3,v5) and abs(v5,v6) then thereExists(UnittedQuantity,value,v6,unit,v4,Plus,x,absuqembedded:absValue).", rules.get(0).toString)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				var resultUQ = (tr as ResultSet).getResultAt(0,0)
+				assertEquals("13.5 \"dollars\"", resultUQ.toString)
+			}
+		];
+	}
+		
 }

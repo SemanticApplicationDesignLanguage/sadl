@@ -261,7 +261,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			for (issue:issues) {
 				println(issue.toString)
 			}
- 			issues.assertHasIssues(2);
+ 			issues.assertHasIssues(2);		// for now, satisfied with warning on units associated with subject; 
+											// not sure how to separate this from expression that should be expandable
+//			issues.assertHasIssues(1);
  			for (issue:issues) {
  				if (issue.severity.equals(Severity.ERROR)) {
  					assertEquals(issue.message,"past, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot be compared (is) with cValue, a datatype property with range  xsd:decimal.")

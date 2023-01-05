@@ -12,6 +12,10 @@ import com.ge.research.sadl.reasoner.SadlCommandResult
 import com.ge.research.sadl.reasoner.ResultSet
 import com.ge.research.sadl.preferences.SadlPreferences
 import org.eclipse.xtext.preferences.PreferenceKey
+import org.eclipse.xtext.diagnostics.Severity
+import java.util.List
+import com.ge.research.sadl.reasoner.ConfigurationItem
+import org.junit.Ignore
 
 class TestSwiProlog extends AbstractSwiPrologTest {
 
@@ -281,4 +285,78 @@ holds('http://sadl.org/Shapes/Shapes#area', PVv0, PVv3) :- holds('http://www.w3.
 		]
 	}
 	
+	@Ignore
+	@Test
+	def void testUnittedQuantityInRule_01() {
+		if (!canRunSwiProlog) {
+			return
+		}
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type UnittedQuantity,
+			 	described by width with values of type UnittedQuantity.
+			 	
+			 MyRect is a Rectangle with width 4.0 ft, with height 2.2 ft.
+			 	
+			 Rule R1: if x is a Rectangle then area of x is height of x * width of x.
+			 
+			 Ask: select s, ar where s is a Rectangle and s has area ar.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			if (cmds !== null) {
+				for (cmd : cmds) {
+					println(cmd.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+		assertGeneratedOutputFor('JavaExternal.sadl', OWL) [
+			println(it)
+		]
+		val content = getPrologFileContent("JavaExternal.pl")
+		println(content)
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"s\",\"ar\"
+\"http://sadl.org/ImpliedPropertiesInRule.sadl#MyRect\",8.8 \"ft*ft\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
 }
