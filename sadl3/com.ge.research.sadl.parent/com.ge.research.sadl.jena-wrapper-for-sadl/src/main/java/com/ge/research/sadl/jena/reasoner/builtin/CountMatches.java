@@ -34,6 +34,7 @@ import org.apache.jena.reasoner.rulesys.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
@@ -112,9 +113,16 @@ public class CountMatches extends TypedBaseBuiltin {
     }
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+		be.setCanProcessListArgument(canProcessListArgument());
+		be.setCanProcessUnittedQuantity(canProcessUnittedQuantity());
+		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus());
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+		return BuiltinUnittedQuantityStatus.UnitsNotSupported;
 	}
 
 }

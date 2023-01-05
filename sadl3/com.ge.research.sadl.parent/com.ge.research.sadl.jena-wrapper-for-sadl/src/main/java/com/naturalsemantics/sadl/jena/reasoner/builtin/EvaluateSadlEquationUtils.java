@@ -568,8 +568,16 @@ public class EvaluateSadlEquationUtils {
 	 */
 	public Method getBestMatch(BuiltinElement bi, List<Method> matchingMethods, boolean methodOnClassOfFirstArgument) {
 		if (matchingMethods != null) {
-			int effectiveNumArguments = bi.getArguments() != null ? 
-					methodOnClassOfFirstArgument ? bi.getArguments().size() - 1 : bi.getArguments().size() : 0;
+			int effectiveNumArguments = 0;
+			int numArgs = 0;
+			if (bi.getArguments() != null) {
+				numArgs = bi.getArguments().size();
+				effectiveNumArguments = methodOnClassOfFirstArgument ? bi.getArguments().size() - 1 : bi.getArguments().size();
+			}
+			else if (bi.getArgumentTypes() != null) {
+				numArgs = bi.getArgumentTypes().size();
+				effectiveNumArguments = methodOnClassOfFirstArgument ? bi.getArgumentTypes().size() - 1 : bi.getArgumentTypes().size();
+			}
 			for (Method m : matchingMethods) {
 				Class<?>[] paramTypes = m.getParameterTypes();
 				int numParams = paramTypes.length;
@@ -584,27 +592,48 @@ public class EvaluateSadlEquationUtils {
 						continue;
 					}
 					boolean match = true;
-					if ((bi.getArguments() == null || bi.getArguments().size() == 0) && numParams > 0) {
+					if (numArgs == 0 && numParams > 0) {
+						// too many parameters
 						continue;
 					}
 					for (int i = 0;  i < paramTypes.length; i++) {
 						Class<?> pt = paramTypes[i];
 						String ptstr = pt.getTypeName();
 						int argIndex = methodOnClassOfFirstArgument ? (i + 1) : i;
-						if (argIndex > bi.getArguments().size() - 1) {
+						if (argIndex >= numArgs) {
+							// too many args
 							if (!variableNumParams) {
 								match = false;
 							}
 							continue;
 						}
-						Node arg = bi.getArguments().get(argIndex);
 						LiteralType dt = null;
-						if (arg instanceof com.ge.research.sadl.model.gp.Literal) {
-							dt = ((com.ge.research.sadl.model.gp.Literal)arg).getLiteralType();
+						boolean hasDecimal = false;
+						if (bi.getArguments() != null) {
+							Node arg = bi.getArguments().get(argIndex);
+							if (arg instanceof com.ge.research.sadl.model.gp.Literal) {
+								dt = ((com.ge.research.sadl.model.gp.Literal)arg).getLiteralType();
+							}
+							else if (arg instanceof Constant) {
+								if(((Constant)arg).equals(SadlConstants.CONSTANT_PI) || ((Constant)arg).equals(SadlConstants.CONSTANT_E)){
+									dt = LiteralType.NumberLiteral;
+								}
+								else {
+									dt = LiteralType.StringLiteral;
+								}
+							}
+							String ot = ((com.ge.research.sadl.model.gp.Literal)arg).getOriginalText();
+							if (ot != null && ot.indexOf('.') < 0) {
+								hasDecimal = true;
+							}
 						}
-						else if (arg instanceof Constant) {
-							if(((Constant)arg).equals(SadlConstants.CONSTANT_PI) || ((Constant)arg).equals(SadlConstants.CONSTANT_E)){
+						else if (bi.getArgumentTypes() != null) {
+							Node argType = bi.getArgumentTypes().get(argIndex);
+							if (isNumericType(argType.getURI())) {
 								dt = LiteralType.NumberLiteral;
+							}
+							else if (argType.getURI().equals(XSD.xboolean.getURI())) {
+								dt = LiteralType.BooleanLiteral;
 							}
 							else {
 								dt = LiteralType.StringLiteral;
@@ -612,8 +641,7 @@ public class EvaluateSadlEquationUtils {
 						}
 						if (dt != null && ptstr != null) {
 							if (isNumber(dt) && isNumber(ptstr)) {
-								String ot = ((com.ge.research.sadl.model.gp.Literal)arg).getOriginalText();
-								if (ot != null && ot.indexOf('.') < 0) {
+								if (hasDecimal) {
 									// int or long
 									if (!ptstr.equals("long") && !ptstr.equals("int")) {
 										match = false;
@@ -646,6 +674,19 @@ public class EvaluateSadlEquationUtils {
 		return null;
 	}
 
+	public boolean isNumericType(String uri) {
+		//uri is exactly a numeric type
+		if (uri.equals(XSD.decimal.getURI()) || uri.equals(XSD.integer.getURI()) || uri.equals(XSD.xdouble.getURI())
+				|| uri.equals(XSD.xfloat.getURI()) || uri.equals(XSD.xint.getURI()) || uri.equals(XSD.xlong.getURI())
+				|| uri.equals(XSD.negativeInteger.getURI()) || uri.equals(XSD.nonNegativeInteger.getURI())
+				|| uri.equals(XSD.nonPositiveInteger.getURI()) || uri.equals(XSD.positiveInteger.getURI())
+				|| uri.equals(XSD.unsignedInt.getURI()) || uri.equals(XSD.unsignedLong.getURI())
+				|| uri.equals(XSD.unsignedShort.getURI()) || uri.equals(XSD.xshort.getURI())) {
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Method to determine the best match to the input arguments from among the matching methods of the identified Java Class
 	 * @param args 

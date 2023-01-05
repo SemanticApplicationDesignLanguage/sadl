@@ -26,6 +26,9 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.util.PrintUtil;
 
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
+import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 
 /**
  * Print its argument list as a side effect
@@ -79,16 +82,27 @@ public class Print extends TypedBaseBuiltin {
      * Print a node list to stdout (stdout may have been redirected to the IDE console)
      */
     public void print(Node[] args, int length, RuleContext context) {
+        JenaUnittedQuantityInferenceHelper juqih = new JenaUnittedQuantityInferenceHelper();
         String msg = "";
     	for (int i = 0 ; i < length; i++) {
     		Node arg = getArg(i, args, context);
     		if (arg instanceof Node_Literal) {
     			Object argLV = ((Node_Literal)arg).getLiteralValue();
     			msg += PrintUtil.print(argLV + " ");
-    		}
-    		else {
-    			msg += PrintUtil.print(arg) + " ";
-    		}
+    		} else
+				try {
+					if (juqih.isUnittedQuantity(arg, context)) {
+						Node val = juqih.getUnittedQuantityValue(arg, context);
+						Node unit = juqih.getUnittedQuantityUnit(arg, context);
+						msg += PrintUtil.print(val) + " '" + PrintUtil.print(unit) + "'"; 
+					}
+					else {
+						msg += PrintUtil.print(arg) + " ";
+					}
+				} catch (UnittedQuantityHandlerException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
         }
     	System.out.println("print: " + msg);
     }
@@ -99,8 +113,15 @@ public class Print extends TypedBaseBuiltin {
 	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+		be.setCanProcessListArgument(canProcessListArgument());
+		be.setCanProcessUnittedQuantity(canProcessUnittedQuantity());
+		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus());
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+		return BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly;
 	}
 }

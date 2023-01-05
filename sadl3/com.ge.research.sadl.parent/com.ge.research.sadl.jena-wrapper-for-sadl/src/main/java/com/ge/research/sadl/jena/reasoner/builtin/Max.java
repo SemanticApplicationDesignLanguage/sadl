@@ -29,8 +29,9 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.RDF;
 
-import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
+import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 
 public class Max extends TypedBaseBuiltin {
 	
@@ -51,10 +52,6 @@ public class Max extends TypedBaseBuiltin {
         return argLength;
     }
     
-    private void setArgLength(int len) {
-    	argLength = len;
-    }
-
 	@Override
 	public String getFunctionSignatureString() {
 		return "max(decimal,decimal,...)decimal";
@@ -74,8 +71,7 @@ public class Max extends TypedBaseBuiltin {
         BindingEnvironment env = context.getEnv();
         Object maxVal = null;
         Node min = null;
-        boolean allLongs = true;
-        Node[] nodes = null;
+         Node[] nodes = null;
         if (GeUtils.isGraphPatternInput(this, args, length, context)) {
         	nodes = GeUtils.matchNonSparqlPattern(this, args, length, true, context);
         }
@@ -109,7 +105,6 @@ public class Max extends TypedBaseBuiltin {
 			                	if (pwd > ((Number)maxVal).doubleValue()) {
 			                		maxVal = nv1;
 			                	}
-			                	allLongs = false;
 			                }
 			                else if (v1 instanceof Integer || v1 instanceof Long) {
 			                	long pwd = nv1.longValue();
@@ -193,19 +188,20 @@ public class Max extends TypedBaseBuiltin {
     }
 
 	@Override
-	public BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
-		return BuiltinUnittedQuantityStatus.SameUnitsRequired;
-	}
-
-	@Override
 	public boolean canProcessListArgument() {
 		return true;
 	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+		be.setCanProcessListArgument(canProcessListArgument());
+		be.setCanProcessUnittedQuantity(canProcessUnittedQuantity());
+		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus());
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+		return BuiltinUnittedQuantityStatus.SameUnitsRequired;
+	}
 }

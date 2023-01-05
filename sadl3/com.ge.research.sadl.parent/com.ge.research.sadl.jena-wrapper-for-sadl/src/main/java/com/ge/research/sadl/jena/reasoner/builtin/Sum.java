@@ -25,25 +25,25 @@ import java.util.List;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.graph.impl.LiteralLabelFactory;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
-import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 
+import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.UnittedQuantity;
 import com.ge.research.sadl.reasoner.TranslationException;
-import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 import com.ge.research.sadl.reasoner.UnittedQuantityNotSupportedException;
+import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 
 /**
 
@@ -159,7 +159,6 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
     	// Not a graph pattern and not 3 arguments, a multiplicand, a multiplier, and a variable, so 
     	// this case must be either a list (length = 2) or more than 3 args.
         Node n1 = getArg(0, args, context);
-        Node n2 = getArg(1, args, context);
         if (n1.isVariable()) {
         	return false;
         }
@@ -244,8 +243,6 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
     }
     
     private Node createUnittedQuantitySum(RuleContext context, Number nSum, List<Node> nodeLst, JenaUnittedQuantityInferenceHelper juqih) {
-		String opStr = "+*";
-		Node operator = NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(opStr));
     	try {
     		juqih.validateUnittedQuantityArgs(context, BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly, nodeLst);
 		} catch (UnittedQuantityHandlerException e) {
@@ -293,7 +290,7 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
             		else if (v1 instanceof Double || ldturi.equals(XSD.xdouble.getURI())) {
             			sum = (Double)v1 + sum.doubleValue();
             		}
-            		else if (v1 instanceof Integer || ldturi.equals(XSD.xint)) {
+            		else if (v1 instanceof Integer || ldturi.equals(XSD.xint.getURI())) {
             			sum = ((Number)v1).intValue() + sum.doubleValue();
             		}
             		else if (ldturi.equals(XSD.decimal.getURI())) {
@@ -319,11 +316,6 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
 		return sum;
 	}
 
-	private Number addList(Number sum, Node lst, RuleContext context) {
-    	java.util.List<Node> l = Util.convertList(lst, context);
-        return addList(sum, l, context);
-    }
-    
     private Number addList(Number sum, java.util.List<Node> l, RuleContext context) {
     	for (int i = 0; l != null && i < l.size(); i++) {
     		Node elt = (Node) l.get(i);
@@ -354,8 +346,7 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
         return sum;
     }
 
-	@Override
-	public BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+	private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
 		return BuiltinUnittedQuantityStatus.SameUnitsRequired;
 	}
 
@@ -370,28 +361,51 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
 	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel context, List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel context, BuiltinElement be, List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException, UnittedQuantityHandlerException {
+		be.setCanProcessListArgument(canProcessListArgument());
+		be.setCanProcessUnittedQuantity(canProcessUnittedQuantity());
+		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus());
 		com.ge.research.sadl.model.gp.Node lastType = null;
 		boolean isList = false;
+		if (argTypes == null) {
+			return null;
+		}
 		for (com.ge.research.sadl.model.gp.Node argType : argTypes) {
-			if (argType.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) || 
-					context.getGraph().contains(NodeFactory.createURI(argType.getURI()), RDFS.subClassOf.asNode(), NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI))) {
-				if (getBuiltinUnittedQuantityStatus().equals(BuiltinUnittedQuantityStatus.UnitsNotSupported)) {
-					throw new UnittedQuantityNotSupportedException(getClass().getCanonicalName() + " doesn't support UnittedQuantity arguments", XSD.decimal.getURI());
-				}
-					
-			}
 			if (lastType != null) {
 				if (!lastType.equals(argType)) {
 					throw new TranslationException("Arguments are not all of the same type.");
 				}
 			}
 			lastType = argType;
+			if (lastType instanceof NamedNode) {
+				isList = ((NamedNode)lastType).isList();
+			}
 		}
 		if (isList) {
-			// get type of list, should be number or UnittedQuantity, and return it
-			// TODO	    			
+			if (lastType instanceof NamedNode) {
+				// type of list should be lastType, but the return won't be a list.
+				NamedNode listType = new NamedNode(((NamedNode)lastType).getURI());
+				listType.setContext(be.getContext());
+				if (((NamedNode) lastType).getNodeType().equals(NodeType.ClassListNode)) {
+					listType.setNodeType(NodeType.ClassNode);
+				}
+				else if (((NamedNode) lastType).getNodeType().equals(NodeType.DataTypeListNode)) {
+					listType.setNodeType(NodeType.DataTypeNode);
+				}
+				else {
+					throw new UnittedQuantityHandlerException("List type isn't Class or Datatype; this is unexpected.");
+				}
+				lastType = listType;
+			}
+			else {
+				// ??
+			}
 		}
 		return lastType;
+	}
+
+	@Override
+	public boolean canProcessUnittedQuantity() {
+		return true;
 	}
 }

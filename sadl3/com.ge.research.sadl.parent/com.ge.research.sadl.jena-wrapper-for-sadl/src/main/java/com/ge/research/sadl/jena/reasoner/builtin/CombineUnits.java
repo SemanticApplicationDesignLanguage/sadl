@@ -18,12 +18,17 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
+import java.util.List;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.impl.LiteralLabelFactory;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.RuleContext;
+
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
+import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 
 /**
 
@@ -58,18 +63,53 @@ public class CombineUnits extends CancellableBuiltin {
          *  2) the units of the 1st argument
          *  3) the units of the 2nd argument
          *  4) the Node_RuleVariable used to return the combined units
+         *  
+         *  OR
+         *  
+         *  1) the operator 
+         *  2) the list of operands
+         *  3) the type of the operands (not used)
+         *  4) the Node_RuleVariable used to return the combined units
          */
         
         Node n1 = getArg(0, args, context);
         Node n2 = getArg(1, args, context);
         Node n3 = getArg(2, args, context);
-        if (!n2.isLiteral()) {
- 			throw new BuiltinException(this, context, "Expected 2nd argument of combineUnits to be a literal but was: " + n2.toString());
-        }
+        
+        List<Node> n2List = null;
         if (!n1.isLiteral()) {
 			throw new BuiltinException(this, context, "Expected 1st argument of combineUnits to be a literal but was: " + n1.toString());
         }
-        if (!n3.isLiteral()) {
+        if (!n2.isLiteral()) {
+             n2List = GeUtils.getListItems(context.getGraph(), null, n2);
+            if (n2List != null) {
+                JenaUnittedQuantityInferenceHelper juqih = new JenaUnittedQuantityInferenceHelper();
+                Node lastUnitNode = null;
+                for (Node n : n2List) {
+            		try {
+						if (juqih.isUnittedQuantity(n, context)) {
+							Node unitNode = juqih.getUnittedQuantityUnit(n, context);
+							if (lastUnitNode !=  null) {
+								String units = Utils.combineUnits(context, n1, lastUnitNode, unitNode);
+								Node combinedUnits = NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral( units ));
+								lastUnitNode = combinedUnits;							
+							}
+							else {
+								lastUnitNode = unitNode;
+							}
+						}
+					} catch (UnittedQuantityHandlerException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+            	}
+               	return env.bind(args[length - 1], lastUnitNode);
+            }
+            else {
+            	throw new BuiltinException(this, context, "Expected 2nd argument of combineUnits to be a literal or a list but was: " + n2.toString());
+            }
+        }
+        if (n2List == null && !n3.isLiteral()) {
 			throw new BuiltinException(this, context, "Expected 3rd argument of combineUnits to be a literal but was: " + n3.toString());
         }
         String units;

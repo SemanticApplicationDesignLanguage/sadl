@@ -18,10 +18,9 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
-import com.ge.research.sadl.model.gp.FunctionSignature;
-import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
-
 import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
+
+import com.ge.research.sadl.model.gp.FunctionSignature;
 
 public abstract class TypedBaseBuiltin extends BaseBuiltin implements ITypedBaseBuiltin {
 	
@@ -29,13 +28,14 @@ public abstract class TypedBaseBuiltin extends BaseBuiltin implements ITypedBase
 		return new FunctionSignature(getFunctionSignatureString(), this.getURI());
 	}
 
-	public BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
-		return null;
-	}
-
+	@Override
 	public boolean canProcessListArgument() {
 		return false;
 	}
 
+	@Override
+	public boolean canProcessUnittedQuantity() {
+		return false;
+	}
 
 }

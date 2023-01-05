@@ -34,6 +34,7 @@ import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.XSD;
 
+import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.UnittedQuantity;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -134,7 +135,14 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
 					for (int i = 0; i < args.length - 1; i++) {
 				        Node n = getArg(i, args, context);
 				        if (n.isLiteral()) {
-				        	Object v = n.getLiteralValue();
+				        	Object v;
+				        	if (n.getLiteralDatatypeURI().equals(XSD.decimal.getURI())) {
+				        		v = Double.parseDouble(n.getLiteralValue().toString());
+		        				args[i] = Util.makeDoubleNode((double) v);
+				        	}
+				        	else {
+				        		v = n.getLiteralValue();
+				        	}
 				        	if (v instanceof Number) {
 				        		if (v instanceof BigDecimal) {
 				        			if (((BigDecimal)v).scale() > 0) {
@@ -326,8 +334,7 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
     	return prod;
     }
 
-	@Override
-	public BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+    private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
 		return BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly;
 	}
 
@@ -342,9 +349,18 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
 	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model,
+	public boolean canProcessUnittedQuantity() {
+		return true;
+	}
+
+	@Override
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be,
 			List<com.ge.research.sadl.model.gp.Node> argTypes)
 			throws UnittedQuantityHandlerException, TranslationException {
+		be.setCanProcessListArgument(canProcessListArgument());
+		be.setCanProcessUnittedQuantity(canProcessUnittedQuantity());
+		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus());
 		return (new Utils()).validateBuiltinAcceptingVarNumListOrGraphPattern(model, argTypes, true);
 	}
+
 }

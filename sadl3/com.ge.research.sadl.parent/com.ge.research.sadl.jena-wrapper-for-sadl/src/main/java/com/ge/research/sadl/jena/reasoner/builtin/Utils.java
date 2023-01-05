@@ -23,6 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -34,11 +35,13 @@ import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Triple;
 //import org.apache.jena.graph.impl.LiteralLabel;
@@ -532,6 +535,9 @@ public class Utils {
 	public static String combineUnits(RuleContext context, Node n1, Node n2, Node n3) throws UnittedQuantityHandlerException {
 		IUnittedQuantityInferenceHelper inst = getUnittedQuantityInferenceHelper(context);
 		Object result = inst.combineUnits(context, n1, n2, n3);
+		if (result instanceof Node_Literal) {
+			return ((Node_Literal)result).getLiteralValue().toString();
+		}
 		return result.toString();
 	}
 	
@@ -577,21 +583,32 @@ public class Utils {
 	public com.ge.research.sadl.model.gp.Node validateBuiltinAcceptingVarNumListOrGraphPattern(OntModel context, List<com.ge.research.sadl.model.gp.Node> argTypes, boolean leftOnlyOK) throws UnittedQuantityHandlerException {
 		int numArgs = argTypes.size();
 		if (numArgs == 1) {
+			com.ge.research.sadl.model.gp.Node argType = argTypes.get(0);
 			// must be a List
-			ClosableIterator<Triple> itr = context.getGraph().find(null, RDF.Nodes.type, NodeFactory.createURI(argTypes.get(0).getURI()));
-			if (itr.hasNext()) {
-				Node subj = itr.next().getSubject();
-				if (subj != null) {
-					boolean isList = context.getGraph().contains(subj, RDFS.subClassOf.asNode(), NodeFactory.createURI(SadlConstants.SADL_LIST_MODEL_LIST_URI));
-					if (!isList) {
-						itr.close();
-						throw new UnittedQuantityHandlerException("A single argument must be a List");
+			if (!(argType instanceof NamedNode && ((NamedNode)argType).isList())) {
+				ClosableIterator<Triple> itr = context.getGraph().find(null, RDF.Nodes.type, NodeFactory.createURI(argType.getURI()));
+				if (itr.hasNext()) {
+					Node subj = itr.next().getSubject();
+					if (subj != null) {
+						boolean isList = context.getGraph().contains(subj, RDFS.subClassOf.asNode(), NodeFactory.createURI(SadlConstants.SADL_LIST_MODEL_LIST_URI));
+						if (!isList) {
+							itr.close();
+							throw new UnittedQuantityHandlerException("A single argument must be a List");
+						}
 					}
-					// get type of list, should be number or UnittedQuantity, and return it
-					// TODO	    			
 				}
+				itr.close();
 			}
-			itr.close();
+	        JenaUnittedQuantityInferenceHelper juqih = new JenaUnittedQuantityInferenceHelper();
+			// get type of list, should be number or UnittedQuantity, and return it
+			if (juqih.isUnittedQuantity(argType, context)) {
+				NamedNode retNN =  new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+				retNN.setNodeType(NodeType.ClassNode);
+				return retNN;
+			}
+			else {
+			 	return argType;
+			}
 		}
 		else if (numArgs >= 2) {
 			int prodIdx = 1;	// 2nd argument
@@ -665,13 +682,7 @@ public class Utils {
 			boolean returnTypeOfFirstArg = false;
 			for (int i = 0; i < argTypes.size(); i++) {
 				Resource argType = context.getResource(argTypes.get(i).getURI());
-				boolean isUQ = false;
-				if (argTypes.get(i).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
-					isUQ = true;
-				}
-				else if (context.contains(argType, RDFS.subClassOf, context.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI))) {
-					isUQ = true;
-				}
+				boolean isUQ = isUnittedQuantityOrSubclass(context, argTypes.get(i));
 				if (isUQ) {
 					uqFound = true;
 				}
@@ -700,6 +711,23 @@ public class Utils {
 			return retNN;
 		}
 		return null;
-
+	}
+	
+	/**
+	 * Method to determine if a type is a UnittedQuantity
+	 * @param context
+	 * @param type
+	 * @return
+	 */
+	public boolean isUnittedQuantityOrSubclass(OntModel context, com.ge.research.sadl.model.gp.Node type) {
+		Resource argType = context.getResource(type.getURI());
+		boolean isUQ = false;
+		if (type.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+			isUQ = true;
+		}
+		else if (context.contains(argType, RDFS.subClassOf, context.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI))) {
+			isUQ = true;
+		}
+		return isUQ;
 	}
 }

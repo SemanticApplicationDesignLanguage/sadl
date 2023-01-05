@@ -30,7 +30,9 @@ import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.vocabulary.RDF;
 
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
+import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
 /**
@@ -149,9 +151,15 @@ public class ListLength extends TypedBaseBuiltin {
     }
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+		be.setCanProcessListArgument(canProcessListArgument());
+		be.setCanProcessUnittedQuantity(canProcessUnittedQuantity());
+		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus());
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+		return BuiltinUnittedQuantityStatus.UnitsNotSupported;
+	}
 }

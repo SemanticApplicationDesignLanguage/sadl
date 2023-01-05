@@ -25,16 +25,23 @@ package com.ge.research.sadl.jena.reasoner.builtin;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Node_Literal;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
-import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class List extends BaseBuiltin {
+import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
+import com.ge.research.sadl.reasoner.TranslationException;
+import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
+import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
+
+public class List extends TypedBaseBuiltin {
     protected static final Logger logger = LoggerFactory.getLogger(List.class);
 	
 	private int argLength = 0;
@@ -145,4 +152,37 @@ public class List extends BaseBuiltin {
          return false;
     }
 
+	@Override
+	public String getFunctionSignatureString() {
+		return "list(...)--";
+	}
+
+	@Override
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be, 
+			java.util.List<com.ge.research.sadl.model.gp.Node> argTypes)
+			throws UnittedQuantityHandlerException, TranslationException {
+		if (argTypes != null && argTypes.size() == 2 && 
+				argTypes.get(1) instanceof NamedNode && ((NamedNode)argTypes.get(1)).getNodeType().equals(NodeType.ClassNode)) {
+			be.setCanProcessListArgument(canProcessListArgument());
+			be.setCanProcessUnittedQuantity(canProcessUnittedQuantity());
+			be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus());
+			NamedNode retType = new NamedNode(argTypes.get(1).getURI());
+			if (((NamedNode) argTypes.get(1)).getNodeType().equals(NodeType.ClassNode)) {
+				retType.setNodeType(NodeType.ClassListNode);
+			}
+			else if (((NamedNode) argTypes.get(1)).getNodeType().equals(NodeType.DataTypeNode)) {
+				retType.setNodeType(NodeType.DataTypeListNode);
+			}
+			else {
+				throw new UnittedQuantityHandlerException("List type isn't Class or Datatype; this is unexpected.");
+			}
+			retType.setList(true);
+			return retType;
+		}
+		return null;
+	}
+
+	private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+		return BuiltinUnittedQuantityStatus.UnitsNotSupported;
+	}
 }

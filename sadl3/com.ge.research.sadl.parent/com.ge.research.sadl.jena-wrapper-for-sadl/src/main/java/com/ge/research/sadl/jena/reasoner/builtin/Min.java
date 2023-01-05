@@ -32,6 +32,8 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.RDF;
 
+import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.reasoner.ArgumentTypeValidationException;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.UnittedQuantity;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
@@ -56,10 +58,6 @@ public class Min extends TypedBaseBuiltin {
         return argLength;
     }
     
-    private void setArgLength(int len) {
-    	argLength = len;
-    }
-
 	@Override
 	public String getFunctionSignatureString() {
 		return "min(decimal,decimal ...)decimal";
@@ -79,7 +77,6 @@ public class Min extends TypedBaseBuiltin {
         BindingEnvironment env = context.getEnv();
         Object minVal = null;
         Node min = null;
-        boolean allLongs = true;
         Node[] nodes = null;
         boolean hasUnittedQuantityArgument = false;
         JenaUnittedQuantityInferenceHelper juqih = new JenaUnittedQuantityInferenceHelper();
@@ -154,7 +151,6 @@ public class Min extends TypedBaseBuiltin {
 			                	if (pwd < ((Number) minVal).doubleValue()) {
 			                		minVal = nv1;
 			                	}
-			                	allLongs = false;
 			                }
 			                else if (v1 instanceof Integer || v1 instanceof Long) {
 			                	long pwd = nv1.longValue();
@@ -241,8 +237,7 @@ public class Min extends TypedBaseBuiltin {
         return min;
     }
 
-	@Override
-	public BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+    private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
 		return BuiltinUnittedQuantityStatus.SameUnitsRequired;
 	}
 
@@ -250,9 +245,17 @@ public class Min extends TypedBaseBuiltin {
 	public boolean canProcessListArgument() {
 		return true;
 	}
+	
+	@Override
+	public boolean canProcessUnittedQuantity() {
+		return true;
+	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be, List<com.ge.research.sadl.model.gp.Node> argTypes) throws ArgumentTypeValidationException {
+		be.setCanProcessListArgument(canProcessListArgument());
+		be.setCanProcessUnittedQuantity(canProcessUnittedQuantity());
+		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus());
 		com.ge.research.sadl.model.gp.Node lastArgType = null;
 		for (com.ge.research.sadl.model.gp.Node argType : argTypes) {
 			if (lastArgType == null) {
@@ -265,8 +268,11 @@ public class Min extends TypedBaseBuiltin {
 				else {
 					int priority1 = numericTypePriority(lastArgType);
 					int priority2 = numericTypePriority(argType);
-					if (priority2 > priority1) {
+					if (priority1 >= 0 && priority2 >= 0 && priority2 > priority1) {
 						lastArgType = argType;
+					}
+					else if (priority1 < 0 || priority2 < 0) {
+						throw new ArgumentTypeValidationException("Incompatible argument types: " + lastArgType.toString() + " and " + argType.toDescriptiveString());
 					}
 				}
 			}

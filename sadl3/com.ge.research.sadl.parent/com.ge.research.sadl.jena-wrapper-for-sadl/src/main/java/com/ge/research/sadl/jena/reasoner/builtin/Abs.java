@@ -18,6 +18,7 @@
 
 package com.ge.research.sadl.jena.reasoner.builtin;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.apache.jena.graph.Node;
@@ -28,6 +29,7 @@ import org.apache.jena.reasoner.rulesys.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.reasoner.IUnittedQuantityInferenceHelper.BuiltinUnittedQuantityStatus;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 
@@ -71,6 +73,13 @@ public class Abs extends TypedBaseBuiltin {
                 if (v1 instanceof Float || v1 instanceof Double) {
                 	double absd = Math.abs(nv1.doubleValue());
                     abs = Util.makeDoubleNode(absd);
+                } else if (v1 instanceof BigDecimal) {
+        			if (n1.getLiteralLexicalForm().indexOf(".") >= 0) {
+        				double absd = Math.abs(nv1.doubleValue());
+                        abs = Util.makeDoubleNode(absd);        			}
+        			else {
+        				double absd = Math.abs(nv1.doubleValue());
+                        abs = Util.makeDoubleNode(absd);        			}
                 } else {
                 	long absl = (long) Math.abs(nv1.longValue());
                     abs = Util.makeLongNode(absl);
@@ -95,8 +104,23 @@ public class Abs extends TypedBaseBuiltin {
 	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
-		// TODO Auto-generated method stub
-		return null;
+	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be, List<com.ge.research.sadl.model.gp.Node> argTypes) throws UnittedQuantityHandlerException {
+		be.setCanProcessListArgument(canProcessListArgument());
+		be.setCanProcessUnittedQuantity(canProcessUnittedQuantity());
+		be.setUnittedQuantityStatus(getBuiltinUnittedQuantityStatus());
+		if (argTypes == null || argTypes.size() == 0) {
+			return null;
+		}
+		else if (argTypes.size() > 1) {
+			throw new UnittedQuantityHandlerException("Function abs requires a single input value.");
+		}
+		com.ge.research.sadl.model.gp.Node argType = argTypes.get(0);
+		// the return type is always the same as the input type regardless of the type
+		return argType;
 	}
+
+	private BuiltinUnittedQuantityStatus getBuiltinUnittedQuantityStatus() {
+		return BuiltinUnittedQuantityStatus.SingleArgument;
+	}
+
 }
