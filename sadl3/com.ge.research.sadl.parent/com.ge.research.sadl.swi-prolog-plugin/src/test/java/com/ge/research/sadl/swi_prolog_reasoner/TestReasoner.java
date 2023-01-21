@@ -71,7 +71,7 @@ public class TestReasoner {
 	}	
 
 	@Test
-	public void testShapes01() throws ConfigurationException, ReasonerNotFoundException, IOException, TripleNotFoundException {
+	public void testShapes01() throws ConfigurationException, ReasonerNotFoundException, IOException, TripleNotFoundException, QueryParseException, QueryCancelledException {
 		if (!canRunSwiProlog()) {
 			return;
 		}
@@ -89,6 +89,15 @@ public class TestReasoner {
 		assertNotNull(rs);
 		System.out.println(rs.toString());
 		assertTrue(rs.getRowCount() > 0);
+		
+		System.out.println("Now more specific query:");
+//		ResultSet rs2 = rsrnr.ask(null, "http://sadl.org/Shapes/Shapes#area", null);
+		ResultSet rs2 = rsrnr.ask("http://sadl.org/Shapes/Test#MyRect", null, null);
+		assertNotNull(rs2);
+		System.out.println(rs2.toString());
+		ResultSet rs3 = rsrnr.ask("listing(area).");
+		assertNotNull(rs3);
+		System.out.println(rs3.toString());
 	}	
 
 	@Test

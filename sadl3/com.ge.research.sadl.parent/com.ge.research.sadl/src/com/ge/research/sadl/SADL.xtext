@@ -393,7 +393,7 @@ InfixOperator :
 	'==' 
 	| '!=' 
 	| '=' 
-	| 'is' ('not'? 'unique' 'in')? 
+	| 'is' (('not'? 'unique' 'in') | ('the'? 'same' 'as') | ('different' 'from'))? 
 	| 'contains'
 	| 'does' 'not' 'contain'
 ;

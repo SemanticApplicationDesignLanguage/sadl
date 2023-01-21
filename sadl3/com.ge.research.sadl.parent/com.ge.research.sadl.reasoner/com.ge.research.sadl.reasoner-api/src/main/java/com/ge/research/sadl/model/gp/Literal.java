@@ -18,6 +18,11 @@
 
 package com.ge.research.sadl.model.gp;
 
+import java.math.BigDecimal;
+
+import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.datatypes.xsd.XSDDuration;
+
 /**
  * Class to capture a literal in the SADL grammar
  * @author 200005201
@@ -97,11 +102,24 @@ public class Literal extends Node {
 		String display = value != null ? value.toString() : "null";
 		String units = getUnits();
 		if (units != null) {
-//			if (!StringUtils.isAlphanumeric(units)) {
-				units = "\"" + units + "\"";
-//			}
+			StringBuilder sb = new StringBuilder();
+			if (getName() != null) {
+				sb.append(getName());
+				sb.append(" (");
+				sb.append(display);
+				sb.append(" \"");
+				sb.append(units);
+				sb.append("\")");
+			}
+			else {
+				sb.append(display);
+				sb.append(" \"");
+				sb.append(units);
+				sb.append("\"");
+			}
+			return sb.toString();
 		}
-		return (units != null) ? display + " " + units : display;
+		return display;
 	}
 
 	@Override
@@ -146,11 +164,57 @@ public class Literal extends Node {
 		this.units = units;
 	}
 
+	/**
+	 * Set a UnittedQuantity Literal's URI
+	 * @param name
+	 */
+	public void setUri(String name) {
+		int hash = name.indexOf('#');
+		if (hash > 0 && hash < name.length() - 1) {
+			this.namespace = name.substring(0, hash + 1);
+			this.name = name.substring(hash + 1);
+		}
+		else {
+		    int colon = name.indexOf(':');
+		    if (colon > 0 && colon < name.length() - 1) {
+		        this.prefix = name.substring(0, colon);
+		        this.name = name.substring(colon + 1);
+		    }
+		    else {
+		        this.prefix = null;
+		        this.name = name;
+		    }
+		}
+	}
+
 	public LiteralType getLiteralType() {
 		return literalType;
 	}
 
 	private void setLiteralType(LiteralType literalType) {
+		if (literalType == null && value != null) {
+			if (value instanceof XSDDateTime) {
+				literalType = LiteralType.StringLiteral;
+			} 
+			else if (value instanceof XSDDuration) {
+				literalType = LiteralType.StringLiteral;
+			}
+			else if (value instanceof Integer || value instanceof Double ||
+					value instanceof Long || value instanceof BigDecimal ||
+					value instanceof Number) {
+				literalType = LiteralType.NumberLiteral;
+			}
+			else if (value instanceof Boolean) {
+				literalType = LiteralType.BooleanLiteral;
+			}
+			else if (value.toString().equals("true") ||
+					value.toString().equals("false")) {
+				literalType = LiteralType.BooleanLiteral;
+			}
+			else {
+				literalType = LiteralType.StringLiteral;
+			}
+		}
 		this.literalType = literalType;
 	}
 
