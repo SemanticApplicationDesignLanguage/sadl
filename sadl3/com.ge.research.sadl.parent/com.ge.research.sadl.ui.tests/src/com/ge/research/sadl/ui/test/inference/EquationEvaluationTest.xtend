@@ -660,6 +660,141 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	}
 	
 	@Test
+	def void testSadlEquationInRule_10() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+		uri "http://sadl.org/JavaExternal.sadl" alias javaexternal.
+		
+		Maximizer is a class, described by listOfValues with values of type float List,
+			described by maxValue with values of type float.
+		
+		Expr: max(2,3).
+		
+		Rule testRule: if x is a Maximizer and x has listOfValues y then maxValue of x is max(y).
+		
+		MyMaximizer is a Maximizer with listOfValues [2.3, 4.5, 56.7].
+		
+		Ask: select x, y where x is a Maximizer and x has maxValue y.
+		Ask: select x, y where x has listOfValues y.
+		''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			var foundExpectedEvaluation = false
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+					if (issue.message.equals("Evaluates to: 2")) {
+						foundExpectedEvaluation = true
+					}
+				}
+			}
+//			assertTrue(foundExpectedEvaluation)
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(rules.size == 1)
+			assertTrue(
+				processor.compareTranslations(rules.get(0).toString(),
+					"Rule testRule:  if rdf(x, rdf:type, javaexternal:Maximizer) and rdf(x, javaexternal:listOfValues, y) and max(y,v0) then rdf(x, javaexternal:maxValue, v0)."))
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof ResultSet)
+				println((tr as ResultSet).toString)
+				if (idx == 0) {
+					assertEquals("\"x\",\"y\"
+\"http://sadl.org/JavaExternal.sadl#MyMaximizer\",56", (tr as ResultSet).toString.trim)
+				}
+				else if (idx == 1) {
+					assertEquals("\"x\",\"y\"
+\"http://sadl.org/JavaExternal.sadl#MyMaximizer\",[2.3,4.5,56.7]", (tr as ResultSet).toString.trim)
+				}
+				(tr as ResultSet).showNamespaces = false
+				println((tr as ResultSet).toString)
+				if (idx++ == 0) {
+					assertEquals("\"x\",\"y\"
+\"MyMaximizer\",56", (tr as ResultSet).toString.trim)
+				}
+				else if (idx++ == 1) {
+					assertEquals("\"x\",\"y\"
+\"MyMaximizer\",[2.3,4.5,56.7]", (tr as ResultSet).toString.trim)
+				}
+			}
+		];
+	}
+		
+	@Test
+	def void testSadlEquationInRule_11() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+		uri "http://sadl.org/JavaExternal.sadl" alias javaexternal.
+		
+		Person is a class described by favoriteColors with values of type Color List.
+		Color is a class.
+		{Red, Green, Blue} are instances of Color.
+		
+		JohnsFavoriteColors is the Color List [Red, Green, Blue].
+			
+		
+		John is a Person with favoriteColors JohnsFavoriteColors.
+		Sam is a Person with favoriteColors [Blue, Red, Green].
+		
+		Ask: select x, y where x has favoriteColors y.
+		''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof ResultSet)
+				println((tr as ResultSet).toString)
+				assertEquals("\"x\",\"y\"
+\"http://sadl.org/JavaExternal.sadl#John\",\"http://sadl.org/JavaExternal.sadl#JohnsFavoriteColors\"
+\"http://sadl.org/JavaExternal.sadl#Sam\",[\"http://sadl.org/JavaExternal.sadl#Blue\",\"http://sadl.org/JavaExternal.sadl#Red\",\"http://sadl.org/JavaExternal.sadl#Green\"]", (tr as ResultSet).toString.trim)
+				(tr as ResultSet).setShowNamespaces(false)
+				println((tr as ResultSet).toString)
+				assertEquals("\"x\",\"y\"
+\"John\",\"JohnsFavoriteColors\"
+\"Sam\",[\"Blue\",\"Red\",\"Green\"]", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+	@Test
 	def void testSadlRuleDualThereExists_01() {
 		createFile('StringFormat.sadl', '''
 				 uri "http://sadl.org/TwoWheelsExist.sadl" alias twowheelsexist.

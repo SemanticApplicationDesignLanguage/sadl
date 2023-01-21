@@ -32,6 +32,7 @@
             <param>com.ge.research.sadl.reasoner.IReasoner</param>
             <param>com.ge.research.sadl.reasoner.ITranslator</param>
             <param>org.apache.jena.reasoner.rulesys.Builtin</param>
+            <param>com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper</param>
           </services>
         </configuration>
       </plugin>

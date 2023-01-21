@@ -17,19 +17,33 @@
  ***********************************************************************/
 package com.naturalsemantics.sadl.jena.reasoner.builtin;
 
+import java.util.Iterator;
+
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_Literal;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.rdf.model.impl.StmtIteratorImpl;
 import org.apache.jena.reasoner.InfGraph;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.Rule;
+import org.apache.jena.reasoner.rulesys.impl.SafeTripleIterator;
 import org.apache.jena.util.iterator.ClosableIterator;
 
 public class RuleContextForEvaluation implements org.apache.jena.reasoner.rulesys.RuleContext {
 
 	private BindingEnvironmentForEvaluation bindingEnv = null;
+	private OntModel theModel = null;
 	
-	public RuleContextForEvaluation(BindingEnvironmentForEvaluation befe) {
+	public RuleContextForEvaluation(BindingEnvironmentForEvaluation befe, OntModel model) {
 		bindingEnv = befe;
+		theModel = model;
 	}
 	
 	@Override
@@ -57,22 +71,62 @@ public class RuleContextForEvaluation implements org.apache.jena.reasoner.rulesy
 
 	@Override
 	public boolean contains(Triple t) {
-		// TODO Auto-generated method stub
-		return false;
+		return contains(t.getSubject(), t.getPredicate(), t.getObject());
 	}
 
 	@Override
 	public boolean contains(Node s, Node p, Node o) {
-		// TODO Auto-generated method stub
+		if (s instanceof Node_URI && p instanceof Node_URI) {
+			RDFNode onode = null;
+			if (o instanceof Node_URI) {
+				onode = theModel.getResource(((Node_URI)o).getURI());
+			}
+			else if (o instanceof Node_Literal) {
+				onode = theModel.createTypedLiteral( ((Node_Literal)o).getLiteral());
+			}
+			return theModel.contains(theModel.getResource(((Node_URI)s).getURI()), 
+					theModel.getProperty(((Node_URI)p).getURI()), onode);
+		}
 		return false;
 	}
 
 	@Override
 	public ClosableIterator<Triple> find(Node s, Node p, Node o) {
-		// TODO Auto-generated method stub
+		if (s instanceof Node_URI && p instanceof Node_URI) {
+			RDFNode onode = null;
+			if (o instanceof Node_URI) {
+				onode = theModel.getResource(((Node_URI)o).getURI());
+			}
+			else if (o instanceof Node_Literal) {
+				onode = theModel.createTypedLiteral( ((Node_Literal)o).getLiteral());
+			}
+			StmtIterator itr = theModel.listStatements(theModel.getResource(((Node_URI)s).getURI()), 
+					theModel.getProperty(((Node_URI)p).getURI()), onode);
+			if (itr.hasNext()) {
+				return createCloseableIterator(itr);
+			}
+		}
 		return null;
 	}
 
+	 private <T> ClosableIterator<Triple> createCloseableIterator(Iterator<Statement> iterator) {
+		    return new ClosableIterator<Triple>() {
+		      @Override public void close() {
+//		    	  iterator.close();
+		      }
+
+		      @Override public boolean hasNext() {
+		        return iterator.hasNext();
+		      }
+
+		      @Override public Triple next() {
+		        Statement stmt = iterator.next();
+		        Triple triple = new Triple(stmt.getSubject().asNode(), stmt.getPredicate().asNode(), stmt.getObject().asNode());
+				return triple;
+		      }
+		    };
+		  }
+	 
 	@Override
 	public void silentAdd(Triple t) {
 		// TODO Auto-generated method stub

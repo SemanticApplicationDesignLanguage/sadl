@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.UnittedQuantityBuiltinHandlingType;
 
 public class CountMatches extends TypedBaseBuiltin {
     protected static final Logger logger = LoggerFactory.getLogger(CountMatches.class);
@@ -112,9 +113,8 @@ public class CountMatches extends TypedBaseBuiltin {
     }
 
 	@Override
-	public boolean canProcessUnittedQuantity() {
-		// TODO Auto-generated method stub
-		return false;
+	public UnittedQuantityBuiltinHandlingType getUnittedQuantityProcessingConstraint() {
+		return UnittedQuantityBuiltinHandlingType.UnitsNotSupported;
 	}
 
 	@Override
@@ -124,8 +124,8 @@ public class CountMatches extends TypedBaseBuiltin {
 	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be,
-			List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
+	public com.ge.research.sadl.model.gp.Node[] validateArgumentTypes(OntModel model, BuiltinElement be,
+			List<com.ge.research.sadl.model.gp.Node> args, List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
 		// TODO Auto-generated method stub
 		return null;
 	}

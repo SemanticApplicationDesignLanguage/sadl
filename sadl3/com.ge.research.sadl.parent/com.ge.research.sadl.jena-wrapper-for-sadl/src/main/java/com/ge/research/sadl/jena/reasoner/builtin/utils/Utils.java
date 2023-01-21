@@ -16,30 +16,44 @@
  *
  ***********************************************************************/
 
-package com.ge.research.sadl.jena.reasoner.builtin;
+package com.ge.research.sadl.jena.reasoner.builtin.utils;
 
 import java.io.InvalidObjectException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.apache.jena.datatypes.DatatypeFormatException;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Triple;
 //import org.apache.jena.graph.impl.LiteralLabel;
 import org.apache.jena.graph.impl.LiteralLabelFactory;
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.reasoner.rulesys.FBRuleInfGraph;
+import org.apache.jena.reasoner.rulesys.Node_RuleVariable;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.util.iterator.ClosableIterator;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
+import com.ge.research.sadl.processing.SadlConstants;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.UnittedQuantityBuiltinHandlingType;
+import com.naturalsemanticsllc.sadl.reasoner.TypedBuiltinFunctionException;
 
 /**
  * This class provides useful utilities for building Jena builtin functions.
@@ -49,7 +63,9 @@ import org.apache.jena.vocabulary.RDFS;
 public class Utils {
 	private static final Logger _logger = LoggerFactory.getLogger(Utils.class);
 	
-    /**
+	private static ITypedBuiltinFunctionHelper typedBuiltinFunctionHelper = null;
+	
+	/**
      * Call this method to delete, replace, or create a triple with the given subject, datatype property, and data value. 
      * For the given subject and property, any existing matching triples will be deleted. If the object is not null, a
      * new triple will be created with that object value.
@@ -498,6 +514,36 @@ public class Utils {
     	}
     	return false;
 	}
+	
+    /**
+     * Convert SADL list to a java list of Nodes
+     * @param root the root node of the list
+     * @param context the graph containing the list assertions
+     */
+    public static List<Node> convertList(Node root, RuleContext context, LinkedList<Node> soFar) {
+       	Node_URI fprop = (Node_URI) NodeFactory.createURI(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
+       	Node_URI rprop = (Node_URI) NodeFactory.createURI(SadlConstants.SADL_LIST_MODEL_REST_URI);
+       	if (soFar == null) {
+       		soFar = new LinkedList<Node>()    ;   	
+       	}
+   	 	ClosableIterator<Triple> it = context.find(root, fprop, null);
+        Node result = null;
+        if (it.hasNext()) {
+            result = it.next().getObject();
+            soFar.add(result);
+        }
+        it.close();
+        it = context.find(root, rprop, null);
+        Node rest = null;
+        if (it.hasNext()) {
+            rest = it.next().getObject();
+            it.close();
+            return convertList(rest, context, soFar);
+        }
+        it.close();       
+        return soFar;
+    }
+
 
 	/**
      * Construct a new float valued node
@@ -513,4 +559,277 @@ public class Utils {
     public static synchronized Node makeXSDDateTimeNode(XSDDateTime value) {
     	return NodeFactory.createLiteral(LiteralLabelFactory.createTypedLiteral(value));
     }
+
+    /*
+     * UnittedQuantity-related utilties
+     */
+	public static boolean listContainsUnittedQuantity(List<Node> nodes, Object context) throws TypedBuiltinFunctionException {
+		if (context instanceof RuleContext) {
+			return listContainsUnittedQuantity(nodes, (RuleContext)context);
+		}
+		throw new TypedBuiltinFunctionException("Invalid RuleContext passed to listContainsUnittedQuantity");
+	}
+
+	private static boolean listContainsUnittedQuantity(List<Node> nodes, RuleContext context) {
+		if (nodes != null) {
+			for (Node node : nodes) {
+				if (isUnittedQuantity(node, context)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Method to determine if a Node is an instance of the SadlImplicitModel UnittedQuantity class.
+	 * Since this is during inference, we can assume that transient closure over class hierarchies
+	 * has made every instance of a subclass of UnittedQuantity also an instance of UnittedQuantity.
+	 * @param node
+	 * @param context
+	 * @return
+	 */
+	public static boolean isUnittedQuantity(Node node, RuleContext context) {
+		if (node instanceof Node_Literal) {
+			return false;
+		}
+		if (node instanceof Node_RuleVariable) {
+			return false;
+		}
+		Node UQCls =  NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		if (context.contains(node, RDF.type.asNode(), UQCls)) {
+			return true;
+		}
+		if (node instanceof Node_URI) {
+			if (context.contains(node, RDFS.subClassOf.asNode(), UQCls)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Method to obtain the value of a Node which is an instance of the SadlImplicitModel's
+	 * UnittedQuantity class
+	 * @param node
+	 * @param context
+	 * @return
+	 */
+	public static Node getUnittedQuantityValue(Node node, RuleContext context) {
+		Node valuePred =  NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
+		ClosableIterator<Triple> citr = context.find(node, valuePred, null);
+		if (citr.hasNext()) {
+			Node val = citr.next().getObject();
+			citr.close();
+			return val;
+		}
+		return null;
+	}
+	
+	/**
+	 * Method to obtain the unit of a Node which is an instance of the SadlImplicitModel's
+	 * UnittedQuantity class
+	 * @param node
+	 * @param context
+	 * @return
+	 */
+	public static Node getUnittedQuantityUnit(Node node,  RuleContext context) {
+		Node unitPred =  NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
+		ClosableIterator<Triple> citr = context.find(node, unitPred, null);
+		if (citr.hasNext()) {
+			Node unit =  citr.next().getObject();
+			citr.close();
+			return unit;
+		}
+		return null;
+	}
+
+	/**
+	 * Method to check to make sure all UnittedQuantity elements in the list have a unit and they are all the same unit.
+	 * @param context
+	 * @param nodeLst
+	 * @throws DatatypeFormatException
+	 * @throws TypedBuiltinFunctionException
+	 */
+	public static void checkUnittedQuantityListSameUnits(RuleContext context, List<Node> nodeLst) throws DatatypeFormatException, TypedBuiltinFunctionException {
+		Node previousUnit =  null;
+		for (Node node : nodeLst) {
+			Node unit = getUnittedQuantityUnit(node, context);
+			Node value = getUnittedQuantityValue(node, context);
+			if (unit == null) {
+				throw new TypedBuiltinFunctionException("Encountered a value (" + 
+						value.getLiteral().getValue().toString() + " without any unit; unitted quantities must have a unit.");
+			}
+			if (previousUnit != null) {
+				if (!previousUnit.equals(unit)) {
+					throw new TypedBuiltinFunctionException("Encountered different units (" + 
+								previousUnit.getLiteral().getValue().toString() + ", " + 
+								unit.getLiteral().getValue().toString() + ") but units must be the same.");
+				}
+			}
+			previousUnit = unit;
+		}
+	}
+
+	/**
+	 * Method to convert a list of Jena Nodes which are UnittedQuanitity instances into a list of SADL Literals.
+	 * @param context
+	 * @param nodeLst
+	 * @param unittedQuantityProcessingConstraint
+	 * @return
+	 */
+	public static List<UnittedQuantity> getUnittedQuantityArgumentList(RuleContext context, List<Node> nodeLst,
+			UnittedQuantityBuiltinHandlingType unittedQuantityProcessingConstraint) {
+		List<UnittedQuantity> uqList = new ArrayList<UnittedQuantity>();
+		for (Node node : nodeLst) {
+			Node unit;
+			Node value;
+			if (node.isLiteral()) {
+				value = node;
+				unit = null;
+			}
+			else {
+				unit = getUnittedQuantityUnit(node, context);
+				value = getUnittedQuantityValue(node, context);
+			}
+			UnittedQuantity uq = new UnittedQuantity(value, unit);
+			uqList.add(uq);
+		}
+		return uqList;
+	}
+
+	/**
+	 * Method to create a new instance of a SadlImplicitModel UnittedQuantity in a Jena model.
+	 * @param context
+	 * @param valNode
+	 * @param unitNode
+	 * @return
+	 */
+	public static Node createUnittedQuantity(RuleContext context, Node valNode, Node unitNode) {
+		Node uQinst = Utils.createInstanceOfClass(context, SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		Node valPred = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
+		Utils.addValue(context, uQinst, valPred, valNode);
+		Node unitPred = NodeFactory.createURI(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
+		Utils.addValue(context, uQinst, unitPred, unitNode);
+		return uQinst;
+
+	}
+
+	/**
+	 * Method to determine the unit of a UnittedQuantity output of a given operator.
+	 * 
+	 * @param context -- the Rule context, providing the inferred model
+	 * @param n1 -- the operator as a string
+	 * @param n2 -- the 1st unit of a binary operation 
+	 * @param n3 -- the 2nd unit of a binary operation
+	 * @return -- the unit of the binary operation output
+	 * @throws UnittedQuantityHandlerException
+	 */
+	public static String combineUnits(RuleContext context, Node n1, Node n2, Node n3) throws TypedBuiltinFunctionException {
+		String op = n1.getLiteralValue().toString();
+		String u1 = n2.getLiteralValue().toString();
+		String u2 = n3.getLiteralValue().toString();
+		
+		ITypedBuiltinFunctionHelper helper = getTypedBuiltinFunctionHelper();
+		Object result = helper.combineUnits(op, u1, u2);
+		if (result instanceof Node_Literal) {
+			return ((Node_Literal)result).getLiteralValue().toString();
+		}
+		return result.toString();
+	}
+
+	public static ITypedBuiltinFunctionHelper getTypedBuiltinFunctionHelper() {
+		return typedBuiltinFunctionHelper;
+	}
+
+	public static void setTypedBuiltinFunctionHelper(ITypedBuiltinFunctionHelper typedBuiltinFunctionHelper) {
+		Utils.typedBuiltinFunctionHelper = typedBuiltinFunctionHelper;
+	}
+
+	public static boolean isNumber(com.ge.research.sadl.model.gp.Node argType, OntModel context) {
+		String uri = argType.getURI();
+		//uri is exactly a numeric type
+		if (uri.equals(XSD.decimal.getURI()) || uri.equals(XSD.integer.getURI()) || uri.equals(XSD.xdouble.getURI())
+				|| uri.equals(XSD.xfloat.getURI()) || uri.equals(XSD.xint.getURI()) || uri.equals(XSD.xlong.getURI())
+				|| uri.equals(XSD.negativeInteger.getURI()) || uri.equals(XSD.nonNegativeInteger.getURI())
+				|| uri.equals(XSD.nonPositiveInteger.getURI()) || uri.equals(XSD.positiveInteger.getURI())
+				|| uri.equals(XSD.unsignedInt.getURI()) || uri.equals(XSD.unsignedLong.getURI())
+				|| uri.equals(XSD.unsignedShort.getURI()) || uri.equals(XSD.xshort.getURI())) {
+			return true;
+		}
+		if (uri.equals(XSD.duration.getURI())) {
+			// xsd:duration will be considered numeric for type checking.
+			return true;
+		}
+		//If Unitted Quantities are ignored then they are also considered a numeric type
+		if(uri.equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI) ||
+						isNamedNodeSubclassOfNamedNode(context, uri,	SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+			return true;
+		}
+		return false;
+	}
+
+	private static boolean isNamedNodeSubclassOfNamedNode(OntModel context, String uri1,
+			String uri2) {
+		OntClass cls1 = context.getOntClass(uri1);
+		if (cls1 != null) {
+			OntClass cls2 = context.getOntClass(uri2);
+			if (cls2 != null) {
+				if (context.contains(cls1, RDFS.subClassOf, cls2)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public static com.ge.research.sadl.model.gp.Node moreGeneralNumericType(com.ge.research.sadl.model.gp.Node type1,
+			com.ge.research.sadl.model.gp.Node type2, OntModel context) {
+		String uri1 = type1.getURI();
+		String uri2 = type2.getURI();
+		if (uri1.equals(XSD.decimal.getURI())) {
+			return type1;
+		}
+		else if (uri2.equals(XSD.decimal.getURI())) {
+			return type2;
+		}
+		else if (uri1.equals(XSD.xdouble.getURI())) {
+			return type1;
+		}
+		else if (uri2.equals(XSD.xdouble.getURI())) {
+			return type2;
+		}
+		else if (uri1.equals(XSD.xfloat.getURI())) {
+			return type1;
+		}
+		else if (uri2.equals(XSD.xfloat.getURI())) {
+			return type2;
+		}
+		else if (uri1.equals(XSD.xlong.getURI())) {
+			return type1;
+		}
+		else if (uri2.equals(XSD.xlong.getURI())) {
+			return type2;
+		}
+		else if (uri1.equals(XSD.integer.getURI())) {
+			return type1;
+		}
+		else if (uri2.equals(XSD.integer.getURI())) {
+			return type2;
+		}
+		else if (uri1.equals(XSD.xint.getURI())) {
+			return type1;
+		}
+		else if (uri2.equals(XSD.xint.getURI())) {
+			return type2;
+		}
+		else if (uri1.equals(XSD.integer.getURI())) {
+			return type1;
+		}
+		else if (uri2.equals(XSD.integer.getURI())) {
+			return type2;
+		}
+		return new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode);
+	}
+
 }

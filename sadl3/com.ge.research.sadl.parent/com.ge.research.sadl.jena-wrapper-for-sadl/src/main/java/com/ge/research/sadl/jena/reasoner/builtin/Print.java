@@ -27,6 +27,7 @@ import org.apache.jena.util.PrintUtil;
 
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.UnittedQuantityBuiltinHandlingType;
 
 /**
  * Print its argument list as a side effect
@@ -100,9 +101,8 @@ public class Print extends TypedBaseBuiltin {
 	}
 
 	@Override
-	public boolean canProcessUnittedQuantity() {
-		// TODO Auto-generated method stub
-		return false;
+	public UnittedQuantityBuiltinHandlingType getUnittedQuantityProcessingConstraint() {
+		return UnittedQuantityBuiltinHandlingType.UnitsNotSupported;
 	}
 
 	@Override
@@ -112,9 +112,11 @@ public class Print extends TypedBaseBuiltin {
 	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be,
-			List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
-		// TODO Auto-generated method stub
+	public com.ge.research.sadl.model.gp.Node[] validateArgumentTypes(OntModel model, BuiltinElement be,
+			List<com.ge.research.sadl.model.gp.Node> args, List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
+		be.setCanProcessListArgument(canProcessListArgument());
+		be.setUnittedQuantityProcessingCapability(getUnittedQuantityProcessingConstraint());
+		// doesn't return anything
 		return null;
 	}
 }

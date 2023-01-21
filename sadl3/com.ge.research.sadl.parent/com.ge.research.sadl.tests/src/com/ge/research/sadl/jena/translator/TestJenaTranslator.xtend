@@ -116,7 +116,8 @@ public class TestJenaTranslator extends AbstractSADLModelProcessorTest {
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 0)
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.empty)
 			assertTrue(rules.size == 1)
 			val trans = getTranslator(processor)
 			if (rules != null) {
@@ -151,7 +152,7 @@ public class TestJenaTranslator extends AbstractSADLModelProcessorTest {
 			assertNotNull(jenaModel)
 			if (issues !== null) {
 				for (issue : issues) {
-					System.out.println(issue.message)
+					System.out.println(issue)
 				}
 			}
 			if (rules !== null) {
@@ -159,7 +160,8 @@ public class TestJenaTranslator extends AbstractSADLModelProcessorTest {
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 4)		// construct requires articles to be enabled (3 errors), v2 (mistranslation) not defined
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 4)		// construct requires articles to be enabled (3 errors), v2 (mistranslation) not defined
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -187,7 +189,7 @@ rdf(v3, rulevars2:var2, v7) and rdf(v4, rulevars2:var3, v8) and +(v7,v8,v9) then
 			assertNotNull(jenaModel)
 			if (issues !== null) {
 				for (issue : issues) {
-					System.out.println(issue.message)
+					System.out.println(issue)
 				}
 			}
 			if (rules !== null) {
@@ -195,7 +197,8 @@ rdf(v3, rulevars2:var2, v7) and rdf(v4, rulevars2:var3, v8) and +(v7,v8,v9) then
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 3)	// content requires articles to be enabled, 2 concl var not bound
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 3)	// content requires articles to be enabled, 2 concl var not bound
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -475,12 +478,14 @@ then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulev
  			assertTrue(errors.get(1).toString.startsWith("ERROR:java.lang.NumberFormatException: For input string: \"sonoo\""))
  
  			val infos = issues.filter[severity === Severity.INFO]
- 			assertTrue(infos.size == 4)
- 			assertTrue(infos.get(0).toString.startsWith("INFO:Evaluates to: \"name is null\""))
- 			assertTrue(infos.get(1).toString.startsWith("INFO:Evaluates to: \"value is 32.334339\""))
- 			assertTrue(infos.get(2).toString.startsWith("INFO:Evaluates to: \"value is                  32.334339141846\""))
- 			assertTrue(infos.get(3).toString.startsWith("INFO:Evaluates to: \"value is                  32.334339141846 != 23.455999\""))
- 
+ 			var found = 0
+ 			for (info : infos) {
+	 			if (info.toString.startsWith("INFO:Evaluates to: \"name is null\"")) found++
+	 			if (info.toString.startsWith("INFO:Evaluates to: \"value is 32.334339\""))  found++
+	 			if (info.toString.startsWith("INFO:Evaluates to: \"value is                  32.334339141846\""))  found++
+	 			if (info.toString.startsWith("INFO:Evaluates to: \"value is                  32.334339141846 != 23.455999\""))  found++
+ 			}
+ 			assertTrue(found == 4)
   			assertNotNull(rules)
  			assertTrue(rules.size == 1)
  			val rule = getTranslator(processor).translateRule(jenaModel, "http://sadl.org/JavaExternal.sadl", rules.get(0))

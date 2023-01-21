@@ -30,22 +30,28 @@ import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_Literal;
+import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.impl.LiteralLabelFactory;
+import org.apache.jena.ontology.Individual;
+import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.XSD;
 
-import com.ge.research.sadl.jena.reasoner.builtin.Utils;
+import com.ge.research.sadl.jena.reasoner.builtin.utils.Utils;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.TypedEllipsisNode;
 import com.ge.research.sadl.model.gp.UnknownNode;
 import com.ge.research.sadl.model.gp.UntypedEllipsisNode;
+import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
@@ -87,9 +93,10 @@ public class EvaluateSadlEquationUtils {
 	 * as in the processing of an "Expr: <builtin>." statement.
 	 * 
 	 * @param bi -- the BuiltinElement to be evaluated
+	 * @param theModel -- the semantic model
 	 * @return -- a SADL Node containing the result of the evaluation
 	 */
-	public Node evaluateSadlEquation(BuiltinElement bi) {
+	public Node evaluateSadlEquation(BuiltinElement bi, OntModel theModel) {
 		Equation eq = bi.getInModelReferencedEquation();
 		if (eq.isExternal()) {
 			// this is an equation whose implementation is outside of the SADL environment
@@ -156,7 +163,7 @@ public class EvaluateSadlEquationUtils {
 							else {
 								result = bestMatch.invoke(clazz.getDeclaredConstructor().newInstance(), args);								
 							}
-							return convertResultToNode(result, bi);
+							return convertResultToNode(result, bi, theModel);
 						} catch (Exception e) {
 							if (e.getMessage() == null) {
 								if (e.getSuppressed() != null && e.getSuppressed().length > 0) {
@@ -208,9 +215,9 @@ public class EvaluateSadlEquationUtils {
 				if (matchingMethods != null) {
 					for (Method mm : matchingMethods) {
 						if (mm.getName().equals(methName)) {
-							Class<?>[] paramTypes = mm.getParameterTypes();
 							List<Node> args = bi.getArguments();
-							org.apache.jena.graph.Node[] biArgs = new org.apache.jena.graph.Node[args.size() + 1];	
+							int numArgs = BuiltinElement.isComparisonBuiltin(bi.getFuncType()) ? args.size() : args.size() + 1;
+							org.apache.jena.graph.Node[] biArgs = new org.apache.jena.graph.Node[numArgs];	
 							int i = 0;
 							for (Node arg : args) {
 								Object value = null;
@@ -233,22 +240,32 @@ public class EvaluateSadlEquationUtils {
 							    		valNode = Util.makeLongNode(((Number) value).longValue());
 							    	}
 								}
+								else if (arg instanceof VariableNode) {
+									valNode = NodeFactory.createVariable(((VariableNode)arg).getName());
+								}
 								else if (arg instanceof NamedNode){
 									valNode = NodeFactory.createURI(((NamedNode)arg).getURI());
 								}
 								else {
-									// TODO
+									addError(new ModelError(bi.toString() + " is too complex to be evaluated.", ErrorType.WARNING));
+									return null;
 								}
 								biArgs[i++] = valNode;
+								}
+							if (!BuiltinElement.isComparisonBuiltin(bi.getFuncType())) {
+								biArgs[i] = NodeFactory.createVariable("retValNode");
 							}
-							biArgs[i] = NodeFactory.createVariable("retValNode");
 							// now construct the rest of the arguments and make the call
 							BindingEnvironmentForEvaluation befe = new BindingEnvironmentForEvaluation();
-							RuleContextForEvaluation rcfe = new RuleContextForEvaluation(befe);
+							RuleContextForEvaluation rcfe = new RuleContextForEvaluation(befe, theModel);
 							try {
 								Object status = mm.invoke(clazz.getDeclaredConstructor().newInstance(), biArgs, biArgs.length, rcfe);
-								if (status instanceof Boolean && ((Boolean)status).booleanValue()) {
-									return convertResultToNode(befe.getBoundValue(biArgs[i]), bi);
+								if (status instanceof Boolean && (((Boolean)status).booleanValue() ||
+										BuiltinElement.isComparisonBuiltin(bi.getFuncType()))) {
+									if (BuiltinElement.isComparisonBuiltin(bi.getFuncType())) {
+										return new Literal(status, null, LiteralType.BooleanLiteral);
+									}
+									return convertResultToNode(befe.getBoundValue(biArgs[i]), bi, theModel);
 								}
 							} catch (Exception e) {
 								addError(new ModelError(e.getMessage(), ErrorType.WARNING));
@@ -456,15 +473,17 @@ public class EvaluateSadlEquationUtils {
 	 * Method to convert the return from Equation invocation to a SADL node containing the desired return type.
 	 * @param result
 	 * @param bi
+	 * @param model
 	 * @return
 	 */
-	private Node convertResultToNode(Object result, BuiltinElement bi) {
-		if (isNumber(result)) {
-			return new com.ge.research.sadl.model.gp.Literal(result, null, LiteralType.NumberLiteral);
-		}
-		else {
-			return new com.ge.research.sadl.model.gp.Literal(result.toString(), null, LiteralType.StringLiteral);
-		}
+	private Node convertResultToNode(Object result, BuiltinElement bi, OntModel model) {
+//		if (isNumber(result)) {
+//			return new com.ge.research.sadl.model.gp.Literal(result, null, LiteralType.NumberLiteral);
+//		}
+//		else {
+//			return new com.ge.research.sadl.model.gp.Literal(result.toString(), null, LiteralType.StringLiteral);
+//		}
+		return getValue(result, model);
 	}
 
 	/**
@@ -872,6 +891,43 @@ public class EvaluateSadlEquationUtils {
 			return true;
 		}
 		return false;
+	}
+	
+	private Node getValue(Object value, OntModel model) {
+		Object lval = null;
+		if (value instanceof Node_Literal) {
+			lval = ((Node_Literal)value).getLiteralValue();
+			if ((lval instanceof Long) ||
+					(lval instanceof Integer) ||
+					(lval instanceof Float) ||
+					(lval instanceof Double) ||
+					(lval instanceof BigDecimal)) {
+				return new Literal(lval, null, LiteralType.NumberLiteral);
+			}
+			else if (lval instanceof XSDBaseNumericType) {
+				return new Literal(lval, null, LiteralType.NumberLiteral);
+			}
+		}
+		else if (value instanceof Node_URI) {
+			String uri = ((Node_URI)value).getURI();
+			OntClass cls = model.getOntClass(uri);
+			if (cls != null) {
+				return new NamedNode(cls.getURI(), NodeType.ClassNode);
+			}
+			Individual inst = model.getIndividual(uri);
+			if (inst != null) {
+				return new NamedNode(inst.getURI(), NodeType.InstanceNode);
+			}
+			Property prop = model.getProperty(uri);
+			if (prop !=  null) {
+				return new NamedNode(uri, NodeType.PropertyNode);
+			}
+			return new NamedNode(uri, NodeType.DataTypeNode);
+		}
+		else if (isNumber(value)) {
+			return new Literal(value, null, LiteralType.NumberLiteral);
+		}
+		return new Literal(value.toString(), null, LiteralType.StringLiteral);
 	}
 
 	/**

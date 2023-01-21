@@ -1405,8 +1405,12 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			}
 		} else if (dtype.equals(DisplayType.LiteralDisplay)) {
 			if (obj instanceof com.ge.research.sadl.model.gp.Literal) {
-				return ((com.ge.research.sadl.model.gp.Literal) obj).getValue()
-						.toString();
+				if (((com.ge.research.sadl.model.gp.Literal) obj).getUnits() != null) {
+					return ((com.ge.research.sadl.model.gp.Literal) obj).toString();
+				}
+				else {
+					return ((com.ge.research.sadl.model.gp.Literal) obj).getValue().toString();
+				}
 			} else if (!displayNS && obj instanceof String
 					&& ((String) obj).indexOf("#") > 0) {
 				return ((String) obj)

@@ -2041,9 +2041,10 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		}
 		assertTrue(issues1.filter[severity === Severity.ERROR].size == 0)
 //		assertTrue(issues1.filter[severity === Severity.WARNING].size == 1)
-		assertTrue(issues1.filter[severity === Severity.INFO].size == 1)
+		assertTrue(issues1.filter[severity === Severity.INFO].size == 2)
   		assertTrue(issues1.filter[severity === Severity.INFO].toString.contains("Evaluates to: 2"))
- 		assertTrue(issues2.size == 1)
+ 		assertTrue(issues2.size == 2)
+ 		assertTrue(issues2.filter[severity === Severity.INFO].toString.contains("Evaluates to: 2"))
  	}
  	
   	@Test
@@ -2074,12 +2075,12 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 		}
 		assertTrue(issues1.filter[severity === Severity.ERROR].size == 0)
 		assertTrue(issues1.filter[severity === Severity.WARNING].size == 0)
-		assertTrue(issues1.filter[severity === Severity.INFO].size == 1)
-  		assertTrue(issues1.filter[severity === Severity.INFO].toString.contains("Evaluates to: \"2\"^^http://www.w3.org/2001/XMLSchema#int"))
+		assertTrue(issues1.filter[severity === Severity.INFO].size == 2)
+  		assertTrue(issues1.filter[severity === Severity.INFO].toString.contains("Evaluates to: 2"))
 		assertTrue(issues2.filter[severity === Severity.ERROR].size == 0)
 		assertTrue(issues2.filter[severity === Severity.WARNING].size == 0)
-		assertTrue(issues2.filter[severity === Severity.INFO].size == 1)
-  		assertTrue(issues2.filter[severity === Severity.INFO].toString.contains("Evaluates to: \"2\"^^http://www.w3.org/2001/XMLSchema#int"))
+		assertTrue(issues2.filter[severity === Severity.INFO].size == 2)
+  		assertTrue(issues2.filter[severity === Severity.INFO].toString.contains("Evaluates to: 2"))
  	}
  	
  	@Test
@@ -2518,8 +2519,8 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			for (cmd : cmds) {
 				println(cmd.toString)
 			}
-			assertEquals(cmds.get(1).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3))))")
-			assertEquals(cmds.get(2).toString, "select v0 v2 v3 v1 v4 v5 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), and(rdf(v1, test:partID, \"123\"), and(rdf(v1, test:processing, v4), rdf(v4, test:processNum, v5))))))")
+			assertEquals("select v0 v1 v2 v3 where rdf(v0, test:partID, \"123\") . rdf(v0, test:processing, v1) . rdf(v1, test:temperature, v2) . rdf(v1, test:processNum, v3)", cmds.get(1).toString)
+			assertEquals("select v0 v2 v3 v1 v4 v5 where rdf(v0, test:partID, \"123\") . rdf(v0, test:processing, v2) . rdf(v2, test:temperature, v3) . rdf(v1, test:partID, \"123\") . rdf(v1, test:processing, v4) . rdf(v4, test:processNum, v5)", cmds.get(2).toString)
 		]
 	}
 	
@@ -2549,8 +2550,8 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			for (cmd : cmds) {
 				println(cmd.toString)
 			}
-			assertEquals(cmds.get(1).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3)))")
-			assertEquals(cmds.get(2).toString, "select v0 v2 v3 v1 v4 v5 where and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), and(rdf(v1, test:processing, v4), rdf(v4, test:processNum, v5))))")
+			assertEquals(cmds.get(1).toString, "select v0 v1 v2 v3 where rdf(v0, test:processing, v1) . rdf(v1, test:temperature, v2) . rdf(v1, test:processNum, v3)")
+			assertEquals(cmds.get(2).toString, "select v0 v2 v3 v1 v4 v5 where rdf(v0, test:processing, v2) . rdf(v2, test:temperature, v3) . rdf(v1, test:processing, v4) . rdf(v4, test:processNum, v5)")
 		]
 	}
 	
@@ -2573,7 +2574,7 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  				println(rule.toString)
  			}
  			assertTrue(issues.size == 1)
- 			assertEquals("area, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot be compared (is) with function product returning xsd:decimal.", issues.get(0).message)
+ 			assertEquals("The left-hand side expects a unitted quantity but the right-hand side provides no units.", issues.get(0).message)
  			assertTrue(rules.size == 1)
  			assertEquals("Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2).", 
  				rules.get(0).toString
@@ -2601,9 +2602,8 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  			}
  			assertTrue(issues.size == 0)
  			assertTrue(rules.size == 1)
- 			assertEquals("Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) and unittedQuantity(v2,\"sq ft\",v3) then rdf(x, impliedpropertiesinrule:area, v3).", 
- 				rules.get(0).toString
- 			)
+			assertEquals("Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then thereExists(UnittedQuantity,value,v2,unit,\"sq ft\",Plus,x,impliedpropertiesinrule:area).",
+ 				rules.get(0).toString)
  		]
 	}
 	

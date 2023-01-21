@@ -17,6 +17,7 @@
  ***********************************************************************/
 package com.ge.research.sadl.ui.preferences;
 
+import static com.ge.research.sadl.preferences.SadlPreferences.ALWAYS_EXPAND_UNITTEDQUANTITY_IN_TRANSLATION;
 import static com.ge.research.sadl.preferences.SadlPreferences.CHECK_FOR_AMBIGUOUS_NAMES;
 import static com.ge.research.sadl.preferences.SadlPreferences.CHECK_FOR_CARDINALITY_OF_PROPERTY_IN_DOMAIN;
 import static com.ge.research.sadl.preferences.SadlPreferences.CONTENT_ASSIST__FILTER_IMPLICIT_MODEL;
@@ -43,19 +44,20 @@ import static com.ge.research.sadl.preferences.SadlPreferences.RDF_JSON;
 import static com.ge.research.sadl.preferences.SadlPreferences.RDF_XML_ABBREV_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.RDF_XML_FORMAT;
 import static com.ge.research.sadl.preferences.SadlPreferences.SADL_BASE_URI;
+import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK;
+import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK_ENDPOINT;
+import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK_STORE_TYPE;
 import static com.ge.research.sadl.preferences.SadlPreferences.SHOW_TIMING_INFORMATION;
 import static com.ge.research.sadl.preferences.SadlPreferences.TABULAR_DATA_IMPORTER_CLASS;
 import static com.ge.research.sadl.preferences.SadlPreferences.TRIG;
 import static com.ge.research.sadl.preferences.SadlPreferences.TRIX;
 import static com.ge.research.sadl.preferences.SadlPreferences.TURTLE_FORMAT;
+import static com.ge.research.sadl.preferences.SadlPreferences.TYPED_BUILTIN_FUNCTION_HELPER;
 import static com.ge.research.sadl.preferences.SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED;
 import static com.ge.research.sadl.preferences.SadlPreferences.TYPE_CHECKING_WARNING_ONLY;
 import static com.ge.research.sadl.preferences.SadlPreferences.VALIDATE_BEFORE_TEST;
-import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK;
-import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK_ENDPOINT;
-import static com.ge.research.sadl.preferences.SadlPreferences.SEMTK_STORE_TYPE;
 
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -73,18 +75,21 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage;
 
+import com.ge.research.sadl.builder.ConfigurationManagerForIDE;
 import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.NameValuePair;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.BooleanFieldEditorExt;
+import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.ComboFieldEditorExt;
 import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.FieldEditorExt;
 import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.FileFieldEditorExt;
 import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.RadioGroupFieldEditorExt;
 import com.ge.research.sadl.ui.preferences.FieldEditorExtensions.StringFieldEditorExt;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper;
 
 @SuppressWarnings("restriction")
 public class SadlRootPreferencePage extends LanguageRootPreferencePage {
@@ -225,6 +230,27 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		addField(new BooleanFieldEditorExt(P_USE_ARTICLES_IN_VALIDATION.getId(), "Use indefinite and definite articles in validation and translation", translationSettings));
 		addField(new BooleanFieldEditorExt(FIND_AND_EXPAND_MISSING_PATTERNS.getId(), "Find and expand missing patterns in translation", translationSettings));
 		addField(new BooleanFieldEditorExt(IGNORE_UNITTEDQUANTITIES.getId(), "Ignore Unitted Quantities (treat as numeric only) during translation", translationSettings));
+		addField(new BooleanFieldEditorExt(ALWAYS_EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.getId(), "Expand Unitted Quantities in translation", translationSettings));
+		
+		List<String> classes = new ArrayList<String>();
+		List<String> clsNames = new ArrayList<String>();
+		List<ITypedBuiltinFunctionHelper> ics = ConfigurationManagerForIDE.getAvailableTypedBuiltinFunctionHelpers();
+		if (ics != null) {
+			for (ITypedBuiltinFunctionHelper cls : ics) {
+				classes.add(cls.getClass().getCanonicalName());
+				clsNames.add(cls.getClass().getSimpleName());
+			}
+		}
+		else {
+			classes.add("com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena");
+			clsNames.add("SadlSimpleUnittedQuantityHanderForJena");
+		}
+		String[][] options = new String[classes.size()] [2];
+		for (int i = 0; i < classes.size(); i++) {
+			options[i][0] = clsNames.get(i);
+			options[i][1] = classes.get(i);
+		}
+		addField(new ComboFieldEditorExt(TYPED_BUILTIN_FUNCTION_HELPER.getId(), "UnittedQuantity Hander", options, translationSettings));
 		addField(new BooleanFieldEditorExt(CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(), "Translate multiple-class domain or range as union class (owl:unionOf)", translationSettings));
 
 		// Type Checking Settings
@@ -250,6 +276,7 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 		//General Settings
 		store.setDefault(SadlPreferences.CREATE_DOMAIN_AND_RANGE_AS_UNION_CLASSES.getId(), true);
 		store.setDefault(SadlPreferences.TYPE_CHECKING_RANGE_REQUIRED.getId(), true);
+		store.setDefault(SadlPreferences.ALWAYS_EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.getId(), false);
 		store.setDefault(SadlPreferences.GRAPH_RENDERER_CLASS.getId(), SadlPreferences.GRAPH_RENDERER_CLASS.getDefaultValue());
 //		store.setDefault(RAEConstants.ANALYSIS_TIMEOUT,"600");
 //		store.setDefault(RAEConstants.RUN_PARTIAL_ANALYSIS,false);

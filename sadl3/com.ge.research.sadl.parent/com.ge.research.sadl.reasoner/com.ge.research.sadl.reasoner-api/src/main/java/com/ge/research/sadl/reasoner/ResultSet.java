@@ -25,6 +25,7 @@ package com.ge.research.sadl.reasoner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import com.ge.research.sadl.model.gp.Literal;
@@ -121,10 +122,11 @@ public class ResultSet {
 	}
 		
 	public Object getResultAt(int r, int c){
-		if (!showNamespaces) {
+		Object element = table[r][c];
+		if (element instanceof String && !showNamespaces) {
 			return extractLocalName(table[r][c]);
 		}
-		return table[r][c];
+		return element;
 	}
 	
 	private void insertData(Object[][] data){
@@ -415,62 +417,61 @@ public class ResultSet {
 	public String toStringWithIndent(int indent, boolean includeHeader) {
 		StringBuilder sb = new StringBuilder();
 		if (table != null && table[0] != null) {
-//			if (table.length > 1 || !includeHeader) {
-				// there is more than 1 row of data OR header is not to be included
-				if (includeHeader && header != null && header.length > 0) {
-					for (int j = 0; j < indent; j++) {
-						sb.append(" ");
-					}
-					for (int i = 0; i < header.length; i++) {
-						if (i > 0) sb.append(",");
-						sb.append(quoteAsNeeded(header[i]));
-					}
-					sb.append(System.getProperty("line.separator"));
+			if (includeHeader && header != null && header.length > 0) {
+				for (int j = 0; j < indent; j++) {
+					sb.append(" ");
 				}
-				for (int i = 0; i < table.length; i++) {
-					for (int j = 0; j < indent; j++) {
-						sb.append(" ");
-					}
-					for (int j = 0; j < table[i].length; j++) {
-						if (j > 0) sb.append(",");
-						Object val = getResultAt(i,j);
-						if (val instanceof String) {
-							sb.append(val != null ? quoteAsNeeded(val) : val);
-						}
-						else {
-							sb.append(val != null ? val.toString() : val);
-						}
-					}
-					sb.append(System.getProperty("line.separator"));
+				for (int i = 0; i < header.length; i++) {
+					if (i > 0) sb.append(",");
+					sb.append(quoteAsNeeded(header[i]));
 				}
-//			}
-//			else {
-//				// there's just one row or header is to be included
-//				for (int j = 0; j < indent; j++) {
-//					sb.append(" ");
-//				}
-//				for (int i = 0; i < table[0].length; i++) {
-//					if (i > 0) {
-//						sb.append(", ");
-//					}
-//					if (header != null && i < header.length) {
-//						sb.append(quoteAsNeeded(header[i]));
-//						sb.append(" = ");
-//					}
-//					Object val = getResultAt(0,i);
-//					if (val instanceof String) {
-//						sb.append(val != null ? quoteAsNeeded(val) : val);
-//					}
-//					else {
-//						sb.append(val != null ? val.toString() : val);
-//					}
-//				}
-//				sb.append(System.getProperty("line.separator"));
-//			}
+				sb.append(System.getProperty("line.separator"));
+			}
+			for (int i = 0; i < table.length; i++) {
+				for (int j = 0; j < indent; j++) {
+					sb.append(" ");
+				}
+				for (int j = 0; j < table[i].length; j++) {
+					if (j > 0) sb.append(",");
+					Object val = getResultAt(i,j);
+					if (val instanceof String) {
+						sb.append(val != null ? quoteAsNeeded(val) : val);
+					}
+					else if (val instanceof List<?>) {
+						sb.append(javaListToString((List<?>) val));
+					}
+					else {
+						sb.append(val != null ? val.toString() : val);
+					}
+				}
+				sb.append(System.getProperty("line.separator"));
+			}
 		}	
 		return sb.toString();
 	}
 	
+	private String javaListToString(List<?> val) {
+		StringBuilder sb = new StringBuilder("[");
+		Iterator<?> vitr = val.iterator();
+		while (vitr.hasNext()) {
+			if (sb.length() > 1) {
+				sb.append(",");
+			}
+			Object v = vitr.next();
+			if (v instanceof String) {
+				if (!showNamespaces) {
+					v = extractLocalName(v);
+				}
+				sb.append(quoteAsNeeded(v));
+			}
+			else {
+				sb.append(v != null ? v.toString() : v);
+			}
+		}
+		sb.append("]");
+		return sb.toString();
+	}
+
 	/**
 	 * Method to place strings in double quotes and to replace any object's toString containing whitespace or a double quote(s) with a quoted string
 	 * @param val

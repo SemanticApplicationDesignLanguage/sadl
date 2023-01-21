@@ -193,7 +193,7 @@ then rdf(v0,rulevars2:var1,rulevars2:Failed) and rdf(v0,rulevars2:var3,rulevars2
 				println(cmd.toString)
 			}
 			assertTrue(cmds.size == 1)
-			assertTrue(processor.compareTranslations(cmds.get(0).toString, "select u v where and(rdf(v0, propchains:partID, \"123\"), and(rdf(v0, propchains:processing, v1), and(rdf(v1, propchains:temperature, v2), and(rdf(v2, sadlimplicitmodel:unit, u), rdf(v2, sadlimplicitmodel:value, v)))))"))
+			assertTrue(processor.compareTranslations(cmds.get(0).toString, "select u v where rdf(v0, propchains:partID, \"123\") . rdf(v0, propchains:processing, v1) . rdf(v1, propchains:temperature, v2) . rdf(v2, sadlimplicitmodel:unit, u) . rdf(v2, sadlimplicitmodel:value, v)"))
 		]
 	}
 	
@@ -233,7 +233,7 @@ then rdf(v0,rulevars2:var1,rulevars2:Failed) and rdf(v0,rulevars2:var3,rulevars2
 				println(cmd.toString)
 			}
 			assertTrue(cmds.size == 1)
-			assertTrue(processor.compareTranslations(cmds.get(0).toString, "select u v where and(rdf(v0, chainqueries:partID, \"123\"), and(rdf(v0, chainqueries:p1, v1), and(rdf(v1, chainqueries:p2, v2), and(rdf(v2, chainqueries:p3, v3), and(rdf(v3, chainqueries:temperature, v4), and(rdf(v4, sadlimplicitmodel:unit, u), rdf(v4, sadlimplicitmodel:value, v)))))))"))
+			assertTrue(processor.compareTranslations(cmds.get(0).toString, "select u v where rdf(v0, chainqueries:partID, \"123\") . rdf(v0, chainqueries:p1, v1) . rdf(v1, chainqueries:p2, v2) . rdf(v2, chainqueries:p3, v3) . rdf(v3, chainqueries:temperature, v4) . rdf(v4, sadlimplicitmodel:unit, u) . rdf(v4, sadlimplicitmodel:value, v)"))
 		]
 	}
 	

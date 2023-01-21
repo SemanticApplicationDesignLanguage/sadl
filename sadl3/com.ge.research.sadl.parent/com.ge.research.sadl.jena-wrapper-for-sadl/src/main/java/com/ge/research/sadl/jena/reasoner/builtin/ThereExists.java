@@ -33,6 +33,7 @@ import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.jena.reasoner.builtin.utils.Utils;
 import com.ge.research.sadl.processing.SadlConstants;
 
 /**

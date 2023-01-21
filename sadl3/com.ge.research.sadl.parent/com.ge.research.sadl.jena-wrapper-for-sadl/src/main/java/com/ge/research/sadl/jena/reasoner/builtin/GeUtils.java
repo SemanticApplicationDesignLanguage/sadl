@@ -23,6 +23,8 @@ import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.jena.reasoner.builtin.utils.Utils;
+
 /**
  * This class provides useful utilities for building Jena builtin functions.
  * @author 200005201
