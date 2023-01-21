@@ -40,6 +40,8 @@ import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.Rule;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.UnittedQuantityBuiltinHandlingType;
 
 public interface ITranslator {
 	
@@ -341,14 +343,44 @@ public interface ITranslator {
 	public String getBuiltinClassName(String builtinName);
 	
 	/**
+	 * Method to get the default implementation of the ITypedBuiltinFunctionHelper. In the future the
+	 * expectation is that this can be overridden via preferences (or via translator properties?), once there 
+	 * are multiple implementations
+	 * @param be
+	 * @return
+	 */
+	public String getDefaultTypedBuiltinFunctionHelperClassname();
+	
+	/**
 	 * Method to validate a the argument types of a built-in and return the return types.
 	 * @param model
+	 * @param args
 	 * @param argTypes
 	 * @return
 	 * @throws UnittedQuantityHandlerException
 	 * @throws ConfigurationException 
 	 * @throws TranslationException 
 	 */
-	public Node validateArgumentTypes(BuiltinElement be, OntModel model, List<Node> argTypes) throws TranslationException;
+	public Node[] validateArgumentTypes(BuiltinElement be, OntModel model, List<Node> args, List<Node> argTypes) throws TranslationException;
+
+	/**
+	 * Method to set the instance of ITypedBuiltinFunctionHelper to be used in translation validation
+	 * @param tfbHelper
+	 */
+	public void setTypedBuiltinFunctionHelper(ITypedBuiltinFunctionHelper tfbHelper);
+	
+	/**
+	 * Method to set the instance of ITypedBuiltinFunctionHelper to be used in translation validation
+	 * @return the ITypedBuiltinFunctionHelper instance
+	 */
+	public ITypedBuiltinFunctionHelper getTypedBuiltinFunctionHelper();
+	
+	/**
+	 * Method to get the UnittedQuantity handing type from the translator for non-common built-ins, that
+	 * is built-ins that aren't part of the grammar but are supported by a particular reasoner/translator pair.
+	 * @param builtinUri
+	 * @return
+	 */
+	public UnittedQuantityBuiltinHandlingType getUnittedQuantityBuiltinHandlingTypeOfBuiltin(String builtinUri);
 
 }

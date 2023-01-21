@@ -63,5 +63,6 @@ Import-Package: com.ge.research.sadl.importer,
  com.ge.research.sadl.model,
  com.ge.research.sadl.model.gp,
  com.ge.research.sadl.reasoner,
+ com.naturalsemanticsllc.sadl.reasoner,
  jakarta.activation
 Automatic-Module-Name: com.ge.research.sadl.jena.wrapper.for.sadl

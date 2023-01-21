@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.reasoner.builtin.ITypedBaseBuiltin;
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
+import com.ge.research.sadl.jena.reasoner.builtin.utils.Utils;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
@@ -93,6 +94,8 @@ import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquationUtils;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.UnittedQuantityBuiltinHandlingType;
 
 public class JenaTranslatorPlugin implements ITranslator {
     private static final String THERE_EXISTS = "thereExists";
@@ -125,6 +128,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 	protected List<ModelError> errors = null;
 
 	private List<TripleElement> additionalWhereTriples = null;
+
+	private ITypedBuiltinFunctionHelper typedBuiltinFunctionHelper = null;
 	
 	/**
 	 * The null argument constructor
@@ -275,6 +280,54 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return (sb.length() > 0 ? sb.toString() : null);
 	}
 	
+//	class BuiltinElementLocation {
+//		private List<GraphPatternElement> patternSet;
+//		int locationWithinPattern;
+//		
+//		public BuiltinElementLocation(List<GraphPatternElement> gpes, int location) {
+//			patternSet = gpes;
+//			locationWithinPattern = location;
+//		}
+//		
+//		List<GraphPatternElement> getPatternSet() {
+//			return patternSet;
+//		}
+//		
+//		int getLocationWithinPattern() {
+//			return locationWithinPattern;
+//		}
+//	}
+	
+	public class ReplacementsWithLocation {
+		private List<GraphPatternElement> patternSet;
+		private Node[] replacementNodes;
+		private int location;
+		
+		public ReplacementsWithLocation(List<GraphPatternElement> patternSet, Node[] replacementNodes, int location) {
+			setPatternSet(patternSet);
+			setReplacementNodes(replacementNodes);
+			setLocation(location);
+		}
+		public List<GraphPatternElement> getPatternSet() {
+			return patternSet;
+		}
+		public void setPatternSet(List<GraphPatternElement> patternSet) {
+			this.patternSet = patternSet;
+		}
+		public Node[] getReplacementNodes() {
+			return replacementNodes;
+		}
+		public void setReplacementNodes(Node[] replacementNodes) {
+			this.replacementNodes = replacementNodes;
+		}
+		public int getLocation() {
+			return location;
+		}
+		public void setLocation(int location) {
+			this.location = location;
+		}
+	}
+	
 	private String graphPatternElementsToJenaRuleString(List<GraphPatternElement> elements, RulePart rulePart) throws TranslationException {
 		if (elements != null && elements.size() > 0) {
 			StringBuilder sb = new StringBuilder();
@@ -412,7 +465,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 							clearAdditionalWhereTriples();
 							sb.append(",");
 						}
-						sb.append(elementStr);
+						if (elementStr != null && elementStr.length() > 0) {
+							sb.append(elementStr);
+						}
+						else if (sb.charAt(sb.length() - 1) == ',') {
+							sb.deleteCharAt(sb.length() - 1);
+						}
 					}
 				}
 				idx++;
@@ -541,7 +599,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 
 	public String translateQuery(OntModel model, String modelName, Query query)
 			throws TranslationException, InvalidNameException, AmbiguousNameException {
-		boolean isEval = false;
 		setTheModel(model);
 		setModelName(modelName);
 		if (query == null) {
@@ -553,7 +610,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 				Object gperhs = ((Junction)gpe1).getRhs();
 				if (gperhs instanceof ProxyNode) gperhs = ((ProxyNode)gperhs).getProxyFor();
 				if (gperhs instanceof BuiltinElement && ((BuiltinElement)gperhs).getFuncName().equalsIgnoreCase("eval")) {
-					isEval = true;
 					Object gpelhs = ((Junction)gpe1).getLhs();
 					if (gpelhs instanceof ProxyNode) gpelhs = ((ProxyNode)gpelhs).getProxyFor();
 					if (gpelhs instanceof GraphPatternElement) {
@@ -1004,6 +1060,52 @@ public class JenaTranslatorPlugin implements ITranslator {
 					sb.append(nodeToString(args.get(0), TranslationTarget.RULE_BUILTIN));
 				}
 			}
+			else if (((BuiltinElement)gpe).getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME)) {
+				Object returnedValue = args != null && args.size() > 2 ? args.get(2) : null;
+				if (returnedValue instanceof VariableNode) {
+					Node valueNode = args.get(0);
+					Node unitNode = args.get(1);
+					List<GraphPatternElement> usesReturnedValue = findGpesUsingReturnedValue(getRuleInTranslation(), (Node) returnedValue);
+					if (usesReturnedValue instanceof TripleElement) {
+						BuiltinElement thereExistsBE = new BuiltinElement();
+						thereExistsBE.setFuncName("thereExists");
+						Node pred = ((TripleElement)usesReturnedValue).getPredicate();
+						Object theModel = getTheModel();
+						if (!(theModel instanceof OntModel)) {
+							throw new TranslationException("The model was not a Jena OntModel as expected.");
+						}
+						OntProperty prop = ((OntModel)theModel).getOntProperty(pred.getURI());
+						NamedNode uQClass = null;
+						if (prop != null) {
+							OntResource rng = prop.getRange();
+							if (rng != null) {
+								uQClass = new NamedNode(rng.getURI());
+							}
+						}
+						if (uQClass == null) {
+							uQClass = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+						}
+						uQClass.setNodeType(NodeType.ClassNode);
+						thereExistsBE.addArgument(uQClass);
+						NamedNode valuePred = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
+						valuePred.setNodeType(NodeType.DataTypeProperty);
+						thereExistsBE.addArgument(valuePred);
+						thereExistsBE.addArgument((Node) valueNode);
+						NamedNode unitPred = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
+						unitPred.setNodeType(NodeType.DataTypeProperty);
+						thereExistsBE.addArgument(unitPred);
+						thereExistsBE.addArgument(unitNode);
+						NamedNode plusNode = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#Plus");
+						plusNode.setNodeType(NodeType.InstanceNode);
+						thereExistsBE.addArgument(plusNode);
+						thereExistsBE.addArgument(((TripleElement)usesReturnedValue).getSubject());
+						thereExistsBE.addArgument(((TripleElement)usesReturnedValue).getPredicate());
+						int thenIdx = getRuleInTranslation().getThens().indexOf(usesReturnedValue);
+						getRuleInTranslation().getThens().set(thenIdx, thereExistsBE);	
+						return sb.toString();
+					}
+				}
+			}
 			else {
 				sb.append(setBuiltinElementNameByBuiltinType((BuiltinElement)gpe));
 				sb.append("(");
@@ -1084,19 +1186,23 @@ public class JenaTranslatorPlugin implements ITranslator {
 	 * @param returnedValue
 	 * @return
 	 */
-	private GraphPatternElement findGpeUsingReturnedValue(Rule rule, Node returnedValue) {
+	private List<GraphPatternElement> findGpesUsingReturnedValue(Rule rule, Node returnedValue) {
+		List<GraphPatternElement> results = new ArrayList<GraphPatternElement>();
 		if (rule.getGivens() != null) {
 			for (GraphPatternElement gpe : rule.getGivens()) {
 				if (gpe instanceof BuiltinElement) {
 					List<Node> args = ((BuiltinElement)gpe).getArguments();
 					if (args.contains(returnedValue) && 
 							!(args.indexOf(returnedValue) == args.size() - 1)) {
-						return gpe;
+						results.add(gpe);
 					}
 				}
 				else if (gpe instanceof TripleElement) {
 					if (((TripleElement)gpe).getSubject().equals(returnedValue)) {
-						return gpe;
+						results.add(gpe);
+					}
+					if (((TripleElement)gpe).getObject().equals(returnedValue)) {
+						results.add(gpe);
 					}
 				}
 			}
@@ -1107,12 +1213,15 @@ public class JenaTranslatorPlugin implements ITranslator {
 					List<Node> args = ((BuiltinElement)gpe).getArguments();
 					if (args.contains(returnedValue) && 
 							!(args.indexOf(returnedValue) == args.size() - 1)) {
-						return gpe;
+						results.add(gpe);
 					}
 				}
 				else if (gpe instanceof TripleElement) {
 					if (((TripleElement)gpe).getSubject().equals(returnedValue)) {
-						return gpe;
+						results.add(gpe);
+					}
+					if (((TripleElement)gpe).getObject().equals(returnedValue)) {
+						results.add(gpe);
 					}
 				}
 			}
@@ -1123,20 +1232,20 @@ public class JenaTranslatorPlugin implements ITranslator {
 					List<Node> args = ((BuiltinElement)gpe).getArguments();
 					if (args.contains(returnedValue) && 
 							!(args.indexOf(returnedValue) == args.size() - 1)) {
-						return gpe;
+						results.add(gpe);
 					}
 				}
 				else if (gpe instanceof TripleElement) {
 					if (((TripleElement)gpe).getSubject().equals(returnedValue)) {
-						return gpe;
+						results.add(gpe);
 					}
 					else if (((TripleElement)gpe).getObject().equals(returnedValue)) {
-						return gpe;
+						results.add(gpe);
 					}
 				}
 			}
 		}
-		return null;
+		return results;
 	}
 
 	private String graphPatternElementToJenaQueryString(GraphPatternElement gpe, StringBuilder sbfilter, 
@@ -1429,55 +1538,55 @@ public class JenaTranslatorPlugin implements ITranslator {
 		BuiltinType ftype = null;
 		if (builtinName == null) return ftype;
 		
-		if (builtinName.equals("quotient")) {
+		if (builtinName.equals("quotient") || builtinName.equals(BuiltinType.Divide.toString())) {
 			ftype = BuiltinType.Divide;	
 		}
-		else if (builtinName.equals("equal")) {
+		else if (builtinName.equals("equal") || builtinName.equals(BuiltinType.Equal.toString())) {
 			ftype = BuiltinType.Equal;
 		}
-		else if (builtinName.equals("greaterThan")) {
+		else if (builtinName.equals("greaterThan") || builtinName.equals(BuiltinType.GT.toString())) {
 			ftype = BuiltinType.GT;
 		}
-		else if (builtinName.equals("ge")) {
+		else if (builtinName.equals("ge") || builtinName.equals(BuiltinType.GTE.toString())) {
 			ftype = BuiltinType.GTE;
 		}
-		else if (builtinName.equals("lessThan")) {
+		else if (builtinName.equals("lessThan") || builtinName.equals(BuiltinType.LT.toString())) {
 			ftype = BuiltinType.LT;
 		}
-		else if (builtinName.equals("le")) {
+		else if (builtinName.equals("le") || builtinName.equals(BuiltinType.LTE.toString())) {
 			ftype = BuiltinType.LTE;
 		}
-		else if (builtinName.equals("difference")) {
+		else if (builtinName.equals("difference") || builtinName.equals(BuiltinType.Minus.toString())) {
 			ftype = BuiltinType.Minus;
 		}
-		else if (builtinName.equals("mod")) {
+		else if (builtinName.equals("mod") || builtinName.equals(BuiltinType.Modulus.toString())) {
 			ftype = BuiltinType.Modulus;
 		}
-		else if (builtinName.equals("product")) {
+		else if (builtinName.equals("product") || builtinName.equals(BuiltinType.Multiply.toString())) {
 			ftype = BuiltinType.Multiply;
 		}
-		else if (builtinName.equals("negative")) {
+		else if (builtinName.equals("negative") || builtinName.equals(BuiltinType.Negative.toString())) {
 			ftype = BuiltinType.Negative;
 		}
-		else if (builtinName.equals("noValue")) {
+		else if (builtinName.equals("noValue") || builtinName.equals(BuiltinType.Not.toString())) {
 			ftype = BuiltinType.Not;
 		}
-		else if (builtinName.equals("notEqual")) {
+		else if (builtinName.equals("notEqual") || builtinName.equals(BuiltinType.NotEqual.toString())) {
 			ftype = BuiltinType.NotEqual;
 		}
-		else if (builtinName.equals("notOnlyValue")) {
+		else if (builtinName.equals("notOnlyValue") || builtinName.equals(BuiltinType.NotOnly.toString())) {
 			ftype = BuiltinType.NotOnly;
 		}
-		else if (builtinName.equals("noValuesOtherThan")) {
+		else if (builtinName.equals("noValuesOtherThan") || builtinName.equals(BuiltinType.Only.toString())) {
 			ftype = BuiltinType.Only;
 		}
-		else if (builtinName.equals("sum")) {
+		else if (builtinName.equals("sum") || builtinName.equals(BuiltinType.Plus.toString())) {
 			ftype = BuiltinType.Plus;
 		}
-		else if (builtinName.equals("pow")) {
+		else if (builtinName.equals("pow") || builtinName.equals(BuiltinType.Power.toString())) {
 			ftype = BuiltinType.Power;
 		}
-		else if (builtinName.equals("assign")) {
+		else if (builtinName.equals("assign") || builtinName.equals(BuiltinType.Assign.toString())) {
 			ftype = BuiltinType.Assign;
 		}
 		return ftype;
@@ -1511,7 +1620,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 			className = bltin.getURI();
 		}
 		else {
-			int cnt = 0;
 			// is it known to the ConfigurationManager?
 			String[] categories = new String[2];
 			try {
@@ -1538,7 +1646,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 					logger.debug("ServiceLoader is OK");
 					for( Iterator<Builtin> itr = serviceLoader.iterator(); itr.hasNext() ; ){
 						bltin = itr.next();
-						cnt++;
 						if (bltin.getName().equals(builtinName)) {
 							className = bltin.getClass().getCanonicalName();
 							break;
@@ -1959,9 +2066,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 				}
 			}
 		}
-		if (firstFoundUri != null) {
-			return firstFoundUri;
-		}
 		
 		if (logger.isDebugEnabled()) {
 			logger.debug("Failed to find '" + name + "' in any model.");
@@ -2142,7 +2246,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 			String modelName, List<String> orderedImports, String saveFilename) throws TranslationException,
 			IOException, URISyntaxException {
 		if (otherStructure instanceof List<?>) {
-			OntModel eqModel = null;	// get model
 			// remove all equations in this namespace
 			boolean equationWarningGiven = false;
 			for (Object os: (List<?>)otherStructure) {
@@ -2394,7 +2497,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 					for (int i = 0; builtins != null && i < builtins.size(); i++) {
 						BuiltinInfo bi = builtins.get(i);
 						if (!builtinsAdded.containsKey(bi.getName())) {
-							boolean inList = updateBuiltinInSignatureList(bfsigs, bi);
 							String untypedFctSignature = bi.getName() + "(--)--";
 							FunctionSignature fs = new FunctionSignature(untypedFctSignature, bi.getUri());
 							sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
@@ -2530,14 +2632,14 @@ public class JenaTranslatorPlugin implements ITranslator {
 	}
 	
 	@Override
-	public Node validateArgumentTypes(BuiltinElement be, OntModel model, List<Node> argTypes) throws TranslationException {
+	public Node[] validateArgumentTypes(BuiltinElement be, OntModel model, List<Node> args, List<Node> argTypes) throws TranslationException {
 		if (be.getExternalUri() != null) {
 			String className = null;
 			className = be.getExternalUri();
 			ITypedBaseBuiltin inst;
 			try {
 				inst = ((ConfigurationManager)configurationMgr).getClassInstance(className, ITypedBaseBuiltin.class);
-				return inst.validateArgumentTypes(model, be, argTypes);
+				return inst.validateArgumentTypes(model, be, args, argTypes);
 			} catch (InstantiationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -2627,22 +2729,33 @@ public class JenaTranslatorPlugin implements ITranslator {
 								String funcIdentifier = be.getInModelReferencedEquation() != null ? be.getInModelReferencedEquation().getUri() : be.getFuncUri();
 								addError(new ModelError("Unable to find an invokable implementation of '" + funcIdentifier + "'.", ErrorType.ERROR));
 							}
-							Object arg0AsInstanceOfClazz = null;
 							List<Method> matchingStaticMethods = eseu.getMatchingMethodsOfExternalUri(clazz, methname, true);
 							Method bestMatch = eseu.getBestMatch(be, matchingStaticMethods, false);
 							if (bestMatch != null) {
 								Class<?> retTypeCls = bestMatch.getReturnType();
-								String cname = retTypeCls.getCanonicalName();
 								String retTypeUri = javaTypeToXsdType(retTypeCls);
 								NamedNode retNN = new NamedNode(retTypeUri);
 								retNN.setNodeType(NodeType.DataTypeNode);
-								return retNN;
+								Node[] retVals = new Node[1];
+								retVals[0] = retNN;
+								return retVals;
 							}
 						}
 					}
 				}
 			} catch (TranslationException e) {
 				throw e;
+			}
+		}
+		if (argTypes != null && argTypes.size() > 0) {
+			UnittedQuantityBuiltinHandlingType uqbht = ITypedBuiltinFunctionHelper.getUnittedQuantityBuiltinHandlingTypeOfCommonBuiltins(be.getFuncType());
+			if (uqbht.equals(UnittedQuantityBuiltinHandlingType.UnitsNotSupported)) {
+				uqbht = getUnittedQuantityBuiltinHandlingTypeOfBuiltin(be.getFuncUri());
+			}
+			if (uqbht.equals(UnittedQuantityBuiltinHandlingType.SameUnitsRequired)) {
+				Node[] retVals = new Node[1];
+				retVals[0] = argTypes.get(0);
+				return retVals;
 			}
 		}
 		return null;
@@ -2674,4 +2787,54 @@ public class JenaTranslatorPlugin implements ITranslator {
 		throw new TranslationException("Type " + retTypeCls.getCanonicalName() + " not handled");
 	}
 
+
+	@Override
+	public String getDefaultTypedBuiltinFunctionHelperClassname() {
+		return "com.naturalsemanticsllc.sadl.reasoner.SimpleJenaTypedBuiltinFunctionHelper";
+	}
+
+
+	@Override
+	public void setTypedBuiltinFunctionHelper(ITypedBuiltinFunctionHelper tbfhelper) {
+		Utils.setTypedBuiltinFunctionHelper(tbfhelper);
+		typedBuiltinFunctionHelper = tbfhelper;
+	}
+
+
+	@Override
+	public ITypedBuiltinFunctionHelper getTypedBuiltinFunctionHelper() {
+		return typedBuiltinFunctionHelper;
+	}
+
+	public UnittedQuantityBuiltinHandlingType getUnittedQuantityBuiltinHandlingTypeOfCommonBuiltins(BuiltinType builtinType) {
+		if (builtinType.equals(BuiltinType.Equal) || 
+				builtinType.equals(BuiltinType.GT) ||
+				builtinType.equals(BuiltinType.GTE) ||
+				builtinType.equals(BuiltinType.LT) ||
+				builtinType.equals(BuiltinType.LTE) ||
+				builtinType.equals(BuiltinType.GT) ||
+				builtinType.equals(BuiltinType.NotEqual)) {
+			return UnittedQuantityBuiltinHandlingType.SameUnitsRequired;
+		}
+		if (builtinType.equals(BuiltinType.Minus) || builtinType.equals(BuiltinType.Plus)) {
+			return UnittedQuantityBuiltinHandlingType.SameUnitsRequired;
+		}
+		else if (builtinType.equals(BuiltinType.Divide) || builtinType.equals(BuiltinType.Multiply)) {
+			return UnittedQuantityBuiltinHandlingType.DifferentUnitsAllowedOrLeftOnly;
+		}
+		return UnittedQuantityBuiltinHandlingType.UnitsNotSupported;
+	}
+
+	@Override
+	public UnittedQuantityBuiltinHandlingType getUnittedQuantityBuiltinHandlingTypeOfBuiltin(String builtinUri) {
+		if (builtinUri.equals("http://sadl.org/builtinfunctions#average") ||
+				builtinUri.equals("http://sadl.org/builtinfunctions#max") ||
+				builtinUri.equals("http://sadl.org/builtinfunctions#min")) {
+			return UnittedQuantityBuiltinHandlingType.SameUnitsRequired;
+		}
+		else if (builtinUri.equals("http://sadl.org/builtinfunctions#abs")) {
+			return UnittedQuantityBuiltinHandlingType.SingleArgument;
+		}
+		return UnittedQuantityBuiltinHandlingType.UnitsNotSupported;
+	}
 }

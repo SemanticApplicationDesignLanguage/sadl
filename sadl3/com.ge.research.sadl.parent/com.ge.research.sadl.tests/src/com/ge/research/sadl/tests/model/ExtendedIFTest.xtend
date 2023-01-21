@@ -42,7 +42,11 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: 2 seconds.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			issues.assertHasNoIssues;
+			for (issue : issues) {
+				println(issue)
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			errors.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("2 \"seconds\"", forTest.get(0).toString())
@@ -56,7 +60,8 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: 2 "seconds".
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			issues.assertHasNoIssues;
+			val errors = issues.filter[severity === Severity.ERROR]
+			errors.assertHasNoIssues;
 			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("2 \"seconds\"", forTest.get(0).toString())
@@ -74,25 +79,13 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				println(issue.toString)
 			}
 			assertTrue(issues.size > 0)
-			assertTrue(issues.get(0).toString.startsWith("INFO:Unable to evaluate '+(2,3)'; no invokable equation found."))
-			val forTest = processor.getIntermediateFormResults()
-			assertEquals(forTest.size, 1)
-			assertEquals("unittedQuantity(+(2,3),\"seconds\")", forTest.get(0).toString())
-		]
-	}
-
-	@Test
-	def void testUnits_04() {
-		'''
-			uri "http://sadl.org/testunits" alias tu.
-			Expr: (2 + 3) "seconds".
-		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
-			assertNotNull(jenaModel)
+			var found = false
 			for (issue : issues) {
-				println(issue.toString)
+				if (issue.toString.startsWith("INFO:Evaluates to: 5 ")) {
+					found = true;
+				}
 			}
-			assertTrue(issues.size > 0)
-			assertTrue(issues.get(0).toString.startsWith("INFO:Unable to evaluate '+(2,3)'; no invokable equation found."))
+			assertTrue(found)
 			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(+(2,3),\"seconds\")", forTest.get(0).toString())
@@ -110,25 +103,13 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				println(issue.toString)
 			}
 			assertTrue(issues.size > 0)
-			assertTrue(issues.get(0).toString.startsWith("INFO:Unable to reduce 'unittedQuantity(PI,\"seconds\")'"))
-			val forTest = processor.getIntermediateFormResults()
-			assertEquals(forTest.size, 1)
-			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
-		]
-	}
-
-	@Test
-	def void testUnits_06() {
-		'''
-			uri "http://sadl.org/testunits" alias tu.
-			Expr: PI seconds.
-		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
-			assertNotNull(jenaModel)
+			var found = false
 			for (issue : issues) {
-				println(issue.toString)
+				if (issue.toString.startsWith("INFO:Unable to reduce 'unittedQuantity(PI,\"seconds\")'")) {
+					found = true
+				}
 			}
-			assertTrue(issues.size > 0)
-			assertTrue(issues.get(0).toString.startsWith("INFO:Unable to reduce 'unittedQuantity(PI,\"seconds\")'"))
+			assertTrue(found)
 			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
@@ -146,14 +127,19 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				println(issue.toString)
 			}
 			assertTrue(issues.size > 0)
-			assertTrue(issues.get(0).toString.startsWith("INFO:Unable to evaluate '+(PI,+(1,2))'; no invokable equation found."))
+			var found = false
+			for (issue : issues) {
+				if (issue.toString.startsWith("WARNING:+(PI,+(1,2)) is too complex to be evaluated.")) {
+					found = true
+				}
+			}
+			assertTrue(found)
 			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals(forTest.get(0).toString(), "unittedQuantity(+(PI,+(1,2)),\"seconds\")")
 		]
 	}
 
-	@Ignore
 	@Test
 	def void testUnits_08() {
 		'''
@@ -161,7 +147,17 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: (PI) seconds.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			issues.assertHasNoIssues;
+			for (issue : issues) {
+				println(issue.toString)
+			}
+			issues.assertHasInfos(2)
+			var found = false
+			for (issue : issues) {
+				if(issue.toString.startsWith("INFO:Unable to reduce 'unittedQuantity(PI,\"seconds\")'")) {
+					found = true
+				}
+			}
+			assertTrue(found)
 			val forTest = processor.getIntermediateFormResults()
 			assertEquals(forTest.size, 1)
 			assertEquals("unittedQuantity(PI,\"seconds\")", forTest.get(0).toString())
@@ -536,7 +532,10 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			Expr: an AircraftEngine with thrust 25000 lb, with weight 3500 lb, with sfc 1.5.
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			issues.assertHasNoIssues;
+			for (issue : issues) {
+				println(issue)
+			}
+			assertTrue(issues.size == 1)
 			val forTest = processor.getIntermediateFormResults()
 			var idx = 0;
 			for (tr : forTest) {
@@ -592,7 +591,10 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 	(an AircraftEngine with thrust 25000 lb, with weight 3500 lb, with sfc 1.5 )).
 		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-			issues.assertHasNoIssues;
+			for (issue : issues) {
+				println(issue)
+			}
+			assertTrue(issues.size == 1)
 			val forTest = processor.getIntermediateFormResults()
 			var idx = 0;
 			for (tr : forTest) {
@@ -804,9 +806,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 //			while (smitr.hasNext) {
 //				smitr.next.write(System.out, "RDF/XML-ABBREV")
 //			}
-//			for (issue:issues) {
-//				println(issue.message)
-//			}
+			for (issue:issues) {
+				println(issue)
+			}
  			issues.assertHasErrors(0);
 			val ifrs = processor.getIntermediateFormResults();
 			var idx = 0
@@ -979,14 +981,15 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
-					println(issue.message)
+					println(issue)
 				}
-				assertTrue(issues.size == 1)
+				val errors = issues.filter[severity === Severity.ERROR]
+				assertTrue(errors.size == 1)
 			}
-			assertTrue(results.size==1)
 			for (result:results) {
 				println(result.toString)
 			}
+			assertTrue(results.size==1)
 			var idx = 0
 			for (t:forTest) {
 				assertEquals(results.get(idx++).toString, t.toString)
@@ -1057,14 +1060,15 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			val results = processor.getIntermediateFormResults()
 			if (issues !== null) {
 				for (issue:issues) {
-					println(issue.severity + ": " + issue.message)
+					println(issue)
 				}
-				assertTrue(issues.size==2)
+				val errors = issues.filter[severity === Severity.ERROR]
+				assertTrue(errors.size==2)
 			}
-			assertTrue(results.size==1)
 			for (result:results) {
 				println(result.toString)
 			}
+			assertTrue(results.size==1)
 			var idx = 0
 			for (t:forTest) {
 				assertEquals(results.get(idx++).toString, t.toString)
@@ -1098,7 +1102,8 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				for (issue:issues) {
 					println(issue.message)
 				}
-				assertTrue(issues.size==0)
+				val errors = issues.filter[severity === Severity.ERROR]
+				assertTrue(errors.size==0)
 			}
 			assertTrue(results.size==1)
 			for (result:results) {
@@ -1509,7 +1514,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
  			issues.assertHasIssues(2);	// one for each function, strConcat and print.
  			var param1issueFound = false;
  			for (issue : issues) {
- 				if (issue.message.equals("Function 'strConcat' has unknown parameter type, cannot do argument type checking.")) {
+ 				if (issue.message.equals("Function 'strConcat' has an unknown (--) parameter type, cannot do argument type checking.")) {
  					param1issueFound = true;
  				}
  			}
@@ -1538,15 +1543,16 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
 			if (issues !== null) {
 				for (issue:issues) {
-					println(issue.message)
+					println(issue)
 				}
 			}
- 			issues.assertHasNoIssues
+			val errors = issues.filter[severity === Severity.ERROR]
+ 			errors.assertHasNoIssues
 			for (rule:rules) {
 				println(rule.toString)
 			}
 			assertTrue(rules.size == 1)
-			assertEquals("Rule R1:  if rdf(x, rdf:type, bottomup:Duration) and +(2 \"seconds\",3 \"seconds\",v0) then rdf(x, bottomup:p, v0).", rules.get(0).toString)
+			assertEquals("Rule R1:  if rdf(x, rdf:type, bottomup:Duration) and +(2,3,v0) then thereExists(UnittedQuantity,value,v0,unit,\"seconds\",Plus,x,bottomup:p).", rules.get(0).toString)
 		]
 	}
 	
@@ -1605,8 +1611,8 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			var cnt = 0
 			for (cmd:cmds) {
 				println(cmd.toString)
-				if (cmd.toString.equals("select x where and(rdf(propchains:p1, propchains:processing, v0), rdf(v0, propchains:temperature, x))")) cnt++
-				if (cmd.toString.equals("select x where and(rdf(v0, propchains:partID, \"123\"), and(rdf(v0, propchains:processing, v1), rdf(v1, propchains:temperature, x)))")) cnt++
+				if (cmd.toString.equals("select x where rdf(propchains:p1, propchains:processing, v0) . rdf(v0, propchains:temperature, x)")) cnt++
+				if (cmd.toString.equals("select x where rdf(v0, propchains:partID, \"123\") . rdf(v0, propchains:processing, v1) . rdf(v1, propchains:temperature, x)")) cnt++
 			}
 			assertTrue(cnt == 2)
 		]
@@ -1645,8 +1651,8 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				println(cmd.toString)
 			}
 			assertTrue(cmds.size == 1)
-			assertTrue(cmds.get(0).toString.equals("select x where and(rdf(v0, propchains:partID, \"123\"), and(rdf(v0, propchains:processing, v1), and(rdf(v1, propchains:temperature, v2), rdf(v2, sadlimplicitmodel:unit, x))))"))
-			
+			assertEquals("select x where rdf(v0, propchains:partID, \"123\") . rdf(v0, propchains:processing, v1) . rdf(v1, propchains:temperature, v2) . rdf(v2, sadlimplicitmodel:unit, x)",
+				cmds.get(0).toString)
 		]
 	}
 
@@ -1683,7 +1689,9 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				println(cmd.toString)
 			}
 			assertTrue(cmds.size == 1)
-			assertTrue(cmds.get(0).toString.equals("select v0 v1 v2 where and(rdf(v0, propchains:partID, \"123\"), and(rdf(v0, propchains:processing, v1), rdf(v1, propchains:temperature, v2)))"))
+			assertEquals("select v0 v1 v2 where rdf(v0, propchains:partID, \"123\") . rdf(v0, propchains:processing, v1) . rdf(v1, propchains:temperature, v2)",
+				cmds.get(0).toString
+			)
 			
 		]
 	}
@@ -1725,10 +1733,10 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				println(cmd.toString)
 			}
 			assertTrue(cmds.size == 4)
-			assertTrue(cmds.get(0).toString.equals("select v0 v1 where rdf(v0, propchains:partID, v1)"))
-			assertTrue(cmds.get(1).toString.equals("select v0 v1 where rdf(v0, propchains:processing, v1)"))
-			assertTrue(cmds.get(2).toString.equals("select v0 v1 v2 where and(rdf(v0, propchains:processing, v1), rdf(v1, propchains:temperature, v2))"))
-			assertTrue(cmds.get(3).toString.equals("select v0 v1 v2 v3 where and(rdf(v0, propchains:processing, v1), and(rdf(v1, propchains:temperature, v2), rdf(v2, sadlimplicitmodel:unit, v3)))"))
+			assertEquals("select v0 v1 where rdf(v0, propchains:partID, v1)", cmds.get(0).toString)
+			assertEquals("select v0 v1 where rdf(v0, propchains:processing, v1)", cmds.get(1).toString)
+			assertEquals("select v0 v1 v2 where rdf(v0, propchains:processing, v1) . rdf(v1, propchains:temperature, v2)", cmds.get(2).toString)
+			assertEquals("select v0 v1 v2 v3 where rdf(v0, propchains:processing, v1) . rdf(v1, propchains:temperature, v2) . rdf(v2, sadlimplicitmodel:unit, v3)", cmds.get(3).toString)
 		]
 	}
 

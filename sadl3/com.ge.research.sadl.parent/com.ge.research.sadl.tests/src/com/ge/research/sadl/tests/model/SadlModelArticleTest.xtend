@@ -38,16 +38,16 @@ class SadlModelArticleTest extends AbstractSADLModelProcessorTest {
 				the area of MyCircle is Y.
   		'''.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
 			assertNotNull(jenaModel)
-//			if (issues !== null) {
-//				for (issue : issues) {
-//					print(issue.message)
-//				}
-//			}
-//			if (rules !== null) {
-//				for (rule : rules) {
-//					print(rule.toString + "\n")
-//				}
-//			}
+			if (issues !== null) {
+				for (issue : issues) {
+					print(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					print(rule.toString + "\n")
+				}
+			}
 			assertTrue(issues.size == 0)
 			assertTrue(rules.size == 1)
 			assertTrue(

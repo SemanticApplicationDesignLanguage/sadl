@@ -30,7 +30,7 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
 
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
-import com.ge.research.sadl.jena.reasoner.builtin.Utils;
+import com.ge.research.sadl.jena.reasoner.builtin.utils.Utils;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.reasoner.TranslationException;
 
@@ -201,23 +201,7 @@ public class InsertElementInList extends TypedBaseBuiltin {
 	}
 
 	@Override
-	public boolean canProcessUnittedQuantity() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public boolean canProcessListArgument() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
-
-	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be,
-			List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
 }

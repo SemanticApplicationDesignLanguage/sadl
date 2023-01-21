@@ -1389,28 +1389,9 @@ public class JenaReasonerPlugin extends Reasoner {
 					}
 				}
 				else if (n != null && n.isResource()) {
-					StmtIterator sitr = infModel.listStatements(n.asResource(), RDF.type, uqcls);
-					if (sitr.hasNext()) {
+					if (isUnittedQuantity(n.asResource(), uqcls)) {	
 						// This is an instance of UnittedQuantity--create a SADL Literal
-						
-						StmtIterator vitr = infModel.listStatements(n.asResource(), valprop, (RDFNode)null);
-						Object val = null;
-						RDFDatatype valDt = null;
-						String units = null;
-						if (vitr.hasNext()) {
-							Literal obj = vitr.nextStatement().getObject().asLiteral();
-							val = obj.getValue();
-							valDt = obj.getDatatype();
-						}
-						StmtIterator uitr = infModel.listStatements(n.asResource(), unitprop, (RDFNode)null);
-						if (uitr.hasNext()) {
-							units = uitr.nextStatement().getObject().asLiteral().getLexicalForm();
-						}
-						LiteralType littype = null;
-						com.ge.research.sadl.model.gp.Literal litval = new com.ge.research.sadl.model.gp.Literal(val, units, littype);
-						if (!(((Resource)n).isAnon()) ) {
-							litval.setUri(((Resource)n).getURI());
-						}
+						com.ge.research.sadl.model.gp.Literal litval = unittedQuantityResourceToSadlLiteral(n.asResource(), valprop, unitprop);
 						temp.add(litval);
 					}
 					else {
@@ -1418,7 +1399,12 @@ public class JenaReasonerPlugin extends Reasoner {
 							temp.add(((Resource)n).getURI());
 						}
 						else {
-							temp.add(n.toString() + "(blank node)");
+							if (isList(n)) {
+								temp.add(listToJavaList(n));
+							}
+							else {
+								temp.add(n.toString() + "(blank node)");
+							}
 						}
 					}
 				}
@@ -1437,6 +1423,128 @@ public class JenaReasonerPlugin extends Reasoner {
 		return rs;		
 	}
 	
+	private com.ge.research.sadl.model.gp.Literal unittedQuantityResourceToSadlLiteral(Resource n,
+			Property valprop, Property unitprop) {
+		StmtIterator vitr = infModel.listStatements(n, valprop, (RDFNode)null);
+		Object val = null;
+		RDFDatatype valDt = null;
+		String units = null;
+		if (vitr.hasNext()) {
+			RDFNode obj = vitr.nextStatement().getObject();
+			if (obj.isLiteral()) {
+				Literal lobj = obj.asLiteral();
+				val = lobj.getValue();
+				valDt = lobj.getDatatype();
+			}
+			else {
+				// how could this not be a Literal?
+				StmtIterator sitr = infModel.listStatements(obj.asResource(), null, (RDFNode)null);
+				while (sitr.hasNext()) {
+					System.err.println(sitr.nextStatement().toString());
+				}
+			}
+		}
+		StmtIterator uitr = infModel.listStatements(n.asResource(), unitprop, (RDFNode)null);
+		if (uitr.hasNext()) {
+			units = uitr.nextStatement().getObject().asLiteral().getLexicalForm();
+		}
+		LiteralType littype = null;
+		com.ge.research.sadl.model.gp.Literal litval = new com.ge.research.sadl.model.gp.Literal(val, units, littype);
+		if (!(((Resource)n).isAnon()) ) {
+			litval.setUri(((Resource)n).getURI());
+		}
+		return litval;
+	}
+
+	/**
+	 * Method to determine if a Resource is a UnittedQuantity
+	 * @param n
+	 * @param uqcls
+	 * @return
+	 */
+	private boolean isUnittedQuantity(Resource n, Resource uqcls) {
+		StmtIterator sitr = infModel.listStatements(n.asResource(), RDF.type, uqcls);
+		if (sitr.hasNext()) {
+			return true;
+		}
+		return false;
+	}
+	
+
+	private List<Object> listToJavaList(RDFNode n) {
+		StmtIterator sitr = infModel.listStatements(n.asResource(), RDF.first, (RDFNode)null);
+		List<Object> lstElements = new ArrayList<Object>();
+		if (sitr.hasNext()) {
+			lstElements = rdfListToJavaList(n, lstElements);
+		}
+       	Property fprop = infModel.getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
+       	Property rprop = infModel.getProperty(SadlConstants.SADL_LIST_MODEL_REST_URI);
+		lstElements = sadlListToJavaList(n, fprop, rprop, lstElements);
+		return lstElements;
+	}
+
+	private List<Object> sadlListToJavaList(RDFNode n, Property fprop, Property rprop, List<Object> listElements) {
+		StmtIterator sitr = infModel.listStatements(n.asResource(), fprop, (RDFNode)null);
+		if (sitr.hasNext()) {
+			RDFNode obj = sitr.nextStatement().getObject();
+			if (obj.isLiteral()) {
+				listElements.add(obj.asLiteral().getValue());
+			}
+			else if (obj.isResource() && isUnittedQuantity(obj.asResource())) {
+				listElements.add(unittedQuantityToLiteral(obj.asResource()));
+			}
+			else {
+				listElements.add(obj.toString());
+			}
+			sitr.close();
+		}
+		sitr = infModel.listStatements(n.asResource(), rprop, (RDFNode)null);
+		if (sitr.hasNext()) {
+			listElements = sadlListToJavaList(sitr.nextStatement().getObject(), fprop, rprop, listElements);
+			sitr.close();
+		}
+		return listElements;
+	}
+
+	private List<Object> rdfListToJavaList(RDFNode n, List<Object> listElements) {
+		StmtIterator sitr = infModel.listStatements(n.asResource(), RDF.first, (RDFNode)null);
+		if (sitr.hasNext()) {
+			RDFNode obj = sitr.nextStatement().getObject();
+			if (obj.isLiteral()) {
+				listElements.add(obj.asLiteral().getValue());
+			}
+			else if (obj.isResource() && isUnittedQuantity(obj.asResource())) {
+				listElements.add(unittedQuantityToLiteral(obj.asResource()));
+			}
+			else {
+				listElements.add(obj.toString());
+			}
+			sitr.close();
+		}
+		sitr = infModel.listStatements(n.asResource(), RDF.rest, (RDFNode)null);
+		if (sitr.hasNext()) {
+			listElements = rdfListToJavaList(sitr.nextStatement().getObject(), listElements);
+			sitr.close();
+		}
+		return listElements;
+	}
+
+	private boolean isList(RDFNode n) {
+		if (n.isResource()) {
+			StmtIterator sitr = infModel.listStatements(n.asResource(), RDF.first, (RDFNode)null);
+			if (sitr.hasNext()) {
+				sitr.close();
+				return true;
+			}
+			Property fprop = infModel.getProperty(SadlConstants.SADL_LIST_MODEL_FIRST_URI);
+			sitr = infModel.listStatements(n.asResource(), fprop, (RDFNode)null);
+			if (sitr.hasNext()) {
+				sitr.close();
+				return true;
+			}
+		}
+		return false;
+	}
 
 	public ResultSet ask(String sub, String pred, String obj)
 			throws TripleNotFoundException {
@@ -3717,7 +3825,7 @@ public class JenaReasonerPlugin extends Reasoner {
 			}		
 		}
 		EvaluateSadlEquationUtils ese = new EvaluateSadlEquationUtils();
-		Node retval = ese.evaluateSadlEquation(bi);
+		Node retval = ese.evaluateSadlEquation(bi, theModel);
 		List<ModelError> errors = ese.getErrors();
 		if (errors != null && errors.size() > 0) {
 			for (ModelError error : errors) {

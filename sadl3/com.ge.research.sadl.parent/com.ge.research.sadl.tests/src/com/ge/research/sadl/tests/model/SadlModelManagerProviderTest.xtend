@@ -1328,6 +1328,9 @@ class SadlModelManagerProviderTest  extends AbstractSADLModelProcessorTest {
 			Rule RectPeremiter if x is a Rectangle then peremiter of x is 2*eq:sum(height of x, width of x). // without eq: prefix would use reasoner builtin and fail
 		'''.assertValidatesTo[jenaModel1, rules1, cmds1, issues1, processor1 |
 			assertNotNull(jenaModel1)
+			for (issue : issues1) {
+				println(issue)
+			}
 			assertTrue(issues1.size == 0)
 		]
 		'''

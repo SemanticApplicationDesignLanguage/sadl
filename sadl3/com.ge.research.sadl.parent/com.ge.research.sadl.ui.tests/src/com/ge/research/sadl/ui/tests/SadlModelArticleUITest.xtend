@@ -668,7 +668,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			}
 			assertEquals(2, commands.size)
 			assertEquals(commands.get(0).toString, commands.get(1).toString)
-			assertEquals(commands.get(0).toString, "select v0 v1 v2 v3 v4 v5 where and(rdf(generalcase:FC1, generalcase:pn, v0), and(rdf(v0, generalcase:pm, v1), and(rdf(v1, generalcase:pl, v2), and(rdf(v2, generalcase:p1, v3), and(rdf(v1, generalcase:qk, v4), rdf(v4, generalcase:q1, v5))))))")
+			assertEquals(commands.get(0).toString, "select v0 v1 v2 v3 v4 v5 where rdf(generalcase:FC1, generalcase:pn, v0) . rdf(v0, generalcase:pm, v1) . rdf(v1, generalcase:pl, v2) . rdf(v2, generalcase:p1, v3) . rdf(v1, generalcase:qk, v4) . rdf(v4, generalcase:q1, v5)")
 		]
 
 	}
@@ -698,7 +698,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			}
 			assertEquals(2, commands.size)
 			assertEquals(commands.get(0).toString, commands.get(1).toString)
-			assertEquals(commands.get(0).toString, "select v0 v1 v2 where and(rdf(test:part1, test:processing, v0), and(rdf(v0, test:temperature, v1), rdf(v0, test:volume, v2)))")
+			assertEquals(commands.get(0).toString, "select v0 v1 v2 where rdf(test:part1, test:processing, v0) . rdf(v0, test:temperature, v1) . rdf(v0, test:volume, v2)")
 		]
 
 	}
@@ -732,7 +732,9 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			}
 			assertEquals(2, commands.size)
 			assertEquals(commands.get(0).toString, commands.get(1).toString)
-			assertEquals(commands.get(0).toString, "select v0 v1 v2 where and(rdf(test:part1, test:processing, v0), and(rdf(v0, test:temperature, v1), rdf(v0, test:processNum, v2)))")
+			assertEquals("select v0 v1 v2 where rdf(test:part1, test:processing, v0) . rdf(v0, test:temperature, v1) . rdf(v0, test:processNum, v2)",
+				commands.get(0).toString
+			)
 		]
 
 	}
@@ -767,9 +769,9 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				println(cmd.toString)
 			}
 			assertEquals(3, commands.size)
-			assertEquals(commands.get(0).toString, "select v0 v1 v2 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), rdf(v1, test:temperature, v2)))")
-			assertEquals(commands.get(1).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3))))")
-			assertEquals(commands.get(2).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3))))")
+			assertEquals(commands.get(0).toString, "select v0 v1 v2 where rdf(v0, test:partID, \"123\") . rdf(v0, test:processing, v1) . rdf(v1, test:temperature, v2)")
+			assertEquals(commands.get(1).toString, "select v0 v1 v2 v3 where rdf(v0, test:partID, \"123\") . rdf(v0, test:processing, v1) . rdf(v1, test:temperature, v2) . rdf(v1, test:processNum, v3)")
+			assertEquals(commands.get(2).toString, "select v0 v1 v2 v3 where rdf(v0, test:partID, \"123\") . rdf(v0, test:processing, v1) . rdf(v1, test:temperature, v2) . rdf(v1, test:processNum, v3)")
 		]
 
 	}
@@ -804,7 +806,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			assertEquals(2, issues.size)
 			assertEquals("There is already an implicit variable with ordinality 1. Please use 'a second' to create another implicit variable or 'the first' to refer to the existing implicit variable.", issues.get(1).message)
 			assertEquals(1, commands.size)
-			assertEquals(commands.get(0).toString, "select v0 v2 v3 v4 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), rdf(v2, test:processNum, v4))))")
+			assertEquals(commands.get(0).toString, "select v0 v2 v3 v4 where rdf(v0, test:partID, \"123\") . rdf(v0, test:processing, v2) . rdf(v2, test:temperature, v3) . rdf(v2, test:processNum, v4)")
 		]
 
 	}
@@ -839,9 +841,9 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 				println(cmd.toString)
 			}
 			assertEquals(3, commands.size)
-			assertEquals(commands.get(0).toString, "select v0 v1 v2 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), rdf(v1, test:temperature, v2)))")
-			assertEquals(commands.get(1).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3))))")
-			assertEquals(commands.get(2).toString, "select v0 v2 v3 v1 v4 v5 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), and(rdf(v1, test:partID, \"123\"), and(rdf(v1, test:processing, v4), rdf(v4, test:processNum, v5))))))")
+			assertEquals(commands.get(0).toString, "select v0 v1 v2 where rdf(v0, test:partID, \"123\") . rdf(v0, test:processing, v1) . rdf(v1, test:temperature, v2)")
+			assertEquals(commands.get(1).toString, "select v0 v1 v2 v3 where rdf(v0, test:partID, \"123\") . rdf(v0, test:processing, v1) . rdf(v1, test:temperature, v2) . rdf(v1, test:processNum, v3)")
+			assertEquals(commands.get(2).toString, "select v0 v2 v3 v1 v4 v5 where rdf(v0, test:partID, \"123\") . rdf(v0, test:processing, v2) . rdf(v2, test:temperature, v3) . rdf(v1, test:partID, \"123\") . rdf(v1, test:processing, v4) . rdf(v4, test:processNum, v5)")
 		]
 
 	}
@@ -876,7 +878,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 			assertTrue(issues.size == 2)
 			assertEquals("The use of articles is not enabled in preferences but the content is only valid when enabled.", issues.get(1).message)
 			assertEquals(1, commands.size)
-			assertEquals(commands.get(0).toString, "select v0 v2 v3 v1 v4 v5 where and(rdf(v0, test:partID, \"123\"), and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), and(rdf(v1, test:processing, v4), rdf(v4, test:processNum, v5)))))"
+			assertEquals(commands.get(0).toString, "select v0 v2 v3 v1 v4 v5 where rdf(v0, test:partID, \"123\") . rdf(v0, test:processing, v2) . rdf(v2, test:temperature, v3) . rdf(v1, test:processing, v4) . rdf(v4, test:processNum, v5)"
 			)
 		]
 

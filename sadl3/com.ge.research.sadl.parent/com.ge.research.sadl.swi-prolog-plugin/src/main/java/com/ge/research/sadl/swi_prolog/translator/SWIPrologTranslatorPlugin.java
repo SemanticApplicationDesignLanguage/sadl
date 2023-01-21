@@ -57,6 +57,8 @@ import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.swi_prolog.fileinterface.FileInterface;
 //import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologInterface;
 import com.ge.research.sadl.swi_prolog.reasoner.SWIPrologReasonerPlugin;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.UnittedQuantityBuiltinHandlingType;
 
 public class SWIPrologTranslatorPlugin implements ITranslator {
     public static final String SWI_RUN_PROLOG_SERVICE_PL = "swi-run-prolog-service.pl";
@@ -375,7 +377,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 				GraphPatternElement gpe = patterns.get(i);
 				String test2 = graphPatternElementToPrologRuleString(gpe, RulePart.NOT_A_RULE);
 				if (i > 0) {
-					sb.append(",");
+					sb.append(", ");
 				}
 				sb.append(test2);
 			}
@@ -1975,7 +1977,31 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(BuiltinElement be, OntModel model, List<com.ge.research.sadl.model.gp.Node> argTypes) {
+	public com.ge.research.sadl.model.gp.Node[] validateArgumentTypes(BuiltinElement be, OntModel model, List<com.ge.research.sadl.model.gp.Node> args, List<com.ge.research.sadl.model.gp.Node> argTypes) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDefaultTypedBuiltinFunctionHelperClassname() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setTypedBuiltinFunctionHelper(ITypedBuiltinFunctionHelper tfbHelper) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ITypedBuiltinFunctionHelper getTypedBuiltinFunctionHelper() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public UnittedQuantityBuiltinHandlingType getUnittedQuantityBuiltinHandlingTypeOfBuiltin(String builtinUri) {
 		// TODO Auto-generated method stub
 		return null;
 	}

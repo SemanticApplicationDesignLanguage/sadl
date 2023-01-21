@@ -9,6 +9,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
+import org.eclipse.xtext.diagnostics.Severity
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -73,7 +74,7 @@ class SadlJenaOSTest extends AbstractSADLModelProcessorTest {
 			assertNotNull(jenaModel)
 			if (issues !== null) {
 				for (issue : issues) {
-					System.out.println(issue.message)
+					System.out.println(issue)
 				}
 			}
 			if (rules !== null) {
@@ -81,7 +82,8 @@ class SadlJenaOSTest extends AbstractSADLModelProcessorTest {
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 5)		// content requires articles to be enabled, variable not assigned in premises
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 5)		// content requires articles to be enabled, variable not assigned in premises
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -116,7 +118,8 @@ rdf(v3,rulevars2:var2,v7) and rdf(v4,rulevars2:var3,v8) and +(v7,v8,v9) then rdf
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 5)	// content requires articles to be enabled, variable not assigned in premises
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 5)	// content requires articles to be enabled, variable not assigned in premises
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -152,7 +155,8 @@ rdf(v3, rulevars2:var2, v7) and rdf(v4, rulevars2:var3, v8) and +(v7,v8,v9) then
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 4)	// content requires articles to be enabled, 2 var not bound in premises
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 4)	// content requires articles to be enabled, 2 var not bound in premises
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),

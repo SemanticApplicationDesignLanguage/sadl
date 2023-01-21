@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.UnittedQuantityBuiltinHandlingType;
 
 public class Abs extends TypedBaseBuiltin {
 	private static final Logger logger = LoggerFactory.getLogger(Abs.class);
@@ -103,9 +104,8 @@ public class Abs extends TypedBaseBuiltin {
 	}
 
 	@Override
-	public boolean canProcessUnittedQuantity() {
-		// TODO Auto-generated method stub
-		return false;
+	public UnittedQuantityBuiltinHandlingType getUnittedQuantityProcessingConstraint() {
+		return UnittedQuantityBuiltinHandlingType.UnitsNotSupported;
 	}
 
 	@Override
@@ -115,9 +115,13 @@ public class Abs extends TypedBaseBuiltin {
 	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be,
-			List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
-		// TODO Auto-generated method stub
+	public com.ge.research.sadl.model.gp.Node[] validateArgumentTypes(OntModel model, BuiltinElement be,
+			List<com.ge.research.sadl.model.gp.Node> args, List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
+		if (argTypes != null && argTypes.get(0) instanceof com.ge.research.sadl.model.gp.Node) {
+			com.ge.research.sadl.model.gp.Node[] retTypes = new com.ge.research.sadl.model.gp.Node[1];
+			retTypes[0] = argTypes.get(0);
+			return retTypes;
+		}
 		return null;
 	}
 

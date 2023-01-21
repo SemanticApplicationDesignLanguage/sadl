@@ -150,22 +150,7 @@ public class ListLength extends TypedBaseBuiltin {
     }
 
 	@Override
-	public boolean canProcessUnittedQuantity() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public boolean canProcessListArgument() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
-
-	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be,
-			List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

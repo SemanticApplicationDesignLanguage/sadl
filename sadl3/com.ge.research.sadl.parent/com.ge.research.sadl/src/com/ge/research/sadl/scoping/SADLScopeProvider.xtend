@@ -76,6 +76,7 @@ import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 import static extension com.ge.research.sadl.utils.SadlASTUtils.*
 import com.ge.research.sadl.sADL.SadlDifferentFrom
 import com.ge.research.sadl.sADL.SadlSameAs
+import com.ge.research.sadl.sADL.ExpressionStatement
 
 /**
  * This class contains custom scoping description.
@@ -616,6 +617,7 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 					&& !obj.inExpression
 					&& !obj.inQueryStatement
 					&& !obj.inRuleStatement
+					&& !obj.inExpressionStatement
 					&& !obj.unit;
 			}
 		}
@@ -651,6 +653,10 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 			return (eContainer as RuleStatement).thens === null;
 		}
 		return false;
+	}
+
+	protected def boolean isInExpressionStatement(SadlResource it) {
+		return EcoreUtil2.getContainerOfType(it, ExpressionStatement) !== null;
 	}
 
 	/**

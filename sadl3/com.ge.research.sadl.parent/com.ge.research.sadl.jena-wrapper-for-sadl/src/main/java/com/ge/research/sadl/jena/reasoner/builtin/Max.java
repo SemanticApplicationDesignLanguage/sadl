@@ -29,8 +29,11 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.RDF;
 
+import com.ge.research.sadl.jena.reasoner.builtin.utils.Utils;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.reasoner.TranslationException;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.UnittedQuantityBuiltinHandlingType;
 
 public class Max extends TypedBaseBuiltin {
 	
@@ -162,6 +165,9 @@ public class Max extends TypedBaseBuiltin {
 
     private Object maxOfList(Node lst, RuleContext context) {
     	java.util.List<Node> l = Util.convertList(lst, context);
+    	if (l == null || l.isEmpty()) {
+    		l = Utils.convertList(lst, context, null);
+    	}
     	Number max = null;
     	XSDDateTime maxDate = null;
     	for (int i = 0; l != null && i < l.size(); i++) {
@@ -193,21 +199,30 @@ public class Max extends TypedBaseBuiltin {
     }
 
 	@Override
-	public boolean canProcessUnittedQuantity() {
-		// TODO Auto-generated method stub
-		return false;
+	public UnittedQuantityBuiltinHandlingType getUnittedQuantityProcessingConstraint() {
+		return UnittedQuantityBuiltinHandlingType.SameUnitsRequired;
 	}
 
 	@Override
 	public boolean canProcessListArgument() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
-	public com.ge.research.sadl.model.gp.Node validateArgumentTypes(OntModel model, BuiltinElement be,
-			List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
-		// TODO Auto-generated method stub
+	public com.ge.research.sadl.model.gp.Node[] validateArgumentTypes(OntModel model, BuiltinElement be,
+			List<com.ge.research.sadl.model.gp.Node> args, List<com.ge.research.sadl.model.gp.Node> argTypes) throws TranslationException {
+		be.setCanProcessListArgument(canProcessListArgument());
+		be.setCanProcessUnittedQuantityArguments(canProcessUnittedQuantityArguments());
+		be.setUnittedQuantityProcessingCapability(getUnittedQuantityProcessingConstraint());
+		be.setCanprocessGraphPatternArguments(canProcessGraphPatternArguments());
+		if (argTypes != null && argTypes.size() == 1) {
+			com.ge.research.sadl.model.gp.Node firstArgType = argTypes.get(0);
+			if (firstArgType instanceof NamedNode && ((NamedNode)firstArgType).isList()) {
+				com.ge.research.sadl.model.gp.Node[] retTypes = new com.ge.research.sadl.model.gp.Node[1];
+				retTypes[0] = ((NamedNode)firstArgType).getLocalizedType();
+				return retTypes;
+			}
+		}
 		return null;
 	}
 

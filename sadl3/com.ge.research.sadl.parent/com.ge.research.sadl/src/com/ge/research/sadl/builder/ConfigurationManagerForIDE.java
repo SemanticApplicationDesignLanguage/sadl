@@ -81,6 +81,7 @@ import com.ge.research.sadl.sADL.SADLPackage;
 import com.ge.research.sadl.utils.ResourceManager;
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper;
 
 /**
  * this class extension supports configuration tasks unique to the IDE (development environment)
@@ -706,7 +707,11 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 	protected static ServiceLoader<IReasoner> getReasonersFromServiceLoader(Class<IReasoner> cls) {
 		return ServiceLoader.load(cls);
 	}
-
+	
+	protected static ServiceLoader<ITypedBuiltinFunctionHelper> getTypedBuiltinFunctionHelpersFromService(Class<ITypedBuiltinFunctionHelper> cls) {
+		return ServiceLoader.load(cls);
+	}
+	
 	/**
 	 * Method to get a list of all the available reasoners using a {@link ServiceLoader}
 	 * @return A list of all available reasoners
@@ -755,6 +760,31 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 			System.err.println("Error getting available translators: " + t.getMessage());
 		}
 		return translators;
+	}
+
+	/**
+	 * Method to get a list of all the available implementations of ITypedBuiltinFunctionHelper using a {@link ServiceLoader}
+	 * @return A list of all available implementations of ITypedBuiltinFunctionHelper
+	 */
+	public static List<ITypedBuiltinFunctionHelper> getAvailableTypedBuiltinFunctionHelpers() {
+		List<ITypedBuiltinFunctionHelper> tbfHelpers = new ArrayList<ITypedBuiltinFunctionHelper>();
+		try {
+			ServiceLoader<ITypedBuiltinFunctionHelper> serviceLoader = getTypedBuiltinFunctionHelpersFromService(ITypedBuiltinFunctionHelper.class);
+			if( serviceLoader != null ){
+				for( Iterator<ITypedBuiltinFunctionHelper> itr = serviceLoader.iterator(); itr.hasNext() ; ){
+					try {
+						tbfHelpers.add(itr.next());
+					}
+					catch (Throwable t) {
+						System.err.println("Error getting available UnittedQuantity handlers: " + t.getMessage());
+					}
+				}
+			}
+		}
+		catch (Throwable t) {
+			System.err.println("Error getting available UnittedQuantity handlers: " + t.getMessage());
+		}
+		return tbfHelpers;
 	}
 
 	/**

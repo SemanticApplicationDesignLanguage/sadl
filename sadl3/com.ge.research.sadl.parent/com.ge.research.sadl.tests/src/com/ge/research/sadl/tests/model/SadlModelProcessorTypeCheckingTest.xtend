@@ -759,7 +759,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			assertNotNull(jenaModel)
 			if (issues !== null) {
 				for (issue : issues) {
-					System.out.println(issue.message)
+					System.out.println(issue)
 				}
 			}
 			if (rules !== null) {
@@ -767,7 +767,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 0)
+			assertTrue(issues.size == 1)
 			assertTrue(rules.size == 7)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),

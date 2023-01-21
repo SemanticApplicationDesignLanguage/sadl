@@ -25,6 +25,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.UnittedQuantityBuiltinHandlingType;
+
 /**
  * Class to represent any function in the Intermediate Form
  * @author 200005201
@@ -46,6 +48,13 @@ public class BuiltinElement extends GraphPatternElement {
 	private List<Node> argumentTypes = null;
 	private List<Node> returnTypes = null;
 
+	// If the built-in implementation of this BuiltinElement can handle UnittedQuantity inputs, this tells how they should be 
+	// processed. Note that this should be set by information that is retrieved from the built-in implementation unless defaulting
+	// to UnitsNotSupported.
+	private UnittedQuantityBuiltinHandlingType unittedQuantityProcessingConstraint;
+	private boolean canProcessUnittedQuantityArguments = false;
+	private boolean canProcessListArgument = false;
+	private boolean canprocessGraphPatternArguments = false;
 	
 	public static enum BuiltinType {
 		Equal, NotEqual, Only, NotOnly, LT,	 				// these are boolean built-ins requiring two input arguments to be bound
@@ -632,5 +641,54 @@ public class BuiltinElement extends GraphPatternElement {
 
 	public void setExternalUri(String externalUri) {
 		this.externalUri = externalUri;
+	}
+
+	public UnittedQuantityBuiltinHandlingType getUnittedQuantityProcessingCapability() {
+		return unittedQuantityProcessingConstraint;
+	}
+
+	public void setUnittedQuantityProcessingCapability(UnittedQuantityBuiltinHandlingType unittedQuantityProcessingConstraint) {
+		this.unittedQuantityProcessingConstraint = unittedQuantityProcessingConstraint;
+	}
+
+	public boolean isCanProcessListArgument() {
+		return canProcessListArgument;
+	}
+
+	public void setCanProcessListArgument(boolean canProcessListArgument) {
+		this.canProcessListArgument = canProcessListArgument;
+	}
+
+	public boolean isCanProcessUnittedQuantityArguments() {
+		return canProcessUnittedQuantityArguments;
+	}
+
+	public void setCanProcessUnittedQuantityArguments(boolean canProcessUnittedQuantityArguments) {
+		this.canProcessUnittedQuantityArguments = canProcessUnittedQuantityArguments;
+	}
+
+	public boolean isCanprocessGraphPatternArguments() {
+		return canprocessGraphPatternArguments;
+	}
+
+	public void setCanprocessGraphPatternArguments(boolean canprocessGraphPatternArguments) {
+		this.canprocessGraphPatternArguments = canprocessGraphPatternArguments;
+	}
+	
+	/**
+	 * Method to determine if this BuiltinElement is a comparison
+	 * @param type
+	 * @return
+	 */
+	public static boolean isComparisonBuiltin(BuiltinType type) {
+		if (type.equals(BuiltinType.Equal) ||
+				type.equals(BuiltinType.GT) ||
+				type.equals(BuiltinType.GTE) ||
+				type.equals(BuiltinType.LT) ||
+				type.equals(BuiltinType.LTE) ||
+				type.equals(BuiltinType.NotEqual)) {
+			return true;
+		}
+		return false;
 	}
 }

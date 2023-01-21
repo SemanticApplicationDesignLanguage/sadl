@@ -41,6 +41,8 @@ import org.apache.jena.util.iterator.ClosableIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.jena.reasoner.builtin.utils.Utils;
+
 /**
  * Can be used in two arg form (X, P) or three arg form (X, P, V). 
  * In three arg form it succeeds if the triple  (X, P, V) is not
