@@ -21,6 +21,7 @@ import com.ge.research.sadl.preferences.SadlPreferences
 import org.eclipse.xtext.preferences.PreferenceKey
 import org.junit.Ignore
 import org.junit.Test
+import org.eclipse.xtext.diagnostics.Severity
 
 class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
@@ -511,6 +512,53 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
  			}
 		]
 
+	}
+
+	@Test
+	def void testCRule_05() {
+		val grd = newArrayList(
+"Rule R1:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:teaches, v1) and !=(v0,v1) then rdf(v0, rulevars:knows, v1).",
+"Rule R2:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:teaches, v1) and !=(v0,v1) then rdf(v0, rulevars:acquaintance, v1).",
+"Rule R3:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).",
+"Rule R3b:  if rdf(v0, rdf:type, rulevars:Person) and rdf(v1, rdf:type, rulevars:Person) and rdf(v0, rulevars:knows, v1) and !=(v0,v1) then rdf(v1, rulevars:knows, v0).")
+		
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+		
+		createFile('UseArticles.sadl', '''
+			    uri "http://sadl.org/SimplePathFindingCase.sadl" alias spfc.
+			    
+			    UnittedQuantity has impliedProperty ^value.
+			    
+			    Shape is a class described by area with values of type UnittedQuantity.
+			    
+			    Circle is a type of Shape described by radius with values of type UnittedQuantity.
+			    
+			    Rule AreaOfCircle2: then the area is PI* the radius^2.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
+			if (rules !== null) {
+	 			for (rule:rules) {
+	 				println("\"" + rule.toString + "\",")
+	 			}
+				for ( rule : rules) {
+					val rc = processor.ifTranslator.cook(rule);
+					println(rc.toString);
+				}
+			}
+			assertEquals(0, issues.filter[severity === Severity.ERROR].size)
+			assertEquals(0, issues.filter[severity === Severity.WARNING].size)
+			assertEquals(3, issues.filter[severity === Severity.INFO].size)
+//			assertTrue(rules.size == 4)
+// 			var grdidx = 0
+// 			for (rule:rules) {
+// 				assertTrue(processor.compareTranslations(rule.toString(), grd.get(grdidx++)))
+// 			}
+		]
 	}
 
 	@Test

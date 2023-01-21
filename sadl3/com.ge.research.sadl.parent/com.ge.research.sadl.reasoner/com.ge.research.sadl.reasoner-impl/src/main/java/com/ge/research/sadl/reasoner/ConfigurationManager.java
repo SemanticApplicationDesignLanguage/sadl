@@ -968,20 +968,22 @@ public class ConfigurationManager implements IConfigurationManager {
 	 * @return
 	 */
 	protected String getImplicitNamespacePrefix(String uri) {
-		if (!uri.endsWith("#")) {
-			uri += "#";
-		}
-		if (uri.equals(RDF.getURI())) {
-			return "rdf";
-		}
-		else if (uri.equals(RDFS.getURI())) {
-			return "rdfs";
-		}
-		else if (uri.equals(OWL.getURI())) {
-			return "owl";
-		}
-		else if (uri.equals(XSD.getURI())) {
-			return "xsd";
+		if (uri != null) {
+			if (!uri.endsWith("#")) {
+				uri += "#";
+			}
+			if (uri.equals(RDF.getURI())) {
+				return "rdf";
+			}
+			else if (uri.equals(RDFS.getURI())) {
+				return "rdfs";
+			}
+			else if (uri.equals(OWL.getURI())) {
+				return "owl";
+			}
+			else if (uri.equals(XSD.getURI())) {
+				return "xsd";
+			}
 		}
 		return null;
 	}

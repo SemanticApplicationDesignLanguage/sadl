@@ -33,6 +33,7 @@ public class FunctionSignature {
 				if (!this.getParameterTypes()[i].trim().equals("--")) {
 					if (!this.getParameterTypes()[i].trim().equals("...")) {
 						sb.append(" X");
+						sb.append(i+1);	// make variable name unique to built-in
 					}
 				}
 				if(i != this.getParameterTypes().length - 1){
@@ -92,7 +93,7 @@ public class FunctionSignature {
 		return uri;
 	}
 
-	private void setUri(String uri) {
+	public void setUri(String uri) {
 		this.uri = uri;
 	}
 
@@ -110,5 +111,27 @@ public class FunctionSignature {
 
 	private void setParameterTypes(String[] parameterTypes) {
 		this.parameterTypes = parameterTypes;
+	}
+	
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getName());
+		sb.append("(");
+		int cnt = 0;
+		for (String pt : getParameterTypes()) {
+			if (cnt++ > 0) {
+				sb.append(",");
+			}
+			sb.append(pt);
+		}
+		sb.append(")");
+		cnt = 0;
+		for (String rt : getReturnTypes()) {
+			if (cnt++ > 0) {
+				sb.append(",");
+			}
+			sb.append(rt);
+		}
+		return sb.toString();
 	}
 }

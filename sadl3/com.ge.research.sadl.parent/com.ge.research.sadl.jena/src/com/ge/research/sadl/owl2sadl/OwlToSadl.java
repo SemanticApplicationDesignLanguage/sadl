@@ -642,6 +642,7 @@ public class OwlToSadl {
 				"from",
 				"gDay",
 				"has",
+				"different",
 				"described",
 				"--",
 				"always",
