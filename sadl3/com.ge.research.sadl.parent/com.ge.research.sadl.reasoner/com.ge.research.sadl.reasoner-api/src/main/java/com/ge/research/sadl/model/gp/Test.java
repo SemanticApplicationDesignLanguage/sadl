@@ -40,6 +40,7 @@ import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 public class Test extends SadlCommand {
 	private Object lhs = null;
 	private Object rhs = null;
+	private List<GraphPatternElement> sharedPatterns = null;
 	private String compName = null;
 	private ComparisonType compType = null;
 	private List<VariableNode> lhsVariables = null;
@@ -201,7 +202,18 @@ public class Test extends SadlCommand {
 		if (rhs != null) {
 			sb.append(rhs.toString());
 		}
+		if (sharedPatterns != null) {
+			sb.append("  where ");
+			sb.append(sharedPatterns.toString());
+		}
 		return sb.toString();
 	}
+	
+	public List<GraphPatternElement> getSharedPatterns() {
+		return sharedPatterns;
+	}
 
+	public void setSharedPatterns(List<GraphPatternElement> sharedPatterns) {
+		this.sharedPatterns = sharedPatterns;
+	}
 }

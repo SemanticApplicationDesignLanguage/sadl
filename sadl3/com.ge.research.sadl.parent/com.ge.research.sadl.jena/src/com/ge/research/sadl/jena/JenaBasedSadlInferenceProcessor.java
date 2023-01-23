@@ -486,199 +486,152 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		Object lhs = ((Test) cmd).getLhs();
 		Object rhs = ((Test) cmd).getRhs();
 		try {
-		if (lhs == null || rhs == null) {
-			// this is just a pass (true) or fail (false) test,
-			// not a comparison
-			if (lhs instanceof Query) {
+			if (lhs == null || rhs == null) {
+				// this is just a pass (true) or fail (false) test,
+				// not a comparison
+				if (lhs instanceof Query) {
 					ResultSet rs = processAdhocQuery(getConfigMgr(getOwlFormat()).getTranslator(), (Query) lhs);
-//				addError(new ModelError("Error: this Query case is not implemented!", ErrorType.ERROR));
-			} else {
-				TripleElement triple = null;
-				if (lhs instanceof TripleElement) {
-					triple = (TripleElement) lhs;
-				} else if (rhs instanceof TripleElement) {
-					triple = (TripleElement) rhs;
+					//				addError(new ModelError("Error: this Query case is not implemented!", ErrorType.ERROR));
+				} else {
+					TripleElement triple = null;
+					if (lhs instanceof TripleElement) {
+						triple = (TripleElement) lhs;
+					} else if (rhs instanceof TripleElement) {
+						triple = (TripleElement) rhs;
+					}
+					if (triple != null) {
+						testResult = testTriple(getInitializedReasoner(), triple);
+					} else if (((Test)cmd).getSharedPatterns() != null) {
+						List<VariableNode> lhv = ((Test)cmd).getLhsVariables();
+						List<VariableNode> rhv = ((Test)cmd).getRhsVariables();
+						List<VariableNode> allVars = new ArrayList<VariableNode>();
+						if (lhv != null) {
+							allVars.addAll(lhv);
+						}
+						if (rhv != null) {
+							allVars.addAll(rhv);
+						}
+
+						Object obj = convertToComparableObject(
+								getModelFolderPath(), getInitializedReasoner(),
+								((Test)cmd).getSharedPatterns(), allVars);
+						if (obj instanceof ResultSet
+								&& ((ResultSet) obj)
+								.getColumnCount() > 0) {
+							ResultSet rs = (ResultSet)obj;
+							int rows = rs.getRowCount();
+							if (rows == 1) {
+								Object lval = null;
+								Object rval = null;
+								if (lhv != null) {
+									lval = rs.getResultAt(0, 0);
+									if (rhv != null) {
+										rval = rs.getResultAt(0, 1);
+									}
+								}
+								else if (rhv != null) {
+									rval = rs.getResultAt(0, 0);
+								}
+								if (lval == null) {
+									lval = ((Test)cmd).getLhs();
+								}
+								if (rval == null) {
+									rval = ((Test)cmd).getRhs();
+								}
+								testResult = doTestComparison(lval, rval, cmd.getCompType());
+							}
+							else {
+								for (int i = 0; i < rows; i++) {
+								}	
+							}
+						}
+
+					} else if (lhs instanceof List<?>
+					&& ((List<?>) lhs).size() == 2) {
+						testResult = testFilteredQuery(getInitializedReasoner(),
+								(List<?>) lhs);
+					} else if (rhs instanceof List<?>
+					&& ((List<?>) rhs).size() == 2) {
+						testResult = testFilteredQuery(getInitializedReasoner(),
+								(List<?>) rhs);
+					} else if (lhs instanceof List<?>
+					&& rhs == null) {
+						Object lhobj = convertToComparableObject(
+								getModelFolderPath(), getInitializedReasoner(),
+								lhs, ((Test) cmd).getLhsVariables());
+						if (lhobj instanceof ResultSet
+								&& ((ResultSet) lhobj)
+								.getColumnCount() > 0) {
+							if (isNegatedTriple(lhs)) {
+								testResult = new TestResult(false);
+							}
+							else {
+								testResult = new TestResult(true);
+							}
+						}
+					} else if (lhs instanceof Junction && rhs == null) {
+						Object lhobj = convertToComparableObject(
+								getModelFolderPath(), getInitializedReasoner(),
+								lhs, ((Test) cmd).getLhsVariables());
+						if (lhobj instanceof ResultSet
+								&& ((ResultSet) lhobj)
+								.getColumnCount() > 0) {
+							testResult = new TestResult(true);
+						}
+
+					} else {
+						testResult = new TestResult(false);
+						if (lhs == null && rhs == null) {
+							testResult.setMsg("Unable to convert '"
+									+ cmd.toString()
+									+ "' to a test.");
+						} else if (lhs == null) {
+							testResult.setMsg("'" + rhs.toString()
+							+ "' did not return a value.");
+						} else if (rhs == null) {
+							testResult.setMsg("'" + lhs.toString()
+							+ "' did not return a value.");
+						}
+					}
 				}
-				if (triple != null) {
-					testResult = testTriple(getInitializedReasoner(), triple);
-				} else if (lhs instanceof List<?>
-						&& ((List<?>) lhs).size() == 2) {
-					testResult = testFilteredQuery(getInitializedReasoner(),
-							(List<?>) lhs);
-				} else if (rhs instanceof List<?>
-						&& ((List<?>) rhs).size() == 2) {
-					testResult = testFilteredQuery(getInitializedReasoner(),
-							(List<?>) rhs);
-				} else if (lhs instanceof List<?>
-						&& rhs == null) {
-					Object lhobj = convertToComparableObject(
-							getModelFolderPath(), getInitializedReasoner(),
-							lhs, ((Test) cmd).getLhsVariables());
-					if (lhobj instanceof ResultSet
-							&& ((ResultSet) lhobj)
-									.getColumnCount() > 0) {
-						testResult = new TestResult(true);
-					}
-				} else if (lhs instanceof Junction && rhs == null) {
-					Object lhobj = convertToComparableObject(
-							getModelFolderPath(), getInitializedReasoner(),
-							lhs, ((Test) cmd).getLhsVariables());
-					if (lhobj instanceof ResultSet
-							&& ((ResultSet) lhobj)
-									.getColumnCount() > 0) {
-						testResult = new TestResult(true);
-					}
-				
+			} else {
+				Object lhobj = convertToComparableObject(
+						getModelFolderPath(), getInitializedReasoner(),
+						((Test) cmd).getLhs(),
+						((Test) cmd).getLhsVariables());
+				Object rhobj = convertToComparableObject(
+						getModelFolderPath(), getInitializedReasoner(),
+						((Test) cmd).getRhs(),
+						((Test) cmd).getRhsVariables());
+				ComparisonType type = ((Test) cmd).getCompType();
+				if (type != null
+						&& (type.equals(ComparisonType.IsNot) || type
+								.equals(ComparisonType.Neq))
+						&& ((lhobj == null && (ITranslator.isKnownNode(rhobj) || rhobj != null)) || 
+								(rhobj == null && (ITranslator.isKnownNode(lhobj) || lhobj != null)))) {
+					testResult = new TestResult(true);
+
+				} else if (lhobj != null && rhobj != null
+						&& type != null) {
+					testResult = doTestComparison(lhobj, rhobj,
+							type);
 				} else {
 					testResult = new TestResult(false);
-					if (lhs == null && rhs == null) {
-						testResult.setMsg("Unable to convert '"
-								+ cmd.toString()
-								+ "' to a test.");
-					} else if (lhs == null) {
-						testResult.setMsg("'" + rhs.toString()
-								+ "' did not return a value.");
-					} else if (rhs == null) {
-						testResult.setMsg("'" + lhs.toString()
-								+ "' did not return a value.");
+					String msg = "";
+					if (type == null) {
+						msg += "Test has no comparison operator. ";
 					}
+					if (lhobj == null) {
+						msg += "'" + lhs.toString()
+						+ "' did not return a value. ";
+					}
+					if (rhobj == null) {
+						msg += "'" + rhs.toString()
+						+ "' did not return a value. ";
+					}
+					testResult.setMsg(msg);
 				}
 			}
-		} else {
-			Object lhobj = convertToComparableObject(
-					getModelFolderPath(), getInitializedReasoner(),
-					((Test) cmd).getLhs(),
-					((Test) cmd).getLhsVariables());
-			Object rhobj = convertToComparableObject(
-					getModelFolderPath(), getInitializedReasoner(),
-					((Test) cmd).getRhs(),
-					((Test) cmd).getRhsVariables());
-			ComparisonType type = ((Test) cmd).getCompType();
-			if (type != null
-					&& (type.equals(ComparisonType.IsNot) || type
-							.equals(ComparisonType.Neq))
-					&& ((lhobj == null && (ITranslator.isKnownNode(rhobj) || rhobj != null)) || 
-							(rhobj == null && (ITranslator.isKnownNode(lhobj) || lhobj != null)))) {
-				testResult = new TestResult(true);
-
-			} else if (lhobj != null && rhobj != null
-					&& type != null) {
-				testResult = doTestComparison(lhobj, rhobj,
-						type);
-			} else {
-				testResult = new TestResult(false);
-				String msg = "";
-				if (type == null) {
-					msg += "Test has no comparison operator. ";
-				}
-				if (lhobj == null) {
-					msg += "'" + lhs.toString()
-							+ "' did not return a value. ";
-				}
-				if (rhobj == null) {
-					msg += "'" + rhs.toString()
-							+ "' did not return a value. ";
-				}
-				testResult.setMsg(msg);
-			}
-		}
-//		if (testResult == null) {
-//			String msg = "Test result is null. This should not happen. Test is: "
-//					+ cmd.toString();
-//			getMessageManager().error(
-//					msg,
-//					getMessageManager().new HyperlinkInfo(
-//							getModelActualUrl().toFileString(),
-//							cmd.getLineNo(), cmd.getOffset(),
-//							cmd.getLength(), 13, -1));
-//			if (writeInEffect != null && !writeInEffect.isDataOnly()) {
-//				writeAccumulator.append(msg);
-//			}
-//		} else if (testResult.isPassed()) {
-//			testsPassed++;
-//			String msg = "Test passed: " + cmd.toString()
-//					+ "\n";
-//			getMessageManager().info(
-//					msg,
-//					getMessageManager().new HyperlinkInfo(
-//							getModelActualUrl().toFileString(),
-//							cmd.getLineNo(), cmd.getOffset(),
-//							cmd.getLength(), 13, -1));
-//			if (writeInEffect != null && !writeInEffect.isDataOnly()) {
-//				writeAccumulator.append(msg);
-//			}
-//		} else {
-//			String msg = "Test failed: " + cmd.toString()
-//					+ "\n";
-//			if (testResult.getMsg() != null) {
-//				msg += "    " + testResult.getMsg() + "\n";
-//			}
-//			getMessageManager().error(
-//					msg,
-//					getMessageManager().new HyperlinkInfo(
-//							getModelActualUrl().toFileString(),
-//							cmd.getLineNo(), cmd.getOffset(),
-//							cmd.getLength(), 13, -1));
-//			getMessageManager().error(
-//					"    " + testResult.toString((Test) cmd)
-//							+ "\n");
-//			if (writeInEffect != null && !writeInEffect.isDataOnly()) {
-//				writeAccumulator.append(msg);
-//			}
-//		}
-//	}
-//} catch (
-//		private void addError(ModelError modelError) {
-//		
-//	}
-//TranslationException e) {
-//	getMessageManager().error(
-//			"Translation error: " + e.getLocalizedMessage()
-//					+ "\n",
-//			getMessageManager().new HyperlinkInfo(
-//					getModelActualUrl().toFileString(), cmd
-//							.getLineNo(), cmd.getOffset(), cmd
-//							.getLength()));
-//} catch (QueryParseException e) {
-//	getMessageManager().error(
-//			"Query parse error: " + e.getLocalizedMessage()
-//					+ "\n",
-//			getMessageManager().new HyperlinkInfo(
-//					getModelActualUrl().toFileString(), cmd
-//							.getLineNo(), cmd.getOffset(), cmd
-//							.getLength()));
-//} catch (QueryCancelledException e) {
-//	getMessageManager().info(e.getLocalizedMessage(),
-//	getMessageManager().new HyperlinkInfo(
-//			getModelActualUrl().toFileString(), cmd
-//					.getLineNo(), cmd.getOffset(), cmd
-//					.getLength()));
-//	cancelled++;
-//} catch (InferenceCanceledException e) {
-//	getMessageManager().info(e.getLocalizedMessage());
-//	break;
-//} catch (TripleNotFoundException e) {
-//	getMessageManager().error(
-//			"Query execution error: " + e.getLocalizedMessage()
-//					+ "\n",
-//			getMessageManager().new HyperlinkInfo(
-//					getModelActualUrl().toFileString(), cmd
-//							.getLineNo(), cmd.getOffset(), cmd
-//							.getLength()));
-//} catch (InvalidNameException e) {
-//	getMessageManager().error(
-//			"Query execution error: " + e.getLocalizedMessage()
-//					+ "\n",
-//			getMessageManager().new HyperlinkInfo(
-//					getModelActualUrl().toFileString(), cmd
-//							.getLineNo(), cmd.getOffset(), cmd
-//							.getLength()));
-//} catch (Throwable t
-//	// catch anything inside the for so that only one test is
-//	// "lost"
-//	t.printStackTrace();
-//}
-		
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
 		} catch (TranslationException e) {
@@ -701,6 +654,15 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		result.setResults(testResult);
 		result.setErrors(getInitializedReasoner().getErrors());
 		return result;
+	}
+	
+	private boolean isNegatedTriple(Object lhs) {
+		if (lhs instanceof List<?> && ((List<?>)lhs).size() == 1 && 
+				((List<?>)lhs).get(0) instanceof TripleElement &&
+				((TripleElement)((List<?>)lhs).get(0)).getModifierType().equals(TripleModifierType.Not)) {
+			return true;
+		}
+		return false;
 	}
 
 	private TestResult testTriple(IReasoner reasoner, TripleElement triple)

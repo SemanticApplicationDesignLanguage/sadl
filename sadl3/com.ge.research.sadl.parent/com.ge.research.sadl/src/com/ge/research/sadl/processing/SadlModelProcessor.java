@@ -60,11 +60,16 @@ import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.refactoring.RefactoringHelper;
+import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
+import com.ge.research.sadl.sADL.Declaration;
 import com.ge.research.sadl.sADL.Expression;
+import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.StringLiteral;
+import com.ge.research.sadl.sADL.SubjHasProp;
+import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -165,6 +170,35 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return lit;
 	}
 
+	/**
+	 * Method to determine if an EObject is the declaration of that object or just a reference. Useful in
+	 * distinguishing between an assignment (declaration) and a comparison, is or equals
+	 * @param expr
+	 * @return
+	 */
+	public static boolean isDeclaration(EObject expr) {
+		if (expr instanceof SubjHasProp) {
+			return isDeclaration(((SubjHasProp) expr).getLeft());
+		} else if (expr instanceof BinaryOperation) {
+			if (isDeclaration(((BinaryOperation) expr).getLeft())) {
+				return true;
+			}
+			if (isDeclaration(((BinaryOperation) expr).getRight())) {
+				return true;
+			}
+		} else if (expr instanceof UnaryExpression && ((UnaryExpression) expr).getExpr() instanceof Declaration) {
+			return true;
+		} else if (expr instanceof Declaration) {
+			return true;
+		}
+		else if (expr instanceof Name) {
+			if (((Name)expr).getName().equals(expr)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static boolean isSparqlQuery(String litObj) {
 		litObj = litObj.trim();
 		litObj = SadlUtils.stripQuotes(litObj);

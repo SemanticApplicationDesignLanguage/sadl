@@ -2738,31 +2738,97 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 	private int validateTest(EObject object, Test test) {
 		int numErrors = 0;
+		if (test.getCompName() != null && !getIfTranslator().isComparisonBuiltin(test.getCompName())) {
+			addError("Invalid test operation; " + test.getCompName() + " is not an operation returning true or false.", object);
+			numErrors++;
+		}
+
+		List<GraphPatternElement> gpes = new ArrayList<GraphPatternElement>();
 		Object lhs = test.getLhs();
 		if (lhs instanceof GraphPatternElement) {
 			numErrors += validateGraphPatternElement(object, (GraphPatternElement) lhs);
+			gpes.add((GraphPatternElement) lhs);
 		} else if (lhs instanceof List<?>) {
 			for (int i = 0; i < ((List<?>) lhs).size(); i++) {
 				Object lhsinst = ((List<?>) lhs).get(i);
 				if (lhsinst instanceof GraphPatternElement) {
 					numErrors += validateGraphPatternElement(object, (GraphPatternElement) lhsinst);
+					gpes.add((GraphPatternElement) lhsinst);
 				}
 			}
 		}
 		Object rhs = test.getRhs();
 		if (rhs instanceof GraphPatternElement) {
 			numErrors += validateGraphPatternElement(object, (GraphPatternElement) rhs);
+			gpes.add((GraphPatternElement) rhs);
 		} else if (rhs instanceof List<?>) {
 			for (int i = 0; i < ((List<?>) rhs).size(); i++) {
 				Object rhsinst = ((List<?>) rhs).get(i);
 				if (rhsinst instanceof GraphPatternElement) {
 					numErrors += validateGraphPatternElement(object, (GraphPatternElement) rhsinst);
+					gpes.add((GraphPatternElement) rhsinst);
 				}
+			}
+		}
+		List<GraphPatternElement> sharedGpes = test.getSharedPatterns();
+		if (sharedGpes != null) {
+			for (GraphPatternElement gpe : sharedGpes) {
+				numErrors += validateGraphPatternElement(object, gpe);
+				gpes.add((GraphPatternElement) gpe);
+			}
+		}
+		// the gpes must either have a comparison builtin that can return true or false 
+		// or a set of triples that are completely bound.
+		List<VariableNode> unboundVars = new ArrayList<VariableNode>();
+		List<VariableNode> boundVars = new ArrayList<VariableNode>();
+		for (int i = gpes.size() - 1; i >= 0; i--) {
+			GraphPatternElement gpe = gpes.get(i);
+			if (gpe instanceof BuiltinElement && getIfTranslator().isComparisonBuiltin(((BuiltinElement)gpe).getFuncName())) {
+				return numErrors;
+			}
+			else if (gpe instanceof TripleElement) {
+				if (((TripleElement)gpe).getSubject() instanceof VariableNode) {
+					VariableNode vn = (VariableNode) ((TripleElement)gpe).getSubject();
+					if (!boundVars.contains(vn) && !unboundVars.contains(vn)) {
+						unboundVars.add(vn);
+					}
+				}
+				else if (((TripleElement)gpe).getObject() instanceof VariableNode) {
+					VariableNode vn = (VariableNode) ((TripleElement)gpe).getObject();
+					if (unboundVars.contains(vn)) {
+						unboundVars.remove(vn);
+						boundVars.add(vn);
+					}
+					else {
+						if (!boundVars.contains(vn) && !unboundVars.contains(vn)) {
+							unboundVars.add(vn);
+						}
+					}
+				}
+			}
+		}
+		if (unboundVars.size() > 0) {
+			if (test.getLhsVariables() != null) {
+				unboundVars.removeAll(test.getLhsVariables());
+			}
+			if (test.getRhsVariables() != null) {
+				unboundVars.removeAll(test.getRhsVariables());
+			}
+			if (unboundVars.size() > 0) {
+				StringBuilder sb = new StringBuilder("Unbound variables found in Test: ");
+				for (int i = 0; i < unboundVars.size(); i++) {
+					if (i > 0) {
+						sb.append(", ");
+					}
+					sb.append(unboundVars.get(i).getName());
+					numErrors++;
+				}
+				addWarning(sb.toString(), object);	// for now this is a warning in case it has faulty detection. When robust can become error. awc 6/14/22
 			}
 		}
 		return numErrors;
 	}
-
+	
 	/**
 	 * This method checks a GraphPatternElement for errors and warnings and
 	 * generates the same if found.
@@ -6929,24 +6995,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 		}
 		return null;
-	}
-
-	protected boolean isDeclaration(EObject expr) {
-		if (expr instanceof SubjHasProp) {
-			return isDeclaration(((SubjHasProp) expr).getLeft());
-		} else if (expr instanceof BinaryOperation) {
-			if (isDeclaration(((BinaryOperation) expr).getLeft())) {
-				return true;
-			}
-			if (isDeclaration(((BinaryOperation) expr).getRight())) {
-				return true;
-			}
-		} else if (expr instanceof UnaryExpression && ((UnaryExpression) expr).getExpr() instanceof Declaration) {
-			return true;
-		} else if (expr instanceof Declaration) {
-			return true;
-		}
-		return false;
 	}
 
 	/**

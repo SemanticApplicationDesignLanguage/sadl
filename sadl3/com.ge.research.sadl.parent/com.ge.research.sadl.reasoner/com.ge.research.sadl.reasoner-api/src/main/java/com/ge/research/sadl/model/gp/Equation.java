@@ -124,10 +124,10 @@ public class Equation {
 		List<Node> args = getArguments();
 		List<Node> argtypes = getArgumentTypes();
 		if (args != null && argtypes != null) {
-			if (!(args.size() == argtypes.size())) {
+			if (!(args.size() == argtypes.size()) && !argtypes.contains(new UntypedEllipsisNode()) && !argtypes.contains(new UnknownNode())) {
 				System.err.println("Error: equation arguments and argument types are not the same size");
 			}
-			else {
+			else if (args != null && args.size() > 0) {
 				for (int i = 0; args != null && i < args.size(); i++) {
 					Node n = args.get(i);
 					Node nt = argtypes.get(i);
@@ -139,6 +139,10 @@ public class Equation {
 						sb.append(n != null ? n.toString() : "<error>");
 					}
 				}
+			}
+			else if (argtypes != null && argtypes.size() > 0){
+				// should only get here for an UntypedEllipsisNode or an UnknownNode
+				sb.append(argtypes.get(0).toString());
 			}
 		}
 		sb.append(")");
@@ -162,8 +166,7 @@ public class Equation {
 			}
 		}
 		return sb.toString();
-	}
-	
+	}	
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder();
 		if (getReturnTypes() != null) {
@@ -189,17 +192,25 @@ public class Equation {
 		sb.append("(");
 		List<Node> args = getArguments();
 		List<Node> argtypes = getArgumentTypes();
-		if (!(args.size() == argtypes.size())) {
-			System.err.println("Error: equation arguments and argument types are not the same size");
-		}
-		else {
-			for (int i = 0; args != null && i < args.size(); i++) {
-				Node n = args.get(i);
-				Node nt = argtypes.get(i);
-				if (i > 0) sb.append(",");
-				sb.append(nt != null ? nt.toDescriptiveString() : "<error>");
-				sb.append(" ");
-				sb.append(n != null ? n.toDescriptiveString() : "<error>");
+		if (args != null && argtypes != null) {
+			if (!(args.size() == argtypes.size()) && !argtypes.contains(new UntypedEllipsisNode()) && !argtypes.contains(new UnknownNode())) {
+				System.err.println("Error: equation arguments and argument types are not the same size");
+			}
+			else if (args != null && args.size() > 0) {
+				for (int i = 0; args != null && i < args.size(); i++) {
+					Node n = args.get(i);
+					Node nt = argtypes.get(i);
+					if (i > 0) sb.append(",");
+					sb.append(nt != null ? nt.toDescriptiveString() : "<error>");
+					if (!(n instanceof UntypedEllipsisNode) && !(n instanceof UnknownNode)) {
+						sb.append(" ");
+						sb.append(n != null ? n.toDescriptiveString() : "<error>");
+					}
+				}
+			}
+			else if (argtypes != null && argtypes.size() > 0){
+				// should only get here for an UntypedEllipsisNode or an UnknownNode
+				sb.append(argtypes.get(0).toString());
 			}
 		}
 		sb.append(")");
@@ -251,17 +262,26 @@ public class Equation {
 		sb.append("(");
 		List<Node> args = getArguments();
 		List<Node> argtypes = getArgumentTypes();
-		if ((args == null && argtypes != null) || (args != null && argtypes == null) || (args != null && argtypes != null && !(args.size() == argtypes.size()))) {
-			System.err.println("Error: equation arguments and argument types are not the same size");
-		}
-		else {
-			for (int i = 0; args != null && i < args.size(); i++) {
-				Node n = args.get(i);
-				Node nt = argtypes.get(i);
-				if (i > 0) sb.append(",");
-				sb.append(nt != null ? nt.toFullyQualifiedString() : "<error>");
-				sb.append(" ");
-				sb.append(n != null ? n.toFullyQualifiedString() : "<error>");
+		if (args != null && argtypes != null) {
+			if (!(args.size() == argtypes.size()) && !argtypes.contains(new UntypedEllipsisNode()) && !argtypes.contains(new UnknownNode())) {
+				System.err.println("Error: equation arguments and argument types are not the same size");
+			}
+			else if (args != null && args.size() > 0) {
+				for (int i = 0; args != null && i < args.size(); i++) {
+					Node n = args.get(i);
+					Node nt = argtypes.get(i);
+					if (i > 0) sb.append(",");
+					sb.append(nt != null ? nt.toFullyQualifiedString() : "<error>");
+					if (!(n instanceof UntypedEllipsisNode) && !(n instanceof UnknownNode)) {
+						// for an untyped ellipsis, n and nt will both be an UntypedEllipsisNode; don't serialize both
+						sb.append(" ");
+						sb.append(n != null ? n.toFullyQualifiedString() : "<error>");
+					}
+				}
+			}
+			else if (argtypes != null && argtypes.size() > 0){
+				// should only get here for an UntypedEllipsisNode or an UnknownNode
+				sb.append(argtypes.get(0).toString());
 			}
 		}
 		sb.append(")");
@@ -286,7 +306,7 @@ public class Equation {
 		}
 		return sb.toString();		
 	}
-
+	
 	public String getNamespace() {
 		return namespace;
 	}

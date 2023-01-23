@@ -97,6 +97,16 @@ public class ConceptName extends ConceptIdentifier {
     }
     
     /**
+     * This constructor allows the ConceptType to be set in the call.
+     * @param name
+     * @param ctype
+     */
+    public ConceptName(String name, ConceptType ctype) {
+    	this(name);
+    	setType(ctype);
+    }
+    
+    /**
      * This constructor is used when the prefix and the localname are both known.
      * 
      * @param _prefix
@@ -109,6 +119,18 @@ public class ConceptName extends ConceptIdentifier {
     	}
         setPrefix(_prefix);
         setName(_name);
+    }
+    
+    /**
+     * This constructor adds the ConceptType to the call
+     * @param _prefix
+     * @param _name
+     * @param ctype
+     * @throws InvalidNameException
+     */
+    public ConceptName(String _prefix, String _name, ConceptType ctype) throws InvalidNameException {
+    	this(_prefix, _name);
+    	setType(ctype);
     }
 
     public void setPrefix(String prefix) {

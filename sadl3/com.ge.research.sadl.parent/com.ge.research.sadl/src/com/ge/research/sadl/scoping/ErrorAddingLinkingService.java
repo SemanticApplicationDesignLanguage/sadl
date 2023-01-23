@@ -48,7 +48,7 @@ public class ErrorAddingLinkingService extends DefaultLinkingService {
 		final String crossRefString = getCrossRefNodeAsString(node);
 		if (crossRefString != null && !crossRefString.equals("")) {
 			logger.debug("before getLinkedObjects: node: '" + crossRefString + "'");
-			if (SadlASTUtils.isUnit(context)) {
+			if (SadlASTUtils.isUnit(context, ref, getScopeProvider())) {
 				return Collections.emptyList();
 			}
 			final IScope scope = getScope(context, ref);
