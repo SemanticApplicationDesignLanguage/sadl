@@ -218,9 +218,6 @@ public class BuiltinElement extends GraphPatternElement {
 			arguments = new ArrayList<Node>();
 		}
 		arguments.add(argument);
-//		if (argument instanceof VariableNode) {
-//			((VariableNode)argument).incrementReferences();
-//		}
 		if (getExpectedArgCount() > 0 && arguments.size() > getExpectedArgCount()) {
 			logger.warn("Added too many arguments to {}", this);
 		}
@@ -565,6 +562,18 @@ public class BuiltinElement extends GraphPatternElement {
 	}
 
 	/**
+	 * Method to add an argument type Node
+	 * @param argumentType
+	 * @return
+	 */
+	public void addArgumentType(Node argumentType) {
+		if (this.argumentTypes == null) {
+			this.argumentTypes = new ArrayList<Node>();
+		}
+		this.argumentTypes.add(argumentType);
+	}
+
+	/**
 	 * Method to get the return types (if known)
 	 * @return
 	 */
@@ -578,6 +587,16 @@ public class BuiltinElement extends GraphPatternElement {
 	 */
 	public void setReturnTypes(List<Node> returnTypes) {
 		this.returnTypes = returnTypes;
+	}
+	
+	/**
+	 * Method to add a return type
+	 */
+	public void addReturnType(Node rt) {
+		if (returnTypes == null) {
+			returnTypes = new ArrayList<Node>();
+		}
+		returnTypes.add(rt);
 	}
 
 	/**

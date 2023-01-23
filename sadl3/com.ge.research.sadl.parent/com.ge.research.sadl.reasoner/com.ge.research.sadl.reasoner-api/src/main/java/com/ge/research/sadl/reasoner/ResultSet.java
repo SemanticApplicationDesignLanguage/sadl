@@ -479,9 +479,15 @@ public class ResultSet {
 	private Object quoteAsNeeded(Object val) {
 		if (val instanceof String) {
 			StringBuilder sb = new StringBuilder();
-			sb.append("\"");
-			sb.append(((String)val).replaceAll("\"", "\"\""));
-			sb.append("\"");
+			String uqVal = checkForValueAndUnit((String) val);
+			if (uqVal !=null) {
+				sb.append(uqVal);
+			}
+			else {
+				sb.append("\"");
+				sb.append(((String)val).replaceAll("\"", "\"\""));
+				sb.append("\"");
+			}
 			return sb.toString();
 		}
 		else if (val != null &&  containsWhitespaceOrQuote(val.toString())) {
@@ -494,6 +500,61 @@ public class ResultSet {
 		else {
 			return val;
 		}
+	}
+	
+	private String checkForValueAndUnit(String val) {
+		// does it start with a valid number followed by a string? If so display as UnittedQuantity
+		int spidx = val.indexOf(" ");
+		if (spidx > 0 && spidx < val.length() - 1) {
+			String possibleNumber = val.substring(0, spidx);
+			try {
+				Double dbl = Double.parseDouble(possibleNumber);		//  failure will take control to the Exception
+				StringBuilder sb = new StringBuilder(possibleNumber);
+				String rest = val.substring(spidx + 1);
+				boolean isQuoted = isDoubleQuoted(rest, "\\");
+				if (!isQuoted) {
+					sb.append(" \"");
+					sb.append(rest.toString().replaceAll("\"", "\"\""));
+					sb.append("\"");
+				}
+				else {
+					sb.append(" ");
+					sb.append(rest);
+				}
+				return sb.toString();
+			}
+			catch (Exception e) {
+				// if there's a name, the space might not be the right one but
+				// it will be followed by a "(" and the rest will end with a ")"
+				String rest = val.substring(spidx + 1).trim();
+				if (rest.startsWith("(") && rest.endsWith(")")) {
+					rest = rest.substring(1, rest.length() - 1);
+					String tryagain = checkForValueAndUnit(rest);
+					if (tryagain != null) {
+						return possibleNumber + " (" + tryagain + ")";
+					}
+				}
+				return null;
+			}
+			
+		}
+		return null;
+	}
+
+	/**
+	 * Method to determine if a string, which may be padded with white space, is double quoted but
+	 * checks to make sure an ending quote isn't escaped.
+	 * @param s
+	 * @return
+	 */
+	public static boolean isDoubleQuoted(String s, String delim) {
+		String sp = s.trim();
+		
+		if (sp.startsWith("\"") && sp.endsWith("\"") && 
+				(!sp.endsWith(delim + "\"") || sp.endsWith(delim + delim + "\""))) {
+			return true;
+		}
+		return false;
 	}
 	
 	/**
