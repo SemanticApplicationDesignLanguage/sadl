@@ -43,7 +43,7 @@ public class RunInference extends SadlActionHandler {
 				generateInferenceJob(project, trgtFile);
 			}
 			else {
-				console.error("No currently selected file; can't test model.\n");
+				console.error("Valid file not identified; can't test model.\n");
 			}
 		}
 		catch (Exception e) {

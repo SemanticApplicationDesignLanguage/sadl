@@ -41,6 +41,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1880,39 +1881,43 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		else if (expression.isComma() && expression.getRight() == null) {
 			getModelProcessor().addTypeCheckingError(SadlErrorMessages.TYPE_COMPARISON.toString(), expression);
 			return null;
-		}
-		else if (!getModelProcessor().isDeclaration(expression) && expression.eContainer() instanceof BinaryOperation || 
-				expression.eContainer() instanceof SelectExpression ||
-				expression.eContainer() instanceof AskExpression ||
-				expression.eContainer() instanceof ConstructExpression) {
-			// we are comparing or assigning this to something else so we want the type of the root (if there is a chain) property
-			if (expression.getProp() instanceof SadlResource) {
-				SadlResource prop = expression.getProp();
-				TypeCheckInfo propTci = getType(prop);
-				if (propTci != null && propTci.getTypeCheckType() == null && isInQuery(expression) && 
-						propTci.getExpressionType() instanceof ConceptName && ((ConceptName)propTci.getExpressionType()).getType() != null && 
-						((ConceptName)propTci.getExpressionType()).getType().equals(ConceptType.VARIABLE)) {
-					throw new DontTypeCheckException();	// OK to not get a type for a property which is a variable in a query
-				}
-				return propTci;
-			}
-			else {
-				getModelProcessor().addTypeCheckingError("This subject-has-property construct isn't properly validated, please report.", expression);
-				return null;
-			}
-		}
-		else {
-			if (modelProcessor.getTarget() instanceof Rule) {
-				return getType(expression.getProp());
-			}
-			else {
-				Declaration subjHasPropInDeclaration = subjHasPropIsDeclaration((SubjHasProp) expression);  // are we in a Declaration (a real declaration--the type is a class)
-				if (subjHasPropInDeclaration != null) {
-					return getType(subjHasPropInDeclaration);
+		} else {
+			if (!(expression.eContainer() instanceof BinaryOperation) || 
+					!getModelProcessor().isAssignmentOperator(((BinaryOperation)expression.eContainer()).getOp())) {
+//			getModelProcessor();
+//			if (!SadlModelProcessor.isDeclaration(expression) && expression.eContainer() instanceof BinaryOperation || 
+//					EcoreUtil2.getContainerOfType(expression, SelectExpression.class) != null ||
+//					EcoreUtil2.getContainerOfType(expression, AskExpression.class) != null ||
+//					EcoreUtil2.getContainerOfType(expression, ConstructExpression.class) != null) {
+				// we are comparing or assigning this to something else so we want the type of the root (if there is a chain) property
+				if (expression.getProp() instanceof SadlResource) {
+					SadlResource prop = expression.getProp();
+					TypeCheckInfo propTci = getType(prop);
+					if (propTci != null && propTci.getTypeCheckType() == null && isInQuery(expression) && 
+							propTci.getExpressionType() instanceof ConceptName && ((ConceptName)propTci.getExpressionType()).getType() != null && 
+							((ConceptName)propTci.getExpressionType()).getType().equals(ConceptType.VARIABLE)) {
+						throw new DontTypeCheckException();	// OK to not get a type for a property which is a variable in a query
+					}
+					return propTci;
 				}
 				else {
-					getModelProcessor().addTypeCheckingError("This appears to be a declaration that isn't fully supported; should it be nested (in parentheses)", expression);
+					getModelProcessor().addTypeCheckingError("This subject-has-property construct isn't properly validated, please report.", expression);
 					return null;
+				}
+			}
+			else {
+				if (modelProcessor.getTarget() instanceof Rule) {
+					return getType(expression.getProp());
+				}
+				else {
+					Declaration subjHasPropInDeclaration = subjHasPropIsDeclaration((SubjHasProp) expression);  // are we in a Declaration (a real declaration--the type is a class)
+					if (subjHasPropInDeclaration != null) {
+						return getType(subjHasPropInDeclaration);
+					}
+					else {
+						getModelProcessor().addTypeCheckingError("This appears to be a declaration that isn't fully supported; should it be nested (in parentheses)?", expression);
+						return null;
+					}
 				}
 			}
 		}
@@ -4696,6 +4701,28 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return new TypeCheckInfo(declarationConceptName, tctype, this, reference);
 	}
 	
+	/**
+	 * This method provides special handling for SubjHasProp definitions of variables
+	 * @param defn
+	 * @return
+	 * @throws InvalidNameException
+	 * @throws TranslationException
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 * @throws ConfigurationException
+	 * @throws DontTypeCheckException
+	 * @throws CircularDefinitionException
+	 * @throws InvalidTypeException
+	 * @throws CircularDependencyException
+	 * @throws PropertyWithoutRangeException
+	 */
+	public TypeCheckInfo getVariableTypeFromDefinition(Expression defn) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
+		if (defn instanceof SubjHasProp) {
+			return getType(((SubjHasProp)defn).getLeft());
+		}
+		return getType(defn);
+	}
+
 	private TypeCheckInfo getTypeFromWhereExpression(SadlResource sr, String uri, Expression expr) throws InvalidNameException, TranslationException, URISyntaxException, IOException, ConfigurationException, DontTypeCheckException, CircularDefinitionException, InvalidTypeException, CircularDependencyException, PropertyWithoutRangeException {
 		if (expr instanceof SubjHasProp) {
 			Expression sexpr = findDefiningExpression(uri, ((SubjHasProp)expr).getLeft());

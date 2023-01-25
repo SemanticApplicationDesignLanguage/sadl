@@ -58,8 +58,7 @@ public class ProxyNode extends Node {
 		}
 		else if (gpe instanceof BuiltinElement) {
 			BuiltinElement oldBE = (BuiltinElement)gpe;
-			BuiltinElement newBE = new BuiltinElement();
-			newBE.setFuncName(oldBE.getFuncName());
+			BuiltinElement newBE = new BuiltinElement(oldBE.getFuncName(), oldBE.getContext());
 			newBE.setFuncUri(oldBE.getFuncUri());
 			newBE.setFuncPrefix(oldBE.getFuncPrefix());
 			newBE.setArgumentTypes(oldBE.getArgumentTypes());

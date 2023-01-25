@@ -474,8 +474,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 	
 	private GraphPatternElement createBinaryBuiltin(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
-		BuiltinElement builtin = new BuiltinElement();
-		builtin.setFuncName(name);
+		BuiltinElement builtin = new BuiltinElement(name, expr);
 		if (lobj != null) {
 			builtin.addArgument(SadlModelProcessor.nodeCheck(lobj));
 		}
@@ -537,8 +536,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				return sobj;
 			}
 		}
-		BuiltinElement builtin = new BuiltinElement();
-		builtin.setFuncName(name);
+		BuiltinElement builtin = new BuiltinElement(name, sexpr);
 		if (isModifiedTriple(builtin.getFuncType())) {
 			if (sobj instanceof TripleElement) {
 				((TripleElement)sobj).setType(getModelProcessor().getTripleModifierType(builtin.getFuncType()));
@@ -1399,8 +1397,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 				}
 				else {
-					workingGpe = new BuiltinElement();
-					workingGpe.setFuncName(((BuiltinElement) gpe).getFuncName());
+					workingGpe = new BuiltinElement(((BuiltinElement) gpe).getFuncName(), ((BuiltinElement)gpe).getContext());
 					workingGpe.setFuncType(((BuiltinElement) gpe).getFuncType());
 					for (int i = 0; i < ((BuiltinElement) gpe).getArguments().size(); i++) {
 						workingGpe.addArgument(originalArgs.get(i));
@@ -1906,8 +1903,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			// at least handle the interesting special case where they  are literals
 			
 			if (lhs instanceof Literal) {
-				BuiltinElement lhsbe = new BuiltinElement();
-				lhsbe.setFuncName("==");
+				BuiltinElement lhsbe = new BuiltinElement("==", ((Junction)pattern).getContext());
 				lhsbe.setCreatedFromInterval(true);
 				lhsbe.addArgument(SadlModelProcessor.nodeCheck(lhs));
 				((Junction)pattern).setLhs(SadlModelProcessor.nodeCheck(lhsbe));
@@ -1927,8 +1923,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			
 			if (rhs instanceof Literal) {
-				BuiltinElement rhsbe = new BuiltinElement();
-				rhsbe.setFuncName("==");
+				BuiltinElement rhsbe = new BuiltinElement("==", ((Junction)pattern).getContext());
 				rhsbe.setCreatedFromInterval(true);
 				rhsbe.addArgument(SadlModelProcessor.nodeCheck(rhs));
 				retval = SadlModelProcessor.nodeCheck(rhsbe);
@@ -2689,7 +2684,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 									((TripleElement)realArg).setType(TripleModifierType.Not);
 									return realArg;	// "not" is a unary operator, so it is safe to assume this is the only argument
 								}
-								else if (be.getFuncName().equals(JenaBasedSadlModelProcessor.THERE_EXISTS) && ((TripleElement)realArg).getSubject() instanceof VariableNode){
+								else if (be.getFuncName().equals(SadlModelProcessor.THERE_EXISTS) && ((TripleElement)realArg).getSubject() instanceof VariableNode){
 									be.getArguments().set(0, ((TripleElement)realArg).getSubject());
 									patterns.add(patterns.size() - 1, be);
 									return null;
@@ -2716,7 +2711,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 		}
-		if (be.getFuncName().equals(JenaBasedSadlModelProcessor.THERE_EXISTS)) {
+		if (be.getFuncName().equals(SadlModelProcessor.THERE_EXISTS)) {
 			if (patterns.size() == 0) {
 				patterns.add(be);
 			}
@@ -2887,73 +2882,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		return false;
 	}
-
-	//Removed implied properties from graph pattern element
-	/*private Object applyExpandedAndImpliedProperties(List<GraphPatternElement> patterns, BuiltinElement be,
-			Object realArgForThen, List<GraphPatternElement> moveToIfts, Object finalIfsVar)
-			throws TranslationException, InvalidNameException, InvalidTypeException {
-		if (be.getExpandedPropertiesToBeUsed() != null) {
-			// create a new VariableNode of the same type as finalIfsVar
-			VariableNode thereExistsVar = getVariableNode(be);
-			thereExistsVar.setType(((VariableNode)finalIfsVar).getType());
-			((TripleElement)realArgForThen).setObject(thereExistsVar);
-			BuiltinElement thereExistsBe = new BuiltinElement();
-			thereExistsBe.setFuncName(JenaBasedSadlModelProcessor.THERE_EXISTS);
-			thereExistsBe.addArgument(thereExistsVar);
-			patterns.add(patterns.size() - 1, thereExistsBe);
-			for (NamedNode ep: be.getExpandedPropertiesToBeUsed()) {
-				VariableNode newVar = null;
-				boolean createTriple = false;
-				if (finalIfsVar instanceof Node) {
-					newVar = findVariableInTargetForReuse((Node)finalIfsVar, ep, null);	
-					if (newVar == null) {
-						createTriple = true;
-						newVar = getVariableNode(be);
-					}
-				}
-				TripleElement epTriple = new TripleElement(SadlModelProcessor.nodeCheck(thereExistsVar), ep, newVar);
-				patterns.add(epTriple);
-				if (createTriple) {
-					TripleElement epTriple2 = new TripleElement(SadlModelProcessor.nodeCheck(finalIfsVar), ep, newVar);
-					moveToIfts.add(epTriple2);
-				}
-			}
-		}
-		else if (be.getLeftImpliedPropertyUsed() != null) {
-			VariableNode newVar = null;
-			boolean createTriple = false;
-			if (finalIfsVar instanceof Node) {
-				newVar = findVariableInTargetForReuse((Node) finalIfsVar, be.getLeftImpliedPropertyUsed(), null);
-				if (newVar == null) {
-					createTriple = true;
-					newVar = getVariableNode((Node) finalIfsVar, be.getLeftImpliedPropertyUsed(), null, false);
-				}
-			}
-			if (createTriple) {
-				TripleElement epTriple = new TripleElement(SadlModelProcessor.nodeCheck(finalIfsVar), SadlModelProcessor.nodeCheck(be.getLeftImpliedPropertyUsed()), newVar);
-				patterns.add(epTriple);
-			}
-			return newVar;
-		}
-		else if (be.getRightImpliedPropertyUsed() != null) {
-			VariableNode newVar = null;
-			boolean createTriple = false;
-			if (finalIfsVar instanceof Node) {
-				newVar = findVariableInTargetForReuse((Node)finalIfsVar, be.getRightImpliedPropertyUsed(), null);
-				if (newVar == null) {
-					createTriple = true;
-					newVar =getVariableNode((Node) finalIfsVar, be.getRightImpliedPropertyUsed(), null, false);
-				}
-			}
-			if (createTriple) {
-				TripleElement epTriple = new TripleElement(SadlModelProcessor.nodeCheck(finalIfsVar), SadlModelProcessor.nodeCheck(be.getRightImpliedPropertyUsed()), newVar);
-				moveToIfts.add(epTriple);
-			}
-			return newVar;
-		}
-		return null;
-	}
-	*/
 	
 	private void removeArgsFromPatterns(List<GraphPatternElement> patterns, BuiltinElement be) {
 		if (patterns != null && patterns.size() > 0) {
@@ -3634,8 +3562,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			VariableNode otherVar = cruleVariablesTypeOutput.get(i);
 			if (otherVar.getType().equals(node.getType())) {
 				if (!notEqualAlreadyPresent(gpes, otherVar, node)) {
-					BuiltinElement newBi = new BuiltinElement();
-					newBi.setFuncName("!=");
+					BuiltinElement newBi = new BuiltinElement("!=", otherVar.getContext());
 					newBi.setFuncType(BuiltinType.NotEqual);
 					newBi.addArgument(otherVar);
 					newBi.addArgument(node);

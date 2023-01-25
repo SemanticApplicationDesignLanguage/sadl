@@ -158,6 +158,16 @@ public class BuiltinElement extends GraphPatternElement {
 	 */
 	public BuiltinElement() {
 	}
+	
+	/**
+	 * Constructor that has essential content as arguments.
+	 * @param funcName
+	 * @param context
+	 */
+	public BuiltinElement(String funcName, Object context) {
+		setFuncName(funcName);
+		setContext(context);
+	}
 
 	/**
 	 * Get the BuiltinElement's function name
