@@ -18,7 +18,6 @@
 package com.ge.research.sadl.tests
 
 import com.ge.research.sadl.jena.JenaBasedSadlModelValidator
-import com.ge.research.sadl.jena.JenaBasedSadlModelValidator.TypeCheckInfo
 import com.ge.research.sadl.model.ConceptIdentifier
 import com.ge.research.sadl.sADL.SADLFactory
 import org.eclipse.xtext.testing.InjectWith
@@ -29,6 +28,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import com.ge.research.sadl.model.gp.NamedNode
+import com.ge.research.sadl.jena.TypeCheckInfo
 
 /**
  * Test to make sure that type check info has a corresponding #hashCode implementation 

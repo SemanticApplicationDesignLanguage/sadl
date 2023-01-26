@@ -21,6 +21,7 @@ package com.ge.research.sadl.jena.translator;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ge.research.sadl.jena.reasoner.builtin.ITypedBaseBuiltin;
 import com.ge.research.sadl.jena.reasoner.builtin.TypedBaseBuiltin;
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
@@ -65,6 +67,7 @@ import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
 import com.ge.research.sadl.reasoner.ConfigurationItem.ConfigurationType;
+import com.ge.research.sadl.reasoner.ConfigurationManager;
 import com.ge.research.sadl.reasoner.ConfigurationOption;
 import com.ge.research.sadl.reasoner.FunctionNotSupportedException;
 import com.ge.research.sadl.reasoner.IConfigurationManager;
@@ -75,6 +78,7 @@ import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquationUtils;
 
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
@@ -86,6 +90,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.reasoner.rulesys.Builtin;
 import org.apache.jena.reasoner.rulesys.BuiltinRegistry;
+import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -1233,6 +1238,31 @@ public class JenaTranslatorPlugin implements ITranslator {
 		}
 	}
 
+	@Override
+	public String setBuiltinElementNameByBuiltinType(BuiltinElement bin) throws TranslationException {
+		String builtinName = builtinTypeToString(bin);
+
+		bin.setFuncName(builtinName);
+		
+		// Note: the order here allows any built-in which overrides the ones in Jena to be picked up preferentially
+		//	see if it is known to the ConfigurationManager or if we can find it in the services registry
+		boolean status = findOrAddBuiltin(builtinName);
+		if (!status) {
+			// if not see if it is one already registered
+			Builtin bltin = BuiltinRegistry.theRegistry.getImplementation(builtinName);
+			if (bltin == null) {
+				logger.error("Something went wrong finding/loading Builtin '" + builtinName + "'");
+				addError("Unable to resolve built-in '" + builtinName + "' in rule '" + getRuleInTranslation().getRuleName() + "'");
+			}
+			else {
+				String uri = bltin.getURI();
+				bin.setFuncUri(uri);
+			}
+		}
+		return builtinName;
+	}
+	
+	@Override
 	public String builtinTypeToString(BuiltinElement bin) throws TranslationException {
 		BuiltinType ftype = bin.getFuncType();
 		if (ftype.equals(BuiltinType.Divide)) {
@@ -1353,6 +1383,64 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return false;
 	}
 
+	@Override
+	public BuiltinType reasonerBuiltinNameToBuiltinType(String builtinName) {
+		BuiltinType ftype = null;
+		if (builtinName == null) return ftype;
+		
+		if (builtinName.equals("quotient")) {
+			ftype = BuiltinType.Divide;	
+		}
+		else if (builtinName.equals("equal")) {
+			ftype = BuiltinType.Equal;
+		}
+		else if (builtinName.equals("greaterThan")) {
+			ftype = BuiltinType.GT;
+		}
+		else if (builtinName.equals("ge")) {
+			ftype = BuiltinType.GTE;
+		}
+		else if (builtinName.equals("lessThan")) {
+			ftype = BuiltinType.LT;
+		}
+		else if (builtinName.equals("le")) {
+			ftype = BuiltinType.LTE;
+		}
+		else if (builtinName.equals("difference")) {
+			ftype = BuiltinType.Minus;
+		}
+		else if (builtinName.equals("mod")) {
+			ftype = BuiltinType.Modulus;
+		}
+		else if (builtinName.equals("product")) {
+			ftype = BuiltinType.Multiply;
+		}
+		else if (builtinName.equals("negative")) {
+			ftype = BuiltinType.Negative;
+		}
+		else if (builtinName.equals("noValue")) {
+			ftype = BuiltinType.Not;
+		}
+		else if (builtinName.equals("notEqual")) {
+			ftype = BuiltinType.NotEqual;
+		}
+		else if (builtinName.equals("notOnlyValue")) {
+			ftype = BuiltinType.NotOnly;
+		}
+		else if (builtinName.equals("noValuesOtherThan")) {
+			ftype = BuiltinType.Only;
+		}
+		else if (builtinName.equals("sum")) {
+			ftype = BuiltinType.Plus;
+		}
+		else if (builtinName.equals("pow")) {
+			ftype = BuiltinType.Power;
+		}
+		else if (builtinName.equals("assign")) {
+			ftype = BuiltinType.Assign;
+		}
+		return ftype;
+	}
 
 	/**
 	 * Method to determine if an RDFNode is a subclass of the SADL typed list
@@ -2443,4 +2531,145 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return supportedDataTypes;
 	}
 	
+	@Override
+	public Node validateArgumentTypes(BuiltinElement be, OntModel model, List<Node> argTypes) throws TranslationException {
+		if (be.getExternalUri() != null) {
+			String className = null;
+			className = be.getExternalUri();
+			ITypedBaseBuiltin inst;
+			try {
+				inst = ((ConfigurationManager)configurationMgr).getClassInstance(className, ITypedBaseBuiltin.class);
+				return inst.validateArgumentTypes(model, be, argTypes);
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ClassCastException e) {
+				BaseBuiltin bbinst;
+				try {
+					bbinst  = ((ConfigurationManager)configurationMgr).getClassInstance(className, BaseBuiltin.class);
+					int numArgs = bbinst.getArgLength();
+					if (numArgs > 0) {
+						// This is a bit tricky. For a built-in that returns a value (other than boolean),
+						// the ArgTypes will not include the variable included in the be.expectedArgCount or
+						// the numArgs. but how to tell if the built-in will have an argument variable added?
+						if (argTypes != null && numArgs == argTypes.size()) {
+							// looks good: get return type from OntModel
+							
+						}
+						else if (numArgs == 0) {
+							// number is flexible: get return type from OntModel
+							
+						}
+						else {
+//							throw new TranslationException("Expected " + numArgs + " arguments but appears that " + 
+//									argTypes.size() + " arguments are provided in the model");
+						}
+					}
+					else if (numArgs == 0) {
+						// this can take a variable number of arguments
+						
+					}
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+//				} catch (TranslationException e1) {
+//					throw e1;
+				}
+				
+			} catch (ClassNotFoundException e) {
+				BaseBuiltin bbinst;
+				try {
+					bbinst  = ((ConfigurationManager)configurationMgr).getClassInstance(className, BaseBuiltin.class);
+					int numArgs = bbinst.getArgLength();
+					if (numArgs > 0) {
+						// This is a bit tricky. For a built-in that returns a value (other than boolean),
+						// the ArgTypes will not include the variable included in the be.expectedArgCount or
+						// the numArgs. but how to tell if the built-in will have an argument variable added?
+						if (argTypes != null && numArgs == argTypes.size()) {
+							// looks good: get return type from OntModel
+							
+						}
+						else if (numArgs == 0) {
+							// number is flexible: get return type from OntModel
+							
+						}
+						else {
+//							throw new TranslationException("Expected " + numArgs + " arguments but appears that " + 
+//									argTypes.size() + " arguments are provided in the model");
+						}
+					}
+					else {
+						
+					}
+				} catch (InstantiationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ClassNotFoundException e1) {
+					// maybe this is a Java class wrapped in a SADL External equation
+					if (className !=  null) {
+						EvaluateSadlEquationUtils eseu = new EvaluateSadlEquationUtils();
+						int lastDot = className.lastIndexOf('.');
+						if (lastDot > 0) {
+							String classname = className.substring(0, lastDot);
+							String methname =  className.substring(lastDot + 1);
+							Class<?> clazz = eseu.getMatchingClassOfExternalUri(classname);
+							Object arg0AsInstanceOfClazz = null;
+							List<Method> matchingStaticMethods = eseu.getMatchingMethodsOfExternalUri(clazz, methname, true);
+							Method bestMatch = eseu.getBestMatch(be, matchingStaticMethods, false);
+							if (bestMatch != null) {
+								Class<?> retTypeCls = bestMatch.getReturnType();
+								String cname = retTypeCls.getCanonicalName();
+								String retTypeUri = javaTypeToXsdType(retTypeCls);
+								NamedNode retNN = new NamedNode(retTypeUri);
+								retNN.setNodeType(NodeType.DataTypeNode);
+								return retNN;
+							}
+						}
+					}
+				}
+			} catch (TranslationException e) {
+				throw e;
+			}
+		}
+		return null;
+	}
+
+
+	private String javaTypeToXsdType(Class<?> retTypeCls) throws TranslationException {
+		if (retTypeCls.equals(String.class) || retTypeCls.getCanonicalName().equals("string")) {
+			return XSD.xstring.getURI();
+		}
+		else if (retTypeCls.equals(Integer.class) || retTypeCls.getCanonicalName().equals("int")) {
+			return XSD.xint.getURI();
+		}
+		else if (retTypeCls.equals(Long.class) || retTypeCls.getCanonicalName().equals("long")) {
+			return XSD.xlong.getURI();
+		}
+		else if (retTypeCls.equals(Float.class) || retTypeCls.getCanonicalName().equals("float")) {
+			return XSD.xfloat.getURI();
+		}
+		else if (retTypeCls.equals(Double.class) || retTypeCls.getCanonicalName().equals("double")) {
+			return XSD.xdouble.getURI();
+		}
+		else if (retTypeCls.equals(Number.class) || retTypeCls.getCanonicalName().equals("decimal")) {
+			return XSD.decimal.getURI();
+		}
+		else if (retTypeCls.equals(Boolean.class) || retTypeCls.getCanonicalName().equals("boolean")) {
+			return XSD.xboolean.getURI();
+		}
+		throw new TranslationException("Type " + retTypeCls.getCanonicalName() + " not handled");
+	}
+
 }
