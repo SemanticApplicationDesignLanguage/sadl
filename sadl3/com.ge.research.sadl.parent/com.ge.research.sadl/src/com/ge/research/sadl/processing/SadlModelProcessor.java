@@ -20,7 +20,6 @@ package com.ge.research.sadl.processing;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +33,6 @@ import org.eclipse.xtext.resource.XtextSyntaxDiagnostic;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.gp.BuiltinElement;
@@ -61,11 +59,15 @@ import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.refactoring.RefactoringHelper;
+import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
-import com.ge.research.sadl.sADL.Expression;
+import com.ge.research.sadl.sADL.Declaration;
+import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.SadlModel;
 import com.ge.research.sadl.sADL.StringLiteral;
+import com.ge.research.sadl.sADL.SubjHasProp;
+import com.ge.research.sadl.sADL.UnaryExpression;
 import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
@@ -166,6 +168,35 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return lit;
 	}
 
+	/**
+	 * Method to determine if a referenced EObject is the declaration of that object. Useful in
+	 * distinguishing between an assignment (declaration) and a comparison for is, equals
+	 * @param expr
+	 * @return
+	 */
+	public boolean isDeclaration(EObject expr) {
+		if (expr instanceof SubjHasProp) {
+			return isDeclaration(((SubjHasProp) expr).getLeft());
+		} else if (expr instanceof BinaryOperation) {
+			if (isDeclaration(((BinaryOperation) expr).getLeft())) {
+				return true;
+			}
+			if (isDeclaration(((BinaryOperation) expr).getRight())) {
+				return true;
+			}
+		} else if (expr instanceof UnaryExpression && ((UnaryExpression) expr).getExpr() instanceof Declaration) {
+			return true;
+		} else if (expr instanceof Declaration) {
+			return true;
+		}
+		else if (expr instanceof Name) {
+			if (((Name)expr).getName().equals(expr)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static boolean isSparqlQuery(String litObj) {
 		litObj = litObj.trim();
 		litObj = SadlUtils.stripQuotes(litObj);
@@ -224,6 +255,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	public GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj, EObject context) throws InvalidNameException, InvalidTypeException, TranslationException {
 		BuiltinElement builtin = new BuiltinElement();
 		builtin.setFuncName(name);
+		builtin.setContext(context);
 		if (lobj != null) {
 			builtin.addArgument(nodeCheck(lobj));
 		}
@@ -287,6 +319,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		}
 		BuiltinElement builtin = new BuiltinElement();
 		builtin.setFuncName(name);
+		builtin.setContext(sexpr);
 		if (isModifiedTriple(builtin.getFuncType())) {
 			if (sobj instanceof TripleElement) {
 				((TripleElement)sobj).setType(getTripleModifierType(builtin.getFuncType()));

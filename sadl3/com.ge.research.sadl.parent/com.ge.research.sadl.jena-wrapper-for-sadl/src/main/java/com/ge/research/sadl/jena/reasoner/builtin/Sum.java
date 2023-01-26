@@ -119,10 +119,13 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
         	try {
 				if (juqih.isUnittedQuantity(getArg(0, args, context), context) ||
 						juqih.isUnittedQuantity(getArg(1, args, context), context)) {
+						Node unit0 = juqih.getUnittedQuantityUnit(getArg(0, args, context), context);
+						Node unit1 = juqih.getUnittedQuantityUnit(getArg(1, args, context), context);
 						Number nSum = Long.valueOf(0);
 						List<Node> nodeLst = new ArrayList<Node>();
-						nodeLst.add(getArg(0, args, context));
-						nodeLst.add(getArg(1, args, context));
+						
+						nodeLst.add(unit0);
+						nodeLst.add(unit1);
 						Node sum = createUnittedQuantitySum(context, nSum, nodeLst, juqih);
 				       	return env.bind(args[length - 1], sum);
 				}
@@ -244,7 +247,7 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
     
     private Node createUnittedQuantitySum(RuleContext context, Number nSum, List<Node> nodeLst, JenaUnittedQuantityInferenceHelper juqih) {
     	try {
-    		juqih.validateUnittedQuantityArgs(context, BuiltinUnittedQuantityStatus.DifferentUnitsAllowedOrLeftOnly, nodeLst);
+    		juqih.validateUnittedQuantityArgs(context, BuiltinUnittedQuantityStatus.SameUnitsRequired, nodeLst);
 		} catch (UnittedQuantityHandlerException e) {
 			throw new BuiltinException(this, context, e.getMessage());
 		}

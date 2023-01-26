@@ -613,7 +613,7 @@ public class SadlUtils {
         Resource rng = null;
         if (rdftype != null) {
 	        rng = m.getResource(rnguri);
-        	List<RDFNode> unionMembers = getRDFDatatypeUnionMembers(m, rng, rdftype);
+        	List<RDFNode> unionMembers = getRDFDatatypeUnionMembers(m, rng);
         	if (unionMembers != null) {
 	        	for (RDFNode member : unionMembers) {
 	        		if (member.isURIResource()) {
@@ -963,14 +963,13 @@ public class SadlUtils {
     /**
      * Method to get the members of a RDFDatatype union
      * @param m -- the OntModel
-     * @param rng -- the range Resource
      * @param rdfdt - the RDFDatatype in question
      * @return -- list of union members else null 
      */
-    private static List<RDFNode> getRDFDatatypeUnionMembers(OntModel m, Resource rng, RDFDatatype rdfdt) {
+    public static List<RDFNode> getRDFDatatypeUnionMembers(OntModel m, Resource rdfdt) {
 		OntClass eqcls = null;
-		if (rng.canAs(OntClass.class)) {
-			eqcls = rng.as(OntClass.class).getEquivalentClass();
+		if (rdfdt.canAs(OntClass.class)) {
+			eqcls = rdfdt.as(OntClass.class).getEquivalentClass();
 		}
 		if (eqcls != null) {
 			Statement uof = eqcls.getProperty(OWL2.unionOf);

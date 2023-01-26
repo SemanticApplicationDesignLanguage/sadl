@@ -929,6 +929,129 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 		
 	@Test
+	def void testUQInRule_sum_01() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/BottomUp.sadl" alias bottomup.
+			 
+			 Duration is a class, described by p with values of type UnittedQuantity.
+			 
+			 Rule R1: if x is a Duration then p of x is 2 seconds + 3 seconds.
+			 Rule R2: if x is a Duration then p of x is (2 + 3) "seconds".
+			 
+			 D1 is a Duration.
+			 
+			 Ask: select d, v where d has p v.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.filter[severity === Severity.ERROR].size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+//				assertEquals("\"c\",\"v\"
+//\"http://sadl.org/UnittedQuantityInRule3.sadl#MyRP\",7.300000000000001 \"ft\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+	@Test
+	def void testUQInRule_sum_01_no_expansion() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/BottomUp.sadl" alias bottomup.
+			 
+			 Duration is a class, described by p with values of type UnittedQuantity.
+			 Duration2 is a class, described by p2 with values of type UnittedQuantity.
+			 Duration3 is a class, described by p3 with values of type UnittedQuantity,
+			 	described by p4 with values of type UnittedQuantity.
+			 
+			 Rule R1: if x is a Duration then p of x is 2 seconds + 3 seconds.
+			 Rule R2: if x is a Duration2 then p2 of x is (2 + 3) "seconds".
+			 Rule r3: if x is a Duration3 and x has p3 y then p4 of x is p3 of x + 1 "seconds".
+			 
+			 D1 is a Duration.
+			 D2 is a Duration2.
+			 D3 is a Duration3 with p3 4 "seconds".
+			 
+			 Ask: select d, v where d has p v.
+			 Ask: select d, v where d has p2 v.
+			 Ask: select d, v where d has p4 v.
+			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			assertTrue(issues.filter[severity === Severity.ERROR].size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+//				assertEquals("\"c\",\"v\"
+//\"http://sadl.org/UnittedQuantityInRule3.sadl#MyRP\",7.300000000000001 \"ft\"", (tr as ResultSet).toString.trim)
+			}
+		];
+	}
+		
+	@Test
 	def void testUQInRule_ge_simple() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'JavaExternal.sadl'
@@ -2295,6 +2418,9 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 			for (rule : rules) {
 				println(rule.toString)
 			}
+			for (issue : issues) {
+				println(issue.toString)
+			}
 			assertEquals(0, issues.size)
 			assertEquals("Rule R1:  if rdf(x, rdf:type, uqir:Rectangle) and rdf(x, uqir:height, v0) and rdf(v0, sadlimplicitmodel:value, v2) and rdf(v0, sadlimplicitmodel:unit, v4) and rdf(x, uqir:width, v1) and rdf(v1, sadlimplicitmodel:value, v3) and rdf(v1, sadlimplicitmodel:unit, v5) and *(v2,v3,v6) and combineUnits(\"*\",v4,v5,v7) then thereExists(UnittedQuantity,value,v6,unit,v7,Plus,x,uqir:area).", 
 				rules.get(0).toString
@@ -2730,4 +2856,130 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 		];
 	}
 		
+	@Test
+	def void testCompoundUnittedQuantityErroneous() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/CompoundUnittedQuantity.sadl" alias compoundunittedquantity.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type UnittedQuantity,
+			 	described by width with values of type UnittedQuantity.
+			 	
+			 MyRect is a Rectangle with width 4.0 ft, with height 2.2 ft.
+			 
+			 Rule R1: if x is a Rectangle and unit of height of x is "ft" and unit of width of x is "ft" 
+			 	then area of x is (height of x * width of x) "sq ft".
+			 Ask: select r, ar where r has area ar.	
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				} 
+			}
+			assertTrue(issues.size == 1)
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+			assertTrue(rules.size == 1)
+			assertEquals("Unitted quantity expression has an invalid numeric part", issues.get(0).message)
+			assertEquals("Rule R1:  if rdf(x, rdf:type, compoundunittedquantity:Rectangle) and rdf(x, compoundunittedquantity:height, v0) and rdf(v0, sadlimplicitmodel:unit, \"ft\") and rdf(x, compoundunittedquantity:width, v1) and rdf(v1, sadlimplicitmodel:unit, \"ft\") and rdf(v0, sadlimplicitmodel:value, v2) and rdf(v1, sadlimplicitmodel:value, v3) and *(v2,v3,v4) then thereExists(UnittedQuantity,value,v4,unit,\"sq ft\",Plus,x,compoundunittedquantity:area).", rules.get(0).toString)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				var resultUQ = (tr as ResultSet).getResultAt(0,1)
+				assertEquals("8.8 \"sq ft\"", resultUQ.toString)
+			}
+		];
+	}
+		
+		
+	@Test
+	def void testCompoundUnittedQuantityFixed() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/CompoundUnittedQuantity.sadl" alias compoundunittedquantity.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type UnittedQuantity,
+			 	described by width with values of type UnittedQuantity.
+			 	
+			 MyRect is a Rectangle with width 4.0 ft, with height 2.2 ft.
+			 
+			 Rule R1: if x is a Rectangle and unit of height of x is "ft" and unit of width of x is "ft" 
+			 	then area of x is (^value of height of x * ^value of width of x) "sq ft".
+			 Ask: select r, ar where r has area ar.	
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				} 
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+			assertTrue(rules.size == 1)
+			assertEquals("Rule R1:  if rdf(x, rdf:type, compoundunittedquantity:Rectangle) and rdf(x, compoundunittedquantity:height, v0) and rdf(v0, sadlimplicitmodel:unit, \"ft\") and rdf(x, compoundunittedquantity:width, v1) and rdf(v1, sadlimplicitmodel:unit, \"ft\") and rdf(v0, sadlimplicitmodel:value, v2) and rdf(v1, sadlimplicitmodel:value, v3) and *(v2,v3,v4) then thereExists(UnittedQuantity,value,v4,unit,\"sq ft\",Plus,x,compoundunittedquantity:area).", rules.get(0).toString)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				var resultUQ = (tr as ResultSet).getResultAt(0,1)
+				assertEquals("8.8 \"sq ft\"", resultUQ.toString)
+			}
+		];
+	}
 }

@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright © 2007-2016 - General Electric Company, All Rights Reserved
+ * Copyright © 2022 - Natural Semantics, LLC. All Rights Reserved.
  *
  * Project: SADL
  *
@@ -16,7 +16,7 @@
  *
  ***********************************************************************/
 
-package com.ge.research.sadl.jena.reasoner.builtin;
+package com.naturalsemantics.sadl.jena.reasoner.builtin;
 
 import java.util.List;
 
@@ -27,6 +27,9 @@ import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.BuiltinException;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 
+import com.ge.research.sadl.jena.reasoner.builtin.CancellableBuiltin;
+import com.ge.research.sadl.jena.reasoner.builtin.GeUtils;
+import com.ge.research.sadl.jena.reasoner.builtin.Utils;
 import com.ge.research.sadl.reasoner.UnittedQuantityHandlerException;
 import com.naturalsemanticsllc.sadl.reasoner.JenaUnittedQuantityInferenceHelper;
 

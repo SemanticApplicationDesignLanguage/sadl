@@ -159,7 +159,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			 	
 			 LivingThing is a type of PhysicalThing,
 			 	described by dateOfBirth with values of type dateTime,
-			 	described by age with values of type float.
+			 	described by age with values of type duration.
 			 	
 			 Mammal is a type of LivingThing,
 			 	described by child with values of type Mammal.
@@ -170,9 +170,10 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			 Pet is a class, described by caredFor with a single value of type boolean.
 			 owns describes Person with values of type Pet.
 			 
-			 External subtractDates(dateTime t1, dateTime t2, string u) returns float : "http://sadl.org/builtins/subtractDates".
+«««			 External subtractDates(dateTime t1, dateTime t2, string u) returns float : "http://sadl.org/builtins/subtractDates".
 			 
-			 Rule AgeRule: if p is a LivingThing then age of p is Test1:subtractDates(now(), dateOfBirth of p, "y"). 		
+«««			 Rule AgeRule: if p is a LivingThing then age of p is Test1:subtractDates(now(), dateOfBirth of p, "y"). 		
+			 Rule AgeRule: if p is a LivingThing then age of p is subtractDates(now(), dateOfBirth of p, "y"). 		
 		'''.sadl
 		sadlModel.assertNoErrors
 	}
@@ -217,6 +218,42 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			   then speedOfSound of air is sosair.
    		'''.sadl
 		sadlModel.assertError('''Object of conclusion triple 'rdf(air, sos:speedOfSound, sosair)' is not bound in rule premises''')
+	}
+
+	@Test
+	def void testUserDefinedEquation5() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ArgsAndParamsTest.sadl" alias argsandparamstest.
+			 
+			 Equation stringAndAnyNumberInt(string x, int ... y) returns string : return "stringAndAnyNumberInt".
+			 
+			 Expr: stringAndAnyNumberInt("hello", 5, "blue").
+   		'''.sadl
+		val String[] errors = #[
+			"Argument (\"blue\") type 'string' doesn't match parameter declaration 'int ...'.",
+			"Sorry, only external equations implemented in Java and on the classpath can be evaluated at this time."
+		]
+		sadlModel.assertErrors(errors)
+	}
+	
+	@Test
+	def void testClassTypeParameter() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ClassTypeParameter.sadl" alias classtypeparameter.
+			 
+			 Shape is a class.
+			 
+			 External exploreShape(Shape x) returns string : "http://sadl.org/exploreshape".
+			 
+			 MyShape is a Shape.
+			 
+			 Expr: exploreShape(MyShape).
+		'''.sadl
+		val String[] errors = #[
+			"",
+			""
+		]
+		sadlModel.assertError("Unable to evaluate external equation \"http://sadl.org/exploreshape\".")
 	}
 	
 	@Test
@@ -312,7 +349,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		for (issue : issues_1) {
 			println(issue.toString)
 		}
-		assertEquals(Iterables.toString(issues_1), 1, issues_1.size);
+		assertEquals(Iterables.toString(issues_1), 2, issues_1.size);
 	}
 	
 	@Test

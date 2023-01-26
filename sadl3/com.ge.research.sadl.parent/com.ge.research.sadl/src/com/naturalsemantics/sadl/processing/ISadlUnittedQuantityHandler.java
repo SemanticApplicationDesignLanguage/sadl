@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
+import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
@@ -56,7 +57,9 @@ public interface ISadlUnittedQuantityHandler {
 	 */
 	
 	/**
-	 * Method to add any combineUnits and there exists constructs to the rule at the end of rule processing.
+	 * Method to add any combineUnits and unittedQuantity BuiltinElement instances to the rule. This happens
+	 * at the end of rule processing.
+	 * 
 	 * @param rule
 	 * @return
 	 * @throws TranslationException 
@@ -64,10 +67,17 @@ public interface ISadlUnittedQuantityHandler {
 	abstract Rule checkRuleForNewUnittedQuantityCreation(Rule rule) throws TranslationException;
 	
 	/**
-	 * Method to expand a binary operation on UnittedQuantity arguments. The TripleElement instances needed to expand 
-	 * the UnittedQuantity instances or variables to patterns referencing the UnittedQuantity unit and value property
-	 * values are identifed and returned. The new arguments for the value objects to be passed to the binary operator
-	 * are put into the BuiltinElement's args list.
+	 * Method to expand a binary operation or function call with one or more UnittedQuantity arguments. The TripleElement 
+	 * instances that are associated with the binary operation are also passed in. In the case of rules, it is sometimes
+	 * necessary to examine GraphPatternElements in other parts of the rule and these can be accessed through the
+	 * IntermediateFormTranslator. When an argument is a UnittedQuantity, the argument must be replaced by the VariableNode
+	 * object of a new or existing TripleElement that gets the value of the UnittedQuantity. A new or existing TripleElement
+	 * must also get the unit of the UnittedQuantity. Sometimes a specific unit can be found from the existing
+	 * GraphPatternElements, sometimes a VariableNode exists or can be created to place appropriate constraints on the 
+	 * unit, relating it to units of other UnittedQuantities. All of this will potentially add new TripleElements to the
+	 * patterns and may even cause some to be removed. This method prepares the rule for later processing by method
+	 * checkRuleForNewUnittedQuantityCreation.
+	 * 
 	 * @param gpe
 	 * @return
 	 * @throws TranslationException
@@ -103,5 +113,14 @@ public interface ISadlUnittedQuantityHandler {
 	 * @return
 	 */
 	abstract String getUnittedQuantityInferenceHelperClassname();
+
+	/**
+	 * Method to add a BuiltinElement with the LHS unit Node and RHS unit Node for latter retrieval during call
+	 * to checkRuleForNewUnittedQuantityCreation
+	 * @param be -- the BuiltinElement to remember
+	 * @param lhsUnitNode -- its LHS unit Node
+	 * @param rhsUnitNode -- its RHS unit Node
+	 */
+	abstract void addModifiedBuiltinElementAndUnits(BuiltinElement uqBe, Node lhsUnitNode, Node rhsUnitNode);
 
 }

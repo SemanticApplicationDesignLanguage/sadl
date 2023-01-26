@@ -102,7 +102,9 @@ public class JenaUnittedQuantityInferenceHelper implements IUnittedQuantityInfer
 		Node unit1 = (Node) arg1Units;
 		Node unit2 = (Node) arg2Units;
 		if (operatorType.equals(BuiltinUnittedQuantityStatus.SameUnitsRequired)) {
-// TODO need to add Average, Max, Min
+			if (unit1 == null || unit2 == null) {
+				throw new UnittedQuantityUnitMismatchException("'+' operation requires both arguments to have the same units but one argument has no units.");
+			}
 			if(!unit1.equals(unit2)) {
 				throw new UnittedQuantityUnitMismatchException("'+' operation requires arguments to have the same units (" + unit1.toString() + "!= " + unit2.toString() + ")");
 			}
@@ -274,6 +276,8 @@ public class JenaUnittedQuantityInferenceHelper implements IUnittedQuantityInfer
 			else {
 				throw new UnittedQuantityHandlerException("Failed to instantiate IUnittedQuantityInferenceHandler class '" + className + "'");
 			}
+		} catch (UnittedQuantityHandlerException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new UnittedQuantityHandlerException("Unable to invoke IUnittedQuantityInferenceHandler method 'validateUnittedQuantityArgs'", e);
 		} 

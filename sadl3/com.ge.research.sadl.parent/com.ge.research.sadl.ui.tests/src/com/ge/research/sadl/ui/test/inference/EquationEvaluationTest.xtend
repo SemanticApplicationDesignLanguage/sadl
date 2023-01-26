@@ -659,4 +659,123 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	 		];
 	}
 	
+	@Test
+	def void testSadlRuleDualThereExists_01() {
+		createFile('StringFormat.sadl', '''
+				 uri "http://sadl.org/TwoWheelsExist.sadl" alias twowheelsexist.
+				 
+				 Bicycle is a class described by wheel with values of type Wheel.
+				 Location is a class, can only be one of {Front, Rear}.
+				 Wheel is a class, described by diamter with values of type float,
+				 	described by location with values of type Location.
+				 wheel of Bicycle has exactly 2 values.
+				 
+				 Rule WheelRule: if x is a Bicycle 
+				 	then thereExists(Wheel, location, Front, Plus, x, wheel) and
+				 		 thereExists(Wheel, location, Rear, Plus, x, wheel).
+				 
+				 MyBike is a Bicycle.
+				 
+«««				 Ask: select b, w, l where b has wheel w and w has location l.
+				 Ask: "select ?b ?l where {?b <wheel> ?w . ?w <location> ?l}".
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+	 			assertNotNull(jenaModel)
+	 			if (issues !== null) {
+	 				for (issue : issues) {
+	 					System.out.println(issue.toString)
+	 				}
+	 			}
+	 			if (rules !== null) {
+	 				for (rule : rules) {
+	 					System.out.println(rule.toString)
+	 				}
+	 			}
+	 			assertTrue(rules.size == 1)
+	 			assertTrue(
+	 				processor.compareTranslations(rules.get(0).toString(),
+	 					"Rule WheelRule:  if rdf(x, rdf:type, twowheelsexist:Bicycle) then thereExists(twowheelsexist:Wheel,twowheelsexist:location,twowheelsexist:Front,sadlimplicitmodel:Plus,x,twowheelsexist:wheel) and thereExists(twowheelsexist:Wheel,twowheelsexist:location,twowheelsexist:Rear,sadlimplicitmodel:Plus,x,twowheelsexist:wheel)."))
+	 		]
+	 
+	 		var List<ConfigurationItem> configItems = newArrayList
+	 		val String[] catHier = newArrayOfSize(1)
+	 		catHier.set(0, "Jena")
+	 		val ci = new ConfigurationItem(catHier)
+	 		ci.addNameValuePair("pModelSpec", "OWL_MEM")
+	 		configItems.add(ci)
+	 		assertInferencer('StringFormat.sadl', null, configItems) [
+	 			var idx = 0
+	 			for (scr : it) {
+	 				println(scr.toString)
+	 				assertTrue(scr instanceof SadlCommandResult)
+	 				val tr = (scr as SadlCommandResult).results
+	 				assertTrue(tr instanceof ResultSet)
+	 				val expected = "\"b\",\"l\"
+\"http://sadl.org/TwoWheelsExist.sadl#MyBike\",\"http://sadl.org/TwoWheelsExist.sadl#Rear\"
+\"http://sadl.org/TwoWheelsExist.sadl#MyBike\",\"http://sadl.org/TwoWheelsExist.sadl#Front\""
+  println(expected)
+  println(tr.toString.trim)
+	 				assertEquals(expected.trim, tr.toString.trim)
+	 			}
+	 		];
+	}
+
+	@Test
+	def void testSadlRuleDualThereExists_02() {
+		createFile('StringFormat.sadl', '''
+				 uri "http://sadl.org/TwoWheelsExist.sadl" alias twowheelsexist.
+				 
+				 Bicycle is a class described by wheel with values of type Wheel.
+				 Location is a class, can only be one of {Front, Rear}.
+				 Wheel is a class, described by diamter with values of type float,
+				 	described by location with values of type Location.
+				 wheel of Bicycle has exactly 2 values.
+				 
+				 Rule WheelRule: if x is a Bicycle 
+				 	then thereExists(Wheel, location, Front, Plus, x, wheel) and
+				 		 thereExists(Wheel, location, Rear, Plus, x, wheel).
+				 
+				 MyBike is a Bicycle.
+				 
+				 Ask: select b, l where b has wheel w and w has location l.
+«««				 Ask: "select ?b ?l where {?b <wheel> ?w . ?w <location> ?l}".
+ 			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+	 			assertNotNull(jenaModel)
+	 			if (issues !== null) {
+	 				for (issue : issues) {
+	 					System.out.println(issue.toString)
+	 				}
+	 			}
+	 			if (rules !== null) {
+	 				for (rule : rules) {
+	 					System.out.println(rule.toString)
+	 				}
+	 			}
+	 			assertTrue(rules.size == 1)
+	 			assertTrue(
+	 				processor.compareTranslations(rules.get(0).toString(),
+	 					"Rule WheelRule:  if rdf(x, rdf:type, twowheelsexist:Bicycle) then thereExists(twowheelsexist:Wheel,twowheelsexist:location,twowheelsexist:Front,sadlimplicitmodel:Plus,x,twowheelsexist:wheel) and thereExists(twowheelsexist:Wheel,twowheelsexist:location,twowheelsexist:Rear,sadlimplicitmodel:Plus,x,twowheelsexist:wheel)."))
+	 		]
+	 
+	 		var List<ConfigurationItem> configItems = newArrayList
+	 		val String[] catHier = newArrayOfSize(1)
+	 		catHier.set(0, "Jena")
+	 		val ci = new ConfigurationItem(catHier)
+	 		ci.addNameValuePair("pModelSpec", "OWL_MEM")
+	 		configItems.add(ci)
+	 		assertInferencer('StringFormat.sadl', null, configItems) [
+	 			var idx = 0
+	 			for (scr : it) {
+	 				println(scr.toString)
+	 				assertTrue(scr instanceof SadlCommandResult)
+	 				val tr = (scr as SadlCommandResult).results
+	 				assertTrue(tr instanceof ResultSet)
+	 				val expected = "\"b\",\"l\"
+\"http://sadl.org/TwoWheelsExist.sadl#MyBike\",\"http://sadl.org/TwoWheelsExist.sadl#Rear\"
+\"http://sadl.org/TwoWheelsExist.sadl#MyBike\",\"http://sadl.org/TwoWheelsExist.sadl#Front\""
+  println(expected)
+  println(tr.toString.trim)
+	 				assertEquals(expected.trim, tr.toString.trim)
+	 			}
+	 		];
+	}
 }

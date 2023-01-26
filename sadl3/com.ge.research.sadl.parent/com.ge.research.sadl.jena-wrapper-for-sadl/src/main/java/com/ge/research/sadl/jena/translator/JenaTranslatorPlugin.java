@@ -1009,6 +1009,52 @@ public class JenaTranslatorPlugin implements ITranslator {
 					sb.append(nodeToString(args.get(0), TranslationTarget.RULE_BUILTIN));
 				}
 			}
+			else if (((BuiltinElement)gpe).getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME)) {
+				Object returnedValue = args != null && args.size() > 2 ? args.get(2) : null;
+				if (returnedValue instanceof VariableNode) {
+					Node valueNode = args.get(0);
+					Node unitNode = args.get(1);
+					GraphPatternElement usesReturnedValue = findGpeUsingReturnedValue(getRuleInTranslation(), (Node) returnedValue);
+					if (usesReturnedValue instanceof TripleElement) {
+						BuiltinElement thereExistsBE = new BuiltinElement();
+						thereExistsBE.setFuncName("thereExists");
+						Node pred = ((TripleElement)usesReturnedValue).getPredicate();
+						Object theModel = getTheModel();
+						if (!(theModel instanceof OntModel)) {
+							throw new TranslationException("The model was not a Jena OntModel as expected.");
+						}
+						OntProperty prop = ((OntModel)theModel).getOntProperty(pred.getURI());
+						NamedNode uQClass = null;
+						if (prop != null) {
+							OntResource rng = prop.getRange();
+							if (rng != null) {
+								uQClass = new NamedNode(rng.getURI());
+							}
+						}
+						if (uQClass == null) {
+							uQClass = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+						}
+						uQClass.setNodeType(NodeType.ClassNode);
+						thereExistsBE.addArgument(uQClass);
+						NamedNode valuePred = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
+						valuePred.setNodeType(NodeType.DataTypeProperty);
+						thereExistsBE.addArgument(valuePred);
+						thereExistsBE.addArgument((Node) valueNode);
+						NamedNode unitPred = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
+						unitPred.setNodeType(NodeType.DataTypeProperty);
+						thereExistsBE.addArgument(unitPred);
+						thereExistsBE.addArgument(unitNode);
+						NamedNode plusNode = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_URI + "#Plus");
+						plusNode.setNodeType(NodeType.InstanceNode);
+						thereExistsBE.addArgument(plusNode);
+						thereExistsBE.addArgument(((TripleElement)usesReturnedValue).getSubject());
+						thereExistsBE.addArgument(((TripleElement)usesReturnedValue).getPredicate());
+						int thenIdx = getRuleInTranslation().getThens().indexOf(usesReturnedValue);
+						getRuleInTranslation().getThens().set(thenIdx, thereExistsBE);	
+						return sb.toString();
+					}
+				}
+			}
 			else {
 				sb.append(setBuiltinElementNameByBuiltinType((BuiltinElement)gpe));
 				sb.append("(");
@@ -1080,6 +1126,70 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return sb.toString();
 	}
 	
+	/**
+	 * Method to find a GraphPatternElement that uses a given Node.
+	 * For a BuiltinElement, this will be one that has the given Node as an input argument
+	 * For a TripleElement, this will be one in the rule body that has the given Node as a subject or 
+	 * one in the rule conclusion that has the given node as an subject or object
+	 * @param rule
+	 * @param returnedValue
+	 * @return
+	 */
+	private GraphPatternElement findGpeUsingReturnedValue(Rule rule, Node returnedValue) {
+		if (rule.getGivens() != null) {
+			for (GraphPatternElement gpe : rule.getGivens()) {
+				if (gpe instanceof BuiltinElement) {
+					List<Node> args = ((BuiltinElement)gpe).getArguments();
+					if (args.contains(returnedValue) && 
+							!(args.indexOf(returnedValue) == args.size() - 1)) {
+						return gpe;
+					}
+				}
+				else if (gpe instanceof TripleElement) {
+					if (((TripleElement)gpe).getSubject().equals(returnedValue)) {
+						return gpe;
+					}
+				}
+			}
+		}
+		if (rule.getIfs() != null) {
+			for (GraphPatternElement gpe : rule.getIfs()) {
+				if (gpe instanceof BuiltinElement) {
+					List<Node> args = ((BuiltinElement)gpe).getArguments();
+					if (args.contains(returnedValue) && 
+							!(args.indexOf(returnedValue) == args.size() - 1)) {
+						return gpe;
+					}
+				}
+				else if (gpe instanceof TripleElement) {
+					if (((TripleElement)gpe).getSubject().equals(returnedValue)) {
+						return gpe;
+					}
+				}
+			}
+		}
+		if (rule.getThens() != null) {
+			for (GraphPatternElement gpe : rule.getThens()) {
+				if (gpe instanceof BuiltinElement) {
+					List<Node> args = ((BuiltinElement)gpe).getArguments();
+					if (args.contains(returnedValue) && 
+							!(args.indexOf(returnedValue) == args.size() - 1)) {
+						return gpe;
+					}
+				}
+				else if (gpe instanceof TripleElement) {
+					if (((TripleElement)gpe).getSubject().equals(returnedValue)) {
+						return gpe;
+					}
+					else if (((TripleElement)gpe).getObject().equals(returnedValue)) {
+						return gpe;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	private String graphPatternElementToJenaQueryString(GraphPatternElement gpe, StringBuilder sbfilter, 
 			TranslationTarget target, RulePart rulePart) throws TranslationException {
 		if (gpe instanceof TripleElement) {

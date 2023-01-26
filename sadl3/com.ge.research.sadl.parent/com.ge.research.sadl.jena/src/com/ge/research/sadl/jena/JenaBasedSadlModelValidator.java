@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.ontology.AllValuesFromRestriction;
 import org.apache.jena.ontology.AnnotationProperty;
 import org.apache.jena.ontology.DatatypeProperty;
@@ -71,6 +72,7 @@ import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.PrefixNotFoundException;
 import com.ge.research.sadl.model.SadlUnionClass;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
@@ -364,6 +366,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			TypeCheckInfo rightTypeCheckInfo = null;
 			try {
 				if (SadlASTUtils.isUnitExpression(rightExpression)) {
+					// a unit expression must have a number for left and a string for unit
+					if (rightExpression instanceof UnitExpression) {
+						Expression unitLeft = ((UnitExpression)rightExpression).getLeft();
+						TypeCheckInfo unitLeftTci = getType(unitLeft);
+						if (!isNumeric(unitLeftTci)) {
+							getModelProcessor().addTypeCheckingError("Unitted quantity expression has an invalid numeric part", rightExpression);
+						}
+					}
 					// make the type that of the predicate
 					rightTypeCheckInfo = new TypeCheckInfo(new ConceptName(((NamedNode)leftTypeCheckInfo.getTypeCheckType()).getURI(), 
 							getModelProcessor().nodeTypeToConceptType(((NamedNode)leftTypeCheckInfo.getTypeCheckType()).getNodeType())), this, expression);
@@ -1422,9 +1432,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			return null;
 		}
 		else if (!getModelProcessor().isDeclaration(expression) && expression.eContainer() instanceof BinaryOperation || 
-				expression.eContainer() instanceof SelectExpression ||
-				expression.eContainer() instanceof AskExpression ||
-				expression.eContainer() instanceof ConstructExpression) {
+				EcoreUtil2.getContainerOfType(expression, SelectExpression.class) != null ||
+				EcoreUtil2.getContainerOfType(expression, AskExpression.class) != null ||
+				EcoreUtil2.getContainerOfType(expression, ConstructExpression.class) != null) {
 			// we are comparing or assigning this to something else so we want the type of the root (if there is a chain) property
 			if (expression.getProp() instanceof SadlResource) {
 				SadlResource prop = expression.getProp();
@@ -1476,6 +1486,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				} else {
 					be = new BuiltinElement();
 					be.setFuncName(op);
+					be.setContext(expression);
 					be.addArgumentType(leftTypeCheckInfo.getTypeCheckType());
 					be.addArgumentType(rightTypeCheckInfo.getTypeCheckType());
 					String translatorBuiltinName = trans.builtinTypeToString(be);
@@ -2806,7 +2817,10 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		//If the expression is a function, find equation definition from name and get the return type
 		if(expression.isFunction()){
 			try {
-				TypeCheckInfo ftci = getFunctionTypeCheckInfoAndCheckArguments(expression, qnm, false);
+				TypeCheckInfo ftci = getCachedTypeCheckInfoByEObject(qnm);
+				if (ftci ==  null) {
+					ftci = getFunctionTypeCheckInfoAndCheckArguments(expression, qnm, false);
+				}
 				if (ftci != null) {
 					return ftci;
 				}
@@ -2907,6 +2921,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		// if check forced or this is a built-in with graph pattern arguments then don't check type except range of final property
 		if (forceCheck || !isGraphPatternArguments(args)) {
 			StringBuilder sb = new StringBuilder();
+			SadlTypeReference typeEllipsisInEffect = null;
 			for (int i = 0; i < args.size(); i++) {
 				Expression arg = args.get(i);
 				SadlParameterDeclaration param = null;
@@ -2918,21 +2933,32 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					param = params.get(i);
 				}
 				if (param != null) {
-					if (param.getUnknown() == null && (!isEllipsis(param) || param.getTypedEllipsis() != null)) {
-						validateBinaryOperationByParts(expression, arg, param.getType(), ISadlModelValidator.ARGUMENT, sb, false);
+					if (param.getTypedEllipsis() != null) {
+						typeEllipsisInEffect = param.getType();
+					}
+					if (typeEllipsisInEffect != null) {
+						validateBinaryOperationByParts(expression, arg, typeEllipsisInEffect, ISadlModelValidator.ARGUMENT, sb, false);
 						if (sb.length() > 0) {
 							getModelProcessor().addTypeCheckingError(sb.toString(), expression);
 						}
+						// keep checking arguments until there are no more
 					}
-					else if (param.getUnknown() != null || param.getEllipsis() != null) {  //&& !isEllipsis(param)) {			
-						
-						getModelProcessor().addWarning(SadlErrorMessages.TYPE_CHECK_BUILTIN_EXCEPTION.get("parameter " + (i + 1)), arg);
+					else if (param.getEllipsis() != null) {
+						// any number of arguments of any type from here on at least so no need to do any more checking
+						break;
+					}
+					else if (param.getUnknown() != null) {
+						String fctName = declarationExtensions.getConceptUri(expression.getName());
+						getModelProcessor().addWarning(SadlErrorMessages.TYPE_CHECK_BUILTIN_EXCEPTION.get(fctName), arg);
 						this.setEObjectInError(expression);
 						cacheTypeCheckInfoByEObject(expression, null);
 					}
 					else {
-						// don't try to typecheck if it's an untyped ellipsis
-						break;
+						// not typed ellipsis, not untyped ellipsis, not unknown
+						validateBinaryOperationByParts(expression, arg, param.getType(), ISadlModelValidator.ARGUMENT, sb, false);
+						if (sb.length() > 0) {
+							getModelProcessor().addTypeCheckingError(sb.toString(), expression);
+						}
 					}
 				}
 			}
@@ -4164,11 +4190,18 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		
 		VariableNode var = getModelProcessor().getVariable(conceptNm);
 		if (var != null && var.getType() != null) {
-			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(var.getType().toFullyQualifiedString(), NodeType.VariableNode));
-			ConceptName et = getModelProcessor().namedNodeToConceptName(tctype);
-			List<ConceptName> ip = getImpliedProperties(getTheJenaModel().getResource(tctype.getURI()));
-			TypeCheckInfo tci = new TypeCheckInfo(et, var.getType(), this, ip, reference);
-			return tci;
+			if (var.getType() instanceof UnknownNode) {
+				ConceptName ukn = new ConceptName(((UnknownNode)var.getType()).getURI());
+				TypeCheckInfo tci = new TypeCheckInfo(ukn, var.getType(), this, reference);
+				return tci;
+			}
+			else {	
+				NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(var.getType().toFullyQualifiedString(), NodeType.VariableNode));
+				ConceptName et = getModelProcessor().namedNodeToConceptName(tctype);
+				List<ConceptName> ip = getImpliedProperties(getTheJenaModel().getResource(tctype.getURI()));
+				TypeCheckInfo tci = new TypeCheckInfo(et, var.getType(), this, ip, reference);
+				return tci;
+			}
 		}
 		if (getVariableSeekingType() != null && getVariableSeekingType().equals(conceptNm)) {
 //			setVariableSeekingType(null);
@@ -4455,6 +4488,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			// get the return type from the handler
 			BuiltinElement be = new BuiltinElement();
 			be.setFuncName(op);
+			be.setContext(binExpr);
 			Node fctRetTypeNN = uqhdlr.computeBuiltinReturnType(be, getArgTypeNodesForBinOp(leftTypeCheckInfo, rightTypeCheckInfo));
 			if (fctRetTypeNN != null && fctRetTypeNN instanceof NamedNode) {
 				TypeCheckInfo fctTci = new TypeCheckInfo(new ConceptName(be.getFuncUri(), ConceptType.FUNCTION_DEFN), this, binExpr);
@@ -6474,7 +6508,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		this.theJenaModel = theJenaModel;
 	}
 	
-	protected TypeCheckInfo checkFunctionArgumentsAndReturnReturnTypeCheckInfo(BuiltinElement be, Equation eq, EObject context) throws InvalidTypeException {
+	protected TypeCheckInfo checkFunctionArgumentsAndReturnReturnTypeCheckInfo(BuiltinElement be, Equation eq, EObject context) throws InvalidTypeException, TranslationException, InvalidNameException {
+		// If this is a declaration and assignment of a variable, there is no need to check, the return should 
+		//	be a boolean
+		if (be.getFuncType().equals(BuiltinType.Equal) && 
+				context != null &&
+				getModelProcessor().isDeclaration(context)) {
+			return createBooleanTypeCheckInfo(context);
+		}
 		TypeCheckInfo returnTci = null;
 		List<Node> args = be.getArguments();
 		List<Node> argTypes = be.getArgumentTypes();
@@ -6506,42 +6547,55 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 			}
 		
 			if (eq != null) {
-				int minNumArgs = eq.getArgumentTypes().size();
+//				int minNumArgs = eq.getArgumentTypes().size();
 	//			String[] operations = new String[1];
 	//			operations[0] = ARGUMENT;
-				boolean argCheckPasses = true;
+//				boolean argCheckPasses = true;
 				List<Node> eqArgTypes = eq.getArgumentTypes();
 				boolean unknownArgs = false;
 				int eqArgIdx = 0;
 				Node lastEqArgType = (eqArgTypes != null && eqArgTypes.size() > 0) ? eqArgTypes.get(0) : null;
 				if (lastEqArgType instanceof UnknownNode) {
-					getModelProcessor().addWarning("Argument type of '" + be.getFuncName() + "' is unknown, cannot do argument type checking.", context);
+					getModelProcessor().addWarning("Function '" + be.getFuncName() + "' has unknown parameter type, cannot do argument type checking.", context);
 				}
 				else {
-					for (Node eqArgType : eqArgTypes) {
-						if (argTypes.size() > eqArgIdx) {
-							Node argType = argTypes.get(eqArgIdx);
-							if (argType.equals(eqArgType)) {
-								continue;
+					StringBuilder sb = null;
+					for (int argTypeIdx = 0; argTypeIdx < argTypes.size(); argTypeIdx++) {
+						// argTypes might be larger than eqArgTypes, so iterate through argTypes
+						Node argType = argTypes.get(argTypeIdx);
+						Node eqArgType;
+						if (argTypeIdx >= eqArgTypes.size()) {
+							if (lastEqArgType instanceof TypedEllipsisNode || lastEqArgType instanceof UntypedEllipsisNode) {
+								eqArgType = lastEqArgType;
 							}
-							else if (argumentTypeMatchesEquation(argType, eqArgType, hasUnittedQuantityInput)) {
-								continue;
-							}
-							argCheckPasses = false;
-						}
-						else if (lastEqArgType != null) {
-							if (lastEqArgType instanceof TypedEllipsisNode) {
-								if (argumentTypeMatchesEquation(lastEqArgType, eqArgType, hasUnittedQuantityInput)) {
-									continue;
-								}
+							else {
+								getModelProcessor().addError("Built-in usage has more arguments than function definition allows", context);
+								break;
 							}
 						}
 						else {
-							// we ran out of argTypes before reaching end of eqArgTypes; this shouldn't happen
-							// report error
-							System.out.println("Built-in usage has more arguments than function definition allows");
+							eqArgType = eqArgTypes.get(argTypeIdx);
+							lastEqArgType = eqArgType;
 						}
-						lastEqArgType = eqArgType;
+						if (argType.equals(eqArgType)) {
+							lastEqArgType = eqArgType;
+							continue;
+						}
+						else if (argumentTypeMatchesEquation(argType, eqArgType, hasUnittedQuantityInput)) {
+							lastEqArgType = eqArgType;
+							continue;
+						}
+						if (sb == null) {
+							sb = new StringBuilder();
+						}
+						else {
+							sb.append("\n");
+						}
+						sb.append("Argument (" + args.get(argTypeIdx) + ") type '" + argType.getName() + "' doesn't match parameter declaration '" + eqArgType.toString() + "'.");
+//						argCheckPasses = false;
+					}
+					if (sb != null) {
+						getModelProcessor().addTypeCheckingError(sb.toString(), context);
 					}
 				}
 				
@@ -6597,7 +6651,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		}
 		return returnTci;
 	}
-	
+	/**
+	 * Method to check the argument type of an equation argument with the type declared in the equation definition.
+	 * @param argType
+	 * @param eqArgType
+	 * @param hasUnittedQuantityInput
+	 * @return true if matching else false
+	 */
 	private boolean argumentTypeMatchesEquation(Node argType, Node eqArgType, boolean hasUnittedQuantityInput) {
 		if (eqArgType instanceof UntypedEllipsisNode) {
 			return true;
@@ -6608,31 +6668,61 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				effectiveArgTypeUri = XSD.decimal.getURI();
 			}
 		}
-		if (effectiveArgTypeUri.equals(eqArgType.getURI())) {
+		String argTypeUri = eqArgType.getURI();
+		
+		boolean match = argumentTypeMatchByUri(effectiveArgTypeUri, argTypeUri);
+		if (match) {
+			return match;
+		}
+		OntResource jenaEqArgType = getTheJenaModel().getOntResource(argTypeUri);
+		if (jenaEqArgType != null) {
+			List<RDFNode> rdfDataTypemembers = SadlUtils.getRDFDatatypeUnionMembers(getTheJenaModel(), jenaEqArgType);
+			if (rdfDataTypemembers != null) {
+				for (RDFNode member : rdfDataTypemembers) {
+					if (member.isURIResource()) {
+						if (argumentTypeMatchByUri(effectiveArgTypeUri, member.asResource().getURI())) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Method to compare argument types by URI
+	 * 
+	 * @param effectiveArgTypeUri
+	 * @param argTypeUri
+	 * @return -- true if match else false
+	 */
+	private boolean argumentTypeMatchByUri(String effectiveArgTypeUri, String argTypeUri) {
+		if (effectiveArgTypeUri.equals(argTypeUri)) {
 			return true;
 		}
-		if (eqArgType.getURI().equals(XSD.decimal.getURI()) &&
+		if (argTypeUri.equals(XSD.decimal.getURI()) &&
 				(effectiveArgTypeUri.equals(XSD.xint.getURI()) ||
 				 effectiveArgTypeUri.equals(XSD.xlong.getURI()) ||
 				 effectiveArgTypeUri.equals(XSD.xfloat.getURI()) ||
 				 effectiveArgTypeUri.equals(XSD.xdouble.getURI()))) {
 			return true;
 		}
-		if (eqArgType.getURI().equals(XSD.xdouble.getURI()) &&
+		if (argTypeUri.equals(XSD.xdouble.getURI()) &&
 				(effectiveArgTypeUri.equals(XSD.xint.getURI()) ||
 				 effectiveArgTypeUri.equals(XSD.xlong.getURI()) ||
 				 effectiveArgTypeUri.equals(XSD.xfloat.getURI()) ||
 				 effectiveArgTypeUri.equals(XSD.decimal.getURI()))) {
 			return true;
 		}
-		if (eqArgType.getURI().equals(XSD.xfloat.getURI()) &&
+		if (argTypeUri.equals(XSD.xfloat.getURI()) &&
 				(effectiveArgTypeUri.equals(XSD.xint.getURI()) ||
 				 effectiveArgTypeUri.equals(XSD.xlong.getURI()) ||
 				 effectiveArgTypeUri.equals(XSD.xfloat.getURI()) ||
 				 effectiveArgTypeUri.equals(XSD.decimal.getURI()))) {
 			return true;
 		}
-		if (eqArgType.getURI().equals(XSD.xlong.getURI()) &&
+		if (argTypeUri.equals(XSD.xlong.getURI()) &&
 				effectiveArgTypeUri.equals(XSD.xint.getURI())) {
 			return true;
 		}

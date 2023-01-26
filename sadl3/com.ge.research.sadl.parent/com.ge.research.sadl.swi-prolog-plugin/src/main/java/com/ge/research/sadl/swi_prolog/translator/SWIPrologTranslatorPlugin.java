@@ -1545,13 +1545,13 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		}
 		else if (node instanceof ConstantNode) {
 			if (node.getName().equals("PI")) {
-				Literal lit = new Literal();
+				Literal lit = new Literal(LiteralType.NumberLiteral);
 				lit.setValue(Math.PI);
 				lit.setOriginalText(node.getName());
 				return "pi";
 			}
 			else if (node.getName().equals("e")) {
-				Literal lit = new Literal();
+				Literal lit = new Literal(LiteralType.NumberLiteral);
 				lit.setValue(Math.E);
 				lit.setOriginalText(node.getName());
 				return "e";

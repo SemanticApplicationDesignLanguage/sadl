@@ -91,85 +91,97 @@ public class EvaluateSadlEquationUtils {
 			// this is an equation whose implementation is outside of the SADL environment
 			String externaluri = eq.getExternalUri();
 			if (externaluri !=  null) {
-				int lastDot = externaluri.lastIndexOf('.');
-				if (lastDot > 0) {
-					String classname = externaluri.substring(0, lastDot);
-					String methname =  externaluri.substring(lastDot + 1);
-					Class<?> clazz = getMatchingClassOfExternalUri(classname);
-					Object arg0AsInstanceOfClazz = null;
-					List<Method> matchingStaticMethods = getMatchingMethodsOfExternalUri(clazz, methname, true);
-					Method bestMatch = getBestMatch(bi, matchingStaticMethods, false);
-					boolean methodOnClassOfFirstArgument = false;
-					if (bestMatch == null) {
-						Class<?> arg0Class = null;
-						int numArgs = 0;
-						if (bi.getArguments() != null && bi.getArguments().size() > 0) {
-							numArgs = bi.getArguments().size();
-							Node arg0 = bi.getArguments().get(0);
-							if (arg0 instanceof com.ge.research.sadl.model.gp.Literal) {
-								arg0AsInstanceOfClazz = sadlNodeAsInstanceOfArgClass(clazz, arg0);
-								if (arg0AsInstanceOfClazz != null) {
-									arg0Class = arg0AsInstanceOfClazz.getClass();
-								}
-							}
-						}
-						if (arg0Class != null && clazz != null && arg0Class.equals(clazz)) {
-							// we want to find the method that will be invoked for the instance of
-							// this class which is the first argument
-							methodOnClassOfFirstArgument = true;
-						}
-
-						List<Method> matchingMethods = getMatchingMethodsOfExternalUri(clazz, methname, false);
-						// now find one that matches the arguments if possible
-					
-						bestMatch = getBestMatch(bi, matchingMethods, methodOnClassOfFirstArgument);
-					}
-					if (bestMatch != null) {
-						bestMatch.setAccessible(true);
-				        Object[] args = getArgs(bestMatch, bi.getArguments(), eq, methodOnClassOfFirstArgument);
-						try {
-							Object result;
-							boolean isStatic = Modifier.isStatic(bestMatch.getModifiers());
-							if (isStatic) {
-								result = bestMatch.invoke(null, args);
-							}
-							else if (methodOnClassOfFirstArgument) {
-								if (arg0AsInstanceOfClazz != null) {
-									result = bestMatch.invoke(arg0AsInstanceOfClazz, args);
-								}
-								else {
-									addError(new ModelError("first argument must be an instance of the class containing the method", ErrorType.ERROR));
-									result = null;
-								}
-							}
-							else {
-								result = bestMatch.invoke(clazz.getDeclaredConstructor().newInstance(), args);								
-							}
-							return convertResultToNode(result, bi);
-						} catch (Exception e) {
-							if (e.getMessage() == null) {
-								if (e.getSuppressed() != null && e.getSuppressed().length > 0) {
-									for (Throwable t : e.getSuppressed()) {
-										addError(new ModelError(t.getMessage(), ErrorType.ERROR));
+				if (!externaluri.startsWith("http:")) {
+					// Might be a java class identifier
+					int lastDot = externaluri.lastIndexOf('.');
+					if (lastDot > 0) {
+						String classname = externaluri.substring(0, lastDot);
+						String methname =  externaluri.substring(lastDot + 1);
+						Class<?> clazz = getMatchingClassOfExternalUri(classname);
+						Object arg0AsInstanceOfClazz = null;
+						List<Method> matchingStaticMethods = getMatchingMethodsOfExternalUri(clazz, methname, true);
+						Method bestMatch = getBestMatch(bi, matchingStaticMethods, false);
+						boolean methodOnClassOfFirstArgument = false;
+						if (bestMatch == null) {
+							Class<?> arg0Class = null;
+							int numArgs = 0;
+							if (bi.getArguments() != null && bi.getArguments().size() > 0) {
+								numArgs = bi.getArguments().size();
+								Node arg0 = bi.getArguments().get(0);
+								if (arg0 instanceof com.ge.research.sadl.model.gp.Literal) {
+									arg0AsInstanceOfClazz = sadlNodeAsInstanceOfArgClass(clazz, arg0);
+									if (arg0AsInstanceOfClazz != null) {
+										arg0Class = arg0AsInstanceOfClazz.getClass();
 									}
 								}
-								else if (e instanceof InvocationTargetException) {
-									addError(new ModelError(((InvocationTargetException)e).getTargetException().getMessage(), ErrorType.ERROR));
+							}
+							if (arg0Class != null && clazz != null && arg0Class.equals(clazz)) {
+								// we want to find the method that will be invoked for the instance of
+								// this class which is the first argument
+								methodOnClassOfFirstArgument = true;
+							}
+	
+							List<Method> matchingMethods = getMatchingMethodsOfExternalUri(clazz, methname, false);
+							// now find one that matches the arguments if possible
+						
+							bestMatch = getBestMatch(bi, matchingMethods, methodOnClassOfFirstArgument);
+						}
+						if (bestMatch != null) {
+							bestMatch.setAccessible(true);
+					        Object[] args = getArgs(bestMatch, bi.getArguments(), eq, methodOnClassOfFirstArgument);
+							try {
+								Object result;
+								boolean isStatic = Modifier.isStatic(bestMatch.getModifiers());
+								if (isStatic) {
+									result = bestMatch.invoke(null, args);
 								}
-							}
-							else {
-								addError(new ModelError(e.getMessage(), ErrorType.ERROR));
-							}
-						} 
+								else if (methodOnClassOfFirstArgument) {
+									if (arg0AsInstanceOfClazz != null) {
+										result = bestMatch.invoke(arg0AsInstanceOfClazz, args);
+									}
+									else {
+										addError(new ModelError("first argument must be an instance of the class containing the method", ErrorType.ERROR));
+										result = null;
+									}
+								}
+								else {
+									result = bestMatch.invoke(clazz.getDeclaredConstructor().newInstance(), args);								
+								}
+								return convertResultToNode(result, bi);
+							} catch (Exception e) {
+								if (e.getMessage() == null) {
+									if (e.getSuppressed() != null && e.getSuppressed().length > 0) {
+										for (Throwable t : e.getSuppressed()) {
+											addError(new ModelError(t.getMessage(), ErrorType.ERROR));
+										}
+									}
+									else if (e instanceof InvocationTargetException) {
+										addError(new ModelError(((InvocationTargetException)e).getTargetException().getMessage(), ErrorType.ERROR));
+									}
+								}
+								else {
+									addError(new ModelError(e.getMessage(), ErrorType.ERROR));
+								}
+							} 
+						}
+						else {
+							addError(new ModelError("no method found matching '" + externaluri + "'", ErrorType.ERROR));						
+						}
 					}
 					else {
-						addError(new ModelError("no method found matching '" + externaluri + "'", ErrorType.ERROR));						
+						addError(new ModelError("Invalid class identifier: " + externaluri, ErrorType.ERROR));
 					}
 				}
 				else {
-					addError(new ModelError("Invalid class identifier: " + externaluri, ErrorType.ERROR));
+					addError(new ModelError("Unable to evaluate external equation \"" + externaluri + "\"", ErrorType.WARNING));
 				}
 			}
+			else {
+				addError(new ModelError("Eexternal equation doesn't appear to have an identifier.", ErrorType.ERROR));
+			}
+		}
+		else {
+			addError(new ModelError("Sorry, only external equations implemented in Java and on the classpath can be evaluated at this time.", ErrorType.WARNING));
 		}
 		return null;
 	}

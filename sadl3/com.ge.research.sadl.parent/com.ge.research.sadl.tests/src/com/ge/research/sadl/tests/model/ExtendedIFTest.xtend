@@ -312,7 +312,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 				assertTrue(cifr instanceof List<?>)
 				assertTrue((cifr as List<?>).size == 1)
 				assertEquals(
-				"and(rdf(v0, model:past, v1), and(rdf(v1, value, v4), and(rdf(v1, unit, \"seconds\"), and(rdf(model:TimingConstant5, model:cValue, v2), is(v4,v2)))))", 
+				"and(rdf(v0, model:past, v1), and(rdf(v1, value, v3), and(rdf(v1, unit, \"seconds\"), and(rdf(model:TimingConstant5, model:cValue, v2), is(v3,v2)))))", 
 					(cifr as List<?>).get(0).toString);
 			}
  			issues.assertHasIssues(0);
@@ -357,12 +357,12 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	@Test
 	def void testUnits_10() {
 		val forTest = newArrayList(
-"Rule R1:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, v4) and rdf(model:TimingConstant3, model:constantValue, v1) and rdf(v1, value, v3) and rdf(v1, unit, v4) and is(v2,v3) then rdf(model:System, model:approved, true).",
-"Rule R1b:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, v4) and rdf(model:TimingConstant3, model:constantValue, v1) and rdf(v1, value, v3) and rdf(v1, unit, v4) and is(v2,v3) then rdf(model:System, model:approved, true).",
-"Rule R1c:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(v0, value, v3) and rdf(v0, unit, \"seconds\") and rdf(model:TimingConstant5, model:cValue, v1) and is(v3,v1) then rdf(model:System, model:approved, true).",
-"Rule R1e:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, \"seconds\") and +(2,3,v1) and is(v2,v1) then rdf(model:System, model:approved, true).",
-"Rule R1f:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, \"seconds\") and +(2,3,v1) and is(v2,v1) then rdf(model:System, model:approved, true).",
-"Rule R5:  if rdf(model:System, model:inspection, model:Passed) then rdf(model:System, model:approved, true).",
+//"Rule R1:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, v4) and rdf(model:TimingConstant3, model:constantValue, v1) and rdf(v1, value, v3) and rdf(v1, unit, v4) and is(v2,v3) then rdf(model:System, model:approved, true).",
+//"Rule R1b:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, v4) and rdf(model:TimingConstant3, model:constantValue, v1) and rdf(v1, value, v3) and rdf(v1, unit, v4) and is(v2,v3) then rdf(model:System, model:approved, true).",
+//"Rule R1c:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, \"seconds\") and rdf(model:TimingConstant5, model:cValue, v1) and is(v2,v1) then rdf(model:System, model:approved, true).",
+//"Rule R1e:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, \"seconds\") and +(2,3,v1) and is(v2,v1) then rdf(model:System, model:approved, true).",
+//"Rule R1f:  if rdf(model:System, model:inspection, model:Passed) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, \"seconds\") and +(2,3,v1) and is(v2,v1) then rdf(model:System, model:approved, true).",
+//"Rule R5:  if rdf(model:System, model:inspection, model:Passed) then rdf(model:System, model:approved, true).",
 "Rule R2:  if rdf(model:System, model:publicized, true) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, \"seconds\") and rdf(model:TimingConstant3, model:constantValue, v1) and rdf(v1, value, v3) and rdf(v1, unit, \"seconds\") and +(v3,3,v4) and is(v2,v4) then rdf(model:System, model:inspection, model:Passed).",
 "Rule R2b:  if rdf(model:System, model:publicized, true) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, \"seconds\") and rdf(model:TimingConstant3, model:constantValue, v1) and rdf(v1, value, v3) and rdf(v1, unit, \"seconds\") and +(v3,3,v4) and is(v2,v4) then rdf(model:System, model:inspection, model:Passed).",
 "Rule R2c:  if rdf(model:System, model:publicized, true) and rdf(model:System, model:past, v0) and rdf(v0, value, v2) and rdf(v0, unit, \"seconds\") and rdf(model:TimingConstant3, model:constantValue, v1) and rdf(v1, value, v3) and rdf(v1, unit, \"seconds\") and +(v3,3,v4) and is(v2,v4) then rdf(model:System, model:inspection, model:Passed).",
@@ -396,34 +396,34 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 			 TimingConstant5 is a SimpleConstant with cValue 5.
 			 cValue of SimpleConstant has exactly 1 value. 
 			 
-			 Rule R1:
-			 	if inspection of System is Passed and past of System is (constantValue of TimingConstant3)
-			 	then approved of System is true.
-			
-			 Rule R1b:
-			 	if inspection of System is Passed and past of System is constantValue of TimingConstant3
-			 	then approved of System is true
-			 	.
-			
-			Rule R1c:
-			 	if inspection of System is Passed and past of System is (cValue of TimingConstant5) seconds
-			 	then approved of System is true .
+«««			 Rule R1:
+«««			 	if inspection of System is Passed and past of System is (constantValue of TimingConstant3)
+«««			 	then approved of System is true.
+«««			
+«««			 Rule R1b:
+«««			 	if inspection of System is Passed and past of System is constantValue of TimingConstant3
+«««			 	then approved of System is true
+«««			 	.
+«««			
+«««			Rule R1c:
+«««			 	if inspection of System is Passed and past of System is (cValue of TimingConstant5) seconds
+«««			 	then approved of System is true .
 			
 «««			Rule R1d:																									// has errors, tested separately below
 «««			 	if inspection of System is Passed and past of System is cValue of TimingConstant5 seconds
 «««			 	then approved of System is true .
 			
-			 Rule R1e:
-			 	if inspection of System is Passed and past of System is 2 seconds + 3 seconds
-			 	then approved of System is true.
-			
-			 Rule R1f:
-			 	if inspection of System is Passed and past of System is (2 seconds + 3 seconds)
-			 	then approved of System is true.
-			
-			 Rule R5:
-			 	if inspection of System is Passed
-			 	then approved of System is true .
+«««			 Rule R1e:
+«««			 	if inspection of System is Passed and past of System is 2 seconds + 3 seconds
+«««			 	then approved of System is true.
+«««			
+«««			 Rule R1f:
+«««			 	if inspection of System is Passed and past of System is (2 seconds + 3 seconds)
+«««			 	then approved of System is true.
+«««			
+«««			 Rule R5:
+«««			 	if inspection of System is Passed
+«««			 	then approved of System is true .
 			 
 			 Rule R2:
 			 	if publicized of System is true and past of System is ((constantValue of TimingConstant3) + (3 seconds))
@@ -1484,7 +1484,7 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
  			issues.assertHasIssues(2);	// one for each function, strConcat and print.
  			var param1issueFound = false;
  			for (issue : issues) {
- 				if (issue.message.equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information")) {
+ 				if (issue.message.equals("Function 'strConcat' has unknown parameter type, cannot do argument type checking.")) {
  					param1issueFound = true;
  				}
  			}

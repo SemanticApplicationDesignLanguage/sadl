@@ -36,6 +36,7 @@ import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.Literal;
+import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.Rule;
@@ -292,13 +293,13 @@ public interface ITranslator {
 	 */
 	public static Literal constantToLiteral(ConstantNode node) throws TranslationException {
 		if (node.getName().equals("PI")) {
-			Literal lit = new Literal();
+			Literal lit = new Literal(LiteralType.NumberLiteral);
 			lit.setValue(Math.PI);
 			lit.setOriginalText(node.getName());
 			return lit;
 		}
 		else if (node.getName().equals("e")) {
-			Literal lit = new Literal();
+			Literal lit = new Literal(LiteralType.NumberLiteral);
 			lit.setValue(Math.E);
 			lit.setOriginalText(node.getName());
 			return lit;

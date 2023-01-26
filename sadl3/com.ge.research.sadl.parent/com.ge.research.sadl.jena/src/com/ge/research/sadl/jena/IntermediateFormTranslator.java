@@ -669,7 +669,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	public Rule postProcessRule(Rule rule, EObject object) throws TranslationException {
 		clearCruleVariableTypedOutput();
 		try {
-			getUnittedQuantityHander().reset();
 			vNum = getModelProcessor().getVariableNumber();
 			variableIsInstanceReplacement(rule);
 			// do this first so that the arguments don't change before these are applied

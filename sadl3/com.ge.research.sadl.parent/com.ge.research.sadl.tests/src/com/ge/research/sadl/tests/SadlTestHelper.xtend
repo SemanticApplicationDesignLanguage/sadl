@@ -154,11 +154,11 @@ External ^unique(...) returns --:
 External thereExists(...) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin.ThereExists".
 
-External subtractDates(...) returns --:
+External subtractDates(dateTime d1, dateTime d2, string unit) returns duration:
 "com.ge.research.sadl.jena.reasoner.builtin.SubtractDates".
 
 External combineUnits(...) returns --:
-"com.ge.research.sadl.jena.reasoner.builtin.CombineUnits".
+"com.naturalsemantics.sadl.jena.reasoner.builtin.CombineUnits".
 
 External getClassFromConstraint(...) returns --:
 "com.ge.research.sadl.jena.reasoner.builtin.GetClassFromConstraint".
@@ -280,7 +280,7 @@ External notLiteral(--) returns --:
 
 // noValue (org.apache.jena.reasoner.rulesys.builtins.NoValue) is overridden by com.ge.research.sadl.jena.reasoner.builtin.NoValue
 
-External now(--) returns --:
+External now() returns dateTime:
 "org.apache.jena.reasoner.rulesys.builtins.Now".
 
 // print (org.apache.jena.reasoner.rulesys.builtins.Print) is overridden by com.ge.research.sadl.jena.reasoner.builtin.Print
