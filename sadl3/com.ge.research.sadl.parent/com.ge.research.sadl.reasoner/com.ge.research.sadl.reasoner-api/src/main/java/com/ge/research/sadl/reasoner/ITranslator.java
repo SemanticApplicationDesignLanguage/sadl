@@ -32,9 +32,12 @@ import org.apache.jena.ontology.OntModel;
 
 import com.ge.research.sadl.model.ModelError;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.ConstantNode;
 import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.Literal;
+import com.ge.research.sadl.model.gp.Literal.LiteralType;
+import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.Rule;
 
@@ -289,13 +292,13 @@ public interface ITranslator {
 	 */
 	public static Literal constantToLiteral(ConstantNode node) throws TranslationException {
 		if (node.getName().equals("PI")) {
-			Literal lit = new Literal();
+			Literal lit = new Literal(LiteralType.NumberLiteral);
 			lit.setValue(Math.PI);
 			lit.setOriginalText(node.getName());
 			return lit;
 		}
 		else if (node.getName().equals("e")) {
-			Literal lit = new Literal();
+			Literal lit = new Literal(LiteralType.NumberLiteral);
 			lit.setValue(Math.E);
 			lit.setOriginalText(node.getName());
 			return lit;
@@ -312,9 +315,40 @@ public interface ITranslator {
 	public String builtinTypeToString(BuiltinElement bin) throws TranslationException;
 	
 	/**
+	 * Method to determine the BuiltinType, if there is one, for the reasoner-specific built-in
+	 * name. This is needed because the SADL model may use the reasoner-specific name but we want
+	 * to treat the expression the same as if the grammar operator had been used.
+	 * 
+	 * @param biName
+	 * @return
+	 */
+	public BuiltinType reasonerBuiltinNameToBuiltinType(String biName);
+	
+	/**
+	 * Method to set the function name in the input BuiltinElement using the BuiltinType
+	 * and return the new name
+	 * @param bin
+	 * @return
+	 * @throws TranslationException
+	 */
+	public String setBuiltinElementNameByBuiltinType(BuiltinElement bin) throws TranslationException;
+	
+	/**
 	 * Return the full package and name of the class implementing the named builtin
 	 * @param builtinName -- name of builtin for which class name is desired
 	 * @return class name
 	 */
 	public String getBuiltinClassName(String builtinName);
+	
+	/**
+	 * Method to validate a the argument types of a built-in and return the return types.
+	 * @param model
+	 * @param argTypes
+	 * @return
+	 * @throws UnittedQuantityHandlerException
+	 * @throws ConfigurationException 
+	 * @throws TranslationException 
+	 */
+	public Node validateArgumentTypes(BuiltinElement be, OntModel model, List<Node> argTypes) throws TranslationException;
+
 }
