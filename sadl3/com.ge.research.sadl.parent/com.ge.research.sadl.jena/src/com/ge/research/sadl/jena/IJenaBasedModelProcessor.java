@@ -47,7 +47,12 @@ public interface IJenaBasedModelProcessor {
 	public List<SadlCommand> getSadlCommands();
 	
 	/**
+<<<<<<< HEAD
 	 * Method to obtain results of model processing, e.g., for testing. Note that this only works for Expr: statements.
+=======
+	 * Method to obtain results of model processing, e.g., for testing. Note that this is only intended 
+	 * for use with Expr: statements.
+>>>>>>> development
 	 * @throws TranslationException 
 	 * @throws InvalidTypeException 
 	 * @throws InvalidNameException 

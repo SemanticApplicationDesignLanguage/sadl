@@ -208,7 +208,7 @@ public class Test extends SadlCommand {
 		}
 		return sb.toString();
 	}
-
+	
 	public List<GraphPatternElement> getSharedPatterns() {
 		return sharedPatterns;
 	}
@@ -216,5 +216,4 @@ public class Test extends SadlCommand {
 	public void setSharedPatterns(List<GraphPatternElement> sharedPatterns) {
 		this.sharedPatterns = sharedPatterns;
 	}
-
 }

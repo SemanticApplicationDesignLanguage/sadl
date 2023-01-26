@@ -39,7 +39,6 @@ public class TestTranslator {
 		String stat = trans.translateRule(om, "http://sadl.org/Shapes.owl", rule);
 	}
 
-	
 	@Test
 	public void testTranslateRule_02() throws TranslationException {
 		ITranslator trans = new SWIPrologTranslatorPlugin();

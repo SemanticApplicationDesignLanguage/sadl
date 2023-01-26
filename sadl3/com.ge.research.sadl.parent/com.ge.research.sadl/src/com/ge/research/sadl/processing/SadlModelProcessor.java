@@ -39,6 +39,7 @@ import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
+import com.ge.research.sadl.model.gp.Junction.JunctionType;
 import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.NamedNode;
@@ -47,6 +48,7 @@ import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.ProxyNode;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
+import com.ge.research.sadl.model.gp.Test;
 import com.ge.research.sadl.model.gp.Test.ComparisonType;
 import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
@@ -62,6 +64,7 @@ import com.ge.research.sadl.refactoring.RefactoringHelper;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Declaration;
+import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.SadlModel;
@@ -74,7 +77,8 @@ import com.google.inject.Inject;
 
 
 public abstract class SadlModelProcessor implements IModelProcessor {
-//    private static final Logger logger = LoggerFactory.getLogger(SadlModelProcessor.class);
+public static final String THERE_EXISTS = "thereExists";
+	//    private static final Logger logger = LoggerFactory.getLogger(SadlModelProcessor.class);
     private Object target = null;	// the instance of Rule, Query, Equation, External, or Test into which we are trying to put the translation
     private List<IFTranslationError> errors = null;
     private Object encapsulatingTarget = null;	// when a query is in a test
@@ -169,12 +173,12 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 	}
 
 	/**
-	 * Method to determine if a referenced EObject is the declaration of that object. Useful in
-	 * distinguishing between an assignment (declaration) and a comparison for is, equals
+	 * Method to determine if an EObject is the declaration of that object or just a reference. Useful in
+	 * distinguishing between an assignment (declaration) and a comparison, is or equals
 	 * @param expr
 	 * @return
 	 */
-	public boolean isDeclaration(EObject expr) {
+	public static boolean isDeclaration(EObject expr) {
 		if (expr instanceof SubjHasProp) {
 			return isDeclaration(((SubjHasProp) expr).getLeft());
 		} else if (expr instanceof BinaryOperation) {
@@ -265,16 +269,18 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return builtin;
 	}
 	
-//	private Junction createJunction(Expression expr, String name, Object lobj, Object robj) {
-//		Junction junction = new Junction();
-//		junction.setJunctionName(name);
-//		junction.setLhs(lobj);
-//		junction.setRhs(robj);
-//		return junction;
-//	}
-
-	protected Object createUnaryBuiltin(EObject sexpr, String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
-		if (sobj instanceof Literal && BuiltinType.getType(name).equals(BuiltinType.Minus)) {
+	/**
+	 * Method to create a unary BuiltinElement
+	 * @param sexpr
+	 * @param unaryOperationName
+	 * @param sobj
+	 * @return
+	 * @throws InvalidNameException
+	 * @throws InvalidTypeException
+	 * @throws TranslationException
+	 */
+	protected Object createUnaryBuiltin(EObject sexpr, String unaryOperationName, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
+		if (sobj instanceof Literal && BuiltinType.getType(unaryOperationName).equals(BuiltinType.Minus)) {
 			Object theVal = ((Literal)sobj).getValue();
 			if (theVal instanceof Integer) {
 				theVal = ((Integer)theVal) * -1;
@@ -298,14 +304,14 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			Object lhs = junc.getLhs();
 			Object rhs = junc.getRhs();
 			if (lhs instanceof Literal && rhs instanceof Literal) {
-				lhs = createUnaryBuiltin(sexpr, name, lhs);
-				rhs = createUnaryBuiltin(sexpr, name, rhs);
+				lhs = createUnaryBuiltin(sexpr, unaryOperationName, lhs);
+				rhs = createUnaryBuiltin(sexpr, unaryOperationName, rhs);
 				junc.setLhs(lhs);
 				junc.setRhs(rhs);
 			}
 			return junc;
 		}
-		if (BuiltinType.getType(name).equals(BuiltinType.Equal)) {
+		if (BuiltinType.getType(unaryOperationName).equals(BuiltinType.Equal)) {
 			if (sobj instanceof BuiltinElement) {
 				if (isComparisonBuiltin(((BuiltinElement)sobj).getFuncName())) {
 					// this is a "is <comparison>"--translates to <comparsion> (ignore is)
@@ -317,9 +323,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 				return sobj;
 			}
 		}
-		BuiltinElement builtin = new BuiltinElement();
-		builtin.setFuncName(name);
-		builtin.setContext(sexpr);
+		BuiltinElement builtin = new BuiltinElement(unaryOperationName, sexpr);
 		if (isModifiedTriple(builtin.getFuncType())) {
 			if (sobj instanceof TripleElement) {
 				((TripleElement)sobj).setType(getTripleModifierType(builtin.getFuncType()));
@@ -332,7 +336,7 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 		return builtin;
 	}
 
-	protected TripleModifierType getTripleModifierType(BuiltinType btype) {
+	public TripleModifierType getTripleModifierType(BuiltinType btype) {
 		if (btype.equals(BuiltinType.Not) || btype.equals(BuiltinType.NotEqual)) {
 			return TripleModifierType.Not;
 		}
@@ -343,6 +347,59 @@ public abstract class SadlModelProcessor implements IModelProcessor {
 			return TripleModifierType.NotOnly;
 		}
 		return null;
+	}
+	/**
+	 * Method to create a binary BuiltinElement with the given name, context, and arguments
+	 * 
+	 * @param builtinName -- name of the BuiltinElement to be created
+	 * @param context -- the Xtext parse tree object associated with the BuiltinElement
+	 * @param lobj -- the result of processing the left side of the binary operation
+	 * @param robj -- the result of processing the right side of the binary opearation
+	 * 
+	 */
+	public GraphPatternElement createBinaryBuiltin(String builtinName, EObject context, Object lobj, Object robj)
+			throws InvalidNameException, InvalidTypeException, TranslationException {
+				if (builtinName.equals(JunctionType.AND_ALPHA) || builtinName.equals(JunctionType.AND_SYMBOL)
+						|| builtinName.equals(JunctionType.OR_ALPHA) || builtinName.equals(JunctionType.OR_SYMBOL)) {
+					Junction jct = new Junction();
+					jct.setJunctionName(builtinName);
+					jct.setLhs(nodeCheck(lobj));
+					jct.setRhs(nodeCheck(robj));
+					return jct;
+				} else if (builtinName.equals("is") && getTarget() instanceof Test) {
+					if (lobj instanceof NamedNode && ((NamedNode)lobj).getNodeType().equals(NodeType.InstanceNode) &&
+							robj instanceof VariableNode && ((VariableNode)robj).getType() instanceof NamedNode &&
+							((NamedNode) ((VariableNode)robj).getType()).getNodeType().equals(NodeType.ClassNode) &&
+							((VariableNode)robj).isCRulesVariable()) {
+						// the right was a Declaration so this is of the form <inst> is a <class>
+						TripleElement te = new TripleElement((Node) lobj, new RDFTypeNode(), ((VariableNode)robj).getType());
+						return te;
+					}
+					else {
+						((Test)getTarget()).setLhs(lobj);
+						((Test)getTarget()).setRhs(robj);
+						((Test)getTarget()).setCompName(builtinName);
+						return null;
+						}
+				} else {
+					BuiltinElement builtin = new BuiltinElement(transformOpName(builtinName), context);
+					if (lobj != null) {
+						builtin.addArgument(nodeCheck(lobj));
+					}
+					if (robj != null) {
+						builtin.addArgument(nodeCheck(robj));
+					}
+					return builtin;
+				}
+			}
+
+	protected String transformOpName(String op) {
+		if (op.equals("there exists")) {
+			return THERE_EXISTS;
+		} else if (op.equals("=") || op.equals("==")) {
+			return "is";
+		}
+		return op;
 	}
 
 	/**

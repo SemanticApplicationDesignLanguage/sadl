@@ -18,8 +18,6 @@
 package com.ge.research.sadl.utils
 
 import com.ge.research.sadl.model.DeclarationExtensions
-import com.ge.research.sadl.processing.SadlModelProcessor
-import com.ge.research.sadl.sADL.BinaryOperation
 import com.ge.research.sadl.sADL.Declaration
 import com.ge.research.sadl.sADL.EquationStatement
 import com.ge.research.sadl.sADL.ExpressionStatement
@@ -106,6 +104,7 @@ class SadlASTUtils {
 		return isUnit(it, null, null);
 	}
 
+
 	/**
 	 * {@code true} if the argument is a SADL resource which represents a non-quoted unit in a unit expression like construct.
 	 * Otherwise, {@code false}.
@@ -177,36 +176,10 @@ class SadlASTUtils {
 				var result = true
 				return result
 			}
-
-//			val leftSR = container.left instanceof SadlResource
-//			val propSR = container.prop instanceof SadlResource
-//			if (propSR) {
-//				val propLName = declarationExtensions.getConcreteName(container.prop as SadlResource)
-//				val inPofS = container.eContainer instanceof PropOfSubject
-//				if (inPofS) {
-//					val contIsRightOfPofS = (container.eContainer as PropOfSubject).right.equals(container)
-//					if (contIsRightOfPofS) {
-//						var retval = (it as SadlResource).equals(container.prop as SadlResource);
-//						return retval
-//					}			
-//				}
-//			}
-//			return eContainingFeature === SUBJ_HAS_PROP__PROP && container.right === null &&
-//				!leftSR
-////				 &&
-////				!container.inQueryStatement && !container.inEquationStatement && !container.inRuleStatement;
 		}
-		
-		
 		return false
 	}
 
-	static def boolean isComparisonOperation(BinaryOperation operation) {
-		return SadlModelProcessor.isComparisonBuiltin(operation.op)
-	}
-
-	// TOOD this logic should be much smarter.
-	
 	private static def isInExpressionGrammar(EObject it) {
 		if (isInRuleStatement) { return true }
 		if (isInQueryStatement) { return true }

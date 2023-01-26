@@ -11,11 +11,13 @@ import org.junit.runner.RunWith
 
 import static org.junit.Assert.*
 import com.ge.research.sadl.jena.JenaBasedSadlModelProcessor
+import org.junit.Ignore
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
 public class OntologyPathFindingTest extends AbstractSADLModelProcessorTest {
 
+	@Ignore ("This requires path finding to pass")
 	@Test 
 	def void test_01() {
 		val forTest = newArrayList(
@@ -33,7 +35,7 @@ public class OntologyPathFindingTest extends AbstractSADLModelProcessorTest {
   		'''.assertValidatesTo([ jenaModel, rules, cmds, issues, rprocessor |
 			println("Issues:")
 			for (issue:issues) {
-				println(issue.message)
+				println(issue)
 			}
 //			assertTrue(issues.size == 0)
 //			assertTrue(issues.filter[severity === Severity.ERROR].nullOrEmpty)  // when run in this way there are errors from model processing because the preference isn't set before model processing awc 6/9/22

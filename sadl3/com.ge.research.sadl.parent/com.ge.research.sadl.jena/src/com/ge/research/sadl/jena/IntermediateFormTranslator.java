@@ -92,6 +92,7 @@ import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.reasoner.TranslationException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
+import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.TestStatement;
 import com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena;
 import com.naturalsemantics.sadl.processing.ISadlUnittedQuantityHandler;
@@ -296,11 +297,112 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 //		return errors;
 //	}
 	@Override
-	public List<com.ge.research.sadl.processing.IFTranslationError> getErrors() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<IFTranslationError> getErrors() {
+		return errors;
+	}
+	
+	private GraphPatternElement createBinaryBuiltin(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
+		BuiltinElement builtin = new BuiltinElement(name, expr);
+		if (lobj != null) {
+			builtin.addArgument(SadlModelProcessor.nodeCheck(lobj));
+		}
+		if (robj != null) {
+			builtin.addArgument(SadlModelProcessor.nodeCheck(robj));
+		}
+		return builtin;
+	}
+	
+	private Junction createJunction(Expression expr, String name, Object lobj, Object robj) throws InvalidNameException, InvalidTypeException, TranslationException {
+		Junction junction = new Junction();
+		junction.setJunctionName(name);
+		junction.setLhs(SadlModelProcessor.nodeCheck(lobj));
+		junction.setRhs(SadlModelProcessor.nodeCheck(robj));
+		return junction;
 	}
 
+	private Object createUnaryBuiltin(Expression sexpr, String name, Object sobj) throws InvalidNameException, InvalidTypeException, TranslationException {
+		if (sobj instanceof Literal && BuiltinType.getType(name).equals(BuiltinType.Minus)) {
+			Object theVal = ((Literal)sobj).getValue();
+			if (theVal instanceof Integer) {
+				theVal = ((Integer)theVal) * -1;
+			}
+			else if (theVal instanceof Long) {
+				theVal = ((Long)theVal) * -1;
+			}
+			else if (theVal instanceof Float) {
+				theVal = ((Float)theVal) * -1;
+			}
+			else if (theVal instanceof Double) {
+				theVal = ((Double)theVal) * -1;
+			}
+			((Literal)sobj).setValue(theVal);
+			((Literal)sobj).setOriginalText("-" + ((Literal)sobj).getOriginalText());
+			return sobj;
+		}
+		if (sobj instanceof Junction) {
+			// If the junction has two literal values, apply the op to both of them.
+			Junction junc = (Junction) sobj;
+			Object lhs = junc.getLhs();
+			Object rhs = junc.getRhs();
+			if (lhs instanceof Literal && rhs instanceof Literal) {
+				lhs = createUnaryBuiltin(sexpr, name, lhs);
+				rhs = createUnaryBuiltin(sexpr, name, rhs);
+				junc.setLhs(SadlModelProcessor.nodeCheck(lhs));
+				junc.setRhs(SadlModelProcessor.nodeCheck(rhs));
+			}
+			return junc;
+		}
+		if (BuiltinType.getType(name).equals(BuiltinType.Equal)) {
+			if (sobj instanceof BuiltinElement) {
+				if (isComparisonBuiltin(((BuiltinElement)sobj).getFuncName())) {
+					// this is a "is <comparison>"--translates to <comparsion> (ignore is)
+					return sobj;
+				}
+			}
+			else if (sobj instanceof Literal || sobj instanceof NamedNode) {
+				// an "=" interval value of a value is just the value
+				return sobj;
+			}
+		}
+		BuiltinElement builtin = new BuiltinElement(name, sexpr);
+		if (isModifiedTriple(builtin.getFuncType())) {
+			if (sobj instanceof TripleElement) {
+				((TripleElement)sobj).setType(getModelProcessor().getTripleModifierType(builtin.getFuncType()));
+				return sobj;
+			}
+		}
+		if (sobj != null) {
+			builtin.addArgument(SadlModelProcessor.nodeCheck(sobj));
+		}
+		return builtin;
+	}
+
+	private TripleElement addGraphPatternElementAtEnd(GraphPatternElement head, Node subject, Node predicate, Node object, TripleSourceType sourceType) {
+		TripleElement newTriple = new TripleElement();
+		newTriple.setSubject(subject);
+		newTriple.setPredicate(predicate);
+		newTriple.setObject(object);
+		newTriple.setSourceType(sourceType);
+		return newTriple;
+	}
+	
+	private GraphPatternElement addGraphPatternElementAtEnd(GraphPatternElement head, GraphPatternElement newTail) {
+		if (head != null) {
+			GraphPatternElement lastElement = getLastGraphPatternElement(head);
+			lastElement.setNext(newTail);
+		}
+		else {
+			head = newTail;
+		}
+		return head;
+	}
+	
+	private GraphPatternElement getLastGraphPatternElement(GraphPatternElement pattern) {
+		while (pattern.getNext() != null) {
+			pattern = pattern.getNext();
+		}
+		return pattern;
+	}
 	
 	/**
 	 * Method to find all of the variables in a graph pattern that might be the implied select variables of a query
@@ -1110,8 +1212,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 				}
 				else {
-					workingGpe = new BuiltinElement();
-					workingGpe.setFuncName(((BuiltinElement) gpe).getFuncName());
+					workingGpe = new BuiltinElement(((BuiltinElement) gpe).getFuncName(), ((BuiltinElement)gpe).getContext());
 					workingGpe.setFuncType(((BuiltinElement) gpe).getFuncType());
 					for (int i = 0; i < ((BuiltinElement) gpe).getArguments().size(); i++) {
 						workingGpe.addArgument(originalArgs.get(i));
@@ -1573,8 +1674,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			// at least handle the interesting special case where they  are literals
 			
 			if (lhs instanceof Literal) {
-				BuiltinElement lhsbe = new BuiltinElement();
-				lhsbe.setFuncName("==");
+				BuiltinElement lhsbe = new BuiltinElement("==", ((Junction)pattern).getContext());
 				lhsbe.setCreatedFromInterval(true);
 				lhsbe.addArgument(SadlModelProcessor.nodeCheck(lhs));
 				((Junction)pattern).setLhs(SadlModelProcessor.nodeCheck(lhsbe));
@@ -1593,8 +1693,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			
 			if (rhs instanceof Literal) {
-				BuiltinElement rhsbe = new BuiltinElement();
-				rhsbe.setFuncName("==");
+				BuiltinElement rhsbe = new BuiltinElement("==", ((Junction)pattern).getContext());
 				rhsbe.setCreatedFromInterval(true);
 				rhsbe.addArgument(SadlModelProcessor.nodeCheck(rhs));
 				retval = SadlModelProcessor.nodeCheck(rhsbe);
@@ -2379,7 +2478,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 									((TripleElement)realArg).setType(TripleModifierType.Not);
 									return realArg;	// "not" is a unary operator, so it is safe to assume this is the only argument
 								}
-								else if (be.getFuncName().equals(JenaBasedSadlModelProcessor.THERE_EXISTS) && ((TripleElement)realArg).getSubject() instanceof VariableNode){
+								else if (be.getFuncName().equals(SadlModelProcessor.THERE_EXISTS) && ((TripleElement)realArg).getSubject() instanceof VariableNode){
 									be.getArguments().set(0, ((TripleElement)realArg).getSubject());
 									patterns.add(patterns.size() - 1, be);
 									return null;
@@ -2406,7 +2505,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 		}
-		if (be.getFuncName().equals(JenaBasedSadlModelProcessor.THERE_EXISTS)) {
+		if (be.getFuncName().equals(SadlModelProcessor.THERE_EXISTS)) {
 			if (patterns.size() == 0) {
 				patterns.add(be);
 			}
@@ -3261,8 +3360,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			VariableNode otherVar = cruleVariablesTypeOutput.get(i);
 			if (otherVar.getType().equals(node.getType())) {
 				if (!notEqualAlreadyPresent(gpes, otherVar, node)) {
-					BuiltinElement newBi = new BuiltinElement();
-					newBi.setFuncName("!=");
+					BuiltinElement newBi = new BuiltinElement("!=", otherVar.getContext());
 					newBi.setFuncType(BuiltinType.NotEqual);
 					newBi.addArgument(otherVar);
 					newBi.addArgument(node);

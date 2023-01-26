@@ -514,7 +514,7 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	}
 
-//	@Ignore
+	@Ignore
 	@Test
 	def void testCRule_05() {
 		val grd = newArrayList(

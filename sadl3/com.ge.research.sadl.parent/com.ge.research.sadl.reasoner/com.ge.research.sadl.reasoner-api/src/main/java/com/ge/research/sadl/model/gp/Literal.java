@@ -186,7 +186,7 @@ public class Literal extends Node {
 		    }
 		}
 	}
-	
+
 	public LiteralType getLiteralType() {
 		return literalType;
 	}

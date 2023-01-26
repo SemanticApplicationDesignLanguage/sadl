@@ -24,7 +24,7 @@ jobs:
 
     steps:
     - name: Check out SADL source
-      uses: actions/checkout@v3.2.0
+      uses: actions/checkout@v3.3.0
 
     - name: Set up Java
       uses: actions/setup-java@v3.9.0
@@ -61,7 +61,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build and push SADL-Eclipse image
-      uses: docker/build-push-action@v3.2.0
+      uses: docker/build-push-action@v3.3.0
       with:
         context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
         file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
@@ -71,7 +71,7 @@ jobs:
           sadl/sadl-eclipse:${{ github.event.release.tag_name }}
 
     - name: Check out sadl-update-sites
-      uses: actions/checkout@v3.2.0
+      uses: actions/checkout@v3.3.0
       with:
         repository: SemanticApplicationDesignLanguage/sadl-update-sites
         token: ${{ secrets.CI_PAT }}

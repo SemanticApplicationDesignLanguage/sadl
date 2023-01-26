@@ -166,8 +166,7 @@ public class Equation {
 			}
 		}
 		return sb.toString();
-	}
-	
+	}	
 	public String toDescriptiveString() {
 		StringBuilder sb = new StringBuilder();
 		if (getReturnTypes() != null) {
@@ -307,7 +306,7 @@ public class Equation {
 		}
 		return sb.toString();		
 	}
-
+	
 	public String getNamespace() {
 		return namespace;
 	}

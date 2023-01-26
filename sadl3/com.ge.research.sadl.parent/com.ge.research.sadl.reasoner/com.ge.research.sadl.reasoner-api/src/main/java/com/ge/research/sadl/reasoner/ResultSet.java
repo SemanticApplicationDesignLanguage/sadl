@@ -508,7 +508,7 @@ public class ResultSet {
 		if (spidx > 0 && spidx < val.length() - 1) {
 			String possibleNumber = val.substring(0, spidx);
 			try {
-				Double dbl = Double.parseDouble(possibleNumber);
+				Double dbl = Double.parseDouble(possibleNumber);		//  failure will take control to the Exception
 				StringBuilder sb = new StringBuilder(possibleNumber);
 				String rest = val.substring(spidx + 1);
 				boolean isQuoted = isDoubleQuoted(rest, "\\");
