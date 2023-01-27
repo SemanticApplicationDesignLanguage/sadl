@@ -68,6 +68,7 @@ import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.NamedNode.NodeType;
 import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.model.gp.ProxyNode;
+import com.ge.research.sadl.model.gp.Query;
 import com.ge.research.sadl.model.gp.RDFTypeNode;
 import com.ge.research.sadl.model.gp.Rule;
 import com.ge.research.sadl.model.gp.Test;
@@ -76,6 +77,8 @@ import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.TripleElement.TripleSourceType;
 import com.ge.research.sadl.model.gp.VariableNode;
+import com.ge.research.sadl.processing.IFTranslationError;
+import com.ge.research.sadl.processing.I_IntermediateFormTranslator;
 import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.processing.SadlModelProcessor;
 import com.ge.research.sadl.reasoner.CircularDependencyException;
@@ -1223,12 +1226,29 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return rule;
 	}
 
-	protected void addImpliedAndExpandedProperties(List<GraphPatternElement> fgpes) throws InvalidNameException, InvalidTypeException, TranslationException {
-//		List<GraphPatternElement> fgpes = flattenLinkedList(gpes);
+	@SuppressWarnings("unchecked")
+	public Object postProcessExpressionStatement(Object exprStmt, EObject context) throws TranslationException, InvalidNameException, InvalidTypeException {
+		if (exprStmt instanceof GraphPatternElement) {
+			return addImpliedAndExpandedProperties((GraphPatternElement)exprStmt);
+		}
+		else if (exprStmt instanceof List<?>) {
+			return addImpliedAndExpandedProperties((List<GraphPatternElement>)exprStmt);
+		}
+		else if (exprStmt instanceof Query) {
+			List<GraphPatternElement> patterns = addImpliedAndExpandedProperties(((Query)exprStmt).getPatterns());
+			((Query)exprStmt).setPatterns(patterns);
+			return exprStmt;
+		}
+//		throw new TranslationException("Unexpected input into postProcessExpressionStatement: " + exprStmt.getClass().getCanonicalName());
+		return exprStmt;
+	}
+	
+	protected List<GraphPatternElement>  addImpliedAndExpandedProperties(List<GraphPatternElement> fgpes) throws InvalidNameException, InvalidTypeException, TranslationException {
 		for (int i = 0; i < fgpes.size(); i++) {
 			GraphPatternElement gpeback = addImpliedAndExpandedProperties(fgpes.get(i));
 			fgpes.set(i, gpeback);
 		}
+		return fgpes;
 	}
 
 	protected GraphPatternElement addImpliedAndExpandedProperties(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -1973,6 +1993,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		else if (retiredNode instanceof VariableNode) {
 			// there's already a triple for te in those patterns processed
+			// however, check to see if there's an embedded TripleElement to be expanded
+			if (te.getObject() instanceof ProxyNode && 
+					((ProxyNode)te.getObject()).getProxyFor() instanceof TripleElement &&
+					((TripleElement)((ProxyNode)te.getObject()).getProxyFor()).getSubject() == null) {
+				TripleElement nestedTriple = (TripleElement)((ProxyNode)te.getObject()).getProxyFor();
+				nestedTriple.setSubject(retiredNode);
+				patterns.add(nestedTriple);
+			}
 			return retiredNode;
 		}
 		Node subj = te.getSubject();
@@ -2486,13 +2514,14 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			Object finalIfsVar = expandProxyNodes(moveToIfts, realArgForIfs, false, UnNestingType.ReturnObjectMoveBefore);
 			if (finalIfsVar == null && realArgForIfs instanceof BuiltinElement) {
 				Node newNode = getVariableNode((BuiltinElement)realArgForIfs);
+				setNewReturnVariableType(newNode, (BuiltinElement)realArgForIfs);
 				((BuiltinElement)realArgForIfs).addArgument(newNode);
 				finalIfsVar = newNode;
 				((ProxyNode)arg1PN).setReplacementNode(SadlModelProcessor.nodeCheck(finalIfsVar));
 				retiredProxyNodes.put((GraphPatternElement) realArgForIfs, arg1PN);
 			}
 			if (realArgForThen instanceof TripleElement && ((TripleElement)realArgForThen).getObject() == null) {
-				Object finalThensVar = expandProxyNodes(patterns, realArgForThen, isRuleThen, UnNestingType.ReturnObjectMoveBefore);
+//				Object finalThensVar = expandProxyNodes(patterns, realArgForThen, isRuleThen, UnNestingType.ReturnObjectMoveBefore);
 				((TripleElement)realArgForThen).setObject(SadlModelProcessor.nodeCheck(finalIfsVar));
 				if (!patterns.contains((TripleElement)realArgForThen)) {
 					patterns.add((TripleElement)realArgForThen);
@@ -2660,6 +2689,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							else if (((BuiltinElement)realArg).getArguments() != null &&
 									getModelProcessor().isBuiltinMissingArgument(((BuiltinElement)realArg).getFuncName(), ((BuiltinElement)realArg).getArguments().size())){
 								Node newNode = getVariableNode((BuiltinElement)realArg);
+								setNewReturnVariableType(newNode, (BuiltinElement)realArg);
 								((BuiltinElement)realArg).addArgument(newNode);
 								argNode = newNode;
 								((ProxyNode)arg).setReplacementNode(SadlModelProcessor.nodeCheck(argNode));
@@ -2669,6 +2699,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 							else if (((BuiltinElement)realArg).getArguments() == null &&
 									getModelProcessor().isBuiltinMissingArgument(((BuiltinElement)realArg).getFuncName(), 0)) {
 								Node newNode = getVariableNode((BuiltinElement)realArg);
+								setNewReturnVariableType(newNode, (BuiltinElement)realArg);
 								((BuiltinElement)realArg).addArgument(newNode);
 								argNode = newNode;
 								((ProxyNode)arg).setReplacementNode(SadlModelProcessor.nodeCheck(argNode));
@@ -2726,6 +2757,84 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		patterns = moveTriplesOutOfBuiltin(patterns, be, isRuleThen);
 		return returnNode;
+	}
+
+	/**
+	 * Method to set the type of a BuiltinElement return variable type
+	 * @param varNode
+	 * @param be
+	 * @throws TranslationException
+	 */
+	private void setNewReturnVariableType(Node varNode, BuiltinElement be) throws TranslationException {
+		if (be.getReturnTypes() != null) {
+			List<Node> retTypes = be.getReturnTypes();
+			((VariableNode)varNode).setType(retTypes.get(retTypes.size() - 1));
+			return;
+		}
+		if (be.getContext() != null && be.getContext() instanceof EObject) {
+			Object beTci;
+			try {
+				beTci = getModelProcessor().getModelValidator().getType((EObject)be.getContext());
+			} catch (TranslationException e) {
+				throw e;
+			} catch (Exception e) {
+				throw new TranslationException(e.getMessage(), e);
+			}
+			if (beTci instanceof TypeCheckInfo) {
+				if (getModelProcessor().isNumericOperator(be.getFuncName())) {
+					List<Node> args = be.getArguments();
+					boolean uqFound = false;
+					for (Node arg : args) {
+						if (isUnittedQuantity(arg)) {
+							uqFound = true;
+						}
+					}
+					if (uqFound) {
+						Node beRetType = ((TypeCheckInfo)beTci).getTypeCheckType();
+						if (beRetType != null) {
+							((VariableNode)varNode).setType(beRetType);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Method to determine if a Node is a UnittedQuantity
+	 * @param arg
+	 * @return
+	 */
+	public boolean isUnittedQuantity(Node arg) {
+		if (arg instanceof VariableNode) {
+			return isUnittedQuantityVariable(arg);
+		}
+		else if (arg instanceof NamedNode) {
+			return getModelProcessor().isUnittedQuantity(((NamedNode)arg).getURI());
+		}
+		if (arg instanceof ProxyNode) {
+			GraphPatternElement pf = ((ProxyNode)arg).getProxyFor();
+			if (pf instanceof BuiltinElement && ((BuiltinElement)pf).getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME)) {
+				return true;
+			}
+		}
+		if (arg instanceof Literal && ((Literal)arg).getUnits() != null) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Method to determine if a VariableNode is a subclass of UnittedQuantity
+	 * @param node
+	 * @return
+	 */
+	private boolean isUnittedQuantityVariable(Node node) {
+		if (node instanceof VariableNode && ((VariableNode)node).getType() instanceof NamedNode) {
+			NamedNode varType = (NamedNode) ((VariableNode)node).getType();
+			return getModelProcessor().isUnittedQuantity(varType.getURI());
+		}
+		return false;
 	}
 
 	private boolean objectShouldBeUnittedQuantity(TripleElement tr) {

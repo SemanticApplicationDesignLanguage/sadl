@@ -193,6 +193,7 @@ import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.owl2sadl.OwlToSadl;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.processing.IFTranslationError;
 import com.ge.research.sadl.processing.ISadlOntologyHelper.Context;
 import com.ge.research.sadl.processing.OntModelProvider;
 import com.ge.research.sadl.processing.SadlConstants;
@@ -1756,6 +1757,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				clearCruleVariables();
 				Object rawResult = postProcessTranslationResult(
 						applyPulledUpOperations(processExpression(((ExpressionStatement) element).getExpr())));
+				getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
+				rawResult = getIfTranslator().postProcessExpressionStatement(rawResult, element);
+				setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 				if (isSyntheticUri(null, element.eResource())) {
 					// for JUnit tests, do not expand; expansion, if desired, will be done upon retrieval
 					addIntermediateFormResult(rawResult);
@@ -1840,6 +1844,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			} catch (ConfigurationException e) {
 				addError(e.getMessage(), expression);
 			}			
+		}
+		else {
+			addInfo("Unable to evaluate '" + bi.getFuncName() + "'; no invokable equation found.", expression);
 		}
 		return null;
 	}
@@ -2258,10 +2265,18 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		return false;
 	}
 
+	/**
+	 * Method to process a TestStatement.
+	 * @param element
+	 * @return
+	 * @throws JenaProcessorException
+	 */
 	public Test[] processStatement(TestStatement element) throws JenaProcessorException {
+		clearCruleVariables();
 		Test[] generatedTests = null;
 		Test sadlTest = null;
 		boolean done = false;
+		Object testtrans = null;
 		try {
 			EList<Expression> tests = element.getTests();
 			for (int tidx = 0; tidx < tests.size(); tidx++) {
@@ -2274,111 +2289,176 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					test.setLength(node.getLength());
 				}
 				setTarget(test);
-
-				// now translate the test expression
-				Object testtrans = postProcessTranslationResult(processExpression(expr));
-
-				// Examine testtrans, the results of the translation.
-				// The recognition of various Test patterns, so that the LHS, RHS, Comparison of
-				// the Test can be
-				// properly set is best done on the translation before the ProxyNodes are
-				// expanded--their expansion
-				// destroys needed information and introduces ambiguity
-
-				if (testtrans instanceof BuiltinElement
-						&& IntermediateFormTranslator.isComparisonBuiltin(((BuiltinElement) testtrans).getFuncName())) {
-					List<Node> args = ((BuiltinElement) testtrans).getArguments();
-					if (args != null && args.size() == 2) {
-						if (((BuiltinElement)testtrans).getFuncType().equals(BuiltinType.Equal) && 
-								args.get(0) instanceof NamedNode && ((NamedNode)args.get(0)).getNodeType().equals(NodeType.InstanceNode) &&
-								args.get(1) instanceof VariableNode && ((VariableNode)args.get(1)).getType() instanceof NamedNode &&
-								((NamedNode)((VariableNode)args.get(1)).getType()).getNodeType().equals(NodeType.ClassNode)) {
-							TripleElement testtriple = new TripleElement((NamedNode)args.get(0), new RDFTypeNode(), ((VariableNode)args.get(1)).getType());
-							test.setLhs(testtriple);
-							generatedTests = new Test[1];
-							generatedTests[0] = test;
-							done = true;
-						}
-						else {
-							test.setCompName(((BuiltinElement) testtrans).getFuncType());
-							getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
-							Object lhsObj = getIfTranslator().expandProxyNodes(args.get(0), false, true);
-							Object rhsObj = getIfTranslator().expandProxyNodes(args.get(1), false, true);
-							setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
-							test.setLhs(
-									(lhsObj != null && lhsObj instanceof List<?> && ((List<?>) lhsObj).size() > 0) ? lhsObj
-											: args.get(0));
-							test.setRhs(
-									(rhsObj != null && rhsObj instanceof List<?> && ((List<?>) rhsObj).size() > 0) ? rhsObj
-											: args.get(1));
-							generatedTests = new Test[1];
-							generatedTests[0] = test;
-							done = true;
-						}
+				
+				/*
+				 * A TestStatement is a SADL expression that evaluates to true (pass) or false (fail). 
+				 * This could be one of several constructs.
+				 *   1. a completely specified expression that translates into a TripleElement or set of TripleElements in the 
+				 *   	IntermediateForm. In that case the triple will either be found (pass) or not found (fail) in the triple store
+				 *   2. a BinaryOperation that is a comparison of a lefthand side (LHS) and a righthand side (RHS) 
+				 *      with a comparison operator, e.g., is, =, <, etc.
+				 * 	   a) if either the LHS or the RHS or both is a SADL SelectExpression, then the two sides must be processed 
+				 *        separately because the SADL SelectExpression will not be a GraphPatternElement so cannot be an argument 
+				 *        to a BuiltinElement. The type of the operation is stored as the Test comparisonType.
+				 *     b) otherwise the BinaryOperation can be completely processed as a single expression
+				 *        i) if either argument of the BinaryOperation contains GraphPatternElements (TripleElements or BuiltinElements),
+				 *           then the BinaryOperation is identified and the variable(s) associated with the results of the set
+				 *           of GraphPatternElements is identified as the LHS and/or RHS variables. In test
+				 *           execution either or both sets of GraphPatternElements is converted to a query
+				 *           and the value(s) returned are compared per the comparison operator.
+				 */
+				
+				getIfTranslator();
+				if (expr instanceof BinaryOperation && IntermediateFormTranslator.isComparisonBuiltin(((BinaryOperation)expr).getOp()) &&
+						(((BinaryOperation)expr).getLeft() instanceof SelectExpression ||
+								((BinaryOperation)expr).getRight() instanceof SelectExpression)) {
+					String op = ((BinaryOperation)expr).getOp();
+					Expression lexpr = ((BinaryOperation)expr).getLeft();
+					Expression rexpr = ((BinaryOperation)expr).getRight();
+					Object ltrans = postProcessTranslationResult(processExpression(lexpr));
+					ltrans = getIfTranslator().postProcessExpressionStatement(ltrans, lexpr);
+					Object rtrans = postProcessTranslationResult(processExpression(rexpr));
+					rtrans = getIfTranslator().postProcessExpressionStatement(rtrans, rexpr);
+					test.setCompName(op);
+					test.setLhs(ltrans);
+					if (ltrans instanceof Query) {
+						test.setLhsVariables(((Query)ltrans).getVariables());
 					}
-				} else if (testtrans instanceof TripleElement) {
-					if (((TripleElement) testtrans).getModifierType() != null
-							&& !((TripleElement) testtrans).getModifierType().equals(TripleModifierType.None)) {
-						// Filtered query with modification
-						TripleModifierType ttype = ((TripleElement) testtrans).getModifierType();
-						getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
-						Object trans = getIfTranslator().expandProxyNodes(testtrans, false, true);
-						setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
-						if ((trans != null && trans instanceof List<?> && ((List<?>) trans).size() > 0)) {
-							if (ttype.equals(TripleModifierType.Not)) {
-								if (changeFilterDirection(trans)) {
-									((TripleElement) testtrans).setType(TripleModifierType.None);
-								}
-							}
-							test.setLhs(trans);
-						} else {
-							if (ttype.equals(TripleModifierType.Not)) {
-								changeFilterDirection(testtrans);
-							}
-							test.setLhs(testtrans);
-						}
-						generatedTests = new Test[1];
-						generatedTests[0] = test;
-						done = true;
-					}
-				}
-				else if (testtrans instanceof Query) {
-					GraphPatternElement lp = ((Query)testtrans).getLastPattern();
-					GraphPatternElement realLp = null;
-					if (lp instanceof Junction) {
-						JunctionList plst = IntermediateFormTranslator.junctionToList((Junction)lp);
-						if (plst.size() > 0) {
-							realLp = plst.get(plst.size() - 1);
-							if (realLp instanceof BuiltinElement && 
-									isComparisonBuiltin(((BuiltinElement)realLp).getFuncName())) {
-								if (((BuiltinElement)realLp).getArguments().get(0) instanceof VariableNode) {
-									GraphPatternElement prior = plst.get(plst.size() - 2);
-									if (prior instanceof TripleElement && 
-											((TripleElement)prior).getObject().equals(((BuiltinElement)realLp).getArguments().get(0))) {
-										plst.remove(plst.size() - 1);
-										plst.remove(plst.size() - 1);
-										plst.add(prior);
-										test.setRhs(((BuiltinElement)realLp).getArguments().get(1));
-										((Query)testtrans).setPatterns(plst);
-									}
-								}
-								else if (((BuiltinElement)realLp).getArguments().get(0) instanceof ProxyNode && 
-										((ProxyNode)((BuiltinElement)realLp).getArguments().get(0)).getProxyFor() instanceof TripleElement) {
-									plst.remove(plst.size() - 1);
-									plst.add(((ProxyNode) ((BuiltinElement)realLp).getArguments().get(0)).getProxyFor());
-									test.setRhs(((BuiltinElement)realLp).getArguments().get(1));
-									((Query)testtrans).setPatterns(plst);
-								}
-								test.setCompName(((BuiltinElement)realLp).getFuncType());
-							}
-						}
-					}
-					if (!done) {
-						test.setLhs(testtrans);
-						done = true;
+					test.setRhs(rtrans);
+					if (rtrans instanceof Query) {
+						test.setRhsVariables(((Query)rtrans).getVariables());
 					}
 					generatedTests = new Test[1];
 					generatedTests[0] = test;
+					done = true;
+				}
+				else {
+					// translate the test expression as a single process
+					testtrans = postProcessTranslationResult(processExpression(expr));
+
+					// Examine testtrans, the results of the translation. Find the binary comparison BuiltinElement.
+					// Its arguments, if variables, will be the variables to be returned by the query. Any other
+					// BuiltinElements that appear in the GraphPatternElements must be operations that are 
+					// supported by the reasoner's query engine for text execution to succeed.
+					
+					getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
+					testtrans = getIfTranslator().postProcessExpressionStatement(testtrans, element);
+					if (testtrans instanceof Junction) {
+						getIfTranslator();
+						testtrans = IntermediateFormTranslator.junctionToList((Junction)testtrans);
+					}
+					Object expanded = getIfTranslator().expandProxyNodes(testtrans, false, true);
+					if (expanded instanceof List<?>) {
+						if (((List<?>)expanded).size() == 1) {
+							Object theGpe = ((List<?>)expanded).get(0);
+							if (theGpe instanceof Junction) {
+								getIfTranslator();
+								JunctionList flattened = IntermediateFormTranslator.junctionToList(((Junction)((List<?>)expanded).get(0)));
+								GraphPatternElement last = flattened.get(flattened.size() - 1);
+								if (last instanceof BuiltinElement) {
+									List<Node> args = ((BuiltinElement)last).getArguments();
+									if (((BuiltinElement)last).getFuncType().equals(BuiltinType.Not) 
+											&& args.get(0) instanceof ProxyNode) {
+										GraphPatternElement notArg = ((ProxyNode)args.get(0)).getProxyFor();
+										if (notArg instanceof BuiltinElement) {
+											args = ((BuiltinElement)notArg).getArguments();
+										}
+									}
+									if (args.size() > 0) {
+										if (args.get(0) instanceof VariableNode) {
+											List<VariableNode> lhsVars = new ArrayList<VariableNode>();
+											lhsVars.add((VariableNode) args.get(0));
+											test.setLhsVariables(lhsVars);
+										}
+										else {
+											test.setLhs(args.get(0));
+										}
+									}
+									if (args.size() > 1) {
+										if (args.get(1) instanceof VariableNode) {
+											List<VariableNode> rhsVars = new ArrayList<VariableNode>();
+											rhsVars.add((VariableNode) args.get(1));
+											test.setRhsVariables(rhsVars);
+										}
+										else {
+											test.setRhs(args.get(1));
+										}
+									}
+									test.setCompName(((BuiltinElement)last).getFuncName());
+									flattened.remove(last);
+									test.setSharedPatterns(flattened);
+									generatedTests = new Test[1];
+									generatedTests[0] = test;
+									done = true;
+								}
+								else {
+									// this isn't a comparison so it must be a pattern that exists (pass) or
+									// doesn't exist (fail) in the triple store
+									test.setLhs(flattened);
+									generatedTests = new Test[1];
+									generatedTests[0] = test;
+									done = true;
+								}
+							}
+							else if (theGpe instanceof TripleElement) {
+								if (((TripleElement) theGpe).getModifierType() != null
+										&& !((TripleElement) theGpe).getModifierType().equals(TripleModifierType.None)) {
+									// Filtered query with modification
+									TripleModifierType ttype = ((TripleElement) theGpe).getModifierType();
+									if (ttype.equals(TripleModifierType.Not)) {
+										if (changeFilterDirection(theGpe)) {
+											((TripleElement) theGpe).setType(TripleModifierType.None);
+										}
+									}
+									test.setLhs(theGpe);
+								}
+								else {
+									test.setLhs(theGpe);
+								}
+								generatedTests = new Test[1];
+								generatedTests[0] = test;
+								done = true;
+							}
+							else if (theGpe instanceof BuiltinElement) {
+								List<Node> args = ((BuiltinElement)theGpe).getArguments();
+								if (args != null && args.size() == 2) {
+									if (((BuiltinElement)testtrans).getFuncType().equals(BuiltinType.Equal) && 
+											args.get(0) instanceof NamedNode && ((NamedNode)args.get(0)).getNodeType().equals(NodeType.InstanceNode) &&
+											args.get(1) instanceof VariableNode && ((VariableNode)args.get(1)).getType() instanceof NamedNode &&
+											((NamedNode)((VariableNode)args.get(1)).getType()).getNodeType().equals(NodeType.ClassNode)) {
+										TripleElement testtriple = new TripleElement((NamedNode)args.get(0), new RDFTypeNode(), ((VariableNode)args.get(1)).getType());
+										test.setLhs(testtriple);
+										generatedTests = new Test[1];
+										generatedTests[0] = test;
+										done = true;
+									}
+									else {
+										test.setCompName(((BuiltinElement) testtrans).getFuncType());
+										if (expanded instanceof BuiltinElement) { 
+										}
+										else if (expanded instanceof List<?> && ((List<?>)expanded).size() == 1 &&
+												((List<?>)expanded).get(0) instanceof Junction) {
+											// TODO working here					getIfTranslator().flattenJunction((Junction) ((List<?>)expanded).get(0));
+										}
+										test.setLhs(args.get(0));
+										test.setRhs(args.get(1));
+										generatedTests = new Test[1];
+										generatedTests[0] = test;
+										done = true;
+									}
+								}
+							}
+							else {
+								addError("Unsupported type of GraphPatternElement in Test statement: " + theGpe.getClass().getCanonicalName(), element);
+							}
+						}
+						else if (testtrans != null){
+							addError("Unexpected result of Test statement processing; the list has " + ((List<?>)expanded).size() + " elements", element);
+						}
+					}
+					else {
+						addError("Unexpected result of Test statement processing: " + expanded.getClass().getCanonicalName(), element);
+					}
 				}
 
 				if (!done) {
@@ -2393,7 +2473,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							testExpanded = ((List<?>)testExpanded).get(0);
 						}
 						if (testExpanded instanceof Junction) {
-							testExpanded = getIfTranslator().junctionToList((Junction) testExpanded);
+							getIfTranslator();
+							testExpanded = IntermediateFormTranslator.junctionToList((Junction) testExpanded);
 						}
 						if (testExpanded instanceof List<?>) {
 							treatAsMultipleTests = containsMultipleTests((List<GraphPatternElement>) testExpanded);
@@ -2434,8 +2515,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 
 			for (int i = 0; generatedTests != null && i < generatedTests.length; i++) {
 				sadlTest = generatedTests[i];
-				applyImpliedProperties(sadlTest, tests.get(0));
-				getIfTranslator().postProcessTest(sadlTest, element);
 				// ICompositeNode node = NodeModelUtils.findActualNodeFor(element);
 				// if (node != null) {
 				// test.setLineNo(node.getStartLine());
@@ -2471,51 +2550,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			// e.printStackTrace();
 		}
 		return generatedTests;
-	}
-
-	private void applyImpliedProperties(Test sadlTest, Expression element) throws TranslationException {
-		sadlTest.setLhs(applyImpliedPropertiesToSide(sadlTest.getLhs(), element));
-		sadlTest.setRhs(applyImpliedPropertiesToSide(sadlTest.getRhs(), element));
-	}
-
-	private Object applyImpliedPropertiesToSide(Object side, Expression element) throws TranslationException {
-		Map<EObject, List<Property>> impprops = OntModelProvider.getAllImpliedProperties(getCurrentResource());
-		if (impprops != null) {
-			Iterator<EObject> imppropitr = impprops.keySet().iterator();
-			while (imppropitr.hasNext()) {
-				EObject eobj = imppropitr.next();
-				String uri = null;
-				if (eobj instanceof SadlResource) {
-					uri = getDeclarationExtensions().getConceptUri((SadlResource) eobj);
-				} else if (eobj instanceof Name) {
-					uri = getDeclarationExtensions().getConceptUri(((Name) eobj).getName());
-				}
-				if (uri != null) {
-					if (side instanceof NamedNode) {
-						if (((NamedNode) side).toFullyQualifiedString().equals(uri)) {
-							List<Property> props = impprops.get(eobj);
-							if (props != null && props.size() > 0) {
-								if (props.size() > 1) {
-									throw new TranslationException("More than 1 implied property found!");
-								}
-								// apply impliedProperties
-								NamedNode pred = new NamedNode(props.get(0).getURI());
-								if (props.get(0) instanceof DatatypeProperty) {
-									pred.setNodeType(NodeType.DataTypeProperty);
-								} else if (props.get(0) instanceof ObjectProperty) {
-									pred.setNodeType(NodeType.ObjectProperty);
-								} else {
-									pred.setNodeType(NodeType.PropertyNode);
-								}
-								return new TripleElement((NamedNode) side, pred, new VariableNode(getNewVar(element)));
-							}
-						}
-					}
-
-				}
-			}
-		}
-		return side;
 	}
 
 	public VariableNode createVariable(SadlResource sr) throws IOException, PrefixNotFoundException,
@@ -3391,6 +3425,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					TypeCheckInfo tci = null;
 					try {
 						tci = getModelValidator().getType(varList.get(i));
+						if (tci != null && tci.getImplicitProperties() != null) {
+							if (var instanceof VariableNode) {
+								if (tci.getImplicitProperties().size() == 1) {
+									ConceptName ipn = tci.getImplicitProperties().get(0);
+									((VariableNode)var).setImpliedPropertyNode(conceptNameToNamedNode(ipn));
+								}
+								else {
+									addWarning("Multiple implied properties on variable not supported", varList.get(i));
+								}
+							}
+						}
 					} catch (DontTypeCheckException e1) {
 						// OK to not type check
 					} catch (CircularDefinitionException e1) {
@@ -3557,6 +3602,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		Object expandedPattern = null;
 		try {
 			getIfTranslator().setStartingVariableNumber(getVariableNumber());	// make sure IF doesn't duplicate var names
+			pattern = getIfTranslator().postProcessExpressionStatement(pattern, whexpr);
 			expandedPattern = getIfTranslator().expandProxyNodes(pattern, false, true);
 			setVariableNumber(getIfTranslator().getVariableNumber());  // make sure this processor doesn't duplicate var names
 		} catch (InvalidNameException e) {
@@ -3596,6 +3642,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			}
 			pattern = getIfTranslator().removeDuplicates((List<?>) pattern);
 			query.setPatterns((List<GraphPatternElement>) pattern);
+		} else if (pattern instanceof GraphPatternElement) {
+			query.addPattern((GraphPatternElement)pattern);
 		} else if (pattern instanceof Literal) {
 			// this must be a SPARQL query
 			query.setSparqlQueryString(((Literal) pattern).getValue().toString());
@@ -5936,7 +5984,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							e.printStackTrace();
 						}
 					}
-					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
+					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel, false);
 				}
 				else {
 					addError("Something is going wrong with translation, please report", rexpr);
@@ -5952,7 +6000,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					if (isDefiningDeclaration) {
 						trel.setObject(((VariableNode)robj).getType());
 					}
-					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
+					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel, false);
 				}
 				else if (!(robj instanceof VariableNode)) {
 					if (lobj instanceof Node && robj instanceof Node) {
@@ -5967,7 +6015,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 								e.printStackTrace();
 							}
 						}
-						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel);
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, trel, false);
 					} else {
 						// throw new TranslationException("Unhandled binary operation condition: left
 						// and right are not both nodes.");
@@ -6073,7 +6121,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					} else if (isComparisonViaBuiltin(robj, lobj)) {
 						BuiltinElement be = (BuiltinElement) ((TripleElement) robj).getNext();
 						be.addMissingArgument((Node) lobj);
-						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern);
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern, false);
 					} else if (pattern instanceof TripleElement) {
 						TripleElement lastPattern = (TripleElement) pattern;
 						// this while may need additional conditions to narrow application to nested
@@ -6119,7 +6167,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					doVariableSubstitution(((TripleElement) pattern),
 							(VariableNode) ((TripleElement) pattern).getSubject(), (VariableNode) assignedNode);
 				}
-				return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern);
+				return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern, false);
 			}
 			BuiltinElement bin = null;
 			boolean binOnRight = false;
@@ -6132,7 +6180,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					//Pull up the not to the outside operator with the "is" operator nested     			
 					Node right_arg = right.getArguments().get(0);
 					GraphPatternElement bi = createBinaryBuiltin(op, expr, lobj, right_arg); 
-					Object biWithImpliedProperties = applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi);
+					Object biWithImpliedProperties = applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi, false);
 					Object ubi = createUnaryBuiltin(container, "not", biWithImpliedProperties);
 					return combineRest(ubi, rest);
 				}
@@ -6162,7 +6210,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 							bin.addArgument(assignedNode);
 						}
 					}
-					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, retObj);
+					return applyImpliedAndExpandedProperties(container, lexpr, rexpr, retObj, false);
 				} else if (assignedNode instanceof Node && isComparisonBuiltin(bin.getFuncName())) {
 					// this is a comparison with an extra "is"
 					if (bin.getArguments().size() == 1) {
@@ -6171,7 +6219,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						} else {
 							bin.addArgument(assignedNode);
 						}
-						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, bin);
+						return applyImpliedAndExpandedProperties(container, lexpr, rexpr, bin, false);
 					}
 				}
 			}
@@ -6189,7 +6237,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						return left;
 					}
 					else {
-						applyImpliedAndExpandedProperties(container, lexpr, rexpr, left);
+						applyImpliedAndExpandedProperties(container, lexpr, rexpr, left, false);
 						GraphPatternElement bi = createBinaryBuiltin(op, expr, left, arg); 
 						if (bi == null && getTarget() instanceof Test) {
 							Test tst = (Test) getTarget();
@@ -6223,7 +6271,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					}
 					gpe = gpe.getNext();
 				}
-				return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern);
+				return applyImpliedAndExpandedProperties(container, lexpr, rexpr, pattern, false);
 			}
 		}
 		// if we get to here we want to actually create a BuiltinElement for the
@@ -6236,7 +6284,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				&& robj instanceof com.ge.research.sadl.model.gp.Literal
 				&& !variableIsBound((Rule) getTarget(), null, (VariableNode) lobj)) {
 			return applyImpliedAndExpandedProperties(container, lexpr, rexpr,
-					createBinaryBuiltin("assign", expr, robj, lobj));
+					createBinaryBuiltin("assign", expr, robj, lobj), false);
 		}
 
 		if (op.equals("and") || op.equals("or")) {
@@ -6364,7 +6412,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (isNegated) {
 				bi = (GraphPatternElement) createUnaryBuiltin(container, "not", bi);
 			}
-			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi), rest);
+			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi, false), rest);
 		}
 	}
 
@@ -6683,7 +6731,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	 * @param maybeGpe
 	 * @return Object
 	 */
-	private Object applyImpliedAndExpandedProperties(EObject binobj, EObject lobj, EObject robj, Object maybeGpe) {
+	private Object applyImpliedAndExpandedProperties(EObject binobj, EObject lobj, EObject robj, Object maybeGpe, boolean recursiveCall) {
 		try {
 			Map<EObject, Property> ip = getModelValidator().getImpliedPropertiesUsed();
 			List<EObject> toBeRemoved = null;
@@ -6713,8 +6761,14 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 									//left is the first argument of a BuiltinElement
 									List<Node> args = ((BuiltinElement) maybeGpe).getArguments();
 									if(args.get(0) instanceof NamedNode ) {
-			        					addLocalizedTypeToNode(((NamedNode) args.get(0)), lPropTci);
-										((NamedNode) args.get(0)).setImpliedPropertyNode(impliedPropertyNode);
+										NamedNode arg1 = (NamedNode) args.get(0);
+										Node arg2 = args.get(1);
+										if (!recursiveCall && ((BuiltinElement)maybeGpe).getFuncType().equals(BuiltinType.Equal) && arg1 instanceof NamedNode) {
+											TripleElement newTr = new TripleElement(arg1, impliedPropertyNode, arg2);
+											maybeGpe = newTr;
+										}
+			        					addLocalizedTypeToNode(arg1, lPropTci);
+										arg1.setImpliedPropertyNode(impliedPropertyNode);
 
 									}else if (args.get(0) instanceof ProxyNode && args.get(1) instanceof ProxyNode) {
 										GraphPatternElement lGPE = ((ProxyNode)args.get(0)).getProxyFor();
@@ -6784,7 +6838,38 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					// TODO must add implied properties to rules, tests, etc.
 				} 
 				else if (maybeGpe == null && getTarget() != null) {
-					addError("implied properties not yet implemented for " + getTarget().getClass().getSimpleName(), binobj);
+					if (getTarget() instanceof Test) {
+						// the two sides of the test are treated as if they were two sides of an "is" BuiltinElement
+						BuiltinElement bi = new BuiltinElement("is", binobj);
+						Object lhsArg = ((Test)getTarget()).getLhs();
+						Object rhsArg = ((Test)getTarget()).getRhs();
+						try {
+							bi.addArgument(lhsArg instanceof Node ? (Node)lhsArg : new ProxyNode((GraphPatternElement) lhsArg));
+							bi.addArgument(rhsArg instanceof Node ? (Node)rhsArg : new ProxyNode((GraphPatternElement) rhsArg));
+							Object result = applyImpliedAndExpandedProperties(binobj, lobj, robj, bi, (maybeGpe == null ? false : true));
+							if (result instanceof BuiltinElement) {
+								((Test)getTarget()).setLhs(((BuiltinElement)bi).getArguments().get(0));
+								((Test)getTarget()).setRhs(((BuiltinElement)bi).getArguments().get(1));
+								return null;
+							}
+							else if (result instanceof TripleElement && 
+									((TripleElement)result).getObject().equals(rhsArg)) {
+								((Test)getTarget()).setLhs(result);
+								((Test)getTarget()).setRhs(null);
+								((Test)getTarget()).setCompName((String)null);
+								return null;
+							}
+							else {
+								throw new TranslationException("Unexpected error applying implied properties to target Test");
+							}
+						} catch (InvalidTypeException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					else {
+						addError("implied properties not yet implemented for " + getTarget().getClass().getSimpleName(), binobj);
+					}
 				}
 				else {
 					throw new TranslationException("Unexpected type to which to apply implied and expanded properties");
@@ -8431,7 +8516,33 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		else if (getTarget() != null && getTarget() instanceof Rule && 
 				((Rule)getTarget()).getVariable(getModelNamespace() + lName) != null) {
-			return ((Rule)getTarget()).getVariable(getModelNamespace() + lName);
+			VariableNode var = ((Rule)getTarget()).getVariable(getModelNamespace() + lName);
+			Property ip = OntModelProvider.getImpliedProperty(getCurrentResource(), aExpr);
+			if (ip != null) {
+				NamedNode propnn = new NamedNode(ip.getURI());
+				NodeType ptype;
+				if (ip instanceof DatatypeProperty) {
+					ptype = NodeType.DataTypeProperty;
+				}
+				else if (ip instanceof ObjectProperty) {
+					ptype = NodeType.ObjectProperty;
+				}
+				else if (ip instanceof AnnotationProperty) {
+					ptype = NodeType.AnnotationProperty;
+				}
+				else {
+					ptype = NodeType.PropertyNode;
+				}
+				propnn.setNodeType(ptype);
+				propnn = validateNamedNode(propnn);
+				TripleElement tr = new TripleElement(var, propnn, null);
+				// remove so it isn't applied again
+				getModelValidator().removeImpliedPropertyUsed(aExpr);
+				return tr;
+			}
+			else {
+				return var;
+			}
 		}			// make sure the right side is defined for binary operation
 		else if (lQName.equals(aExpr) && aExpr.eContainer() instanceof BinaryOperation
 				&& ((BinaryOperation) aExpr.eContainer()).getRight() != null
@@ -16537,4 +16648,17 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		}
 		cachedJenaResource.put(key, jenaResource);
 	}
+
+	@Override
+	public boolean isUnittedQuantity(String uri) {
+		OntClass cls = getTheJenaModel().getOntClass(uri);
+		if (cls != null) {
+			OntClass uQCls = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+			if (uQCls != null && (cls.equals(uQCls) || cls.hasSuperClass(uQCls, false))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }

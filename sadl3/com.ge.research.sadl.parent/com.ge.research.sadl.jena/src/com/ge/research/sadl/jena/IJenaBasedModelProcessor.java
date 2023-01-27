@@ -137,4 +137,10 @@ public interface IJenaBasedModelProcessor {
 	 */
 	Map<String, String> getPreferences(Resource resource);
 
+	/**
+	 * Method to determine a URI is that of UnittedQuantity or of a subclass of UnittedQuantity
+	 * @param uri
+	 * @return
+	 */
+	public boolean isUnittedQuantity(String uri);
 }

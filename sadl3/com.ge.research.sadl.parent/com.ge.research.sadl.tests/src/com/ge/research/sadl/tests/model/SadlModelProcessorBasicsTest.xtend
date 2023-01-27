@@ -2031,11 +2031,52 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
  		'''.sadl
  		val issues1 = _validationTestHelper.validate(sadlModel1)
 		val issues2 = _validationTestHelper.validate(sadlModel2)
-// 		assertTrue(issues1.empty)
-// 		assertFalse(issues2.empty)
-// 		assertTrue(issues2.toString.contains("Declaration of concepts in another namespace not supported"))
- 		val numiss1 = issues1.size
- 		val numiss2 = issues2.size
+		println("model 1")
+		for (issue : issues1) {
+			println(issue)
+		}
+		println("model 2")
+		for (issue : issues2) {
+			println(issue)
+		}
+		assertTrue(issues1.filter[severity === Severity.ERROR].size == 0)
+		assertTrue(issues1.filter[severity === Severity.WARNING].size == 1)
+		assertTrue(issues1.filter[severity === Severity.INFO].size == 1)
+  		assertTrue(issues1.filter[severity === Severity.INFO].toString.contains("Evaluates to: 2"))
+ 		assertTrue(issues2.size == 1)
+ 	}
+ 	
+  	@Test
+ 	def void testGH_518b() {
+ 		val sadlModel1 = '''
+			 uri "http://sadl.org/JavaExternal.sadl" alias javaexternal.
+			 			 
+			 Expr: min(2,3).
+			 
+			 Rule testRule: then print(min(2,3)).
+ 		'''.sadl
+		val sadlModel2 = '''
+			 uri "http://sadl.org/JavaExternalImported.sadl" alias javaexternalimported.
+			 
+			 import "http://sadl.org/JavaExternal.sadl" .
+			 
+			 Expr: min(2,3).
+ 		'''.sadl
+ 		val issues1 = _validationTestHelper.validate(sadlModel1)
+		val issues2 = _validationTestHelper.validate(sadlModel2)
+		println("model 1")
+		for (issue : issues1) {
+			println(issue)
+		}
+		println("model 2")
+		for (issue : issues2) {
+			println(issue)
+		}
+		assertTrue(issues1.filter[severity === Severity.ERROR].size == 0)
+		assertTrue(issues1.filter[severity === Severity.WARNING].size == 1)
+		assertTrue(issues2.filter[severity === Severity.INFO].size == 1)
+  		assertTrue(issues2.filter[severity === Severity.INFO].toString.contains("Unable to evaluate 'min'; no invokable equation found."))
+ 		assertTrue(issues2.size == 1)
  	}
  	
  	@Test
@@ -2507,6 +2548,133 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			}
 			assertEquals(cmds.get(1).toString, "select v0 v1 v2 v3 where and(rdf(v0, test:processing, v1), and(rdf(v1, test:temperature, v2), rdf(v1, test:processNum, v3)))")
 			assertEquals(cmds.get(2).toString, "select v0 v2 v3 v1 v4 v5 where and(rdf(v0, test:processing, v2), and(rdf(v2, test:temperature, v3), and(rdf(v1, test:processing, v4), rdf(v4, test:processNum, v5))))")
+		]
+	}
+	
+	@Test
+	def void testImpliedPropertyInRule() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type float,
+			 	described by width with values of type float.
+			 	
+			 Rule R1: if x is a Rectangle then area of x is height of x * width of x.
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			for (issue : issues) {
+				println(issue.message.toString)
+			}
+ 			for (rule : rules) {
+ 				println(rule.toString)
+ 			}
+ 			assertTrue(issues.size == 1)
+ 			assertTrue(issues.get(0).toString.contains("area, an object property with range  http://sadl.org/sadlimplicitmodel#UnittedQuantity, cannot be compared (is) with function product returning decimal."))
+ 			assertTrue(rules.size == 1)
+ 			assertEquals("Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2).", 
+ 				rules.get(0).toString
+ 			)
+ 		]
+	}
+	
+	@Test
+	def void testImpliedPropertyInRule_02() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type float,
+			 	described by width with values of type float.
+			 	
+			 Rule R1: if x is a Rectangle then area of x is (height of x * width of x) "sq ft".
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			for (issue : issues) {
+				println(issue.message.toString)
+			}
+ 			for (rule : rules) {
+ 				println(rule.toString)
+ 			}
+ 			assertTrue(issues.size == 0)
+ 			assertTrue(rules.size == 1)
+ 			assertEquals("Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) and unittedQuantity(v2,\"sq ft\",v3) then rdf(x, impliedpropertiesinrule:area, v3).", 
+ 				rules.get(0).toString
+ 			)
+ 		]
+	}
+	
+	@Test
+	def void testImpliedPropertyInRule_03() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type float,
+			 	described by width with values of type float.
+			 	
+			 BigRectangle is a type of Rectangle.
+			 	
+			 Rule R2: if x is a Rectangle and area of x > 20 "sq ft" then x is a BigRectangle.
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			for (issue : issues) {
+				println(issue.message.toString)
+			}
+ 			for (rule : rules) {
+ 				println(rule.toString)
+ 			}
+ 		]
+	}
+	
+	@Test
+	def void testImpliedPropertyInRule_04() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			 
+			 Shape is a class described by area with values of type UnittedQuantity.
+			 
+			 Rectangle is a class described  by height with values of type UnittedQuantity,
+			 	described by width with values of type UnittedQuantity.
+			 	
+			 Rule R1: if x is a Rectangle then area of x is height of x * width of x.
+ 		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			for (issue : issues) {
+				println(issue.message.toString)
+			}
+ 			for (rule : rules) {
+ 				println(rule.toString)
+ 			}
+ 		]
+	}
+	
+	@Test
+	def void testGH_440a() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ImpliedPropertyInTest.sadl" alias ImpliedPropertyInTest.
+			 
+			 Person is a class 
+			 	described by child with values of type Person,
+			 	described by age with values of type decimal,
+			 	described by weight with values of type decimal.
+			 Person has impliedProperty age //, has impliedProperty weight
+			 .
+			 
+			 Sue is a Person with age 23, with weight 125.
+			 
+			 Test: Sue is 23 .
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor|
+			for (issue : issues) {
+				println(issue.message.toString)
+			}
+			assertEquals(issues.size, 1)
+			assertTrue(issues.get(0).message.toString.startsWith("Implied property 'age' used (left side of 'is') to pass type check"))
+			assertNotNull(cmds);
+			assertTrue(cmds.size == 1)
+			for (cmd : cmds) {
+				println(cmd.toString)
+			}
+			assertEquals(cmds.get(0).toString, "rdf(ImpliedPropertyInTest:Sue, age, 23)")
 		]
 	}
 	

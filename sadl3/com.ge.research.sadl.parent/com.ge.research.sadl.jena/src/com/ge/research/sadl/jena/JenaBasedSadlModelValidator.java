@@ -3294,7 +3294,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				et.setType(ConceptType.VARIABLE);
 				//tci.setExpressionType(et);
 				setVariableSeekingType(null);  // this has to be reset somewhere or test fails. Not sure this is the right place awc 4/23/19
-				return new TypeCheckInfo(et, tci.getTypeCheckType(), tci.getImplicitProperties(), this, reference);
+				TypeCheckInfo newTci = new TypeCheckInfo(et, tci.getTypeCheckType(), tci.getImplicitProperties(), this, reference);
+				newTci.setTypeToExprRelationship(tci.getTypeToExprRelationship());
+				return newTci;
 			}
 			return tci;
 		}
@@ -4061,7 +4063,9 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (var != null && var.getType() != null) {
 			NamedNode tctype = getModelProcessor().validateNamedNode(new NamedNode(var.getType().toFullyQualifiedString(), NodeType.VariableNode));
 			ConceptName et = getModelProcessor().namedNodeToConceptName(tctype);
-			TypeCheckInfo tci = new TypeCheckInfo(et, var.getType(), this, reference);
+			List<ConceptName> ip = getImpliedProperties(getTheJenaModel().getResource(tctype.getURI()));
+			TypeCheckInfo tci = new TypeCheckInfo(et, var.getType(), this, ip, reference);
+			tci.setTypeToExprRelationship(TypeCheckInfo.TYPE_OF_VARIABLE);
 			return tci;
 		}
 		if (getVariableSeekingType() != null && getVariableSeekingType().equals(conceptNm)) {
