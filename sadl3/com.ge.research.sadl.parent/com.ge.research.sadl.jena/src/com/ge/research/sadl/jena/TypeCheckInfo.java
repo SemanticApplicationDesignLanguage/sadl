@@ -52,6 +52,7 @@ public class TypeCheckInfo {
 	public static final String UNITTED_QUANTITY = "unitted quantity";
 	public static final String RESTRICTED_TO = "restriction to";
 	public static final String INSTANCE_OF_CLASS = "instance of class";
+	public static final String TYPE_OF_VARIABLE = "variable type";
 	public static final String INSTANCE_OF_LIST = "instance of typed list of type";
 	public static final String NAMED_LIST_OF_TYPE = "type of a named typed list class";
 	public static final String UNAMED_LIST_OF_TYPE = "type of an unnamed typed list class";

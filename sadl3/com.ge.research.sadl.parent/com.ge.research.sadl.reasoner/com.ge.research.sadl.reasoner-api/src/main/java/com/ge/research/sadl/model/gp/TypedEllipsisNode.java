@@ -1,13 +1,13 @@
 package com.ge.research.sadl.model.gp;
 
 /**
- * This class is a special subtype of VariableNode used as an Equation argument, 
+ * This class is a special subtype of NamedNode used as an Equation argument, 
  * indicating that the parameter declaration has an ellipsis, so is VarArgs parameter.
  * 
  * @author Natural Semantics, LLC
  *
  */
-public class TypedEllipsisNode extends VariableNode {
+public class TypedEllipsisNode extends NamedNode {
 	
 	public TypedEllipsisNode(String name) {
 		super(name);
