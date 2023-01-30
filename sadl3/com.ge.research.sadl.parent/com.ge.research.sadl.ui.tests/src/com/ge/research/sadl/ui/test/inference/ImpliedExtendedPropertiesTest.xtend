@@ -667,8 +667,9 @@ class ImpliedExtendedPropertiesTest extends AbstractSadlPlatformTest {
 				assertTrue(scr instanceof SadlCommandResult)
 				val tr = (scr as SadlCommandResult).results
 				println(tr.toString)
-//				assertTrue(tr instanceof TestResult)
-//				assertTrue((tr as TestResult).passed)
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"v0\",\"v1\",\"v2\",\"v3\"
+\"http://sadl.org/test3.sadl#TypeB1\",3,\"http://sadl.org/test3.sadl#TypeB2\",3", (tr as ResultSet).toString.trim)
 			}
 		];
 	}

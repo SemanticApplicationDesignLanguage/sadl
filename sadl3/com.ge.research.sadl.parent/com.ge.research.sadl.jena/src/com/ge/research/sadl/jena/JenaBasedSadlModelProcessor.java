@@ -5825,7 +5825,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	protected boolean isVariableDefinition(Name expr) throws CircularDefinitionException {
 		if (expr instanceof Name && getDeclarationExtensions().getOntConceptType(((Name) expr).getName())
 				.equals(OntConceptType.VARIABLE)) {
-			if (getDeclarationExtensions().getDeclaration(((Name) expr).getName()).equals(((Name) expr).getName())) {
+			if (getDeclarationExtensions().getDeclaration(((Name) expr).getName()).equals((Name) expr)) {
 				// addInfo("This is a variable definition of '" +
 				// getDeclarationExtensions().getConceptUri(((Name)expr).getName()) + "'",
 				// expr);
@@ -6463,7 +6463,9 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			if (isNegated) {
 				bi = (GraphPatternElement) createUnaryBuiltin(container, "not", bi);
 			}
-			bi.setContext(container);
+			if (bi != null) {
+				bi.setContext(container);
+			}
 			return combineRest(applyImpliedAndExpandedProperties(container, lexpr, rexpr, bi, false), rest);
 		}
 	}
@@ -6892,8 +6894,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				else if (maybeGpe == null && getTarget() != null) {
 					if (getTarget() instanceof Test) {
 						// the two sides of the test are treated as if they were two sides of an "is" BuiltinElement
-						BuiltinElement bi = new BuiltinElement();
-						bi.setFuncName("is");
+						BuiltinElement bi = new BuiltinElement("is", binobj);
 						Object lhsArg = ((Test)getTarget()).getLhs();
 						Object rhsArg = ((Test)getTarget()).getRhs();
 						try {

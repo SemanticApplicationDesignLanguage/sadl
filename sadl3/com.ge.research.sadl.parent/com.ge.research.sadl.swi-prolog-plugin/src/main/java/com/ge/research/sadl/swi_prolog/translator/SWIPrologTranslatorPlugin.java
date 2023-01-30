@@ -1971,7 +1971,6 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	@Override
 	public String setBuiltinElementNameByBuiltinType(BuiltinElement bin) throws TranslationException {
 		String builtinName = builtinTypeToString(bin);
-		BuiltinType ftype = bin.getFuncType();
 		bin.setFuncName(builtinName);
 		return builtinName;
 	}
