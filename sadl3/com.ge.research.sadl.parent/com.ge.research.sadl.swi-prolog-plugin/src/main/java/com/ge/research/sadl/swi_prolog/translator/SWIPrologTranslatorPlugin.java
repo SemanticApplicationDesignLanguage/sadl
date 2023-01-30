@@ -1979,5 +1979,4 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }
