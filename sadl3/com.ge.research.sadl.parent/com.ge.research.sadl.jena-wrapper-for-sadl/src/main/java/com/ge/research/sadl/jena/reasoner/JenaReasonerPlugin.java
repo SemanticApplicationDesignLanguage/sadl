@@ -49,6 +49,7 @@ import java.util.Set;
 
 import org.apache.jena.atlas.web.HttpException;
 import org.apache.jena.datatypes.DatatypeFormatException;
+import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.datatypes.xsd.XSDDuration;
 import org.apache.jena.graph.Graph;
@@ -344,11 +345,7 @@ public class JenaReasonerPlugin extends Reasoner{
 		this.ruleList = new ArrayList<Rule>();
 		
 		try {
-//<<<<<<< HEAD
-//			if (tbox != null && !configurationMgr.getSadlModelGetter(repoType).modelExists(tbox)) {
-//=======
 			if (tbox != null && !configurationMgr.getSadlModelGetter(repoType).modelExists(getModelName())) {
-//>>>>>>> development
 				if (tbox.equals(getModelName())) {
 					throw new ConfigurationException("The model '" + getModelName() + "' does not have a mapping and was not found.");
 				}
@@ -406,15 +403,9 @@ public class JenaReasonerPlugin extends Reasoner{
 					ReadFailureHandler rfHandler = new SadlReadFailureHandler(logger);
 					schemaModel.getDocumentManager().setProcessImports(true);
 					schemaModel.getDocumentManager().setReadFailureHandler(rfHandler );
-//<<<<<<< HEAD
 					schemaModel.getSpecification().setImportModelGetter(configurationMgr.getSadlModelGetterPutter(format));
 					if (tbox != null) {
 						schemaModel.read(tbox, SadlPersistenceFormat.getRDFFormat(format).toString());
-//=======
-//					schemaModel.getSpecification().setImportModelGetter((ModelGetter) configurationMgr.getModelGetter());
-//					if (tbox != null) {
-//						schemaModel.read(tbox, SadlSerializationFormat.getRDFFormat(format).toString());
-//>>>>>>> development
 					}
 				}
 			}
@@ -646,41 +637,6 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (rules != null) {
 			setPreLoadedRules(loadRulesFromString(rules));
 		}
-
-//<<<<<<< HEAD
-		//TODO: AG: this block of code was commented out in GH-794
-//		String format = repoType;
-//		try {
-//			String tdbFolder = configurationMgr.getTdbFolder();
-//			if (configurationMgr.getSadlModelGetter(format) == null) {
-//				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
-//			}
-//			format = configurationMgr.getModelGetter().getFormat();
-//			if (repoType == null) repoType = format;	
-//			if (format != null && !format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-//				configurationMgr.getModelGetter().setFormat(format);
-//			}
-//		}
-//		catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//=======
-//		String format = repoType;
-//		try {
-//			String tdbFolder = configurationMgr.getTdbFolder();
-//			if (configurationMgr.getModelGetter() == null) {
-//				configurationMgr.setModelGetter(new SadlJenaModelGetter(configurationMgr, tdbFolder));
-//			}
-//			format = configurationMgr.getModelGetter().getFormat();
-//			if (repoType == null) repoType = format;	
-//			if (format != null && !format.equals(SadlSerializationFormat.JENA_TDB_FORMAT)) {
-//				configurationMgr.getModelGetter().setFormat(format);
-//			}
-//		}
-//		catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//>>>>>>> development
 		initialized = true;
 		
 		return 1;
@@ -1432,6 +1388,10 @@ public class JenaReasonerPlugin extends Reasoner{
 		if (!results.hasNext()) {
 			return null;
 		}
+		Resource uqcls = infModel.getResource(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		Property valprop = infModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
+		Property unitprop = infModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
+
 		ArrayList<ArrayList<Object>> o = new ArrayList<ArrayList<Object>>();
 		List<String> queryVars = results.getResultVars();
 		String[] columnName = new String[queryVars.size()];
@@ -1454,11 +1414,37 @@ public class JenaReasonerPlugin extends Reasoner{
 					}
 				}
 				else if (n != null && n.isResource()) {
-					if (!((Resource)n).isAnon()){
-						temp.add(((Resource)n).getURI());
+					StmtIterator sitr = infModel.listStatements(n.asResource(), RDF.type, uqcls);
+					if (sitr.hasNext()) {
+						// This is an instance of UnittedQuantity--create a SADL Literal
+						
+						StmtIterator vitr = infModel.listStatements(n.asResource(), valprop, (RDFNode)null);
+						Object val = null;
+						RDFDatatype valDt = null;
+						String units = null;
+						if (vitr.hasNext()) {
+							Literal obj = vitr.nextStatement().getObject().asLiteral();
+							val = obj.getValue();
+							valDt = obj.getDatatype();
+						}
+						StmtIterator uitr = infModel.listStatements(n.asResource(), unitprop, (RDFNode)null);
+						if (uitr.hasNext()) {
+							units = uitr.nextStatement().getObject().asLiteral().getLexicalForm();
+						}
+						LiteralType littype = null;
+						com.ge.research.sadl.model.gp.Literal litval = new com.ge.research.sadl.model.gp.Literal(val, units, littype);
+						if (!(((Resource)n).isAnon()) ) {
+							litval.setUri(((Resource)n).getURI());
+						}
+						temp.add(litval);
 					}
 					else {
-						temp.add(n.toString() + "(blank node)");
+						if (!((Resource)n).isAnon()){
+							temp.add(((Resource)n).getURI());
+						}
+						else {
+							temp.add(n.toString() + "(blank node)");
+						}
 					}
 				}
 				else {
@@ -1543,7 +1529,13 @@ public class JenaReasonerPlugin extends Reasoner{
 			Statement s = stI.next();
 			result.add(new ArrayList<Object>());
 			if (sub == null) {
-				result.get(i).add(s.getSubject().getURI());
+				Resource subrsrc = s.getSubject();
+				if (isUnittedQuantity(subrsrc)) {
+					result.get(i).add(unittedQuantityToLiteral(subrsrc));
+				}
+				else {
+					result.get(i).add(s.getSubject().getURI());
+				}
 			}
 			if (pred == null) {
 				result.get(i).add(s.getPredicate().getURI());
@@ -1558,6 +1550,9 @@ public class JenaReasonerPlugin extends Reasoner{
 						System.err.println("Error (" + t.getMessage() + ") converting literal value to result set");
 						result.get(i).add(((Literal)objval).getLexicalForm());
 					}
+				}
+				else if (objval.isResource() && isUnittedQuantity((Resource)objval)) {
+					result.get(i).add(unittedQuantityToLiteral((Resource)objval));
 				}
 				else if (objval != null && objval.isResource() && !((Resource)objval).isAnon()){
 					result.get(i).add(((Resource)objval).getURI());
@@ -1593,6 +1588,46 @@ public class JenaReasonerPlugin extends Reasoner{
 		return rs;
 	}
 	
+	/**
+	 * Method to convert a Jena Model UnittedQuantity to a SADL Literal with units
+	 * @param n
+	 * @return
+	 */
+	private Object unittedQuantityToLiteral(Resource n) {
+		Property valprop = infModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI);
+		Property unitprop = infModel.getProperty(SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI);
+		StmtIterator vitr = infModel.listStatements(n.asResource(), valprop, (RDFNode)null);
+		if (vitr.hasNext()) {
+			Object val = vitr.next().getObject().asLiteral().getValue();
+			if (val instanceof XSDDateTime) {
+				val = ((XSDDateTime)val).asCalendar().getTime();
+			} 
+			else if (val instanceof XSDDuration) {
+				val = ((XSDDuration)val).toString();
+			}
+			StmtIterator uitr = infModel.listStatements(n.asResource(), unitprop, (RDFNode)null);
+			if (uitr.hasNext()) {
+				com.ge.research.sadl.model.gp.Literal uq = new com.ge.research.sadl.model.gp.Literal(val, uitr.next().getObject().toString(), (LiteralType)null);
+				return uq;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Method to determine if a node in the graph is a UnittedQuantity
+	 * @param n
+	 * @return
+	 */
+	private boolean isUnittedQuantity(Resource n) {
+		Resource uqcls = infModel.getResource(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		StmtIterator sitr = infModel.listStatements(n, RDF.type, uqcls);
+		if (sitr.hasNext()) {
+			sitr.close();
+			return true;
+		}
+		return false;
+	}
 
 	public List<Explanation> explain(String rulename) {
 		startTrace();
@@ -3138,12 +3173,13 @@ public class JenaReasonerPlugin extends Reasoner{
 		List<BuiltinInfo> implbltins = new ArrayList<BuiltinInfo>();
 		String pkg = "org.apache.jena.reasoner.rulesys.builtins";
 		String[] impbuiltinnames = {
-		"AddOne", "Bound", "CountLiteralValues", "IsBNode", "IsDType",
-		"IsLiteral", "ListContains", "ListEntry", "ListEqual", 
-//		"ListLength", this one removed so that the custom builtin by same name will not be confounded awc 4/9/2021
-		"ListMapAsObject", "ListMapAsSubject", "ListNotContains", "ListNotEqual", 
-		"NotBNode", "NotDType", "NotLiteral", "Now", "Regex", "StrConcat", "Table", 
+		"AddOne", "Bound", "CountLiteralValues", "Difference", "Equal", "GE", "GreaterThan", 
+		"IsBNode", "IsDType", "IsLiteral", "LE", "LessThan", "ListContains", "ListEntry", "ListEqual", 
+		"ListLength", "ListMapAsObject", "ListMapAsSubject", "ListNotContains", "ListNotEqual", 
+		"Max", "Min", "NotBNode", "NotDType", "NotEqual", "NotLiteral", "NoValue", "Now", "Print",
+		"Regex", "Product", "Quotient", "Regex", "StrConcat", "Sum", "Table", 
 		"TableAll", "Unbound", "UriConcat"};
+		List<FunctionSignature> signatures = getImplicitBuiltinSignatures();
 		for (int i = 0; i < impbuiltinnames.length; i++) {
 			String fqn = pkg + "." + impbuiltinnames[i];
 			try {
@@ -3152,6 +3188,16 @@ public class JenaReasonerPlugin extends Reasoner{
 				Object javaInstance = c.newInstance();
 				if (javaInstance instanceof Builtin) {
 					BuiltinInfo bi = new BuiltinInfo(((Builtin)javaInstance).getName(), fqn, getReasonerFamily(), ((Builtin)javaInstance).getArgLength());
+					for (FunctionSignature sig : signatures) {
+						if (sig.getName().equals(bi.getName())) {
+							bi.setSignature(sig.toString());
+							break;
+						}
+					}
+					if (bi.getSignature() == null) {
+						String untypedFctSignature = bi.getName() + "(...)--";
+						bi.setSignature(untypedFctSignature);
+					}
 					implbltins.add(bi);
 				}
 			} catch (ClassNotFoundException e) {
@@ -3679,6 +3725,14 @@ public class JenaReasonerPlugin extends Reasoner{
 
 	@Override
 	public Node evaluateSadlEquation(BuiltinElement bi) {
+		String furi = bi.getFuncUri();
+		if (furi.indexOf("#") > 0) {
+			String ns = furi.substring(0, furi.indexOf("#"));
+			if (ns != null && ns.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)) {
+				addError(new ModelError("Jena built-in '" +  furi + "' can't be evaluated in an Expr statement", ErrorType.WARNING));
+				return null;
+			}
+		}
 		EvaluateSadlEquationUtils ese = new EvaluateSadlEquationUtils();
 		Node retval = ese.evaluateSadlEquation(bi);
 		List<ModelError> errors = ese.getErrors();

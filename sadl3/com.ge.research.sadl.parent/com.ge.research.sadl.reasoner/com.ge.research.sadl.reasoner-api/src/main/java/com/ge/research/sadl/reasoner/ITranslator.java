@@ -307,7 +307,7 @@ public interface ITranslator {
 	}
 
 	/**
-	 * Method to get the particular reasoner's name for a BuiltinElement
+	 * Method to get the particular reasoner's name for a BuiltinElement.
 	 * @param bin -- the BuiltinElement in question
 	 * @return -- the name of the BuiltinElement as it should appear in this translator
 	 * @throws TranslationException

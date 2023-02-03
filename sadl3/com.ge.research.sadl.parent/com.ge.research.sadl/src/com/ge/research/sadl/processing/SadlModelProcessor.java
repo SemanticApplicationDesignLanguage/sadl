@@ -57,6 +57,7 @@ import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
 import com.ge.research.sadl.preferences.SadlPreferences;
+import com.ge.research.sadl.reasoner.IConfigurationManager;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -257,6 +258,19 @@ public static final String THERE_EXISTS = "thereExists";
 		throw new TranslationException("nodeCheck called with non-Node, non-GraphPatternElement argument: " + nodeObj.getClass().getCanonicalName());
 	}
 	
+	public GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj, EObject context) throws InvalidNameException, InvalidTypeException, TranslationException {
+		BuiltinElement builtin = new BuiltinElement();
+		builtin.setFuncName(name);
+		builtin.setContext(context);
+		if (lobj != null) {
+			builtin.addArgument(nodeCheck(lobj));
+		}
+		if (robj != null) {
+			builtin.addArgument(nodeCheck(robj));
+		}
+		return builtin;
+	}
+	
 	/**
 	 * Method to create a unary BuiltinElement
 	 * @param sexpr
@@ -324,7 +338,7 @@ public static final String THERE_EXISTS = "thereExists";
 		return builtin;
 	}
 
-	protected TripleModifierType getTripleModifierType(BuiltinType btype) {
+	public TripleModifierType getTripleModifierType(BuiltinType btype) {
 		if (btype.equals(BuiltinType.Not) || btype.equals(BuiltinType.NotEqual)) {
 			return TripleModifierType.Not;
 		}
@@ -475,6 +489,9 @@ public static final String THERE_EXISTS = "thereExists";
 		}
 		else if (gpe instanceof Junction) {
 			Object lhsobj = ((Junction)gpe).getLhs();
+			if (lhsobj instanceof ProxyNode) {
+				lhsobj = ((ProxyNode)lhsobj).getProxyFor();
+			}
 			if (lhsobj instanceof GraphPatternElement && variableIsBound((GraphPatternElement)lhsobj, v)) {
 				return true;
 			}
@@ -482,6 +499,9 @@ public static final String THERE_EXISTS = "thereExists";
 				return true;
 			}
 			Object rhsobj = ((Junction)gpe).getRhs();
+			if (rhsobj instanceof ProxyNode) {
+				rhsobj = ((ProxyNode)rhsobj).getProxyFor();
+			}
 			if (rhsobj instanceof GraphPatternElement && variableIsBound((GraphPatternElement)rhsobj, v)) {
 				return true;
 			}
@@ -894,5 +914,38 @@ public static final String THERE_EXISTS = "thereExists";
 		}
 		return null;
 	}
+
+	/**
+	 * Method to get a configuration manager
+	 * @return
+	 */
+	abstract public IConfigurationManager getConfigMgr() ;
+
+	/**
+	 * Method to get the model name
+	 * @return
+	 */
+	public abstract String getModelName();
+
+	/**
+	 * Method to determine if a built-in function is a comparison operator
+	 * @param funcName
+	 * @return
+	 */
+	public abstract boolean isComparisonOperator(String funcName);
+
+	/**
+	 * Method to determine if a built-in function is a numeric operator
+	 * @param funcName
+	 * @return
+	 */
+	public abstract boolean isNumericOperator(String funcName);
+
+	/**
+	 * Method to identify any other expandable operation
+	 * @param funcName
+	 * @return
+	 */
+	public abstract boolean isOtherExpandableOperator(String funcName);
 
 }

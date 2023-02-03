@@ -96,7 +96,6 @@ class SadlASTUtils {
 		}
 		return null;
 	}
-
 	
 	/**
 	 * This is called when not doing scoping and calls the main method with null for EReference and IScopeProvider
@@ -179,7 +178,6 @@ class SadlASTUtils {
 		}
 		return false
 	}
-
 
 	private static def isInExpressionGrammar(EObject it) {
 		if (isInRuleStatement) { return true }

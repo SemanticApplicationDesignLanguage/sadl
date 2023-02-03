@@ -966,7 +966,7 @@ public class SadlUtils {
      * @param rdfdt - the RDFDatatype in question
      * @return -- list of union members else null 
      */
-    private static List<RDFNode> getRDFDatatypeUnionMembers(OntModel m, Resource rdfdt) {
+    public static List<RDFNode> getRDFDatatypeUnionMembers(OntModel m, Resource rdfdt) {
 		OntClass eqcls = null;
 		if (rdfdt.canAs(OntClass.class)) {
 			eqcls = rdfdt.as(OntClass.class).getEquivalentClass();

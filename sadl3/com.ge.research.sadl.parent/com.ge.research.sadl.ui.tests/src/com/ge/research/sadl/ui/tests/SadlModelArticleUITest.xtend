@@ -882,4 +882,71 @@ class SadlModelArticleUITest extends AbstractSadlPlatformTest {
 
 	}
 
+	@Test
+	def void testCRuleEmbeddedSubject() {
+		val grd = newArrayList(
+"Rule NorthernerAtHeart:  if rdf(v0, rdf:type, gm:Birth) and rdf(v0, gm:location, v1) and rdf(v1, gm:latitude, v2) and rdf(gm:Philadelphia, gm:latitude, v3) and >(v2,v3) and rdf(v0, gm:child, v4) then rdf(v4, gm:likes, \"cold weather in the winter\").")
+
+		updatePreferences(new PreferenceKey(SadlPreferences.P_USE_ARTICLES_IN_VALIDATION.id, Boolean.TRUE.toString));
+
+		createFile('UseArticles.sadl', '''
+			uri "http://com.ge.research.sadlGeorgeAndMartha" alias gm.
+			
+			Person is a type of PhysicalObject, described by spouse with  a single value of type Person,
+				described by friend with values of type Person,
+				described by age with a single value of type decimal,
+				described by likes with values of type string
+				described by weight with values of type DATA
+				.
+				
+			Birth is a class described by child with values of type Person,
+				described by mother with a single value of type Person,
+				described by location with a single value of type Location,
+				described by ^when with a single value of type dateTime,
+				described by weight. // with a single value of type float.
+				
+			Location is a class, described by latitude with a single value of type double,
+				described by longitude with a single value of type double,
+				described by gm:description with values of type string.
+				
+			Philadelphia is a Location with latitude 39.9522.
+				
+			// this rule will have multiple errors if use articles in translation is not checked	
+			Rule NorthernerAtHeart 
+				if     the latitude of the location of a Birth > latitude of Philadelphia  	  
+				then (a child of the Birth) likes "cold weather in the winter".
+						
+			 DATA is a class, 
+			 	described by gm:^value with a single value of type decimal,
+			 	described by gm:validity with a single value of type boolean,
+			 	described by gm:unit with a single value of type string.
+			 DATA has impliedProperty gm:^value.
+			 DATA has impliedProperty gm:unit.
+			 DATA has impliedProperty gm:validity.
+			 	
+			 PhysicalObject is a class
+			// 	described by weight with values of type DATA
+			.
+
+			''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					println(issue.message)
+				}
+			}
+			if (rules !== null) {
+	 			for (rule:rules) {
+	 				println("\"" + rule.toString + "\",")
+	 			}
+			}
+			issues.assertHasNoIssues;
+			assertEquals(1, rules.size);
+ 			var grdidx = 0
+ 			for (rule:rules) {
+ 				assertTrue(processor.compareTranslations(rule.toString(), grd.get(grdidx++)))
+ 			}
+ 		]
+	}
+
 }

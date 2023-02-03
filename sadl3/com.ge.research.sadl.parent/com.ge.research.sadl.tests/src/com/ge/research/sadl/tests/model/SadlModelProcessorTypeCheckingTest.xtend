@@ -159,7 +159,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			 	
 			 LivingThing is a type of PhysicalThing,
 			 	described by dateOfBirth with values of type dateTime,
-			 	described by age with values of type float.
+			 	described by age with values of type duration.
 			 	
 			 Mammal is a type of LivingThing,
 			 	described by child with values of type Mammal.
@@ -217,6 +217,42 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 			   then speedOfSound of air is sosair.
    		'''.sadl
 		sadlModel.assertError('''Object of conclusion triple 'rdf(air, sos:speedOfSound, sosair)' is not bound in rule premises''')
+	}
+
+	@Test
+	def void testUserDefinedEquation5() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ArgsAndParamsTest.sadl" alias argsandparamstest.
+			 
+			 Equation stringAndAnyNumberInt(string x, int ... y) returns string : return "stringAndAnyNumberInt".
+			 
+			 Expr: stringAndAnyNumberInt("hello", 5, "blue").
+   		'''.sadl
+		val String[] errors = #[
+			"Argument (\"blue\") type 'string' doesn't match parameter declaration 'int ...'.",
+			"Sorry, only external equations implemented in Java and on the classpath can be evaluated at this time."
+		]
+		sadlModel.assertErrors(errors)
+	}
+	
+	@Test
+	def void testClassTypeParameter() {
+		val sadlModel = '''
+			 uri "http://sadl.org/ClassTypeParameter.sadl" alias classtypeparameter.
+			 
+			 Shape is a class.
+			 
+			 External exploreShape(Shape x) returns string : "http://sadl.org/exploreshape".
+			 
+			 MyShape is a Shape.
+			 
+			 Expr: exploreShape(MyShape).
+		'''.sadl
+		val String[] errors = #[
+			"",
+			""
+		]
+		sadlModel.assertError("Unable to find an invokable implementation of 'http://sadl.org/ClassTypeParameter.sadl#exploreShape'.")
 	}
 	
 	@Test
@@ -309,7 +345,10 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 		'''.sadl.enableAmbiguousNameDetection;
 
 		val issues_1 = validate(model_1);
-		assertEquals(Iterables.toString(issues_1), 4, issues_1.size);
+		for (issue : issues_1) {
+			println(issue.toString)
+		}
+		assertEquals(Iterables.toString(issues_1), 2, issues_1.size);
 	}
 	
 	@Test
@@ -342,7 +381,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 //			"Type comparison not possible"
 //		]
 //		sadlModel.assertErrors(errors)
-		sadlModel.assertError("age, a datatype property with range  xsd:float, cannot be compared (is) with No type check info generated.")
+		sadlModel.assertError("age, a datatype property with range  xsd:float, cannot be compared (is) with function subtractDates returning --.")
 	}
 	
 	@Test
@@ -603,8 +642,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 1)	
-			issues.get(0).equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information")
+			assertTrue(issues.empty)	
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -632,8 +670,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 1)	
-			issues.get(0).equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information")
+			assertTrue(issues.isEmpty)
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -663,8 +700,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 1)	
-			issues.get(0).equals("Built-in function, parameter 1, was found, but the reasoner and translator pair does not provide further type-checking information")
+			assertTrue(issues.empty)	
 			assertTrue(rules.size == 1)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -731,12 +767,7 @@ class SadlModelProcessorTypeCheckingTest extends AbstractSADLModelProcessorTest 
 					System.out.println(rule.toString)
 				}
 			}
-			assertTrue(issues.size == 14)
-			var idx = 0
-			for (iss : issues) {
-				assertEquals(issueList.get(idx), iss.message)
-				idx++
-			}
+			assertTrue(issues.size == 0)
 			assertTrue(rules.size == 7)
 			assertTrue(
 				processor.compareTranslations(rules.get(0).toString(),
@@ -862,7 +893,6 @@ Rule ListLength:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:Y
 		assertTrue(issues.empty)
 	}
 
-	@Ignore
 	@Test
 	def void testAgeOfMarthaIsAnInt() {
 		val sadlModel = '''
@@ -877,7 +907,7 @@ Rule ListLength:  if rdf(UsingListExpression:l1, rdf:type, UsingListExpression:Y
 		for (issue : issues) {
 			println(issue.toString)
 		}
-		
+		assertTrue(issues.filter[severity === Severity.ERROR].size > 0)
 	}
 	
 }

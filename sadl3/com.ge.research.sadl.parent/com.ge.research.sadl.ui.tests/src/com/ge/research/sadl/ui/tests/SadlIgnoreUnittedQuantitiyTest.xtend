@@ -103,8 +103,104 @@ class SadlIgnoreUnittedQuantitiyTest extends AbstractSadlPlatformTest {
 			for (rule : rules) {
 				println(rule.toString)
 			}
-			processor.compareTranslations(rules.get(0).toString, 
-				"Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2).")
+			assertTrue(processor.compareTranslations(rules.get(0).toString, 
+				"Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2)."))
+		]
+	}
+
+	@Test
+	def void testIgnoreUnitsInSadl4() {
+
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString));
+//		updatePreferences(new PreferenceKey(SadlPreferences.EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.FALSE.toString))
+
+		createFile('OntologyWithUnittedQuantity.sadl', '''
+			uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+			Shape is a class described by area with values of type UnittedQuantity.
+			Rectangle is a class described  by height with values of type UnittedQuantity,
+						 	described by width with values of type UnittedQuantity.
+						 	
+			MyRect is a Rectangle with width 4.0 ft, with height 2.2 ft.
+						 	
+			Rule R1: if x is a Rectangle then area of x is height of x * width of x.
+						 
+			Ask: select s, ar where s is a Rectangle and s has area ar.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			for (issue : issues) {
+				println(issue.toString)
+			}
+			assertTrue(issues.empty)
+			for (rule : rules) {
+				println(rule.toString)
+			}
+			assertTrue(processor.compareTranslations(rules.get(0).toString, 
+				"Rule R1:  if rdf(x, rdf:type, impliedpropertiesinrule:Rectangle) and rdf(x, impliedpropertiesinrule:height, v0) and rdf(x, impliedpropertiesinrule:width, v1) and *(v0,v1,v2) then rdf(x, impliedpropertiesinrule:area, v2)."))
+		]
+	}
+	
+	@Test
+	def void testIgnoreUnitsInSadl5() {
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString));
+
+		createFile('OntologyWithUnittedQuantity.sadl', '''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by age with values of type int.
+			 
+			 George is a Person with age 25 years. 
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (!issues.empty) {
+				for (issue : issues) {
+					println(issue.toString)
+				}
+			}
+			assertTrue(issues.empty)
+		]
+	}
+
+	@Test
+	def void testIgnoreUnitsInSadl6() {
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString));
+
+		createFile('OntologyWithUnittedQuantity.sadl', '''
+				 uri "http://sadl.org/test2.sadl" alias test2.
+				 
+				 Person is a class described by age with values of type UnittedQuantity.
+				 
+				 George is a Person with age 25 years.
+		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (!issues.empty) {
+				for (issue : issues) {
+					println(issue.toString)
+				}
+			}
+			assertTrue(issues.empty)
+		]
+	}
+
+	@Test
+	def void testIgnoreUnitsInSadl7() {
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.TRUE.toString));
+
+		createFile('OntologyWithUnittedQuantity.sadl', '''
+			 uri "http://sadl.org/test3.sadl" alias test3.
+			 
+			 TimeSpan is a type of UnittedQuantity.
+			 
+			 Person is a class described by age with values of type TimeSpan.  
+			 
+			 George is a Person with age 25 years.
+ 		''').resource.assertValidatesTo [ jenaModel, rules, commands, issues, processor |
+			assertNotNull(jenaModel)
+			if (!issues.empty) {
+				for (issue : issues) {
+					println(issue.toString)
+				}
+			}
+			assertTrue(issues.empty)
 		]
 	}
 

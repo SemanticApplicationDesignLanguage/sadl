@@ -21,6 +21,7 @@ import java.util.List;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
 import com.ge.research.sadl.model.gp.NamedNode;
+import com.ge.research.sadl.model.gp.Node;
 import com.ge.research.sadl.reasoner.InvalidNameException;
 import com.ge.research.sadl.reasoner.InvalidTypeException;
 import com.ge.research.sadl.reasoner.TranslationException;
@@ -130,4 +131,30 @@ public interface I_IntermediateFormTranslator {
 	 * @return
 	 */
 	boolean graphPatternElementMustBeInConclusions(GraphPatternElement gpe);
+
+	/**
+	 * Method to get a name for a new VariableNode
+	 * @return
+	 */
+	abstract String getNewVar();
+
+	/**
+	 * Method to determine if a Node is a UnittedQuantity
+	 * @param lhsArg
+	 * @return
+	 */
+	abstract boolean isUnittedQuantity(Node lhsArg);
+
+	/**
+	 * Method to determine if a built-in function is a comparison function
+	 * @param funcName
+	 * @return
+	 */
+	abstract boolean isComparisonBuiltin(String funcName);
+
+	/**
+	 * Method to get the OWL model generated from the SADL model
+	 * @return
+	 */
+	abstract Object getTheModel();
 }

@@ -1581,4 +1581,21 @@ class SadlLinkingTest extends AbstractLinkingTest {
 			 John has <rdfp2> Mary.
 		'''.assertLinking[sadl]
 	}
+	
+	@Test
+	def void testUnittedQuantity_01() {
+		'''
+			 uri "http://sadl.org/test.sadl" alias test.
+			 
+			 Person is a class described by [age] with values of type <UnittedQuantity>.
+			 
+			 Adult is a type of Person.
+			  
+			 Jane is a Person with <age> 23 years.
+			 
+			 Rule AdultRule: if [p] is a Person and <p> has <age> >= 18 years then <p> is an Adult.
+			 Rule AdultRule2: if [p] is a Person and <p> has <age> uq and unit of uq is "years" and ^value of uq >= 18 then p is an Adult.
+		'''.assertLinking[sadl]
+	}
+	
 }
