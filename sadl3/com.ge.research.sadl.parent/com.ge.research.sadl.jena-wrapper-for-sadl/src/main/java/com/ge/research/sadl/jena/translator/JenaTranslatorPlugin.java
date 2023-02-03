@@ -2288,6 +2288,11 @@ public class JenaTranslatorPlugin implements ITranslator {
 			if (args != null && args.get(args.size() - 1) != null && args.get(args.size() - 1).equals(v)) {
 				return true;
 			}
+			else if (((BuiltinElement) gpe).getFuncType().equals(BuiltinType.Assign)) {
+				if (args != null && args.get(0) != null && args.get(0).equals(v)) {
+					return true;
+				}
+			}
 		}
 		else if (gpe instanceof Junction) {
 			Object lhsobj = ((Junction)gpe).getLhs();
