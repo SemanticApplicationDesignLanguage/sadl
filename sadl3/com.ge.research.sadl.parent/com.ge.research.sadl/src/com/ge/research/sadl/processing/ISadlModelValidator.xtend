@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright © 2007-2016 - General Electric Company, All Rights Reserved
+ * Copyright © 2007-2022 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -25,6 +25,10 @@ import com.ge.research.sadl.sADL.Constant
  *  
  */
 interface ISadlModelValidator {
+	// Pseudo operators for validation of binary operations
+	public static final String ARGUMENT = "argument";	// used to compare an argument with the parameter declaration
+	public static final String IS = "is";
+	
 	def boolean validate(BinaryOperation expression, StringBuilder errorMessageBuilder)
 	def boolean isSkippedConstant(Constant expr)
 }

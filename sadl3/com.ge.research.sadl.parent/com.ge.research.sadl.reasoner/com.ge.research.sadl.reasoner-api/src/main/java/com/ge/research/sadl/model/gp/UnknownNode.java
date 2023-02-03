@@ -8,7 +8,7 @@ package com.ge.research.sadl.model.gp;
  *
  */
 public class UnknownNode extends Node {
-
+	
 	public UnknownNode() {
 		name = this.getClass().getName();
 		namespace = "http://" + this.getClass().getPackage().getName() + "#";

@@ -23,6 +23,7 @@ import org.eclipse.jface.preference.RadioGroupFieldEditor
 import org.eclipse.jface.preference.StringFieldEditor
 import org.eclipse.swt.widgets.Composite
 import org.eclipse.xtend.lib.annotations.Accessors
+import org.eclipse.jface.preference.ComboFieldEditor
 
 /**
  * This class provides a workaround for the following issues:
@@ -116,4 +117,24 @@ final class FieldEditorExtensions {
 
 	}
 
+	static class ComboFieldEditorExt extends ComboFieldEditor implements FieldEditorExt {
+		@Accessors(PUBLIC_GETTER)
+		val Composite parent
+		
+		new(String name, String labelText, String[][] labelAndValues, Composite parent) {
+			super(name, labelText, labelAndValues, parent)
+			this.parent = parent
+		}
+		
+		override protected doStore() {
+			val field = ComboFieldEditor.getDeclaredField('value');
+			field.accessible = true;
+			val value = field.get(this);
+			if (value instanceof String) {
+				preferenceStore.putValue(preferenceName, value);
+			} else {
+				preferenceStore.toDefault = preferenceName;
+			}
+		}
+	}
 }

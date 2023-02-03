@@ -155,10 +155,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private Map<Resource, List<TripleElement>> missingTriplesByResource;
 	private List<NamedNode> namedNodesToCleanOfMissingPatternsWhenCooked = null;
 	private Map<String, Boolean> addMissingTriplePatternsReturnValueByReqName;
-    private Object encapsulatingTarget = null;	// when a query is in a test
     private GraphPatternElement firstOfPhrase = null;
     
-    private List<ConceptName> namedNodes = null;
     private boolean collectNamedNodes = false;
     private List<String> userDefinedVariables = new ArrayList<String>();
     private OntModel theJenaModel = null;
@@ -225,44 +223,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			errors.clear();
 		}
 		setTarget(null);
-		encapsulatingTarget = null;
 		setFirstOfPhrase(null);
 	}
 	
-	/**
-	 * Returns the bottom triple whose subject was replaced.
-	 * @param pattern
-	 * @param proxyFor
-	 * @param assignedNode
-	 * @return
-	 */
-	private TripleElement assignNullSubjectInProxies(TripleElement pattern,
-			TripleElement proxyFor, Node assignedNode) {
-		if (pattern.getSubject() instanceof ProxyNode) {
-			Object proxy = ((ProxyNode)pattern.getSubject()).getProxyFor();
-			if (proxy instanceof TripleElement) {
-//				((ProxyNode)pattern.getSubject()).setReplacementNode(assignedNode);
-				if (((TripleElement)proxy).getSubject() == null) {
-					// this is the bottom of the recursion
-					((TripleElement)proxy).setSubject(assignedNode);
-					return (TripleElement) proxy;
-				}
-				else {
-					// recurse down
-					TripleElement bottom = assignNullSubjectInProxies(((TripleElement)proxy), proxyFor, assignedNode);
-					// make the proxy next and reassign this subject as assignedNode
-					((ProxyNode)((TripleElement)proxy).getSubject()).setReplacementNode(assignedNode);
-					((TripleElement)proxy).setSubject(assignedNode);
-					if (bottom.getNext() == null) {
-						bottom.setNext(pattern);
-					}
-					return bottom;
-				}
-			}
-		}
-		return null;
-	}
-
 	/**
 	 * Method to determine if a BuiltinElement should generate a DirectedPath
 	 * @param bi
@@ -275,78 +238,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				bi.getFuncName().equals("elementAfter") ||
 				bi.getFuncName().equals("elementInList")) {
 			return true;
-		}
-		return false;
-	}
-
-	private TripleElement getProxyWithNullSubject(TripleElement pattern) {
-		if (pattern.getSubject() instanceof ProxyNode) {
-			Object proxy = ((ProxyNode)pattern.getSubject()).getProxyFor();
-			if (proxy instanceof TripleElement) {
-				if (((TripleElement)proxy).getSubject() == null) {
-					return (TripleElement)proxy;
-				}
-				else {
-					return getProxyWithNullSubject(((TripleElement)proxy));
-				}
-			}
-		}
-		return null;
-	}
-
-	private boolean isComparisonViaBuiltin(Object robj, Object lobj) {
-		if (robj instanceof TripleElement && lobj instanceof Node &&
-				((TripleElement)robj).getNext() instanceof BuiltinElement) {
-			BuiltinElement be = (BuiltinElement) ((TripleElement)robj).getNext();
-			if (isComparisonBuiltin(be.getFuncName()) && be.getArguments().size() == 1) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean isModifiedTripleViaBuitin(Object robj) {
-		if (robj instanceof TripleElement && ((TripleElement)robj).getNext() instanceof BuiltinElement) {
-			BuiltinElement be = (BuiltinElement) ((TripleElement)robj).getNext();
-			if (((TripleElement)robj).getPredicate() instanceof RDFTypeNode) {
-				if (isModifiedTriple(be.getFuncType())) {
-					Node subj = ((TripleElement)robj).getSubject();
-					Node arg = (be.getArguments() != null && be.getArguments().size() > 0) ? be.getArguments().get(0) : null;
-					if (subj == null && arg == null) {
-						return true;
-					}
-					if (subj != null && arg != null && subj.equals(arg)) {
-						return true;
-					}
-				}
-			}
-			else {
-				if (isModifiedTriple(be.getFuncType()) && ((TripleElement)robj).getObject().equals(be.getArguments().get(0))) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private boolean hasCommonVariableSubject(Object robj) {
-		if (robj instanceof TripleElement && 
-				(((TripleElement)robj).getSubject() instanceof VariableNode && 
-						((TripleElement)robj).getSourceType() != null &&
-						(((TripleElement)robj).getSourceType().equals(TripleSourceType.SPV)) ||
-						((TripleElement)robj).getSourceType().equals(TripleSourceType.ITC))) {
-			VariableNode subjvar = (VariableNode) ((TripleElement)robj).getSubject();
-			Object trel = robj;
-			while (trel != null && trel instanceof TripleElement) {
-				if (!(trel instanceof TripleElement) || 
-						(((TripleElement)trel).getSubject() != null &&!(((TripleElement)trel).getSubject().equals(subjvar)))) {
-					return false;
-				}
-				trel = ((TripleElement)trel).getNext();
-			}
-			if (trel == null) {
-				return true;
-			}
 		}
 		return false;
 	}
@@ -382,84 +273,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return null;
 	}
 
-//	/**
-//	 * This method fills in missing information in a NamedNode: 
-//	 * the prefix, the namespace, the type
-//	 * 
-//	 * @param namedNode
-//	 * @return
-//	 * @throws InvalidNameException 
-//	 */
-//	protected Node validateNode(Node node) throws InvalidNameException {
-//		if (node instanceof NamedNode) {
-//			if (!((NamedNode)node).isValidated()) {
-//				if (node instanceof VariableNode) {
-//					((VariableNode) node).setNodeType(NodeType.VariableNode);
-//					userDefinedVariables.add(((NamedNode) node).getName());
-//				}
-//				else if (node instanceof RDFTypeNode) {
-//					((RDFTypeNode) node).setNodeType(NodeType.PropertyNode);
-//				}
-//				else {
-//					ConceptName cname = null;
-//					ConceptType ctype = null;
-//					String name = ((NamedNode)node).toString(); //getName();
-//					if (name == null) {
-//						throw new InvalidNameException("A NamedNode has a null name! Did ResourceByName resolution fail?");
-//					}
-//				    int colon = name.indexOf(':');
-//					if (colon > 0 && colon < name.length() - 1) {
-//						String pfx = name.substring(0, colon);
-//				        ((NamedNode)node).setPrefix(pfx);
-//				        String lname = name.substring(colon + 1);
-//				        ((NamedNode)node).setName(lname);
-////				        cname = modelManager.validateConceptName(new ConceptName(pfx, lname));
-//				    }
-//				    else {
-////				    	cname = modelManager.validateConceptName(new ConceptName(name));
-//				    }
-//			        ctype = cname.getType();
-//			        ((NamedNode)node).setNamespace(cname.getNamespace());
-//			        ((NamedNode)node).setPrefix(cname.getPrefix());
-//			    	if (ctype.equals(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL)) {
-////			    		modelManager.addToVariableNamesCache(cname);
-//			    		node = new VariableNode(((NamedNode)node).getName());
-//			    		userDefinedVariables.add(((NamedNode) node).getName());
-//			    	}
-//			    	else if (ctype.equals(ConceptType.ANNOTATIONPROPERTY)){
-//			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
-//			    	}
-//			    	else if (ctype.equals(ConceptType.DATATYPEPROPERTY)){
-//			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
-//			    	}
-//			    	else if (ctype.equals(ConceptType.OBJECTPROPERTY)){
-//			    		((NamedNode)node).setNodeType(NodeType.PropertyNode);
-//			    	}
-//			    	else if (ctype.equals(ConceptType.ONTCLASS)){
-//			    		((NamedNode)node).setNodeType(NodeType.ClassNode);
-//			    	}
-//			    	else if (ctype.equals(ConceptType.INDIVIDUAL)){
-//			    		((NamedNode)node).setNodeType(NodeType.InstanceNode);
-//			    	}
-//			    	else {
-//			    		logger.error("Unexpected ConceptType: " + ctype.toString());
-//				    	addError(new IFTranslationError("Unexpected ConceptType: " + ctype.toString()));
-//			    	}
-//			    	if (isCollectNamedNodes()) {
-//			    		if (namedNodes == null) {
-//			    			namedNodes = new ArrayList<ConceptName>();
-//			    		}
-//			    		if (!namedNodes.contains(cname)) {
-//			    			namedNodes.add(cname);
-//			    		}
-//			    	}
-//				}
-//				((NamedNode)node).setValidated(true);
-//			}
-//		}
-//		return node;
-//	}
-	
 	private void addError(IFTranslationError error) {
 		if (errors == null) {
 			errors = new ArrayList<IFTranslationError>();
@@ -715,8 +528,20 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 */
 	public void postProcessTest(Test test, TestStatement object) {
 		try {
+			if (test.getLhs() instanceof ProxyNode) {
+				test.setLhs(((ProxyNode)test.getLhs()).getProxyFor());
+			}
 			Object lhs = test.getLhs();
-			if (lhs instanceof List<?> && ((List<?>)lhs).size() > 0) {
+			if (lhs instanceof NamedNode) {
+				if (((NamedNode)lhs).getImpliedPropertyNode() != null) {
+					TripleElement lhsTriple = applyImpliedPropertyOfSubject((NamedNode)lhs);
+					if (lhsTriple != null) {
+						lhs = lhsTriple;
+						test.setLhs(lhs);
+					}
+				}
+			}
+			else if (lhs instanceof List<?> && ((List<?>)lhs).size() > 0) {
 				if (((List<?>)lhs).get(0) instanceof GraphPatternElement) {
 					flattenLinkedList((List<GraphPatternElement>)lhs);
 				}
@@ -775,7 +600,16 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				test.setRhs(((ProxyNode)test.getRhs()).getProxyFor());
 			}
 			Object rhs = test.getRhs();
-			if (rhs instanceof List<?> && ((List<?>)rhs).size() > 0) {
+			if (rhs instanceof NamedNode) {
+				if (((NamedNode)rhs).getImpliedPropertyNode() != null) {
+					TripleElement rhsTriple = applyImpliedPropertyOfSubject((NamedNode)rhs);
+					if (rhsTriple != null) {
+						rhs = new ProxyNode(rhsTriple);
+						test.setRhs(rhs);
+					}
+				}
+			}
+			else if (rhs instanceof List<?> && ((List<?>)rhs).size() > 0) {
 				if (((List<?>)rhs).get(0) instanceof GraphPatternElement) {
 					flattenLinkedList((List<GraphPatternElement>)rhs);
 				}
@@ -797,10 +631,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					test.setRhs(flattenLinkedList(newRhs));
 				}
 			}
-	
-			if (test.getLhs() instanceof ProxyNode) {
-				test.setLhs(((ProxyNode)test.getLhs()).getProxyFor());
+			
+			if (lhs != null && lhs instanceof GraphPatternElement) {
+// TODO				
 			}
+	
 			if (test.getCompType() != null && test.getCompType().equals(ComparisonType.Eq) 
 					&& test.getLhs() != null && test.getRhs() != null 
 					&& test.getLhs() instanceof NamedNode && test.getRhs() instanceof List<?>) {
@@ -859,9 +694,41 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 				}
 			}
+			else if (test.getLhs() instanceof List<?>) {
+				boolean comparisonOpFound = false;
+				boolean triplesOnly = true;
+				for (GraphPatternElement gpe : (JunctionList)test.getLhs()) {
+					if (!(gpe instanceof TripleElement)) {
+						triplesOnly = false;
+					}
+					if (gpe instanceof BuiltinElement && SadlModelProcessor.isComparisonBuiltin(((BuiltinElement)gpe).getFuncName())) {
+						comparisonOpFound = true;
+					}
+				}
+				if (!triplesOnly && !comparisonOpFound) {
+					addError(new IFTranslationError("Does not appear to be a valid test--contains operators but no comparison comparison.", object));
+				}
+				else if (triplesOnly) {
+					// make sure all variables are bound
+					List<VariableNode> vars = new ArrayList<VariableNode>();
+					for (GraphPatternElement gpe : (JunctionList)test.getLhs()) {
+						if (gpe instanceof TripleElement) {
+							if (((TripleElement) gpe).getObject() instanceof VariableNode) {
+								vars.add((VariableNode) ((TripleElement) gpe).getObject());
+							}
+							else if (((TripleElement) gpe).getSubject() instanceof VariableNode) {
+								vars.remove(((TripleElement) gpe).getSubject());
+							}
+						}
+					}
+					if (vars.size() > 0) {
+						addError(new IFTranslationError("Test appears to have unbound variables so can't be evaluated to true or false", object));
+					}
+				}
+			}
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			addError(new IFTranslationError(e.getMessage() ));
 		}
 	}
 
@@ -895,7 +762,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 	}
 
-	public static boolean isComparisonBuiltin(String builtinName) {
+	@Override
+	public boolean isComparisonBuiltin(String builtinName) {
 		ComparisonType[] types = ComparisonType.values();
 		for (ComparisonType type : types) {
 			if (type.matches(builtinName)) {
@@ -909,6 +777,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		clearCruleVariableTypedOutput();
 		variableIsInstanceReplacement(rule);
 		try {
+			vNum = getModelProcessor().getVariableNumber();
+			variableIsInstanceReplacement(rule);
 			// do this first so that the arguments don't change before these are applied
 			addImpliedAndExpandedProperties(rule);
 			// now do this before any null subjects that are the same variable get replaced with different variables.
@@ -1094,8 +964,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			for (int i = 0; i < nullSubjects.size(); i++) {
 				Node prop = nullSubjects.get(i).getPredicate();
 				if (prop instanceof NamedNode) {
-					Property p = getTheJenaModel().getProperty(((NamedNode)prop).toFullyQualifiedString());
-					StmtIterator dmnitr = getTheJenaModel().listStatements(p, RDFS.domain, (RDFNode)null);
+					Property p = getTheModel().getProperty(((NamedNode)prop).toFullyQualifiedString());
+					StmtIterator dmnitr = getTheModel().listStatements(p, RDFS.domain, (RDFNode)null);
 					if (dmnitr.hasNext()) {
 						List<Resource> dmnclses = new ArrayList<Resource>();
 						while (dmnitr.hasNext()) {
@@ -1208,16 +1078,13 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	private Rule addImpliedAndExpandedProperties(Rule rule) throws InvalidNameException, InvalidTypeException, TranslationException {
-		boolean clearPreviouslyRetired = true;	// must clear on first call
 		List<GraphPatternElement> gvns = rule.getGivens();
 		if (gvns != null) {
 			addImpliedAndExpandedProperties(gvns);
-			clearPreviouslyRetired = false;
 		}
 		List<GraphPatternElement> ifs = rule.getIfs();
 		if (ifs != null) {
 			addImpliedAndExpandedProperties(ifs);
-			clearPreviouslyRetired = false;
 		}
 		List<GraphPatternElement> thens = rule.getThens();
 		if (thens != null) {
@@ -1243,12 +1110,49 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return exprStmt;
 	}
 	
-	protected List<GraphPatternElement>  addImpliedAndExpandedProperties(List<GraphPatternElement> fgpes) throws InvalidNameException, InvalidTypeException, TranslationException {
+	protected List<GraphPatternElement> addImpliedAndExpandedProperties(List<GraphPatternElement> fgpes) throws InvalidNameException, InvalidTypeException, TranslationException {
 		for (int i = 0; i < fgpes.size(); i++) {
 			GraphPatternElement gpeback = addImpliedAndExpandedProperties(fgpes.get(i));
 			fgpes.set(i, gpeback);
 		}
 		return fgpes;
+	}
+	
+	/**
+	 * Method to create a new TripleElement for a given predicate NamedNode and object Node using
+	 * the predicate node's impliedPropertyNode
+	 * @param pred
+	 * @param objNode
+	 * @return
+	 */
+	protected TripleElement applyImpliedPropertyOfPredicate(NamedNode pred, Node objNode) {
+		if (pred.getImpliedPropertyNode() != null) {
+			TripleElement newTriple = new TripleElement(null, pred, null);
+			newTriple.setSourceType(TripleSourceType.ImpliedPropertyTriple);
+			newTriple.setPredicate(pred.getImpliedPropertyNode());
+			newTriple.setObject(objNode);
+			pred.setImpliedPropertyNode(null);
+			return newTriple;
+		}
+		return null;
+	}
+
+	/**
+	 * Method to create a new TripleElement for a given predicate NamedNode and object Node using
+	 * the predicate node's impliedPropertyNode
+	 * @param pred
+	 * @param objNode
+	 * @return
+	 */
+	protected TripleElement applyImpliedPropertyOfSubject(NamedNode subj) {
+		NamedNode impPropNode = subj.getImpliedPropertyNode();
+		if (impPropNode != null) {
+			TripleElement newTriple = new TripleElement(subj, impPropNode, null);
+			newTriple.setSourceType(TripleSourceType.ImpliedPropertyTriple);
+			subj.setImpliedPropertyNode(null);
+			return newTriple;
+		}
+		return null;
 	}
 
 	protected GraphPatternElement addImpliedAndExpandedProperties(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
@@ -1281,12 +1185,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			else if (gpe instanceof TripleElement) {
 				Node pred = ((TripleElement)gpe).getPredicate();
 				if (pred instanceof NamedNode && ((NamedNode)pred).getImpliedPropertyNode() != null) {
-					TripleElement newTriple = new TripleElement(null, ((TripleElement)gpe).getPredicate(), null);
-					newTriple.setSourceType(TripleSourceType.ImpliedPropertyTriple);
-					newTriple.setPredicate(((NamedNode)pred).getImpliedPropertyNode());
-					newTriple.setObject(((TripleElement)gpe).getObject());
+					TripleElement newTriple = applyImpliedPropertyOfPredicate((NamedNode)pred, ((TripleElement)gpe).getObject());
 					((TripleElement)gpe).setObject(SadlModelProcessor.nodeCheck(newTriple));
-					((NamedNode)pred).setImpliedPropertyNode(null);
 					if (((TripleElement)gpe).getModifierType().equals(TripleModifierType.Not)) {
 						newTriple.setType(TripleModifierType.Not);
 						((TripleElement)gpe).setType(TripleModifierType.None);
@@ -1343,40 +1243,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			TripleElement newTriple = new TripleElement(((TripleElement)gpe).getSubject(), ((TripleElement)gpe).getPredicate(), null);
 			((TripleElement)gpe).setSubject(SadlModelProcessor.nodeCheck(newTriple));
 			((TripleElement)gpe).setPredicate(lip);
-			//gpe.setRightImpliedPropertyUsed(null);
-		}
-		else {
-			throw new TranslationException("Unexpected GraphPatternElement (" + gpe.getClass().getCanonicalName() + ") encountered applying implied property");
-		}
-	}
-
-	//Need to update for implied properties being moved off graph pattern elements?
-	private void applyRightImpliedProperty(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
-		NamedNode rip = null; //gpe.getRightImpliedPropertyUsed();
-		if (gpe instanceof BuiltinElement) {
-			if (((BuiltinElement)gpe).getArguments() == null || ((BuiltinElement)gpe).getArguments().size() != 2) {
-				throw new TranslationException("Implied properties can't be applied to a BuiltinElement with other than 2 arguments");
-			}
-			Node arg1 = ((BuiltinElement)gpe).getArguments().get(1);
-			if (arg1 instanceof NamedNode && getModelProcessor().isProperty(((NamedNode)arg1))) {
-				TripleElement newTriple = singlePropertyToTriple((NamedNode)arg1);
-				arg1 = SadlModelProcessor.nodeCheck(newTriple);
-			}
-			TripleElement newTriple = new TripleElement(arg1, rip, null);
-			arg1 = SadlModelProcessor.nodeCheck(newTriple);
-			((BuiltinElement)gpe).getArguments().set(1, arg1);			
-			for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
-				Node agi = ((BuiltinElement)gpe).getArguments().get(i);
-				if (agi instanceof ProxyNode && ((ProxyNode)agi).getProxyFor() instanceof BuiltinElement) {
-					addImpliedAndExpandedProperties((BuiltinElement)((ProxyNode)agi).getProxyFor());
-				}
-			}
-			//gpe.setRightImpliedPropertyUsed(null);
-		}
-		else if (gpe instanceof TripleElement) {
-			Node objNode = ((TripleElement)gpe).getObject();
-			TripleElement newTriple = new TripleElement(objNode, rip, null);
-			((TripleElement)gpe).setObject(SadlModelProcessor.nodeCheck(newTriple));
 			//gpe.setRightImpliedPropertyUsed(null);
 		}
 		else {
@@ -1478,39 +1344,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return newTriple;
 	}
 
-	private List<NamedNode> getNamedNodeList(List<NamedNode> found, GraphPatternElement gpe) {
-		if (gpe instanceof TripleElement) {
-			found = addNamedNode(found, ((TripleElement)gpe).getSubject());
-			found = addNamedNode(found, ((TripleElement)gpe).getObject());
-		}
-		else if (gpe instanceof BuiltinElement) {
-			if (((BuiltinElement)gpe).getArguments() != null) {
-				for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
-					found = addNamedNode(found, ((BuiltinElement)gpe).getArguments().get(i));
-				}
-			}
-		}
-		else if (gpe instanceof Junction) {
-			Object lhs = ((Junction)gpe).getLhs();
-			if (lhs instanceof Node) {
-				found = addNamedNode(found, (Node) lhs);
-			}
-			Object rhs = ((Junction)gpe).getRhs();
-			if (rhs instanceof Node) {
-				found = addNamedNode(found, (Node) rhs);
-			}
-		}
-		return found;
-	}
-
-	private List<NamedNode> addNamedNode(List<NamedNode> found, Node node) {
-		if (node instanceof NamedNode && !(node instanceof VariableNode)) {
-			if (found == null) found = new ArrayList<NamedNode>();
-			found.add((NamedNode)node);
-		}
-		return found;
-	}
-
 	private List<GraphPatternElement> decorateCRuleVariables(List<GraphPatternElement> gpes, boolean isRuleThen) {
 		for (int i = 0; i < gpes.size(); i++) {
 			Object premise = gpes.get(i);
@@ -1607,8 +1440,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		if (type instanceof NamedNode && type2 instanceof NamedNode && 
 				((NamedNode)type).getNodeType().equals(NodeType.ClassNode) &&
 				((NamedNode)type2).getNodeType().equals(NodeType.ClassNode)) {
-			OntClass cls1 = getTheJenaModel().getOntClass(type.getURI());
-			OntClass cls2 = getTheJenaModel().getOntClass(type2.getURI());
+			OntClass cls1 = getTheModel().getOntClass(type.getURI());
+			OntClass cls2 = getTheModel().getOntClass(type2.getURI());
 			try {
 				if (SadlUtils.classIsSubclassOf(cls1, cls2, true, null)) {
 					return true;
@@ -1657,8 +1490,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	private List<GraphPatternElement> flattenRuleJunction(Junction jct) throws TranslationException {
 		List<GraphPatternElement>results = new ArrayList<GraphPatternElement>();
 		if (!jct.getJunctionType().equals(JunctionType.Conj)) {
-//			addError(new IFTranslationError("Disjunction not supported in rules at this time"));
-			// this is up to the target translator to decide, not the Intermediate Form Translator
+			// Whether this is supported is up to the target translator to decide, not the Intermediate Form Translator
 			results.add(jct);
 			return results;
 		}
@@ -1723,16 +1555,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			rule.getIfs().add(tgpe);			
 		}
 		else {
-//			if (tgpe instanceof TripleElement) {
-//				if (((TripleElement)tgpe).getPredicate() instanceof RDFTypeNode && 
-//					((TripleElement)tgpe).getSubject() instanceof VariableNode) {
-//					if (isCruleVariableInTypeOutput((VariableNode) ((TripleElement)tgpe).getSubject())) {
-//						results.remove(tgpe);
-//						rule.getIfs().add(0, tgpe);
-//					}
-//				}
-//			}
-//			else 
 			if (tgpe instanceof Junction) {
 				int idx = results.indexOf(tgpe);
 				GraphPatternElement newtgpe = moveEmbeddedFromJunction(rule, (Junction)tgpe);
@@ -2065,8 +1887,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					rememberedPatterns = patterns;
 					patterns = new ArrayList<GraphPatternElement>();
 				}
-///* works for test_08: */				Object objNode = expandProxyNodes(patterns, realObj, isRuleThen, UnNestingType.ReturnSubjectMoveAfter);
-///* works for test_19: */				Object objNode = expandProxyNodes(patterns, realObj, isRuleThen, UnNestingType.ReturnObjectMoveBefore); // UnNestingType.ReturnSubjectMoveAfter);
+///* works for test_08: */	//			Object objNode = expandProxyNodes(patterns, realObj, isRuleThen, UnNestingType.ReturnSubjectMoveAfter);
+///* works for test_19: */	//			Object objNode = expandProxyNodes(patterns, realObj, isRuleThen, UnNestingType.ReturnObjectMoveBefore); // UnNestingType.ReturnSubjectMoveAfter);
 				Object objNode;
 				if (realObj instanceof TripleElement && te.getSourceType() != null && te.getSourceType().equals(TripleSourceType.VariableDefinition)) {
 					unt = UnNestingType.ReturnObjectMoveAfter;
@@ -2206,12 +2028,23 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * Currently it just creates a new variable with a new name.
 	 * @param bltin
 	 * @return
+	 * @throws InvalidNameException 
+	 * @throws TranslationException 
 	 */
-	protected VariableNode getVariableNode(BuiltinElement bltin) {
+	protected VariableNode getVariableNode(BuiltinElement bltin) throws TranslationException, InvalidNameException {
 		if (getTarget() != null) {
 			
 		}
-		return new VariableNode(getNewVar());
+		VariableNode var = new VariableNode(getNewVar());
+		if (bltin.getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME) 
+//			||
+//				builtinElementWithUnittedQuantityArgReturnsUnittedQuantity(bltin)
+) {
+			NamedNode uqType = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode);
+			var.setType(modelProcessor.validateNode(uqType));
+
+		}
+		return var;
 	}
 	
 	/**
@@ -2227,12 +2060,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	protected VariableNode getVariableNode(Node subject, Node predicate, Node object, boolean varIsSubject) {
 		VariableNode var = findVariableInTargetForReuse(subject, predicate, object);
 		if (var != null) {
-//			return new VariableNode(var.getName());
 			return var;
 		}
 		if (predicate != null) {
 			var = new VariableNode(getNewVar());
-			Property prop = this.getTheJenaModel().getProperty(predicate.toFullyQualifiedString());
+			Property prop = this.getTheModel().getProperty(predicate.toFullyQualifiedString());
 			try {
 				ConceptName propcn = new ConceptName(predicate.toFullyQualifiedString());
 				propcn.setType(ConceptType.RDFPROPERTY);  	// assume the most general
@@ -2416,12 +2248,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return null;
 	}
 	
-	protected String getNewVar() {
+	public String getNewVar() {
 		String proposedName = "v" + vNum;
-		while (userDefinedVariables.contains(proposedName)
-//				||
-//				!modelManager.getConceptType(proposedName).equals(ConceptType.CONCEPT_NOT_FOUND_IN_MODEL)
-		) {
+		while (userDefinedVariables.contains(proposedName)) {
 			vNum++;
 			proposedName = "v" + vNum;
 		}
@@ -2458,14 +2287,23 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						GraphPatternElement gpe = itr.next();
 						if (gpe instanceof TripleElement && !(((TripleElement)gpe).getPredicate() instanceof RDFTypeNode)) {
 							if ((te.getSubject() == null || te.getSubject().equals(((TripleElement)gpe).getSubject()))
-									&& (te.getPredicate() == null || te.getPredicate().equals(((TripleElement)gpe).getPredicate()))
-									&& (te.getObject() == null || te.getObject().equals(((TripleElement)gpe).getObject()))) {
-								if (te.getObject() == null && te.getSubject() == null) {
-									// this is too broad for some cases
-									continue;
+									&& (te.getPredicate() == null || te.getPredicate().equals(((TripleElement)gpe).getPredicate()))) {
+								// first condition
+								if ((te.getObject() == null || te.getObject().equals(((TripleElement)gpe).getObject())) ||
+										// second condition
+										(((TripleElement)gpe).getObject() instanceof VariableNode) &&
+										te.getObject() instanceof ProxyNode && 
+										((ProxyNode)te.getObject()).getProxyFor() instanceof TripleElement &&
+										((TripleElement)((ProxyNode)te.getObject()).getProxyFor()).getSubject() == null) {
+									if (te.getObject() == null && te.getSubject() == null) {
+										// this is too broad for some cases
+										continue;
+									}
+									ProxyNode pn = retiredProxyNodes.get(gpe);
+									if (pn != null) {
+										return pn.getReplacementNode();
+									}
 								}
-								ProxyNode pn = retiredProxyNodes.get(gpe);
-								return pn.getReplacementNode();
 							}
 						}
 					}
@@ -2516,12 +2354,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				Node newNode = getVariableNode((BuiltinElement)realArgForIfs);
 				setNewReturnVariableType(newNode, (BuiltinElement)realArgForIfs);
 				((BuiltinElement)realArgForIfs).addArgument(newNode);
+				((BuiltinElement)realArgForIfs).addArgumentType(((VariableNode)newNode).getType());
 				finalIfsVar = newNode;
 				((ProxyNode)arg1PN).setReplacementNode(SadlModelProcessor.nodeCheck(finalIfsVar));
 				retiredProxyNodes.put((GraphPatternElement) realArgForIfs, arg1PN);
 			}
 			if (realArgForThen instanceof TripleElement && ((TripleElement)realArgForThen).getObject() == null) {
-//				Object finalThensVar = expandProxyNodes(patterns, realArgForThen, isRuleThen, UnNestingType.ReturnObjectMoveBefore);
 				((TripleElement)realArgForThen).setObject(SadlModelProcessor.nodeCheck(finalIfsVar));
 				if (!patterns.contains((TripleElement)realArgForThen)) {
 					patterns.add((TripleElement)realArgForThen);
@@ -2746,7 +2584,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				patterns.add(be);
 			}
 			else {
-//				patterns.add(patterns.size() - 1, be);
 				patterns.add(be);
 			}
 			returnNode = be.getArguments() != null ? be.getArguments().get(0) : null;	// this can occur during editing
@@ -2843,7 +2680,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			if (propRange.getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
 				return true;
 			}
-			OntClass unittedQuantitySubclass = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+			OntClass unittedQuantitySubclass = getTheModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
 			try {
 				if (SadlUtils.classIsSubclassOf(propRange, unittedQuantitySubclass, true, null)) {
 					return true;
@@ -2857,8 +2694,8 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	private OntClass getPropertyRange(Node pred) {
-		Property prop = getTheJenaModel().getProperty(pred.getURI());
-		StmtIterator rngItr = getTheJenaModel().listStatements(prop.asResource(), RDFS.range, (RDFNode)null);
+		Property prop = getTheModel().getProperty(pred.getURI());
+		StmtIterator rngItr = getTheModel().listStatements(prop.asResource(), RDFS.range, (RDFNode)null);
 		OntClass unittedQuantitySubclass = null;
 		if (rngItr.hasNext()) {
 			RDFNode rng = rngItr.nextStatement().getObject();
@@ -2869,7 +2706,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			if (unittedQuantitySubclass == null) {
 				// apparently has more than 1 range, use UnittedQuantity
-				unittedQuantitySubclass = getTheJenaModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+				unittedQuantitySubclass = getTheModel().getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
 			}
 		}
 		return unittedQuantitySubclass;
@@ -3287,8 +3124,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		for( Node lProxy : lProxies ) {
 			if( lProxy instanceof ProxyNode ) {
 				lResult.add(((ProxyNode)lProxy).getProxyFor());
-//			} else {
-//				throw new TranslationException("junctionToGraphPatternList called on junction which includes a non-GraphPatternElement; this is not supported.");
 			}
 		}
 		return lResult;
@@ -3400,40 +3235,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	/**
-	 * This method returns true only if all variables in the element are bound in other rule elements
-	 * 
-	 * @param rule
-	 * @param gpe
-	 * @return
-	 */
-	private boolean allElementVariablesBound(Rule rule,
-			GraphPatternElement gpe) {
-		if (gpe instanceof TripleElement) {
-			Node subject = ((TripleElement)gpe).getSubject();
-			if ((subject instanceof VariableNode || subject instanceof NamedNode)
-					&& !variableIsBound(rule, gpe, subject)) {
-				return false;
-			}
-			Node object = ((TripleElement)gpe).getObject();
-			if ((object instanceof VariableNode || object instanceof NamedNode) 
-					&& !variableIsBound(rule, gpe, object)) {
-				return false;
-			}
-		}
-		else if (gpe instanceof BuiltinElement) {
-			List<Node> args = ((BuiltinElement)gpe).getArguments();
-			for (int i = 0; args != null && i < args.size(); i++) {
-				Node arg = args.get(i);
-				if ((arg instanceof VariableNode || arg instanceof NamedNode) 
-					&& !variableIsBound(rule, gpe, arg)) {
-						return false;
-					}
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * This method returns true if the argument node is bound in some other element of the rule
 	 * 
 	 * @param rule
@@ -3535,67 +3336,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return false;
 	}
 
-	private boolean doVariableSubstitution(List<GraphPatternElement> gpes,
-			VariableNode v1, VariableNode v2) {
-		boolean retval = false;
-		for (int i = 0; gpes != null && i < gpes.size(); i++) {
-			GraphPatternElement gpe = gpes.get(i);
-			if (gpe instanceof TripleElement) {
-				if (((TripleElement)gpe).getSubject().equals(v1)) {
-					((TripleElement)gpe).setSubject(v2);
-					retval = true;
-				}
-				else if (((TripleElement)gpe).getObject().equals(v1)) {
-					((TripleElement)gpe).setObject(v2);
-					retval = true;
-				}
-			}
-			else if (gpe instanceof BuiltinElement) {
-				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				for (int j = 0; j < args.size(); j++) {
-					if (args.get(j).equals(v1)) {
-						args.set(j, v2);
-						retval = true;
-					}
-				}
-			}
-			else if (gpe instanceof Junction) {
-				logger.error("Not yet handled");
-			}
-		}
-		return retval;
-	}
-
-	private boolean doVariableSubstitution(GraphPatternElement gpe, VariableNode v1, VariableNode v2) {
-		boolean retval = false;
-		do {
-			if (gpe instanceof TripleElement) {
-				if (((TripleElement)gpe).getSubject().equals(v1)) {
-					((TripleElement)gpe).setSubject(v2);
-					retval = true;
-				}
-				else if (((TripleElement)gpe).getObject().equals(v1)) {
-					((TripleElement)gpe).setObject(v2);
-					retval = true;
-				}
-			}
-			else if (gpe instanceof BuiltinElement) {
-				List<Node> args = ((BuiltinElement)gpe).getArguments();
-				for (int j = 0; j < args.size(); j++) {
-					if (args.get(j).equals(v1)) {
-						args.set(j, v2);
-						retval = true;
-					}
-				}
-			}
-			else if (gpe instanceof Junction) {
-				logger.error("Not yet handled");
-			}
-			gpe = gpe.getNext();
-		} while (gpe != null);
-		return retval;
-	}
-
 	private void setFirstOfPhrase(GraphPatternElement firstOfPhrase) {
 		this.firstOfPhrase = firstOfPhrase;
 	}
@@ -3609,7 +3349,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 */
 	@Override
 	public void setEncapsulatingTarget(Object _encapsulatingTarget) {
-		encapsulatingTarget = _encapsulatingTarget;
 	}
 
 	public boolean isCollectNamedNodes() {
@@ -3618,23 +3357,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 
 	public void setCollectNamedNodes(boolean collectNamedNodes) {
 		this.collectNamedNodes = collectNamedNodes;
-	}
-
-	/**
-	 * This method can be called only once for a given set of translations; calling it clears the list of ConceptNames
-	 * @return
-	 */
-	public List<ConceptName> getNamedNodes() {
-		if (namedNodes != null) {
-			List<ConceptName> x = new ArrayList<ConceptName>(namedNodes);
-			namedNodes.clear();
-			return x;
-		}
-		return null;
-	}
-
-	private void setNamedNodes(List<ConceptName> namedNodes) {
-		this.namedNodes = namedNodes;
 	}
 
 	private boolean isCruleVariableInTypeOutput(VariableNode cruleVariable) {
@@ -3738,7 +3460,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			// find and add missing pattern triples
 			if (!rule.isMissingPatternsAdded()) {
 				try {
-					addMissingTriplePatterns(getTheJenaModel(), rule);
+					addMissingTriplePatterns(getTheModel(), rule);
 				}
 				catch (TranslationException e) {
 					addError(new IFTranslationError(e.getMessage()));
@@ -4049,7 +3771,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 
 	private NamedNode findMatchingSubclass(Map<NamedNode, NamedNode> classInstanceMap, NamedNode arg) {
-		OntClass cls = getTheJenaModel().getOntClass(arg.getURI());
+		OntClass cls = getTheModel().getOntClass(arg.getURI());
 		if (cls != null) {
 			ExtendedIterator<OntClass> scitr = cls.listSubClasses(true);
 			while (scitr.hasNext()) {
@@ -4218,24 +3940,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 			}
 			if (matchOnSubclasses) {
-				OntClass cls = getTheJenaModel().getOntClass(classUri);
+				OntClass cls = getTheModel().getOntClass(classUri);
 				VariableNode subclassV = findVariableOfRIghtTypeInSubclass(cls, variables);
 				if (subclassV != null) {
 					return subclassV;
 				}
-//				for (VariableNode v : variables) {
-//					OntClass cls = getTheJenaModel().getOntClass(classUri);
-//					if (cls != null && v.getType() != null) {
-//						ExtendedIterator<OntClass> scitr = cls.listSubClasses();
-//						while (scitr.hasNext()) {
-//							OntClass sc = scitr.next();
-//							if (sc.isURIResource() && sc.getURI().equals(v.getType().getURI())) {
-//								scitr.close();
-//								return v;
-//							}
-//						}
-//					}
-//				}
 			}
 		}
 		return null;
@@ -4267,7 +3976,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		String classUri = nn.getURI();
 		if (variables != null) {
 			for (VariableNode v : variables) {
-				OntClass cls = getTheJenaModel().getOntClass(classUri);
+				OntClass cls = getTheModel().getOntClass(classUri);
 				if (cls != null && v.getType() != null) {
 					if (findSuperclassVariable(v, cls)) {
 						return v;
@@ -4585,39 +4294,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @throws TranslationException
 	 */
 	private void applyMissingPatternsToAllOccurrencesOfNamedNode(Rule rule) throws TranslationException {
-//		if (!rule.getContext().isMissingPatternsAddedToVariables() && rule.getContext().getCtxElements() != null) {
-//			applyMissingPatternsToGraphPatternElements(rule.getContext().getCtxElements());
-//			Map<String, RequirementVariable> ctxVarMap = rule.getContext().getVariables();
-//			if (ctxVarMap != null) {
-//				Iterator<String> varitr = ctxVarMap.keySet().iterator();
-//				while (varitr.hasNext()) {
-//					RequirementVariable var = ctxVarMap.get(varitr.next());
-//					if (var.getDefinitions() != null) {
-//						List<Node> defns = var.getDefinitions();
-//						for (Node defn : defns) {
-//							if (defn instanceof ProxyNode && ((ProxyNode)defn).getProxyFor() instanceof GraphPatternElement) {
-//								applyMissingPatternsToGraphPatternElement((GraphPatternElement) ((ProxyNode)defn).getProxyFor());
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//		if (rule.getVariables() != null) {
-//			Map<String, RequirementVariable> varMap = rule.getVariables();
-//			Iterator<String> varitr = varMap.keySet().iterator();
-//			while (varitr.hasNext()) {
-//				RequirementVariable var = varMap.get(varitr.next());
-//				if (var.getDefinitions() != null) {
-//					List<Node> defns = var.getDefinitions();
-//					for (Node defn : defns) {
-//						if (defn instanceof ProxyNode && ((ProxyNode)defn).getProxyFor() instanceof GraphPatternElement) {
-//							applyMissingPatternsToGraphPatternElement((GraphPatternElement) ((ProxyNode)defn).getProxyFor());
-//						}
-//					}
-//				}
-//			}
-//		}
 		applyMissingPatternsToGraphPatternElements(rule.getGivens());
 		applyMissingPatternsToGraphPatternElements(rule.getIfs());
 		applyMissingPatternsToGraphPatternElements(rule.getThens());
@@ -4779,7 +4455,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 	}
 
-	protected OntModel getTheJenaModel() {
+	public OntModel getTheModel() {
 		return theJenaModel;
 	}
 
@@ -5034,10 +4710,10 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			return null;
 		}
 		if (getModelProcessor().isProperty(theNode)) {
-			rsrc = getTheJenaModel().getProperty(theNode.toFullyQualifiedString());
+			rsrc = getTheModel().getProperty(theNode.toFullyQualifiedString());
 		}
 		else {
-			rsrc = getTheJenaModel().getResource(theNode.toFullyQualifiedString());
+			rsrc = getTheModel().getResource(theNode.toFullyQualifiedString());
 		}
 		if (!resourceToNamedNodeMap.containsKey(rsrc) ) {
 			resourceToNamedNodeMap.put(rsrc, theNode);
@@ -5054,7 +4730,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	 * @return
 	 */
 	public Property getPropertyFromNamedNode(NamedNode theNode) throws TranslationException {
-		Property prop = getTheJenaModel().getProperty(theNode.toFullyQualifiedString());
+		Property prop = getTheModel().getProperty(theNode.toFullyQualifiedString());
 		if (!resourceToNamedNodeMap.containsKey(prop)) {
 			resourceToNamedNodeMap.put(prop, theNode);
 		}

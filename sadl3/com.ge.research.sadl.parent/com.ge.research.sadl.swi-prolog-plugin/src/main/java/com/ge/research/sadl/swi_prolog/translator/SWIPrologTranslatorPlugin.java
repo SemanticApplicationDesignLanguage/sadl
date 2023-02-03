@@ -1378,7 +1378,6 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		else {
 			logger.warn("Something went wrong finding/loading Builtin '" + bin.getFuncName() + "' of type '" + ftype + "'");
 			addError(getModelName() + ": Found reference to unknown built-in '" + bin.getFuncName() + "' of type '" + ftype + "'", ErrorType.WARNING);
-//			throw new TranslationException("Unable to resolve built-in of type '" + ftype + "'");
 			return bin.getFuncName();
 		}
 
@@ -1545,13 +1544,13 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		}
 		else if (node instanceof ConstantNode) {
 			if (node.getName().equals("PI")) {
-				Literal lit = new Literal();
+				Literal lit = new Literal(LiteralType.NumberLiteral);
 				lit.setValue(Math.PI);
 				lit.setOriginalText(node.getName());
 				return "pi";
 			}
 			else if (node.getName().equals("e")) {
-				Literal lit = new Literal();
+				Literal lit = new Literal(LiteralType.NumberLiteral);
 				lit.setValue(Math.E);
 				lit.setOriginalText(node.getName());
 				return "e";

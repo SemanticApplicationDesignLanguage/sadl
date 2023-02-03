@@ -125,9 +125,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 	private String modelName;
 
 	protected List<ModelError> errors = null;
-														// provided, we need to look for rule files in
-														// imported models and if there are any create a rule file
-														// for this model so that the imported rule files will be loaded
+
+	private List<TripleElement> additionalWhereTriples = null;
 	
 	/**
 	 * The null argument constructor
@@ -404,7 +403,18 @@ public class JenaTranslatorPlugin implements ITranslator {
 						addError(me);
 					}
 					else {
-						sb.append(graphPatternElementToJenaRuleString(elements.get(idx), rulePart));
+						String elementStr = graphPatternElementToJenaRuleString(elements.get(idx), rulePart);
+						if (getAdditionalWhereTriples() != null) {
+							for (TripleElement tr : getAdditionalWhereTriples()) {
+								if (sb.length() > 0) {
+									sb.append(",");
+									sb.append(graphPatternElementToJenaRuleString(tr, RulePart.PREMISE));
+								}
+							}
+							clearAdditionalWhereTriples();
+							sb.append(",");
+						}
+						sb.append(elementStr);
 					}
 				}
 				idx++;
@@ -493,12 +503,12 @@ public class JenaTranslatorPlugin implements ITranslator {
 				return SpecialBuiltin.ISKNOWN;
 			}
 		}
-//		else if (elements.get(index) instanceof BuiltinElement && ((BuiltinElement)elements.get(index)).getFuncName().equals(THERE_EXISTS)) {
-//			return SpecialBuiltin.THEREEXISTS;
-//		}
 		else if (elements.get(index) instanceof BuiltinElement &&
 				((BuiltinElement)elements.get(index)).getInModelReferencedEquation() != null) {
-			return SpecialBuiltin.CONTAINS_SADL_EQUATION;
+			// don't wrap if from SadlBuiltinFunctionsModel
+			if (!(((BuiltinElement)elements.get(index)).getFuncUri().startsWith(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#"))) {
+				return SpecialBuiltin.CONTAINS_SADL_EQUATION;
+			}
 		}
 		return null;
 	}
@@ -715,6 +725,16 @@ public class JenaTranslatorPlugin implements ITranslator {
 			// the filter string will be added in the method
 			graphPatternElementToJenaQueryString(gpe, sbfilter, TranslationTarget.QUERY_FILTER, RulePart.NOT_A_RULE);
 		}
+		if (getAdditionalWhereTriples() != null) {
+			for (TripleElement tr : getAdditionalWhereTriples()) {
+				if (sbmain.length() > 0) {
+					sbmain.append(" . ");
+					sbmain.append(graphPatternElementToJenaQueryString(tr, sbfilter, TranslationTarget.QUERY_TRIPLE, RulePart.NOT_A_RULE));
+				}
+				tripleCtr++;
+			}
+			clearAdditionalWhereTriples();
+		}
 		return tripleCtr;
 	}
 	
@@ -838,6 +858,17 @@ public class JenaTranslatorPlugin implements ITranslator {
 			throw new TranslationException("Unhandled filter type: " + gpe.getFuncName());
 		}
 	}
+
+	private List<TripleElement> getAdditionalWhereTriples() {
+		return additionalWhereTriples == null ? null : additionalWhereTriples.size() > 0 ? additionalWhereTriples : null;
+	}
+	
+	private void clearAdditionalWhereTriples() {
+		if (additionalWhereTriples != null) {
+			additionalWhereTriples.clear();
+		}
+	}
+
 
 	protected boolean translateAndSaveRules(OntModel model, List<Rule> ruleList, String modelName, String filename) throws TranslationException, IOException {
 		if (ruleList == null || ruleList.size() < 1) {
@@ -976,7 +1007,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 				}
 			}
 			else {
-				sb.append(builtinTypeToString((BuiltinElement)gpe));
+				sb.append(setBuiltinElementNameByBuiltinType((BuiltinElement)gpe));
 				sb.append("(");
 				for (int i = 0; args != null && i < args.size(); i++) {
 					Node arg = args.get(i);
@@ -1046,6 +1077,70 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return sb.toString();
 	}
 	
+	/**
+	 * Method to find a GraphPatternElement that uses a given Node.
+	 * For a BuiltinElement, this will be one that has the given Node as an input argument
+	 * For a TripleElement, this will be one in the rule body that has the given Node as a subject or 
+	 * one in the rule conclusion that has the given node as an subject or object
+	 * @param rule
+	 * @param returnedValue
+	 * @return
+	 */
+	private GraphPatternElement findGpeUsingReturnedValue(Rule rule, Node returnedValue) {
+		if (rule.getGivens() != null) {
+			for (GraphPatternElement gpe : rule.getGivens()) {
+				if (gpe instanceof BuiltinElement) {
+					List<Node> args = ((BuiltinElement)gpe).getArguments();
+					if (args.contains(returnedValue) && 
+							!(args.indexOf(returnedValue) == args.size() - 1)) {
+						return gpe;
+					}
+				}
+				else if (gpe instanceof TripleElement) {
+					if (((TripleElement)gpe).getSubject().equals(returnedValue)) {
+						return gpe;
+					}
+				}
+			}
+		}
+		if (rule.getIfs() != null) {
+			for (GraphPatternElement gpe : rule.getIfs()) {
+				if (gpe instanceof BuiltinElement) {
+					List<Node> args = ((BuiltinElement)gpe).getArguments();
+					if (args.contains(returnedValue) && 
+							!(args.indexOf(returnedValue) == args.size() - 1)) {
+						return gpe;
+					}
+				}
+				else if (gpe instanceof TripleElement) {
+					if (((TripleElement)gpe).getSubject().equals(returnedValue)) {
+						return gpe;
+					}
+				}
+			}
+		}
+		if (rule.getThens() != null) {
+			for (GraphPatternElement gpe : rule.getThens()) {
+				if (gpe instanceof BuiltinElement) {
+					List<Node> args = ((BuiltinElement)gpe).getArguments();
+					if (args.contains(returnedValue) && 
+							!(args.indexOf(returnedValue) == args.size() - 1)) {
+						return gpe;
+					}
+				}
+				else if (gpe instanceof TripleElement) {
+					if (((TripleElement)gpe).getSubject().equals(returnedValue)) {
+						return gpe;
+					}
+					else if (((TripleElement)gpe).getObject().equals(returnedValue)) {
+						return gpe;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	private String graphPatternElementToJenaQueryString(GraphPatternElement gpe, StringBuilder sbfilter, 
 			TranslationTarget target, RulePart rulePart) throws TranslationException {
 		if (gpe instanceof TripleElement) {
@@ -1265,122 +1360,70 @@ public class JenaTranslatorPlugin implements ITranslator {
 	@Override
 	public String builtinTypeToString(BuiltinElement bin) throws TranslationException {
 		BuiltinType ftype = bin.getFuncType();
+		String builtinName = null;
 		if (ftype.equals(BuiltinType.Divide)) {
-//			return "quotient";
-			bin.setFuncName("quotient");
+			builtinName = "quotient";
 		}
-		else 
-			if (ftype.equals(BuiltinType.Equal)) {
-//			return "equal";
-			bin.setFuncName("equal");
+		else if (ftype.equals(BuiltinType.Equal)) {
+			builtinName = "equal";
 		}
 		else if (ftype.equals(BuiltinType.GT)) {
-//			return "greaterThan";
-			bin.setFuncName("greaterThan");
+			builtinName = "greaterThan";
 		}
 		else if (ftype.equals(BuiltinType.GTE)) {
-//			return "ge";
-			bin.setFuncName("ge");
+			builtinName = "ge";
 		}
 		else if (ftype.equals(BuiltinType.LT)) {
-//			return "lessThan";
-			bin.setFuncName("lessThan");
+			builtinName = "lessThan";
 		}
 		else if (ftype.equals(BuiltinType.LTE)) {
-//			return "le";
-			bin.setFuncName("le");
+			builtinName = "le";
 		}
 		else if (ftype.equals(BuiltinType.Minus)) {
-//			return "difference";
-			bin.setFuncName("difference");
+			builtinName = "difference";
 		}
 		else if (ftype.equals(BuiltinType.Modulus)) {
-//			return "mod";
-			bin.setFuncName("mod");
+			builtinName = "mod";
 		}
 		else if (ftype.equals(BuiltinType.Multiply)) {
-//			return "product";
-			bin.setFuncName("product");
+			builtinName = "product";
 		}
 		else if (ftype.equals(BuiltinType.Negative)) {
-//			return "negative";
-			bin.setFuncName("negative");
+			builtinName = "negative";
 		}
 		else if (ftype.equals(BuiltinType.Not)) {
-//			return "noValue";
-			bin.setFuncName("noValue");
+			builtinName = "noValue";
 		}
 		else if (ftype.equals(BuiltinType.NotEqual)) {
-//			return "notEqual";
-			bin.setFuncName("notEqual");
+			builtinName = "notEqual";
 		}
 		else if (ftype.equals(BuiltinType.NotOnly)) {
-//			return "notOnlyValue";
-			bin.setFuncName("notOnlyValue");
+			builtinName = "notOnlyValue";
 		}
 		else if (ftype.equals(BuiltinType.Only)) {
-//			return "noValuesOtherThan";
-			bin.setFuncName("noValuesOtherThan");
+			builtinName = "noValuesOtherThan";
 		}
 		else if (ftype.equals(BuiltinType.Plus)) {
-//			return "sum";
-			bin.setFuncName("sum");
+			builtinName = "sum";
 		}
 		else if (ftype.equals(BuiltinType.Power)) {
-//			return "pow";			
-			bin.setFuncName("pow");
+			builtinName = "pow";			
 		}
 		else if (ftype.equals(BuiltinType.Assign)) {
-//			return "assign";
-			bin.setFuncName("assign");
+			builtinName = "assign";
 		}
-
-		String builtinName = bin.getFuncName();
+		if (builtinName != null) {
+			return builtinName;
+		}
+		
+		builtinName = bin.getFuncName();
 		if (builtinName.equals("length") && bin.getArguments() != null && bin.getArguments().size() == 2) {
 			Node arg0 = bin.getArguments().get(0);
 			if (arg0 instanceof NamedNode) {
 				builtinName = "listLength";		
 			}
 		}
-
-		// Note: the order here allows any built-in which overrides the ones in Jena to be picked up preferentially
-		//	see if it is known to the ConfigurationManager or if we can find it in the services registry
-		boolean status = findOrAddBuiltin(builtinName);
-		if (!status) {
-			// if not see if it is one already registered
-			Builtin bltin = BuiltinRegistry.theRegistry.getImplementation(builtinName);
-			if (bltin == null) {
-				logger.error("Something went wrong finding/loading Builtin '" + builtinName + "'");
-				addError("Unable to resolve built-in '" + builtinName + "' in rule '" + getRuleInTranslation().getRuleName() + "'");
-			}
-			else {
-				String uri = bltin.getURI();
-				bin.setFuncUri(uri);
-			}
-		}
 		return builtinName;
-	}
-	
-	/**
-	 * Method to determine if an Node is an instance of a SADL typed list
-	 * @param node
-	 * @return
-	 */
-	private boolean isSadlTypeList(Node node) {
-		Node instType = null;
-		if (node instanceof VariableNode) {
-			instType = ((VariableNode)node).getType();
-		}
-		else if (node instanceof NamedNode) {
-			instType =((NamedNode)node).getLocalizedType();	
-		}
-		if (instType != null && instType instanceof NamedNode) {
-			OntClass type = getTheModel().getOntClass(((NamedNode)instType).getURI());
-			if (type != null) {
-				return isTypedListSubclass(getTheModel(), type);
-			}
-		}
-		return false;
 	}
 
 	@Override
@@ -2194,81 +2237,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return theseErrors;
 	}
 	
-	private Map<String, NamedNode> getTypedVars(com.ge.research.sadl.model.gp.Rule rule) {
-		Map<String, NamedNode> results = getTypedVars(rule.getGivens());
-		Map<String, NamedNode> moreResults = getTypedVars(rule.getIfs());
-		if (moreResults != null) {
-			if (results == null) {
-				results = moreResults;
-			}
-			else {
-				results.putAll(moreResults);
-			}
-		}
-		moreResults = getTypedVars(rule.getThens());
-		if (moreResults != null) {
-			if (results == null) {
-				results = moreResults;
-			}
-			else {
-				results.putAll(moreResults);
-			}
-		}
-		return results;
-	}
-	
-	private Map<String, NamedNode> getTypedVars(List<GraphPatternElement> gpes) {
-		Map<String, NamedNode> results = null;
-		for (int i = 0; gpes != null && i < gpes.size(); i++) {
-			GraphPatternElement gpe = gpes.get(i);
-			if (gpe instanceof TripleElement && 
-					(((TripleElement)gpe).getModifierType() == null || 
-					((TripleElement)gpe).getModifierType().equals(TripleModifierType.None) ||
-					((TripleElement)gpe).getModifierType().equals(TripleModifierType.Not)) &&
-					((TripleElement)gpe).getSubject() instanceof VariableNode &&
-					((TripleElement)gpe).getPredicate() instanceof RDFTypeNode &&
-					((TripleElement)gpe).getObject() instanceof NamedNode) {
-				if (results == null) {
-					results = new HashMap<String, NamedNode>();
-				}
-				String varName = ((VariableNode)((TripleElement)gpe).getSubject()).getName();
-				NamedNode varType = (NamedNode) ((TripleElement)gpe).getObject();
-				if (results.containsKey(varName)) {
-					NamedNode nn = results.get(varName);
-					if (!nn.equals(varType) && !(nn instanceof VariableNode || varType instanceof VariableNode)) {
-						ModelError me = new ModelError("Variable '" + varName + "' is typed more than once in the rule.", ErrorType.WARNING);
-						me.setContext(nn.getContext() != null ? nn.getContext() : gpe.getContext());
-						addError(me);
-					}
-				}
-				results.put(varName, varType);
-			}
-			else if (gpe instanceof Junction) {
-				Object lobj = ((Junction)gpe).getLhs();
-				Object robj = ((Junction)gpe).getRhs();
-				if (lobj instanceof GraphPatternElement || robj instanceof GraphPatternElement) {
-					List<GraphPatternElement> junctgpes = new ArrayList<GraphPatternElement>();
-					if (lobj instanceof GraphPatternElement) {
-						junctgpes.add((GraphPatternElement) lobj);
-					}
-					if (robj instanceof GraphPatternElement) {
-						junctgpes.add((GraphPatternElement) robj);
-					}
-					if (results == null) {
-						results = getTypedVars(junctgpes);
-					}
-					else {
-						Map<String, NamedNode> moreresults = getTypedVars(junctgpes);
-						if (moreresults != null) {
-							results.putAll(moreresults);
-						}
-					}
-				}
-			}
-		}
-		return results;
-	}
-
 	/**
 	 * This method checks the list of GraphPatternElements to see if the specified variable is bound in these elements
 	 * 
@@ -2352,10 +2320,13 @@ public class JenaTranslatorPlugin implements ITranslator {
 	
 	@Override
 	public String getBuiltinFunctionModel(List<String> reservedWords){
+		Map<String, String> builtinsAdded = new HashMap<String, String>();
 		/*
 		 * Note that for the Jena Reasoner, there are two kinds of built-ins
 		 * 1. those that are called implicit built-ins, obtained by calling reasoner getImplicitBuiltinSignatures
 		 * 2. those that are added as implementations of the builtin class and obtained from Java service
+		 * Note that the second could have an override of the first at runtime so get the second list,
+		 *   then add from the first list only if the name isn't in the second list.
 		 */
 		StringBuilder sb = new StringBuilder();
 		sb.append("uri \"");
@@ -2366,11 +2337,6 @@ public class JenaTranslatorPlugin implements ITranslator {
 		
 		try {
 			List<FunctionSignature> bfsigs = getBuiltinFunctionSignatures();
-			for(FunctionSignature fs : bfsigs){
-				sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
-				sb.append("\n\n");
-			}
-			
 			if (configurationMgr instanceof IConfigurationManagerForEditing) {
 				IReasoner reasonerInst = null;
 				try {
@@ -2381,20 +2347,31 @@ public class JenaTranslatorPlugin implements ITranslator {
 					if (serviceLoader != null) {
 						for ( Iterator<?> itr = serviceLoader.iterator(); itr.hasNext();) {
 							try {
-								Object trans = itr.next();
-								BuiltinInfo binfo = reasonerInst.getBuiltinInfo(trans
-										.getClass());
-								if (trans != null) {
-									if (trans instanceof TypedBaseBuiltin) {
-										FunctionSignature fs = new FunctionSignature(((TypedBaseBuiltin)trans).getFunctionSignatureString(), binfo.getUri());
-										sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
-										sb.append("\n\n");
-									} else {
-										// # arguments not known, use "..." for arguments
-										// return type not known, use "--" for return type
-										String untypedFctSignature = binfo.getName() + "(...)--";
-										FunctionSignature fs = new FunctionSignature(untypedFctSignature, binfo.getUri());
-										sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
+								Object bi = itr.next();
+								BuiltinInfo binfo = reasonerInst.getBuiltinInfo(bi.getClass());
+								if (bi != null) {
+									if (!builtinsAdded.containsKey(binfo.getName())) {
+										if (bi instanceof TypedBaseBuiltin) {
+											FunctionSignature fs = new FunctionSignature(((TypedBaseBuiltin)bi).getFunctionSignatureString(), binfo.getUri());
+											sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
+											sb.append("\n\n");
+										} else {
+											// # arguments not known, use "..." for arguments
+											// return type not known, use "--" for return type
+											String untypedFctSignature = binfo.getName() + "(...)--";
+											FunctionSignature fs = new FunctionSignature(untypedFctSignature, binfo.getUri());
+											sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
+											sb.append("\n\n");
+										}
+										builtinsAdded.put(binfo.getName(), binfo.getClassName());
+									}
+									else {
+										sb.append("// ");
+										sb.append(binfo.getName());
+										sb.append(" (");
+										sb.append(binfo.getClassName());
+										sb.append(") is overridden by ");
+										sb.append(builtinsAdded.get(binfo.getName()));
 										sb.append("\n\n");
 									}
 								}
@@ -2413,10 +2390,20 @@ public class JenaTranslatorPlugin implements ITranslator {
 					List<BuiltinInfo> builtins = ((IConfigurationManagerForEditing)configurationMgr).getAvailableBuiltinsForCurrentReasoner();
 					for (int i = 0; builtins != null && i < builtins.size(); i++) {
 						BuiltinInfo bi = builtins.get(i);
-						if (!builtinInSignatureList(bfsigs, bi)) {
+						if (!builtinsAdded.containsKey(bi.getName())) {
+							boolean inList = updateBuiltinInSignatureList(bfsigs, bi);
 							String untypedFctSignature = bi.getName() + "(--)--";
 							FunctionSignature fs = new FunctionSignature(untypedFctSignature, bi.getUri());
 							sb.append(fs.FunctionSignatureToSadlModelFormat(reservedWords));
+							sb.append("\n\n");
+						}
+						else {
+							sb.append("// ");
+							sb.append(bi.getName());
+							sb.append(" (");
+							sb.append(bi.getClassName());
+							sb.append(") is overridden by ");
+							sb.append(builtinsAdded.get(bi.getName()));
 							sb.append("\n\n");
 						}
 					}
@@ -2433,14 +2420,22 @@ public class JenaTranslatorPlugin implements ITranslator {
 		return sb.toString();
 	}
 	
-	private boolean builtinInSignatureList(List<FunctionSignature> bfsigs, BuiltinInfo bi) {
+	private boolean updateBuiltinInSignatureList(List<FunctionSignature> bfsigs, BuiltinInfo bi) {
 		String biName = bi.getName();
-		String biNS = bi.getClassName().substring(0, bi.getClassName().lastIndexOf('.'));
-		if (bfsigs != null) {
-			for (int i = 0; i < bfsigs.size(); i++) {
-				FunctionSignature bfsig = bfsigs.get(i);
-				if (bfsig.getName().equals(biName) && bfsig.getUri().substring(0, bfsig.getUri().indexOf('#')).equals(biNS)) {
-					return true;
+		String clsName = bi.getClassName();
+		int lastDot = clsName.lastIndexOf('.');
+		if (lastDot > 0) {
+			String biNS = clsName.substring(0, lastDot);
+			if (bfsigs != null) {
+				for (int i = 0; i < bfsigs.size(); i++) {
+					FunctionSignature bfsig = bfsigs.get(i);
+					String fsName = bfsig.getName();
+					String fsUri = bfsig.getUri();
+					int fsDot = fsUri.indexOf('#');
+					if (fsDot > 0 && fsName.equals(biName) && fsUri.substring(0, fsDot).equals(biNS)) {
+						bfsig.setUri(bi.getClassName());
+						return true;
+					}
 				}
 			}
 		}
@@ -2625,6 +2620,10 @@ public class JenaTranslatorPlugin implements ITranslator {
 							String classname = className.substring(0, lastDot);
 							String methname =  className.substring(lastDot + 1);
 							Class<?> clazz = eseu.getMatchingClassOfExternalUri(classname);
+							if (clazz == null) {
+								String funcIdentifier = be.getInModelReferencedEquation() != null ? be.getInModelReferencedEquation().getUri() : be.getFuncUri();
+								addError(new ModelError("Unable to find an invokable implementation of '" + funcIdentifier + "'.", ErrorType.ERROR));
+							}
 							Object arg0AsInstanceOfClazz = null;
 							List<Method> matchingStaticMethods = eseu.getMatchingMethodsOfExternalUri(clazz, methname, true);
 							Method bestMatch = eseu.getBestMatch(be, matchingStaticMethods, false);

@@ -14,6 +14,7 @@ import org.eclipse.xtext.testing.XtextRunner
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.junit.Test
 import org.junit.runner.RunWith
+import static org.junit.Assert.*
 
 @RunWith(XtextRunner)
 //@InjectWith(RequirementsInjectorProvider)
@@ -33,13 +34,8 @@ class SadlModelProcessorCircularImportsTest extends AbstractSADLModelProcessorTe
 			 
 			 import "http://sadl.org/model1.sadl".
  		'''.sadl
-//		sadlModel1.assertNoErrors
-//		sadlModel2.assertNoErrors
 		val issues1 = validationTestHelper.validate(sadlModel1)
 		val issues2 = validationTestHelper.validate(sadlModel2)
-//		val sprocessor1 = getReqProcessor(sadlModel1)
-//		val List<Issue> issues1= newArrayList
-//		sprocessor1.onValidate(sadlModel1, new ValidationAcceptor([issues1 += it]),  CheckMode.FAST_ONLY, new ProcessorContext(CancelIndicator.NullImpl,  preferenceProvider.getPreferenceValues(sadlModel1)))
 		if (issues1 !== null) {
 			for (issue: issues1) {
 				System.err.println(issue.toString)
@@ -50,6 +46,11 @@ class SadlModelProcessorCircularImportsTest extends AbstractSADLModelProcessorTe
 				System.err.println(issue.toString)
 			}
 		}
+		assertTrue(issues1 !== null && issues1.size > 0)
+		assertTrue(issues2 !== null && issues2.size > 0)
+		assertTrue(issues1.get(0).toString.contains("Dependency cycle was detected"))
+		assertTrue(issues2.get(0).toString.contains("Dependency cycle was detected"))
+		
 	}
 	
 }

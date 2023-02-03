@@ -149,15 +149,16 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			e1.printStackTrace();
 		}
 
+		OntModel om = OntModelProvider.find(resource);
+		if (om == null) {
+			System.err.println("Unable to find OWL model for Resource '" + resource.getURI().toString() + "'. Does the file have errors?");
+		}
+
 		// clear old reasoner
 		try {
 			getConfigMgr(getOwlFormat()).clearReasoner();
 		} catch (ConfigurationException e2) {
 			e2.printStackTrace();
-		}
-		OntModel om = OntModelProvider.find(resource);
-		if (om == null) {
-			System.err.println("Unable to find OWL model for Resource '" + resource.getURI().toString() + "'. Does the file have errors?");
 		}
 		List<SadlCommand> cmds = OntModelProvider.getSadlCommands(resource);
 		if (cmds == null || cmds.size() < 1) {
@@ -486,152 +487,249 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		Object lhs = ((Test) cmd).getLhs();
 		Object rhs = ((Test) cmd).getRhs();
 		try {
-			if (lhs == null || rhs == null) {
-				// this is just a pass (true) or fail (false) test,
-				// not a comparison
-				if (lhs instanceof Query) {
+		if (lhs == null || rhs == null) {
+			// this is just a pass (true) or fail (false) test,
+			// not a comparison
+			if (lhs instanceof Query) {
 					ResultSet rs = processAdhocQuery(getConfigMgr(getOwlFormat()).getTranslator(), (Query) lhs);
-					//				addError(new ModelError("Error: this Query case is not implemented!", ErrorType.ERROR));
-				} else {
-					TripleElement triple = null;
-					if (lhs instanceof TripleElement) {
-						triple = (TripleElement) lhs;
-					} else if (rhs instanceof TripleElement) {
-						triple = (TripleElement) rhs;
+//				addError(new ModelError("Error: this Query case is not implemented!", ErrorType.ERROR));
+			} else {
+				TripleElement triple = null;
+				if (lhs instanceof TripleElement) {
+					triple = (TripleElement) lhs;
+				} else if (rhs instanceof TripleElement) {
+					triple = (TripleElement) rhs;
+				}
+				if (triple != null) {
+					testResult = testTriple(getInitializedReasoner(), triple);
+				} else if (((Test)cmd).getSharedPatterns() != null) {
+					List<VariableNode> lhv = ((Test)cmd).getLhsVariables();
+					List<VariableNode> rhv = ((Test)cmd).getRhsVariables();
+					List<VariableNode> allVars = new ArrayList<VariableNode>();
+					if (lhv != null) {
+						allVars.addAll(lhv);
 					}
-					if (triple != null) {
-						testResult = testTriple(getInitializedReasoner(), triple);
-					} else if (((Test)cmd).getSharedPatterns() != null) {
-						List<VariableNode> lhv = ((Test)cmd).getLhsVariables();
-						List<VariableNode> rhv = ((Test)cmd).getRhsVariables();
-						List<VariableNode> allVars = new ArrayList<VariableNode>();
-						if (lhv != null) {
-							allVars.addAll(lhv);
-						}
-						if (rhv != null) {
-							allVars.addAll(rhv);
-						}
-
-						Object obj = convertToComparableObject(
-								getModelFolderPath(), getInitializedReasoner(),
-								((Test)cmd).getSharedPatterns(), allVars);
-						if (obj instanceof ResultSet
-								&& ((ResultSet) obj)
-								.getColumnCount() > 0) {
-							ResultSet rs = (ResultSet)obj;
-							int rows = rs.getRowCount();
-							if (rows == 1) {
-								Object lval = null;
-								Object rval = null;
-								if (lhv != null) {
-									lval = rs.getResultAt(0, 0);
-									if (rhv != null) {
-										rval = rs.getResultAt(0, 1);
-									}
+					if (rhv != null) {
+						allVars.addAll(rhv);
+					}
+					
+					Object obj = convertToComparableObject(
+							getModelFolderPath(), getInitializedReasoner(),
+							((Test)cmd).getSharedPatterns(), allVars);
+					if (obj instanceof ResultSet
+							&& ((ResultSet) obj)
+									.getColumnCount() > 0) {
+						ResultSet rs = (ResultSet)obj;
+						int rows = rs.getRowCount();
+						if (rows == 1) {
+							Object lval = null;
+							Object rval = null;
+							if (lhv != null) {
+								lval = rs.getResultAt(0, 0);
+								if (rhv != null) {
+									rval = rs.getResultAt(0, 1);
 								}
-								else if (rhv != null) {
-									rval = rs.getResultAt(0, 0);
-								}
-								if (lval == null) {
-									lval = ((Test)cmd).getLhs();
-								}
-								if (rval == null) {
-									rval = ((Test)cmd).getRhs();
-								}
-								testResult = doTestComparison(lval, rval, cmd.getCompType());
 							}
-							else {
-								for (int i = 0; i < rows; i++) {
-								}	
+							else if (rhv != null) {
+								rval = rs.getResultAt(0, 0);
 							}
+							if (lval == null) {
+								lval = ((Test)cmd).getLhs();
+							}
+							if (rval == null) {
+								rval = ((Test)cmd).getRhs();
+							}
+							testResult = doTestComparison(lval, rval, cmd.getCompType());
 						}
-
-					} else if (lhs instanceof List<?>
-					&& ((List<?>) lhs).size() == 2) {
-						testResult = testFilteredQuery(getInitializedReasoner(),
-								(List<?>) lhs);
-					} else if (rhs instanceof List<?>
-					&& ((List<?>) rhs).size() == 2) {
-						testResult = testFilteredQuery(getInitializedReasoner(),
-								(List<?>) rhs);
-					} else if (lhs instanceof List<?>
-					&& rhs == null) {
-						Object lhobj = convertToComparableObject(
-								getModelFolderPath(), getInitializedReasoner(),
-								lhs, ((Test) cmd).getLhsVariables());
-						if (lhobj instanceof ResultSet
-								&& ((ResultSet) lhobj)
-								.getColumnCount() > 0) {
-							if (isNegatedTriple(lhs)) {
-								testResult = new TestResult(false);
-							}
-							else {
-								testResult = new TestResult(true);
-							}
+						else {
+							for (int i = 0; i < rows; i++) {
+							}	
 						}
-					} else if (lhs instanceof Junction && rhs == null) {
-						Object lhobj = convertToComparableObject(
-								getModelFolderPath(), getInitializedReasoner(),
-								lhs, ((Test) cmd).getLhsVariables());
-						if (lhobj instanceof ResultSet
-								&& ((ResultSet) lhobj)
-								.getColumnCount() > 0) {
+					}
+					
+				} else if (lhs instanceof List<?>
+						&& ((List<?>) lhs).size() == 2) {
+					testResult = testFilteredQuery(getInitializedReasoner(),
+							(List<?>) lhs);
+				} else if (rhs instanceof List<?>
+						&& ((List<?>) rhs).size() == 2) {
+					testResult = testFilteredQuery(getInitializedReasoner(),
+							(List<?>) rhs);
+				} else if (lhs instanceof List<?>
+						&& rhs == null) {
+					Object lhobj = convertToComparableObject(
+							getModelFolderPath(), getInitializedReasoner(),
+							lhs, ((Test) cmd).getLhsVariables());
+					if (lhobj instanceof ResultSet
+							&& ((ResultSet) lhobj)
+									.getColumnCount() > 0) {
+						if (isNegatedTriple(lhs)) {
+							testResult = new TestResult(false);
+						}
+						else {
 							testResult = new TestResult(true);
 						}
-
-					} else {
-						testResult = new TestResult(false);
-						if (lhs == null && rhs == null) {
-							testResult.setMsg("Unable to convert '"
-									+ cmd.toString()
-									+ "' to a test.");
-						} else if (lhs == null) {
-							testResult.setMsg("'" + rhs.toString()
-							+ "' did not return a value.");
-						} else if (rhs == null) {
-							testResult.setMsg("'" + lhs.toString()
-							+ "' did not return a value.");
-						}
 					}
-				}
-			} else {
-				Object lhobj = convertToComparableObject(
-						getModelFolderPath(), getInitializedReasoner(),
-						((Test) cmd).getLhs(),
-						((Test) cmd).getLhsVariables());
-				Object rhobj = convertToComparableObject(
-						getModelFolderPath(), getInitializedReasoner(),
-						((Test) cmd).getRhs(),
-						((Test) cmd).getRhsVariables());
-				ComparisonType type = ((Test) cmd).getCompType();
-				if (type != null
-						&& (type.equals(ComparisonType.IsNot) || type
-								.equals(ComparisonType.Neq))
-						&& ((lhobj == null && (ITranslator.isKnownNode(rhobj) || rhobj != null)) || 
-								(rhobj == null && (ITranslator.isKnownNode(lhobj) || lhobj != null)))) {
-					testResult = new TestResult(true);
-
-				} else if (lhobj != null && rhobj != null
-						&& type != null) {
-					testResult = doTestComparison(lhobj, rhobj,
-							type);
+				} else if (lhs instanceof Junction && rhs == null) {
+					Object lhobj = convertToComparableObject(
+							getModelFolderPath(), getInitializedReasoner(),
+							lhs, ((Test) cmd).getLhsVariables());
+					if (lhobj instanceof ResultSet
+							&& ((ResultSet) lhobj)
+									.getColumnCount() > 0) {
+						testResult = new TestResult(true);
+					}
+				
 				} else {
 					testResult = new TestResult(false);
-					String msg = "";
-					if (type == null) {
-						msg += "Test has no comparison operator. ";
+					if (lhs == null && rhs == null) {
+						testResult.setMsg("Unable to convert '"
+								+ cmd.toString()
+								+ "' to a test.");
+					} else if (lhs == null) {
+						testResult.setMsg("'" + rhs.toString()
+								+ "' did not return a value.");
+					} else if (rhs == null) {
+						testResult.setMsg("'" + lhs.toString()
+								+ "' did not return a value.");
 					}
-					if (lhobj == null) {
-						msg += "'" + lhs.toString()
-						+ "' did not return a value. ";
-					}
-					if (rhobj == null) {
-						msg += "'" + rhs.toString()
-						+ "' did not return a value. ";
-					}
-					testResult.setMsg(msg);
 				}
 			}
+		} else {
+			Object lhobj = convertToComparableObject(
+					getModelFolderPath(), getInitializedReasoner(),
+					((Test) cmd).getLhs(),
+					((Test) cmd).getLhsVariables());
+			Object rhobj = convertToComparableObject(
+					getModelFolderPath(), getInitializedReasoner(),
+					((Test) cmd).getRhs(),
+					((Test) cmd).getRhsVariables());
+			ComparisonType type = ((Test) cmd).getCompType();
+			if (type != null
+					&& (type.equals(ComparisonType.IsNot) || type
+							.equals(ComparisonType.Neq))
+					&& ((lhobj == null && (ITranslator.isKnownNode(rhobj) || rhobj != null)) || 
+							(rhobj == null && (ITranslator.isKnownNode(lhobj) || lhobj != null)))) {
+				testResult = new TestResult(true);
+
+			} else if (lhobj != null && rhobj != null
+					&& type != null) {
+				testResult = doTestComparison(lhobj, rhobj,
+						type);
+			} else {
+				testResult = new TestResult(false);
+				String msg = "";
+				if (type == null) {
+					msg += "Test has no comparison operator. ";
+				}
+				if (lhobj == null) {
+					msg += "'" + lhs.toString()
+							+ "' did not return a value. ";
+				}
+				if (rhobj == null) {
+					msg += "'" + rhs.toString()
+							+ "' did not return a value. ";
+				}
+				testResult.setMsg(msg);
+			}
+		}
+//		if (testResult == null) {
+//			String msg = "Test result is null. This should not happen. Test is: "
+//					+ cmd.toString();
+//			getMessageManager().error(
+//					msg,
+//					getMessageManager().new HyperlinkInfo(
+//							getModelActualUrl().toFileString(),
+//							cmd.getLineNo(), cmd.getOffset(),
+//							cmd.getLength(), 13, -1));
+//			if (writeInEffect != null && !writeInEffect.isDataOnly()) {
+//				writeAccumulator.append(msg);
+//			}
+//		} else if (testResult.isPassed()) {
+//			testsPassed++;
+//			String msg = "Test passed: " + cmd.toString()
+//					+ "\n";
+//			getMessageManager().info(
+//					msg,
+//					getMessageManager().new HyperlinkInfo(
+//							getModelActualUrl().toFileString(),
+//							cmd.getLineNo(), cmd.getOffset(),
+//							cmd.getLength(), 13, -1));
+//			if (writeInEffect != null && !writeInEffect.isDataOnly()) {
+//				writeAccumulator.append(msg);
+//			}
+//		} else {
+//			String msg = "Test failed: " + cmd.toString()
+//					+ "\n";
+//			if (testResult.getMsg() != null) {
+//				msg += "    " + testResult.getMsg() + "\n";
+//			}
+//			getMessageManager().error(
+//					msg,
+//					getMessageManager().new HyperlinkInfo(
+//							getModelActualUrl().toFileString(),
+//							cmd.getLineNo(), cmd.getOffset(),
+//							cmd.getLength(), 13, -1));
+//			getMessageManager().error(
+//					"    " + testResult.toString((Test) cmd)
+//							+ "\n");
+//			if (writeInEffect != null && !writeInEffect.isDataOnly()) {
+//				writeAccumulator.append(msg);
+//			}
+//		}
+//	}
+//} catch (
+//		private void addError(ModelError modelError) {
+//		
+//	}
+//TranslationException e) {
+//	getMessageManager().error(
+//			"Translation error: " + e.getLocalizedMessage()
+//					+ "\n",
+//			getMessageManager().new HyperlinkInfo(
+//					getModelActualUrl().toFileString(), cmd
+//							.getLineNo(), cmd.getOffset(), cmd
+//							.getLength()));
+//} catch (QueryParseException e) {
+//	getMessageManager().error(
+//			"Query parse error: " + e.getLocalizedMessage()
+//					+ "\n",
+//			getMessageManager().new HyperlinkInfo(
+//					getModelActualUrl().toFileString(), cmd
+//							.getLineNo(), cmd.getOffset(), cmd
+//							.getLength()));
+//} catch (QueryCancelledException e) {
+//	getMessageManager().info(e.getLocalizedMessage(),
+//	getMessageManager().new HyperlinkInfo(
+//			getModelActualUrl().toFileString(), cmd
+//					.getLineNo(), cmd.getOffset(), cmd
+//					.getLength()));
+//	cancelled++;
+//} catch (InferenceCanceledException e) {
+//	getMessageManager().info(e.getLocalizedMessage());
+//	break;
+//} catch (TripleNotFoundException e) {
+//	getMessageManager().error(
+//			"Query execution error: " + e.getLocalizedMessage()
+//					+ "\n",
+//			getMessageManager().new HyperlinkInfo(
+//					getModelActualUrl().toFileString(), cmd
+//							.getLineNo(), cmd.getOffset(), cmd
+//							.getLength()));
+//} catch (InvalidNameException e) {
+//	getMessageManager().error(
+//			"Query execution error: " + e.getLocalizedMessage()
+//					+ "\n",
+//			getMessageManager().new HyperlinkInfo(
+//					getModelActualUrl().toFileString(), cmd
+//							.getLineNo(), cmd.getOffset(), cmd
+//							.getLength()));
+//} catch (Throwable t
+//	// catch anything inside the for so that only one test is
+//	// "lost"
+//	t.printStackTrace();
+//}
+		
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
 		} catch (TranslationException e) {
@@ -655,7 +753,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		result.setErrors(getInitializedReasoner().getErrors());
 		return result;
 	}
-	
+
 	private boolean isNegatedTriple(Object lhs) {
 		if (lhs instanceof List<?> && ((List<?>)lhs).size() == 1 && 
 				((List<?>)lhs).get(0) instanceof TripleElement &&
@@ -1078,7 +1176,7 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 									.createTypedLiteral(
 											((com.ge.research.sadl.model.gp.Literal) objval)
 													.getValue()).toString();
-						} else if (objval != null) {
+						} else if (objval != null && objval instanceof NamedNode) {
 							strObjVal = ((NamedNode) objval)
 									.toFullyQualifiedString();
 						}
@@ -1164,6 +1262,22 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 			ComparisonType type) {
 		Object lhval = toComparableObject(lhobj);
 		Object rhval = toComparableObject(rhobj);
+		if (isUnittedQuantity(lhval) && isUnittedQuantity(rhval)) {
+			String lhunits = getUnittedQuantityUnits(lhval);
+			String rhunits = getUnittedQuantityUnits(rhval);
+			Object lhUQval = getUnittedQuantityValue(lhval);
+			Object rhUQval = getUnittedQuantityValue(rhval);
+			if (ResultSet.valuesMatch(lhunits, rhunits)) {
+				return doTestComparison(lhUQval, rhUQval, type);
+			}
+			else {
+				TestResult result = new TestResult(false);
+				result.setMsg("Units of left-hand side (" + lhunits + 
+						") and right-hand side (" + rhunits + ") do not match");
+				result.setType(type);
+				return result;
+			}
+		}
 		if (lhval != null && rhval != null) {
 			if (ResultSet.valuesMatch(lhval, rhval)) {
 				if (type.equals(ComparisonType.Eq)
@@ -1223,6 +1337,32 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 		return createTestFailed(lhobj, lhval, rhobj, rhval, type);
 	}
 
+	private Object getUnittedQuantityValue(Object val) {
+		if (val instanceof Literal) {
+			return ((Literal)val).getValue();
+		}
+		return null;
+	}
+
+	private String getUnittedQuantityUnits(Object val) {
+		if (val instanceof Literal) {
+			return ((Literal)val).getUnits();
+		}
+		return null;
+	}
+
+	/**
+	 * Method to determine if a test comparison value is a UnittedQuantity
+	 * @param lhval
+	 * @return
+	 */
+	private boolean isUnittedQuantity(Object val) {
+		if (val instanceof Literal && ((Literal)val).getUnits() != null) {
+			return true;
+		}
+		return false;
+	}
+
 	private TestResult createTestFailed(Object lhobj, Object lhval,
 			Object rhobj, Object rhval, ComparisonType type) {
 		TestResult result = new TestResult(false);
@@ -1280,6 +1420,9 @@ public class JenaBasedSadlInferenceProcessor implements ISadlInferenceProcessor 
 
 	private Object toComparableObject(Object obj) {
 		if (obj instanceof com.ge.research.sadl.model.gp.Literal) {
+			if (((com.ge.research.sadl.model.gp.Literal)obj).getUnits() != null) {
+				return obj;
+			}
 			return ((com.ge.research.sadl.model.gp.Literal) obj).getValue();
 		} else if (obj instanceof ResultSet) {
 			ResultSet rs = (ResultSet) obj;

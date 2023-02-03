@@ -91,11 +91,18 @@ public class EvaluateSadlEquationUtils {
 			// this is an equation whose implementation is outside of the SADL environment
 			String externaluri = eq.getExternalUri();
 			if (externaluri !=  null) {
+				if (bi.getExternalUri() == null) {
+					bi.setExternalUri(externaluri);
+				}
 				int lastDot = externaluri.lastIndexOf('.');
 				if (lastDot > 0) {
 					String classname = externaluri.substring(0, lastDot);
 					String methname =  externaluri.substring(lastDot + 1);
 					Class<?> clazz = getMatchingClassOfExternalUri(classname);
+					if (clazz == null) {
+						addError(new ModelError("Unable to find an invokable implementation of '" + eq.getUri() + "'.", ErrorType.ERROR));
+						return null;
+					}
 					Object arg0AsInstanceOfClazz = null;
 					List<Method> matchingStaticMethods = getMatchingMethodsOfExternalUri(clazz, methname, true);
 					Method bestMatch = getBestMatch(bi, matchingStaticMethods, false);
@@ -823,9 +830,8 @@ public class EvaluateSadlEquationUtils {
 				return fctCls;
 			}
 		} catch (ClassNotFoundException e) {
-			addError(new ModelError("External Java class '" + classname + "' not found.", ErrorType.ERROR));
+			return null;
 		}
-		addError(new ModelError("Invalid class name: " + classname, ErrorType.ERROR));
 		return null;
 	}
 	/**

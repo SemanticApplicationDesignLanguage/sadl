@@ -710,7 +710,7 @@ public class OwlToSadl {
 				"Deductions",
 				"time",
 				"gYearMonth");
-	}
+		}
 	
 	/**
 	 * Save the SADL model to the specified file
