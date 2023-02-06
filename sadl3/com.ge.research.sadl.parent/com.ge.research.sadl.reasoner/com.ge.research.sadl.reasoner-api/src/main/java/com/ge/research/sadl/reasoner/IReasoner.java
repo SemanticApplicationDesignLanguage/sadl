@@ -30,6 +30,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.ontology.OntModel;
+
 import jakarta.activation.DataSource;
 
 import com.ge.research.sadl.model.Explanation;
@@ -360,9 +362,10 @@ public interface IReasoner {
 	 * Method to evaluate a SADL Equation or External equation, wrapped in a BuiltinElement that identifies the
 	 * equation's inputs.
 	 * @param bi
+	 * @param theModel
 	 * @return --a SADL Node, which could be a Literal, a NamedNode, or a ProxyNode to wrap a GraphPatternElement 
 	 */
-	public Node evaluateSadlEquation(BuiltinElement bi);
+	public Node evaluateSadlEquation(BuiltinElement bi, OntModel theModel);
 	
 	/**
 	 * Write the inferred model (or deductions only) to the specified filename

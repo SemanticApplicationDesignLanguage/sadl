@@ -578,6 +578,7 @@ class EquationEvaluationTest extends AbstractSadlPlatformTest {
 	
 	@Test
 	def void testSadlEquationInRule_09() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		createFile('StringFormat.sadl', '''
 			 uri "http://sadl.org/StringFormat.sadl" alias stringformat.
 			 

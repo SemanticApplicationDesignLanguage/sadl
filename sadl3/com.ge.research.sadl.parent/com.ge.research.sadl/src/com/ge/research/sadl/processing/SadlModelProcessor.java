@@ -20,7 +20,6 @@ package com.ge.research.sadl.processing;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,7 +33,6 @@ import org.eclipse.xtext.resource.XtextSyntaxDiagnostic;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 
-import com.ge.research.sadl.model.ConceptName;
 import com.ge.research.sadl.model.ConceptName.ConceptType;
 import com.ge.research.sadl.model.OntConceptType;
 import com.ge.research.sadl.model.gp.BuiltinElement;
@@ -66,7 +64,6 @@ import com.ge.research.sadl.refactoring.RefactoringHelper;
 import com.ge.research.sadl.sADL.BinaryOperation;
 import com.ge.research.sadl.sADL.BooleanLiteral;
 import com.ge.research.sadl.sADL.Declaration;
-import com.ge.research.sadl.sADL.Expression;
 import com.ge.research.sadl.sADL.Name;
 import com.ge.research.sadl.sADL.NumberLiteral;
 import com.ge.research.sadl.sADL.SadlModel;
@@ -202,7 +199,7 @@ public static final String THERE_EXISTS = "thereExists";
 		}
 		return false;
 	}
-	
+
 	public static boolean isSparqlQuery(String litObj) {
 		litObj = litObj.trim();
 		litObj = SadlUtils.stripQuotes(litObj);
@@ -257,7 +254,7 @@ public static final String THERE_EXISTS = "thereExists";
 		}
 		throw new TranslationException("nodeCheck called with non-Node, non-GraphPatternElement argument: " + nodeObj.getClass().getCanonicalName());
 	}
-	
+
 	public GraphPatternElement createBinaryBuiltin(String name, Object lobj, Object robj, EObject context) throws InvalidNameException, InvalidTypeException, TranslationException {
 		BuiltinElement builtin = new BuiltinElement();
 		builtin.setFuncName(name);

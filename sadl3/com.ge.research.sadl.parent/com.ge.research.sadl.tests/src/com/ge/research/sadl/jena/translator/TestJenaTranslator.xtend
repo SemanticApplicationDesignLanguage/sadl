@@ -16,6 +16,7 @@ import org.junit.runner.RunWith
 import org.pojava.datetime.Duration
 
 import static org.junit.Assert.*
+import org.eclipse.xtext.diagnostics.Severity
 
 @RunWith(XtextRunner)
 @InjectWith(SADLInjectorProvider)
@@ -465,15 +466,22 @@ then rdf(v1, rulevars2:var1, rulevars2:Failed) and rdf(v2, rulevars2:var3, rulev
 			 
 			 Rule R1: if x is a TestClass then formatedString of x is formatString("value is %32.12f != %f", 32.33434, 23.456).
  		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
- 			var errorFound = false;
- 			for (issue : issues) {
+  			for (issue : issues) {
  				println(issue.toString)
- 				if (issue.toString.startsWith("ERROR:java.lang.NumberFormatException: For input string: \"sonoo\"")) {
- 					errorFound = true;
- 				}
  			}
- 			assertTrue(errorFound)
- 			assertNotNull(rules)
+ 			val errors = issues.filter[severity === Severity.ERROR]
+ 			assertTrue(errors.size == 2)
+ 			assertTrue(errors.get(0).toString.startsWith("ERROR:Argument (\"sonoo\") type 'string' doesn't match parameter declaration 'float ...'."))
+ 			assertTrue(errors.get(1).toString.startsWith("ERROR:java.lang.NumberFormatException: For input string: \"sonoo\""))
+ 
+ 			val infos = issues.filter[severity === Severity.INFO]
+ 			assertTrue(infos.size == 4)
+ 			assertTrue(infos.get(0).toString.startsWith("INFO:Evaluates to: \"name is null\""))
+ 			assertTrue(infos.get(1).toString.startsWith("INFO:Evaluates to: \"value is 32.334339\""))
+ 			assertTrue(infos.get(2).toString.startsWith("INFO:Evaluates to: \"value is                  32.334339141846\""))
+ 			assertTrue(infos.get(3).toString.startsWith("INFO:Evaluates to: \"value is                  32.334339141846 != 23.455999\""))
+ 
+  			assertNotNull(rules)
  			assertTrue(rules.size == 1)
  			val rule = getTranslator(processor).translateRule(jenaModel, "http://sadl.org/JavaExternal.sadl", rules.get(0))
  			println(rule.toString)

@@ -33,8 +33,6 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -126,7 +124,6 @@ import com.ge.research.sadl.jena.translator.JenaTranslatorPlugin.TranslationTarg
 import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.ImportMapping;
 import com.ge.research.sadl.model.gp.BuiltinElement;
-import com.ge.research.sadl.model.gp.Equation;
 import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
 import com.ge.research.sadl.model.gp.Junction;
@@ -164,10 +161,7 @@ import com.ge.research.sadl.reasoner.RuleNotFoundException;
 import com.ge.research.sadl.reasoner.TripleNotFoundException;
 import com.ge.research.sadl.reasoner.utils.SadlUtils;
 import com.ge.research.sadl.reasoner.utils.StringDataSource;
-import com.ge.research.sadl.sADL.Constant;
 import com.naturalsemantics.sadl.jena.reasoner.builtin.EvaluateSadlEquationUtils;
-
-import jakarta.activation.DataSource;
 
 import jakarta.activation.DataSource;
 
@@ -188,7 +182,7 @@ import jakarta.activation.DataSource;
  * $Author: crapo $ 
  * $Revision: 1.19 $ Last modified on   $Date: 2015/09/28 15:19:32 $
  */
-public class JenaReasonerPlugin extends Reasoner{
+public class JenaReasonerPlugin extends Reasoner {
     private static final String DEFAULT_TRANSLATOR_CLASSNAME = "com.ge.research.sadl.jena.translator.JenaTranslatorPlugin";
 	protected static final Logger logger = LoggerFactory.getLogger(JenaReasonerPlugin.class);
 	public static String ReasonerFamily="Jena-Based";
@@ -279,25 +273,6 @@ public class JenaReasonerPlugin extends Reasoner{
 	private OntModel preLoadedModel = null;
 	
 	public JenaReasonerPlugin() {
-		// these will have been loaded by the translator and added to the configuration if they are needed
-//		String pkg = "com.ge.research.sadl.jena.reasoner.builtin.";
-//		addBuiltin("abs", pkg + "Abs");
-//		addBuiltin("average", pkg + "Average");
-//		addBuiltin("ceiling", pkg + "Ceiling");
-//		addBuiltin("floor", pkg + "Floor");
-//		addBuiltin("max", pkg + "Max");
-//		addBuiltin("min", pkg + "Min");
-//		addBuiltin("noSubjectsOtherThan", pkg + "NoSubjectsOtherThan");
-//		addBuiltin("notOnlyValue", pkg + "NotOnlyValue");
-//		addBuiltin("noUnknownValues", pkg + "NoUnknownValues");
-//		addBuiltin("noValuesOtherThan", pkg + "NoValuesOtherThan");
-//		addBuiltin("pow", pkg + "Pow");
-//		addBuiltin("print", pkg + "Print");
-//		addBuiltin("product", pkg + "Product");
-//		addBuiltin("sqrt", pkg + "Sqrt");
-//		addBuiltin("subtractDates", pkg + "SubtractDates");
-//		addBuiltin("sum", pkg + "Sum");
-//		PropertyConfigurator.configure("c:/sadlalt2/log4j2.xml");
 	}
 	
 	/**
@@ -325,10 +300,10 @@ public class JenaReasonerPlugin extends Reasoner{
 	 * @throws ConfigurationException 
 	 */
 	public void setConfigurationManager(IConfigurationManager configMgr) throws ConfigurationException {
-//		if ((configMgr instanceof IConfigurationManagerForEditing)) {
-//			((IConfigurationManagerForEditing) configMgr).setReasonerClassName(this.getClass().getCanonicalName());
-//		}
 		configurationMgr = configMgr;
+		if (repoType == null) {
+			repoType = configMgr.getRepoType();
+		}
 	}
 	
 
@@ -3724,14 +3699,22 @@ public class JenaReasonerPlugin extends Reasoner{
 	}
 
 	@Override
-	public Node evaluateSadlEquation(BuiltinElement bi) {
+	public Node evaluateSadlEquation(BuiltinElement bi, OntModel theModel) {
 		String furi = bi.getFuncUri();
 		if (furi.indexOf("#") > 0) {
 			String ns = furi.substring(0, furi.indexOf("#"));
 			if (ns != null && ns.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)) {
-				addError(new ModelError("Jena built-in '" +  furi + "' can't be evaluated in an Expr statement", ErrorType.WARNING));
-				return null;
-			}
+				EvaluateSadlEquationUtils ese = new EvaluateSadlEquationUtils();
+				Node retval = null;
+				retval = ese.evaluateJenaBuiltin(bi, theModel);
+				List<ModelError> errors = ese.getErrors();
+				if (errors != null && errors.size() > 0) {
+					for (ModelError error : errors) {
+						addError(error);
+					}
+				}
+				return retval;
+			}		
 		}
 		EvaluateSadlEquationUtils ese = new EvaluateSadlEquationUtils();
 		Node retval = ese.evaluateSadlEquation(bi);

@@ -18,26 +18,26 @@
 package com.ge.research.sadl.utils
 
 import com.ge.research.sadl.model.DeclarationExtensions
+import com.ge.research.sadl.sADL.Declaration
 import com.ge.research.sadl.sADL.EquationStatement
+import com.ge.research.sadl.sADL.ExpressionStatement
 import com.ge.research.sadl.sADL.NumberLiteral
 import com.ge.research.sadl.sADL.QueryStatement
+import com.ge.research.sadl.sADL.RuleStatement
 import com.ge.research.sadl.sADL.SadlResource
 import com.ge.research.sadl.sADL.SubjHasProp
+import com.ge.research.sadl.sADL.TestStatement
 import com.ge.research.sadl.sADL.UnitExpression
 import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.resource.XtextResource
+import org.eclipse.xtext.scoping.IScope
+import org.eclipse.xtext.scoping.IScopeProvider
 
 import static com.ge.research.sadl.sADL.SADLPackage.Literals.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.getContainerOfType
-import com.ge.research.sadl.sADL.Declaration
-import com.ge.research.sadl.sADL.RuleStatement
-import com.ge.research.sadl.sADL.ExpressionStatement
-import com.ge.research.sadl.sADL.TestStatement
-import org.eclipse.xtext.resource.IEObjectDescription
-import org.eclipse.xtext.scoping.IScope
-import org.eclipse.xtext.scoping.IScopeProvider
-import org.eclipse.emf.ecore.EReference
 
 /**
  * Static utility class for SADL AST elements.

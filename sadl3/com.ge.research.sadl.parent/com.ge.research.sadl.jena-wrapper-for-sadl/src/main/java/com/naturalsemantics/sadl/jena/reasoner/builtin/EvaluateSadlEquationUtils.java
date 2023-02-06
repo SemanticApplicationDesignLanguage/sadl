@@ -26,14 +26,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.datatypes.xsd.impl.XSDBaseNumericType;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.graph.impl.LiteralLabelFactory;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.XSD;
 
+import com.ge.research.sadl.jena.reasoner.builtin.Utils;
 import com.ge.research.sadl.model.gp.BuiltinElement;
+import com.ge.research.sadl.model.gp.BuiltinElement.BuiltinType;
 import com.ge.research.sadl.model.gp.Equation;
+import com.ge.research.sadl.model.gp.Literal;
 import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.NamedNode;
 import com.ge.research.sadl.model.gp.Node;
@@ -79,8 +85,6 @@ public class EvaluateSadlEquationUtils {
 	/**
 	 * Method to evaluate a BuiltinElement containing a SADL Equation directly, 
 	 * as in the processing of an "Expr: <builtin>." statement.
-	 * 
-	 * The 
 	 * 
 	 * @param bi -- the BuiltinElement to be evaluated
 	 * @return -- a SADL Node containing the result of the evaluation
@@ -176,6 +180,83 @@ public class EvaluateSadlEquationUtils {
 				else {
 					addError(new ModelError("Invalid class identifier: " + externaluri, ErrorType.ERROR));
 				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Method to evaluate a BuiltinElement corresponding to a Jena built-in function, as defined in
+	 * the SadlBuiltinFunctions.sadl model.
+	 * 
+	 * @param bi
+	 * @param theModel 
+	 * @return
+	 */
+	public Node evaluateJenaBuiltin(BuiltinElement bi, OntModel theModel) {
+		Equation eq = bi.getInModelReferencedEquation();
+		if (eq != null) {
+			String fqClsName = eq.getExternalUri();
+			if (fqClsName != null) {
+				Class<?> clazz = getMatchingClassOfExternalUri(fqClsName);
+				if (clazz == null) {
+					addError(new ModelError("Unable to find an invokable implementation of '" + eq.getUri() + "'.", ErrorType.ERROR));
+					return null;
+				}
+				String methName = "bodyCall";
+				Method[] matchingMethods = clazz.getMethods();
+				if (matchingMethods != null) {
+					for (Method mm : matchingMethods) {
+						if (mm.getName().equals(methName)) {
+							Class<?>[] paramTypes = mm.getParameterTypes();
+							List<Node> args = bi.getArguments();
+							org.apache.jena.graph.Node[] biArgs = new org.apache.jena.graph.Node[args.size() + 1];	
+							int i = 0;
+							for (Node arg : args) {
+								Object value = null;
+								org.apache.jena.graph.Node valNode = null;
+								if (arg instanceof Literal) {
+									value = ((Literal)arg).getValue();
+							    	if (value instanceof Float) {
+							    		valNode = Utils.makeFloatNode((Float) value);
+							    	}
+							    	else if ( value instanceof Double) {
+							    		valNode = Util.makeDoubleNode(((Double) value).doubleValue());
+							    	}
+							    	else if (value instanceof XSDDateTime) {
+							    		valNode = Utils.makeXSDDateTimeNode((XSDDateTime) value);
+							    	}
+							    	else if ( value instanceof Integer) {
+							    		valNode = Util.makeIntNode(((Integer) value).intValue());
+							    	}
+							    	else {
+							    		valNode = Util.makeLongNode(((Number) value).longValue());
+							    	}
+								}
+								else if (arg instanceof NamedNode){
+									valNode = NodeFactory.createURI(((NamedNode)arg).getURI());
+								}
+								else {
+									// TODO
+								}
+								biArgs[i++] = valNode;
+							}
+							biArgs[i] = NodeFactory.createVariable("retValNode");
+							// now construct the rest of the arguments and make the call
+							BindingEnvironmentForEvaluation befe = new BindingEnvironmentForEvaluation();
+							RuleContextForEvaluation rcfe = new RuleContextForEvaluation(befe);
+							try {
+								Object status = mm.invoke(clazz.getDeclaredConstructor().newInstance(), biArgs, biArgs.length, rcfe);
+								if (status instanceof Boolean && ((Boolean)status).booleanValue()) {
+									return convertResultToNode(befe.getBoundValue(biArgs[i]), bi);
+								}
+							} catch (Exception e) {
+								addError(new ModelError(e.getMessage(), ErrorType.WARNING));
+							}
+						}
+					}
+				}
+				
 			}
 		}
 		return null;
@@ -777,6 +858,9 @@ public class EvaluateSadlEquationUtils {
 	 * @return
 	 */
 	private boolean isNumber(Object value) {
+		if (value instanceof Node_Literal) {
+			value = ((Node_Literal)value).getLiteralValue();
+		}
 		if ((value instanceof Long) ||
 				(value instanceof Integer) ||
 				(value instanceof Float) ||
@@ -860,5 +944,6 @@ public class EvaluateSadlEquationUtils {
 		}
 		return null;
 	}
+
 
 }
