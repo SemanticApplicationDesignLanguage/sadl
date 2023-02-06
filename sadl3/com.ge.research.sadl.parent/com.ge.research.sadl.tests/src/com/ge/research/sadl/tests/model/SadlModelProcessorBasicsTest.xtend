@@ -2073,11 +2073,13 @@ class SadlModelProcessorBasicsTest extends AbstractSADLModelProcessorTest {
 			println(issue)
 		}
 		assertTrue(issues1.filter[severity === Severity.ERROR].size == 0)
-		assertTrue(issues1.filter[severity === Severity.WARNING].size == 1)
-  		assertTrue(issues1.filter[severity === Severity.WARNING].toString.contains("Jena built-in 'http://sadl.org/builtinfunctions#min' can't be evaluated in an Expr statement"))
+		assertTrue(issues1.filter[severity === Severity.WARNING].size == 0)
+		assertTrue(issues1.filter[severity === Severity.INFO].size == 1)
+  		assertTrue(issues1.filter[severity === Severity.INFO].toString.contains("Evaluates to: \"2\"^^http://www.w3.org/2001/XMLSchema#int"))
 		assertTrue(issues2.filter[severity === Severity.ERROR].size == 0)
-		assertTrue(issues2.filter[severity === Severity.WARNING].size == 1)
-  		assertTrue(issues2.filter[severity === Severity.WARNING].toString.contains("Jena built-in 'http://sadl.org/builtinfunctions#min' can't be evaluated in an Expr statement"))
+		assertTrue(issues2.filter[severity === Severity.WARNING].size == 0)
+		assertTrue(issues2.filter[severity === Severity.INFO].size == 1)
+  		assertTrue(issues2.filter[severity === Severity.INFO].toString.contains("Evaluates to: \"2\"^^http://www.w3.org/2001/XMLSchema#int"))
  	}
  	
  	@Test

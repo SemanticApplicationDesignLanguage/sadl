@@ -1525,6 +1525,32 @@ class ExtendedIFTest extends AbstractSADLModelProcessorTest {
 	}
 	
 	@Test
+	def void testRuleUnboundVariableBug() {
+		'''
+			 uri "http://sadl.org/BottomUp.sadl" alias bottomup.
+			 
+			 Duration is a class, described by p with values of type UnittedQuantity.
+			 
+			 Rule R1: if x is a Duration then p of x is 2 seconds + 3 seconds.
+			 D1 is a Duration.
+
+			 Ask: select d, v where d has p v.
+		'''.assertValidatesTo[jenaModel, rules, cmds, issues, processor |
+			if (issues !== null) {
+				for (issue:issues) {
+					println(issue.message)
+				}
+			}
+ 			issues.assertHasNoIssues
+			for (rule:rules) {
+				println(rule.toString)
+			}
+			assertTrue(rules.size == 1)
+			assertEquals("Rule R1:  if rdf(x, rdf:type, bottomup:Duration) and +(2 \"seconds\",3 \"seconds\",v0) then rdf(x, bottomup:p, v0).", rules.get(0).toString)
+		]
+	}
+	
+	@Test
 	def void testGH_858() {
 		'''
 			 uri "http://sadl.org/OtherTypesBug.sadl" alias othertypesbug.

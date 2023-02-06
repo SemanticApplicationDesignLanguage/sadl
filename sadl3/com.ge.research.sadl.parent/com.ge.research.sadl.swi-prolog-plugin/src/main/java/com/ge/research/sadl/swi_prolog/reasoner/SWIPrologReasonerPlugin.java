@@ -1214,7 +1214,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	}
 
 	@Override
-	public Node evaluateSadlEquation(BuiltinElement bi) {
+	public Node evaluateSadlEquation(BuiltinElement bi, OntModel theModel) {
 		addError(new ModelError(this.getClass().getCanonicalName() + " does not support evaluation of SADL equations", ErrorType.ERROR));
 		return null;
 	}

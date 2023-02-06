@@ -1216,40 +1216,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		return gpe;
 	}
 
-	//Need to update for implied properties being moved off graph pattern elements?
-	private void applyLeftImpliedProperty(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
-		NamedNode lip = null; //gpe.getLeftImpliedPropertyUsed();
-		if (gpe instanceof BuiltinElement) {
-			if (((BuiltinElement)gpe).getArguments() == null || ((BuiltinElement)gpe).getArguments().size() != 2) {
-				throw new TranslationException("Implied properties can't be applied to a BuiltinElement with other than 2 arguments");
-			}
-			Node arg0 = ((BuiltinElement)gpe).getArguments().get(0);
-			if (arg0 instanceof NamedNode && getModelProcessor().isProperty(((NamedNode)arg0))) {
-				TripleElement newTriple = singlePropertyToTriple((NamedNode)arg0);
-				arg0 = SadlModelProcessor.nodeCheck(newTriple);
-			}
-			TripleElement newTriple = new TripleElement(arg0, lip, null);
-			arg0 = SadlModelProcessor.nodeCheck(newTriple);
-			((BuiltinElement)gpe).getArguments().set(0, arg0);	
-			for (int i = 0; i < ((BuiltinElement)gpe).getArguments().size(); i++) {
-				Node agi = ((BuiltinElement)gpe).getArguments().get(i);
-				if (agi instanceof ProxyNode && ((ProxyNode)agi).getProxyFor() instanceof BuiltinElement) {
-					addImpliedAndExpandedProperties((BuiltinElement)((ProxyNode)agi).getProxyFor());
-				}
-			}
-			//((BuiltinElement)gpe).setLeftImpliedPropertyUsed(null);
-		}
-		else if (gpe instanceof TripleElement) {
-			TripleElement newTriple = new TripleElement(((TripleElement)gpe).getSubject(), ((TripleElement)gpe).getPredicate(), null);
-			((TripleElement)gpe).setSubject(SadlModelProcessor.nodeCheck(newTriple));
-			((TripleElement)gpe).setPredicate(lip);
-			//gpe.setRightImpliedPropertyUsed(null);
-		}
-		else {
-			throw new TranslationException("Unexpected GraphPatternElement (" + gpe.getClass().getCanonicalName() + ") encountered applying implied property");
-		}
-	}
-
 	private GraphPatternElement applyExpandedProperties(GraphPatternElement gpe) throws InvalidNameException, InvalidTypeException, TranslationException {
 		List<NamedNode> eps = gpe.getExpandedPropertiesToBeUsed();
 		List<GraphPatternElement> junctionMembers = null;
@@ -1759,7 +1725,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 				else {
 					((Junction)pattern).setLhs(SadlModelProcessor.nodeCheck(listToAnd(lhsPatterns).get(0)));
-	//				throw new TranslationException("LHS of a Junction should be a single GraphPatternElement: " + jctPatterns.toString());
 				}
 			}
 			
@@ -1780,7 +1745,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 				else {
 					((Junction)pattern).setRhs(SadlModelProcessor.nodeCheck(listToAnd(rhsPatterns).get(0)));
-	//				throw new TranslationException("RHS of a Junction should be a single GraphPatternElement: " + jctPatterns.toString());
 				}
 			}
 			patterns = existingPatterns;
@@ -1887,8 +1851,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					rememberedPatterns = patterns;
 					patterns = new ArrayList<GraphPatternElement>();
 				}
-///* works for test_08: */	//			Object objNode = expandProxyNodes(patterns, realObj, isRuleThen, UnNestingType.ReturnSubjectMoveAfter);
-///* works for test_19: */	//			Object objNode = expandProxyNodes(patterns, realObj, isRuleThen, UnNestingType.ReturnObjectMoveBefore); // UnNestingType.ReturnSubjectMoveAfter);
 				Object objNode;
 				if (realObj instanceof TripleElement && te.getSourceType() != null && te.getSourceType().equals(TripleSourceType.VariableDefinition)) {
 					unt = UnNestingType.ReturnObjectMoveAfter;
@@ -2118,7 +2080,6 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 	}
 	
 	protected VariableNode findVariableInTargetForReuse(Node subject, Node predicate, Node object) {
-		// Note: when we find a match we still create a new VariableNode with the same name in order to have the right reference counts for the new VariableNode
 		if (getTarget() instanceof Rule) {
 			VariableNode var = findVariableInTripleForReuse(((Rule)getTarget()).getGivens(), subject, predicate, object);
 			if (var != null) {
@@ -2327,9 +2288,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		Node returnNode = null;
 		Node retiredNode = findMatchingElementInRetiredProxyNodes(be);
 		boolean isNotOfEqual = false;
-		if (isRuleThen && (be.getFuncType().equals(BuiltinType.Equal) || be.getFuncType().equals(BuiltinType.Assign))
-				&& be.getArguments() != null && be.getArguments().size() == 2
-				&& be.getArguments().get(0) instanceof ProxyNode && be.getArguments().get(1) instanceof ProxyNode) {
+		if (isRuleThen 
+				&& (be.getFuncType().equals(BuiltinType.Equal) || be.getFuncType().equals(BuiltinType.Assign))
+				&& be.getArguments() != null 
+				&& be.getArguments().size() == 2
+				&& be.getArguments().get(0) instanceof ProxyNode 
+				&& be.getArguments().get(1) instanceof ProxyNode) {
 			ProxyNode arg1PN = (ProxyNode) be.getArguments().get(0);
 			ProxyNode arg2PN = (ProxyNode) be.getArguments().get(1);
 			Object realArgForThen = arg1PN.getProxyFor();
@@ -2827,7 +2791,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		}
 		return false;
 	}
-	
+
 	private void removeArgsFromPatterns(List<GraphPatternElement> patterns, BuiltinElement be) {
 		if (patterns != null && patterns.size() > 0) {
 			List<Node> args = be.getArguments();
@@ -3312,7 +3276,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 		else if (gpe instanceof BuiltinElement) {
 			List<Node> args = ((BuiltinElement)gpe).getArguments();
 			// TODO built-ins can actually have more than the last argument as output, but we can only tell this
-			//	if we have special knowledge of the builtin. Current SADL grammar doesn't allow this to occur.
+			//	if we have special knowledge of the builtin.
 			if (args != null && args.get(args.size() - 1) != null && args.get(args.size() - 1).equals(v)) {
 				return true;
 			}

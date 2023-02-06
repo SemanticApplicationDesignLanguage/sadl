@@ -130,7 +130,6 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.preferences.IPreferenceValues;
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider;
 import org.eclipse.xtext.resource.XtextResource;
-import org.eclipse.xtext.resource.XtextSyntaxDiagnostic;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.IScopeProvider;
 import org.eclipse.xtext.service.OperationCanceledError;
@@ -305,7 +304,6 @@ import com.ge.research.sadl.utils.SadlASTUtils;
 import com.ge.research.sadl.utils.SadlProjectHelper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Iterables;
 
 public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements IJenaBasedModelProcessor {
 	private static final Logger logger = LoggerFactory.getLogger(JenaBasedSadlModelProcessor.class);
@@ -325,8 +323,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 	public enum AnnType {
 		ALIAS, NOTE, SEE
 	}
-
-	private static List<String> sadlTokens = null;
 
 	private List<String> comparisonOperators = Arrays.asList(">=", ">", "<=", "<", "==", "!=", "is", "=", "not",
 			"unique", "in", "contains", "does", /* "not", */"contain");
@@ -1244,7 +1240,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				return;
 			}
 			case SADLHASVALUECONDITION_RESTRICTION: {
-				SadlResource prop = subject;
 				OntConceptType candtype = getDeclarationExtensions().getOntConceptType(candidate);
 				if (!candtype.equals(OntConceptType.INSTANCE)) {
 					String canduri = getDeclarationExtensions().getConceptUri(candidate);
@@ -1815,7 +1810,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		if (bi != null && bi.getInModelReferencedEquation() != null) {
 			try {
 				IReasoner reasoner = getConfigMgr().getReasoner();
-				Node evalNode = reasoner.evaluateSadlEquation(bi);
+				Node evalNode = reasoner.evaluateSadlEquation(bi, getTheJenaModel());
 				if (evalNode != null) {
 					addInfo("Evaluates to: " + evalNode.toString(), expression);
 				}
@@ -2318,7 +2313,6 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				 *           and the value(s) returned are compared per the comparison operator.
 				 */
 				
-		
 				if (expr instanceof BinaryOperation && getIfTranslator().isComparisonBuiltin(((BinaryOperation)expr).getOp()) &&
 						(((BinaryOperation)expr).getLeft() instanceof SelectExpression ||
 								((BinaryOperation)expr).getRight() instanceof SelectExpression)) {
