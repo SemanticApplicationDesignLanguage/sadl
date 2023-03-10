@@ -281,4 +281,57 @@ holds('http://sadl.org/Shapes/Shapes#area', PVv0, PVv3) :- holds('http://www.w3.
 		]
 	}
 	
+static val UQTest1 = '''
+ uri "http://sadl.org/ImpliedPropertiesInRule.sadl" alias impliedpropertiesinrule.
+ 
+ Shape is a class described by area with values of type UnittedQuantity.
+ 
+ Rectangle is a class described  by height with values of type UnittedQuantity,
+ 	described by width with values of type UnittedQuantity.
+ 	
+ MyRect is a Rectangle with width 4.0 ft, with height 2.2 ft.
+ 	
+ Rule R1: if x is a Rectangle then area of x is height of x * width of x.
+ 
+ Ask: select s, ar where s is a Rectangle and s has area ar.
+'''
+
+	@Test
+	def void testUQ1() {
+		if (!canRunSwiProlog) {
+			return
+		}
+		val sfname = 'UQTest1.sadl'
+		createFile(sfname, UQTest1)
+		assertNoErrorsInWorkspace;
+		assertGeneratedOutputFor('UQTest1.sadl', OWL) [
+			println(it)
+		]
+		val content = getPrologFileContent("UQTest1.pl")
+		println(content)
+//		assertEquals("".trim(),content.trim())
+//		assertGeneratedOutputFor('Likes.sadl', PL) [
+//			println(it)
+//		]
+		assertInferencer(sfname, null, null) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof ResultSet)
+				println((tr as ResultSet).toString)
+//				if (idx == 0) {
+//					assertEquals("".trim, scr.toString.trim)
+//				}
+//				if (idx == 1) {
+//					assertEquals("".trim, scr.toString.trim)
+//				}
+				idx++
+			}
+			assertTrue(idx > 0)
+		];
+
+	}
+
 }

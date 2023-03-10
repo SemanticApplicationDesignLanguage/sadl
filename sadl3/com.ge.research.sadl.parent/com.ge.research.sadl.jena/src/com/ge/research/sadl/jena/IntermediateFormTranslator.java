@@ -2607,6 +2607,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						}
 					}
 				}
+				else if (((TypeCheckInfo)beTci).getTypeCheckType() != null) {
+					((VariableNode)varNode).setType(((TypeCheckInfo)beTci).getTypeCheckType());
+				}
 			}
 		}
 	}
@@ -2637,6 +2640,15 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 								return true;
 							}
 						}
+					}
+				}
+			}
+			else if (pf instanceof TripleElement) {
+				Node pn = ((TripleElement)pf).getPredicate();
+				if (pn instanceof NamedNode && ((NamedNode)pn).getLocalizedType() != null) {
+					Node lt = ((NamedNode)pn).getLocalizedType();
+					if (lt instanceof NamedNode) {
+						return getModelProcessor().isUnittedQuantity(((NamedNode)lt).getURI());
 					}
 				}
 			}

@@ -1507,27 +1507,35 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (cachedGPE != null) {
 					be = (BuiltinElement) cachedGPE;
 				} else {
-					be = new BuiltinElement(op, expression);
-					be.addArgumentType(leftTypeCheckInfo.getTypeCheckType());
-					be.addArgumentType(rightTypeCheckInfo.getTypeCheckType());
-					String translatorBuiltinName = trans.builtinTypeToString(be);
-					if (translatorBuiltinName != null) {
-						String biUri = SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#" + translatorBuiltinName;
-						Individual biInst = getTheJenaModel().getIndividual(biUri);
-						if (biInst != null) {
-							Equation eq = getModelProcessor().getEquationFromOwl(expression, translatorBuiltinName, biInst);
-							be.setInModelReferencedEquation(eq);
-							TypeCheckInfo binOpTci = checkFunctionArgumentsAndReturnReturnTypeCheckInfo(be, eq, expression);
-							if (binOpTci != null && binOpTci.getTypeCheckType() != null) {
-								be.addReturnType(binOpTci.getTypeCheckType());
-								getModelProcessor().eobjectPreprocessed(expression, be);
-								addValidatedBuiltinElementCache(expression, be);
-								
-								return binOpTci;
+					if (leftTypeCheckInfo == null ) {
+						getModelProcessor().addTypeCheckingError("Unable to determine type of left-hand side", expression.getLeft());
+					}
+					else if (rightTypeCheckInfo == null) {
+						getModelProcessor().addTypeCheckingError("Unable to determine type of right-hand side", expression.getLeft());
+					}
+					else {
+						be = new BuiltinElement(op, expression);
+						be.addArgumentType(leftTypeCheckInfo.getTypeCheckType());
+						be.addArgumentType(rightTypeCheckInfo.getTypeCheckType());
+						String translatorBuiltinName = trans.builtinTypeToString(be);
+						if (translatorBuiltinName != null) {
+							String biUri = SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#" + translatorBuiltinName;
+							Individual biInst = getTheJenaModel().getIndividual(biUri);
+							if (biInst != null) {
+								Equation eq = getModelProcessor().getEquationFromOwl(expression, translatorBuiltinName, biInst);
+								be.setInModelReferencedEquation(eq);
+								TypeCheckInfo binOpTci = checkFunctionArgumentsAndReturnReturnTypeCheckInfo(be, eq, expression);
+								if (binOpTci != null && binOpTci.getTypeCheckType() != null) {
+									be.addReturnType(binOpTci.getTypeCheckType());
+									getModelProcessor().eobjectPreprocessed(expression, be);
+									addValidatedBuiltinElementCache(expression, be);
+									
+									return binOpTci;
+								}
 							}
 						}
+						getModelProcessor().eobjectPreprocessed(expression, be);
 					}
-					getModelProcessor().eobjectPreprocessed(expression, be);
 				}
 			} catch (ConfigurationException e) {
 				// TODO Auto-generated catch block
@@ -6407,7 +6415,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 						getModelProcessor().addWarning("Function '" + be.getFuncName() + "' has an unknown (--) parameter type, cannot do argument type checking.", context);
 					}
 				}
-				else {
+				else if (argTypes != null) {
 					StringBuilder sb = null;
 					for (int argTypeIdx = 0; argTypeIdx < argTypes.size(); argTypeIdx++) {
 						// argTypes might be larger than eqArgTypes, so iterate through argTypes
