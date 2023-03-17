@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.reasoner.builtin.utils.Utils;
+import com.ge.research.sadl.processing.SadlConstants;
 
 /**
  * This class provides useful utilities for building Jena builtin functions.
@@ -48,6 +49,30 @@ public class GeUtils {
     		Object t = bigItr.next();
     		Node o = ((Triple)t).getMatchObject();
     		list = getListItems(grph, list, o);
+    	}
+    	if (list == null) {
+    		bigItr = grph.find(n, NodeFactory.createURI(SadlConstants.SADL_LIST_MODEL_FIRST_URI), null);
+        	while (bigItr.hasNext()) {
+        		Object t = bigItr.next();
+        		Node o = ((Triple) t).getMatchObject();
+        		if (list == null) {
+        			list = new ArrayList<Node>();
+        		}
+        		list.add(o);
+        	}
+        	bigItr = grph.find(n, NodeFactory.createURI(SadlConstants.SADL_LIST_MODEL_REST_URI), null);
+    		List<Node> listAlt = null;
+        	while (bigItr.hasNext()) {
+        		Object t = bigItr.next();
+        		Node o = ((Triple)t).getMatchObject();
+        		listAlt = getListItems(grph, listAlt, o);
+        	}
+        	if (list == null) {
+        		list = listAlt;
+        	}
+        	else if (listAlt != null) {
+        		list.addAll(listAlt);
+        	}
     	}
     	return list;
     }

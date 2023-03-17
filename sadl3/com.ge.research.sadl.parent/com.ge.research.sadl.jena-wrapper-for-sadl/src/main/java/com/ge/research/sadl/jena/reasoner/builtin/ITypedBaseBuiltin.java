@@ -57,6 +57,13 @@ public interface ITypedBaseBuiltin {
 	abstract boolean canProcessGraphPatternArguments();
 	
 	/**
+	 * Method to answer the number of arguments (VariableNodes) expected
+	 * to have values bound to them as results of built-in evaluation.
+	 * @return
+	 */
+	abstract int numOutputArgs();
+	
+	/**
 	 * Method to validate the input argument types and return the output types. 
 	 * @param model -- the OntModel providing the context for validation
 	 * @param be -- the BuiltinElement, passed in so that fields can be set within it

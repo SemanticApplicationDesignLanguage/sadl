@@ -60,8 +60,12 @@ public class Assign extends BaseBuiltin {
         checkArgs(length, context);
         BindingEnvironment env = context.getEnv();
         Node n1 = getArg(0, args, context);
-        if (n1.isLiteral()) {
-            return env.bind(args[1], n1);
+        Node n2 = getArg(1, args, context);
+        if (n1.isVariable()) {
+            return env.bind(n1, n2);
+        }
+        else if (n2.isVariable()) {
+        	return env.bind(n2, n1);
         }
         // Doesn't (yet) handle partially bound cases
         return false;

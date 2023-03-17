@@ -35,6 +35,7 @@ import org.apache.jena.graph.impl.LiteralLabelFactory;
 import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.reasoner.rulesys.Util;
 import org.apache.jena.vocabulary.XSD;
@@ -53,6 +54,7 @@ import com.ge.research.sadl.model.gp.UnknownNode;
 import com.ge.research.sadl.model.gp.UntypedEllipsisNode;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.processing.SadlConstants;
+import com.ge.research.sadl.reasoner.IReasoner;
 import com.ge.research.sadl.reasoner.ModelError;
 import com.ge.research.sadl.reasoner.ModelError.ErrorType;
 import com.ge.research.sadl.sADL.Constant;
@@ -74,6 +76,12 @@ public class EvaluateSadlEquationUtils {
 	enum PossibleDataTypes {INT, LONG, FLOAT, DOUBLE, BOOLEAN, STRING, NUMBER}
 
 	private List<ModelError> newErrors = null;
+	
+	IReasoner reasoner = null;
+	
+	public EvaluateSadlEquationUtils(IReasoner reasoner) {
+		this.reasoner = reasoner;
+	}
 
 	public List<ModelError> getErrors() {
 		List<ModelError> returning = newErrors;
@@ -216,8 +224,41 @@ public class EvaluateSadlEquationUtils {
 					for (Method mm : matchingMethods) {
 						if (mm.getName().equals(methName)) {
 							List<Node> args = bi.getArguments();
-							int numArgs = BuiltinElement.isComparisonBuiltin(bi.getFuncType()) ? args.size() : args.size() + 1;
-							org.apache.jena.graph.Node[] biArgs = new org.apache.jena.graph.Node[numArgs];	
+							int numInputArgs = args.size();
+							int numOutputArgs = 1; 	// default
+							try {
+								Method argSizeMethod = clazz.getMethod("getArgLength", null);
+								Object clzInst = clazz.getDeclaredConstructor().newInstance();
+								if (argSizeMethod != null) {
+									Object declaredArgSize = argSizeMethod.invoke(clzInst, null);
+									if (declaredArgSize != null && declaredArgSize instanceof Integer) {
+										numInputArgs = ((Integer)declaredArgSize).intValue();
+									}
+									else {
+										numInputArgs = BuiltinElement.isComparisonBuiltin(bi.getFuncType()) ? args.size() : args.size() + 1;
+									}
+								}
+								Method numOutputArgsMethod = clazz.getMethod("numOutputArgs", null);
+								if (numOutputArgsMethod != null) {
+									Object numOutputArgsObj = numOutputArgsMethod.invoke(clzInst, null);
+									if (numOutputArgsObj != null && numOutputArgsObj instanceof Integer) {
+										numOutputArgs = ((Integer)numOutputArgsObj).intValue();
+									}
+									else {
+										if (BuiltinElement.isComparisonBuiltin(bi.getFuncType()) ||
+												bi.getFuncType().equals(BuiltinType.Assign)) {
+											// these just return true or false to the reasoner
+											numOutputArgs = 0;
+										}
+									}
+								}
+							} catch (Exception e1) {
+								numInputArgs = (BuiltinElement.isComparisonBuiltin(bi.getFuncType()) || bi.getFuncType().equals(BuiltinType.Assign)) ? args.size() : args.size() + 1;
+							}
+							if (numInputArgs == 0) {
+								numInputArgs = args.size();
+							}
+							org.apache.jena.graph.Node[] biArgs = new org.apache.jena.graph.Node[numInputArgs + numOutputArgs];	
 							int i = 0;
 							for (Node arg : args) {
 								Object value = null;
@@ -252,17 +293,25 @@ public class EvaluateSadlEquationUtils {
 								}
 								biArgs[i++] = valNode;
 								}
-							if (!BuiltinElement.isComparisonBuiltin(bi.getFuncType())) {
+							if (numOutputArgs > 0) {
 								biArgs[i] = NodeFactory.createVariable("retValNode");
 							}
-							// now construct the rest of the arguments and make the call
-							BindingEnvironmentForEvaluation befe = new BindingEnvironmentForEvaluation();
-							RuleContextForEvaluation rcfe = new RuleContextForEvaluation(befe, theModel);
 							try {
+								// now construct the rest of the arguments and make the call
+								BindingEnvironmentForEvaluation befe = new BindingEnvironmentForEvaluation();
+								Model infGraph;
+								if (reasoner != null) {
+									infGraph = (Model) reasoner.getInferredModel(false);
+								}
+								else {
+									infGraph = theModel;
+								}
+
+								RuleContextForEvaluation rcfe = new RuleContextForEvaluation(befe, infGraph);
 								Object status = mm.invoke(clazz.getDeclaredConstructor().newInstance(), biArgs, biArgs.length, rcfe);
 								if (status instanceof Boolean && (((Boolean)status).booleanValue() ||
 										BuiltinElement.isComparisonBuiltin(bi.getFuncType()))) {
-									if (BuiltinElement.isComparisonBuiltin(bi.getFuncType())) {
+									if (numOutputArgs == 0) {
 										return new Literal(status, null, LiteralType.BooleanLiteral);
 									}
 									return convertResultToNode(befe.getBoundValue(biArgs[i]), bi, theModel);

@@ -35,8 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ge.research.sadl.jena.reasoner.builtin.utils.Utils;
+import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.UnittedQuantityBuiltinHandlingType;
 
-public class List extends BaseBuiltin {
+public class List extends TypedBaseBuiltin {
     protected static final Logger logger = LoggerFactory.getLogger(List.class);
 	
 	private int argLength = 0;
@@ -147,4 +148,29 @@ public class List extends BaseBuiltin {
          return false;
     }
 
+	@Override
+	public String getFunctionSignatureString() {
+		return "list(...)--";
+	}
+
+	@Override
+	public int numOutputArgs() {
+		return 1;
+	}
+
+	@Override
+	public boolean canProcessUnittedQuantityArguments() {
+		return true;
+	}
+	
+	@Override
+	public boolean canProcessGraphPatternArguments() {
+		return true;
+	}
+
+	@Override
+	public UnittedQuantityBuiltinHandlingType getUnittedQuantityProcessingConstraint() {
+		return UnittedQuantityBuiltinHandlingType.SameUnitsRequired;
+	}
+	
 }

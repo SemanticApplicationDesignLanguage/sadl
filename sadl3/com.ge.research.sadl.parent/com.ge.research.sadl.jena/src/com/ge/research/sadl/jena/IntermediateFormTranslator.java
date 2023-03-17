@@ -5161,6 +5161,9 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 				}
 				List<GraphPatternElement> patternSet = findContainingPatternSet(rule, be);
 				Node[] expansionResults = expandBodyBuiltinElement(be, patternSet, replacements);
+				if (expansionResults == null) {
+					continue;
+				}
 				// save expansionResults in case there are subsequent computations for which we need an output unit
 				Node[] replacementNodes1 = new Node[2];
 				replacementNodes1[0] = expansionResults[0];;
@@ -5611,7 +5614,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 								outputUnit = specifiedUnits; 
 							}
 						}
-						else {
+						else if (units.size() == 2 && units.get(0) != null && units.get(1) != null){
 							// must compute output unit at runtime
 							// insert a combinedUnits(be.getFuncName(), units) into patternSet
 							BuiltinElement cu = new BuiltinElement();
@@ -5639,7 +5642,7 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					}
 					else {
 						addError(new IFTranslationError("Built-in function '" + be.getFuncName() + "' does not support UnittedQuantity input", be.getContext()));
-						throw new TranslationException("Built-in function '" + be.getFuncName() + "' does not support UnittedQuantity input");
+//						throw new TranslationException("Built-in function '" + be.getFuncName() + "' does not support UnittedQuantity input");
 					}
 				}
 			}

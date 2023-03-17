@@ -1507,11 +1507,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				if (cachedGPE != null) {
 					be = (BuiltinElement) cachedGPE;
 				} else {
-					if (leftTypeCheckInfo == null ) {
-						getModelProcessor().addTypeCheckingError("Unable to determine type of left-hand side", expression.getLeft());
-					}
-					else if (rightTypeCheckInfo == null) {
-						getModelProcessor().addTypeCheckingError("Unable to determine type of right-hand side", expression.getLeft());
+					if (leftTypeCheckInfo == null || rightTypeCheckInfo == null) {
+						if (leftTypeCheckInfo == null ) {
+							getModelProcessor().addTypeCheckingError("Unable to determine type of left-hand side", expression.getLeft());
+						}
+						if (rightTypeCheckInfo == null) {
+							getModelProcessor().addTypeCheckingError("Unable to determine type of right-hand side", expression.getRight());
+						}
 					}
 					else {
 						be = new BuiltinElement(op, expression);

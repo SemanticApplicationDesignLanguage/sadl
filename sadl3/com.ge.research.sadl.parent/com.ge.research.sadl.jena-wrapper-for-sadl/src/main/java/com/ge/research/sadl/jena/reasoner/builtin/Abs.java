@@ -125,4 +125,9 @@ public class Abs extends TypedBaseBuiltin {
 		return null;
 	}
 
+	@Override
+	public int numOutputArgs() {
+		return 1;
+	}
+
 }

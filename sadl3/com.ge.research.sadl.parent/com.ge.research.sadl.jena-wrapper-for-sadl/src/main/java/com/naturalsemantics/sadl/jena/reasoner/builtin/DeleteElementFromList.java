@@ -189,4 +189,9 @@ public class DeleteElementFromList extends TypedBaseBuiltin {
 	public boolean canProcessListArgument() {
 		return true;
 	}
+
+	@Override
+	public int numOutputArgs() {
+		return 1;
+	}
 }
