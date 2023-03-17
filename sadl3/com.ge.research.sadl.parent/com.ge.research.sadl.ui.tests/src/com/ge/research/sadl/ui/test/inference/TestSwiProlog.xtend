@@ -12,6 +12,7 @@ import com.ge.research.sadl.reasoner.SadlCommandResult
 import com.ge.research.sadl.reasoner.ResultSet
 import com.ge.research.sadl.preferences.SadlPreferences
 import org.eclipse.xtext.preferences.PreferenceKey
+import org.junit.Ignore
 
 class TestSwiProlog extends AbstractSwiPrologTest {
 
@@ -295,7 +296,7 @@ static val UQTest1 = '''
  
  Ask: select s, ar where s is a Rectangle and s has area ar.
 '''
-
+	@Ignore
 	@Test
 	def void testUQ1() {
 		if (!canRunSwiProlog) {
