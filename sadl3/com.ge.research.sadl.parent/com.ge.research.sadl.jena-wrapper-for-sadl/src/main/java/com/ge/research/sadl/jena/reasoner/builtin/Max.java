@@ -226,4 +226,8 @@ public class Max extends TypedBaseBuiltin {
 		return null;
 	}
 
+	@Override
+	public int numOutputArgs() {
+		return 1;
+	}
 }

@@ -213,4 +213,8 @@ public class Min extends TypedBaseBuiltin {
 		return null;
 	}
 
+	@Override
+	public int numOutputArgs() {
+		return 1;
+	}
 }

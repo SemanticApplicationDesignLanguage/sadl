@@ -78,7 +78,7 @@ public class EvaluateSadlEquation extends CancellableBuiltin {
 				restOfArgs.add(allArgs[i]);
 			}
 			List<Node>returnTypes = null; 
-			(new EvaluateSadlEquationUtils()).evaluateSadlEquation(exturi, null, restOfArgs, false, returnTypes);
+			(new EvaluateSadlEquationUtils(null)).evaluateSadlEquation(exturi, null, restOfArgs, false, returnTypes);
 		}
 	}
     
@@ -200,7 +200,7 @@ public class EvaluateSadlEquation extends CancellableBuiltin {
 		    				citr6.close();
 	    				}
 	    			}	    				
-	    			Node result = (new EvaluateSadlEquationUtils()).evaluateSadlEquation(javaUriStr, restOfArgs, restOfArgTypes, varArgs, returnTypes);
+	    			Node result = (new EvaluateSadlEquationUtils(null)).evaluateSadlEquation(javaUriStr, restOfArgs, restOfArgTypes, varArgs, returnTypes);
 	           		return context.getEnv().bind(args[length - 1], result);	     
 	    		}
 	    		else {

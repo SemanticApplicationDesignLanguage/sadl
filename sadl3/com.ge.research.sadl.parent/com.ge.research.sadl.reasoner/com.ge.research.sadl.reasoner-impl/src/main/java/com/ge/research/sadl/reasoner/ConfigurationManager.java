@@ -1579,7 +1579,7 @@ public class ConfigurationManager implements IConfigurationManager {
 		return jenaDocumentMgr;
 	}
 	
-	private void setJenaDocumentMgr(OntDocumentManager jenaDocumentMgr) {
+	protected void setJenaDocumentMgr(OntDocumentManager jenaDocumentMgr) {
 		this.jenaDocumentMgr = jenaDocumentMgr;
 	}
 	
@@ -1690,7 +1690,7 @@ public class ConfigurationManager implements IConfigurationManager {
     	}
     	    	    	
     	// if not given altImportUrl, then we must have the publicImportUri so find the altImportUrl in mapping
-    	if (altImportUrl == null) {
+    	if (altImportUrl == null && !importingOntology.getURI().equals(publicImportUri)) {
     		altImportUrl = getAltUrlFromPublicUri(publicImportUri);
     	}
     	

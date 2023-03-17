@@ -20,28 +20,25 @@ package com.naturalsemantics.sadl.jena.reasoner.builtin;
 import java.util.Iterator;
 
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Node_Literal;
 import org.apache.jena.graph.Node_URI;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.InfModel;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.rdf.model.impl.StmtIteratorImpl;
 import org.apache.jena.reasoner.InfGraph;
 import org.apache.jena.reasoner.rulesys.BindingEnvironment;
 import org.apache.jena.reasoner.rulesys.Rule;
-import org.apache.jena.reasoner.rulesys.impl.SafeTripleIterator;
 import org.apache.jena.util.iterator.ClosableIterator;
 
 public class RuleContextForEvaluation implements org.apache.jena.reasoner.rulesys.RuleContext {
 
 	private BindingEnvironmentForEvaluation bindingEnv = null;
-	private OntModel theModel = null;
+	private Model theModel = null;
 	
-	public RuleContextForEvaluation(BindingEnvironmentForEvaluation befe, OntModel model) {
+	public RuleContextForEvaluation(BindingEnvironmentForEvaluation befe, Model model) {
 		bindingEnv = befe;
 		theModel = model;
 	}
@@ -53,7 +50,9 @@ public class RuleContextForEvaluation implements org.apache.jena.reasoner.rulesy
 
 	@Override
 	public InfGraph getGraph() {
-		// TODO Auto-generated method stub
+		if (theModel instanceof InfModel) {
+			return (InfGraph) ((InfModel) theModel).getGraph();
+		}
 		return null;
 	}
 

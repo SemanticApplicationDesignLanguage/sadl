@@ -136,4 +136,8 @@ public class ElementAfter extends TypedBaseBuiltin {
 		return true;
 	}
 
+	@Override
+	public int numOutputArgs() {
+		return 1;
+	}
 }

@@ -119,6 +119,11 @@ public class Print extends TypedBaseBuiltin {
 		// doesn't return anything
 		return null;
 	}
+
+	@Override
+	public int numOutputArgs() {
+		return 0;
+	}
 }
 
 /*

@@ -425,4 +425,8 @@ public class Sum extends org.apache.jena.reasoner.rulesys.builtins.Sum implement
 		return true;
 	}
 
+	@Override
+	public int numOutputArgs() {
+		return 1;
+	}
 }

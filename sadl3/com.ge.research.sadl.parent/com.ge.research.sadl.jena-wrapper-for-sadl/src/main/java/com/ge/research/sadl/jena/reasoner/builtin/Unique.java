@@ -35,7 +35,7 @@ public class Unique extends BaseBuiltin {
      * Return the expected number of arguments for this functor or 0 if the number is flexible.
      */
     public int getArgLength() {
-        return 2;
+        return 3;
     }
     
     /**

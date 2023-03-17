@@ -1377,4 +1377,19 @@ public class ConfigurationManagerForIDE extends ConfigurationManagerForEditing i
 		return true;
 	}
 	
+	@Override
+	public OntDocumentManager getJenaDocumentMgr() {
+		if (jenaDocumentMgr == null) {
+			if (getMappingModel() != null) {
+				setJenaDocumentMgr(new OntDocumentManager(getMappingModel()));
+				if (getOntModelSpec(null) != null) {
+					getOntModelSpec(null).setDocumentManager(getJenaDocumentMgr());
+				}
+			}
+			else {
+				setJenaDocumentMgr(OntDocumentManager.getInstance());
+			}
+		}
+		return jenaDocumentMgr;
+	}
 }

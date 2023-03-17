@@ -562,7 +562,8 @@ public class JenaTranslatorPlugin implements ITranslator {
 		else if (elements.get(index) instanceof BuiltinElement &&
 				((BuiltinElement)elements.get(index)).getInModelReferencedEquation() != null) {
 			// don't wrap if from SadlBuiltinFunctionsModel
-			if (!(((BuiltinElement)elements.get(index)).getFuncUri().startsWith(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#"))) {
+			if (((BuiltinElement)elements.get(index)).getFuncUri() != null && 
+					!(((BuiltinElement)elements.get(index)).getFuncUri().startsWith(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI + "#"))) {
 				return SpecialBuiltin.CONTAINS_SADL_EQUATION;
 			}
 		}
@@ -2719,7 +2720,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 				} catch (ClassNotFoundException e1) {
 					// maybe this is a Java class wrapped in a SADL External equation
 					if (className !=  null) {
-						EvaluateSadlEquationUtils eseu = new EvaluateSadlEquationUtils();
+						EvaluateSadlEquationUtils eseu = new EvaluateSadlEquationUtils(null);
 						int lastDot = className.lastIndexOf('.');
 						if (lastDot > 0) {
 							String classname = className.substring(0, lastDot);
@@ -2746,6 +2747,11 @@ public class JenaTranslatorPlugin implements ITranslator {
 			} catch (TranslationException e) {
 				throw e;
 			}
+		}
+		if (BuiltinElement.isComparisonBuiltin(be.getFuncType())) {
+			Node[] retVals = new Node[1];
+			retVals[0] = new NamedNode(XSD.xboolean.getURI(), NodeType.DataTypeNode);
+			return retVals;
 		}
 		if (argTypes != null && argTypes.size() > 0) {
 			UnittedQuantityBuiltinHandlingType uqbht = ITypedBuiltinFunctionHelper.getUnittedQuantityBuiltinHandlingTypeOfCommonBuiltins(be.getFuncType());

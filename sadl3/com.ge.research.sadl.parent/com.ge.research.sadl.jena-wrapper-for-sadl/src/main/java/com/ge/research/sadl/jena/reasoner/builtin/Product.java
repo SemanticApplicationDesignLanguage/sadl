@@ -549,4 +549,9 @@ public class Product extends org.apache.jena.reasoner.rulesys.builtins.Product i
 		}
 		return false;
 	}
+
+	@Override
+	public int numOutputArgs() {
+		return 1;
+	}
 }

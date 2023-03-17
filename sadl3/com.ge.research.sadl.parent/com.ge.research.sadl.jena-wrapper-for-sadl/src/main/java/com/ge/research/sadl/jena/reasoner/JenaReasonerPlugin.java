@@ -3812,7 +3812,7 @@ public class JenaReasonerPlugin extends Reasoner {
 		if (furi.indexOf("#") > 0) {
 			String ns = furi.substring(0, furi.indexOf("#"));
 			if (ns != null && ns.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_URI)) {
-				EvaluateSadlEquationUtils ese = new EvaluateSadlEquationUtils();
+				EvaluateSadlEquationUtils ese = new EvaluateSadlEquationUtils(this);
 				Node retval = null;
 				retval = ese.evaluateJenaBuiltin(bi, theModel);
 				List<ModelError> errors = ese.getErrors();
@@ -3824,7 +3824,7 @@ public class JenaReasonerPlugin extends Reasoner {
 				return retval;
 			}		
 		}
-		EvaluateSadlEquationUtils ese = new EvaluateSadlEquationUtils();
+		EvaluateSadlEquationUtils ese = new EvaluateSadlEquationUtils(this);
 		Node retval = ese.evaluateSadlEquation(bi, theModel);
 		List<ModelError> errors = ese.getErrors();
 		if (errors != null && errors.size() > 0) {
