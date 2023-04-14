@@ -27,7 +27,7 @@ jobs:
 
     steps:
     - name: Check out SADL source
-      uses: actions/checkout@v3.5.1
+      uses: actions/checkout@v3.5.2
 
     - name: Set up Java
       uses: actions/setup-java@v3.11.0
@@ -81,7 +81,7 @@ jobs:
         readme-filepath: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/README.md
 
     - name: Check out sadl-update-sites
-      uses: actions/checkout@v3.5.1
+      uses: actions/checkout@v3.5.2
       with:
         repository: SemanticApplicationDesignLanguage/sadl-update-sites
         token: ${{ secrets.CI_PAT }}
