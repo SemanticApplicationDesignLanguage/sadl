@@ -2,7 +2,7 @@
 <feature
       id="com.ge.research.sadl.feature"
       label="SADL Feature"
-      version="3.5.0.qualifier"
+      version="3.6.0.qualifier"
       provider-name="GE Research">
 
    <description url="http://www.example.com/description">
@@ -12,7 +12,7 @@ semantic models.
    </description>
 
    <copyright url="http://www.example.com/copyright">
-      Copyright General Electric, 2007-2021.
+      Copyright General Electric, 2007-2023.
    </copyright>
 
    <license url="http://sadl.sourceforge.net">

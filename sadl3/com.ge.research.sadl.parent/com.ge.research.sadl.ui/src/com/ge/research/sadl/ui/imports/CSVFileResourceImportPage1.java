@@ -435,7 +435,7 @@ public class CSVFileResourceImportPage1 extends WizardResourceImportPage
     				imports.remove(selectedImport);
         		}
         		if (!result.isOK()) {
-        			StatusUtil.handleStatus(result, StatusManager.SHOW, parent.getShell());
+        			StatusUtil.handleStatus(result, StatusManager.SHOW);
         		}
         		importsViewer.refresh(false);
         	}

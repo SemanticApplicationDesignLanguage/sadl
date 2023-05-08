@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright � 2007-2018 - General Electric Company, All Rights Reserved
+ * Copyright 2007-2023 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -26,7 +26,6 @@ var projectPath = "./"
 var rootPath = "${projectPath}/.."
 
 Workflow {
-	
 	component = XtextGenerator {
 		configuration = {
 			project = StandardProjectConfig {
@@ -45,10 +44,9 @@ Workflow {
 			}
 			code = {
 				encoding = "UTF-8"
-				lineDelimiter = "\r\n"
 				fileHeader = 
 '/************************************************************************
- * Copyright 2007-2016- General Electric Company, All Rights Reserved
+ * Copyright 2007-2023 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -69,9 +67,7 @@ Workflow {
 		language = com.ge.research.sadl.xtextgenerator.SerializerDisablingStandardLanguage {
 			name = "com.ge.research.sadl.testsuite.TestSuite"
 			fileExtensions = "test"
-
 			referencedResource = 'platform:/resource/com.ge.research.sadl/model/generated/SADL.genmodel'
-
 			serializer = {
 				generateStub = false
 			}

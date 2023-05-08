@@ -3,7 +3,7 @@ Automatic-Module-Name: com.ge.research.sadl.importer.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.importer.tests
 Bundle-Vendor: GE Research
-Bundle-Version: 3.5.0.qualifier
+Bundle-Version: 3.6.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.importer.tests; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.sadl.importer,
@@ -11,7 +11,7 @@ Require-Bundle: com.ge.research.sadl.importer,
  org.eclipse.xtext.testing,
  org.eclipse.xtext.xbase.testing,
  org.eclipse.xtext.xbase.lib;bundle-version="2.14.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: com.ge.research.sadl.importer.tests;x-internal=true
 Import-Package: org.hamcrest.core,
  org.junit;version="4.5.0",

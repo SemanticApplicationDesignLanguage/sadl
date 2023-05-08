@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.jena
 Bundle-SymbolicName: com.ge.research.jena
-Bundle-Version: 3.5.0.qualifier
+Bundle-Version: 3.6.0.qualifier
 Bundle-Vendor: GE Research
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Require-Bundle: org.slf4j.api
 Export-Package: au.com.bytecode.opencsv,
@@ -158,22 +158,13 @@ Bundle-ClassPath: lib/collection.jar,
  lib/jackson-core.jar,
  lib/jackson-databind.jar,
  lib/jakarta.activation.jar,
- lib/javax.annotation-api.jar,
  lib/jcl-over-slf4j.jar,
  lib/jena-arq.jar,
  lib/jena-base.jar,
  lib/jena-core.jar,
- lib/jena-dboe-base.jar,
- lib/jena-dboe-index.jar,
- lib/jena-dboe-storage.jar,
- lib/jena-dboe-trans-data.jar,
- lib/jena-dboe-transaction.jar,
  lib/jena-iri.jar,
- lib/jena-rdfconnection.jar,
- lib/jena-shacl.jar,
  lib/jena-shaded-guava.jar,
  lib/jena-tdb.jar,
- lib/jena-tdb2.jar,
  lib/jsonld-java.jar,
  lib/libthrift.jar,
  lib/log4j-api.jar,

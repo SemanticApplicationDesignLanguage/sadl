@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.jena-wrapper-for-sadl
 Bundle-SymbolicName: com.ge.research.sadl.jena-wrapper-for-sadl;singleton:=true
-Bundle-Version: 3.5.0.qualifier
+Bundle-Version: 3.6.0.qualifier
 Bundle-Activator: com.ge.research.sadl.jena_plugin.Activator
 Bundle-Vendor: GE Research
 Require-Bundle: com.ge.research.jena,
@@ -14,7 +14,7 @@ Require-Bundle: com.ge.research.jena,
  org.slf4j.api
 Eclipse-BuddyPolicy: dependent
 Eclipse-RegisterBuddy: com.ge.research.sadl
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Export-Package: com.ge.research.sadl.jena.importer,
  com.ge.research.sadl.jena.multithreaded,

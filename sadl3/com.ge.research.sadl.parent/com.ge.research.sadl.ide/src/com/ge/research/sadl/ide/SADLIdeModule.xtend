@@ -1,25 +1,24 @@
 /************************************************************************
- * Copyright 2007-2018 - General Electric Company, All Rights Reserved
- * 
+ * Copyright 2007-2023 - General Electric Company, All Rights Reserved
+ *
  * Project: SADL
- * 
+ *
  * Description: The Semantic Application Design Language (SADL) is a
  * language for building semantic models and expressing rules that
  * capture additional domain knowledge. The SADL-IDE (integrated
  * development environment) is a set of Eclipse plug-ins that
  * support the editing and testing of semantic models using the
  * SADL language.
- * 
+ *
  * This software is distributed "AS-IS" without ANY WARRANTIES
  * and licensed under the Eclipse Public License - v 1.0
  * which is available at http://www.eclipse.org/org/documents/epl-v10.php
- * 
+ *
  ***********************************************************************/
 package com.ge.research.sadl.ide
 
 import com.ge.research.sadl.external.ExternalEmfResourcePredicate
 import com.ge.research.sadl.ide.contentassist.antlr.lexer.jflex.JFlexBasedInternalSADLLexer
-import com.ge.research.sadl.ide.editor.coloring.SadlIdeSemanticHighlightingCalculator
 import com.ge.research.sadl.ide.editor.contentassist.IOntologyContextProvider
 import com.ge.research.sadl.ide.editor.contentassist.SadlContentAssistContextFactory
 import com.ge.research.sadl.ide.editor.contentassist.SadlIdeContentProposalPriorities
@@ -45,15 +44,13 @@ import org.eclipse.xtext.ide.editor.contentassist.IdeContentProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.IdeCrossrefProposalProvider
 import org.eclipse.xtext.ide.editor.contentassist.antlr.ContentAssistContextFactory
 import org.eclipse.xtext.ide.editor.contentassist.antlr.internal.Lexer
-import org.eclipse.xtext.ide.editor.syntaxcoloring.ISemanticHighlightingCalculator
 import org.eclipse.xtext.ide.server.ILanguageServerExtension
 import org.eclipse.xtext.ide.server.rename.IRenameService2
-import org.eclipse.xtext.ide.server.semanticHighlight.ISemanticHighlightingStyleToTokenMapper
 import org.eclipse.xtext.preferences.IPreferenceValuesProvider
 import org.eclipse.xtext.validation.ResourceValidatorImpl
 
 /**
- * Use this class to register generic IDE components.
+ * Use this class to register ide components.
  */
 class SADLIdeModule extends AbstractSADLIdeModule {
 
@@ -67,14 +64,6 @@ class SADLIdeModule extends AbstractSADLIdeModule {
 
 	def Class<? extends IdeCrossrefProposalProvider> bindIdeCrossrefProposalProvider() {
 		return SadlIdeCrossrefProposalProvider;
-	}
-
-	def Class<? extends ISemanticHighlightingCalculator> bindISemanticHighlightingCalculator() {
-		return SadlIdeSemanticHighlightingCalculator;
-	}
-
-	def Class<? extends ISemanticHighlightingStyleToTokenMapper> bindISemanticHighlightingStyleToTokenMapper() {
-		return SadlIdeSemanticHighlightingCalculator;
 	}
 
 	def Class<? extends ILanguageServerExtension> bindILanguageServerExtension() {
