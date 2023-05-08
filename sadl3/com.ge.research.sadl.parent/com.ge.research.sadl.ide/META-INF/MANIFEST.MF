@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.ide
 Bundle-Vendor: GE Research
-Bundle-Version: 3.5.0.qualifier
+Bundle-Version: 3.6.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.ide; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.jena,
@@ -18,7 +18,7 @@ Require-Bundle: com.ge.research.jena,
  org.eclipse.xtext.ide,
  org.eclipse.xtext.xbase.ide,
  org.slf4j.api
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: com.ge.research.sadl.ide,
  com.ge.research.sadl.ide.contentassist.antlr,
  com.ge.research.sadl.ide.contentassist.antlr.internal,

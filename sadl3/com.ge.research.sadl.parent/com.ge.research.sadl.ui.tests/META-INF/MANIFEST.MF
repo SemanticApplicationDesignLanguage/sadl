@@ -2,32 +2,26 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.ui.tests
 Bundle-Vendor: GE Research
-Bundle-Version: 3.5.0.qualifier
+Bundle-Version: 3.6.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.ui.tests; singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.ge.research.sadl.ui,
- org.eclipse.xtext.xbase.junit,
- org.eclipse.core.runtime,
- org.eclipse.ui.workbench;resolution:=optional,
+Require-Bundle: com.ge.research.jena,
  com.ge.research.sadl,
- org.eclipse.xtext.testing,
- org.eclipse.xtext.junit4,
- org.eclipse.xtext.xbase.testing,
- org.junit;bundle-version="4.12.0",
  com.ge.research.sadl.jena,
- com.ge.research.jena,
+ com.ge.research.sadl.swi-prolog-plugin,
  com.ge.research.sadl.tests,
+ com.ge.research.sadl.ui,
+ org.eclipse.core.runtime,
  org.eclipse.ui.ide,
+ org.eclipse.ui.workbench;resolution:=optional,
+ org.eclipse.xtext.junit4,
+ org.eclipse.xtext.testing,
  org.eclipse.xtext.ui.testing,
- com.ge.research.sadl.swi-prolog-plugin;bundle-version="3.5.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+ org.eclipse.xtext.xbase.junit,
+ org.eclipse.xtext.xbase.testing,
+ org.eclipse.xtext.xbase.ui.testing,
+ org.junit
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: com.ge.research.sadl.ui.tests;x-internal=true,
  com.ge.research.sadl.ui.tests.contentassist
-Import-Package: org.hamcrest.core,
- org.junit;version="4.5.0",
- org.junit.runners.model;version="4.5.0",
- org.junit.runner;version="4.5.0",
- org.junit.runners;version="4.5.0",
- org.junit.runner.manipulation;version="4.5.0",
- org.junit.runner.notification;version="4.5.0"
 Automatic-Module-Name: com.ge.research.sadl.ui.tests

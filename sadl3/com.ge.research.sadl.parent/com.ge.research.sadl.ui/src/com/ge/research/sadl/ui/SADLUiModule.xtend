@@ -51,7 +51,6 @@ import com.ge.research.sadl.ui.refactoring.SadlRenameRefactoringController
 import com.ge.research.sadl.ui.refactoring.SadlRenameRefactoringExecuter
 import com.ge.research.sadl.ui.refactoring.SadlResourceRenameStrategy
 import com.ge.research.sadl.ui.syntaxcoloring.SadlHighlightingConfiguration
-import com.ge.research.sadl.ui.syntaxcoloring.SadlSemanticHighlightingCalculator
 import com.ge.research.sadl.ui.syntaxcoloring.SadlTokenToAttributeIdMapper
 import com.ge.research.sadl.utils.SadlConsole
 import com.google.inject.Binder
@@ -98,11 +97,6 @@ class SADLUiModule extends AbstractSADLUiModule {
 	// Registers our own syntax coloring styles.
 	def Class<? extends IHighlightingConfiguration> bindILexicalHighlightingConfiguration() {
 		return SadlHighlightingConfiguration
-	}
-
-	// Maps our Ecore nodes to our syntax coloring styles.
-	def Class<? extends ISemanticHighlightingCalculator> bindISemanticHighlightingCalculator() {
-		return SadlSemanticHighlightingCalculator
 	}
 
 	// Maps our token names to our syntax coloring styles.

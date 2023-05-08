@@ -1,5 +1,5 @@
 /************************************************************************
- * Copyright © 2007-2016 - General Electric Company, All Rights Reserved
+ * Copyright 2007-2023 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -46,7 +46,7 @@ Workflow {
 				encoding = "UTF-8"
 				fileHeader = 
 '/************************************************************************
- * Copyright 2007-2016- General Electric Company, All Rights Reserved
+ * Copyright 2007-2023 - General Electric Company, All Rights Reserved
  *
  * Project: SADL
  *
@@ -68,19 +68,16 @@ Workflow {
 		language = xtextgenerator.SerializerDisablingStandardLanguage {
 			name = "com.ge.research.sadl.SADL"
 			fileExtensions = "sadl"
-
 			parserGenerator = {
 				debugGrammar = true
 				combinedGrammar = false
 			}
 			serializer = {
-				
 				generateStub = false
 			}
 			validator = {
 				// composedCheck = "org.eclipse.xtext.validation.NamesAreUniqueValidator"
 			}
-			
 			fragment = xtextgenerator.JFlexFragment {}
 		}
 	}

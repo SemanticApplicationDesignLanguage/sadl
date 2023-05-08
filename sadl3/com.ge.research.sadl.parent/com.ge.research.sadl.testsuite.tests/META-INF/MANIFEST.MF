@@ -3,7 +3,7 @@ Automatic-Module-Name: com.ge.research.sadl.testsuite.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: com.ge.research.sadl.testsuite.tests
 Bundle-Vendor: GE Research
-Bundle-Version: 3.5.0.qualifier
+Bundle-Version: 3.6.0.qualifier
 Bundle-SymbolicName: com.ge.research.sadl.testsuite.tests; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.ge.research.sadl.testsuite,
@@ -12,7 +12,7 @@ Require-Bundle: com.ge.research.sadl.testsuite,
  org.eclipse.xtext.xbase.testing,
  org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
  com.ge.research.sadl
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Export-Package: com.ge.research.sadl.testsuite.tests;x-internal=true
 Import-Package: org.hamcrest.core,
  org.junit;version="4.5.0",

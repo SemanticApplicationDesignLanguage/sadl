@@ -18,8 +18,8 @@
     label="Sadl3">
   <setupTask
       xsi:type="jdt:JRETask"
-      version="J2SE-11"
-      location="${jre.location-11}"/>
+      version="J2SE-17"
+      location="${jre.location-17}"/>
   <setupTask
       xsi:type="setup:EclipseIniTask"
       option="-Xmx"
@@ -32,7 +32,7 @@
   <setupTask
       xsi:type="setup:VariableTask"
       name="eclipse.target.platform"
-      defaultValue="2020-12"
+      defaultValue="2022-12"
       storageURI="scope://Workspace"/>
   <setupTask
       xsi:type="setup.p2:P2Task"
@@ -54,9 +54,9 @@
     <repository
         url="${xtext.releases.composite}"/>
     <repository
-        url="http://download.jboss.org/jbosstools/updates/m2e-extensions/m2e-jdt-compiler/"/>
+        url="https://download.jboss.org/jbosstools/updates/m2e-extensions/m2e-jdt-compiler/"/>
     <repository
-        url="http://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-tycho/0.8.0/N/0.8.0.201409231215/"/>
+        url="https://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-tycho/0.9.0/N/0.9.0.201811261502/"/>
   </setupTask>
   <setupTask
       xsi:type="setup:CompoundTask"

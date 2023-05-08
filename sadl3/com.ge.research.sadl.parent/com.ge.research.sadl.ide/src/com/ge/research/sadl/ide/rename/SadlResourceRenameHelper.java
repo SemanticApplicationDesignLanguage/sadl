@@ -95,7 +95,7 @@ public class SadlResourceRenameHelper {
 
 				// Fail if any of the planned edits has a conflict
 				List<? extends SymbolInformation> conflicts = workspaceSymbolService
-						.getSymbols("", resourceAccess, indexData, cancelIndicator).stream()
+						.getSymbols("", resourceAccess, indexData, cancelIndicator).getLeft().stream()
 						.filter(symbol -> escapedName.equals(symbol.getName()))
 						.filter(symbol -> locationsPerResource.containsKey(symbol.getLocation().getUri()))
 						.collect(Collectors.toList());
