@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?pde version="3.5"?>
+<?pde version="3.8"?>
 
 <product name="SADL Eclipse Platform" uid="sadl.product" id="org.eclipse.sdk.ide" application="org.eclipse.ui.ide.workbench" version="3.6.0.qualifier" useFeatures="true" includeLaunchers="true">
 
