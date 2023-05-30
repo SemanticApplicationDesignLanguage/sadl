@@ -62,7 +62,7 @@
     <version.slf4j>1.7.36</version.slf4j>
     <version.surefire>3.1.0</version.surefire>
     <version.tycho>3.0.4</version.tycho>
-    <version.xtext>2.30.0</version.xtext>
+    <version.xtext>2.31.0</version.xtext>
     <version.xtext-antlr>2.1.1</version.xtext-antlr>
   </properties>
 
