@@ -60,7 +60,7 @@
     <version.sadl>${project.version}</version.sadl>
     <!-- Can't use slf4j-api 2 yet, must match Eclipse and log4j-slf4j-impl -->
     <version.slf4j>1.7.36</version.slf4j>
-    <version.surefire>3.1.0</version.surefire>
+    <version.surefire>3.1.2</version.surefire>
     <version.tycho>3.0.4</version.tycho>
     <version.xtext>2.31.0</version.xtext>
     <version.xtext-antlr>2.1.1</version.xtext-antlr>
