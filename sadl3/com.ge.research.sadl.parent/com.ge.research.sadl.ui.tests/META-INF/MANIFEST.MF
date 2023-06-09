@@ -21,7 +21,7 @@ Require-Bundle: com.ge.research.jena,
  org.eclipse.xtext.xbase.testing,
  org.eclipse.xtext.xbase.ui.testing,
  org.junit
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.ui.tests;x-internal=true,
  com.ge.research.sadl.ui.tests.contentassist
 Automatic-Module-Name: com.ge.research.sadl.ui.tests

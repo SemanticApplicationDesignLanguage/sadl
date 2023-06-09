@@ -16,7 +16,7 @@ Require-Bundle: com.ge.research.sadl.testsuite.ui,
  org.eclipse.ui.workbench;resolution:=optional,
  org.eclipse.xtext.ui.testing,
  org.eclipse.xtext.xbase.ui.testing
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.testsuite.ui.tests;x-internal=true
 Import-Package: org.hamcrest.core,
  org.junit;version="4.5.0",

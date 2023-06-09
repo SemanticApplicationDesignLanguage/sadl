@@ -18,7 +18,7 @@ Require-Bundle: com.ge.research.jena,
  org.eclipse.xtext.xbase.testing,
  org.junit;bundle-version="4.12.0",
  org.objectweb.asm;resolution:=optional
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.jena.translator,
  com.ge.research.sadl.tests;x-internal=true,
  com.ge.research.sadl.tests.helpers

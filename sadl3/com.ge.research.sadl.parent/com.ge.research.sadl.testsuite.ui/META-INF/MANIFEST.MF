@@ -21,7 +21,7 @@ Require-Bundle: com.ge.research.sadl.testsuite,
  com.ge.research.jena,
  com.ge.research.sadl,
  com.ge.research.sadl.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.testsuite.ui.internal,
  com.ge.research.sadl.testsuite.ui.quickfix,
  com.ge.research.sadl.testsuite.ui.contentassist

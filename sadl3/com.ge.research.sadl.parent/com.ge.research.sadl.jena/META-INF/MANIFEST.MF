@@ -4,7 +4,7 @@ Bundle-Name: com.ge.research.sadl.jena
 Bundle-SymbolicName: com.ge.research.sadl.jena;singleton:=true
 Bundle-Version: 3.6.0.qualifier
 Bundle-Vendor: GE Research
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.jena;
   uses:="org.eclipse.emf.ecore,
    org.apache.jena.ontology,

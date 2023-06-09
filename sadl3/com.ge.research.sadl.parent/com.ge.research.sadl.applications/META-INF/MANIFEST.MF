@@ -4,7 +4,7 @@ Bundle-Name: com.ge.research.sadl.applications
 Bundle-SymbolicName: com.ge.research.sadl.applications;singleton:=true
 Bundle-Version: 3.6.0.qualifier
 Bundle-Vendor: GE Research
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.applications;
   uses:="org.osgi.framework,
    org.eclipse.core.runtime,

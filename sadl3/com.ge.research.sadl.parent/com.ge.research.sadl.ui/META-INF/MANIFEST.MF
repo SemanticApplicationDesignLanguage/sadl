@@ -29,7 +29,7 @@ Require-Bundle: com.ge.research.jena,
  org.eclipse.xtext.ui.shared,
  org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
  org.slf4j.api
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.ui,
  com.ge.research.sadl.ui.builder,
  com.ge.research.sadl.ui.contentassist,

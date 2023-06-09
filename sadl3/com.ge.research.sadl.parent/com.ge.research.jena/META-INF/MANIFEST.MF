@@ -4,7 +4,7 @@ Bundle-Name: com.ge.research.jena
 Bundle-SymbolicName: com.ge.research.jena
 Bundle-Version: 3.6.0.qualifier
 Bundle-Vendor: GE Research
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Eclipse-RegisterBuddy: com.ge.research.sadl
 Require-Bundle: org.slf4j.api
 Export-Package: au.com.bytecode.opencsv,

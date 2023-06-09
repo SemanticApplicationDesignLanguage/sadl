@@ -4,7 +4,7 @@ Bundle-Name: com.ge.research.sadl.errorgenerator
 Bundle-SymbolicName: com.ge.research.sadl.errorgenerator
 Bundle-Version: 3.6.0.qualifier
 Bundle-Vendor: GE Research
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.errorgenerator.generator,
  com.ge.research.sadl.errorgenerator.messages,
  com.ge.research.sadl.errorgeneratorbase

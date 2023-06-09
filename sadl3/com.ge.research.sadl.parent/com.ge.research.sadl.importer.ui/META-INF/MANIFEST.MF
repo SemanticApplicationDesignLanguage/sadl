@@ -25,7 +25,7 @@ Require-Bundle: com.ge.research.sadl.importer,
 Import-Package: org.apache.jena.query,
  org.apache.jena.rdf.model,
  org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: com.ge.research.sadl.importer.ui.quickfix,
  com.ge.research.sadl.importer.ui.contentassist,
  com.ge.research.sadl.importer.ui.internal
