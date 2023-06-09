@@ -6,14 +6,14 @@
   <body>
     <h1>Unitted Quantities in SADL</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->11/17/2022<!--webbot bot="Timestamp" endspan i-checksum="12605" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->03/30/2023<!--webbot bot="Timestamp" endspan i-checksum="12514" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <p> </p>
     <h2 style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial;"><a
         name="UnittedQuantities">Introduction</a></h2>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial"><span
         style="font-family: &quot;Times New Roman&quot;, serif;">Quantitative
-        data, either measured or computed or assumed, is an important concept in many
+        data, either measured, computed, or assumed, is an important concept in many
         modeling problems. A quantitative data item has a numerical <em>value</em>
         and usually has a <em>unit</em> associated with it, which gives meaning
         to the number by relating the quantitative value to some standard
@@ -200,12 +200,14 @@
         quantitative data with possibly restrictions on units and/or values. This allows modelers to create more complex models of
     <i>UnittedQuantity</i>. (For example, see <a href="http://www.qudt.org/">QUDT</a>. 
     SADL allows custom implementations of more complex models through the use of 
-    a UnittedQuantity handler interface.) If transitive closure is enabled by the reasoner, instances of
+    a UnittedQuantity handler interface. See 
+    <a href="developer/UnittedQuantityHandlerDevelopment.html">Developing Unitted Quantity 
+    Handlers</a>.) If transitive closure is enabled by the reasoner, instances of
         all sub-classes of <i>UnittedQuantity</i> should behave in the expected way as
         they will also be instances of <i>UnittedQuantity</i>.</span></p>
     <p><span style="font-family: &quot;Times New Roman&quot;, serif;">Assuming 
     that the range of <i>age</i> and <i>weight</i> is the class <i>
-    UnittedQuantity</i>, the semantic model is</span></p>
+    UnittedQuantity</i>, the semantic model becomes</span></p>
     <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>
     <font style="font-size: 10pt; font-family:Times New Roman, serif; color:navy">Person</font></b><font face="Monospace" color="#000000" style="font-size: 9pt" size="2"> </font>
     <font style="font-size: 10pt; font-family:Times New Roman, serif; color:purple">is a class described by</font><font face="Monospace" color="#000000" style="font-size: 9pt" size="2">
@@ -316,7 +318,7 @@
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial">
       Now suppose that we had the following ontology which subclasses <i>
       UnittedQuantity</i>. This might be desirable if we were using a more 
-      complex model such as <span style="font-family: &quot;Times New Roman&quot;, serif;"> <a href="http://www.qudt.org/">QUDT</a>. 
+      complex unitted quantity model such as <span style="font-family: &quot;Times New Roman&quot;, serif;"> <a href="http://www.qudt.org/">QUDT</a>. 
       Then</span> <i>Weight</i> would correspond with the <i>qudt:QuantityKind 
       Force</i> and values of the <i>unit</i> property for instances of <i>
       Weight</i> would be restricted to units of force. <i>TimeSpan</i> would be 
@@ -463,7 +465,7 @@
       also be included in SADL expressions used in rules, queries, and tests. In
       particular, unitted quantities can appear in math operations such as
       addition, subtraction, multiplication, division, and exponentiation, and
-      in comparison operations such as less than, greater than, etc. </p>
+      in comparison operations such as equals, less than, greater than, etc. </p>
     <p> <span style="font-family: &quot;Times New Roman&quot;, serif;">Using a
         rule to illustrate, and building on the example above that has <em>UnittedQuantity</em>
         specified as the range of <em>age</em>, consider the following rule.</span></p>
@@ -643,7 +645,7 @@
       <font SIZE="2" COLOR="#ff00ff"><i>x</i></font><font SIZE="2"> &gt; 18.</p>
     </blockquote>
     </font>
-    <p style="line-height: 100%; margin-bottom: 0in">Thus for the first query to 
+    <p style="line-height: 100%; margin-bottom: 0in">For the first query to 
     be able to return the expected results, either 1) the first query must be 
     automatically translated into a query engine-specific representation 
     equivalent to the second query, or 2) the greater than (&gt;) built-in function 
@@ -695,8 +697,8 @@
     pair of tests to produce the expected result, that is the same result as the 
     fully expanded test, either 1) the first tests must be automatically 
     translated to the equivalent of the expanded test, or 2) the greater than 
-    (&gt;) built-in function used by the test execution (the SADL test execution 
-    uses the query engine) must be able to handle instances of <i>
+    (&gt;) built-in function used by the test execution mechanism (the SADL test execution 
+    uses the query engine for test execution) must be able to handle instances of <i>
     UnittedQuantity</i>.</p>
     <h2 style="line-height: 100%; margin-bottom: 0in">Two Approaches to Unit 
     Handling</h2>
@@ -707,22 +709,26 @@
     and variables of type UnittedQuantity to an expanded form that uses simple 
     numerical math and comparison operators with no <i>UnittedQuantity</i> 
     instances or variables as arguments. This translation must include 
-    appropriate constraints on the units the instances of <i>UnittedQuantity</i>. The second approach requires no 
+    appropriate constraints on the units of the instances of <i>UnittedQuantity</i>. The second approach requires no 
     special translation but depends upon the ability of all built-in functions 
     used to do comparison 
     and math operations in rules, queries, and tests 
-    being able to take instances of <i>UnittedQuantity</i> as inputs and do the 
+    to take instances of <i>UnittedQuantity</i> as inputs and do the 
     proper handling of the instances of <i>UnittedQuantity</i> within those 
     built-ins. In the case of math operations, the built-in functions must also 
     be able to create appropriate instances of UnittedQuantity as the value 
-    returned by the operation. Which approach is taken is dependent upon the SADL preference 
-    setting &quot;Expand Unitted Quantities in translation&quot;. Note that the expansion 
+    returned by the operation.  </p>
+    <p style="line-height: 100%; margin-bottom: 0in">Which approach is taken by 
+    the SADL model processor is dependent upon the SADL preference 
+    setting &quot;Expand Unitted Quantities in translation&quot; and the 
+    presence of built-in functions capable of accepting UnittedQuantity input. Note that the expansion 
     of UnittedQuantity references is an all or nothing proposition. If the 
     preference is not checked then all applicable built-in functions in both the 
     reasoner (rule processor) and the query engine must be able to properly hand UnittedQuantity inputs. The default Jena-based reasoner plug-in used by SADL 
     has Jena rule built-ins for comparison and math functions that support <i>
     UnittedQuantity</i> inputs. However, the built-ins for the Jena SPARQL query 
-    engine do not currently support <i>UnittedQuantity</i> inputs.</p>
+    engine do not currently support <i>UnittedQuantity</i> inputs. Note that 
+    tests may use queries during evaluation.</p>
     <p style="line-height: 100%; margin-bottom: 0in">In addition to the 
     preference &quot;Expand Unitted Quantities in translation&quot;, another preference 
     allows selection of a UnittedQuantity handler to be used to perform the 
@@ -731,9 +737,11 @@
     works with the default Jena-based reasoner/translator pair and implements a very 
     simplistic handling of UnittedQuantity arguments of built-in functions. Its 
     validation methods assure that the arguments to addition, subtraction, and 
-    comparisons have the same units. It also includes an implementation of <i>
+    comparisons have the same units. It also includes an implementation of 
+    built-in function <i>
     combineUnits</i> for determining the units of the result of multiplication 
-    and division. Custom handlers that, for instance, make use of the much more 
+    and division. Built-in <i>combineUnits</i> takes the name of the operation 
+    and the two operands as inputs. A binary operation is assumed. Custom handlers that, for instance, make use of the much more 
     sophisticated models of&nbsp; <span style="font-family: &quot;Times New Roman&quot;, serif;"> <a href="http://www.qudt.org/">QUDT</a></span>, 
     can be added. See <a href="UnittedQuantityHandlerDevelopment.html">Developing UnittedQuantity Handlers</a>.</p>
     <p style="line-height: 100%; margin-bottom: 0in"><span style="font-family: &quot;Times New Roman&quot;, serif;">Note
@@ -893,8 +901,8 @@
     instance of <i>UnittedQuantity</i> with <i>value</i> <i>av</i> and with <i>
     unit</i> <i>au</i>. In addition, it assigns this newly created instance of
     <i>UnittedQuantity</i> as the <i>value</i> of the <i>area</i> of <i>x</i>. 
-    The built-in <i>combineUnits</i> invokes the UnittedQuantity handler to 
-    figure out the <i>unit</i> of the new <i>value</i> of <i>area</i>.</p>
+    (See <a href="ThereExists.html">There Exists</a>.) The built-in <i>combineUnits</i> invokes the UnittedQuantity handler to 
+    figure out the <i>unit</i> of the new <i>value</i> of <i>area</i>. (See <a href="UnittedQuantityHandlerDevelopment.html">Developing UnittedQuantity Handlers</a>.)</p>
     <h2 style="line-height: 100%; margin-bottom: 0in">Type Checking of Unitted 
     Quantities</h2>
     <p style="line-height: 100%; margin-bottom: 0in">Type checking of 
@@ -934,10 +942,10 @@
       <li>
     <p style="line-height: 100%; margin-bottom: 0in">Comparison operations and 
     some math operations require either that the inputs have the same units or 
-    that the reasoner be able to do unit conversions before doing thge numerical 
+    that the reasoner be able to do unit conversions before doing the numerical 
     comparison or math operation. The simple UnittedQuantity handler <i>
     SadlSimpleUnittedQuantityHandlerForJena</i> does not do automatic unit 
-    conversion and so a compatible handler will require that the units be the 
+    conversion and so  requires that for comparisons, addition, subtraction, etc. the units be the 
     same. A more sophisticated UnittedQuantity model, such as <span style="font-family: &quot;Times New Roman&quot;, serif;"> <a href="http://www.qudt.org/">QUDT</a>,</span> 
     would enable implementation of a handler that does unit conversion.</p>
       </li>
@@ -999,7 +1007,7 @@
       their units must be the same; <em>x
           &lt; y</em>&nbsp; translates to the conditions <em>unit of x = unit of y</em>
         and <em>value of x &lt; value of y</em>.</li>
-      <li>Equals (= or == or is) -- if one argument is an instance of UnittedQuantity
+      <li>Equals (= or == or <i>is</i>) -- if one argument is an instance of UnittedQuantity
         then both arguments must be instances of <em>UnittedQuantity</em> and 
       their units must be the same; <em>x
           = y</em>&nbsp; translates to the conditions <em>unit of x = unit of y</em>
@@ -1034,18 +1042,18 @@
         to be a <em>UnittedQuantity</em> and the second a number only, e.g., <em>80
           mph / 4</em> will yield <em>20 mph</em>. In this case the type of the 
       result is the same type as the <i>UnittedQuantity</i> input.</li>
-      <li>Sum (+) -- if all of the arguments are instances of <em>UnittedQuantity</em>, 
+      <li>Sum (+) --  all of the arguments must be instances of <em>UnittedQuantity</em>, 
       or of the same subclass thereof,
-        and have the same units, the result will be a new instance of <em>UnittedQuantity</em>, 
+        and have the same units. The result will be a new instance of <em>UnittedQuantity</em>, 
       or of the common subclass,
         whose <em>value</em> is the sum of the values of the addends and
         whose <em>unit</em> is the unit of the addends. For example, <em>2.0
           ft + 3 .0ft</em> will yield <em>5.0 ft</em>. Note that<em> x + y</em>, 
       where x and y are variables of type UnittedQuantity, translates to the condition <em>unit of x = unit of y</em>
         and the numerical result <em>value of x + value of y</em>.</li>
-      <li>Difference (-) -- if both arguments are instances of <em>UnittedQuantity</em>, 
+      <li>Difference (-) --  both arguments must be instances of <em>UnittedQuantity</em>, 
       or of the same subclass thereof,
-        and have the same units, the result will be a new instance of <em>UnittedQuantity</em>, 
+        and have the same units. The result will be a new instance of <em>UnittedQuantity</em>, 
       or of the common subclass,
         whose <em>value</em> is the difference between the minuend and the 
       subtrahend values and
@@ -1065,17 +1073,15 @@
     not checked, the default Jena reasoner built-in functions <em>product</em> (*) and <em>sum</em> (+)  can
       take any number of input arguments of type <em>UnittedQuantity</em> or a
       single input argument which is a <a href="ListsInSADL.html">list</a> of 
-    type<em> UnittedQuantity</em>.
-      The remaining computation operators listed above are binary. The <em>sum</em>
-      and <em>difference</em> operators require that the <em>unit</em> of both
-      arguments are the same.</p>
+    type<em> UnittedQuantity</em>. The remaining computation operators listed 
+    above are binary.</p>
     <h3>Other Operators Supporting Unitted Quantities</h3>
     <p>There are some additional common operators that can take UnittedQuantity
-      arguments. Although these operators do not create new UnittedQuanity
+      arguments. Although these operators do not create new UnittedQuantity
       instances, they do return a UnittedQuantity instance, one of the input 
     instances. They require that the arguments all have the same <i>unit</i>. 
     When &quot;Expand Unitted Quantities in translation&quot; is not checked, the default 
-    Jena rule built-ins can take more than three arguments are a list of 
+    Jena rule built-ins can take more than three arguments or a list of 
     instances of UnittedQuantity as an argument. When it is checked, translation 
     is only supported for two input arguments.</p>
     <ol>
@@ -1083,11 +1089,14 @@
         all arguments must be instances of <em>UnittedQuantity</em> and their 
       units must be the same; <em>max(x,
           y)</em>&nbsp; translates to the conditions <em>unit of x = unit of y</em> 
-      and <em>max(value of x, value of y</em>).</li>
+      and the result will be that input instance of <i>UnittedQuantity</i> whose 
+      value is <em>max(value of x, value of y</em>).</li>
       <li>Min (min)-- f one argument is an instance of UnittedQuantity then all
         arguments must be instances of <em>UnittedQuantity</em> and their units 
       must be the same; <em>min(x, y)</em>&nbsp;
-        translates to the conditions <em>unit of x = unit of y</em> and <em>min(value of x, value of y</em>).</li>
+        translates to the conditions <em>unit of x = unit of y</em> and the 
+      result will be that input instance of <i>UnittedQuantity</i> whose value 
+      is <em>min(value of x, value of y</em>).</li>
     </ol>
     <h3>Unitted Quantities in Rules</h3>
     <p>The math and comparison operators used by the JenaReasonerPlugin have
@@ -1112,11 +1121,11 @@
       to be matched and an additional filter condition on units. In other words,
       all expressions involving UnittedQuantity will be expanded for SADL
       queries. However, if UnittedQuantities are not ignored and &quot;Expand Unitted 
-    Quantities in translation&quot; is not checked, the default reasoner will not 
+    Quantities in translation&quot; is not checked, the default reasoner may not 
     provide correct results.</p>
     <h3><span style="font-family: &quot;Times New Roman&quot;, serif;">Unitted
         Quantities in Query Results</span></h3>
-    <p>The default Jena Reasoner Plug-in places query results into an instance 
+    <p>The default Jena Reasoner Plug-in places unitted quantity query results into an instance 
     of the SADL class <i>com.ge.research.sadl.reasoner.ResultSet</i> as an 
     instance of <i>com.ge.research.sadl.model.gp.Literal</i>. This class can 
     contain a <i>value</i> and a <i>unit</i>, and can also contain a name and 
@@ -1157,9 +1166,10 @@
             size="2"><u><br>
               &nbsp;&lt;/uqe:weight&gt;<br>
               &nbsp;&lt;uqe:age&gt;</u></font><br>
-          &nbsp; &lt;sadlimplicitmodel:UnittedQuantity&gt;<font style="font-size: 10pt"
+          &nbsp; </font></font>
+      <font style="font-size: 10pt" size="2" face="Monospace">&lt;sadlimplicitmodel:UnittedQuantity&gt;</font><font face="Monospace" color="#4c4c4c"><font style="font-size: 10pt"
             size="2"><u><br>
-              &nbsp;&nbsp; &lt;sadlimplicitmodel:unit&gt;</u></font></font></font><font
+              &nbsp;&nbsp; &lt;sadlimplicitmodel:unit&gt;</u></font></font><font
         face="Monospace"><font style="font-size: 10pt" size="2">years</font></font><font
         face="Monospace"><font style="font-size: 10pt" size="2"><font style="font-size: 10pt"
             size="2"><u>&lt;/sadlimplicitmodel:unit&gt;</u></font><br>
@@ -1184,13 +1194,15 @@
           &nbsp;&nbsp; &lt;sadlimplicitmodel:value
           rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal"&gt;9.5</font></font><font
         color="#4c4c4c"><font face="Monospace"><font style="font-size: 10pt" size="2"><u>&lt;/sadlimplicitmodel:value&gt;</u></font><br>
-          &nbsp; &lt;/sadlimplicitmodel:UnittedQuantity&gt;<font style="font-size: 10pt"
+          &nbsp; </font></font>
+      <font style="font-size: 10pt" size="2" face="Monospace">&lt;/sadlimplicitmodel:UnittedQuantity&gt;</font><font face="Monospace" color="#4c4c4c"><font style="font-size: 10pt"
             size="2"><u><br>
               &nbsp;&lt;/uqe:weight&gt;<br>
               &nbsp;&lt;uqe:age&gt;</u></font><br>
-          &nbsp; &lt;sadlimplicitmodel:UnittedQuantity&gt;<font style="font-size: 10pt"
-            size="2"><u><br>
-              &nbsp;&nbsp; &lt;sadlimplicitmodel:unit&gt;days</u></font></font></font><font
+          &nbsp; </font><font style="font-size: 10pt" size="2" face="Monospace">
+      &lt;sadlimplicitmodel:UnittedQuantity&gt;</font><font style="font-size: 10pt"
+            size="2" face="Monospace" color="#4c4c4c"><u><br>
+              &nbsp;&nbsp; &lt;sadlimplicitmodel:unit&gt;days</u></font><font
         face="Monospace"><font style="font-size: 10pt" size="2"><font style="font-size: 10pt"
             size="2"><u>&lt;/sadlimplicitmodel:unit&gt;</u></font><br>
           &nbsp;&nbsp; &lt;sadlimplicitmodel:value
@@ -1211,7 +1223,7 @@
     UnittedQuantity. More complex models of UnittedQuantity, such 
     as <span style="font-family: &quot;Times New Roman&quot;, serif;">&nbsp;<a href="http://www.qudt.org/">QUDT</a></span>, 
     would require their own UnittedQuantity handler. For information on creating 
-    additioinal UnittedQuantity handlers see 
+    additional UnittedQuantity handlers see 
     <a href="developer/UnittedQuantityHandlerDevelopment.html">Developing UnittedQuantity 
     Handlers</a>.</p>
   </body>

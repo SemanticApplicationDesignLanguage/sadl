@@ -7,28 +7,29 @@
   <body>
     <h1>Equations and External Equations</h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->1/25/2022<!--webbot bot="Timestamp" endspan i-checksum="12511" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->02/04/2023<!--webbot bot="Timestamp" endspan i-checksum="12552" -->.
       <a href="contact.html">Contact us</a>.</h5>
     <p> </p>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;">Introduction</span></h2>
-    <h2><span style="font-family: &quot;Times New Roman&quot;, serif;"></span></h2>
     <p>Equations, also known as functions (see <a href="Tutorial/FCSM_Outline.html">Foundational
         Concepts in Semantic Modeling</a>, Part 2), are snippets of procedural
       code that provide instructions for computing an output from a set of
-      inputs. The inputs are typed variables. The output is unnamed but its type
-      is the return type. Actually, in the general case an equation can return
-      multiple values as can be the case in Python. Functions can be very
+      inputs. At the declaration, or definition level, inputs are typed variables. 
+    At execution time, inputs are actual values passed in to the function. In 
+    the function declaration, an output is unnamed but its type
+      is defined as the return type of the function. Actually, in the general case 
+    a function can return
+      multiple values, as functions can in Python. Functions can be very
       important in modeling a domain. For example, many reasoners allow rules to
       have built-in functions to handle math operations, and without the ability
       to do math operations it may not be possible to construct a useful model.</p>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;">Equations
         vs. External Equations</span></h2>
-    <h2><span style="font-family: &quot;Times New Roman&quot;, serif;"></span></h2>
     <p>The SADL grammar supports two kinds of equations, one in which the body
-      of the function<span>&nbsp;</span>&lt;(the set of instructions for
-      computing)&nbsp;&gt;is defined in the SADL statement, and another where
+      of the function<span>&nbsp;</span>(the set of instructions for
+      computing the function output) is defined in the SADL statement, and another where
       the body of the function exists somewhere outside of the ontology. The
-      first kind uses the<span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>keyword.</p>
+      first kind uses the<span>&nbsp;</span><i>Equation</i><span>&nbsp;grammar </span>keyword.</p>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; line-height: normal; margin: 0in 0in 0.0001pt 0.5in;"><span
         style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: purple;">Equation</span><span
         style="font-size: 11pt; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
@@ -78,15 +79,25 @@
         </span><i>Equation</i><span>&nbsp;</span>uses<span>&nbsp;</span></span><span
         style="font-family: &quot;Times New Roman&quot;, serif;"><b><span style="font-size: 12pt; color: rgb(128, 20, 128);">areaOfCircle</span></b><span>&nbsp;</span>in
         its body.</span></p>
-    <p>The second kind of equation uses the<span>&nbsp;</span><i>External</i><span>&nbsp;</span>keyword.
-      This kind of equation needs a means of specifying the identity of the
-      specification of the body (computational instructions) of the equation.
-      The location, outside of the ontology, where the complete specification
-      can be found may also be given. Consistent with the W3C practice of
-      identity by URI, the instance of<span>&nbsp;</span><i>External</i><span>&nbsp;</span>is
-      given an<span> </span><span></span>identifying URI. It may also have a<span>
-      </span>location<span>, given by URL, </span>to help the <span></span><i>External</i><span>&nbsp;</span>to
-      be found.</p>
+    <p>The second kind of equation uses the<span>&nbsp;</span><i>External</i><span>&nbsp;grammar </span>keyword.
+      This kind of equation provides a name and signature, but the actual 
+    specification of the body of the equation (the computational instructions) 
+    is located elsewhere. This gives rise to at least two and as many as three 
+    resource identifiers.</p>
+    <ol>
+      <li>The external equation has an identifier within the defining model. 
+      This consists of the URI of the model containing the statement and the 
+      name given following the External keyword. In the example below were in 
+      the model with URI &quot;http://sadl.org/examples/externals&quot;, then the external 
+      equation&#39;s URI would be &quot;http://sadl.org/examples/externals#abs&quot;.</li>
+      <li>The identifier of the external implementation of the computational 
+      instructions. For implementations expressed coded in Java, this is the 
+      fully qualified name of the implementing method. For the example below, 
+      this is the &quot;java.lang.Math.abs&quot;.</li>
+      <li>Optionally, an External statement may also contain a &quot;located at&quot; URL 
+      string. In the example below, this is specified as &quot;http://java.lang.Math&quot; 
+      for purposes of illustration, although that URL isn&#39;t useful in this case.</li>
+    </ol>
     <p class="MsoNormal" style="color: rgb(0, 0, 0); font-family: &quot;Times New Roman&quot;; font-size: medium; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; white-space: normal; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; margin: 0in 0in 0.0001pt 0.5in;"><span
         style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">External</span><span
         style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span></span><b><span
@@ -106,17 +117,103 @@
         style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span>"</span><span
         style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span
           style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">http://</span>java.lang.Math".</span></p>
-    <p><strong>Note</strong>: the external identity URI is, in this example as
-      in practice when the functions are in Java, not strictly a URI but rather
-      is the Java package, class, and method name of the external Java method.
+    <p><strong>Note</strong>: in the example above, the external identity URI is not 
+    a conformant URI, but rather
+      is the Java package, class, and method name of the external Java method to 
+    which the equation maps.
       For information on how to wrap any Java class method that takes primitive
-      data as inputs and outputs in a SADL External declaration, making it
-      available for use, see <a href="ExternalWrappingJavaForJena.html">Wrapping
+      data as inputs and and returns a primitive data type output in a SADL External 
+    statement to make it available for use in reasoning, see <a href="ExternalWrappingJavaForJena.html">Wrapping
         Java Class Methods for the Jena Reasoner</a>.</p>
-    <p>The named functions declared with either the<span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>or<span>&nbsp;</span><i>External</i><span>&nbsp;</span>keyword
-      can be used in expressions in SADL or derivative grammars. Using the
+    <h2>User-defined Equations Versus Reasoner Built-in Functions</h2>
+    <p>The examples in the previous section are all user-defined equations. Such 
+    user-defined equations may or may not be executable during reasoning, 
+    depending upon the reasoner/translator pair chosen and their ability to 
+    invoke the function. Reasoner/translator pairs may also have a known set of 
+    functions which can be used in models. These are defined as&nbsp; external 
+    equations in the SadlBuiltinFunctions.sadl model in the project&#39;s 
+    ImplicitModel folder. These functions will normally be more tightly 
+    integrated with the reasoner that user-defined functions, as is the case 
+    with Jena built-ins, or they may be functions native to the language as is 
+    the case with the SWI-Prolog reasoner. The content of the 
+    SadlBuiltinFunctions.sadl model is obtained from the reasoner/translator 
+    pair itself. Generally speaking, built-in functions in the 
+    SadlBuiltinFunctions.sadl model, even if implemented in Java, will not 
+    conform to the access mechanism described above and illustrated with 
+    java.lang.Math.abs. For example, built-in functions for the Jena Reasoner 
+    are implemented by a class, not a single method, and take Jena class 
+    instances as inputs rather than primitive data types.</p>
+    <p>While named functions declared with either the<span>&nbsp;</span><i>Equation</i><span>&nbsp;</span>or<span>&nbsp;</span><i>External</i><span>&nbsp;</span>keyword
+      can be used in expressions in SADL or derivative grammars, using the
       functions to do actual computation is a task for the reasoner or other
       related processors.</p>
+    <h2>Signatures</h2>
+    <p>The name of the equation and the type of inputs allowed and the type of 
+    output generated is specified in the equation&#39;s signature. This information 
+    is useful for type checking during model construction. The format of the 
+    signature is the name, followed by an opening parenthesis, followed by the 
+    type and name of the each argument, each type/name pair separated by a 
+    comma, followed by a closing parenthesis, followed by the types of the 
+    returned values, comma separated if more than one. The syntax is shown 
+    below, where the angle brackets enclose a grammar conforming type or name 
+    but are not part of the syntax.</p>
+    <p>&nbsp;&nbsp;&nbsp; &lt;name&gt;(&lt;type of 1st argument&gt; &lt;name of first 
+    argument&gt;, &lt;type of second argument&gt; &lt;name of second argument&gt;....)&lt;type of 
+    first returned value&gt;, &lt;type of second returned value&gt;...</p>
+    <p>The examples above provide concrete illustrations of signatures.</p>
+    <p>There are some special notations available for use in signatures. The 
+    most vague ambiguous type symbol is the unknown indicator, &quot;--&quot;, which is 
+    used without a name.</p>
+    <p><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">&nbsp;&nbsp;&nbsp; External</span><span style="font-size: 11pt; line-height: 14.2667px; font-family: 'Times New Roman', serif; color: black">&nbsp;</span><b><span style="font-size: 11pt; line-height: 14.2667px; font-family: 'Times New Roman', serif; color: #801480">foo</span></b><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;"><span>&nbsp;</span>(</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; ">--</span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">)<span>&nbsp;</span></span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: purple;">returns</span><span style="font-size: 11pt; line-height: 14.2667px; font-family: 'Times New Roman', serif; color: black">&nbsp;</span><span style="font-size: 11pt; line-height: 14.2667px; font-family: 'Times New Roman', serif">-- </span><span
+        style="font-size: 11pt; line-height: 14.2667px; font-family: &quot;Times New Roman&quot;, serif; color: black;">:
+        "<a href="http://entirely/vague#foo">http://entirely/vague#foo</a>".</span></p>
+    <p>This tells us that we do not know what kind of inputs foo accepts or what 
+    kind of outputs should be generated. This does not mean that we can&#39;t 
+    reference the function, only that we know&nbsp; nothing that will allow us 
+    to do type checking while building the model.</p>
+    <p>An ellipsis (...) is used to indicate a variable number of arguments. An 
+    ellipsis may be typed or untyped. A typed ellipsis is preceded by the type 
+    of the inputs that are expected. An ellipsis does not have an associated 
+    name.</p>
+    <p>&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#800080">External</font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#801480"><b>formatString</b></font><font SIZE="2">(</font><font SIZE="2" COLOR="#800080">string</font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#ff00ff"><b>fmt</b></font><font SIZE="2">,
+    </font><font SIZE="2" COLOR="#800080">float</font><font SIZE="2"> ... </font>
+    <font SIZE="2" COLOR="#ff00ff"><b>vals</b></font><font SIZE="2">) </font>
+    <font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> </font>
+    <font SIZE="2" COLOR="#800080">string</font><font SIZE="2"> : &quot;java.lang.String.format&quot;.</font></p>
+    <p>This tells us that the formatString function takes a string as the first 
+    argument, named &quot;fmt&quot;, followed by any number of float inputs, and returns a 
+    string as output.</p>
+    <p>&nbsp;&nbsp;&nbsp; <font SIZE="2" COLOR="#800080">External</font><font SIZE="2">
+    </font><font SIZE="2" COLOR="#801480"><b>print</b></font><font SIZE="2">(...)
+    </font><font SIZE="2" COLOR="#800080">returns</font><font SIZE="2"> --: &quot;com.ge.research.sadl.jena.reasoner.builtin.Print&quot;.</p>
+    </font>
+    <p>This signature tells us that the print function can take any number of 
+    inputs of unspecified type and what it will return is not known.</p>
+    <h2>Special Consideration for List and UnittedQuantity Built-in Inputs</h2>
+    <p>Some built-in functions may allow inputs which are of type List (see
+    <a href="ListsInSADL.html">Lists in SADL</a>) or of type UnittedQuantity 
+    (see <a href="UnittedQuantity.html">UnittedQuantities in SADL</a>). In order 
+    to be able to properly do type checking, built-in functions should be able 
+    to tell the reasoner/translator pair whether such inputs are allowed. This 
+    information is in addition to the argument and return type information 
+    contained in the equation signature. The following rules describe how 
+    arguments types interact with list and unitted quantity support.</p>
+    <ol>
+      <li>If a given argument is of a specified type and the function supports 
+      lists, then a list with the elements which are of that type are assumed to 
+      be valid.</li>
+      <li>Since a unitted quantity always has a numeric value as well as a unit, 
+      if an argument or a returned value has a numeric type and the function 
+      supports unitted quantities, it is assumed that a input or output of type 
+      UnittedQuantity (or a subclass thereof) is valid.</li>
+    </ol>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;">Additional
         Argument and Return Type Information</span></h2>
     <p>The SADL grammar supports additional information about function arguments
@@ -215,7 +312,6 @@
     </ol>
     <h2><span style="font-family: &quot;Times New Roman&quot;, serif;">Translation
         to OWL</span></h2>
-    <h2><span style="font-family: &quot;Times New Roman&quot;, serif;"></span></h2>
     <p>Translation of equations and external equations to OWL uses the
       meta-model defined in the <span style="font-family: &quot;Times New Roman&quot;, serif;"><a
           href="SadlImplicitModel.html">SADL Implicit Model</a>. Excluding <a href="AugmentedTypes.html">augmented
@@ -640,7 +736,8 @@
       argument local name.</p>
     <p>Use of this meta-model is illustrated by the following OWL snippet
       showing the translation of the areaOfCircle equation above.</p>
-    <div style="margin-left: 40px;"> <img src="images/EqnTrans1.png" alt=""></div>
+    <div style="margin-left: 40px;"> 
+      <img src="images/EqnTrans1.png" alt="" width="1089" height="516"></div>
     <p><br>
     </p>
     <p>Observe that the <em>sadlimplicitmodel:arguments</em> and <em>sadlimplicitmodel:returnTypes</em>
@@ -650,7 +747,8 @@
       the type, <em>xsd:float</em>, for both the argument and returned value.</p>
     <p>The translation of the external equation <em>abs</em> provides a second
       example.</p>
-    <div style="margin-left: 40px;"><img src="images/EqnTrans2.png" alt=""><br>
+    <div style="margin-left: 40px;">
+      <img src="images/EqnTrans2.png" alt="" width="1276" height="547"><br>
     </div>
     <p>In this case there is no <em>expression</em> with a <em>language</em>
       and <em>script</em> but instead there is an <em>externalURI</em>
@@ -663,10 +761,8 @@
             types</a>: capturing additional knowledge in equation declarations</span></li>
       <li><span style=" font-family: &quot;Times New Roman&quot;, serif;"><a href="SadlImplicitModel.html">The
             SADL Implicit Model</a>, where the meta-model for Equations and
-          Externals is defined<br>
-        </span></li>
+          Externals is defined</span></li>
     </ol>
-    <br class="Apple-interchange-newline">
-    <p></p>
+    <p>&nbsp;</p>
   </body>
 </html>
