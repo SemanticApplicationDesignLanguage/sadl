@@ -1671,6 +1671,84 @@ class UnittedQuantityTest extends AbstractSadlPlatformTest {
 	}
 
 	@Test
+	def void testUnittedQuantityInRule_Drew4() {
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))
+		updatePreferences(new PreferenceKey(SadlPreferences.ALWAYS_EXPAND_UNITTEDQUANTITY_IN_TRANSLATION.id, Boolean.TRUE.toString));
+		val sfname = 'JavaExternal.sadl'
+		createFile(sfname, '''
+			 uri "http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl" alias mileslighttravelsperunitoftime.
+			 
+			 Trip is a class, described by timeTraveled with values of type UnittedQuantity,
+			 	described by distanceTraveled with values of type UnittedQuantity,
+			 	described by speed with values of type UnittedQuantity.
+			 	
+			// Rule DistanceTraveled: if tr is a Trip and tr has speed s and tr has timeTraveled t then distanceTraveled of tr is s * t. 
+			// Rule DistanceTraveled2: if tr is a Trip and tr has speed s and tr has timeTraveled t then distanceTraveled of tr is product(s,t). 	
+			 Rule DistanceTraveled3: 
+			 	if tr is a Trip and 
+			 	tr has speed s and 
+			 	s has ^value sv and
+			 	s has unit su and 
+			 	su is "m/s" and
+			 	tr has timeTraveled t and
+			 	t has ^value tv and
+			 	t has unit tu and
+			 	tu is "hrs" and
+			 	dv = sv * tv * 60 * 60 and
+			 	du = combineUnits("*", su, "sec")
+			 	then thereExists(UnittedQuantity,^value, dv, unit, du, tr, distanceTraveled). 	
+			 	
+			 Trip1 is a Trip, with speed 299792458.0 "m/s", with timeTraveled 10000000000000.0 hrs.
+			 Trip2 is a Trip, with speed 2.997924580E8 "m/s", with timeTraveled 1.0E13 hrs.
+			 	
+			 Ask: select tr, dt where tr is a Trip and tr has distanceTraveled dt.
+  			 ''').resource.assertValidatesTo [ jenaModel, rules, cmds, issues, processor |
+			assertNotNull(jenaModel)
+			if (issues !== null) {
+				for (issue : issues) {
+					System.out.println(issue.message)
+				}
+			}
+			if (rules !== null) {
+				for (rule : rules) {
+					System.out.println(rule.toString)
+				}
+			}
+			val errors = issues.filter[severity === Severity.ERROR]
+			assertTrue(errors.size == 0)
+		]
+
+		var List<ConfigurationItem> configItems = newArrayList
+		val String[] catHier = newArrayOfSize(1)
+		catHier.set(0, "Jena")
+		val ci = new ConfigurationItem(catHier)
+		ci.addNameValuePair("pModelSpec", "OWL_MEM_RDFS")
+		configItems.add(ci)
+		assertInferencer(sfname, null, configItems) [
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val errs = (scr as SadlCommandResult).errors
+				if (errs !== null) {
+					for (err : errs) {
+						println(err.toString)
+					}
+				}
+				val tr = (scr as SadlCommandResult).results
+				if (tr !== null) {
+					println(tr.toString)
+				}
+				assertTrue(tr instanceof ResultSet)
+				assertEquals("\"tr\",\"dt\"
+\"http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl#Trip2\",1.0792528488E25 \"m/s*sec\"
+\"http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl#Trip1\",1.0792528488E25 \"m/s*sec\"
+", (tr as ResultSet).toString)
+			}
+		];
+	}
+
+	@Test
 	def void testUQInRule_min_uq_expanded_erroneous() {
 		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		updatePreferences(new PreferenceKey(SadlPreferences.IGNORE_UNITTEDQUANTITIES.id, Boolean.FALSE.toString))

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -16,8 +17,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.activation.DataSource;
-
 //import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologInterface;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
@@ -27,6 +26,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,10 @@ import com.ge.research.sadl.model.Explanation;
 import com.ge.research.sadl.model.gp.BuiltinElement;
 import com.ge.research.sadl.model.gp.FunctionSignature;
 import com.ge.research.sadl.model.gp.GraphPatternElement;
+import com.ge.research.sadl.model.gp.Literal;
+import com.ge.research.sadl.model.gp.Literal.LiteralType;
 import com.ge.research.sadl.model.gp.Node;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -61,6 +64,8 @@ import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologServiceInterface;
 import com.ge.research.sadl.swi_prolog.plinterface.SWIPrologServiceInterfaceThreaded;
 import com.ge.research.sadl.swi_prolog.translator.SWIPrologTranslatorPlugin;
 
+import jakarta.activation.DataSource;
+
 public class SWIPrologReasonerPlugin extends Reasoner {
     protected static final Logger logger = LoggerFactory.getLogger(SWIPrologReasonerPlugin.class);
 	public static String ReasonerFamily="SWI-Prolog-Based";
@@ -77,6 +82,8 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 	private String modelName;
 	private String repoType;
 	private boolean useThreadedService = true;
+	private int MAX_NUM_FAILURES = 3;
+	private int failureCount = 0;
 	
 	public SWIPrologReasonerPlugin() {
 		logger.debug("Creating new " + this.getClass().getName() + " reasoner.");
@@ -462,9 +469,13 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			}
 
 			try {
+				setFailureCount(0);
 				return prologQueryToResultSet(plQuery, vars);
 			} catch (Exception e) {
 				addError(new ModelError("Error processing query '" + plQuery + "': " + e.getMessage(), ErrorType.ERROR));
+				if (getFailureCount() > 0) {
+					addError(new ModelError("(Attempted query " + getFailureCount() + " times.)", ErrorType.ERROR));
+				}
 				// TODO Auto-generated catch block
 //				e.printStackTrace();
 			}
@@ -477,6 +488,9 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		Object[][] returnset = null;
 		
 		try {
+			if (getPrologServiceInstance() == null) {
+				initializeReasoner(getKbIdentifier(), getModelName(), getRepoType());
+			}
 			if (vars != null && vars.size() > 0) {
 					result = getPrologServiceInstance().runPlQueryMultipleArgs(getPlUrl(), plQuery, vars, true);
 				if (result != null && result.size() > 0) {
@@ -485,7 +499,13 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 					for (Hashtable hTable: result){
 						int col = 0;
 						for (String var: vars){ 
-							returnset[row][col] = hTable.get(var).toString();
+							String varVal = hTable.get(var).toString();
+							if (isBnode(varVal) && isUnittedQuantity(varVal)) {
+								returnset[row][col] = unittedQuantityInstanceNameToSadlLiteral(varVal);
+							}
+							else {
+								returnset[row][col] = varVal;
+							}
 							col += 1;
 						}
 						row += 1;
@@ -506,21 +526,110 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 			}
 		} catch (PlServiceFailedException e) {
 			try {
+				if (getFailureCount() > MAX_NUM_FAILURES) {
+					throw e;
+				}
+				setFailureCount(getFailureCount() + 1);
 				initializeReasoner(getKbIdentifier(), getModelName(), getRepoType());
 				return prologQueryToResultSet(plQuery, vars);
 			} catch (ReasonerNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+//				e1.printStackTrace();
+				addError(new ModelError("Error processing query '" + plQuery + "': " + e.getMessage(), ErrorType.ERROR));
 			} catch (ConfigurationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+//				e1.printStackTrace();
+				addError(new ModelError("Error processing query '" + plQuery + "': " + e1.getMessage(), ErrorType.ERROR));
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw e;
+//			e.printStackTrace();
+			addError(new ModelError("Error processing query '" + plQuery + "': " + e.getMessage(), ErrorType.ERROR));
 		}
 		return null;
+	}
+
+	private boolean isBnode(String varVal) {
+		if (varVal.startsWith("_:")) {
+			return true;
+		}
+		return false;
+	}
+
+	private void setFailureCount(int i) {
+		failureCount = i;
+	}
+
+	private int getFailureCount() {
+		return failureCount;
+	}
+
+	private Literal unittedQuantityInstanceNameToSadlLiteral(String varVal) throws TripleNotFoundException, QueryParseException, QueryCancelledException {
+//		ResultSet rsv = ask(varVal , SadlConstants.SADL_IMPLICIT_MODEL_VALUE_URI, null);
+//		ResultSet rsv = ask("getUqValue('" + varVal + "', V).");
+		List<String> vars = new ArrayList<String>();
+		vars.add("X");
+		ResultSet rsv = null;
+		String vQuery = null;
+		try {
+			vQuery = "holds('http://sadl.org/sadlimplicitmodel#value', '" + varVal + "', literal(type('http://www.w3.org/2001/XMLSchema#decimal', X)))";
+			rsv = prologQueryToResultSet(vQuery, vars);
+		} catch (Exception e) {
+			addError(new ModelError("Error processing query '" + vQuery + "': " + e.getMessage(), ErrorType.ERROR));
+			return null;
+		}
+		if (rsv != null && rsv.hasNext()) {
+//			ResultSet rsu = ask(varVal , SadlConstants.SADL_IMPLICIT_MODEL_UNIT_URI, null);
+//			ResultSet rsu = ask("getUqUnit('" + varVal + "', U).");
+			ResultSet rsu = null;
+			String uQuery;
+			try {
+				uQuery = "holds('http://sadl.org/sadlimplicitmodel#unit', '" + varVal + "', literal(type('http://www.w3.org/2001/XMLSchema#string', X)))";
+				rsu = prologQueryToResultSet(uQuery, vars);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (rsu != null && rsu.hasNext()) {
+				Literal lit = new Literal(LiteralType.NumberLiteral);
+				Object vObj = rsv.getResultAt(0, 0);
+				if (vObj instanceof String) {
+					String origTxt = (String)vObj;
+					BigDecimal val = new BigDecimal(origTxt);
+					if (!origTxt.contains(".") && !origTxt.contains("e")) {
+						if (val.longValue() >= Integer.MAX_VALUE || val.longValue() <= Integer.MIN_VALUE) {
+							long lval = Long.parseLong(origTxt);
+							lit.setValue(lval);
+						}
+						else {
+							int ival = Integer.parseInt(origTxt);
+							lit.setValue(ival);
+						}
+					}
+					if (val.doubleValue() >= Float.MAX_VALUE || val.doubleValue() <= Float.MIN_VALUE) {
+						double dval = Double.parseDouble(origTxt);
+						lit.setValue(dval);
+					}
+					else {
+						float fval = Float.parseFloat(origTxt);
+						lit.setValue(fval);
+					}
+				}
+				lit.setUnits(rsu.getResultAt(0, 0).toString());
+				return lit;
+			}
+		}
+		Literal lit = new Literal();
+		lit.setValue(varVal);
+		return lit;
+	}
+
+	private boolean isUnittedQuantity(String varVal) throws TripleNotFoundException {
+		ResultSet rs = ask(varVal , RDF.type.getURI(), SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+		if (rs != null) {
+			Object result = rs.getResultAt(0, 0);
+			if (result != null) {
+				return Boolean.parseBoolean(result.toString());
+			}
+		}
+		return false;
 	}
 
 	private String removeLeadingQuestion(String var) {
@@ -575,8 +684,7 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		try {
 			return prologQueryToResultSet(query.toString(), args);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			addError(new ModelError("Error processing query '" + query + "': " + e.getMessage(), ErrorType.ERROR));
 		}
 		return null;
 	}
@@ -722,37 +830,84 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 				int lastRowArity = Integer.parseInt(rs.getResultAt(0, 1).toString());
 				int dupCntr = 0; 
 				StringBuilder sb = new StringBuilder();
+				String signatureFoundFor = null;
 				for (int i = 1; i < rs.getRowCount(); i++) {
 					String pred = rs.getResultAt(i, 0).toString();
 					int arity = Integer.parseInt(rs.getResultAt(i, 1).toString());
-					if (!pred.equals(lastRowPredicate) || i == rs.getRowCount() - 1) {
-						if (Character.isAlphabetic(lastRowPredicate.charAt(0)) && lastRowPredicate.matches("^[a-zA-Z_]+[a-zA-Z0-9_\\-%~]*")) {
-							// valid name
-							sb.append("(");
-							if (dupCntr > 0) {
-								sb.append("--");
-							}
-							else {
-								for (int j = 0; j <= lastRowArity; j++) {
-									if (j > 0) {
-										sb.append(",");
+					if (signatureFoundFor == null || !lastRowPredicate.startsWith(signatureFoundFor)) {
+						if (!pred.equals(lastRowPredicate) || i == rs.getRowCount() - 1) {
+							if (Character.isAlphabetic(lastRowPredicate.charAt(0)) && lastRowPredicate.matches("^[a-zA-Z_]+[a-zA-Z0-9_\\-%~]*")) {
+								// valid name
+								sb.append("(");
+								try {
+									String className = "com.ge.research.sadl.swi-prolog.predicate#" + lastRowPredicate;
+									String classUri = "\"com.ge.research.sadl.swi-prolog.predicate#" + lastRowPredicate;
+									String signature = getPredicateSignature(lastRowPredicate);
+									if (signature !=  null) {
+										signatureFoundFor = lastRowPredicate;
+										String rest = signature;
+										int sigStart = rest.indexOf('(');
+										int sigEnd = rest.indexOf(')');
+										String args = signature.substring(sigStart + 1, sigEnd);
+										int argCntr = 0;
+										while (args !=  null && args.trim().length() > 0) {
+											String argType;
+											if (args.indexOf(',') > 0) {
+												argType = args.substring(0, args.indexOf(',')).trim();
+												args = args.substring(args.indexOf(',') + 1);
+											}
+											else {
+												argType = args;
+												args = null;
+											}
+											if (argCntr++ > 0) {
+												sb.append(", ");
+											}
+											sb.append(argType);
+											sb.append(" ");
+											sb.append("PV" + argCntr);
+										}
+										sb.append(") returns ");
+										String returnType = signature.substring(signature.indexOf(')') + 1);
+										sb.append(returnType);
+										sb.append(" : ");
+										sb.append(classUri);
+										BuiltinInfo biinfo = new BuiltinInfo(lastRowPredicate, className, ReasonerFamily, argCntr);
+										biinfo.setSignature(sb.toString());
+										bilst.add(biinfo);
 									}
-									sb.append("string ");	// assume all arguments are strings for now
-									sb.append("PV" + j);
+									else {
+										if (dupCntr > 0) {
+											sb.append("--");
+										}
+										else {
+											for (int j = 0; j < lastRowArity; j++) {
+												if (j > 0) {
+													sb.append(",");
+												}
+												sb.append("--");
+											}
+										}
+										sb.append(") returns -- : ");
+										sb.append(classUri);
+										BuiltinInfo biinfo = new BuiltinInfo(lastRowPredicate, className, ReasonerFamily, dupCntr > 0 ? -9999 : lastRowArity);
+										biinfo.setSignature(sb.toString());
+										bilst.add(biinfo);
+									}
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
 								}
+								sb.setLength(0);
 							}
-							String className = "com.ge.research.sadl.swi-prolog.predicate#" + lastRowPredicate;
-							sb.append(") returns -- : \"com.ge.research.sadl.swi-prolog.predicate#");
-							sb.append(lastRowPredicate);
-							BuiltinInfo biinfo = new BuiltinInfo(lastRowPredicate, className, ReasonerFamily, dupCntr > 0 ? -9999 : lastRowArity);
-							biinfo.setSignature(sb.toString());
-							bilst.add(biinfo);
-							sb.setLength(0);
+							dupCntr = 0;
 						}
-						dupCntr = 0;
+						else {
+							dupCntr++;
+						}
 					}
 					else {
-						dupCntr++;
+						signatureFoundFor = null;
 					}
 					lastRowPredicate = pred;
 					lastRowArity = arity;
@@ -766,6 +921,24 @@ public class SWIPrologReasonerPlugin extends Reasoner {
 		} catch (QueryCancelledException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * Method to get the signature of a predicate if one has been declared.
+	 * @param lastRowPredicate
+	 * @return
+	 * @throws Exception
+	 */
+	private String getPredicateSignature(String lastRowPredicate) throws Exception {
+		String signaturePredicate = lastRowPredicate + "Signature";
+		List<String> vars = new ArrayList<String>();
+		vars.add("Sig");
+		String query = signaturePredicate + "(Sig)";
+		ResultSet rs = prologQueryToResultSet(query, vars);
+		if (rs != null) {
+			return rs.getResultAt(0, 0).toString();
 		}
 		return null;
 	}

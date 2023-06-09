@@ -31,12 +31,13 @@ static val CONFIG = '''
 	override void createProject(String projectName) {
 		val project = IResourcesSetupUtil.createProject(projectName);
 		createFile('/OwlModels/configuration.rdf', CONFIG)
+		
 		IResourcesSetupUtil.addNature(project, XtextProjectHelper.NATURE_ID);
 		IResourcesSetupUtil.addBuilder(project, XtextProjectHelper.BUILDER_ID);
 		IResourcesSetupUtil.waitForBuild;
 		configurePreferences();
 		// This is used to trigger the implicit model creation before the tests.
-		val file = createFile(project.name, 'Dummy.sadl', 'uri "http://sadl.org/Dummy.sadl."');
+		val file = createFile(project.name, 'Dummy.sadl', 'uri "http://sadl.org/Dummy.sadl".');
 		IResourcesSetupUtil.fullBuild();
 		file.delete(true, IResourcesSetupUtil.monitor);
 		IResourcesSetupUtil.fullBuild();

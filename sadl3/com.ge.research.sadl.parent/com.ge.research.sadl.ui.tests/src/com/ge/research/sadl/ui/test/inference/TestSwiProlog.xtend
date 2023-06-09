@@ -1,17 +1,13 @@
 package com.ge.research.sadl.ui.test.inference;
 
-import com.ge.research.sadl.ui.tests.AbstractSadlPlatformTest
+import com.ge.research.sadl.preferences.SadlPreferences
+import com.ge.research.sadl.reasoner.ResultSet
+import com.ge.research.sadl.reasoner.SadlCommandResult
+import org.eclipse.xtext.preferences.PreferenceKey
 import org.junit.Test
 
 import static com.ge.research.sadl.ui.tests.GeneratedOutputFormat.*
-import java.nio.file.Paths
-import com.ge.research.sadl.jena.UtilsForJena
-import com.ge.research.sadl.reasoner.utils.SadlUtils
-import java.io.File
-import com.ge.research.sadl.reasoner.SadlCommandResult
-import com.ge.research.sadl.reasoner.ResultSet
-import com.ge.research.sadl.preferences.SadlPreferences
-import org.eclipse.xtext.preferences.PreferenceKey
+import com.ge.research.sadl.model.gp.TestResult
 import org.junit.Ignore
 
 class TestSwiProlog extends AbstractSwiPrologTest {
@@ -296,12 +292,13 @@ static val UQTest1 = '''
  
  Ask: select s, ar where s is a Rectangle and s has area ar.
 '''
-	@Ignore
+
 	@Test
 	def void testUQ1() {
 		if (!canRunSwiProlog) {
 			return
 		}
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
 		val sfname = 'UQTest1.sadl'
 		createFile(sfname, UQTest1)
 		assertNoErrorsInWorkspace;
@@ -335,4 +332,389 @@ static val UQTest1 = '''
 
 	}
 
+static val DirectCreateUnittedQuantityReference = '''
+ uri "http://sadl.org/test2.sadl"  alias test2.
+ 
+ Timespan is a class described by ^duration with values of type UnittedQuantity.
+ 
+ 
+ Rule R1: if x is a Timespan then ^duration of x is createUnittedQuantity(25, "miles").
+ 
+ Rule R2: if x is a Timespan and dv is 25 and du is "miles" and uq is createUnittedQuantity(25, "miles") then ^duration of x is uq.
+ 
+ TS25miles is a Timespan.
+ 
+ Ask: select t where t is a Timespan.
+ 
+ Ask: select uq where uq is a UnittedQuantity.
+ 
+ Ask: select t, p, v where t is a Timespan and t has p v.
+ '''
+
+	@Ignore
+	@Test
+	def void testDirectCreateUnittedQuantityReference() {
+		if (!canRunSwiProlog) {
+			return
+		}
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'DirectCreateUnittedQuantityReference.sadl'
+		createFile(sfname, DirectCreateUnittedQuantityReference)
+		assertNoErrorsInWorkspace;
+		assertGeneratedOutputFor('DirectCreateUnittedQuantityReference.sadl', OWL) [
+			println(it)
+		]
+		val content = getPrologFileContent("DirectCreateUnittedQuantityReference.pl")
+		println(content)
+//		assertEquals("".trim(),content.trim())
+//		assertGeneratedOutputFor('Likes.sadl', PL) [
+//			println(it)
+//		]
+		assertInferencer(sfname, null, null) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+//				assertTrue(tr instanceof ResultSet)
+				if (tr instanceof ResultSet) {
+					println((tr as ResultSet).toString)
+				}
+				else {
+					println(scr.toString)
+				}
+				if (idx == 0) {
+					assertNotNull(tr)
+					assertEquals("\"PVt\"
+\"http://sadl.org/test2.sadl#TS25miles\"".trim, tr.toString.trim)
+				}
+				if (idx == 1) {
+					assertNotNull(tr)
+					assertEquals("\"PVt\",\"PVp\",\"PVv\"
+\"http://sadl.org/test2.sadl#TS25miles\",\"http://www.w3.org/1999/02/22-rdf-syntax-ns#type\",\"http://sadl.org/test2.sadl#Timespan\"
+\"http://sadl.org/test2.sadl#TS25miles\",\"http://sadl.org/test2.sadl#duration\",25.0 \"miles\"
+\"http://sadl.org/test2.sadl#TS25miles\",\"http://sadl.org/test2.sadl#duration\",25.0 \"miles\"".trim, tr.toString.trim)
+				}
+				idx++
+			}
+			assertTrue(idx > 0)
+		];
+
+	}
+
+static val LIGHT_TRAVEL = '''
+ uri "http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl" alias mileslighttravelsperunitoftime.
+ 
+ Trip is a class, described by timeTraveled with values of type UnittedQuantity,
+ 	described by distanceTraveled with values of type UnittedQuantity,
+ 	described by speed with values of type UnittedQuantity.
+ 	
+ Rule DistanceTraveled3: 
+ 	if tr is a Trip and 
+ 	tr has speed s and 
+ 	s has ^value sv and
+ 	s has unit su and 
+ 	su is "m/s" and
+ 	tr has timeTraveled t and
+ 	t has ^value tv and
+ 	t has unit tu and
+ 	tu is "hrs" and
+ 	dv = sv * tv * 60.0 * 60.0 and
+ 	du = combineUnits("*", su, tu) and
+ 	uq = createUnittedQuantity(dv, du)
+ 	then tr has distanceTraveled uq. 
+ 	
+ Trip1 is a Trip, with speed 299792458.0 "m/s", with timeTraveled 10000000000000.0 hrs.
+ Trip2 is a Trip, with speed 2.997924580E8 "m/s", with timeTraveled 1.0E13 hrs.
+ 	
+ Ask: select tr, dt where tr is a Trip and tr has distanceTraveled dt.
+'''
+
+	@Test
+	def void testUQLightTravel() {
+		if (!canRunSwiProlog) {
+			return
+		}
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'MilesLightTravelsPerUnitOfTime.sadl'
+		createFile(sfname, LIGHT_TRAVEL)
+		assertNoErrorsInWorkspace;
+		assertGeneratedOutputFor(sfname, OWL) [
+			println(it)
+		]
+		val content = getPrologFileContent("MilesLightTravelsPerUnitOfTime.pl")
+		println(content)
+//		assertEquals("".trim(),content.trim())
+//		assertGeneratedOutputFor('Likes.sadl', PL) [
+//			println(it)
+//		]
+		assertInferencer(sfname, null, null) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof ResultSet)
+				println((tr as ResultSet).toString)
+				assertEquals("\"PVtr\",\"PVdt\"
+\"http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl#Trip1\",1.0792528E25 \"m/s*hrs\"
+\"http://sadl.org/MilesLightTravelsPerUnitOfTime.sadl#Trip2\",1.0792528E25 \"m/s*hrs\"".trim, tr.toString.trim)
+				idx++
+			}
+			assertTrue(idx > 0)
+		];
+
+	}
+	
+	static val TEST2 = '''
+ uri "http://sadl.org/test2.sadl"  alias test2.
+ 
+ Timespan is a class described by ^duration with values of type UnittedQuantity.
+ 
+ 
+// Rule R1: if x is a Timespan then ^duration of x is createUnittedQuantity(25, "miles").
+ 
+ Rule R2: if x is a Timespan and dv is 25 and du is "miles" and uq is createUnittedQuantity(25, "miles") then ^duration of x is uq.
+ 
+ TS25miles is a Timespan.
+ 
+ Ask: select t, d where t is a Timespan and t has ^duration d.
+	'''
+
+	@Test
+	def void testTest2a() {
+		if (!canRunSwiProlog) {
+			return
+		}
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'test2a.sadl'
+		createFile(sfname, TEST2)
+//		assertNoErrorsInWorkspace;
+		assertGeneratedOutputFor(sfname, OWL) [
+			println(it)
+		]
+		val content = getPrologFileContent("test2a.pl")
+		println(content)
+//		assertEquals("".trim(),content.trim())
+//		assertGeneratedOutputFor('Likes.sadl', PL) [
+//			println(it)
+//		]
+		assertInferencer(sfname, null, null) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof ResultSet)
+				println((tr as ResultSet).toString)
+//				if (idx == 0) {
+//					assertEquals("".trim, scr.toString.trim)
+//				}
+//				if (idx == 1) {
+//					assertEquals("".trim, scr.toString.trim)
+//				}
+				idx++
+			}
+			assertTrue(idx > 0)
+		];
+
+	}
+	
+	static val TEST2b = '''
+ uri "http://sadl.org/test2.sadl"  alias test2.
+ 
+ Timespan is a class described by ^duration with values of type UnittedQuantity.
+ 
+ Rule R2: if x is a Timespan and dv is 25 and du is "miles" and uq is createUnittedQuantity(dv, du) then ^duration of x is uq.
+ 
+ TS25miles is a Timespan.
+ 
+ Ask: select t, d where t is a Timespan and t has ^duration d.
+	'''
+
+	@Test
+	def void testTest2() {
+		if (!canRunSwiProlog) {
+			return
+		}
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'test2b.sadl'
+		createFile(sfname, TEST2b)
+//		assertNoErrorsInWorkspace;
+		assertGeneratedOutputFor(sfname, OWL) [
+			println(it)
+		]
+		val content = getPrologFileContent("test2b.pl")
+		println(content)
+//		assertEquals("".trim(),content.trim())
+//		assertGeneratedOutputFor('Likes.sadl', PL) [
+//			println(it)
+//		]
+		assertInferencer(sfname, null, null) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof ResultSet)
+				println((tr as ResultSet).toString)
+//				if (idx == 0) {
+//					assertEquals("".trim, scr.toString.trim)
+//				}
+//				if (idx == 1) {
+//					assertEquals("".trim, scr.toString.trim)
+//				}
+				idx++
+			}
+			assertTrue(idx > 0)
+		];
+
+	}
+	
+	static val TEST2c = '''
+ uri "http://sadl.org/test2.sadl"  alias test2.
+ 
+ Timespan is a class described by ^duration with values of type UnittedQuantity.
+ 
+ Rule R1: if x is a Timespan then ^duration of x is createUnittedQuantity(25, "miles").
+ 
+ TS25miles is a Timespan.
+ 
+ Ask: select t, d where t is a Timespan and t has ^duration d.
+	'''
+
+	@Test
+	def void testTest2c() {
+		if (!canRunSwiProlog) {
+			return
+		}
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'test2c.sadl'
+		createFile(sfname, TEST2c)
+//		assertNoErrorsInWorkspace;
+		assertGeneratedOutputFor(sfname, OWL) [
+			println(it)
+		]
+		val content = getPrologFileContent("test2c.pl")
+		println(content)
+//		assertEquals("".trim(),content.trim())
+//		assertGeneratedOutputFor('Likes.sadl', PL) [
+//			println(it)
+//		]
+		assertInferencer(sfname, null, null) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof ResultSet)
+				println((tr as ResultSet).toString)
+//				if (idx == 0) {
+//					assertEquals("".trim, scr.toString.trim)
+//				}
+//				if (idx == 1) {
+//					assertEquals("".trim, scr.toString.trim)
+//				}
+				idx++
+			}
+			assertTrue(idx > 0)
+		];
+
+	}
+	
+	static val TestCombineUnits='''
+ uri "http://sadl.org/TestCombineUnits.sadl" alias testcombineunits.
+ 
+ Thing is a class described by unit1 with values of type string, 
+ 	described by unit2 with values of type string,
+ 	described by combined with values of type string.
+ 	
+ Rule CU: if x is a Thing and x has unit1 u1 and x has unit2 u2 and cu is combineUnits('*', u1, u2) 
+ 	then x has combined cu.
+ 	
+ MyThing is a Thing with unit1 "foot", with unit2 "lbs". 	
+ 	
+ Test: MyThing has combined "foot*lbs".
+	'''
+	
+	@Test
+	def void testCombineUnits() {
+		if (!canRunSwiProlog) {
+			return
+		}
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'TestCombineUnits.sadl'
+		createFile(sfname, TestCombineUnits)
+//		assertNoErrorsInWorkspace;
+		assertGeneratedOutputFor(sfname, OWL) [
+			println(it)
+		]
+		val content = getPrologFileContent("TestCombineUnits.pl")
+		println(content)
+//		assertEquals("".trim(),content.trim())
+//		assertGeneratedOutputFor('Likes.sadl', PL) [
+//			println(it)
+//		]
+		assertInferencer(sfname, null, null) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+				idx++
+			}
+			assertTrue(idx > 0)
+		];
+
+	}
+	
+	static val TestCreateUnittedQuantity='''
+  uri "http://sadl.org/TestCreateUnittedQuantity.sadl" alias testcreateunittedquantity.
+  
+  Thing is a class described by tunit with values of type string, 
+  	described by tvalue with values of type decimal,
+  	described by tuq with values of type UnittedQuantity.
+  	
+  Rule CU: if x is a Thing and x has tunit u and x has tvalue v and uq is createUnittedQuantity(v, u) 
+  	then x has tuq uq.
+  	
+  MyThing is a Thing with tvalue 25, with tunit "ft". 	
+  	
+  Test: MyThing has tuq 25 "ft".
+	'''
+	
+	@Test
+	def void testCreateUnittedQuantity() {
+		if (!canRunSwiProlog) {
+			return
+		}
+		updatePreferences(new PreferenceKey(SadlPreferences.TYPE_CHECKING_WARNING_ONLY.id, Boolean.TRUE.toString));
+		val sfname = 'TestCombineUnits.sadl'
+		createFile(sfname, TestCreateUnittedQuantity)
+//		assertNoErrorsInWorkspace;
+		assertGeneratedOutputFor(sfname, OWL) [
+			println(it)
+		]
+		val content = getPrologFileContent("TestCombineUnits.pl")
+		println(content)
+//		assertEquals("".trim(),content.trim())
+//		assertGeneratedOutputFor('Likes.sadl', PL) [
+//			println(it)
+//		]
+		assertInferencer(sfname, null, null) [
+			var idx = 0
+			for (scr : it) {
+				println(scr.toString)
+				assertTrue(scr instanceof SadlCommandResult)
+				val tr = (scr as SadlCommandResult).results
+				assertTrue(tr instanceof TestResult)
+				assertTrue((tr as TestResult).passed)
+				idx++
+			}
+			assertTrue(idx > 0)
+		];
+
+	}
 }
