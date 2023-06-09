@@ -77,6 +77,7 @@ import static extension com.ge.research.sadl.utils.SadlASTUtils.*
 import com.ge.research.sadl.sADL.SadlDifferentFrom
 import com.ge.research.sadl.sADL.SadlSameAs
 import com.ge.research.sadl.sADL.ExpressionStatement
+import com.ge.research.sadl.processing.SadlConstants
 
 /**
  * This class contains custom scoping description.
@@ -564,16 +565,18 @@ class SADLScopeProvider extends AbstractGlobalScopeDelegatingScopeProvider {
 		if (importedSymbols.isEmpty) {
 			IMPLICIT_MODELS.forEach [ fileName, desiredUri |
 				if (!resource.URI.toString.endsWith(fileName)) {
-					val qName = QualifiedName.create(desiredUri);
-					val predicate = globalScopeProviderFilterProvider.getPredicate(resource);
-					val filteredGlobalScope = new FilteringScope(getGlobalScope(resource, SADL_IMPORT__IMPORTED_RESOURCE), predicate);
-					val element = filteredGlobalScope.getSingleElement(qName)
-					if (element !== null) {
-						val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
-						if (eobject !== null) {
-							createResourceScope(eobject.eResource, null, importedResources).allElements.forEach [
-								importedSymbols.put(name, it)
-							]
+					if (!(resource.URI.toString.endsWith("ImplicitModel/SadlImplicitModel.sadl") && fileName.equals(SadlConstants.SADL_BUILTIN_FUNCTIONS_FILENAME))) {
+						val qName = QualifiedName.create(desiredUri);
+						val predicate = globalScopeProviderFilterProvider.getPredicate(resource);
+						val filteredGlobalScope = new FilteringScope(getGlobalScope(resource, SADL_IMPORT__IMPORTED_RESOURCE), predicate);
+						val element = filteredGlobalScope.getSingleElement(qName)
+						if (element !== null) {
+							val eobject = resource.resourceSet.getEObject(element.EObjectURI, true)
+							if (eobject !== null) {
+								createResourceScope(eobject.eResource, null, importedResources).allElements.forEach [
+									importedSymbols.put(name, it)
+								]
+							}
 						}
 					}
 				}

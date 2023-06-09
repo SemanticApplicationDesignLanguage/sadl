@@ -2449,7 +2449,7 @@ public class JenaTranslatorPlugin implements ITranslator {
 				try {
 					reasonerInst = configurationMgr.getReasoner();
 					Class<?> bcls = reasonerInst.getBuiltinClass();
-					 ServiceLoader<?> serviceLoader = ServiceLoader.load(bcls);
+					ServiceLoader<?> serviceLoader = bcls != null ? ServiceLoader.load(bcls) : null;
 
 					if (serviceLoader != null) {
 						for ( Iterator<?> itr = serviceLoader.iterator(); itr.hasNext();) {

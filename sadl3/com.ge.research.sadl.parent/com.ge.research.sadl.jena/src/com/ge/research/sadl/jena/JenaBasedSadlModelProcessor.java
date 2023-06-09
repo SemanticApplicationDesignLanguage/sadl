@@ -953,7 +953,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					addError(err.getErrorMsg(), (EObject) err.getContext());
 				}
 				else {
-					System.err.println(err.getErrorMsg());
+					String locErr = resource.getURI().lastSegment() + ": " + err.getErrorMsg();
+					System.err.println(locErr);
 				}
 			}
 			else if (err.getErrorType().equals(ErrorType.WARNING)){
@@ -961,7 +962,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					addWarning(err.getErrorMsg(), (EObject) err.getContext());
 				}
 				else {
-					System.out.println(err.getErrorMsg());
+					String locErr = resource.getURI().lastSegment() + ": " + err.getErrorMsg();
+					System.err.println(locErr);
 				}
 			}
 			else {
@@ -969,7 +971,8 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 					addInfo(err.getErrorMsg(), (EObject) err.getContext());
 				}
 				else {
-					System.out.println(err.getErrorMsg());
+					String locErr = resource.getURI().lastSegment() + ": " + err.getErrorMsg();
+					System.err.println(locErr);
 				}
 			}
 		}
@@ -1499,7 +1502,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 			ProcessorContext context) {
 
 		Stopwatch stopwatch = Stopwatch.createStarted();
-		logger.debug("onValidate called for Resource '" + resource.getURI() + "'");
+		logger.debug("onValidate for Resource '" + resource.getURI() + "'");
 		if (mode.shouldCheck(CheckType.EXPENSIVE)) {
 			// do expensive validation, i.e. those that should only be done when 'validate'
 			// action was invoked.
@@ -5516,7 +5519,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 		((BuiltinElement)bi).setFuncName("assign");
 		List<Node> args = bi.getArguments();
 		if (args.size() == 2 && args.get(0) instanceof VariableNode && !(args.get(1) instanceof VariableNode)) {
-			// switch args
+			// switch args to fit the standard ordering that the variable getting the value is the last variable
 			Node argSave = args.get(1);
 			args.set(1, args.get(0));
 			args.set(0,  argSave);
@@ -6548,7 +6551,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 						newBe.addArgumentType(ltype.getTypeCheckType());
 					}
 				}
-				Node arg2 = newBe.getArguments().get(1);
+				Node arg2 = newBe.getArguments().size() > 1 ? newBe.getArguments().get(1) : null;
 				if (arg2 instanceof NamedNode && 
 						((NamedNode)arg2).getLocalizedType() != null) {
 					newBe.addArgumentType(((NamedNode)arg2).getLocalizedType());

@@ -1535,6 +1535,16 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 									return binOpTci;
 								}
 							}
+							else {
+								// 
+								TypeCheckInfo binOpTci = checkFunctionArgumentsAndReturnReturnTypeCheckInfo(be, null, expression);
+								if (binOpTci != null && binOpTci.getTypeCheckType() != null) {
+									be.addReturnType(binOpTci.getTypeCheckType());
+									getModelProcessor().eobjectPreprocessed(expression, be);
+									addValidatedBuiltinElementCache(expression, be);	
+									return binOpTci;
+								}
+							}
 						}
 						getModelProcessor().eobjectPreprocessed(expression, be);
 					}
@@ -2899,12 +2909,14 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		if (qnm.eContainer() instanceof ExternalEquationStatement) {
 			EList<Expression> args = expression.getArglist();
 			EList<SadlParameterDeclaration> params = ((ExternalEquationStatementImpl)qnm.eContainer()).getParameter();
-			actualFtci = checkFunctionArguments(params, args, expression, forceCheck);
+			EList<SadlReturnDeclaration> retTypes = ((ExternalEquationStatementImpl)qnm.eContainer()).getReturnType();
+			actualFtci = checkFunctionArguments(params, retTypes, args, expression, forceCheck);
 		}
 		else if (qnm.eContainer() instanceof EquationStatement) {
 			EList<Expression> args = expression.getArglist();
 			EList<SadlParameterDeclaration> params = ((EquationStatement)qnm.eContainer()).getParameter();
-			actualFtci = checkFunctionArguments(params, args, expression, forceCheck);
+			EList<SadlReturnDeclaration> retTypes = ((EquationStatement)qnm.eContainer()).getReturnType();
+			actualFtci = checkFunctionArguments(params, retTypes, args, expression, forceCheck);
 		}
 		if (actualFtci != null) {
 			return actualFtci;
@@ -2912,7 +2924,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 		return ftci;
 	}
 
-	private TypeCheckInfo checkFunctionArguments(EList<SadlParameterDeclaration> params, EList<Expression> args, Name expression, boolean forceCheck)
+	private TypeCheckInfo checkFunctionArguments(EList<SadlParameterDeclaration> params, EList<SadlReturnDeclaration> retTypes, EList<Expression> args, Name expression, boolean forceCheck)
 			throws InvalidTypeException, TranslationException, DontTypeCheckException {
 		if (isEObjectInError(expression)) {
 			return getCachedTypeCheckInfoByEObject(expression);
@@ -2924,8 +2936,13 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				params.get(params.size() - 1).getEllipsis() != null);
 		boolean hasUnknown = params.size() > 0 && 
 				(params.get(params.size() - 1).getUnknown() != null);
-		int minNumArgs = 0;
-		if (args.size() != params.size()) {
+		int additionalReturnArgs = (retTypes == null || retTypes.size() == 0) ? 0 : 
+			((SadlReturnDeclaration)retTypes.get(0)).getNone() != null ? 0 : retTypes.size();
+		int minNumArgs = args.size();
+		if (args.size() > params.size() && (args.size() == params.size() + 1) && args.get(args.size() - 1) instanceof VariableNode) {
+			minNumArgs++;
+		}
+		if (args.size() != minNumArgs) {
 			// this could be a wrong number of arguments unless there's an ellipsis, typed or untyped, or it's an unknown
 			boolean wrongNumArgs = false;
 			if (!hasEllipsis && !hasUnknown) {
@@ -3197,6 +3214,12 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				OntConceptType refltype = declarationExtensions.getOntConceptType((Name)reference);
 				if (reflname != null && refltype != null && refltype.equals(OntConceptType.VARIABLE)) {
 					return null;
+				}
+			}
+			else {
+				SadlResource declSr = getModelProcessor().getDeclarationExtensions().getDeclaration(sr);
+				if (declSr != null && declSr != sr) {
+					return getType(declSr, reference);
 				}
 			}
 			getModelProcessor().addTypeCheckingError(SadlErrorMessages.UNIDENTIFIED.toString(), (reference != null ? reference : sr));
@@ -6412,7 +6435,7 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 				List<Node> eqArgTypes = eq.getArgumentTypes();
 				Node lastEqArgType = (eqArgTypes != null && eqArgTypes.size() > 0) ? eqArgTypes.get(0) : null;
 				if (lastEqArgType instanceof UnknownNode) {
-					if (!be.getFuncType().equals(BuiltinType.Equal)) {
+					if (!be.getFuncType().equals(BuiltinType.Equal) && !be.getFuncType().equals(BuiltinType.Assign)) {
 						// equal is too broad to be able to specify types in the equation signature
 						getModelProcessor().addWarning("Function '" + be.getFuncName() + "' has an unknown (--) parameter type, cannot do argument type checking.", context);
 					}
@@ -6510,6 +6533,37 @@ public class JenaBasedSadlModelValidator implements ISadlModelValidator {
 					// This can't be right--what's needed here? awc 2/23/23
 					getModelProcessor().addTypeCheckingError(variableSeekingType, context);
 				}
+			}
+		}
+		else {
+			ITypedBuiltinFunctionHelper uqhdlr;
+			try {
+				uqhdlr = getModelProcessor().getTranslator().getTypedBuiltinFunctionHelper();
+				// get the return type from the handler
+				Node[] returnTypes = uqhdlr.validateArgumentTypes(be, getTheJenaModel(), args, argTypes);
+				if (returnTypes != null && returnTypes.length > 0) {
+					Node returnType = returnTypes[0];
+					String detUri = eq != null ? eq.getUri() : be.getFuncUri();
+					ConceptName determinant = new ConceptName(detUri, ConceptType.FUNCTION_DEFN);
+					returnTci = new TypeCheckInfo(determinant, this, context);
+					returnTci.setTypeCheckType(returnType);
+					returnTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);	
+					cacheTypeCheckInfoByEObject(context, returnTci);
+
+				}
+				else if (getModelProcessor().isNumericOperator(be.getFuncName())) {
+					if (hasUnittedQuantityInput) {
+						Node returnType = getModelProcessor().validateNamedNode(new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode));
+						ConceptName determinant = new ConceptName(eq.getUri(), ConceptType.FUNCTION_DEFN);
+						returnTci = new TypeCheckInfo(determinant, this, context);
+						returnTci.setTypeCheckType(returnType);
+						returnTci.setTypeToExprRelationship(TypeCheckInfo.FUNCTION_RETURN);	
+						cacheTypeCheckInfoByEObject(context, returnTci);
+					}
+				}
+			} catch (ConfigurationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 		return returnTci;

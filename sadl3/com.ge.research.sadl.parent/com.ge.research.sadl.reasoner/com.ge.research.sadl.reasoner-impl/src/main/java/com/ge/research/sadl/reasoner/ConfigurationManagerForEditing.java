@@ -877,7 +877,7 @@ public class ConfigurationManagerForEditing extends ConfigurationManager
 
 		// get the service registered builtins
 		Class<?> bcls = reasonerInst.getBuiltinClass();
-		ServiceLoader<Class<?>> serviceLoader = getServiceLoader(bcls);
+		ServiceLoader<Class<?>> serviceLoader = bcls != null ? getServiceLoader(bcls) : null;
 
 		if (serviceLoader != null) {
 			for (Iterator<Class<?>> itr = serviceLoader.iterator(); itr

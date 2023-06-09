@@ -5,10 +5,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
@@ -41,6 +44,7 @@ import com.ge.research.sadl.model.gp.TripleElement;
 import com.ge.research.sadl.model.gp.TripleElement.TripleModifierType;
 import com.ge.research.sadl.model.gp.VariableNode;
 import com.ge.research.sadl.model.persistence.SadlPersistenceFormat;
+import com.ge.research.sadl.processing.SadlConstants;
 import com.ge.research.sadl.reasoner.BuiltinInfo;
 import com.ge.research.sadl.reasoner.ConfigurationException;
 import com.ge.research.sadl.reasoner.ConfigurationItem;
@@ -63,6 +67,8 @@ import com.naturalsemanticsllc.sadl.reasoner.ITypedBuiltinFunctionHelper.Unitted
 public class SWIPrologTranslatorPlugin implements ITranslator {
     public static final String SWI_RUN_PROLOG_SERVICE_PL = "swi-run-prolog-service.pl";
 
+    public static final String SWI_PREDICATE_SIGNATURES_PL = "swi-predicate-signatures.pl";
+    
 	public static final String SWI_CUSTOM_PREDICATES_PL = "swi-custom-predicates.pl";
 
 	public static final String SWI_PROLOG_SERVICE_PL = "swi-prolog-service.pl";
@@ -98,10 +104,14 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	private String translationFolder;
 
 	private IReasoner reasoner;
+
+	private ITypedBuiltinFunctionHelper typedBuiltinFunctionHelper = null;
 	
     private enum RulePart {PREMISE, CONCLUSION, NOT_A_RULE}
-    private enum SpecialBuiltin {NOVALUE, NOVALUESPECIFIC, NOTONLY, ONLY, ISKNOWN}
+    private enum SpecialBuiltin {NOVALUE, NOVALUESPECIFIC, NOTONLY, ONLY, ISKNOWN, THERE_EXISTS, COMBINE_UNITS}
 	public enum TranslationTarget {RULE_TRIPLE, RULE_BUILTIN, QUERY_TRIPLE, QUERY_FILTER}
+	
+	private StringBuilder toBeAddedAtEnd = null;
 	
 	public SWIPrologTranslatorPlugin() {
 		logger.debug("Creating new '" + this.getClass().getName() + "' translator.");
@@ -232,6 +242,13 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		if (!f.exists()) {
 			FileInterface.writeFile(prologService, getService(), false);
 		}
+		String sigs = translationFolder + File.separator + SWI_PREDICATE_SIGNATURES_PL;
+		File spf = new File(sigs);
+		if (!spf.exists()) {
+			String defaultSignatures = "createUnittedQuantitySignature(Sig) :- Sig = 'createUnittedQuantity(decimal, string)UnittedQuantity'.\n"
+					+ "combineUnitsSignature(Sig) :- Sig = 'combineUnits(string, string, string)string'.\n\n";
+			FileInterface.writeFile(sigs, "% signatures for SWI-Prolog predicates\n\n" + defaultSignatures, false);
+		}
 		String custom = translationFolder + File.separator + SWI_CUSTOM_PREDICATES_PL;
 		File cpf = new File(custom);
 		if (!cpf.exists()) {
@@ -251,7 +268,12 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 			IOException, URISyntaxException {
 		if (!modelName.equals(IReasoner.SADL_BUILTIN_FUNCTIONS_URI) &&
 				otherStructure instanceof List<?> && ((List<?>)otherStructure).size() > 0) {
-			addError("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.",ErrorType.ERROR);
+			if (((List<?>)otherStructure).get(0) instanceof Equation) {
+				addError("Predicates can only be added to the SWI-Prolog reasoner by adding them to 'swi-custom-predicates.pl' in the OwlModels folder.", ErrorType.ERROR);
+			}
+			else {
+				addError("This translator (" + this.getClass().getCanonicalName() + ") does not translate other knowledge structures.",ErrorType.ERROR);
+			}
 		}
 		return errors;
 	}
@@ -260,6 +282,7 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 	public String translateRule(OntModel model, String modelName, Rule rule)
 			throws TranslationException {
 		setRuleInTranslation(rule);
+		setToBeAddedAtEnd(null);
 
 		List<GraphPatternElement> thens = rule.getThens();
 		if (thens != null) {
@@ -289,6 +312,10 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 							thisThen.append(", ");
 						}
 						thisThen.append(ifStr);
+					}
+					if (getToBeAddedAtEnd() != null) {
+						thisThen.append(",");
+						thisThen.append(getToBeAddedAtEnd().toString());
 					}
 					if (thisThen.length() > 0) {
 						thisThen.append(". \n");
@@ -645,6 +672,17 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		sb.append("    concat(Pred,'(',PredStr),\n");
 		sb.append("    sub_string(E,0,L,A,PredStr), !.\n\n\n");
 		
+		sb.append("createUnittedQuantity(V, U, BID) :- rdf_bnode(BID), \n");
+		sb.append("    rdf_assert(BID, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type', 'http://sadl.org/sadlimplicitmodel#UnittedQuantity'),\n");
+		sb.append("    rdf_assert(BID, 'http://sadl.org/sadlimplicitmodel#value', literal(type('http://www.w3.org/2001/XMLSchema#decimal', V))), \n");
+		sb.append("    rdf_assert(BID, 'http://sadl.org/sadlimplicitmodel#unit', literal(type('http://www.w3.org/2001/XMLSchema#string', U))).\n\n\n");
+		
+		sb.append("assignNewUQ(S, P, V, U) :- createUnittedQuantity(V,U,BID), rdf_assert(S, P, BID).\n\n\n");
+		
+		sb.append("combineUnits(Op, U1, U2, Uout) :- string_concat(U1, Op, Inter), string_concat(Inter, U2, Uout).\n\n\n");
+		
+		sb.append(":- consult('swi-predicate-signatures.pl').\n\n\n");
+		
 		sb.append(":- consult('swi-custom-predicates.pl').\n\n\n");
 
 		sb.append("%%%%%%%%%%%%%%%\n");
@@ -853,9 +891,6 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 					if (elements.get(i) instanceof TripleElement) {
 						trel = (TripleElement)elements.get(i);
 					}
-					else {
-						logger.error("Unhandled graph pattern element detected as special builtin: " + elements.get(i).toString());
-					}
 					
 					// translate based on type of spb
 					if (spb.equals(SpecialBuiltin.NOVALUE)) {
@@ -865,6 +900,66 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 						sb.append(graphPatternElementToPrologRuleString(trel, rulePart));
 						sb.append(", ");
 						sb.append("bound(" + nodeToString(trel.getObject(), TranslationTarget.RULE_BUILTIN) + ")");
+					}
+					else if (spb.equals(SpecialBuiltin.THERE_EXISTS)) {
+						BuiltinElement be = (BuiltinElement) elements.get(i);
+						List<Node> args = be.getArguments();
+						if (args.size() == 8) {		// shouild be 8 args
+							if (args.get(0) instanceof NamedNode && 
+									((NamedNode)args.get(0)).getURI().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI)) {
+								// special handling for UnittedQuantity thereExists
+								Node uqVal = args.get(2);
+								Node uqUnit = args.get(4);
+								Node subj = args.get(6);
+								Node prop = args.get(7);
+								sb.append("holds(");
+								sb.append(nodeToString(prop, TranslationTarget.RULE_TRIPLE));
+								sb.append(",");
+								sb.append(nodeToString(subj, TranslationTarget.RULE_TRIPLE));
+								sb.append(",");
+								String newUqNode = getNewPrologOnlyVariableForRule();
+								sb.append(newUqNode);
+								sb.append(")");
+								StringBuilder addToEnd = new StringBuilder("createUnittedQuantity(");
+								addToEnd.append(nodeToString(uqVal, TranslationTarget.RULE_TRIPLE));
+								addToEnd.append(",");
+								addToEnd.append(nodeToString(uqUnit, TranslationTarget.RULE_TRIPLE));
+								addToEnd.append(",");
+								addToEnd.append(newUqNode);
+								addToEnd.append(")");
+								setToBeAddedAtEnd(addToEnd);
+							}
+							else {
+								throw new TranslationException("Support for general thereExists not yet implemented");
+							}
+						}
+					}
+					else if (spb.equals(SpecialBuiltin.COMBINE_UNITS)) {
+						BuiltinElement be = (BuiltinElement)elements.get(i);
+						sb.append(be.getFuncName());
+						sb.append("(");
+						List<Node> args = be.getArguments();
+						Node opNode = args.get(0);
+						if (opNode instanceof Literal) {
+							String opStr = ((Literal)opNode).getValue().toString();
+							if (opStr.equals("Multiply")) {
+								opStr = "*";
+							}
+							else if (opStr.equals("Divide")) {
+								opStr = "/";
+							}
+							sb.append(singleQuoteString(opStr, true));
+						}
+						else {
+							sb.append(nodeToString(opNode, TranslationTarget.RULE_BUILTIN));
+						}
+						sb.append(",");
+						sb.append(nodeToString(args.get(1), TranslationTarget.RULE_BUILTIN));
+						sb.append(",");
+						sb.append(nodeToString(args.get(2), TranslationTarget.RULE_BUILTIN));
+						sb.append(",");
+						sb.append(nodeToString(args.get(3), TranslationTarget.RULE_BUILTIN));
+						sb.append(")");
 					}
 					else  {
 						if (spb.equals(SpecialBuiltin.NOVALUESPECIFIC)) {
@@ -1002,6 +1097,23 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 					}
 					else {
 						addError("BuiltinType is equal but not the expected variable and class ", ErrorType.ERROR);
+					}
+				}
+				else if (((BuiltinElement)gpe).getFuncType().equals(BuiltinType.Assign)) {
+					if (args.size() == 2) {
+						Node arg0 = args.get(0);
+						Node arg1 = args.get(1);
+						if (arg1 instanceof VariableNode) {
+							sb.append(nodeToString(arg1, TranslationTarget.RULE_BUILTIN));
+							sb.append(" = ");
+							sb.append(nodeToString(arg0, TranslationTarget.RULE_BUILTIN));
+						}
+						else {
+							addError("BuiltinType is assign bu the second argument is not a variable.", ErrorType.ERROR);
+						}
+					}
+					else {
+						
 					}
 				}
 				else if (((BuiltinElement)gpe).getArguments().size() == 2) {
@@ -1193,21 +1305,36 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 				else {
 					if (rulePart.equals(RulePart.PREMISE) && target.equals(TranslationTarget.RULE_TRIPLE) && obj instanceof VariableNode) {
 						String littype = getDatatypePropertyXSDRange(gpe);
+						boolean numericObj = tripleHasNumericObject(gpe);
 						if (littype != null) {
-							String litval = getNewPrologOnlyVariableForRule();
+							boolean newVarCreated = false;
+							String litval;
+							if (obj instanceof VariableNode  && !numericObj) {
+								litval = nodeToString(obj, target);
+							}
+							else {
+								litval = getNewPrologOnlyVariableForRule();
+								newVarCreated = true;
+							}
 							sb.append("literal(type('");
 							sb.append(littype);
 							sb.append("',");
 							sb.append(litval);
-							sb.append("))),");
-							if (tripleHasNumericObject(gpe)) {
-								sb.append(" atom_number(");
+							sb.append("))");
+							if (numericObj && newVarCreated) {
+								sb.append("), atom_number(");
 								sb.append(litval);
 								sb.append(",");
+								sb.append(nodeToString(obj, target));
 							}
 						}
+						else {
+							sb.append(nodeToString(obj, target));
+						}
 					}
-					sb.append(nodeToString(obj, target));
+					else {
+						sb.append(nodeToString(obj, target));
+					}
 				}
 			}
 			if (target.equals(TranslationTarget.RULE_TRIPLE)) {
@@ -1310,6 +1437,17 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 				Node var = new VariableNode("v" + System.currentTimeMillis());
 				((TripleElement)elements.get(index)).setObject(var);
 				return SpecialBuiltin.ISKNOWN;
+			}
+		}
+		else if (elements.get(index) instanceof BuiltinElement) {
+			BuiltinElement be = (BuiltinElement) elements.get(index);
+			if (be.getFuncName().equals("thereExists")) {
+				// this is the creation of a new UnittedQuantity
+				return SpecialBuiltin.THERE_EXISTS;
+			}
+			else if (be.getFuncName().equals("combineUnits")) {
+				// this also requires some special handling of the operator
+				return SpecialBuiltin.COMBINE_UNITS;
 			}
 		}
 		return null;
@@ -1888,6 +2026,12 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 		sb.append(IReasoner.SADL_BUILTIN_FUNCTIONS_ALIAS);
 		sb.append(".\n\n");
 		
+		XSDDateTime now = new XSDDateTime(Calendar.getInstance());
+		sb.append("// Generated by " + this.getClass().getCanonicalName() + " " + now.toString());
+		sb.append("\n\n");
+		
+//		sb.append("import \"http://sadl.org/DeclareClassForUseInFunctionModel.sadl\".\n\n");
+		
 		List<BuiltinInfo> bfinfolst;
 		try {
 			bfinfolst = getBuiltinFunctionInformation();
@@ -1978,8 +2122,61 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 
 	@Override
 	public com.ge.research.sadl.model.gp.Node[] validateArgumentTypes(BuiltinElement be, OntModel model, List<com.ge.research.sadl.model.gp.Node> args, List<com.ge.research.sadl.model.gp.Node> argTypes) {
-		// TODO Auto-generated method stub
+		// Handle at least the common operations
+		boolean hasUQArgType = false;
+		if (argTypes !=  null) {
+			for (Node argType : argTypes) {
+				if (isUnittedQuantity(model, argType)) {
+					hasUQArgType = true;
+					break;
+				}
+			}
+		}
+		if (be.getFuncType().equals(BuiltinType.Multiply) || be.getFuncType().equals(BuiltinType.Divide)) {
+			Node[] retTypes = new Node[1];
+			if (hasUQArgType) {
+				retTypes[0] = new NamedNode(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI, NodeType.ClassNode);
+				return retTypes;
+			}
+			else {
+				retTypes[0] = new NamedNode(argTypes.get(0).getURI(), NodeType.DataTypeNode);
+				return retTypes;
+			}
+		}
+		else if (be.getFuncType().equals(BuiltinType.Minus) || 
+				be.getFuncType().equals(BuiltinType.Plus) ||
+				be.getFuncType().equals(BuiltinType.Power)) {
+			Node[] retTypes = new Node[1];
+			if (hasUQArgType) {
+				retTypes[0] = new NamedNode(argTypes.get(0).getURI(), NodeType.ClassNode);
+			}
+			else {
+				retTypes[0] = new NamedNode(argTypes.get(0).getURI(), NodeType.DataTypeNode);
+			}
+			return retTypes;
+		}
+		else if (be.getFuncType().equals(BuiltinType.GT) ||
+				be.getFuncType().equals(BuiltinType.GTE) ||
+				be.getFuncType().equals(BuiltinType.LT) ||
+				be.getFuncType().equals(BuiltinType.LTE) ||
+				be.getFuncType().equals(BuiltinType.Equal)
+				) {
+			Node[] retTypes = new Node[1];
+			retTypes[0] = new NamedNode(XSD.xboolean.getURI(), NodeType.DataTypeNode);
+			return retTypes;
+		}
 		return null;
+	}
+
+	public boolean isUnittedQuantity(OntModel model, Node argType) {
+		OntClass cls = model.getOntClass(argType.getURI());
+		if (cls != null) {
+			OntClass uQCls = model.getOntClass(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_URI);
+			if (uQCls != null && (cls.equals(uQCls) || cls.hasSuperClass(uQCls, false))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -1990,19 +2187,25 @@ public class SWIPrologTranslatorPlugin implements ITranslator {
 
 	@Override
 	public void setTypedBuiltinFunctionHelper(ITypedBuiltinFunctionHelper tfbHelper) {
-		// TODO Auto-generated method stub
-		
+		typedBuiltinFunctionHelper = tfbHelper;
 	}
 
 	@Override
 	public ITypedBuiltinFunctionHelper getTypedBuiltinFunctionHelper() {
-		// TODO Auto-generated method stub
-		return null;
+		return typedBuiltinFunctionHelper;
 	}
 
 	@Override
 	public UnittedQuantityBuiltinHandlingType getUnittedQuantityBuiltinHandlingTypeOfBuiltin(String builtinUri) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	private StringBuilder getToBeAddedAtEnd() {
+		return toBeAddedAtEnd;
+	}
+
+	private void setToBeAddedAtEnd(StringBuilder toBeAddedAtEnd) {
+		this.toBeAddedAtEnd = toBeAddedAtEnd;
 	}
 }

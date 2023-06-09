@@ -304,8 +304,21 @@ import com.google.inject.Inject;
 					members = modelFolder.members();
 					for (int i = 0; members != null && i < members.length; i++) {
 						IResource member = members[i];
+						boolean isRuleFile = false;
+						String ext = member.getFileExtension();
+						if (ext != null && !ext.equals("owl")) {
+							String baseName = member.getName().substring(0, member.getName().length() - ext.length());
+							String potentialOwlFilename = baseName.concat("owl");
+							for (IResource m : members) {
+								if (m.getName().equals(potentialOwlFilename)) {
+									// this IResource is a rule file generated from a SADL file
+									isRuleFile = true;
+									break;
+								}
+							}
+						}
 						if (member.getName().endsWith(".metrics.owl") ||
-								member.getName().endsWith(".sadl.pl")) {
+								member.getName().endsWith(".sadl.pl") || isRuleFile) {
 							member.delete(true, null);
 						}
 					}

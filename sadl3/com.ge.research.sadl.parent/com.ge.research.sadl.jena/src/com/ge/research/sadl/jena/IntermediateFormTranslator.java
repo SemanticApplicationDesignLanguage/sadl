@@ -5103,6 +5103,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 					if (argTypes != null) {
 						int idx = 0;
 						for (Node argType : argTypes) {
+							if (idx == argTypes.size() - 1 &&
+									((BuiltinElement)gpe).getReturnTypes() != null &&
+									((BuiltinElement)gpe).getReturnTypes().size() > 0) {
+								continue;
+							}
 							if (isUnittedQuantity(argType)) {
 								if (alwaysExpandUQs || mustExpandUnittedQuantityArguments(gvns, ifs, thens, (BuiltinElement)gpe)) {
 									// this BuiltinElement has at least one argument which must be expanded
@@ -5514,7 +5519,11 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 						}
 					}
 					else if (!(arg instanceof NamedNode)){	// OK if a NamedNode
-						throw new TranslationException("Arg isn't Literal or VariableNode; this shouldn't happen!");
+						if (!(arg instanceof ProxyNode) || 
+								!((arg instanceof ProxyNode && ((ProxyNode)arg).getProxyFor() instanceof BuiltinElement) &&
+										((BuiltinElement)((ProxyNode)arg).getProxyFor()).getFuncName().equals(SadlConstants.SADL_IMPLICIT_MODEL_UNITTEDQUANTITY_BUILTIN_NAME))) {
+							throw new TranslationException("Arg isn't Literal or VariableNode; this shouldn't happen!");
+						}
 					}
 				}
 			}
@@ -5648,7 +5657,12 @@ public class IntermediateFormTranslator implements I_IntermediateFormTranslator 
 			}
 			output[0] = args.get(args.size() - 1);
 			if (output[0] instanceof VariableNode) {
-				((VariableNode)output[0]).changeType(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
+				if (((VariableNode)output[0]).getType() == null) {
+					((VariableNode)output[0]).setType(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
+				}
+				else {
+					((VariableNode)output[0]).changeType(new NamedNode(XSD.decimal.getURI(), NodeType.DataTypeNode));
+				}
 			}
 			if (outputUnit == null) {
 				ReplacementsWithLocation repl = replacements.get(output[0]);
