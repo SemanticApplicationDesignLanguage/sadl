@@ -61,7 +61,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build and push SADL-Eclipse image
-      uses: docker/build-push-action@v4.1.0
+      uses: docker/build-push-action@v4.1.1
       with:
         context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
         file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
