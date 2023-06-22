@@ -17007,7 +17007,7 @@ public class JenaBasedSadlModelProcessor extends SadlModelProcessor implements I
 				}
 				if (typedBuiltinFunctionHelperClassname == null) {
 					// apparently the translator didn't provide a default handler
-					typedBuiltinFunctionHelperClassname = "com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena";
+					typedBuiltinFunctionHelperClassname = "com.ge.research.sadl.jena.reasoner.SimpleJenaTypedBuiltinFunctionHelper";
 				}
 			}
 			setTypedBuiltinFunctionHelperClassname(typedBuiltinFunctionHelperClassname);

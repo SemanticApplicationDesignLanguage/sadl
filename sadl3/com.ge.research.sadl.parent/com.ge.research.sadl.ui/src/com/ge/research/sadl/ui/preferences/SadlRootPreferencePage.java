@@ -242,8 +242,8 @@ public class SadlRootPreferencePage extends LanguageRootPreferencePage {
 			}
 		}
 		else {
-			classes.add("com.naturalsemantics.sadl.jena.SadlSimpleUnittedQuantityHanderForJena");
-			clsNames.add("SadlSimpleUnittedQuantityHanderForJena");
+			classes.add("com.ge.research.sadl.jena.reasoner.SimpleJenaTypedBuiltinFunctionHelper");
+			clsNames.add("SimpleJenaTypedBuiltinFunctionHelper");
 		}
 		String[][] options = new String[classes.size()] [2];
 		for (int i = 0; i < classes.size(); i++) {
