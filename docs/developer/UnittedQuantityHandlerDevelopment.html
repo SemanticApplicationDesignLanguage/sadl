@@ -11,55 +11,63 @@
     <h1>Developing UnittedQuantity Handlers<br>
     </h1>
     <h5>Last revised
-      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->10/27/2022<!--webbot bot="Timestamp" endspan i-checksum="12611" -->.
+      <!--webbot bot="Timestamp" S-Type="EDITED" S-Format="%m/%d/%Y" startspan -->06/22/2023<!--webbot bot="Timestamp" endspan i-checksum="12544" -->.
       <a href="contact.html">Contact us</a>.</h5>
-    <p>Two kinds of UnittedQuantity handlers are used by the SADL IDE. The first 
-    is responsible for expanding references to UnittedQuantity instances and 
-    variable </p>
-    <p>UnittedQuantity handlers must implement the Java Interface class 
-    com.ge.research.sadl.processing.ISadlUnittedQuantityHandler. Implementations 
-    must include the following three methods.</p>
+    <p>Handling of instances of <i>UnittedQuantity</i> occurring in expressions 
+    during editing and inference is treated as a subset of type checking. A 
+    helper class may be specified in the SADL preferences under &quot;UnittedQuantity 
+    Handler&quot;. </p>
+    <p>A helper class must implement the Interface class <i>
+    ITypedBuiltinFunctionHelper</i>. This Interface class defines the enum <i>
+    UnittedQuantityBuiltinHandlingType</i> which categorizes built-in functions 
+    with respect to restrictions on <i>UnittedQuantity</i> arguments and which 
+    has the following members.</p>
     <ol>
-      <li>Rule checkRuleForNewUnittedQuantityCreation(Rule rule) -- method that 
-      is called when the processing of the rule, query, or test is almost 
-      completed and which must add any built-in calls to create units and to 
-      create new instances of UnittedQuantity for the rule head.</li>
-      <li>List&lt;GraphPatternElement&gt; expandUnittedQuantities(List&lt;GraphPatternElement&gt; 
-      patterns, BuiltinElement be, boolean isRuleThen) throws 
-      TranslationException -- method to expand binary operations on 
-      UnittedQuantity arguments to create additional instances of TripleElement 
-      to appear in the Rule body. This method should do all validation that is 
-      implied by the ontology of UnittedQuantity.</li>
-      <li>void reset() -- method to reset the handler instance for a new rule, 
-      query, or test.</li>
+      <li>SingleArgument -- the function takes only a single argument of type <i>
+      UnittedQuantity.</i></li>
+      <li>SameUnitsRequired -- the function may have two or more arguments of 
+      type <i>UnittedQuantity</i> but all must arguments must have the same 
+      units. Examples include sum, difference, minimum, maximum, and comparison 
+      operators.</li>
+      <li>DifferentUnitAllowedOrLeftOnly -- the function may have multiple 
+      arguments of type <i>UnittedQuantity</i> or the first argument may be of 
+      type <i>UnittedQuantity</i> and subsequent arguments are not of type <i>
+      UnittedQuantity. </i>Examples include multiplication and division.</li>
+      <li>LeftUnitsOnly -- the function have a <i>UnittedQuantity</i> argument 
+      only as the first argument. An example is exponentiation.</li>
+      <li>UnitsNotSupported -- the function does not support arguments of type
+      <i>UnittedQuantity.</i></li>
     </ol>
-    <p>A simple implementation can be found in the class 
-    com.ge.research.sadl.jena.SadlSimpleUnittedQuantityHandlerForJena.</p>
+    <p>Implementations of the Interface must override the following methods.</p>
+    <ol>
+      <li>combineUnits -- takes a binary operator and two arguments, which are 
+      the units of the binary operation. Returns the units of the output of the 
+      operation.</li>
+      <li>performUnitConversions -- takes four inputs: first argument, first 
+      argument units, second argument, second argument units. It returns a array 
+      with four elements: new first argument value, first argument units, second 
+      argument value, second argument units.</li>
+      <li>validateArgumentTypes -- this method is not restricted to 
+      UnittedQuantity arguments but will take any set of arguments and argument 
+      types and check them to see if they are valid. It will return the type(s) 
+      of the output of the function.</li>
+      <li>getTranslator -- returns the translator being used. This is necessary 
+      as the translator may be used in the implementation of some method 
+      functionality.</li>
+      <li>setTranslator -- sets the translator being used.</li>
+      <li>getUnittedQuantityBuiltinHandlingTypeOfBuiltinFromTranslator -- calls 
+      the translator to obtain the <i>UnittedQuantityBuiltinHandlingType</i>.</li>
+    </ol>
+    <p>In addition, the static method 
+    getUnittedQuantityBuiltinHandlingTypeOfCommonBuiltins may be overridden if 
+    desired.</p>
+    <p>A simple implementation of the Interface <i>ITypedBuiltinFunctionHelper
+    </i>be found in the class com.ge.research.sadl.jena.reasoner.SimpleJenaTypedBuiltinFunctionHelper. 
+    This implementation does not support unit conversions and the implemented 
+    approach to combining units is very simple. Given a richer semantic model of 
+    units, such as that provided by <span style="font-family: &quot;Times New Roman&quot;, serif;"><a href="http://www.qudt.org/">QUDT</a></span>, 
+    these methods could be made very powerful.</p>
 
-    <p style="line-height: 100%; margin-bottom: 0in">In order for the first rule
-      above to work with a reasoner supporting numerical built-in functions as
-      operators, the range of <em>age</em> and the <em>value</em> and <em>unit</em>
-      of the right side of the greater than or equal comparison operator must be
-      preserved in the <a href="SadlIntermediateForm.html">Intermediate
-        Form</a>, passed on to the reasoner-specific translator for correct
-      translation, and be represented in the final rule given to the reasoner
-      for inference (see <a href="../ReasonerTranslatorPairs.html">SADL
-        Translator/Reasoner Plug-in Pairs</a>). There are two different possible
-      approaches to accomplishing the translation. One approach is to
-      expand the details of each element of type <em>UnittedQuantity</em> to
-      make the <em>value</em> and <em>unit</em> triples explicit, as they were
-      in the second rule above. The other approach is to enhance the built-in
-      math operators that work on unitted quantities, such as "&gt;=", to handle
-      arguments of type <em>UnittedQuantity</em>. The Jena-based reasoner/translator 
-    pair that comes bundled with SADL can handle both approaches. Which approach is used depends upon the preference setting "Expand UnittedQuantity in translation". If this preference is checked, the
-        value and unit properties of UnittedQuantity will be expanded and made 
-    explicit in translation. If it is not checked, the UnittedQuantity instances will be passed directly into math and
-        comparison operators.<span style="color: #CC0000"> </span>Note that 
-    other the preference is actually applied in the Intermediate Form 
-    translator, so other reasoner/translator pairs that have simple numerical 
-    operation built-ins taking numerical input should be able to work with 
-    unitted quantitites.</p>
-    
-</body>
+    </body>
 
 </html>
