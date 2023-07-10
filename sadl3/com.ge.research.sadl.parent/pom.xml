@@ -54,7 +54,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Versions of plugins/dependencies -->
-    <version.jena>4.8.0</version.jena>
+    <version.jena>4.9.0</version.jena>
     <version.log4j>2.20.0</version.log4j>
     <version.mwe2>2.14.0</version.mwe2>
     <version.sadl>${project.version}</version.sadl>
