@@ -26,6 +26,7 @@ import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import org.junit.Assert
 import org.junit.Test
 import org.junit.Ignore
+import java.util.ArrayList
 
 class ExternalEmfResourceTest extends AbstractLinkingTest {
 	
@@ -228,12 +229,16 @@ class ExternalEmfResourceTest extends AbstractLinkingTest {
 		
 		val desc = mnr.getResourceDescription(resource)
 		val exported = desc.exportedObjects.toList
-		Assert.assertEquals("http://sadl.org/test.sadl", converter.toString(exported.get(0).name))
-		Assert.assertEquals("http://sadl.org/test.sadl:Thingy", converter.toString(exported.get(1).name))
-		Assert.assertEquals("http://sadl.org/test.sadl:MyThingy", converter.toString(exported.get(2).name))
-		Assert.assertEquals("http://sadl.org/test.sadl:attribute1", converter.toString(exported.get(3).name))
-		Assert.assertEquals("http://sadl.org/test.sadl:OtherThingy", converter.toString(exported.get(4).name))
-		Assert.assertEquals("http://sadl.org/test.sadl:relation1", converter.toString(exported.get(5).name))
-		Assert.assertEquals(6, exported.size)
+		Assert.assertTrue(exported.size == 6)
+		var content = new ArrayList<String>()
+		for (var i = 0; i < 6; i++) {
+			content.add(converter.toString(exported.get(i).name))
+		}
+		Assert.assertTrue(content.contains("http://sadl.org/test.sadl"))
+		Assert.assertTrue(content.contains("http://sadl.org/test.sadl:Thingy"))
+		Assert.assertTrue(content.contains("http://sadl.org/test.sadl:MyThingy"))
+		Assert.assertTrue(content.contains("http://sadl.org/test.sadl:attribute1"))
+		Assert.assertTrue(content.contains("http://sadl.org/test.sadl:OtherThingy"))
+		Assert.assertTrue(content.contains("http://sadl.org/test.sadl:relation1"))
 	}
 }

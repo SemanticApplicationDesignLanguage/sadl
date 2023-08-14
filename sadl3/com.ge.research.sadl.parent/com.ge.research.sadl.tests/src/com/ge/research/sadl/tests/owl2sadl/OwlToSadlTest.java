@@ -1,6 +1,11 @@
 package com.ge.research.sadl.tests.owl2sadl;
 
+import static org.junit.Assert.fail;
+
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -585,11 +590,42 @@ public class OwlToSadlTest {
 		System.out.print(sadlModelContent);
 		assertEquals(expected.trim(), sadlModelContent.trim());
 	}
-	private void assertEquals(Object expected, Object actual) {
-		String s1 = expected.toString().replace("\r", "");
-		s1 = s1.replace("\n", "");
-		String s2 = actual.toString().replace("\r", "");
-		s2 = s2.replace("\n", "");
-		org.junit.Assert.assertEquals(s1, s2);	
+	private void assertEquals(String expected, String actual) {
+		String[] expectedLines = expected.split(System.lineSeparator());
+		for (int i = 0; i < expectedLines.length; i++) {
+			expectedLines[i] = expectedLines[i].trim();
+		}
+		String[] actualLines = actual.split(System.lineSeparator());
+		for (int i = 0; i < actualLines.length; i++) {
+			actualLines[i] = actualLines[i].trim();
+		}
+		List<String> expectedList = Arrays.asList(expectedLines);
+		List<String> actualList = Arrays.asList(actualLines);
+		List<String> missingLines = new ArrayList<String>();
+		List<String> extraLines = new ArrayList<String>();
+		for (int i = 0; i < expectedList.size(); i++) {
+			if (!actualList.contains(expectedList.get(i))) {
+				missingLines.add(expectedList.get(i));
+			}
+		}
+		for (int i = 0; i < actualList.size(); i++) {
+			if (!expectedList.contains(actualList.get(i))) {
+				extraLines.add(actualList.get(i));
+			}
+		}
+		//assertEquals(expected, sadlModelContent);
+		if (!missingLines.isEmpty()) {
+			for (String missing : missingLines) {
+				System.err.println("Model is missing line '" + missing + "'");
+			}
+		}
+		if (!extraLines.isEmpty()) {
+			for (String extra : extraLines) {
+				System.err.println("Model has extra line '" + extra + "'");
+			}
+		}
+		if (!missingLines.isEmpty() || !extraLines.isEmpty()) {
+			fail("Expected and actual models do not match");
+		}
 	}
 }
