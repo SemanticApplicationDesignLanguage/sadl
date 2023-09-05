@@ -30,7 +30,7 @@ jobs:
 
     steps:
     - name: Check out SADL source
-      uses: actions/checkout@v3.6.0
+      uses: actions/checkout@v4.0.0
 
     - name: Set up Java
       uses: actions/setup-java@v3.12.0
