@@ -55,7 +55,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <!-- Versions of plugins/dependencies -->
     <version.jena>4.9.0</version.jena>
-    <version.log4j>2.20.0</version.log4j>
+    <version.log4j>2.21.0</version.log4j>
     <version.mwe2>2.15.0</version.mwe2>
     <version.sadl>${project.version}</version.sadl>
     <!-- Can't use slf4j-api 2 yet, must match Eclipse and log4j-slf4j-impl -->
