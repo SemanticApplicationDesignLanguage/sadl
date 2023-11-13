@@ -180,7 +180,6 @@ Bundle-ClassPath: lib/RoaringBitmap.jar,
  lib/protobuf-java.jar,
  lib/reasoner-api.jar,
  lib/reasoner-impl.jar,
- lib/shims.jar,
  lib/stax-api.jar,
  lib/titanium-json-ld.jar,
  lib/wstx-asl.jar
