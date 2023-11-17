@@ -70,7 +70,7 @@ jobs:
       uses: docker/setup-buildx-action@v3.0.0
 
     - name: Build and push SADL-Eclipse image
-      uses: docker/build-push-action@v5.0.0
+      uses: docker/build-push-action@v5.1.0
       with:
         context: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product
         file: sadl3/com.ge.research.sadl.parent/com.ge.research.sadl.product/Dockerfile
