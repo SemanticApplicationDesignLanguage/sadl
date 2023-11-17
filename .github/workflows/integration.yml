@@ -1,11 +1,10 @@
 name: SADL Integration Workflow
 
-# Runs whenever a pull request is created, reopened, or has a change
-# made to it
+# Runs whenever a pull request is created, reopened, or modified
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [ opened, reopened, synchronize ]
   workflow_dispatch:
 
 # Runs integration workflow as a CI check:
@@ -14,33 +13,32 @@ on:
 
 jobs:
   integration:
-    strategy:
-      matrix:
-        distribution: [ temurin ]
-        java-version: [ 17 ]
-        maven-version: [ 3.9 ]
-        os: [ ubuntu-22.04 ]
-
-    runs-on: ${{ matrix.os }}
     container:
       image: maven:${{ matrix.maven-version }}
       volumes:
       - /usr/bin/docker:/usr/bin/docker
       - /var/run/docker.sock:/var/run/docker.sock
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        distribution: [ temurin ]
+        java-version: [ 17 ]
+        maven-version: [ 3.9.5 ]
+        os: [ ubuntu-22.04 ]
 
     steps:
     - name: Check out SADL source
       uses: actions/checkout@v4.1.1
 
-    - name: Set up Java
+    - name: Set up Java and Maven
       uses: actions/setup-java@v3.13.0
       with:
+        cache: maven
         distribution: ${{ matrix.distribution }}
         java-version: ${{ matrix.java-version }}
-        cache: maven
 
     - name: Build SADL source
-      run: mvn -f sadl3/com.ge.research.sadl.parent/pom.xml package -Dtycho.localArtifacts=ignore
+      run: mvn -B package -f sadl3/com.ge.research.sadl.parent/pom.xml -Dtycho.localArtifacts=ignore
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3.0.0

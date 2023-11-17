@@ -1,7 +1,6 @@
 name: SADL Main Workflow
 
-# Runs whenever the main branch has a change made to it (except for
-# tag-only pushes)
+# Runs whenever the main branch is changed (except for tags)
 
 on:
   push:
@@ -17,33 +16,32 @@ on:
 
 jobs:
   main:
-    strategy:
-      matrix:
-        distribution: [ temurin ]
-        java-version: [ 17 ]
-        maven-version: [ 3.9 ]
-        os: [ ubuntu-22.04 ]
-
-    runs-on: ${{ matrix.os }}
     container:
       image: maven:${{ matrix.maven-version }}
       volumes:
       - /usr/bin/docker:/usr/bin/docker
       - /var/run/docker.sock:/var/run/docker.sock
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        distribution: [ temurin ]
+        java-version: [ 17 ]
+        maven-version: [ 3.9.5 ]
+        os: [ ubuntu-22.04 ]
 
     steps:
     - name: Check out SADL source
       uses: actions/checkout@v4.1.1
 
-    - name: Set up Java
+    - name: Set up Java and Maven
       uses: actions/setup-java@v3.13.0
       with:
+        cache: maven
         distribution: ${{ matrix.distribution }}
         java-version: ${{ matrix.java-version }}
-        cache: maven
 
     - name: Build SADL source
-      run: mvn -f sadl3/com.ge.research.sadl.parent/pom.xml package -Dtycho.localArtifacts=ignore
+      run: mvn -B package -f sadl3/com.ge.research.sadl.parent/pom.xml -Dtycho.localArtifacts=ignore
 
     - name: Get SADL version
       run: |
