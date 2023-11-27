@@ -127,7 +127,7 @@ final class FieldEditorExtensions {
 		}
 		
 		override protected doStore() {
-			val field = ComboFieldEditor.getDeclaredField('value');
+			val field = ComboFieldEditor.getDeclaredField('fValue');
 			field.accessible = true;
 			val value = field.get(this);
 			if (value instanceof String) {
