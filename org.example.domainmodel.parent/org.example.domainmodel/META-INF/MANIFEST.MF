@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: org.example.domainmodel
+Bundle-ManifestVersion: 2
+Bundle-Name: org.example.domainmodel
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: org.example.domainmodel; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
+ org.eclipse.xtext.util,
+ org.eclipse.emf.common,
+ org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Export-Package: org.example.domainmodel.scoping,
+ org.example.domainmodel.serializer,
+ org.example.domainmodel.parser.antlr.internal,
+ org.example.domainmodel.parser.antlr,
+ org.example.domainmodel.domainmodel.impl,
+ org.example.domainmodel.services,
+ org.example.domainmodel.domainmodel,
+ org.example.domainmodel.validation,
+ org.example.domainmodel.generator,
+ org.example.domainmodel.domainmodel.util,
+ org.example.domainmodel
+Import-Package: org.apache.log4j
