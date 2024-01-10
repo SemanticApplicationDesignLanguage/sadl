@@ -37,8 +37,8 @@ public class DomainmodelLanguageServer extends LanguageServerImpl {
 				if (tokenTypes != null) {
 					tokenTypes.setAccessible(true);
 					List<String> tokenTypesInst = (List<String>) tokenTypes.get(semanticTokensServiceInst);
-					tokenTypesInst.add(DomainModelHightlightingStyles.DATA_TYPE);
-					tokenTypesInst.add(DomainModelHightlightingStyles.ENTITY);
+					tokenTypesInst.add(DomainmodelHighlightingStyles.DATA_TYPE);
+					tokenTypesInst.add(DomainmodelHighlightingStyles.ENTITY);
 				}
 			}
 		} catch (NoSuchFieldException e) {
