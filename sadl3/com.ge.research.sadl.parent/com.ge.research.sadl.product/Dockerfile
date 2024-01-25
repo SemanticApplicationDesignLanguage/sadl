@@ -4,7 +4,7 @@
 
 ARG BUILDKIT_INLINE_CACHE=1
 
-# Base our image on Ubuntu 22.04 with latest Temurin JDK 17 build
+# Base our image on Ubuntu 22.04 with latest Temurin JDK build
 
 FROM eclipse-temurin:21.0.2_13-jdk
 
