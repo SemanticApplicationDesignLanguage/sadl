@@ -29,7 +29,7 @@ jobs:
 
     steps:
     - name: Check out SADL source
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v4.1.2
 
     - name: Set up Java and Maven
       uses: actions/setup-java@v4.1.0
@@ -77,7 +77,7 @@ jobs:
           sadl/sadl-eclipse:${{ github.event.release.tag_name }}
 
     - name: Check out sadl-update-sites
-      uses: actions/checkout@v4.1.1
+      uses: actions/checkout@v4.1.2
       with:
         repository: SemanticApplicationDesignLanguage/sadl-update-sites
         token: ${{ secrets.CI_PAT }}
